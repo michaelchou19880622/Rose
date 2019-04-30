@@ -104,7 +104,10 @@ public enum LOG_TARGET_ACTION_TYPE {
 			
 			ACTION_FriendshipApi("FriendshipApi"),
             ACTION_FriendshipApi_Error("FriendshipApi_Error"),
-
+            
+            ACTION_SendPnpToLineApiStatus("SendPnpToLineApiStatus"),
+            ACTION_SendPnpToLineApi("SendPnpToLineApi"),
+            ACTION_SendPnpToLineApi_Error("SendPnpToLineApi_Error"),
 	/**
 	 * TARGET_LineBotApi
 	 */

@@ -16,6 +16,9 @@ public class UriHelper {
 	/** Logger */
 	private static Logger logger = Logger.getLogger(UriHelper.class);
 	
+	public static final String TO_TYPE_MID = "MID";
+	public static final String TO_TYPE_PHONE = "PHONE";
+	
 	public static String bcsMPage = CoreConfigReader.getString(CONFIG_STR.M_PAGE);
 
 	static String baseUrl_Https = CoreConfigReader.getString(CONFIG_STR.BaseUrlHTTPS);

@@ -22,7 +22,12 @@ public interface LineUserRepository extends EntityRepository<LineUser, String>, 
 	@Query("select x.mid from LineUser x where x.mid in ( ?1 )")
 //	@Query("select x.mid from LineUser x where x.mid in ?1") // MYSQL Difference
 	List<String> findMidByMidIn(List<String> mids);
-
+	
+	@Transactional(readOnly = true, timeout = 30)
+	@Query("select x.mobile , x.mid from LineUser x where x.mobile in ( ?1 )")
+//	@Query("select x.mid from LineUser x where x.mid in ?1") // MYSQL Difference
+	List<Object[]> findMidsByMobileIn(List<String> mobile);
+	
 	@Query("select x.mid from LineUser x where x.mid in ( ?1 ) and (x.status = 'BINDED' or x.status = 'UNBIND')")
 //	@Query("select x.mid from LineUser x where x.mid in  ?1  and (x.status = 'BINDED' or x.status = 'UNBIND')")// MYSQL Difference
 	List<String> findMidByMidInAndActive(List<String> mids);

@@ -68,6 +68,12 @@ public class LineUserService {
 		return lineUserRepository.findMidByMidInAndActive(mids);
 	}
 	
+	public List<Object[]> findMidsByMobileIn(List<String> mobiles) {
+		return lineUserRepository.findMidsByMobileIn(mobiles);
+	}
+	
+	
+	
 //	private boolean notNull(LineUser result){
 //		if(result != null && StringUtils.isNotBlank(result.getMid()) && !"-".equals(result.getMid())){
 //			return true;

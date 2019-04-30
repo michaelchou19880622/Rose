@@ -17,6 +17,10 @@ import com.bcs.core.record.service.CatchRecordBinded;
 import com.bcs.core.record.service.CatchRecordOpAddReceive;
 import com.bcs.core.record.service.CatchRecordOpBlockedReceive;
 import com.bcs.core.resource.CoreConfigReader;
+import com.bcs.core.taishin.circle.PNP.scheduler.LoadFtbPnpDataTask;
+import com.bcs.core.taishin.circle.PNP.scheduler.PnpPNPMsgService;
+import com.bcs.core.taishin.circle.PNP.scheduler.PnpPushMsgService;
+import com.bcs.core.taishin.circle.PNP.scheduler.PnpSMSMsgService;
 import com.bcs.core.taishin.circle.service.BillingNoticeFtpService;
 import com.bcs.core.taishin.circle.service.BillingNoticeSendMsgService;
 import com.bcs.core.utils.DataSyncUtil;
@@ -46,6 +50,14 @@ public class InitController {
 	private BillingNoticeFtpService billingNoticeFtpService;
 	@Autowired
 	private BillingNoticeSendMsgService billingNoticeSendMsgService;
+	@Autowired
+	private LoadFtbPnpDataTask loadFtbPnpDataTask;
+	@Autowired
+	private PnpPushMsgService pnpPushMsgService;
+	@Autowired
+	private PnpPNPMsgService pnpPNPMsgService;
+	@Autowired
+	private PnpSMSMsgService pnpSMSMsgService;
 	
 	/** Logger */
 	private static Logger logger = Logger.getLogger(InitController.class);
@@ -93,6 +105,50 @@ public class InitController {
 			if(CoreConfigReader.isBillingNoticeSendMsg()) {//WEB
 				logger.info("init Billing Notice send ");
 				billingNoticeSendMsgService.startCircle();
+			}
+		} catch (Throwable e) {
+			logger.error(ErrorRecord.recordError(e));
+		}
+		
+		//PNP FTP flow
+		try {
+			//判斷WEB OR AP
+			if(CoreConfigReader.isBillingNoticeSendMsg()) {//WEB
+				logger.info("init PNP FTP flow ");
+				loadFtbPnpDataTask.startCircle();
+			}
+		} catch (Throwable e) {
+			logger.error(ErrorRecord.recordError(e));
+		}
+		
+		//PNP pnpPushMsg flow
+		try {
+			//判斷WEB OR AP
+			if(CoreConfigReader.isBillingNoticeSendMsg()) {//WEB
+			logger.info("init pnpPushMsg flow ");
+			pnpPushMsgService.startCircle();
+			}
+		} catch (Throwable e) {
+			logger.error(ErrorRecord.recordError(e));
+		}
+		
+		//PNP PHONE NUMBER PUSH flow
+		try {
+			//判斷WEB OR AP
+			if(CoreConfigReader.isBillingNoticeSendMsg()) {//WEB
+				logger.info("init PNP PHONE NUMBER PUSH flow ");
+				pnpPNPMsgService.startCircle();
+			}
+		} catch (Throwable e) {
+			logger.error(ErrorRecord.recordError(e));
+		}
+		
+		//PNP transfer file to SMS flow
+		try {
+			//判斷WEB OR AP
+			if(CoreConfigReader.isBillingNoticeSendMsg()) {//WEB
+				logger.info("init PNP transfer file to SMS flow ");
+				pnpSMSMsgService.startCircle();
 			}
 		} catch (Throwable e) {
 			logger.error(ErrorRecord.recordError(e));

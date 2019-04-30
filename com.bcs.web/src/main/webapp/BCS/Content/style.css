@@ -1,0 +1,929 @@
+html, body, .LyContents {
+    width: 100%;
+    min-height: 97%;
+    min-width: 900px;
+}
+body, input {
+    line-height: 1.3;
+    color: #333;
+    font-family: '微軟正黑體';
+    font-size: 13px;
+}
+/* Login */
+.loginbg {
+    /*background: #F07F13;*/
+}
+.loginLogo {
+    background-image: url(../images/bcs_logo.png);
+    /*background-image: url(../images/bcs_logo-1.png);*/
+    background-repeat: no-repeat;
+    background-position: center center;
+    cursor: pointer;
+    background-size: 60%;
+    min-width: 350px;
+    max-width: 35%;
+    min-height: 250px;
+    margin: 5% auto 0 auto;
+}
+.loginbg form {
+    width: 350px;
+    margin: auto;
+}
+.MdInputTxt01 {
+    width: 100%;
+    height: 50px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    background-color: #fff;
+    border: 1px solid #e6e8ea;
+    padding: 14px 16px 0;
+}
+.MdInputTxt01>input {
+    width: 100%;
+    background-color: transparent;
+    font-size: 18px;
+    color: #333;
+    border: 0;
+}
+input:focus, textarea:focus {
+    outline: 0 !important;
+}
+.MdInputTxt01+.MdInputTxt01 {
+    margin-top: 6px;
+}
+.MdBtn03Login {
+    width: 100%;
+    height: 60px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    background-color: #000000;
+    border: 1px solid rgba(0,0,0,0);
+    font-size: 20px;
+    color: #fff;
+    font-weight: bold;
+    margin-top: 20px;
+}
+.MdBtn03Login:disabled {
+    background-color: #b3b6c9;
+    cursor: default;
+}
+.help {
+    margin-top: 3em;
+    color: #D6D6D6;
+    text-align: center;
+}
+.help a {
+    color: #D6D6D6;
+    text-decoration: none;
+    padding: 0 10px;
+}
+.help a:nth-of-type(1) {
+    border-right: 1px solid #cdced0;
+}
+
+/* header */
+.LyHead {
+    width: 100%;
+    height: 64px;
+    background-color: #e2e1e1;
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.1);
+    text-shadow: none;
+}
+.MdGHD01Logo .mdGHD01AT {
+    /*background: #F07F13;*/
+    color: #fff;
+    padding: 21px 121px;
+    text-decoration: none;
+    line-height: 3;
+    font-size: 20px;
+    background-image: url(../images/bcs_logo_home.png);
+    /*background-image: url(../images/bcs_logo_home-1.png);*/
+    background-repeat: no-repeat;
+    background-position: center center;
+    cursor: pointer;
+    background-size: 30%;
+}
+.MdGHD03Util {
+    position: absolute;
+    top: 23px;
+    right: 50px;
+}
+.MdGHD03Util li {
+    display: inline-block;
+    color: rgba(255,255,255,0.5);
+}
+.MdGHD03Util li+li {
+    margin-left: 6px;
+}
+.MdGHD03Util li a {
+    color: rgba(0,0,0,0.8);
+    text-decoration: none;
+}
+
+/* content */
+.LyContents {
+    position: relative;
+    background: url(../images/bg_LyContents.png) repeat-y;
+}
+
+/* left menu */
+.LySub {
+    float: left;
+    width: 242px;
+    background-color: #fcfbfb;
+    border-right: 1px solid #e2e1e1;
+    margin-right: -242px;
+}
+.Nav ul>li {
+    font-size: 14px;
+    color: #2c2c2c;
+    line-height: 20px;
+}
+.Nav a {
+    display: block;
+}
+.Nav ul>li>a {
+    color: #2c2c2c;
+    padding: 12px 30px 11px;
+}
+.Nav .subMenu {
+    margin-bottom: 15px;
+}
+.Nav .subMenu>li.ExSelected>a {
+    color: #005AA9;
+}
+.Nav .subMenu>li>a {
+    color: #747474;
+    padding: 7px 30px 6px 41px;
+}
+.Nav a:link, .Nav a:visited, .Nav a:hover, .Nav a:active, .Nav a:focus {
+    text-decoration: none;
+}
+
+/* right content */
+.LyMain {
+    padding: 63px 50px 50px;
+    margin-left: 242px;
+}
+.ContentHead {
+    position: relative;
+    margin: 0 0 11px;
+}
+.ContentHead .CHTtl {
+    font-size: 25px;
+    font-weight: bold;
+    color: #1e283a;
+}
+.ContentHead .CHDesc {
+    color: #a1a7b5;
+    padding: 3px 0 2px;
+    margin-bottom: 15px;
+}
+.ContentHead .mdCMN01Link {
+    position: absolute;
+    top: 10px;
+    right: 0;
+}
+.ContentHead .mdCMN01Link a {
+    color: #6a758d;
+}
+
+/* 子選項 */
+.CHBtnSet {
+    text-align: left;
+    margin: 15px 0 14px;
+}
+.CHBtnSet .CHLeft {
+    min-width: 70%;
+    display: inline-block;
+}
+.CHBtnSet .CHLeft .CHLeftBtn {
+    float: left;
+}
+.CHBtnSet .CHLeft .CHLeftBtn>input {
+    background: #e6eaf0;
+    border: 1px solid #b7bfca;
+    border-left: 1px solid #b7bfca;
+    border-radius: 0!important;
+    box-shadow: none!important;
+    color: #6d7987;
+    font-size: 14px;
+    font-weight: normal;
+    text-shadow: none!important;
+    line-height: 33px;
+    margin: 0 2px;
+    padding: 0 12px;
+    min-width: 70px;
+}
+.CHBtnSet .CHLeft+.CHRight {
+    display: inline-block;
+    float: right;
+}
+.CHBtnSet .CHRight {
+    text-align: right;
+}
+.CHBtnSet .CHRight>.btn_add{
+    float: none;
+    margin: 0;
+}
+.CHBtnSet .CHRight>.btn_upload_keywords{
+    float: none;
+    margin: 0;
+}
+.CHBtnSet .CHLeft ul>li.ExSelected>input {
+    background: #A0A0A0;
+    color: #fff;
+}
+
+/* 內容 */
+.mainFrame {
+    border: 1px solid #e2e5eb;
+    margin: 0 0 20px;
+}
+.mainFrame table {
+    width: 100%;
+}
+.mainFrame>table {
+    border-top: 2px solid #4c5564;
+}
+.mainFrame table th {
+    background: #eaecf0;
+    border: 1px solid #ced2db;
+    padding: 14px 10px 12px;
+    font-size: 13px;
+    color: #3b4865;
+    font-weight: bold;
+    vertical-align: middle;
+}
+.mainFrame table td {
+    padding: 12px 10px 11px;
+    border: 1px solid #e2e5eb;
+    background: #fff;
+    word-break: break-word;
+    text-align: center;
+    vertical-align: middle;
+}
+.mainFrame table td>input[type='text'] {
+    display: block;
+    width: 100%;
+    height: 34px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.mainFrame table td li {
+    margin-top: 10px;
+}
+.CMsg table td {
+    text-align: left;
+}
+.TInput {
+    display: block;
+    border-color: #ced2dc;
+    box-shadow: none;
+    border-radius: 0;
+}
+.TInput textarea {
+    width: 99%;
+    font-size: 13px;
+    color: #000;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.mainFrame .subTable {
+    width: 100%
+}
+.mainFrame .subTable td{
+    text-align: center;
+}
+.mainFrame a{
+    color: #6a758d;
+}
+.MdTxtNotice01 {
+    font-size: 12px;
+    color: #a1a7b5;
+}
+.MdAC {
+    text-align: center !important;
+}
+.floatRight{
+    float: right;
+}
+.pad10 {
+    margin: 10px;
+}
+
+/* 下拉式選單-自定義選項 */
+.option {
+    position: relative;
+    display: inline-block;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    min-width: 90px;
+    background: white url(../images/ico_mdFRM03Select.png) no-repeat right center;
+    border: 1px solid #ced2dc;
+    border-radius: 0;
+    padding: 9px 24px 8px 9px;
+}
+.option .optionLabel {
+    font-size: 13px;
+    color: #a1a7b5;
+}
+.option .optionSelect {
+    display: block;
+    position: absolute;
+    top: 7px;
+    left: 10px;
+    width: 100%;
+    opacity: 0;
+}
+.option.date {
+    width: 130px;
+    background: white url(../images/ico_mdFRM01Date.png) no-repeat 103px center;
+}
+.option.date>input {
+    border: 0;
+    width: 90px;
+}
+.option.time {
+    min-width: 60px;
+}
+.schedule {
+    margin-left: 2em;
+}
+
+
+/* 按鈕 */
+.BtnSet {
+    text-align: center;
+    margin: 20px 0 40px;
+}
+.btn_add {
+    float: right;
+    color: #fff;
+    background: #005AA9;
+    border: 1px solid #005AA9;
+    border-left: 1px solid #005AA9;
+    border-radius: 0!important;
+    box-shadow: none!important;
+    font-size: 14px;
+    font-weight: normal;
+    text-shadow: none!important;
+    line-height: 33px;
+    padding: 0 12px;
+    margin-bottom: 5px;
+    min-width: 70px;
+}
+.btn_upload_keywords {
+    float: right;
+    color: #fff;
+    background: #005AA9;
+    border: 1px solid #005AA9;
+    border-left: 1px solid #005AA9;
+    border-radius: 0!important;
+    box-shadow: none!important;
+    font-size: 14px;
+    font-weight: normal;
+    text-shadow: none!important;
+    line-height: 33px;
+    padding: 0 12px;
+    margin-bottom: 5px;
+    min-width: 70px;
+}
+div.btn_delete {
+    background-image: url(../images/btn_delete.png);
+    background-repeat: no-repeat;
+    background-position: center center;
+    cursor: pointer;
+    background-size: 100%;
+    width: 20px;
+    height: 20px;
+    margin: 0 auto;
+}
+.btn_query, .btn_save, .btn_cancel, .btn_draft {
+    color: #fff;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    box-shadow: none;
+    border: 0;
+    min-width: 80px;
+    background: darkgrey;
+}
+.btn_save {
+    background: #005AA9;
+}
+.btn_copy, .btn_detele, .btn_redeisgn, .btn_winner_list, .btn_prize_list, .btn_detail, .btn_point_record ,.btn_coupon_record,.btn_qr_code,.btn_upload_userList, .btn_gen_qrcode {
+    background: #ADADAD;
+    color: #fff;
+    padding: 5px 10px;
+    margin-bottom: 10px;
+    box-shadow: none;
+    border: 0;
+}
+
+.btn_css {
+    background: #ADADAD;
+    color: #fff;
+    padding: 5px 10px;
+    margin-bottom: 10px;
+    box-shadow: none;
+    border: 0;
+}
+
+/* 訊息類別按鈕 */
+.TypeMsgSolid {
+    padding: 12px 14px;
+}
+.TypeMsgSolid .TypeMsgBtns {
+    max-width: 1020px;
+    margin: auto;
+    text-align: center;
+}
+.TypeMsgSolid li {
+    margin: 5px;
+    display: inline-block;
+}
+.TypeMsgSolid li .MdBtn {
+    width: 190px;
+    margin: 0;
+}
+.TypeMsgSolid li .MdBtn>input {
+    background: #e6eaf0;
+    border: 1px solid #b7bfca;
+    border-left: 1px solid #b7bfca;
+    border-radius: 0!important;
+    box-shadow: none!important;
+    color: #6d7987;
+    font-size: 14px;
+    font-weight: normal;
+    text-shadow: none!important;
+    line-height: 33px;
+    margin: 0 2px;
+    padding: 0 12px;
+    width: 100%;
+}
+
+.stickerSelectSolid li {
+    margin: 5px;
+    display: inline-block;
+}
+
+.emoticonSelectSolid li {
+    margin: 5px;
+    display: inline-block;
+    cursor: pointer;
+}
+
+/* 各式訊息框 */
+.MsgFrame {
+    position: relative;
+    border: 1px solid #d2d3d8;
+    background: #f0f2f5;
+    margin: 20px;
+    border-radius: 0;
+}
+.MsgFrame .mdCMN07Head {
+    position: relative;
+    border-bottom: 1px solid #d2d3d8;
+    padding: 13px 20px 12px;
+}
+.MsgFrame .mdCMN07HeadTtl01 {
+    display: inline-block;
+    font-weight: bold;
+    color: #3b4865;
+}
+.MsgFrame .MdCMN06BtnList {
+    position: absolute;
+    top: 9px;
+    right: 7px;
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+    margin: 0 7px 0 0;
+}
+.MsgFrame .MdCMN06BtnList .mdCMN06Ul {
+    background: none;
+    border-radius: 0;
+    overflow: hidden;
+}
+.MsgFrame .MdCMN06BtnList .mdCMN06Ul li {
+    float: left;
+    border-radius: 0;
+}
+.MsgFrame .MdCMN06BtnList .MdBtn03Delete {
+    margin-left: 7px;
+    width: 30px;
+    height: 25px;
+    background-position: -590px -37px;
+    background-color: transparent;
+    background-image: url(../images/common-s88aa02bb79.png);    
+    border: 0;
+}
+.MsgFrame .mdCMN07Body {
+    position: relative;
+    padding: 12px 14px;
+}
+.MsgFrame .MdFRM04MsgBox .MdFRM01Input {
+    display: block;
+    border-color: #ced2dc;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 7px 9px 6px;
+    box-sizing: border-box;
+    background: #fff;
+    border: 1px solid #ced2db;
+    position: relative;
+}
+.MsgFrame .MdFRM04MsgBox .MdFRM01Input textarea {
+    display: block;
+    width: 100%;
+    resize: vertical;
+    font-size: 13px;
+    color: #000;
+}
+.MdFRM01Input input[type="text"], .MdFRM01Input input[type="password"], .MdFRM01Input textarea {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
+    -webkit-box-align: stretch;
+    -moz-box-align: stretch;
+    border: none;
+    background: transparent;
+    vertical-align: middle;
+    padding: 0;
+}
+.MsgFrame .MdFRM04MsgBox .MdTxtInputCount {
+    float: right;
+    margin-top: 6px;
+    display: inline-block;
+    font-size: 11px;
+    color: #acb2c1;
+    vertical-align: bottom;
+    margin-bottom: 9px;
+}
+.MsgFrame .MdFRM04MsgBox .MdBtnEmoticon {
+    margin-top: 6px;
+    margin: 0;
+}
+.MsgFrame .MdBtnEmoticon .mdBtnEmoticonTxt {
+    font-size: 13px;
+    font-weight: bold;
+    color: #6d7886;
+    background-color: #e6eaef;
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#f0f3f7), to(#dce1e8));
+    background-image: -webkit-linear-gradient(#f0f3f7, #dce1e8);
+    background-image: linear-gradient(#f0f3f7, #dce1e8);
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.26);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
+    border: 1px solid #B7BFC9;
+    margin-top: 5px;
+    min-width: 70px;
+    padding: 2px 14px 1px;
+}
+.MsgFrame .MdFRM03File .mdFRM03Img {
+    overflow: hidden;
+    position: relative;
+    width: 90px;
+    height: 90px;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    border: 1px solid #e4e4e4;
+    border-radius: 3px;
+    box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    margin: 0;
+    background: white url(../images/noImg_image.png) no-repeat center center;
+    display: inline-block;
+}
+.MsgFrame .MdFRM03File .mdFRM03Audio {
+    overflow: hidden;
+    position: relative;
+    width: 90px;
+    height: 90px;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    border: 1px solid #e4e4e4;
+    border-radius: 3px;
+    box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    margin: 0 10px 10px 0;
+    background: white url(../images/noImg_audio.png) no-repeat center center;
+    display: inline-block;
+}
+.MsgFrame .MdFRM03File .mdFRM03Video {
+    overflow: hidden;
+    position: relative;
+    width: 90px;
+    height: 90px;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    border: 1px solid #e4e4e4;
+    border-radius: 3px;
+    box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    margin: 0 10px 10px 0;
+    background: white url(../images/noImg_video.png) no-repeat center center;
+    display: inline-block;
+}
+.MsgFrame .MdBtnUpload {
+    border-radius: 0!important;
+    box-shadow: none!important;
+    padding: 0!important;
+    background: #e6eaf0;
+    border: 1px solid #b7bfca;
+    overflow: hidden;
+    position: relative;
+    vertical-align: top;
+    margin: 0 3px 0 0;
+    display: inline-block;
+    box-sizing: border-box;
+}
+.MsgFrame .MdBtnUpload .mdBtnUploadTxt {
+    border-radius: 0;
+    background: none!important;
+    box-shadow: none!important;
+    text-shadow: none!important;
+    color: #6d7987;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 33px;
+    padding: 0 12px;
+    width: auto !important;
+    height: 33px;
+}
+.MsgFrame .MdBtnUpload .mdBtnUploadInput {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    font-size: 27px;
+}
+.MsgFrame .mdFRM03Txt {
+    display: inline-block;
+    vertical-align: top;
+    margin: 40px auto;
+    color: #6a758d;
+}
+.MsgFrame .linkInput {
+    display: inline-block;
+    width: 80%;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin: 10px 10px 10px 5px;
+    padding: 5px;
+}
+.MsgFrame .tagInput {
+    display: inline-block;
+    width: 10%;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin: 10px 10px 10px 5px;
+    padding: 5px;
+}
+
+/* 圖文訊息 */
+.mainFrame.alignCenter {
+    text-align: center;
+    border-top: 2px solid #4c5564;
+    padding: 15px 0;
+}
+.mainFrame.alignLeft td{
+    text-align: left;
+}
+.mainFrame .typeMenu {
+    display: inline-block;
+    text-align: center;
+    margin: 10px 35px 10px 35px;
+}
+.mainFrame .mdFRM03Img {
+    overflow: hidden;
+    position: relative;
+    width: 90px;
+    height: 90px;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    border: 1px solid #e4e4e4;
+    border-radius: 3px;
+    box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    margin: 0 10px 10px 0;
+    background: white url(../images/noImg_image.png) no-repeat center center;
+    display: inline-block;
+}
+.mainFrame td .MdBtnUpload {
+    border-radius: 0!important;
+    box-shadow: none!important;
+    padding: 0!important;
+    background: #e6eaf0;
+    border: 1px solid #b7bfca;
+    overflow: hidden;
+    position: relative;
+    vertical-align: top;
+    margin: 0 3px 0 0;
+    display: inline-block;
+    box-sizing: border-box;
+}
+.mainFrame td .MdBtnUpload .mdBtnUploadTxt {
+    border-radius: 0;
+    background: none!important;
+    box-shadow: none!important;
+    text-shadow: none!important;
+    color: #6d7987;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 33px;
+    padding: 0 12px;
+    width: auto !important;
+    height: 33px;
+}
+.mainFrame td .MdBtnUpload .mdBtnUploadInput {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    font-size: 27px;
+}
+.mainFrame td .MdFRM01Input {
+    box-shadow: none;
+    padding: 7px 9px 6px;
+    box-sizing: border-box;
+    background: #fff;
+    border: 1px solid #ced2db;
+    position: relative;
+    display: inline-block;
+    width: 50%;
+    height: 34px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555;
+    border-radius: 4px;
+}
+
+.searchInput {
+	box-shadow: none;
+    padding: 7px 9px 6px;
+    box-sizing: border-box;
+    background: #fff;
+    border: 1px solid #ced2db;
+    position: relative;
+    display: inline-block;
+    width: 35%;
+    height: 37px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555;
+}
+
+.mainFrame div  .tagInput {
+    display: inline-block;
+    width: 50%;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px;
+}
+
+.mainFrame td .MdFRM01Input input[type="text"], .mainFrame td .MdFRM01Input input[type="password"] {
+    width: 100%;
+}
+.mainFrame td .MdFRM01Input p {
+    display: inline-block;
+    font-size: 11px;
+    color: #acb2c1;
+    vertical-align: bottom;
+    margin-bottom: 9px;
+}
+.mainFrame td .MdFRM01Input + input[type="button"] {
+    background: #e6eaf0;
+    border: 1px solid #b7bfca;
+    border-left: 1px solid #b7bfca;
+    border-radius: 0!important;
+    box-shadow: none!important;
+    color: #6d7987;
+    font-size: 14px;
+    font-weight: normal;
+    text-shadow: none!important;
+    line-height: 33px;
+    margin: 0 2px;
+    padding: 0 12px;
+}
+
+.showMdFRM01Input {
+    background: #e6eaf0;
+    border: 1px solid #b7bfca;
+    border-left: 1px solid #b7bfca;
+    border-radius: 0!important;
+    box-shadow: none!important;
+    color: #6d7987;
+    font-size: 14px;
+    font-weight: normal;
+    text-shadow: none!important;
+    line-height: 33px;
+    margin: 0 2px;
+    padding: 0 12px;
+}
+
+.mainFrame.alignLeft td .typeSideTxt {
+    color: #005AA9;
+    font-weight: bold;
+}
+.mainFrame.alignLeft td .MdTxtInputCount {
+    margin-top: 6px;
+    display: inline-block;
+    font-size: 11px;
+    color: #acb2c1;
+    vertical-align: bottom;
+    margin-bottom: 9px;
+}
+.mainFrame.alignLeft th img {
+    display: block;
+    margin: 10px auto;
+}
+
+/* 優惠券 */
+.Pre .mdFRM05Inline li {
+    display: inline-block;
+    margin: 0 6px 0 0;
+    list-style-type: none;
+}
+.Pre .MdFRM01Input.ExDisabled {
+    background-color: #eee;
+}
+.Pre .MdTxtInputCount {
+    margin: 11px 0 0 3px;
+    display: inline-block;
+}
+
+/* 權限 */
+.mainFrame.AA td .MdFRM01Input {
+    width: 40%;
+}
+
+/* 報表 */
+.Lreport, .Rreport {
+    width: 40%;
+    display: inline-block;
+    vertical-align: top;
+    margin: 4%;
+}
+.Lreport table, .Rreport table {
+    width: 100%;
+    border-top: 2px solid #4c5564;
+}
+.Lreport table tr:nth-of-type(1), .Rreport table tr:nth-of-type(1) {
+    background: #eaecf0;
+    font-size: 13px;
+    color: #3b4865;
+    font-weight: bold;
+}
+.Lreport table th, .Lreport table td, .Rreport table th, .Rreport table td {
+    padding: 10px;
+    border: 1px solid #E2E5EB;
+    vertical-align: middle;
+}
+.report td {
+    vertical-align: middle;
+}
+.report td:nth-last-of-type(1), .report td:nth-last-of-type(2) {
+    text-align: right
+}
+.report td:nth-of-type(2) {
+    text-align: left;
+}
+.report td:nth-of-type(2) img {
+    display: inline-block;
+    margin-right: 5px;
+}
+.report td:nth-of-type(2) div{
+    display: inline-block;
+    width: 65%;
+}
+
+/* 表單驗證 */
+form label.error {
+	color: red;
+}
+
+form input.error {
+	border: 1px solid red;
+}

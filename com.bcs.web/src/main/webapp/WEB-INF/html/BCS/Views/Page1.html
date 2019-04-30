@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Send Group Create Page', '/BCS/JS/page1.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page1')"></div>
+
+        <!-- Right Content -->  
+        <div class="LyMain" role="main">
+            <form id="formSendGroup">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">建立發送群組</h3>
+                        <p class="CHDesc">您可透過條件搜尋建立客製化群組分類。</p>
+                    </header>
+                    <div class="mainFrame">
+                        <table border="1">
+                            <colgroup><col width="190"><col></colgroup>
+                            <tbody >
+                                <tr>
+                                    <th>群組名稱</th>
+                                    <td>
+                                        <input type="text" id="groupTitle" name="groupTitle" value="" maxlength="50" >
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>群組說明</th>
+                                    <td>
+                                        <div class="TInput">
+                                            <textarea id="groupDescription" name="groupDescription" cols="" rows="4" placeholder="請輸入群組說明" maxlength="700"></textarea>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr id="queryContent">
+                                    <th>群組條件</th>
+                                    <td>
+	                                    <input accept="application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, text/plain"  id="upload_mid_btn" name="file" type="file" style="display:none">
+                        				<input class="btn_add add_rule" style="cursor: pointer;" type="button" value="加入條件">
+                        				<input class="btn_add upload_mid" style="cursor: pointer; margin-right: 3px;" type="button" value="匯入UID">
+                                        <table class="subTable" id="tableBody">
+                                            <tr>
+                                                <th>欄位</th>
+                                                <th>條件</th>
+                                                <th>數值</th>
+                                                <th></th>
+                                            </tr>
+                                            <tr class="dataTemplate">
+                                                <td>
+                                                    <div class="labelField" style="display: none;"></div>
+                                                    
+                                                    <div class="option">
+                                                        <div class="optionLabel">請選擇</div>
+                                                        <select class="optionSelect queryField" name="queryField">
+                                                            <option value="">請選擇</option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="labelOp" style="display: none;"></div>
+                                                    
+                                                    <div class="option">
+                                                        <div class="optionLabel">請選擇</div>
+                                                        <select class="optionSelect queryOp" name="queryOp">
+                                                            <option value="">請選擇</option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+                                                <td style="text-align: left;" class='queryValueComponent'>
+                                                
+                                                	<!-- SelectList -->
+                                                    <div class="option queryValueComponentSelectList" style="display: none;">
+                                                        <div class="optionLabel">請選擇</div>
+                                                        <select class="optionSelect queryValue" name="queryValue">
+                                                            <option value="">請選擇</option>
+                                                        </select>
+                                                    </div>
+                                                    
+                                                    <!-- Input -->
+                                                    <div class="queryValueComponentInput" style="display: none;">
+                                                    	<input class="queryValue" type="text" name="queryValue" value="" placeholder="請輸入"/>
+                                                    </div>
+                                                    
+                                                    <!-- DatePicker -->
+                                                    <div class="option date queryValueComponentDatepicker" style="display: none;">
+                                                    	<input class="datepicker queryValue" type="text" name="queryValue" placeholder="YYYY-MM-DD"/>
+                                                    </div>
+                                                    
+                                                    <div class="labelValue" style="display: none;"></div>
+                                                </td>
+                                                <td>
+                                                    <div class="btn_delete" style="cursor: pointer;"></div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </section>
+                <div class="BtnSet">
+                    <div>
+                        <input class="btn_query" style="cursor: pointer;" type="button" value="條件結果">
+                        <input class="btn_draft" type="button" value="匯出UID" style="cursor: pointer;">
+                        <input class="btn_save" style="cursor: pointer;" type="button" value="儲存">
+                        <input class="btn_cancel" style="cursor: pointer;" type="button" value="取消">
+                    </div>
+                    <iframe id="downloadReport" style='display:none' ></iframe>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

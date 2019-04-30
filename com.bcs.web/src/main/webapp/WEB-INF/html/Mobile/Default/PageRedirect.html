@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width,initial-sale=1" />
+    
+	<!-- default header name is X-CSRF-TOKEN -->
+	
+    
+	<script type='text/javascript' src='../webjars/jquery/2.2.3/jquery.min.js'></script>
+    <title>redirect頁面</title>
+		<script th:inline="javascript" type="text/javascript">
+			var link =  /*[[${linkDefault}]]*/ '';
+			window.location.replace(link);
+		</script>
+</head>
+
+<body>
+</body>
+
+</html>

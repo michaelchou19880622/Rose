@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Export Share User Record Page', '/BCS/JS/pageMGM4.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('PageMGM2')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">匯出MGM名單頁面</h3>
+                    </header>
+                    <div class="CHBtnSet">
+                        <div>
+                            <span>日期區間：</span>
+                            <div class="option date">
+                                <input type="text" 
+                                    class="datepicker" 
+                                    id="reportStartDate" 
+                                    placeholder="YYYY-MM-DD"/>
+                            </div>
+                            <span>~</span>
+                            <div class="option date">
+                                <input type="text" 
+                                    class="datepicker" 
+                                    id="reportEndDate" 
+                                    placeholder="YYYY-MM-DD"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="CHBtnSet">
+                        <div class="CHRight">
+                        	<a class="btn_add" reportType="COMPLETED" style="margin-right: 10px; cursor: pointer; padding: 7px 12px; text-decoration: none">已達成</a>
+                        	<a class="btn_add" reportType="UNCOMPLETED" style="margin-right: 10px; cursor: pointer; padding: 7px 12px; text-decoration: none">未達成</a>
+                        	<a class="btn_add" reportType="DETAIL" style="margin-right: 10px; cursor: pointer; padding: 7px 12px; text-decoration: none">明細</a>
+                       		<iframe id="downloadReport" style='display:none' ></iframe>
+                       	</div>
+                    </div>
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

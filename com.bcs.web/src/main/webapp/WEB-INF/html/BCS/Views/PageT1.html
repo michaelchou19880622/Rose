@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"  
+      th:with="strList = ${ {'/BCS/JS/MsgFragment/TemplateMsgPreviewContent.js', '/BCS/JS/pageT1.base.js'} }">
+<head th:replace="/BCS/Views/Common/Head :: head ('Template Msg Create Page', ${strList})">
+</head>
+<body>
+
+<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+    	<div th:replace="/BCS/Views/Common/Menu :: menu ('PageT1')"></div>
+    	
+    	<!-- Right Content -->
+    	<div class="LyMain" role="main">
+    		<form>
+    			<section>
+    				<header class="ContentHead">
+                    	<input name="cancel" class="btn_cancel" type="button" value="返回" style="float: right; cursor: pointer;">
+                        <h3 class="CHTtl">建立樣板訊息</h3>
+                        <p class="CHDesc">您可以利用。</p>
+                    </header>
+                    <div class="mainFrame">
+                    	<div class="typeMenu">
+                            <div class="mdFRM05Img">
+                                <img th:src="@{/BCS/images/templatemenu_Buttons.png}" alt="Buttons" style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Input">
+                                <input type="radio" name="templateType" value="buttons"  style="cursor: pointer;">
+                            </div>
+                        </div>
+                        <div class="typeMenu">
+                            <div class="mdFRM05Img">
+                                <img th:src="@{/BCS/images/templatemenu_Confirm.png}" alt="Confirm" style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Input">
+                                <input type="radio" name="templateType" value="confirm"  style="cursor: pointer;">
+                            </div>
+                        </div>
+                        <div class="typeMenu">
+                            <div class="mdFRM05Img">
+                                <img th:src="@{/BCS/images/templatemenu_Carousel.png}" alt="Carousel" style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Input">
+                                <input type="radio" name="templateType" value="carousel"  style="cursor: pointer;">
+                            </div>
+                        </div>
+                    </div>
+    			</section>
+    		</form>
+    		<form>
+    			<section>
+                    <header class="ContentHead">
+                    	<div id="customizeTypeBtn" style="float: right">
+	                        <input id="addTable" class="btn_save" type="button" value="增加樣板" style="cursor: pointer;">
+	                        <input id="deleteTable" class="btn_cancel" type="button" value="刪除樣板" style="cursor: pointer;">
+	                        <input id="addAction" class="btn_save" type="button" value="增加動作" style="cursor: pointer;">
+	                        <input id="deleteAction" class="btn_cancel" type="button" value="刪除動作" style="cursor: pointer;">
+                        </div>
+                        <h3 class="CHTtl">設定樣板訊息</h3>
+                        <p class="CHDesc" style="color: red">注意 : 標題或圖片必須所有column都有或都沒有。</p>
+                    </header>
+                    <div class="mainFrame alignLeft">
+                    	<div id="tabs">
+  							<ul style="height:35px; background:#e9e9e9; border:0px;">
+  							</ul>
+						</div>
+                        <table class="templateTable" name="templateTable">
+                        	<colgroup><col width="120"><col></colgroup>
+                            <tr class="titleTr">
+								<th>
+									訊息標題
+								</th>
+								<td colspan="2">
+									<div class="MdFRM01Input">
+	                                	<input type="text" placeholder="限40字" maxlength="40" id="templateMsgTitle">
+	                                </div>&nbsp; 
+	                                <!-- <span class="MdTxtInputCount ng-binding">0/40</span> -->
+								</td>
+                            </tr>
+                            <tr class="textTr">
+								<th>
+									訊息內容
+								</th>
+								<td colspan="2">
+									<div class="MdFRM01Input">
+	                                	<input type="text" placeholder="限60字" maxlength="60" id="templateMsgText">
+	                                </div>&nbsp; 
+	                                <!-- <span class="MdTxtInputCount ng-binding">0/100</span> -->
+								</td>
+                            </tr>
+                            <tr class="altTextTr">
+								<th>
+									非手機顯示訊息<span style="color: red">*</span>
+								</th>
+								<td colspan="2">
+									<div class="TInput">
+	                                	<textarea id="altText" 
+                                            	name="couponDescription" 
+                                            	cols="80" 
+                                            	rows="5" 
+                                            	placeholder="400" 
+                                            	maxlength="500" 
+                                            	class="jqCountString"></textarea>
+                                            <!--<span class="MdTxtNotice01 floatRight">0/500</span>-->
+	                                </div>&nbsp; 
+	                                <!-- <span class="MdTxtInputCount ng-binding">0/100</span> -->
+								</td>
+                            </tr>
+                            <tr class="imageTr">
+								<th>
+									圖片
+								</th>
+								<td colspan="2">
+									<div class="MdFRM03File">
+                                    	<input type="hidden" class="imgId">
+                                        <div class="mdFRM03Img">
+                                        	<img src="" style="height: 100%;">
+                                        </div>
+                                        <div class="MdBtnUpload">
+                                            <span class="mdBtnUploadTxt">上傳</span>
+                                            <input accept="image/jpeg" class="mdBtnUploadInput" name="titleImage" type="file"  id="titleImage">
+                                        </div>
+                                        <p class="MdTxtNotice01">上傳一張依據設計指南所製作的圖片。可支援的規格為906 x 600向量，可支援檔案格式為jpg。</p>
+                                    </div>
+								</td>
+                            </tr>
+                            <tr>
+                            	<th rowspan="2" class="actionTh">
+                            		加入動作<span style="color: red">*</span>
+                                </th>
+                            </tr>
+                            <tr class="actionTr">
+                                <td rowspan="2" width="1" style="text-align:center" class="actionTypeTd">
+                                    <span class="typeSideTxt">A</span><br/>
+                                    <label class="MdFRM02Check">
+                						<input type="radio" name="actionType" class="actionType" value="uri" style="cursor: pointer;" checked="true" >連結
+            						</label>
+            						<label class="MdFRM02Check">
+                						<input type="radio" name="actionType" class="actionType" value="message" style="cursor: pointer;" >文字
+            						</label>
+            						<label class="MdFRM02Check">
+                						<input type="radio" name="actionType" class="actionType" value="postback" style="cursor: pointer;" >隱藏
+            						</label>
+                                </td>
+                                <td class="labelTd">
+        							<p>按鈕文字<span style="color: red">*</span></p>
+            						<div class="MdFRM01Input">
+                						<input type="text" placeholder="限20字" maxlength="20" name="label">
+            						</div>
+    							</td>
+                            </tr>
+                            <tr class="actionTr">
+                                <td class="textTd">
+        							<p>連結<span style="color: red">*</span></p>
+        							<div class="MdFRM01Input">
+            							<input type="text" maxlength="300" name="text">
+        							</div>
+    							</td>
+                            </tr>
+                            <tr class="actionTr" style="display:none;">
+                            	<td class="dataTd">
+        							<p>隱藏訊息<span style="color: red;">*</span></p>
+            						<div class="MdFRM01Input">
+                						<input type="text" placeholder="限300字" maxlength="20" name="data">
+            						</div>
+    							</td>
+                            </tr>
+                        </table>
+                    </div>
+    			</section>
+    		</form>
+    		<div class="BtnSet">
+                <div>
+                    <input id="save" class="btn_save" type="button" value="儲存" style="cursor: pointer;">
+                </div>
+            </div>
+    	</div>
+    </div>
+
+</body>
+</html>

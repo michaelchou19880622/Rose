@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.springframework.org/security/tags"
+      xmlns:th="http://www.thymeleaf.org"  th:with="strList = ${ {'/BCS/JS/MsgFragment/MsgList.base.js', '/BCS/JS/pageMGM2.base.js'} }" >
+<head th:replace="/BCS/Views/Common/Head :: head ('ShareCampaign List Page', ${strList})" >
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('PageMGM2')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">MGM活動列表 生效</h3>
+                        <p class="CHDesc">可建立MGM活動。建立完成的活動可以訊息形式傳送、投稿至動態消息，或顯示於行動官網。</p>
+                    </header>
+                    <div class="CHBtnSet">
+                        <div class="CHLeft">
+                            <ul>
+                                <li class="CHLeftBtn ExSelected"><input class="ActiveBtn" type="button" value="生效" style="cursor: pointer;"></li>
+                                <li class="CHLeftBtn"><input class="DisableBtn" type="button" value="取消" style="cursor: pointer;"></li>
+                            </ul>
+                        </div>
+                        <div class="CHRight"><input class="btn_add" style="cursor: pointer;" type="button" value="建立活動"></div>
+                    </div>
+                    <div class="mainFrame">
+                        <table border="1" id="tableBody">
+                            <colgroup>
+                            	<col width="150">
+                            	<col width="150">
+                            	<col width="100">
+                                <col width="50">
+                            	<col width="80">
+                            	<col width="100">
+                            	<col width="50">
+                            </colgroup>
+                            <tr>
+                                <th>標題</th>
+                                <th>活動期間</th>
+                                <th>建立時間<br>建立人員</th>
+								<th>狀態</th>
+                                <th>分享次數</th>
+                                <th>複製/刪除</th>
+                                <th>MGM網址</th>
+                            </tr>
+                            <tr class="dataTemplate">
+                                <td class="campaignTitle"><a href=""></a></td>
+                                <td class="campaignTime"></td>
+                                <td class="modifyUser"></td>
+                                <td class="status">
+                                	<span></span>
+                                	<br/>
+                                    <input class="btn_redeisgn" type="button" value="取消" style="cursor: pointer;">
+                                </td>
+                                <td class="campaignShareNumber"><a></a></td>
+                                <td>
+                                    <input class="btn_copy" style="cursor: pointer;" type="button" value="複製">
+                                    <input sec:authorize="hasRole('ROLE_ADMIN')" 
+                                    	class="btn_detele" style="cursor: pointer;" type="button" value="刪除">
+                                </td>
+                                <td>
+                                    <input class="btn_css" style="cursor: pointer;" type="button" value="網址">
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </section>
+            </form>
+            
+            <div id="linkDialog" style="display: none;" title="MGM網址">
+                <div class="mainFrame">
+                    <table id="dialogTable">
+                        <colgroup>
+	                        <col width="50">
+	                        <col width="100">
+                        </colgroup>
+                        <tr>
+                            <th>標題</th>
+                            <th>網址</th>
+                        </tr>
+                        <tr>
+                            <td id="dialogTitle">
+                               <div style="text-align:center;"></div>
+                            </td>
+                            <td id="dialogUrl">
+                               <div style="text-align:center;"></div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input id="mgmTracingUrlPre" type="hidden" th:value="${mgmTracingUrlPre}"/>
+</body>
+
+</html>

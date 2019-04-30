@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.springframework.org/security/tags">
+<body>
+	<!-- Dialog TemplateMsg Select  -->
+				<div id="dialogTemplateMsgSelect" title="選擇樣板訊息" th:fragment="dialogTemplateMsgSelect" >  
+					<div >
+	                    <div class="mainFrame">
+	                        <table border="1" id="templateMsgListTable">
+                            	<colgroup><col width="150"><col width="150"><col width="130"><col width="100"><col width="100"></colgroup>
+                            	<tr>
+                                	<th>標題與內容</th>
+                                	<th>類型</th>
+                                	<th>建立時間</th>
+                                	<th>建立人員</th>
+                            	</tr>
+                            	<tbody class="templateMsgTrTemplate">
+                            	<tr>
+                                	<td class="templateMsgImgTitle">
+                                		<input type="hidden" class="templateMsgId">
+                                    	<img src="" width="100px" style="cursor: pointer;">
+                                    	<div><a class="templateMsgTitle" style="cursor: pointer;"></a></div>
+                                	</td>
+                                	<td class="templateMsgType" style="text-align: center;"></td>
+                                	<td class="templateMsgCreateTime"></td>
+                                	<td class="templateMsgCreateUser"></td>
+                            	</tr>
+                            	</tbody>
+                        	</table>
+	                    </div>
+					</div>
+				</div>
+				
+</body>
+</html>

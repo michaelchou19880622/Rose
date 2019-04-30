@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Interactive Response Create Page', '/BCS/JS/page13.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page12')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formSendGroup">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">互動式回應訊息</h3>
+                        <p class="CHDesc">設定用戶在聊天室輸入特定關鍵字時自動傳送的互動式訊息。</p>
+                    </header>
+                    <div class="CHBtnSet">
+                        <div class="CHLeft">
+                            <ul>
+                                <li class="CHLeftBtn"><input type="button" class="CancelBtn" value="取消" style="cursor: pointer;"></li>
+                            </ul>
+                        </div>
+                        <div class="CHRight"><input class="btn_add" type="button" value="設定" style="cursor: pointer;"></div>
+                    </div>
+                    <div class="mainFrame CMsg">
+						<input class="interactiveStatus" type="hidden" value="DISABLE">
+                        <table border="1">
+                            <colgroup><col width="190"><col></colgroup>
+                            <tbody >
+                                <tr>
+                                    <th>使用者狀態</th>
+                                    <td>
+                                        <div class="option">
+                                            <div class="optionLabel">請選擇</div>
+                                            <select class="optionSelect userStatus" name="userStatus">
+                                                <option value="">請選擇</option>
+                                                <option value="ALL">全部</option>
+                                                <option value="UNBIND">一般</option>
+                                                <option value="BINDED">已串聯</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>代表關鍵字</th>
+                                    <td>
+                                        <div class="MdFRM01Input"><input type="text" placeholder="" maxlength="30" id="keywordInput" name="keywordInput" class="inputKeyup"></div>&nbsp; <span class="MdTxtInputCount"limit="30">0/30</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>追加關鍵字</th>
+                                    <td>
+                                    	<div class="dataTemplate">
+	                                        <div class="MdFRM01Input"  style="margin-bottom: 10px;">
+	                                        	<input class="otherKeyword" type="text" placeholder="" maxlength="30">
+	                                        </div>
+											<div class="btn_delete" style="cursor: pointer;display: inline-block;"></div>
+                                        </div>
+                                    	<input type="button" value="追加關鍵字" class="addKeyword showMdFRM01Input" style="cursor: pointer;"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>回應內容</th>
+                                    <td>
+                                        <div class="MdFRM01Input"><input type="text" placeholder="" maxlength="30" id="responseInput" name="responseInput" class="inputKeyup"></div>&nbsp; <span class="MdTxtInputCount" limit="30">0/30</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>回應連結</th>
+                                    <td>
+                                        <div class="MdFRM01Input"><input type="text" placeholder="" maxlength="300" id="linkInpu" name="linkInpu" class="inputKeyup"></div>&nbsp; <span class="MdTxtInputCount"limit="300">0/300</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>連結說明</th>
+                                    <td>
+                                        <div class="MdFRM01Input"><input type="text" placeholder="" maxlength="30" id="linkDesc" name="linkDesc" class="inputKeyup"></div>&nbsp; <span class="MdTxtInputCount" limit="30">0/30</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <div class="BtnSet">
+                    <div>
+                        <input class="btn_save" type="button" value="設定" style="cursor: pointer;">
+                        <input class="btn_cancel" type="button" value="取消" style="cursor: pointer;">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=640, target-densitydpi=device-dpi, maximum-scale=2.0, user-scalable=yes" />
+    
+		<!-- default header name is X-CSRF-TOKEN -->
+		
+	
+    	<title>我的專屬優惠券</title>
+		<link href="../Mobile/Coupon/css/normalize.css" rel="stylesheet" type="text/css">
+		<link href="../Mobile/Coupon/css/style.css" rel="stylesheet" type="text/css">
+    	<link href="../webjars/jquery-ui/1.11.4/jquery-ui.min.css" type="text/css" rel="stylesheet" />
+		
+		<script type='text/javascript' src='../webjars/momentjs/2.13.0/min/moment.min.js'></script>
+		<script type='text/javascript' src='../webjars/jquery/2.2.3/jquery.min.js'></script>
+		<script type='text/javascript' src='../webjars/jquery-ui/1.11.4/jquery-ui.min.js'></script>
+		
+		<script type='text/javascript' src="../Mobile/JS/lib/jquery.blockui.js"></script>
+		
+		<script type='text/javascript' src='../Mobile/JS/core.js'></script>
+	
+		<script src="../Mobile/Coupon/js/function.js"></script>
+		
+		<script src="../Mobile/Coupon/js/index.base.js"></script>
+		
+		<!--[if lt IE 9]>
+		<script src="../Mobile/Coupon/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+	
+	<body>
+		<div class="wrapper">
+			<div class="index_top">
+				<h1 class="title">我的專屬優惠券</h1>
+			</div>
+			<ul class="coupon_list">
+				<li class="dataTemplate">
+					<a class="linkBody">
+						<img src="../Mobile/Coupon/images/index_thumb.png" class="coupon_thumb" style="width: 170px;height: 170px;">
+						<strong class="coupon_title"  style="word-wrap: break-word;"></strong>
+					</a>
+				</li>
+			</ul>   
+		</div>
+		<div class="index_btn">
+			<span>逾期的優惠券，將不會顯示於此優惠券列表中</span>
+		</div>
+        <!-- popup area start-->
+        <div class="popup_wrapper" style="display:none">
+            <div class="popup_box">
+                <p class="popup_text">
+                	是否領取此數位優惠卷，並至指定分點進行兌換<br>
+                	領取數位優惠卷後，即無法於分點機台領取實體優惠卷
+                </p>
+                <div class="popup_btn">
+                    <a class="cancel">取消</a>
+                    <a class="confirm">確認</a>
+	                <a class="check" style="display:none; width: 98%;">確認</a>
+                </div>
+            </div>
+        </div>
+         <input id="noCoupon" type="hidden" th:value="${noCoupon}"/>
+	</body>
+
+</html>

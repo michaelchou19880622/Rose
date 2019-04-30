@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width,initial-sale=1" />
+    
+    <!-- CSRF token -->
+	
+	<!-- default header name is X-CSRF-TOKEN -->
+	
+    
+    <link href="../Mobile/Content/style.css" type="text/css" rel="stylesheet" />
+	<script type='text/javascript' src='../webjars/jquery/2.2.3/jquery.min.js'></script>
+	<script type='text/javascript' src='../Mobile/JS/core.js'></script>
+	<script type='text/javascript' src='../Mobile/JS/page1-2.base.js'></script>
+    <title>升級LINE帳號</title>
+</head>
+
+<body>
+    <div class="gridContainer clearfix mainDiv">
+    	<img src="../Mobile/images/UserNotBindedPage1-2.png" >
+    	<div style="top: 0; position: absolute;" class="mainDiv">
+    		<table style="width:100%">
+    			<tr heightPercent="63"  style="width:100%">
+    			</tr>
+    			<tr heightPercent="11" style="width:100%">
+    				<td>
+    					<a th:href="@{/m/userBindingPage}">
+    						<div  style="width:100%"></div>
+    					</a>
+    				</td>
+    			</tr>
+    			<tr heightPercent="10" style="width:100%">
+    				<td >
+    					<a th:href="@{http://bit.ly/2b4WLGm}">
+    						<div  style="width:100%"></div>
+    					</a>
+    				</td>
+    			</tr>
+    		</table>
+    	</div>
+    </div>
+</body>
+
+</html>

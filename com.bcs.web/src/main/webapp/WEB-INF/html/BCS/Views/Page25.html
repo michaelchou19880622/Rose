@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      th:with="strList = ${ {'/BCS/JS/MsgFragment/MsgFragment.js', '/BCS/JS/page25.base.js'} }" >
+<head th:replace="/BCS/Views/Common/Head :: head ('Tracing Generate Page', ${strList})" >
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page25')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formSendGroup">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">建立追蹤網址</h3>
+                        <p class="CHDesc">您可產生追蹤網址。</p>
+                    </header>
+                    <div class="CHBtnSet">
+                        <div class="CHRight"><input class="btn_add" type="button" value="產生追蹤連結" style="cursor: pointer;"></div>
+                    </div>
+
+                    <div class="mainFrame CMsg">
+
+						<div th:replace="/BCS/Views/MsgFragment/MsgFragmentBase :: msgFrame"></div>
+						
+						<div class="GeneratePlace">  
+	                        <div class="MsgFrame" >
+		                            <div class="mdCMN07Head">
+		                                <h4 class="mdCMN07HeadTtl01">產生結果</h4>
+		                            </div>
+		
+		                            <div class="mdCMN07Body">
+		                                <div class="MdFRM04MsgBox" countstring="">
+		                                    <div class="MdBtnEmoticon">
+		                                        連結
+		                                        <input type="text" placeholder="" value="" name="links" lang-direction="" class="linkInput" maxlength="500" style=" width: 70%;">
+		                                    </div>
+		                                </div>
+		                            </div>
+		                        </div>
+	                        </div>
+                    </div>
+
+                </section>
+                <div class="BtnSet">
+                    <div>
+                        <input class="btn_save" type="button" value="產生追蹤連結" style="cursor: pointer;">
+                    </div>
+                </div>
+
+				<div th:replace="/BCS/Views/MsgFragment/DialogLinkListSelect :: dialogLinkListSelect"></div>
+            </form>
+
+            <div id="previewDialog" style="display: none;">
+			</div>
+        </div>
+    </div>
+</body>
+
+</html>

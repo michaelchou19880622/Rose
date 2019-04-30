@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"  th:with="strList = ${ {'/BCS/JS/MsgFragment/MsgList.base.js', '/BCS/JS/page12.base.js'} }" >
+<head th:replace="/BCS/Views/Common/Head :: head ('Interactive Response Page', ${strList})" >
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page12')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">互動式回應 生效</h3>
+                        <p class="CHDesc">設定用戶在聊天室輸入特定關鍵字時自動傳送的互動式訊息。</p>
+                    </header>
+                    <div class="CHBtnSet">
+                        <div class="CHLeft">
+                            <ul>
+                                <li class="CHLeftBtn ExSelected"><input class="ActiveBtn" type="button" value="生效" style="cursor: pointer;"></li>
+                                <li class="CHLeftBtn"><input class="DisableBtn" type="button" value="取消" style="cursor: pointer;"></li>
+                            </ul>
+                        </div>
+                        <div class="CHRight"><input class="btn_add" type="button" value="建立回應" style="cursor: pointer;"></div>
+                    </div>
+                        <div class="mainFrame">
+                        <table border="1" id="tableBody">
+                                <colgroup>
+                                	<col width="100">
+                                	<col width="70">
+                                	<col width="70">
+                                	<col width="100">
+                                	<col width="100">
+                                	<col width="50">
+                                	<col width="70">
+                                	<col width="130">
+                                	<col width="100">
+                                </colgroup>
+                                <tr>
+                                    <th>關鍵字</th>
+                                    <th>使用者</th>
+                                    <th>訊息內容</th>
+                                    <th>類別</th>
+                                    <th>狀態</th>
+									<th>回覆數量</th>
+                                    <th>存檔時間</th>
+                                    <th>建立人員</th>
+                                    <th>複製/刪除</th>
+                                </tr>
+	                            <tr class="dataTemplate">
+	                                <td class="mainKeyword"><a href=""></a></td>
+	                                <td class="userStatus"></td>
+	                                <td class="msgContent"></td>
+	                                <td class="msgType"></td>
+	                                <td class="interactiveStatus">
+	                                	<span style="font-weight: bold;font-size: 16px;"></span>
+	                                	<br/>
+	                                	<br/>
+	                                    <input class="btn_redeisgn" type="button" value="取消" style="cursor: pointer;">
+	                                </td>
+	                                <td class="sendCount"><a href=""></a></td>
+	                                <td class="modifyTime"></td>
+	                                <td class="modifyUser"></td>
+	                                <td>
+	                                    <input class="btn_copy" type="button" value="複製" style="cursor: pointer;">
+	                                    <input class="btn_detele" type="button" value="刪除" style="cursor: pointer;">
+	                                </td>
+	                            </tr>
+                            </table>
+                        </div>
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

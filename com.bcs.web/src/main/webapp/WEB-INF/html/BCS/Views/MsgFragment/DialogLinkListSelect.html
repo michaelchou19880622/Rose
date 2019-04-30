@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.springframework.org/security/tags">
+<body>
+	<!-- Dialog Link List Select  -->
+	            <div id="urlDialog" title="選擇連結" th:fragment="dialogLinkListSelect" >
+					<div >
+	                    <div class="mainFrame">
+	                        <table border="1" id="urlDialogTable">
+	                            <colgroup><col width="150"></colgroup>
+	                            <tr>
+	                                <th>連結</th>
+	                            </tr>
+								<tr class="urlDialogTr" style="cursor: pointer">
+									<td><span class="urls"></span></td>
+								</tr>
+	                        </table>
+	                    </div>
+					</div>
+				</div>
+</body>
+</html>

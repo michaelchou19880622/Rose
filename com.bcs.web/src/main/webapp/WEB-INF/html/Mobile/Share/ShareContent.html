@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width,initial-sale=1" />
+    
+    <!-- CSRF token -->
+	
+	<!-- default header name is X-CSRF-TOKEN -->
+	
+    
+    <link href="../Mobile/Content/style.css" type="text/css" rel="stylesheet" />
+    <link href="../webjars/jquery-ui/1.11.4/jquery-ui.min.css" type="text/css" rel="stylesheet" />
+    
+	<script type='text/javascript' src='../webjars/jquery/2.2.3/jquery.min.js'></script>
+	<script type='text/javascript' src='../webjars/jquery-ui/1.11.4/jquery-ui.min.js'></script>
+	<script type='text/javascript' src="../Mobile/JS/lib/jquery.blockui.js"></script>
+	<script type='text/javascript' src='../Mobile/JS/core.js'></script>
+	<script type='text/javascript' src='../Mobile/Share/js/share.content.base.js'></script>
+    <title>回饋升級好友發年終</title>
+</head>
+
+<body>
+    <div class="gridContainer clearfix mainDiv">
+    	<img src="../Mobile/Share/images/bc_page_A_red.jpg" >
+    	<div style="top: 0; position: absolute;" class="mainDiv">
+    		<table style="width:100%">
+    			<tr heightPercent="34.84"  style="width:100%">
+    				<td style="width:5%"></td>
+    				<td style="width:16%"></td>
+    				<td style="width:29%"></td>
+    				<td style="width:29%"></td>
+    				<td style="width:21%"></td>
+    				<td></td>
+    			</tr>
+    			<tr heightPercent="3.5" style="width:100%">
+    				<td ></td>
+    				<td ></td>
+    				<td colspan="2"  id="eventShareTrigger">
+    					<!-- 
+    					<a href="">
+    						<div  style="width:100%"></div>
+    					</a>
+    					 -->
+    				</td>
+    				<td></td>
+    			</tr>
+    			<tr heightPercent="56.5" style="width:100%">
+    				<td></td>
+    				<td colspan="2">
+    				</td>
+    				<td></td>
+    				<td></td>
+    			</tr>
+    			<tr heightPercent="1.5" style="width:100%">
+    				<td></td>
+    				<td colspan="2">
+    					<a th:href="@{/m/shareRulePage}">
+    						<div  style="width:100%"></div>
+    					</a>
+    				</td>
+    				<td></td>
+    				<td></td>
+    			</tr>
+    			<tr heightPercent="3" style="width:100%">
+    				<td></td>
+    				<td colspan="2">
+    				</td>
+    				<td></td>
+    				<td></td>
+    			</tr>
+    		</table>
+    	</div>
+    </div>
+</body>
+
+</html>

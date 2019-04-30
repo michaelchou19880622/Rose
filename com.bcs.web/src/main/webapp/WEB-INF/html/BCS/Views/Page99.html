@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Upload Picture Page', '/BCS/JS/page99.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page99')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formUploadPicture">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">上傳電子發票</h3>
+                        <p class="CHDesc">您可透過上傳電子發票確認是否符合活動資格</p>
+                    </header>
+                    <div class="mainFrame alignLeft">
+                        <table border="1">
+                            <colgroup><col width="190"><col></colgroup>
+                            <tbody >
+                                <tr>
+                                    <th>參加活動</th>
+                                    <td>
+                                        <div class="option">
+                                            <div class="optionLabel">請選擇</div>
+                                            <select class="optionSelect campaign" id="campaignId" name="campaignId">
+                                                <option value="">請選擇</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>電子發票照片</th>
+                                    <td>
+                                    	<input id="uploadPictureFile" name="uploadPictureFile" type="file" style="display:none">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </section>
+                <div class="BtnSet">
+                    <div>
+                        <input class="btn_add btn_upload" style="cursor: pointer;" type="button" value="上傳">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

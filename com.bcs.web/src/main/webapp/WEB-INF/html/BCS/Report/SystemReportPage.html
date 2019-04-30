@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      th:with="strList = ${ {'/BCS/JS/Report/systemReport.base.js', '/BCS/JS/lib/vis.min.js'} }" >
+<head th:replace="/BCS/Views/Common/Head :: head ('System Report Page', ${strList})" >
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page0')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formSendGroup">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">系統負載</h3>
+                        <p class="CHDesc">系統負載</p>
+                    </header>
+                    <div class="mainFrame">
+                        <table border="1" id="tableBody">
+                            <colgroup><col width="100"><col width="500"></colgroup>
+                            <tr class="tableHeader">
+                                <th>資料欄位</th>
+                                <th>資料內容</th>
+                            </tr>
+                            <tr >
+                                <td class="dataTitle">Version</td>
+                                <td class="dataContent">2017-12-14 : findAllLinkUrlByLikeFlag</td>
+                            </tr>
+                            <tr >
+                                <td class="dataTitle">getConfigData</td>
+                                <td class="dataContent"><a href="./getConfigurationData">getConfigurationData</a></td>
+                            </tr>
+                            <tr >
+                                <td class="dataTitle">clearConfigData</td>
+                                <td class="dataContent"><a href="./clearConfigurationData">clearConfigurationData</a></td>
+                            </tr>
+                            <tr >
+                                <td class="dataTitle">systemLogList</td>
+                                <td class="dataContent"><a href="./systemLogList">systemLogList</a></td>
+                            </tr>
+                            <tr >
+                                <td class="dataTitle">userTraceLogList</td>
+                                <td class="dataContent"><a href="./userTraceLogList">userTraceLogList</a></td>
+                            </tr>
+                            <tr >
+                                <td class="dataTitle">configListPage</td>
+                                <td class="dataContent"><a href="./configListPage">configListPage</a></td>
+                            </tr>
+                            <tr >
+                                <td class="dataTitle">connectionTestPage</td>
+                                <td class="dataContent"><a href="connectionTestPage">connectionTestPage</a></td>
+                            </tr>
+                            <tr class="checkAccessTokenTime">
+                                <td class="dataTitle">Access Token Time</td>
+                                <td class="dataContent"><div id="checkAccessTokenTime"></div></td>
+                            </tr>
+                            <tr class="checkSendingMsgHandlerTaskCount">
+                                <td class="dataTitle">傳送訊息處理紀錄</td>
+                                <td class="dataContent"><div id="checkSendingMsgHandlerTaskCount"></div></td>
+                            </tr>
+                            <tr class="checkReceivingMsgHandlerTaskCount">
+                                <td class="dataTitle">接收訊息處理紀錄</td>
+                                <td class="dataContent"><div id="checkReceivingMsgHandlerTaskCount"></div></td>
+                            </tr>
+                            <tr class="catchRecordBindedList">
+                                <td class="dataTitle">綁定紀錄</td>
+                                <td class="dataContent"><div id="catchRecordBindedList"></div></td>
+                            </tr>
+                            <tr class="catchRecordOpReceiveList">
+                                <td class="dataTitle">新增,封鎖紀錄</td>
+                                <td class="dataContent" ><div id="catchRecordOpReceiveList" ></div></td>
+                            </tr>
+                            <tr class="allReceiveList">
+                                <td class="dataTitle">總訊息紀錄</td>
+                                <td class="dataContent"><div id="allReceiveList"></div></td>
+                            </tr>
+                            <tr class="catchRecordReceiveList">
+                                <td class="dataTitle">接收訊息紀錄</td>
+                                <td class="dataContent"><div id="catchRecordReceiveList"></div></td>
+                            </tr>
+                            <tr class="catchRecordOpAddReceiveList">
+                                <td class="dataTitle">新增記錄</td>
+                                <td class="dataContent"><div id="catchRecordOpAddReceiveList"></div></td>
+                            </tr>
+                            <tr class="catchRecordOpBlockedReceiveList">
+                                <td class="dataTitle">封鎖紀錄</td>
+                                <td class="dataContent"><div id="catchRecordOpBlockedReceiveList"></div></td>
+                            </tr>
+                            <tr class="catchHandleMsgReceiveTimeoutList">
+                                <td class="dataTitle">超時紀錄</td>
+                                <td class="dataContent"><div id="catchHandleMsgReceiveTimeoutList"></div></td>
+                            </tr>
+                            <tr class="dataTemplate">
+                                <td class="dataTitle"></td>
+                                <td class="dataContent"></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

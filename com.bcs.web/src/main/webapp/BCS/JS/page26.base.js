@@ -1,0 +1,6 @@
+/**
+ *
+ */
+$(function(){
+	//$.BCS.getTracingLinkList();
+});

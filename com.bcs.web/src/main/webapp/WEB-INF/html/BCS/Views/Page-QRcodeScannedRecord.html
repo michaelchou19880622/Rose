@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('QRcode Scanned Record Page', '/BCS/JS/page-QRcodeScannedRecord.base.js')">
+</head>
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+	
+	<div class="LyContents">
+    	<div th:replace="/BCS/Views/Common/Menu :: menu ('Page-QRcodeScannedRecord')"></div>
+    	
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">貴賓之夜 QRcode 掃碼統計報表</h3>
+                        <p class="CHDesc">點擊「QRcode 掃碼人數」即可匯出 UID 清單</p>
+                    </header>
+
+                    <div class="CHBtnSet"><br /></div>
+
+                    <div class="mainFrame">
+                        <table border="1" id="recordListTable">
+                            <colgroup>
+	                            <col width="150">
+	                            <col width="100">
+                            </colgroup>
+                            <tr>
+                                <th>活動名稱</th>
+                                <th>QRcode 掃碼人數</th>
+                            </tr>
+                            <tbody class="recordTrTemplate">
+                            <tr>
+                                <td class="campaignName">貴賓之夜</td>
+                                <td class="QrcodeScannedCount"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

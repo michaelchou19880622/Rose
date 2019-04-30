@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Coupon Check Page', '/BCS/JS/Test/couponCheck.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page0')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formSendGroup">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">查詢優惠券資料</h3>
+                        <p class="CHDesc">查詢優惠券資料</p>
+                    </header>
+                    <div class="mainFrame">
+                        <table border="1" id="tableBody">
+                            <colgroup>
+                            	<col width="150">
+                            	<col width="250">
+                            	<col width="150">
+                            	<col width="150">
+                            	<col>
+                            </colgroup>
+                            <tbody >
+                                <tr>
+                                    <th>UID資料</th>
+                                    <td style="text-align: left;" colspan="4">
+                                    	<div class="MdFRM01Input">
+                                        	<input type="text" id="userId" name="userId" placeholder="請輸入" maxlength="10">
+                                        	<span class="MdTxtInputCount"></span>
+                                        </div>
+                                        	<input class="btn_query btn_css" type="button" value="查詢" style="cursor: pointer;">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th  colspan="2">優惠券資料</th>
+                                    <th>時間</th>
+                                    <th>狀態</th>
+                                    <th>方法</th>
+                                </tr>
+                            	<tr class="dataTemplate">
+                                    <td class="couponTitle"  colspan="2"></td>
+                                    <td class="actionTime" ></td>
+                                    <td class="actionType" ></td>
+	                                <td>
+	                                    <input class="btn_detele" type="button" value="刪除" style="cursor: pointer;">
+	                                </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Report Link Click Page', '/BCS/JS/page20.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page20')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">連結點擊 成效列表</h3>
+                    </header>
+                    <div class="CHBtnSet">
+                    	<div style="float:left">
+                            <ul>
+                                <li class="CHLeftBtn">
+                                	<input class="LeftBtn" type="button" value="<" style="cursor: pointer;">第 <span id="pageText"></span> 頁
+                                	<input class="RightBtn" type="button" value=">" style="cursor: pointer;">
+                                </li>
+                            </ul>
+	                    </div>
+                        <div class="CHRight">
+	                    	<span>查詢註記：</span>
+	                    	<div class="option date"  style="width:330px;">
+	                        	<input type="text"  id="queryByFlag"  style="width:300px;"/>
+	                       	</div>
+	                      	<input class="btn_save query" type="button" value="查詢"  style="cursor: pointer;">
+                       	</div>
+                    </div>
+                    <p class="MdTxtNotice01 MdAC pad10"></p>
+                    <div class="mainFrame">
+                        <table border="1" id="tableBody">
+                            <colgroup><col width="180"><col width="150"><col width="300"><col width="100"><col width="100"></colgroup>
+                            <tr class="tableHeader">
+                                <th>連結名稱</th>
+                                <th>連結</th>
+                                <th>時間/註記</th>
+                                <th>點擊次數</th>
+                                <th>點擊人數</th>
+                            </tr>
+                            <tr class="dataTemplate">
+                                <td class="linkTitle"><a href=""></a></td>
+                                <td class="linkUrl"></td>
+                                <td class="linkFlag"></td>
+                                <td class="totalCount"><a></a></td>
+                                <td class="userCount"><a></a></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

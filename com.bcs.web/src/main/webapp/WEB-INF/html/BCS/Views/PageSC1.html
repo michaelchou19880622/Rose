@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"  
+      th:with="strList = ${ {'/BCS/JS/pageSC1.base.js'} }">
+<head th:replace="/BCS/Views/Common/Head :: head ('Scratch Card Create Page', ${strList})">
+</head>
+<body>
+
+<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+    	<div th:replace="/BCS/Views/Common/Menu :: menu ('PageG1')"></div>
+    	
+    	<!-- Right Content -->
+    	<div class="LyMain" role="main">
+    		<form>
+    			<section>
+                    <header class="ContentHead">
+                    	<div id="customizeTypeBtn" style="float: right">
+	                        <input id="deletePrize" class="btn_cancel" type="button" value="刪除獎品" style="cursor: pointer;">
+                    		<input id="addPrize" class="btn_save" type="button" value="增加獎品" style="cursor: pointer;">
+	                        <input name="cancel" class="btn_cancel" type="button" value="返回" style="cursor: pointer;">
+                        </div>
+                        <h3 class="CHTtl">設定遊戲及獎品</h3>
+                    </header>
+                    <div class="mainFrame alignLeft">
+                        <table class="gameTable">
+                        	<colgroup><col width="120"><col></colgroup>
+                            <tr>
+								<th>
+									遊戲名稱
+								</th>
+								<td>
+									<div class="MdFRM01Input">
+	                                	<input type="text" id="gameName">
+	                                </div>&nbsp;
+	                                <!-- <span class="MdTxtInputCount ng-binding">0/40</span> -->
+								</td>
+                            </tr>
+                            <tr>
+								<th>
+									遊戲內容
+								</th>
+								<td>
+									<div class="MdFRM01Input">
+	                                	<input type="text" id="gameContent">
+	                                </div>&nbsp;
+	                                <!-- <span class="MdTxtInputCount ng-binding">0/40</span> -->
+								</td>
+                            </tr>
+                            <tr>
+								<th>
+									活動標題圖片
+								</th>
+								<td class="headerImageTd">
+									<div class="MdFRM03File">
+                                    	<input type="hidden" class="imgId">
+                                        <div class="mdFRM03Img">
+                                        	<img src="" style="height: 100%;">
+                                        </div>
+                                        <div class="MdBtnUpload">
+                                            <span class="mdBtnUploadTxt">上傳</span>
+                                            <input accept="image/jpeg" class="mdBtnUploadInput image" name="headerImage" type="file">
+                                        </div>
+                                        <p class="MdTxtNotice01">上傳一張依據設計指南所製作的圖片。可支援的規格為 650 x 650向量，可支援檔案格式為jpg。</p>
+                                    </div>
+								</td>
+                            </tr>
+                            <tr>
+								<th>
+									活動說明圖片
+								</th>
+								<td class="footerImageTd">
+									<div class="MdFRM03File">
+                                    	<input type="hidden" class="imgId">
+                                        <div class="mdFRM03Img">
+                                        	<img src="" style="height: 100%;">
+                                        </div>
+                                        <div class="MdBtnUpload">
+                                            <span class="mdBtnUploadTxt">上傳</span>
+                                            <input accept="image/jpeg" class="mdBtnUploadInput image" name="footerImage" type="file">
+                                        </div>
+                                        <p class="MdTxtNotice01">上傳一張依據設計指南所製作的圖片。可支援的規格為 650 x 3001向量，可支援檔案格式為jpg。</p>
+                                    </div>
+								</td>
+                            </tr>
+                            <tr>
+								<th>
+									刮刮卡背景
+								</th>
+								<td class="scratchCardBGImageTd">
+									<div class="MdFRM03File">
+                                    	<input type="hidden" class="imgId">
+                                        <div class="mdFRM03Img">
+                                        	<img src="" style="height: 100%;">
+                                        </div>
+                                        <div class="MdBtnUpload">
+                                            <span class="mdBtnUploadTxt">上傳</span>
+                                            <input accept="image/jpeg" class="mdBtnUploadInput image" name="scratchCardBGImage" type="file">
+                                        </div>
+                                        <p class="MdTxtNotice01">上傳一張依據設計指南所製作的圖片。可支援的規格為 650 x 600向量，可支援檔案格式為jpg。</p>
+                                    </div>
+								</td>
+                            </tr>
+                            <tr>
+								<th>
+									刮刮卡圖案
+								</th>
+								<td class="scratchCardFrontImageTd">
+									<div class="MdFRM03File">
+                                    	<input type="hidden" class="imgId">
+                                        <div class="mdFRM03Img">
+                                        	<img src="" style="height: 100%;">
+                                        </div>
+                                        <div class="MdBtnUpload">
+                                            <span class="mdBtnUploadTxt">上傳</span>
+                                            <input accept="image/jpeg" class="mdBtnUploadInput image" name="scratchCardFrontImage" type="file">
+                                        </div>
+                                        <p class="MdTxtNotice01">上傳一張依據設計指南所製作的圖片。可支援的規格為 450 x 450向量，可支援檔案格式為jpg。</p>
+                                    </div>
+								</td>
+                            </tr>
+                            <tr>
+								<th>
+									「開始遊戲」按鈕圖案
+								</th>
+								<td class="scratchCardStartButtonImageTd">
+									<div class="MdFRM03File">
+                                    	<input type="hidden" class="imgId">
+                                        <div class="mdFRM03Img">
+                                        	<img src="" style="height: 100%;">
+                                        </div>
+                                        <div class="MdBtnUpload">
+                                            <span class="mdBtnUploadTxt">上傳</span>
+                                            <input accept="image/jpeg" class="mdBtnUploadInput image" name="scratchCardStartButtonImage" type="file">
+                                        </div>
+                                        <p class="MdTxtNotice01">上傳一張依據設計指南所製作的圖片。可支援的規格為 450 x 450向量，可支援檔案格式為jpg。</p>
+                                    </div>
+								</td>
+                            </tr>
+                            <tbody class="prizeTrTemplate">
+	                            <tr>
+									<th rowspan="6">
+										獎品<span class="typeSideTxt">A</span><br/>
+										<!-- 安慰獎<input type="radio" name="isConsolationPrize" style="cursor: pointer;"> -->
+									</th>
+									<!-- <td>
+	        							<p>獎品名稱<span style="color: red">*</span></p>
+	        							<div class="MdFRM01Input">
+	            							<input type="text" class="prizeName">
+	        							</div>
+	    							</td> -->
+	                            </tr>
+	                            <tr>
+									<td>
+										<p>優惠券<span style="color: red">*</span></p>
+										<!-- <div class="MdFRM03File">
+	                                    	<input type="hidden" class="imgId">
+	                                        <div class="mdFRM03Img">
+	                                        	<img src="" style="height: 100%;">
+	                                        </div>
+	                                        <div class="MdBtnUpload">
+	                                            <span class="mdBtnUploadTxt">上傳</span>
+	                                            <input accept="image/jpeg" class="mdBtnUploadInput image" name="prizeImage" type="file">
+	                                        </div>
+	                                        <p class="MdTxtNotice01">上傳一張依據設計指南所製作的圖片。可支援的規格為 450 x 450向量，可支援檔案格式為jpg。</p>
+	                                    </div> -->
+	                                    <div th:replace="/BCS/Views/MsgFragment/MsgFragmentBase :: msgFrame"></div>
+										<div th:replace="/BCS/Views/MsgFragment/MsgFragmentBtn :: msgFrameBtn (${ {'COUPON'} })"></div>
+										<div th:replace="/BCS/Views/MsgFragment/DialogCouponSelect :: dialogCouponSelect"></div>
+									</td>
+	                            </tr>
+	                            <!-- <tr>
+									<td>
+	        							<p>獎品內容<span style="color: red">*</span></p>
+	        							<div class="MdFRM01Input">
+	            							<input type="text" class="prizeContent">
+	        							</div>
+	    							</td>
+	                            </tr>
+	                            <tr>
+									<td>
+	        							<p>獎品數量<span style="color: red">*</span></p>
+	        							<div class="MdFRM01Input">
+	            							<input type="text" class="prizeQuantity" onkeyup="value=value.replace(/[^0-9]/g,'')">
+	        							</div>
+	    							</td>
+	                            </tr> -->
+	                            <tr>
+									<td>
+	        							<p>獎品機率<span style="color: red">*</span></p>
+	        							<div class="MdFRM01Input">
+	            							<input maxlength="5" type="text" class="coupon_probability" onkeyup="value=value.replace(/[^0-9/.]/g,'')">
+	        							</div>&nbsp; 
+		                                <span>%</span>
+	    							</td>
+	                            </tr>
+	                            <!-- <tr>
+									<td>
+	        							<p>自動回應訊息<span style="color: red">*</span></p>
+	        							<div class="MdFRM01Input">
+	            							<input type="text" class="message">
+	        							</div>&nbsp;
+	    							</td>
+	                            </tr> -->
+	                    	</tbody>
+                        </table>
+                    </div>
+    			</section>
+    		</form>
+    		<div class="BtnSet">
+                <div>
+                    <input id="save" class="btn_save" type="button" value="儲存" style="cursor: pointer;">
+                </div>
+            </div>
+    	</div>
+    </div>
+
+</body>
+</html>

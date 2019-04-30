@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"  
+      th:with="strList = ${ {'/BCS/JS/MsgFragment/PreviewDialog.js', '/BCS/JS/page7.base.js'} }">
+<head th:replace="/BCS/Views/Common/Head :: head ('Coupon Create Page', ${strList})" >
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page7')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formContentCoupon">
+                <section>
+                    <header class="ContentHead">
+                        <h3 th:text="${param.actionType == null || param.actionType[0] == 'Create' ? '建立新優惠券' : '更改優惠券'}" class="CHTtl"></h3>
+                        <p class="CHDesc">請輸入優惠券內容。</p>
+                    </header>
+                    <div class="CHBtnSet">
+                        <div class="CHLeft">
+                            <ul>
+                                <li class="CHLeftBtn"><input type="button" style="cursor: pointer;" class="btn_preview" value="預覽"></li>
+                            </ul>
+                        </div>
+                        <div class="CHRight"><input class="btn_save" style="cursor: pointer;" type="button" value="儲存"></div>
+                    </div>
+                    <div class="mainFrame CMsg Pre">
+                        <table border="1">
+                            <colgroup><col width="190"><col></colgroup>
+                            <tbody >
+                                <tr>
+                                    <th>優惠券標題 <span style="color: red">*</span></th>
+                                    <td>
+                                        <div class="MdFRM01Input">
+                                        	<input type="text" id="couponTitle" name="couponTitle" placeholder="請輸入" maxlength="50">
+                                        </div>&nbsp; <span class="MdTxtInputCount">0/50</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>列表縮圖<br>( 170 X 170 )</th>
+                                    <td>
+                                        <div class="MdFRM03File">
+                                            <img id="couponListImage" th:src="@{/BCS/images/noImg_image.png}" style="height: 100px;"/>
+                                            <div class="MdBtnUpload" style="cursor: pointer;">
+                                                <span class="mdBtnUploadTxt">上傳</span>
+                                                <input accept="image/jpeg" class="mdBtnUploadInput"  id="couponListImageInput" name="couponListImageInput" type="file"/>
+                                            </div>
+                                            <p class="MdTxtNotice01">jpg格式的檔案。最大1MB。圖檔較大時，讀取時可能須花費一些時間。</p>
+                                            <input type="hidden" id="couponListImageId" name="couponListImageId" value=""/>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>主要圖片<br>( 650 X 650 )</th>
+                                    <td>
+                                        <div class="MdFRM03File">
+                                            <img id="couponImage" th:src="@{/BCS/images/noImg_image.png}" style="height: 100px;"/>
+                                            <div class="MdBtnUpload" style="cursor: pointer;">
+                                                <span class="mdBtnUploadTxt">上傳</span>
+                                                <input accept="image/jpeg" class="mdBtnUploadInput" 
+                                                	id="couponImageInput" name="couponImageInput" type="file"/>
+                                            </div>
+                                            <p class="MdTxtNotice01">jpg格式的檔案。最大1MB。圖檔較大時，讀取時可能須花費一些時間。</p>
+                                            <input type="hidden" id="couponImageId" name="couponImageId" value=""/>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>優惠券類型</th>
+                                    <td>
+										<div>
+											<input type="text" 
+												id="couponType" 
+												name="couponType" 
+												placeholder="請輸入" 
+												maxlength="50"/>
+										</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>使用效期<span style="color: red">*</span></th>
+                                    <td>
+                                        <span>
+                                            <div class="option date">
+                                                <input type="text" 
+                                                	class="datepicker" 
+                                                	id="couponStartUsingTime" 
+                                                	name="couponStartUsingTime" 
+                                                	placeholder="YYYY-MM-DD"/>
+                                            </div>
+                                            <div class="option time">
+                                                <div class="optionLabel">00</div>
+                                                <select id="couponStartUsingTimeHour" name="couponStartUsingTimeHour" class="optionSelect">
+												    <option th:each="i : ${#numbers.sequence( 0, 23, 1)}"
+												    	th:with="hour=${i < 10 ? '0' + i : i}"
+												    	th:value="${hour}"
+												    	th:text="${hour}" >
+												    </option>
+                                                </select>
+                                            </div>
+                                            :
+                                            <div class="option time">
+                                                <div class="optionLabel">00</div>
+                                                <select id="couponStartUsingTimeMinute" name="couponStartUsingTimeMinute" class="optionSelect">
+												    <option th:each="i : ${#numbers.sequence( 0, 59, 1)}"
+												    	th:with="minute=${i < 10 ? '0' + i : i}"
+												    	th:value="${minute}"
+												    	th:text="${minute}" >
+												    </option>
+                                                </select>
+                                            </div>
+                                        </span>
+                                        ～
+                                        <span>
+                                            <div class="option date">
+                                                <input type="text" 
+                                                	class="datepicker" 
+                                                	id="couponEndUsingTime" 
+                                                	name="couponEndUsingTime" 
+                                                	placeholder="YYYY-MM-DD"/>
+                                            </div>
+                                            <div class="option time">
+                                                <div class="optionLabel">00</div>
+                                                <select id="couponEndUsingTimeHour" name="couponEndUsingTimeHour" class="optionSelect">
+												    <option th:each="i : ${#numbers.sequence( 0, 23, 1)}"
+												    	th:with="hour=${i < 10 ? '0' + i : i}"
+												    	th:value="${hour}"
+												    	th:text="${hour}" >
+												    </option>
+                                                </select>
+                                            </div>
+                                            :
+                                            <div class="option time">
+                                                <div class="optionLabel">00</div>
+                                                <select id="couponEndUsingTimeMinute" name="couponEndUsingTimeMinute" class="optionSelect">
+												    <option th:each="i : ${#numbers.sequence( 0, 59, 1)}"
+												    	th:with="minute=${i < 10 ? '0' + i : i}"
+												    	th:value="${minute}"
+												    	th:text="${minute}" >
+												    </option>
+                                                </select>
+                                            </div>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                 <th>電子序號</th>
+                                 <td>
+                                  	<div class="mdFRM05Inline">
+                                  		<ul>
+                                  		<li><label><input class="isCouponCode" type="radio" name="isCouponCode" value="0" checked="checked">不使用</label></li>
+                                  		</ul>
+                                  		</br>
+                                  		<ul>
+                                  		
+                                  		<li><label><input class="isCouponCode" type="radio" name="isCouponCode" value="1">使用上傳之優惠券序號<p class="MdTxtNotice01">(檔案格式:csv，標題:serialNumber)</p></label></li>
+                                  		        		
+      									<li>
+      										<div class="MdBtnUpload couponCodeListUpload" style="cursor: pointer; display: none;">
+      										  <span class="mdBtnUploadTxt btn_upload_CSV" >上傳</span>
+      										  <input accept=".csv"  id="uploadCouponCodeCSVFile" name="uploadCouponCodeCSVFile" type="file" style="display:none">
+      										<div>
+      									</li>
+      									<li>
+      										<div class="couponCodeListUpload" style="display: none;">
+      											<p id="couponCodeUploadFile" name="couponCodeUploadFile"  style="cursor: pointer; display: none;"></p>	
+      										</div>
+      									</li>
+      									</ul>
+      									</br>
+      									<ul>
+      									<li><label><input class="isCouponCode" type="radio" name="isCouponCode" value="2">使用固定優惠券序號</label></li>
+      									<li>
+      										<div class="couponSerialNumber" style="display: none;">
+	                                            <div class="MdFRM01Input">
+	                                                 <input type="text" 
+	                                                    	id="couponSerialNumber" 
+	                                                    	name="couponSerialNumber"
+	                                                    	size="50" 
+	                                                    	maxlength="50" 
+	                                                    	/>
+	                                            </div>
+	                                            <div class="MdTxtInputCount">0/50</div>
+                                            </div>
+                                        </li>
+      									</ul>
+      								</div>
+      							</td>
+                                </tr>
+                                <tr>
+                                	<th>優惠券數量</th>
+                                    <td>
+										<div class="MdFRM01Input">
+											<input type="text" 
+												id="couponGetLimitNumber" 
+												name="couponGetLimitNumber"
+												placeholder="請輸入"
+												/>
+										</div>&nbsp; <span class="MdTxtInputCount">不輸入表示不限制</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>使用者填寫表單</th>
+                                    <td>
+                                        <div class="mdFRM05Inline">
+                                            <ul>
+                                            	<li><label><input class="isFillIn" type="radio" name="isFillIn" value="1">填寫</label></li>
+                                                <li><label><input class="isFillIn" type="radio" name="isFillIn" value="0" checked="checked">不填寫</label></li>   
+                                           </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>可使用次數</th>
+                                    <td>
+                                        <div class="mdFRM05Inline">
+                                            <ul>
+                                                <li><label><input class="couponUsingLimit" type="radio" name="couponUsingLimit" value="ONCE" checked="checked">僅限一次</label></li>
+                                                <li><label><input class="couponUsingLimit" type="radio" name="couponUsingLimit" value="UNLIMITED">有效期間內不限次數</label></li>
+                                                <li><label><input class="couponUsingLimit" type="radio" name="couponUsingLimit" value="ONCE_A_DAY">一天一次</label></li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>宣傳文字</th>
+                                    <td>
+                                        <div class="TInput">
+                                            <textarea id="couponDescription" 
+                                            	name="couponDescription" 
+                                            	cols="80" 
+                                            	rows="10" 
+                                            	placeholder="請輸入" 
+                                            	maxlength="500" 
+                                            	class="jqCountString"></textarea>
+                                            <span class="MdTxtNotice01 floatRight">0/500</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>使用方法</th>
+                                    <td>
+                                        <div class="TInput">
+                                            <textarea id="couponUseDescription" 
+                                            	name="couponUseDescription" 
+                                            	cols="80" 
+                                            	rows="10" 
+                                            	placeholder="請輸入" 
+                                            	maxlength="500" 
+                                            	class="jqCountString"></textarea>
+                                            <span class="MdTxtNotice01 floatRight">0/500</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>注意事項</th>
+                                    <td>
+                                        <div class="TInput">
+                                            <textarea id="couponRuleDescription" 
+                                            	name="couponRuleDescription" 
+                                            	cols="80" 
+                                            	rows="10" 
+                                            	placeholder="請輸入" 
+                                            	maxlength="500" 
+                                            	class="jqCountString"></textarea>
+                                            <span class="MdTxtNotice01 floatRight">0/500</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>領取期間</th>
+                                    <td>
+                                        <span>
+                                            <div class="option date">
+                                                <input type="text" 
+                                                	class="datepicker" 
+                                                	id="couponStartGetTime" 
+                                                	name="couponStartGetTime" 
+                                                	placeholder="YYYY-MM-DD"/>
+                                            </div>
+                                            <div class="option time">
+                                                <div class="optionLabel">00</div>
+                                                <select id="couponStartGetTimeHour" name="couponStartGetTimeHour" class="optionSelect">
+												    <option th:each="i : ${#numbers.sequence( 0, 23, 1)}"
+												    	th:with="hour=${i < 10 ? '0' + i : i}"
+												    	th:value="${hour}"
+												    	th:text="${hour}" >
+												    </option>
+                                                </select>
+                                            </div>
+                                            :
+                                            <div class="option time">
+                                                <div class="optionLabel">00</div>
+                                                <select id="couponStartGetTimeMinute" name="couponStartGetTimeMinute" class="optionSelect">
+												    <option th:each="i : ${#numbers.sequence( 0, 59, 1)}"
+												    	th:with="minute=${i < 10 ? '0' + i : i}"
+												    	th:value="${minute}"
+												    	th:text="${minute}" >
+												    </option>
+                                                </select>
+                                            </div>
+                                        </span>
+                                        ～
+                                        <span>
+                                            <div class="option date">
+                                                <input type="text" 
+                                                	class="datepicker" 
+                                                	id="couponEndGetTime" 
+                                                	name="couponEndGetTime" 
+                                                	placeholder="YYYY-MM-DD"/>
+                                            </div>
+                                            <div class="option time">
+                                                <div class="optionLabel">00</div>
+                                                <select id="couponEndGetTimeHour" name="couponEndGetTimeHour" class="optionSelect">
+												    <option th:each="i : ${#numbers.sequence( 0, 23, 1)}"
+												    	th:with="hour=${i < 10 ? '0' + i : i}"
+												    	th:value="${hour}"
+												    	th:text="${hour}" >
+												    </option>
+                                                </select>
+                                            </div>
+                                            :
+                                            <div class="option time">
+                                                <div class="optionLabel">00</div>
+                                                <select id="couponEndGetTimeMinute" name="couponEndGetTimeMinute" class="optionSelect">
+												    <option th:each="i : ${#numbers.sequence( 0, 59, 1)}"
+												    	th:with="minute=${i < 10 ? '0' + i : i}"
+												    	th:value="${minute}"
+												    	th:text="${minute}" >
+												    </option>
+                                                </select>
+                                            </div>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <!-- <th>優惠劵事件設定</th>
+                                    <td>
+										<div class="MdFRM01Input">
+											<input type="text" 
+												id="eventReference" 
+												name="eventReference" 
+												placeholder="請輸入" 
+												maxlength="50"/>
+										</div>&nbsp; <span class="MdTxtInputCount">0/50</span> -->
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>優惠券其他設定 <p class="MdTxtNotice01">設定為集點卡與刮刮樂使用，<br>請選擇【隱藏優惠券】。</p></th>
+                                    <td>
+                                        <div class="option">
+                                            <div class="optionLabel">請選擇</div>
+                                            <select class="optionSelect couponFlag" name="couponFlag" id="couponFlag">
+                                                <option value="">請選擇</option>
+                                                <option value="PRIVATE">隱藏優惠券</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>優惠券備註</th>
+                                    <td>
+                                        <div class="TInput">
+                                            <textarea id="couponRemark" 
+                                            	name="couponRemark" 
+                                            	cols="80" 
+                                            	rows="10" 
+                                            	placeholder="請輸入" 
+                                            	maxlength="500" 
+                                            	class="jqCountString"></textarea>
+                                            <span class="MdTxtNotice01 floatRight">0/500</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <p class="MdTxtNotice01 MdAC">儲存後，想要傳送優惠券時，請依序選擇「訊息」＞「建立新頁面」＞「優惠券」，並夾帶檔案。</p>
+                <div class="BtnSet">
+                    <div>
+                        <input class="btn_query" style="cursor: pointer;" type="button" value="預覽">
+                        <input class="btn_save" style="cursor: pointer;" type="button" value="儲存">
+                    	<input name="cancel" class="btn_cancel" type="button" value="取消" style="cursor: pointer;">
+                    </div>
+                </div>
+            </form>
+			<div id="previewDialog">
+			</div>
+        </div>
+    </div>
+</body>
+
+</html>

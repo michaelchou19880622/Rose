@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width,initial-sale=1" />
+	
+	<link href="../Mobile/Coupon/css/normalize.css" rel="stylesheet" type="text/css">
+	<link href="../Mobile/Coupon/css/style.css" rel="stylesheet" type="text/css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	
+	<script src="../Mobile/JS/lib/jquery-3_2_1.min.js"></script>
+	<script src="../Mobile/JS/lib/loadingoverlay.min.js"></script>
+	<script type='text/javascript' src='../Mobile/JS/core.js'></script>
+	<script type='text/javascript' src='../Mobile/JS/fill_out_info.base.js'></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
+	<script type='text/javascript' src="../Mobile/JS/lib/jquery.blockui.js"></script>
+	<title>資料填寫頁面</title>
+</head>
+
+<body>
+	<div class="wrapper">
+		<div class="coupon_banner">
+			<div class="coupon_banner_image">
+				<img th:if="${!#strings.isEmpty(imageSource)}"
+					th:src="${imageSource}"> <img
+					th:if="${#strings.isEmpty(imageSource)}"
+					src="../Mobile/Coupon/images/kv.png">
+			</div>
+			<div class="coupon_banner_title">
+				<p th:text="${contentCoupon.couponTitle}"></p>
+				<img src="../Mobile/Coupon/images/dot_arr.png"> <input
+					id="couponId" type="hidden" th:value="${contentCoupon.couponId}" />
+			</div>
+			<div class="coupon_banner_desc">
+				<p th:text="${contentCoupon.couponDescription}"></p>
+			</div>
+			<div class="coupon_banner_reedem">
+				使用效期開始：<span th:text="${#dates.format(couponStartUsingTime, 'yyyy/MM/dd HH:mm')} + '~' "></span><br />
+					         結束：<span th:text="${#dates.format(couponEndUsingTime, 'yyyy/MM/dd HH:mm')}"></span>
+			</div>
+		</div>
+		<div class="container" style="background-color: #f4f4f4;">
+			<h2>領取資訊</h2>
+			<p>請填寫詳細資訊以兌換優惠券</p>
+			<form style="margin-bottom: 20px">
+				<div class="form-group">
+					<label for="usr">姓名：</label> <input type="text"
+						class="form-control" id="name" placeholder="請輸入...">
+				</div>
+				<div class="form-group">
+					<label for="pwd">身分證字號:</label> <input type="text"
+						class="form-control" id="id_card_number" placeholder="請輸入...">
+				</div>
+				<div class="form-group">
+					<label for="pwd">電話:</label> <input type="text"
+						class="form-control" id="phone" placeholder="請輸入...">
+				</div>
+				<div class="form-group">
+					<label for="pwd">地址:</label> <input type="text"
+						class="form-control" id="address" placeholder="請輸入...">
+				</div>
+				<div class="checkbox">
+					<label> 
+						<input type="checkbox" name="announcement" value=""><a id="announcement" target="_blank">個人資料保護之法定公告事項</a>
+					</label>
+				</div>
+				<div class="text-center">
+					<button type="button" class="btn btn-primary btn-md" id="confirm"
+						style="text-align: center;">送出</button>
+				</div>
+			</form>
+		</div>
+
+		<div class="popup_wrapper" style="display: none">
+			<div class="popup_box" style="margin-top: 70%;">
+				<p class="popup_text">
+					請確認資料填寫無誤<br>
+				</p>
+				<div class="popup_btn">
+					<a class="cancel">取消</a> <a class="confirm">確認</a> <a class="check" 	style="display: none; width: 98%;">確認</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>

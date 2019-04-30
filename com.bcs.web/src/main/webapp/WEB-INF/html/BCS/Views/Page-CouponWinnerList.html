@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Coupon Serial Number Page', '/BCS/JS/page-CouponWinnerList.js')">
+</head>
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+	
+	<div class="LyContents">
+    	<div th:replace="/BCS/Views/Common/Menu :: menu ('Page8')"></div>
+    	
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">填寫資料紀錄</h3>
+                    </header>
+
+                    <div class="CHBtnSet">
+                    	<div style="float:left">
+	                    	<span>日期區間：</span>
+	                    	<div class="option date">
+	                        	<input type="text" 
+		                           	class="datepicker" 
+		                           	id="recoredStartDate" 
+		                           	placeholder="YYYY-MM-DD"/>
+	                       	</div>
+	                       	<span>~</span>
+	                       	<div class="option date">
+	                        	<input type="text" 
+		                        	class="datepicker" 
+		                           	id="recordEndDate" 
+		                           	placeholder="YYYY-MM-DD"/>
+	                      	</div>
+	                      	<input class="btn_save query" type="button" value="查詢"  style="cursor: pointer;">
+	                      	<ul>
+                                <li class="CHLeftBtn">
+                               		<input class="LeftBtn" type="button" value="<" style="cursor: pointer;">第 <input id="pageText" size="4" onkeyup="value=value.replace(/[^0-9]/g,'')"> 頁
+                                	<input class="RightBtn" type="button" value=">" style="cursor: pointer;">
+                                	共 <span id="pageTotalText"></span> 頁
+                                </li>
+                            </ul>
+	                    </div>
+                        <div class="CHRight">
+                        	<input class="btn_add exportPageToExcel" type="button" value="匯出此頁EXCEL"  style="cursor: pointer;">
+                        	<input class="btn_add exportAllToExcel" type="button" value="匯出總資料EXCEL"  style="cursor: pointer;">                  
+                        </div>
+                    </div>
+
+                    <div class="mainFrame">
+                        <table border="1" id="recordListTable">
+                            <colgroup>
+	                            <col width="200">
+	                            <col width="100">
+	                            <col width="100">
+	                            <col width="100">
+	                            <col width="100">
+	                            <col width="100">
+	                            <col width="100">
+                            </colgroup>
+                            <tr>
+                                <th>UID</th>
+                                <th>名稱</th>
+                                <th>時間</th>
+                                <th>地址</th>
+                                <th>身分證</th>
+                                <th>手機</th>
+                                <th>電子序號</th>
+                            </tr>
+                            <tbody class="recordTrTemplate">
+                            <tr>
+                                <td class="uid"></td>
+                                <td class="userName"></td>
+                                <td class="modifyTime"></td>
+                                <td class="userAddress"></td>
+                                <td class="userIdCardNumber"></td>
+                                <td class="userPhoneNumber"></td>
+                                <td class="couponCode"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

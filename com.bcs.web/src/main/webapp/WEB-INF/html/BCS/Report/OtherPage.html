@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      th:with="strList = ${ {'/BCS/JS/lib/vis.min.js'} }" >
+<head th:replace="/BCS/Views/Common/Head :: head ('Other Page', ${strList})" >
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page23')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formSendGroup">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">其他資料</h3>
+                        <p class="CHDesc">其他資料</p>
+                    </header>
+                    <div class="mainFrame">
+                        <table border="1" id="tableBody">
+                            <colgroup><col width="100"><col width="500"></colgroup>
+                            <tr class="tableHeader">
+                                <th>資料欄位</th>
+                                <th>資料內容</th>
+                            </tr>
+                            <tr >
+                                <td class="dataTitle">MID to UID</td>
+                                <td class="dataContent"><a href="./convertingMidToUidPage">MIDtoUID</a></td>
+                            </tr>
+                            <tr >
+                                <td class="dataTitle">更新綁定狀態</td>
+                                <td class="dataContent"><a href="./updateBindedStatusPage">更新綁定狀態</a></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

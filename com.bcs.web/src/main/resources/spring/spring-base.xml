@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"	
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xmlns:tx= "http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/data/jpa
+		http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop.xsd
+		">
+		
+	<context:component-scan base-package="com.bcs.*">
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+	
+    <jpa:repositories base-package="com.bcs.*" />
+    
+	<bean id="HttpOncePerRequestFilter" class="com.bcs.web.ui.filter.HttpOncePerRequestFilter" />
+    
+    <bean id="applicationContextProvder" class="com.bcs.core.spring.ApplicationContextProvider"/>
+	
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+    	<property name="dataSource" ref="dataSource" />
+      	<property name="packagesToScan">
+			<array>
+				<value>com.bcs.core.db.entity</value>
+				<value>com.bcs.core.bc.db.entity</value>
+				<value>com.bcs.core.bot.db.entity</value>
+				<value>com.bcs.core.taishin.circle.db.entity</value>
+			</array>
+     	</property>
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+			    <property name="generateDdl" value="false"/>
+			    <property name="showSql" value="true"/>
+			</bean>
+		</property>
+		<property name="jpaProperties">
+	        <props>
+            	<!-- <prop key="hibernate.dialect">org.hibernate.dialect.DB2400Dialect</prop> -->
+            	<prop key="hibernate.dialect">org.hibernate.dialect.SQLServer2008Dialect</prop>
+            	<!-- <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop> -->
+            	<prop key="hibernate.show_sql">true</prop>
+            	<prop key="hibernate.format_sql">true</prop>
+            	<prop key="hibernate.hbm2ddl.auto">update</prop> <!-- none / update  -->
+            	<prop key="hibernate.jdbc.batch_size">50</prop>
+            	<prop key="hibernate.order_inserts">true</prop>
+				<prop key="hibernate.order_updates">true</prop>
+	        </props>
+	    </property>
+    </bean>
+    
+    <!-- ======= JDBC connection pool start ======= -->
+	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+	    <constructor-arg ref="hikariConfig" />
+	</bean>
+	
+	<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
+		<property name="poolName" value="springHikariCP" />
+		
+		<!-- 
+			jtds 只支援 JDBC3 而不支援 JDBC4，所以須設定 connectionTestQuery
+			若是支援 JDBC4 的 driver 則不須設定 connectionTestQuery
+		-->
+		<!-- <property name="connectionTestQuery" value="SELECT 1" />
+		<property name="dataSourceClassName" value="net.sourceforge.jtds.jdbcx.JtdsDataSource" />
+		<property name="maximumPoolSize" value="10" />
+		<property name="dataSourceProperties">
+			<props>
+				<prop key="user">bcsAdmin</prop>
+				<prop key="password">dj/4ej03</prop>
+				<prop key="serverName">61.218.5.103</prop>
+				<prop key="databaseName">Taishin Customer Connect</prop>
+				<prop key="portNumber">2819</prop>
+			</props>
+		</property> -->
+		<property name="connectionTestQuery" value="SELECT 1" />
+		<property name="dataSourceClassName" value="net.sourceforge.jtds.jdbcx.JtdsDataSource" />
+		<property name="maximumPoolSize" value="10" />
+		<property name="dataSourceProperties">
+			<props>
+				<prop key="user">sa</prop>
+				<prop key="password">XtremeApp53811062</prop>
+				<prop key="serverName">172.104.113.123</prop>
+				<prop key="databaseName">Taishin_Customer_Connect</prop>
+				<prop key="portNumber">1433</prop>
+			</props>
+		</property>
+	</bean>
+	<!-- ======= JDBC connection pool end ======= -->
+	   
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+	
+	<!-- Enable Annotation based Declarative Transaction Management -->
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+	
+	<!-- Transaction 先不使用 AOP 規範 service 方法名稱的作法，先使用 @Transactional 的作法即可
+    <aop:config>
+        <aop:pointcut id="serviceOperation" expression="execution(public * *..service..*Service.*(..))" />
+        <aop:advisor id="managerTx" advice-ref="txAdvice" pointcut-ref="serviceOperation" order="2"/>
+    </aop:config>
+
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="get*" read-only="true" />
+            <tx:method name="find*" read-only="true" />
+            <tx:method name="is*" read-only="true" />
+            <tx:method name="count*" read-only="true" />
+            <tx:method name="query*" read-only="true" />
+            <tx:method name="create*" rollback-for="Exception" />
+            <tx:method name="save*" rollback-for="Exception" />
+            <tx:method name="update*" rollback-for="Exception" />
+            <tx:method name="delete*" rollback-for="Exception" />
+        </tx:attributes>
+    </tx:advice>
+	-->
+</beans>

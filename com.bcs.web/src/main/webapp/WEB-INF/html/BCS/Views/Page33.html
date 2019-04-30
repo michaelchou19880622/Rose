@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Product Group Create Page', '/BCS/JS/page33.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page33')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formProductGroup">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">建立商品組合</h3>
+                        <p class="CHDesc"></p>
+                    </header>
+                    <div class="CHBtnSet">
+                    </div>
+                    <div class="mainFrame">
+                        <table border="1">
+                            <colgroup><col width="190"><col></colgroup>
+                            <tbody >
+                                <tr>
+                                    <th>商品組合名稱</th>
+                                    <td>
+                                        <input type="text" id="groupName" name="groupName" value="" maxlength="100" >
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </section>
+                <div class="BtnSet">
+                    <div>
+                        <input class="btn_save" style="cursor: pointer;" type="button" value="儲存">
+                        <input class="btn_cancel" style="cursor: pointer;" type="button" value="取消">
+                    </div>
+                </div>
+                <section id="productListBody">
+                    <div class="CHBtnSet">
+                        <div class="CHRight"><input class="btn_add" style="cursor: pointer;" type="button" value="建立商品"></div>
+                    </div>
+                    <div class="mainFrame">
+                        <table border="1" id="tableBody">
+                            <colgroup><col width="180"><col width="150"><col width="100"><col width="100"><col width="130"></colgroup>
+                            <tr class="tableHeader">
+                                <th>商品名稱</th>
+                                <th>修改日期</th>
+                                <th>建立人員</th>
+                                <th>刪除</th>
+                            </tr>
+                            <tr class="dataTemplate">
+                                <td class="productName"><a href=""></a></td>
+                                <td class="modifyTime"></td>
+                                <td class="modifyUser"></td>
+                                <td>
+                                    <input class="btn_detele" style="cursor: pointer;" type="button" value="刪除">
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

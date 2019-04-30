@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width,initial-sale=1" />
+    
+    <!-- CSRF token -->
+	
+	<!-- default header name is X-CSRF-TOKEN -->
+	
+    
+    <link href="../Mobile/Content/style.css" type="text/css" rel="stylesheet" />
+	<script type='text/javascript' src='../webjars/jquery/2.2.3/jquery.min.js'></script>
+	<script type='text/javascript' src='../Mobile/JS/core.js'></script>
+	<script type='text/javascript' src='../Mobile/JS/AcceptPrizePage.base.js'></script>
+    <title>分享好友</title>
+</head>
+<body>
+	<input id="gameId" type="hidden" th:value="${gameId}">
+	<!-- 
+	<div class="headerImage" style="width:750px;margin: 0 auto;position: relative;"><img/></div>
+	<div class="prizeImageShow" style="width:750px;margin: 0 auto;position: relative;margin-top: -10px;"><img/></div>
+	 -->
+	<div class="shareBtn shareImage" style="max-width:750px;margin: 0 auto;position: relative;">
+		<img src="../Mobile/images/ShareLine-1.jpg" />
+	</div>
+	
+	<!-- 
+    <div class="footerImage" style="width:750px;margin: 0 auto;position: relative;margin-top: -10px;"><img/></div>
+	 -->
+</body>
+</html>

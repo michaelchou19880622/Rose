@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.springframework.org/security/tags">
+<body>
+	<!-- Message Fragment Button  -->
+                        <div class="TypeMsgSolid" th:fragment="msgFrameBtn (enableMsgTypes)" >  
+                            <ul class="TypeMsgBtns">
+                                <li th:if="${#lists.contains(enableMsgTypes, 'TEXT')}">
+                                	<div class="MdBtn"><input type="button" value="文字" msgType="TEXT" style="cursor: pointer;"></div>
+                                </li>
+                                <li th:if="${#lists.contains(enableMsgTypes, 'STICKER')}">
+                                	<div class="MdBtn"><input type="button" value="貼圖" msgType="STICKER" style="cursor: pointer;"></div>
+                                </li>
+                                <li th:if="${#lists.contains(enableMsgTypes, 'IMAGE')}">
+                                	<div class="MdBtn"><input type="button" value="照片" msgType="IMAGE" style="cursor: pointer;"></div>
+                                </li>
+                                <li th:if="${#lists.contains(enableMsgTypes, 'LINK')}">
+                                	<div class="MdBtn"><input type="button" value="連結訊息" msgType="LINK" style="cursor: pointer;"></div>
+                                </li>
+                                <li th:if="${#lists.contains(enableMsgTypes, 'RICH_MSG')}">
+                                	<div class="MdBtn"><input type="button" value="圖文訊息" msgType="RICH_MSG" style="cursor: pointer;" id="rewardCoupon" name="rewardCoupon"></div>
+                                </li>
+                                <!-- <li th:if="${#lists.contains(enableMsgTypes, 'COUPON')}">
+                                	<div class="MdBtn"><input type="button" value="優惠券" msgType="COUPON" style="cursor: pointer;"></div>
+                                </li>
+                                <li th:if="${#lists.contains(enableMsgTypes, 'REWARDCARD')}">
+                                	<div class="MdBtn"><input type="button" value="集點卡" msgType="REWARDCARD" style="cursor: pointer;"></div>
+                                </li> -->
+                                <li th:if="${#lists.contains(enableMsgTypes, 'VIDEO')}">
+                                	<div class="MdBtn"><input type="button" value="影片" msgType="VIDEO" style="cursor: pointer;"></div>
+                                </li>
+                                <li th:if="${#lists.contains(enableMsgTypes, 'AUDIO')}">
+                                	<div class="MdBtn"><input type="button" value="聲音" msgType="AUDIO" style="cursor: pointer;"></div>
+                                </li>
+                                <li th:if="${#lists.contains(enableMsgTypes, 'BCS_PAGE')}">
+                                	<div class="MdBtn"><input type="button" value="BCS卡友頁面" msgType="BCS_PAGE" style="cursor: pointer;"></div>
+                                </li>
+                                <li th:if="${#lists.contains(enableMsgTypes, 'TEMPLATE')}">
+                                    <div class="MdBtn"><input type="button" value="樣板訊息" msgType="TEMPLATE" style="cursor: pointer;"></div>
+                                </li>
+                                <!-- <li><div class="MdBtn"><input type="button" value="位置訊息" msgType="LOCATION" style="cursor: pointer;"></div></li> -->
+                            </ul>
+                        </div>
+</body>
+</html>

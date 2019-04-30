@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width,initial-sale=1" />
+	<!-- CSRF token -->
+<!--     <meta name="_csrf" th:content="${_csrf.token}"/> -->
+    <!-- default header name is X-CSRF-TOKEN -->
+<!--     <meta name="_csrf_header" th:content="${_csrf.headerName}"/> -->
+	
+	<link rel="stylesheet" href="../Mobile/Mgm/css/reset.css">
+    <link rel="stylesheet" href="../Mobile/Mgm/css/style.css">
+	<script type='text/javascript' src='../webjars/jquery/2.2.3/jquery.min.js'></script>
+	<script type='text/javascript' src='../Mobile/JS/core.js'></script>
+	<script type='text/javascript' src="../Mobile/JS/lib/jquery.blockui.js"></script>
+	<script th:inline="javascript" type="text/javascript">
+		var bcs = {
+			bcsContextPath : /*[[@{/bcs}]]*/ ''
+		};
+    </script>
+	<script src="../Mobile/Mgm/js/MgmPage.base.js"></script>
+
+    <style>
+        .wrapper {
+		    width: 100%;
+		    margin: 0 auto;
+		    position: relative;
+		    overflow: hidden;
+		}
+    </style>
+    <title>MGM Page</title>
+</head>
+    <body>
+	    <div class="wrapper" >
+	    	<div class="mainDiv" th:if="${errorMsg == null}" >
+	            <img id="actionImg" style="width:100%;border:0px;margin:0px;float:left;" th:src="${actionImgUrl}" />
+
+	            <img id="shareImg" style="width:100%;border:0px;margin:0px;float:left;" th:src="${shareImgUrl}" />
+
+	            <img id="descriptionImg" style="width:100%;border:0px;margin:0px;clear:both;" th:src="${descriptionImgUrl}" />
+	        </div>
+	    </div>
+	    <input id="errorMsg" type="hidden" th:value="${errorMsg == null? '' : errorMsg}"/>
+    </body>
+</html>

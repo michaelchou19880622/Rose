@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      th:with="strList = ${ {'/BCS/JS/MsgFragment/DialogTracingLinkList.js', '/BCS/JS/page26.base.js'} }" >
+<head th:replace="/BCS/Views/Common/Head :: head ('Tracing Generate List Page', ${strList})" >
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page26')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">追蹤網址列表</h3>
+                    </header>
+                    <p class="MdTxtNotice01 MdAC pad10"></p>
+                    <div class="mainFrame">
+	                        <table border="1" id="tracingListTable">
+                            <colgroup><col width="180"><col width="100"><col width="100"><col width="100"><col width="100"></colgroup>
+                            <tr class="tableHeader">
+                                <th>追蹤連結</th>
+                                <th>標題/註記</th>
+                                <th>追蹤目標</th>
+                                <th>建立時間</th>
+                                <th>建立人員</th>
+                            </tr>
+	                            <tbody class="tracingTrTemplate">
+	                            <tr>
+	                                <td class="tracingLink"><a></a></td>
+	                                <td class="tracingTargetTitle"></td>
+	                                <td class="tracingTarget"><a target="_blank"></a></td>
+	                                <td class="modifyTime"></td>
+	                                <td class="modifyUser"></td>
+	                            </tr>
+	                            </tbody>
+	                        </table>
+                    </div>
+
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

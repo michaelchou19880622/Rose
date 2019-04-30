@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Main Page', '')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page0')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+                	
+        	<!-- 權限不足 -->
+        	<div th:if="${accessDenied}" style="color: red;">
+        		您沒有權限瀏覽此網頁。
+        	</div>
+        	
+        	<!-- 一般錯誤 -->
+        	<div th:if="${exception}" style="color: red;">
+        		錯誤發生，請找開發人員協助，錯誤發生時間：<span th:text="${exceptionDate}"></span>。
+        	</div>
+        	
+        	<!-- 404 -->
+        	<div th:if="${error404}" style="color: red;">
+        		找不到網頁。
+        	</div>
+        </div>
+    </div>
+</body>
+
+</html>

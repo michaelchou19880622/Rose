@@ -1,0 +1,139 @@
+package com.bcs.core.taishin.service;
+
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.bcs.core.bot.db.entity.MsgBotReceive;
+import com.bcs.core.db.entity.LineUser;
+import com.bcs.core.db.entity.UserFieldSet;
+import com.bcs.core.db.service.LineUserService;
+import com.bcs.core.db.service.UserFieldSetService;
+import com.bcs.core.enums.LOG_TARGET_ACTION_TYPE;
+import com.bcs.core.log.util.UserTraceLogUtil;
+import com.bcs.core.record.service.CatchRecordBinded;
+import com.bcs.core.taishin.api.model.UpdateStatusFieldModel;
+import com.bcs.core.taishin.api.model.UpdateStatusModel;
+import com.bcs.core.utils.ErrorRecord;
+import com.bcs.core.utils.LineIdUtil;
+
+@Service
+public class RichartValidateService {
+	@Autowired
+	private LineUserService lineUserService;
+	@Autowired
+	private CatchRecordBinded catchRecordBinded;
+	@Autowired
+	private UserFieldSetService userFieldSetService;
+	
+	/** Logger */
+	private static Logger logger = Logger.getLogger(RichartValidateService.class);
+	
+	@Transactional(rollbackFor=Exception.class, timeout = 30)
+	public void bindedLineUser(UpdateStatusModel model) throws Exception{
+		logger.debug("bindedLineUser");
+
+		if(LineIdUtil.isLineUID(model.getUid())){
+			// Validate
+		}
+		else{
+			throw new Exception("UidError:" + model.getUid());
+		}
+		
+		String uid = model.getUid();
+		
+		if(LineUser.STATUS_BINDED.equals(model.getStatus()) || LineUser.STATUS_UNBIND.equals(model.getStatus())){
+			// Validate
+		}
+		else{
+			throw new Exception("StatusError:" + model.getStatus());
+		}
+		
+		Date date = new Date(model.getTime());
+		
+		LineUser lineUser = lineUserService.findByMid(uid);
+		if(lineUser == null){
+			lineUser = new LineUser();
+		}
+		
+		lineUser.setMid(uid);
+		lineUser.setStatus(lineUser.getStatus().equals(LineUser.STATUS_BLOCK) ? lineUser.getStatus() : model.getStatus());
+		lineUser.setIsBinded(model.getStatus());
+		lineUser.setSoureType(MsgBotReceive.SOURCE_TYPE_USER);
+		lineUser.setModifyTime(date);
+		
+		if(lineUser.getCreateTime() == null){
+			lineUser.setCreateTime(date);
+		}
+		List<UserFieldSet> exsitedUserFieldSets = userFieldSetService.findByMid(uid);
+		
+		// Save UpdateStatusFieldModel
+		List<UpdateStatusFieldModel> fields = model.getField();
+		if(fields != null && fields.size() > 0){
+			for(int i = 0; i < fields.size(); i++){
+				Boolean isExsited = false;
+				UpdateStatusFieldModel field = fields.get(i);
+				if(StringUtils.isBlank(field.getKey())){
+					throw new Exception("FieldError:[" + i + "]:KeyNull");
+				}
+				if(StringUtils.isBlank(field.getName())){
+					throw new Exception("FieldError:[" + i + "]:NameNull");
+				}
+				if(StringUtils.isBlank(field.getType())){
+					throw new Exception("FieldError:[" + i + "]:TypeNull");
+				}
+				if(StringUtils.isBlank(field.getValue())){
+					throw new Exception("FieldError:[" + i + "]:ValueNull");
+				}
+				
+				for(UserFieldSet exsitedUserFieldSet:exsitedUserFieldSets){//更新已存在相同KEY的資料
+					if(exsitedUserFieldSet.getKeyData().equals(field.getKey().toUpperCase())){
+						exsitedUserFieldSet.setValue(field.getValue());
+						exsitedUserFieldSet.setSetTime(date);
+						userFieldSetService.save(exsitedUserFieldSet);
+						isExsited=true;
+						break;
+					}
+				}
+				
+				if(!isExsited){//新增資料
+					UserFieldSet set = new UserFieldSet();
+					set.setKeyData(field.getKey().toUpperCase());
+					set.setName(field.getName());
+					set.setSetTime(date);
+					set.setType(field.getType());
+					set.setMid(uid);
+					set.setValue(field.getValue());
+					userFieldSetService.save(set);
+				}
+			}
+		}
+		lineUserService.save(lineUser);
+		UserTraceLogUtil.saveLogTrace(LOG_TARGET_ACTION_TYPE.TARGET_LineUser, LOG_TARGET_ACTION_TYPE.ACTION_Binded, uid, lineUser, uid);
+		// Catch Record Binded
+		catchRecordBinded.incrementCount();
+	}
+	
+	public boolean isActive(String Uid){
+		
+		try{
+			if(StringUtils.isNotBlank(Uid)){
+				LineUser lineUser = lineUserService.findByMid(Uid);
+				// Validate UID is Active
+				if(lineUser != null && (LineUser.STATUS_BINDED.equals(lineUser.getStatus()) || LineUser.STATUS_UNBIND.equals(lineUser.getStatus()))){
+					return true;
+				}
+			}
+		}
+		catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));
+		}
+		
+		return false; 
+	}
+}

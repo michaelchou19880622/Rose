@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.springframework.org/security/tags"
+      xmlns:th="http://www.thymeleaf.org"  th:with="strList = ${ {'/BCS/JS/MsgFragment/MsgList.base.js', '/BCS/JS/page42.base.js'} }" >
+<head th:replace="/BCS/Views/Common/Head :: head ('Reward Card  List Page', ${strList})" >
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page42')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">集點卡列表 生效</h3>
+                        <p class="CHDesc">	可建立集點卡。建立完成的集點卡可以訊息形式傳送、投稿至動態消息，或顯示於行動官網。</p>
+                    </header>
+                    <div class="CHBtnSet">
+                        <div class="CHLeft">
+                            <ul>
+                                <li class="CHLeftBtn ExSelected"><input class="ActiveBtn" type="button" value="生效" style="cursor: pointer;"></li>
+                                <li class="CHLeftBtn"><input class="DisableBtn" type="button" value="取消" style="cursor: pointer;"></li>
+                            </ul>
+                        </div>
+                        <div class="CHRight"><input class="btn_add" style="cursor: pointer;" type="button" value="建立集點卡"></div>
+                    </div>
+                    <div class="mainFrame">
+                        <table border="1" id="tableBody">
+                            <colgroup>
+                            	<col width="150">
+                            	<col width="150">
+                            	<col width="100">
+                                <col width="50">
+                            	<col width="80">
+                            	<col width="100">
+                            	<col width="100">
+                            </colgroup>
+                            <tr>
+                                <th>標題</th>
+                                <th>有效期限</th>
+                                <th>優惠券</th>
+                                <th>建立時間<br>建立人員</th>
+								<th>狀態</th>
+                                <th>刪除</th>
+                                <th></th>
+                            </tr>
+                            <tr class="dataTemplate">
+                                <td class="rewardCardTitle"><a href=""></a></td>
+                                <td class="expireTime"></td>
+                                <td class="couponTitle">
+                                	<input id="couponId" name="couponId" type="hidden">
+                                </td>
+                                <td class="modifyUser"></td>
+                                <td class="status">
+                                	<span></span>
+                                	<br/>
+                                    <input class="btn_redeisgn" type="button" value="取消" style="cursor: pointer;">
+                                </td>
+                               <td>
+                                    <!-- <input class="btn_copy" style="cursor: pointer;" type="button" value="複製">-->
+                                    <input sec:authorize="hasRole('ROLE_ADMIN')" 
+                                    	class="btn_detele" style="cursor: pointer;" type="button" value="刪除">
+                                </td> 
+                                 <td>
+                                    <input class="btn_qr_code" style="cursor: pointer;" type="button" value="行動條碼">
+                                    <input class="btn_point_record" style="cursor: pointer;" type="button" value="贈點紀錄">
+                                    <input class="btn_coupon_record" style="cursor: pointer;" type="button" value="兌禮紀錄">
+                                    <iframe id="downloadCouponRecordList" style='display:none' ></iframe>
+                                    <div class="MdBtnUpload">
+						            	<span class="btn_coupon_record">上傳集點名單</span>
+						            	<input accept=".csv" class="mdBtnUploadInput csvFile" type="file">
+					            	</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

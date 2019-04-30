@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('ESN List Page', '/BCS/JS/pageESN2.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('PageESN2')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">電子序號列表</h3>
+                        <p class="CHDesc">可上傳電子序號、使用者Line UID，以發送電子序號給使用者。</p>
+                    </header>
+                    <div class="CHBtnSet">
+                        <div class="CHLeft">
+                            <div>
+	                            <span>日期區間：</span>
+	                            <div class="option date">
+	                                <input type="text" 
+	                                    class="datepicker" 
+	                                    id="startDate" 
+	                                    placeholder="YYYY-MM-DD"/>
+	                            </div>
+	                            <span>~</span>
+	                            <div class="option date">
+	                                <input type="text" 
+	                                    class="datepicker" 
+	                                    id="endDate" 
+	                                    placeholder="YYYY-MM-DD"/>
+	                            </div>
+	                            <input class="btn_save" type="button" value="查詢"  style="cursor: pointer;">
+                            </div>
+                        </div>
+                        <div class="CHRight">
+	                      	<input class="btn_add" type="button" value="建立電子序號"  style="cursor: pointer;">
+                       	</div>
+                    </div>
+                    <div class="mainFrame">
+                        <table border="1" id="tableBody">
+                            <colgroup>
+                                <col width="150">
+                                <col width="150">
+                                <col width="80">
+                                <col width="80">
+                                <col width="80">
+                                <col width="100">
+                            </colgroup>
+                            <tr>
+                                <th>標題</th>
+                                <th>建立時間<br>建立人員</th>
+                                <th>電子序號總數</th>
+                                <th>已發送數量</th>
+                                <th>剩餘數量</th>
+                                <th>發送電子序號</th>
+                            </tr>
+                            <tr class="dataTemplate">
+                                <td class="esnName"><a></a></td>
+                                <td class="modifyUser"></td>
+                                <td class="totalCount"></td>
+                                <td class="finishCount"><a></a></td>
+                                <td class="lastCount"></td>
+                                <td>
+	                                <input class="btn_css" style="cursor: pointer;" type="button" value="發送">
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

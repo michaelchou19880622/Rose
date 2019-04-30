@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width,initial-sale=1" />
+    
+	<!-- default header name is X-CSRF-TOKEN -->
+	
+    
+    <link href="../Mobile/Content/style.css" type="text/css" rel="stylesheet" />
+	<script type='text/javascript' src='../webjars/jquery/2.2.3/jquery.min.js'></script>
+	<script type='text/javascript' src='../Mobile/JS/core.js'></script>
+	<script type='text/javascript' src='../Mobile/JS/AcceptPrizePage_Invoice.base.js'></script>
+    <title>獲獎頁面</title>
+	<style type="text/css">
+		input:not([type="image" i]), select {
+			box-sizing: border-box;
+			font-size: 12pt; 
+		}
+		fieldset {
+		    margin: 0;
+		    padding: 0;
+		    border: 0;
+		    vertical-align: baseline;
+		}
+		fieldset input { 
+			display:block;
+			box-shadow:inset 0 1px 10px rgba(0,0,0,0);
+			padding:10px 10px;
+		}
+		/*
+		fieldset select { 
+			display:inline-block;
+			text-align:center;
+			border-right:1px solid #0082bb;
+			padding:10px 0px !important;
+		}*/
+		fieldset select { 
+			display:inline-block; 
+			width:97%; 
+			color:#555; 
+			text-align:center; 
+			border-radius:0 !important; 
+			border: 1px solid #0082bb; 
+			border-right:1px solid #0082bb; 
+			padding:10px 0px !important; 
+			margin:7px 0px; 
+		}
+		.form_field {
+			width:97%;
+			border:5px solid #0082bb;
+			border-radius:4px;
+			color:#555;
+			margin:7px 0;
+		}
+		.checkbox {
+			margin : 10px;
+			max-width:42%;
+		}
+		#main {
+			font-size: 12pt;
+			background-image: url(../Mobile/images/invoice/AcceptPrizePage_background.jpg);
+			background-repeat: repeat-y;
+			background-size: 100%;
+		}
+		.grid {
+			max-width:750px;
+			margin: 0 auto -1px;
+			position: relative;
+		}
+		fieldset legend { display:block; padding-top:15px; font-weight:bold; color:#555; width:100%; position:relative; font-size: 1.2rem; }
+		/*fieldset input[type="tel"] { display:block; width:85%; border:1px solid #0082bb; border-radius:4px; box-shadow:inset 0 1px 10px rgba(0,0,0,0); color:#555; padding:10px 10px; margin:7px 0; }*/
+		fieldset select { display:inline-block; width:97%; color:#555; text-align:center; border-radius:0 !important; border: 1px solid #0082bb; border-right:1px solid #0082bb; padding:10px 0px !important; margin:7px 0px; }
+		fieldset .selectset {}
+		fieldset .selectset3 > select { width:25%; }
+		
+		input[type=radio] {
+		    border: 0px;
+		    width: 20%;
+		    height: 3.5em;
+		}
+	</style>
+</head>
+<body>
+	<input id="gameId" type="hidden" th:value="${gameId}">
+	<input id="isBinding" type="hidden" th:value="${isBinding}">
+	<!-- 
+	<div class="headerImage grid"><img/></div>
+	 -->
+	<div class="prizeImageShow grid"><img/></div>
+	<div class="gridContainer grid clearfix">
+    	<div style="line-height:0;">
+		        <div id='main'>
+		    		<img src="../Mobile/images/invoice/AcceptPrizePage_body1.jpg" />
+					<fieldset>
+						<input type="text" id="userName" class='form_field' >
+					</fieldset>
+		    		<img class="notBindingShow" src="../Mobile/images/invoice/AcceptPrizePage_bodyz.jpg" />
+					<fieldset class="notBindingShow" style="background-image: url(../Mobile/images/invoice/AcceptPrizePage_bodyz-1.jpg);">
+						<div class="selectset selectset3" style=" font-size: 1.2rem;">
+							<input type="radio" name="Gender" value="M" style="display: inline;">
+							<input type="radio" name="Gender" value="F" style="display: inline;">
+						</div>
+					</fieldset>
+		    		<img class="notBindingShow" src="../Mobile/images/invoice/AcceptPrizePage_bodybirth.jpg" />
+					<fieldset class="notBindingShow">
+						<select id="BirthdayYear" name="BirthdayYear" class='form_field' style="font-size: 1.5rem;width: 30%; ">
+							<option value="">請選擇</option>
+				   			<option th:each="i : ${#numbers.sequence(#dates.year(#dates.createNow()) -7, 1917, -1)}"
+				    			th:value="${i}"
+				    			th:text="${i}" >
+				   			</option>	
+						</select>
+						年
+						<select id="BirthdayMonth" name="BirthdayMonth" class='form_field' style="font-size: 1.5rem;width: 30%; ">
+                        	<option value="">請選擇</option>
+						   	<option th:each="i : ${#numbers.sequence(1, 12, 1)}"
+								th:with="value=${i < 10 ? '0' + i : i}"
+						    	th:value="${value}"
+						    	th:text="${i}" >
+						   	</option>
+						</select>
+						月
+					</fieldset>
+		    		<img class="notBindingShow" src="../Mobile/images/invoice/AcceptPrizePage_bodytel.jpg" />
+	            	<fieldset class="notBindingShow">
+						<input type="tel" maxlength="10" id="PhoneNum" class='form_field' >
+	                </fieldset>
+		    		<img src="../Mobile/images/invoice/AcceptPrizePage_body2.jpg" />
+					<fieldset>
+						<input type="text" id="address" class='form_field' >
+					</fieldset>
+		    		<img src="../Mobile/images/invoice/AcceptPrizePage_body3.jpg" />
+					<fieldset>
+						<select id="numOfChildren" name="numOfChildren" class='form_field' style="font-size: 1.5rem; ">
+						   	<option th:each="i : ${#numbers.sequence(0, 4, 1)}"
+						    	th:value="${i}"
+						    	th:text="${i < 4 ? i : i + '個以上'}" >
+						   	</option>
+						</select>
+					</fieldset>
+		    		<img src="../Mobile/images/invoice/AcceptPrizePage_body4.jpg" />
+					<div style="text-align: center;">
+						<img id="checkboxHair" src="../Mobile/images/invoice/AcceptPrizePage_hair_checkbox.jpg" class='checkbox' />
+						<img id="checkboxCheckedHair" 
+							style="display: none;" class='checkbox' 
+							src="../Mobile/images/invoice/AcceptPrizePage_hair_checkboxChecked.jpg" />
+						<img id="checkboxOral" src="../Mobile/images/invoice/AcceptPrizePage_oral_checkbox.jpg" class='checkbox' />
+						<img id="checkboxCheckedOral" 
+							style="display: none;" class='checkbox' 
+							src="../Mobile/images/invoice/AcceptPrizePage_oral_checkboxChecked.jpg" />
+					</div>
+					<div style="text-align: center;">
+						<img id="checkboxHouse" src="../Mobile/images/invoice/AcceptPrizePage_house_checkbox.jpg" class='checkbox' />
+						<img id="checkboxCheckedHouse" 
+							style="display: none;" class='checkbox' 
+							src="../Mobile/images/invoice/AcceptPrizePage_house_checkboxChecked.jpg" />
+						<img id="checkboxFemale" src="../Mobile/images/invoice/AcceptPrizePage_female_checkbox.jpg" class='checkbox' />
+						<img id="checkboxCheckedFemale" 
+							style="display: none;" class='checkbox' 
+							src="../Mobile/images/invoice/AcceptPrizePage_female_checkboxChecked.jpg" />
+					</div>
+					<div style="text-align: center;">
+						<img id="checkboxMale" src="../Mobile/images/invoice/AcceptPrizePage_male_checkbox.jpg" class='checkbox' />
+						<img id="checkboxCheckedMale" 
+							style="display: none;" class='checkbox' 
+							src="../Mobile/images/invoice/AcceptPrizePage_male_checkboxChecked.jpg" />
+						<img id="checkboxBaby" src="../Mobile/images/invoice/AcceptPrizePage_baby_checkbox.jpg" class='checkbox' />
+						<img id="checkboxCheckedBaby" 
+							style="display: none;" class='checkbox' 
+							src="../Mobile/images/invoice/AcceptPrizePage_baby_checkboxChecked.jpg" />
+					</div>
+		        </div>
+	    		<img src="../Mobile/images/invoice/UserReadTermsOfBusinessPage7_body_in.png" class="TermsOfBusiness" style="margin-top: -5px;" />
+				<img id="checkboxImage" src="../Mobile/images/invoice/UserReadTermsOfBusinessPage7_checkbox.png" style="margin-top: -5px;" />
+				<img id="checkboxCheckedImage" 
+					style="display: none;margin-top: -5px;" 
+					src="../Mobile/images/invoice/UserReadTermsOfBusinessPage7_checkboxChecked.png" />
+				<div id="goWinPrizePage" style='cursor : pointer'>
+					<img src="../Mobile/images/invoice/AcceptPrizePage_footer.jpg" />
+				</div>
+		</div>
+    </div>
+    <div class="footerImage" style="max-width:750px;margin: 0 auto;position: relative;"><img/></div>
+</body>
+</html>

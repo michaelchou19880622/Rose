@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"  
+      th:with="strList = ${ {'/BCS/JS/pageT2.base.js'} }">
+<head th:replace="/BCS/Views/Common/Head :: head ('Template Msg List Page', ${strList})">
+</head>
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+	
+	<div class="LyContents">
+    	<div th:replace="/BCS/Views/Common/Menu :: menu ('PageT2')"></div>
+    	
+    	<!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">樣板訊息列表</h3>
+                    </header>
+
+                    <div class="CHBtnSet">
+                        <div class="CHRight"><input class="btn_add" type="button" value="建立樣板訊息"  style="cursor: pointer;"></div>
+                    </div>
+
+                    <div class="mainFrame">
+                        <table border="1" id="templateMsgListTable">
+                            <colgroup><col width="150"><col width="150"><col width="130"><col width="100"><col width="100"></colgroup>
+                            <tr>
+                                <th>標題與內容</th>
+                                <th>類型</th>
+                                <th>建立時間</th>
+                                <th>建立人員</th>
+                                <th>複製/刪除</th>
+                            </tr>
+                            <tbody class="templateMsgTrTemplate">
+                            <tr>
+                                <td class="templateMsgImgTitle">
+                                	<input type="hidden" class="templateMsgId">
+                                    <img src="" width="100px" style="cursor: pointer;">
+                                    <div><a href="templateMsgCreatePage" class="templateMsgTitle"></a></div>
+                                </td>
+                                <td class="templateMsgType" style="text-align: center;"></td>
+                                <td class="templateMsgCreateTime"></td>
+                                <td class="templateMsgCreateUser"></td>
+                                <td>
+                                    <input class="btn_copy" type="button" value="複製" style="cursor: pointer;">
+                                    <input class="btn_detele" type="button" value="刪除" style="cursor: pointer;" sec:authorize="hasAnyRole('ROLE_ADMIN')">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

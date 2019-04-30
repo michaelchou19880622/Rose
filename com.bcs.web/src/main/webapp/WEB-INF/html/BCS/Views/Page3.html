@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.springframework.org/security/tags"
+      th:with="strList = ${ {'/BCS/JS/MsgFragment/MsgFragment.js', '/BCS/JS/MsgFragment/PreviewDialog.js', '/BCS/JS/MsgFragment/TextMsgPreviewContent.js', '/BCS/JS/MsgFragment/StickerMsgPreviewContent.js', '/BCS/JS/MsgFragment/ImageMsgPreviewContent.js', '/BCS/JS/MsgFragment/RichMsgPreviewContent.js', '/BCS/JS/MsgFragment/LinkMsgPreviewContent.js', '/BCS/JS/MsgFragment/CouponMsgPreviewContent.js', '/BCS/JS/MsgFragment/RewardCardMsgPreviewContent.js', '/BCS/JS/MsgFragment/TemplateMsgPreviewContent.js', '/BCS/JS/page3.base.js'} }" >
+<head th:replace="/BCS/Views/Common/Head :: head ('Msg Create Page', ${strList})" >
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page3')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formSendGroup">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">建立訊息</h3>
+                        <p class="CHDesc">您可建立、編輯、測試欲傳送的訊息。</p>
+                    </header>
+
+                    <div class="CHBtnSet">
+                        <div class="CHLeft">
+                            <ul>
+                                <li class="CHLeftBtn"><input type="button" class="SendPreviewBtn" value="預覽" style="cursor: pointer;"></li>
+                                <li class="CHLeftBtn"><input type="button" class="SendGroupQueryBtn" value="預計發送人數" style="cursor: pointer;"></li>
+                                <li class="CHLeftBtn"><input type="button" class="SaveDraftBtn" value="儲存草稿" style="cursor: pointer;"></li>
+                                <li class="CHLeftBtn"><input type="button" class="SendToMeBtn" value="傳送給我" style="cursor: pointer;"></li>
+                                <li class="CHLeftBtn"><input type="button" class="SendToTestBtn" value="傳送測試群組" style="cursor: pointer;"></li>
+                            </ul>
+                        </div>
+                        <div class="CHRight"><input sec:authorize="hasAnyRole('ROLE_ADMIN')" class="btn_add" type="button" value="傳送" style="cursor: pointer;"></div>
+                    </div>
+
+                    <div class="mainFrame CMsg">
+                        <table border="1">
+                            <colgroup><col width="190"><col></colgroup>
+                            <tbody >
+                                <tr>
+                                    <th>發送群組</th>
+                                    <td>
+                                        <div class="option">
+                                            <div class="optionLabel">請選擇</div>
+                                            <select class="optionSelect sendGroupSelect" name="sendGroupSelect">
+                                                <option value="">請選擇</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>發送時間</th>
+                                    <td>
+                                        <div>
+                                            <ul>
+                                                <li>
+                                                    <label class="MdFRM02Check">
+                                                        <input type="radio" name="sendTimeType"  value="DELAY" >預約發送
+                                                    </label>
+                                                    <span id="delaySelect">
+                                                        <div class="option date">
+                                                            <input class="datepicker" type="text" name="sendDate" placeholder="YYYY-MM-DD" >
+                                                        </div>
+                                                        <div class="option time">
+                                                            <div class="optionLabel">0</div>
+                                                            <select class="optionSelect selectHour">
+																<option value="00" >0</option>
+																<option value="01">1</option>
+																<option value="02">2</option>
+																<option value="03">3</option>
+																<option value="04">4</option>
+																<option value="05">5</option>
+																<option value="06">6</option>
+																<option value="07">7</option>
+																<option value="08">8</option>
+																<option value="09">9</option>
+																<option value="10">10</option>
+																<option value="11">11</option>
+																<option value="12">12</option>
+																<option value="13">13</option>
+																<option value="14">14</option>
+																<option value="15">15</option>
+																<option value="16">16</option>
+																<option value="17">17</option>
+																<option value="18">18</option>
+																<option value="19">19</option>
+																<option value="20">20</option>
+																<option value="21">21</option>
+																<option value="22">22</option>
+																<option value="23">23</option>
+                                                            </select>
+                                                        </div>
+                                                        :
+                                                        <div class="option time">
+                                                            <div class="optionLabel">0</div>
+                                                            <select class="optionSelect selectMinuteOne">
+																<option value="0">0</option>
+																<option value="1">1</option>
+																<option value="2">2</option>
+																<option value="3">3</option>
+																<option value="4">4</option>
+																<option value="5">5</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="option time">
+                                                            <div class="optionLabel">0</div>
+                                                            <select class="optionSelect selectMinuteTwo">
+																<option value="0">0</option>
+																<option value="1">1</option>
+																<option value="2">2</option>
+																<option value="3">3</option>
+																<option value="4">4</option>
+																<option value="5">5</option>
+																<option value="6">6</option>
+																<option value="7">7</option>
+																<option value="8">8</option>
+																<option value="9">9</option>
+                                                            </select>
+                                                        </div>
+                                                    </span>
+                                                </li>
+                                                <li>
+                                                    <label class="MdFRM02Check">
+                                                        <input type="radio" name="sendTimeType" value="IMMEDIATE">立即傳送
+                                                    </label>
+                                                </li>
+                                                <li>
+                                                    <label class="MdFRM02Check">
+                                                        <input type="radio" name="sendTimeType" value="SCHEDULE">排程發送
+                                                    </label>
+                                                    <div class="schedule">
+                                                        <label class="MdFRM02Check">
+                                                            <input type="radio" name="schedule" value="EveryMonth">每月
+                                                        </label>
+                                                        <label class="MdFRM02Check">
+                                                            <input type="radio" name="schedule" value="EveryWeek">每週
+                                                        </label>
+                                                        <label class="MdFRM02Check">
+                                                            <input type="radio" name="schedule" value="EveryDay">每日
+                                                        </label>
+                                                        <span id="scheduleSelect">
+                                                            <div class="option time" style="display: none;">
+                                                                <div class="optionLabel">1 號</div>
+                                                                <select class="optionSelect selectMonth">
+																	<option value="1">1 號</option>
+																	<option value="2">2 號</option>
+																	<option value="3">3 號</option>
+																	<option value="4">4 號</option>
+																	<option value="5">5 號</option>
+																	<option value="6">6 號</option>
+																	<option value="7">7 號</option>
+																	<option value="8">8 號</option>
+																	<option value="9">9 號</option>
+																	<option value="10">10 號</option>
+																	<option value="11">11 號</option>
+																	<option value="12">12 號</option>
+																	<option value="13">13 號</option>
+																	<option value="14">14 號</option>
+																	<option value="15">15 號</option>
+																	<option value="16">16 號</option>
+																	<option value="17">17 號</option>
+																	<option value="18">18 號</option>
+																	<option value="19">19 號</option>
+																	<option value="20">20 號</option>
+																	<option value="21">21 號</option>
+																	<option value="22">22 號</option>
+																	<option value="23">23 號</option>
+																	<option value="24">24 號</option>
+																	<option value="25">25 號</option>
+																	<option value="26">26 號</option>
+																	<option value="27">27 號</option>
+																	<option value="28">28 號</option>
+																	<option value="29">29 號</option>
+																	<option value="30">30 號</option>
+																	<option value="31">31 號</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="option time" style="display: none;">
+                                                                <div class="optionLabel">一</div>
+                                                                <select class="optionSelect selectWeek">
+																	<option value="MON">一</option>
+																	<option value="TUE">二</option>
+																	<option value="WED">三</option>
+																	<option value="THU">四</option>
+																	<option value="FRI ">五</option>
+																	<option value="SAT">六</option>
+																	<option value="SUN">日</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="option time" style="display: none;">
+                                                                <div class="optionLabel">0</div>
+                                                                <select class="optionSelect selectHour">
+																	<option value="00" >0</option>
+																	<option value="01">1</option>
+																	<option value="02">2</option>
+																	<option value="03">3</option>
+																	<option value="04">4</option>
+																	<option value="05">5</option>
+																	<option value="06">6</option>
+																	<option value="07">7</option>
+																	<option value="08">8</option>
+																	<option value="09">9</option>
+																	<option value="10">10</option>
+																	<option value="11">11</option>
+																	<option value="12">12</option>
+																	<option value="13">13</option>
+																	<option value="14">14</option>
+																	<option value="15">15</option>
+																	<option value="16">16</option>
+																	<option value="17">17</option>
+																	<option value="18">18</option>
+																	<option value="19">19</option>
+																	<option value="20">20</option>
+																	<option value="21">21</option>
+																	<option value="22">22</option>
+																	<option value="23">23</option>
+                                                                </select>
+                                                            </div>
+                                                            :
+                                                            <div class="option time" style="display: none;">
+                                                                <div class="optionLabel">0</div>
+                                                                <select class="optionSelect selectMinuteOne">
+																	<option value="0">0</option>
+																	<option value="1">1</option>
+																	<option value="2">2</option>
+																	<option value="3">3</option>
+																	<option value="4">4</option>
+																	<option value="5">5</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="option time" style="display: none;">
+                                                                <div class="optionLabel">0</div>
+                                                                <select class="optionSelect selectMinuteTwo">
+																	<option value="0">0</option>
+																	<option value="1">1</option>
+																	<option value="2">2</option>
+																	<option value="3">3</option>
+																	<option value="4">4</option>
+																	<option value="5">5</option>
+																	<option value="6">6</option>
+																	<option value="7">7</option>
+																	<option value="8">8</option>
+																	<option value="9">9</option>
+                                                                </select>
+                                                            </div>
+                                                        </span>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>訊息類別</th>
+                                    <td>
+                                        <input type="text" size="20" id="msgTag" value="" style="width: 20%;" name="msgTag"/>
+                                    </td>
+                                </tr>
+                                <tr sec:authorize="hasAnyRole('NotShowRole')">
+                                    <th>套用參數設定</th>
+                                    <td>
+                                        <div class="option">
+                                            <div class="optionLabel">請選擇</div>
+                                            <select class="optionSelect serialSetting" name="serialSetting" id="serialSetting">
+                                                <option value="">請選擇</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th colspan='2'>發送內容</th>
+                                </tr>
+                            </tbody>
+                        </table>
+
+						<div th:replace="/BCS/Views/MsgFragment/MsgFragmentBase :: msgFrame"></div>
+
+						<div th:replace="/BCS/Views/MsgFragment/MsgFragmentBtn :: msgFrameBtn (${ {'TEXT', 'STICKER', 'IMAGE', 'COUPON','REWARDCARD', 'RICH_MSG', 'AUDIO', 'LINK', 'VIDEO', 'TEMPLATE'} })"></div>
+                    </div>
+
+                </section>
+                <div class="BtnSet">
+                    <div>
+                        <input class="btn_query SendPreviewBtn" type="button" value="預覽" style="cursor: pointer;">
+                        <input class="btn_draft" type="button" value="儲存草稿" style="cursor: pointer;">
+                        <input class="btn_save" type="button" value="傳送" style="cursor: pointer;" sec:authorize="hasAnyRole('ROLE_ADMIN')">
+                        <input class="btn_cancel" type="button" value="取消" style="cursor: pointer;">
+                    </div>
+                </div>
+
+				<div th:replace="/BCS/Views/MsgFragment/DialogStickerSelect :: dialogStickerSelect"></div>
+
+				<div th:replace="/BCS/Views/MsgFragment/DialogRichMsgSelect :: dialogRichMsgSelect"></div>
+
+				<div th:replace="/BCS/Views/MsgFragment/DialogLinkListSelect :: dialogLinkListSelect"></div>
+
+				<div th:replace="/BCS/Views/MsgFragment/DialogEmoticonSelect :: dialogEmoticonSelect"></div>
+				
+				<div th:replace="/BCS/Views/MsgFragment/DialogCouponSelect :: dialogCouponSelect"></div>
+				
+				<div th:replace="/BCS/Views/MsgFragment/DialogRewardCardSelect :: dialogRewardCardSelect"></div>
+				
+				<div th:replace="/BCS/Views/MsgFragment/DialogTemplateMsgSelect :: dialogTemplateMsgSelect"></div>
+            </form>
+
+            <div id="previewDialog" style="display: none;">
+			</div>
+        </div>
+    </div>
+</body>
+
+</html>

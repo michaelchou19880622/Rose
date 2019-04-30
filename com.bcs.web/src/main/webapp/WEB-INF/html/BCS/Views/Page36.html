@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.springframework.org/security/tags"
+      th:with="strList = ${ {'/BCS/JS/MsgFragment/MsgFragment.js', '/BCS/JS/page36.base.js'} }" >
+<head th:replace="/BCS/Views/Common/Head :: head ('Interactive Response Create Page', ${strList})">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page36')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formSendGroup">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">互動式回應訊息</h3>
+                        <p class="CHDesc">設定用戶在聊天室輸入特定關鍵字時自動傳送的互動式訊息。</p>
+                    </header>
+                    <div class="CHBtnSet">
+                        <div class="CHLeft">
+                            <ul>
+                                <li class="CHLeftBtn"><input type="button" class="CancelBtn" value="取消" style="cursor: pointer;"></li>
+                            </ul>
+                        </div>
+                        <div class="CHRight"><input class="btn_add" type="button" value="設定" style="cursor: pointer;"></div>
+                    </div>
+                    <div class="mainFrame CMsg">
+						<input class="interactiveStatus" type="hidden" value="DISABLE">
+                        <table border="1">
+                            <colgroup><col width="190"><col></colgroup>
+                            <tbody >
+                                <tr>
+                                    <th>使用者狀態</th>
+                                    <td>
+                                        <div class="option">
+                                            <div class="optionLabel">請選擇</div>
+                                            <select class="optionSelect userStatus" name="userStatus">
+                                                <option value="">請選擇</option>
+                                                <option value="ALL">全部</option>
+                                                <option value="UNBIND">一般</option>
+                                                <option value="BINDED">已串聯</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>參加活動</th>
+                                    <td>
+                                        <div class="option">
+                                            <div class="optionLabel">請選擇</div>
+                                            <select class="optionSelect campaignId" id="campaignId" name="campaignId">
+                                                <option value="">請選擇</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>代表關鍵字</th>
+                                    <td>
+                                        <div class="MdFRM01Input"><input type="text" placeholder="" maxlength="30" id="keywordInput" name="keywordInput" class="inputKeyup"></div>&nbsp; <span class="MdTxtInputCount"limit="30">0/30</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>追加關鍵字</th>
+                                    <td>
+                                    	<div class="dataTemplate">
+	                                        <div class="MdFRM01Input"  style="margin-bottom: 10px;">
+	                                        	<input class="otherKeyword" type="text" placeholder="" maxlength="30">
+	                                        </div>
+											<div class="btn_delete" style="cursor: pointer;display: inline-block;"></div>
+                                        </div>
+                                    	<input type="button" value="追加關鍵字" class="addKeyword showMdFRM01Input" style="cursor: pointer;"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>觸發關鍵字之回應內容</th>
+                                    <td>
+                                        <input class="btn_show_dialog showMdFRM01Input" alt-event-type='UPLOAD_INVOICE' type="button" value="設定訊息" style="cursor: pointer;">
+                                        <span id='msgUploadInvoice'></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>發票驗證成功後之回應內容</th>
+                                    <td>
+                                        <input class="btn_show_dialog showMdFRM01Input" alt-event-type='UPLOAD_INVOICE_SUCCESS' type="button" value="設定訊息" style="cursor: pointer;">
+                                        <span id='msgUploadInvoiceSuccess'></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>發票號碼驗證失敗後之回應內容</th>
+                                    <td>
+                                        <input class="btn_show_dialog showMdFRM01Input" alt-event-type='UPLOAD_INVOICE_FAIL' type="button" value="設定訊息" style="cursor: pointer;">
+                                        <span id='msgUploadInvoiceFail'></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>請使用者輸入發票年月(格式如10601)之訊息</th>
+                                    <td>
+                                        <input class="btn_show_dialog showMdFRM01Input" alt-event-type='TYPE_IN_INVTERN' type="button" value="設定訊息" style="cursor: pointer;">
+                                        <span id='msgTypeInInvtern'></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>發票年月驗證失敗之訊息</th>
+                                    <td>
+                                        <input class="btn_show_dialog showMdFRM01Input" alt-event-type='TYPE_IN_INVTERN_FAIL' type="button" value="設定訊息" style="cursor: pointer;">
+                                        <span id='msgTypeInInvternFail'></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>請使用者輸入發票隨機碼(格式如1234)之訊息</th>
+                                    <td>
+                                        <input class="btn_show_dialog showMdFRM01Input" alt-event-type='TYPE_IN_RANDON_NUM' type="button" value="設定訊息" style="cursor: pointer;">
+                                        <span id='msgTypeInRandonNum'></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>發票隨機碼驗證失敗之訊息</th>
+                                    <td>
+                                        <input class="btn_show_dialog showMdFRM01Input" alt-event-type='TYPE_IN_RANDON_NUM_FAIL' type="button" value="設定訊息" style="cursor: pointer;">
+                                        <span id='msgTypeInRandonNumFail'></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>無法辨識發票條碼之回應內容</th>
+                                    <td>
+                                        <input class="btn_show_dialog showMdFRM01Input" alt-event-type='DECODE_FAIL' type="button" value="設定訊息" style="cursor: pointer;">
+                                        <span id='msgDecodeFail'></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>消費時間不符活動時間區間之回應內容</th>
+                                    <td>
+                                        <input class="btn_show_dialog showMdFRM01Input" alt-event-type='NOT_IN_INTERNAL' type="button" value="設定訊息" style="cursor: pointer;">
+                                        <span id='msgNotInInternal'></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>消費金額不符活動規則之回應內容</th>
+                                    <td>
+                                        <input class="btn_show_dialog showMdFRM01Input" alt-event-type='LESS_PAYMENT' type="button" value="設定訊息" style="cursor: pointer;">
+                                        <span id='msgLessPayment'></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>發票已使用之回應內容</th>
+                                    <td>
+                                        <input class="btn_show_dialog showMdFRM01Input" alt-event-type='INVOICE_IS_USED' type="button" value="設定訊息" style="cursor: pointer;">
+                                        <span id='msgInvoiceIsUsed'></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>無法取得發票(賣方未上傳或無此發票)之回應內容</th>
+                                    <td>
+                                        <input class="btn_show_dialog showMdFRM01Input" alt-event-type='NOT_FOUND' type="button" value="設定訊息" style="cursor: pointer;">
+                                        <span id='msgNotFound'></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>達錯誤次數之回應內容</th>
+                                    <td>
+                                        <input class="btn_show_dialog showMdFRM01Input" alt-event-type='TOO_MUCH_ERROR' type="button" value="設定訊息" style="cursor: pointer;">
+                                        <span id='msgTooMuchError'></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>錯誤次數上限(設0表示無上限)</th>
+                                    <td>
+                                        <input type="number" id="errorLimit" name="errorLimit" value="0" >
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Timeout秒數(設0表示無上限)</th>
+                                    <td>
+                                        <input type="number" id="timeout" name="timeout" value="1800" >
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <div class="BtnSet">
+                    <div>
+                        <input class="btn_save" type="button" value="設定" style="cursor: pointer;">
+                        <input class="btn_cancel" type="button" value="取消" style="cursor: pointer;">
+                    </div>
+                </div>
+                
+
+                <div th:replace="/BCS/Views/MsgFragment/DialogStickerSelect :: dialogStickerSelect"></div>
+                <div th:replace="/BCS/Views/MsgFragment/DialogRichMsgSelect :: dialogRichMsgSelect"></div>
+                <div th:replace="/BCS/Views/MsgFragment/DialogLinkListSelect :: dialogLinkListSelect"></div>
+                <div th:replace="/BCS/Views/MsgFragment/DialogEmoticonSelect :: dialogEmoticonSelect"></div>
+                <div th:replace="/BCS/Views/MsgFragment/DialogCouponSelect :: dialogCouponSelect"></div>
+                <div th:replace="/BCS/Views/MsgFragment/DialogTemplateMsgSelect :: dialogTemplateMsgSelect"></div>
+
+                <div th:replace="/BCS/Views/MsgFragment/MsgFragmentDialog :: msgFragmentDialog ('dialogMsgUploadInvoice', 'UPLOAD_INVOICE')"></div>
+                <div th:replace="/BCS/Views/MsgFragment/MsgFragmentDialog :: msgFragmentDialog ('dialogMsgUploadInvoiceSuccess', 'UPLOAD_INVOICE_SUCCESS')"></div>
+                <div th:replace="/BCS/Views/MsgFragment/MsgFragmentDialog :: msgFragmentDialog ('dialogMsgUploadInvoiceFail', 'UPLOAD_INVOICE_FAIL')"></div>
+                <div th:replace="/BCS/Views/MsgFragment/MsgFragmentDialog :: msgFragmentDialog ('dialogMsgTypeInInvtern', 'TYPE_IN_INVTERN')"></div>
+                <div th:replace="/BCS/Views/MsgFragment/MsgFragmentDialog :: msgFragmentDialog ('dialogMsgTypeInInvternFail', 'TYPE_IN_INVTERN_FAIL')"></div>
+                <div th:replace="/BCS/Views/MsgFragment/MsgFragmentDialog :: msgFragmentDialog ('dialogMsgDeocodeFail', 'DECODE_FAIL')"></div>
+                <div th:replace="/BCS/Views/MsgFragment/MsgFragmentDialog :: msgFragmentDialog ('dialogMsgTypeInRandonNum', 'TYPE_IN_RANDON_NUM')"></div>
+                <div th:replace="/BCS/Views/MsgFragment/MsgFragmentDialog :: msgFragmentDialog ('dialogMsgTypeInRandonNumFail', 'TYPE_IN_RANDON_NUM_FAIL')"></div>
+                <div th:replace="/BCS/Views/MsgFragment/MsgFragmentDialog :: msgFragmentDialog ('dialogMsgNotInInternal', 'NOT_IN_INTERNAL')"></div>
+                <div th:replace="/BCS/Views/MsgFragment/MsgFragmentDialog :: msgFragmentDialog ('dialogMsgLessPayment', 'LESS_PAYMENT')"></div>
+                <div th:replace="/BCS/Views/MsgFragment/MsgFragmentDialog :: msgFragmentDialog ('dialogMsgTooMuchError', 'TOO_MUCH_ERROR')"></div>
+                <div th:replace="/BCS/Views/MsgFragment/MsgFragmentDialog :: msgFragmentDialog ('dialogMsgInvoiceIsUsed', 'INVOICE_IS_USED')"></div>
+                <div th:replace="/BCS/Views/MsgFragment/MsgFragmentDialog :: msgFragmentDialog ('dialogMsgNotFound', 'NOT_FOUND')"></div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"  
+      th:with="strList = ${ {'/BCS/JS/pageG4.base.js'} }">
+<head th:replace="/BCS/Views/Common/Head :: head ('Winner List Page', ${strList})">
+</head>
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+	
+	<div class="LyContents">
+    	<div th:replace="/BCS/Views/Common/Menu :: menu ('PageG2')"></div>
+    	
+    	<!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">中獎名單</h3>
+                    </header>
+
+                    <div class="CHBtnSet">
+                    	<div style="float:left">
+	                    	<span>日期區間：</span>
+	                    	<div class="option date">
+	                        	<input type="text" 
+		                           	class="datepicker" 
+		                           	id="winnerListStartDate" 
+		                           	placeholder="YYYY-MM-DD"/>
+	                       	</div>
+	                       	<span>~</span>
+	                       	<div class="option date">
+	                        	<input type="text" 
+		                        	class="datepicker" 
+		                           	id="winnerListEndDate" 
+		                           	placeholder="YYYY-MM-DD"/>
+	                      	</div>
+	                      	<input class="btn_save query" type="button" value="查詢"  style="cursor: pointer;">
+	                      	<ul>
+                                <li class="CHLeftBtn">
+                               		<input class="LeftBtn" type="button" value="<" style="cursor: pointer;">第 <input id="pageText" size="4" onkeyup="value=value.replace(/[^0-9]/g,'')"> 頁
+                                	<input class="RightBtn" type="button" value=">" style="cursor: pointer;">
+                                	共 <span id="pageTotalText"></span> 頁
+                                </li>
+                            </ul>
+	                    </div>
+                       <div class="CHRight">
+                        	<input class="btn_add exportPageToExcel" type="button" value="匯出此頁EXCEL"  style="cursor: pointer;">
+                        	<input class="btn_add exportAllToExcel" type="button" value="匯出總資料EXCEL"  style="cursor: pointer;">                  
+                        </div>
+                    </div>
+
+                    <div class="mainFrame">
+                        <table border="1" id="winnerListTable">
+                            <colgroup><col width="100"><col width="100"><col width="100"><col width="100"><col width="100"></colgroup>
+                            <tr>
+                                <th>得獎者UID</th>
+                                <th>獎品名稱</th>
+                                <th>中獎時間</th>
+                                <th>得獎者詳細資訊</th>
+                                <th>發送文字訊息</th>
+                            </tr>
+                            <tbody class="winnerTrTemplate">
+                            <tr>
+                                <td class="userName">
+                                	<input type="hidden" class="winnerId">
+                                	<div class="name"></div>
+                                </td>
+                                <td class="prizeName"></td>
+                                <td class="modifyTime"></td>
+                                <td>
+                                    <input class="btn_detail" type="button" value="詳細" style="cursor: pointer;">
+                                </td>
+                                <td>
+                                	<input type="hidden" class="UID">
+                                    <input class="btn_message" type="button" value="送訊息" style="cursor: pointer;">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </form>
+            <div id="detailDialog" title="得獎者詳細資訊" style="display: none;">
+            	<div class="mainFrame">
+	            	<table class="userDetailTable">
+	                	<colgroup><col width="120"><col></colgroup>
+	                    <tr>
+							<th>姓名</th>
+							<td>
+								<div class="userName"></div>
+							</td>
+	                   	</tr>
+	                   	<tr>
+							<th>身分證字號</th>
+							<td>
+								<div class="userIdCardNumber"></div>
+							</td>
+	                  	</tr>
+	                    <tr>
+							<th>電話</th>
+							<td>
+								<div class="userPhoneNumber"></div>
+							</td>
+	                  	</tr>
+	                    <!-- <tr>
+							<th>電子信箱</th>
+							<td>
+								<div class="userEmailAddress"></div>
+							</td>
+	                    </tr> -->
+	                    <tr>
+							<th>居住地址</th>
+							<td>
+								<div class="userAddress"></div>
+							</td>
+	                    </tr>
+	            	</table>
+            	</div>
+            </div>
+            <div id="messageDialog" title="發送文字訊息" style="display: none;">
+            	<div class="mainFrame">
+            		<div class="TInput">
+	                	<textarea id="messageText" 
+                         name="message" 
+                         cols="80" 
+                         rows="5"
+                         maxlength="400" 
+                         class="jqCountString"></textarea>
+                    </div>
+                    <div align="center">
+                    	<input class="sendMessage" type="button" value="送出" style="cursor: pointer;">
+            		</div>
+            	</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

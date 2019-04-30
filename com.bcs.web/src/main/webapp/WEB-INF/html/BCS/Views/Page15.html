@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.springframework.org/security/tags"
+      xmlns:th="http://www.thymeleaf.org"  
+      th:with="strList = ${ {'/BCS/JS/MsgFragment/MsgFragment.js', '/BCS/JS/MsgFragment/PreviewDialog.js', '/BCS/JS/MsgFragment/TextMsgPreviewContent.js', '/BCS/JS/MsgFragment/StickerMsgPreviewContent.js', '/BCS/JS/MsgFragment/ImageMsgPreviewContent.js', '/BCS/JS/MsgFragment/RichMsgPreviewContent.js', '/BCS/JS/MsgFragment/LinkMsgPreviewContent.js', '/BCS/JS/MsgFragment/TemplateMsgPreviewContent.js', '/BCS/JS/page15.base.js'} }" >
+<head th:replace="/BCS/Views/Common/Head :: head ('Keyword Response Create Page', ${strList})" >
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page14')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formSendGroup">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">關鍵字回應訊息</h3>
+                        <p class="CHDesc">設定用戶在聊天室輸入特定關鍵字時自動傳送的訊息。</p>
+                    </header>
+                    <div class="CHBtnSet">
+                        <div class="CHLeft">
+                            <ul>
+                                <li class="CHLeftBtn"><input type="button" class="SendPreviewBtn" value="預覽" style="cursor: pointer;"></li>
+                                <li class="CHLeftBtn"><input type="button" class="SendToMeBtn" value="傳送給我" style="cursor: pointer;"></li>
+                                <li class="CHLeftBtn"><input type="button" class="SendToTestBtn" value="傳送測試群組" style="cursor: pointer;"></li>
+                            </ul>
+                        </div>
+                        <div class="CHRight"><input class="btn_add" type="button" value="設定" style="cursor: pointer;"></div>
+                    </div>
+                    <div class="mainFrame CMsg">
+						<input class="interactiveStatus" type="hidden" value="DISABLE">
+                        <table border="1">
+                            <colgroup><col width="190"><col></colgroup>
+                            <tbody >
+                                <tr>
+                                    <th>代表關鍵字</th>
+                                    <td>
+                                        <div class="MdFRM01Input"><input type="text" placeholder="" maxlength="30" id="keywordInput" name="keywordInput"></div>&nbsp; <span class="MdTxtInputCount">0/30</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>追加關鍵字</th>
+                                    <td>
+                                    	<div class="dataTemplate">
+	                                        <div class="MdFRM01Input"  style="margin-bottom: 10px;">
+	                                        	<input class="otherKeyword" type="text" placeholder="" maxlength="30">
+	                                        </div>
+											<div class="btn_delete" style="cursor: pointer;display: inline-block;"></div>
+                                        </div>
+                                    	<input type="button" value="追加關鍵字" class="addKeyword showMdFRM01Input" style="cursor: pointer;"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>使用者狀態</th>
+                                    <td>
+                                        <div class="option">
+                                            <div class="optionLabel">請選擇</div>
+                                            <select class="optionSelect userStatus" name="userStatus">
+                                                <option value="">請選擇</option>
+                                                <option value="ALL">全部</option>
+                                                <option value="UNBIND">一般</option>
+                                                <option value="BINDED">已串聯</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>生效時間</th>
+                                    <td>
+                                        <div>
+                                            <ul>
+                                                <li>
+                                                    <label class="MdFRM02Check">
+                                                        <input type="radio" name="sendTimeType"  value="TYPE_NULL" >不設定
+                                                    </label>
+                                                </li>
+                                                <li>
+                                                    <label class="MdFRM02Check">
+                                                        <input type="radio" name="sendTimeType"  value="TYPE_DAY" >一天區間
+                                                    </label>
+			                                        <span class="typeDaySetting">
+				                                        <span>
+				                                            <div class="option time">
+				                                                <div class="optionLabel">0</div>
+				                                                <select name="startHour" class="optionSelect startHour">
+																    <option th:each="i : ${#numbers.sequence( 0, 23, 1)}"
+																    	th:with="hour=${i}"
+																    	th:value="${hour}"
+																    	th:text="${hour}" >
+																    </option>
+				                                                </select>
+				                                            </div>
+				                                            :
+				                                            <div class="option time">
+				                                                <div class="optionLabel">0</div>
+				                                                <select name="startMinute" class="optionSelect startMinute">
+																    <option th:each="i : ${#numbers.sequence( 0, 59, 1)}"
+																    	th:with="minute=${i}"
+																    	th:value="${minute}"
+																    	th:text="${minute}" >
+																    </option>
+				                                                </select>
+				                                            </div>
+				                                        </span>
+				                                        ～
+				                                        <span>
+				                                            <div class="option time">
+				                                                <div class="optionLabel">0</div>
+				                                                <select name="endHour" class="optionSelect endHour">
+																    <option th:each="i : ${#numbers.sequence( 0, 23, 1)}"
+																    	th:with="hour=${i}"
+																    	th:value="${hour}"
+																    	th:text="${hour}" >
+																    </option>
+				                                                </select>
+				                                            </div>
+				                                            :
+				                                            <div class="option time">
+				                                                <div class="optionLabel">0</div>
+				                                                <select name="endMinute" class="optionSelect endMinute">
+																    <option th:each="i : ${#numbers.sequence( 0, 59, 1)}"
+																    	th:with="minute=${i}"
+																    	th:value="${minute}"
+																    	th:text="${minute}" >
+																    </option>
+				                                                </select>
+				                                            </div>
+				                                        </span>
+			                                        </span>
+                                                </li>
+                                                <li>
+                                                    <label class="MdFRM02Check">
+                                                        <input type="radio" name="sendTimeType"  value="TYPE_RANGE" >時間區間
+                                                    </label>
+			                                        <span class="typeRangeSetting">
+				                                        <span>
+				                                            <div class="option date">
+				                                                <input type="text" 
+				                                                	class="datepicker" 
+				                                                	id="startTime" 
+				                                                	name="startTime" 
+				                                                	placeholder="YYYY-MM-DD"/>
+				                                            </div>
+				                                            <div class="option time">
+				                                                <div class="optionLabel">0</div>
+				                                                <select name="startHour" class="optionSelect startHour">
+																    <option th:each="i : ${#numbers.sequence( 0, 23, 1)}"
+																    	th:with="hour=${i}"
+																    	th:value="${hour}"
+																    	th:text="${hour}" >
+																    </option>
+				                                                </select>
+				                                            </div>
+				                                            :
+				                                            <div class="option time">
+				                                                <div class="optionLabel">0</div>
+				                                                <select name=""startMinute"" class="optionSelect startMinute" >
+																    <option th:each="i : ${#numbers.sequence( 0, 59, 1)}"
+																    	th:with="minute=${i}"
+																    	th:value="${minute}"
+																    	th:text="${minute}" >
+																    </option>
+				                                                </select>
+				                                            </div>
+				                                        </span>
+				                                        ～
+				                                        <span>
+				                                            <div class="option date">
+				                                                <input type="text" 
+				                                                	class="datepicker" 
+				                                                	id="endTime" 
+				                                                	name="endTime" 
+				                                                	placeholder="YYYY-MM-DD"/>
+				                                            </div>
+				                                            <div class="option time">
+				                                                <div class="optionLabel">0</div>
+				                                                <select name="endHour" class="optionSelect endHour">
+																    <option th:each="i : ${#numbers.sequence( 0, 23, 1)}"
+																    	th:with="hour=${i}"
+																    	th:value="${hour}"
+																    	th:text="${hour}" >
+																    </option>
+				                                                </select>
+				                                            </div>
+				                                            :
+				                                            <div class="option time">
+				                                                <div class="optionLabel">0</div>
+				                                                <select name="endMinute" class="optionSelect endMinute">
+																    <option th:each="i : ${#numbers.sequence( 0, 59, 1)}"
+																    	th:with="minute=${i}"
+																    	th:value="${minute}"
+																    	th:text="${minute}" >
+																    </option>
+				                                                </select>
+				                                            </div>
+				                                        </span>
+			                                        </span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>順位</th>
+                                    <td>
+                                        <div class="option">
+                                            <div class="optionLabel">請選擇</div>
+                                            <select class="optionSelect interactiveIndex" name="interactiveIndex">
+                                                <option value="">請選擇</option>
+                                                <option value="1">第一順位</option>
+                                                <option value="2">第二順位</option>
+                                                <option value="3">第三順位</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>群組條件</th>
+                                    <td>
+                                        <div class="option">
+                                            <div class="optionLabel">請選擇</div>
+                                            <select class="optionSelect otherRole" name="otherRole">
+                                                <option value="">請選擇</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr sec:authorize="hasAnyRole('NotShowRole')">
+                                    <th>套用參數設定</th>
+                                    <td>
+                                        <div class="option">
+                                            <div class="optionLabel">請選擇</div>
+                                            <select class="optionSelect serialSetting" name="serialSetting" id="serialSetting">
+                                                <option value="">請選擇</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th colspan='2'>發送內容</th>
+                                </tr>
+                            </tbody>
+                        </table>
+
+						<div th:replace="/BCS/Views/MsgFragment/MsgFragmentBase :: msgFrame"></div>
+
+						<div th:replace="/BCS/Views/MsgFragment/MsgFragmentBtn :: msgFrameBtn (${ {'TEXT', 'STICKER', 'IMAGE', 'RICH_MSG', 'AUDIO', 'LINK', 'VIDEO', 'TEMPLATE'} })"></div>
+					</div>
+                </section>
+                <div class="BtnSet">
+                    <div>
+                        <input class="btn_query SendPreviewBtn" type="button" value="預覽" style="cursor: pointer;">
+                        <input class="btn_save" type="button" value="設定" style="cursor: pointer;">
+                        <input class="btn_cancel" type="button" value="取消" style="cursor: pointer;">
+                    </div>
+                </div>
+                
+				<div th:replace="/BCS/Views/MsgFragment/DialogStickerSelect :: dialogStickerSelect"></div>
+                
+				<div th:replace="/BCS/Views/MsgFragment/DialogRichMsgSelect :: dialogRichMsgSelect"></div>
+				
+				<div th:replace="/BCS/Views/MsgFragment/DialogLinkListSelect :: dialogLinkListSelect"></div>
+				
+				<div th:replace="/BCS/Views/MsgFragment/DialogEmoticonSelect :: dialogEmoticonSelect"></div>
+				
+				<div th:replace="/BCS/Views/MsgFragment/DialogTemplateMsgSelect :: dialogTemplateMsgSelect"></div>
+            </form>
+            
+			<div id="previewDialog" style="display: none;">
+			</div>
+        </div>
+    </div>
+</body>
+
+</html>

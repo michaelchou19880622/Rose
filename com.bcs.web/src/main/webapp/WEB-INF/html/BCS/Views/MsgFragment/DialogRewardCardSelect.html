@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.springframework.org/security/tags">
+<body>
+	<!-- Dialog rewardCard Select  -->
+				<div id="dialogRewardCardSelect" title="選擇集點卡" th:fragment="dialogRewardCardSelect" >  
+					<div >
+	                    <div class="mainFrame">
+	                        <table border="1" id="rewardCardListTable">
+	                            <colgroup><col width="150"><col width="150"><col width="130"><col width="100"><col width="100"></colgroup>
+	                            <tr>
+	                                <th>標題</th>
+	                                <th>使用說明</th>
+	                                <th>建立時間</th>
+	                                <th>建立人員</th>
+	                            </tr>
+	                            <tbody class="rewardCardTrTemplate">
+	                            <tr>
+	                                <td class="rewardCardImgTitle">
+	                                	<input type="hidden" class="rewardCardId">
+	                                    <img src="" width="100px"  style="cursor: pointer;">
+	                                    <div><a class="rewardCardTitle"  style="cursor: pointer;"></a></div>
+	                                </td>
+	                                <td class="rewardCardDescription" style="text-align: left;"></td>
+	                                <td class="rewardCardCreateTime"></td>
+	                                <td class="rewardCardCreateUser"></td>
+	                            </tr>
+	                            </tbody>
+	                        </table>
+	                    </div>
+					</div>
+				</div>
+				
+</body>
+</html>

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" th:with="strList = ${ {'/BCS/JS/page41.base.js', '/BCS/JS/MsgFragment/PreviewDialog.js'} }">
+
+<head th:replace="/BCS/Views/Common/Head :: head ('Reward Card Create Page', ${strList})">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+	<div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page41')"></div>
+
+		<!-- Right Content -->
+		<div class="LyMain" role="main">
+			<form id="formContentRewardCard">
+				<section>
+					<header class="ContentHead">
+						<h3 th:text="${param.actionType == null || param.actionType[0] == 'Create' ? '建立集點卡' : '更改集點卡'}" class="CHTtl"></h3>
+						<p class="CHDesc">
+							<div>這是一項可免費建立並使用集點卡的服務。</div>
+							<div>善用此項服務，即可延攬新的顧客或粉絲，並且有助於使顧客回流！</div>
+						</p>
+					</header>
+					<header class="ContentHead">
+						<h3 class="CHSecondTtl">樣版</h3>
+					</header>
+					<div class="mainFrame CMsg Pre mw_985">
+						<table border="1">
+							<colgroup>
+								<col width="190">
+							</colgroup>
+							<tbody class="mdCMN03TblBody">
+								<tr>
+									<td style="width: 360px;">
+										<div id="profileHeader_bg" class="shop_hd owner" style="background-image: url(); background-size: cover;">
+											<div class="hd_con">
+												<span class="thum"> <img id="profileHeader_thum"
+													th:src="@{/BCS/images/bcs_logo.png}">
+												</span>
+												<hgroup class="tit">
+													<h1 class="rewardCardMainTitle"></h1>
+													<h2 class="rewardCardSubTitle"></h2>
+												</hgroup>
+											</div>
+										</div>
+										<div id="cre_stamp_template"></div>
+										<div id="sample_card_background" class="pc_cms stamp_wrap owner">
+											<div class="stamp_box">
+												<!-- stamp_con = stamp.html참조 -->
+												<div class="stamp_con stamp_con_bg_color_01">
+													<div class="bartang">
+														<!--點數欄位-->
+														<div class="bang_area" id="stamp_list_render_area">
+															<ul id="bang_size">
+															</ul>
+														</div>
+													</div>
+													<div class="bang_date">
+														<span class="img img-clock"></span> <span id="expireTypePreview">無使用期限</span>
+													</div>
+												</div>
+											</div>
+										</div>
+									</td>
+									<td>
+										<div class="pc_cms stamp_prev mt30">
+											<h1 class="MdCMN10Head mdCMN10Ttl">款式</h1>
+											<div class="scroll-x">
+												<ul id="crePrevBox">
+													<li class="on">
+														<div class="img_001" data-template-num="001"></div>
+													</li>
+													<li>
+														<div class="img_002" data-template-num="002"></div>
+													</li>
+													<li>
+														<div class="img_003" data-template-num="003"></div>
+													</li>
+													<li>
+														<div class="img_004" data-template-num="004"></div>
+													</li>
+													<li>
+														<div class="img_005" data-template-num="005"></div>
+													</li>
+													<li>
+														<div class="img_006" data-template-num="006"></div>
+													</li>
+													<li>
+														<div class="img_007" data-template-num="007"></div>
+													</li>
+													<li>
+														<div class="img_008" data-template-num="008"></div>
+													</li>
+													<li>
+														<div class="img_009" data-template-num="009"></div>
+													</li>
+													<li>
+														<div class="img_010" data-template-num="010"></div>
+													</li>
+												</ul>
+											</div>
+											<input id="template_no" name="template_no" type="hidden" maxlength="2" value="001"><br />
+											<table border="0">
+												<tr>
+													<td>
+														<div class="customizedRewardCardBackground">
+															<div class="MdBtnUpload" style="cursor: pointer;">
+																<span class="mdBtnUploadTxt">上傳自訂底圖</span>
+																<input accept="image/jpeg" class="mdBtnUploadInput" id="rewardCardBackgroundInput" name="rewardCardBackgroundInput" type="file"
+																/>
+															</div>
+															<input type="hidden" id="rewardCardBackgroundImageId" name="rewardCardBackgroundImageId" value="" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+															<p id="background_image_name" style="display: inline; vertical-align: -webkit-baseline-middle;"></p>
+														</div>
+														<!-- <div>
+															<img id="rewardCardBackgroundImage" th:src="@{/BCS/images/noImg_image.png}" style="height: 100px;"/>
+														</div> -->
+														<br />
+														<p class="MdTxtNotice01">◎ 點數為1 ~ 5點時，底圖的建議解析度為 350 × 152</p>
+														<p class="MdTxtNotice01">◎ 點數為6 ~ 10點時，底圖的建議解析度為 350 × 172</p>
+														<p class="MdTxtNotice01">◎ 點數為11 ~ 15點時，底圖的建議解析度為 350 × 233</p>
+														<p class="MdTxtNotice01">◎ 點數為16 ~ 20點時，底圖的建議解析度為 350 × 294</p>
+														<p class="MdTxtNotice01">◎ 點數為21 ~ 25點時，底圖的建議解析度為 350 × 355</p>
+														<p class="MdTxtNotice01">◎ 點數為26 ~ 30點時，底圖的建議解析度為 350 × 182</p>
+														<p class="MdTxtNotice01">◎ 點數為31 ~ 40點時，底圖的建議解析度為 350 × 201</p>
+														<p class="MdTxtNotice01">◎ 點數為41 ~ 50點時，底圖的建議解析度為 350 × 240</p>
+													</td>
+												</tr>
+											</table>
+										</div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<header class="ContentHead">
+						<h3 class="CHSecondTtl">設定項目</h3>
+					</header>
+					<div class="mainFrame CMsg Pre">
+						<table border="1">
+							<colgroup>
+								<col width="190">
+								<col>
+							</colgroup>
+							<tbody>
+								<tr>
+									<th>所需收集點數</th>
+									<td>
+										<div class="option">
+											<div id="optionLabelBlack2" class="optionLabel">5</div>
+											<select class="optionSelect featureList" id="requirePoint">
+												<option value="1">1</option>
+												<option value="2">2</option>
+												<option value="3">3</option>
+												<option value="4">4</option>
+												<option selected="selected" value="5">5</option>
+												<option value="6">6</option>
+												<option value="7">7</option>
+												<option value="8">8</option>
+												<option value="9">9</option>
+												<option value="10">10</option>
+												<option value="11">11</option>
+												<option value="12">12</option>
+												<option value="13">13</option>
+												<option value="14">14</option>
+												<option value="15">15</option>
+												<option value="16">16</option>
+												<option value="17">17</option>
+												<option value="18">18</option>
+												<option value="19">19</option>
+												<option value="20">20</option>
+												<option value="21">21</option>
+												<option value="22">22</option>
+												<option value="23">23</option>
+												<option value="24">24</option>
+												<option value="25">25</option>
+												<option value="26">26</option>
+												<option value="27">27</option>
+												<option value="28">28</option>
+												<option value="29">29</option>
+												<option value="30">30</option>
+												<option value="31">31</option>
+												<option value="32">32</option>
+												<option value="33">33</option>
+												<option value="34">34</option>
+												<option value="35">35</option>
+												<option value="36">36</option>
+												<option value="37">37</option>
+												<option value="38">38</option>
+												<option value="39">39</option>
+												<option value="40">40</option>
+												<option value="41">41</option>
+												<option value="42">42</option>
+												<option value="43">43</option>
+												<option value="44">44</option>
+												<option value="45">45</option>
+												<option value="46">46</option>
+												<option value="47">47</option>
+												<option value="48">48</option>
+												<option value="49">49</option>
+												<option value="50">50</option>
+											</select>
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<th>主標題</span>
+									</th>
+									<td>
+										<div class="MdFRM01Input">
+											<input type="text" id="rewardCardMainTitle" name="rewardCardMainTitle" placeholder="請輸入" maxlength="50">
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<th>副標題</span>
+									</th>
+									<td>
+										<div class="MdFRM01Input">
+											<input type="text" id="rewardCardSubTitle" name="rewardCardSubTitle" placeholder="請輸入" maxlength="50">
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<th>列表縮圖<br>( 170 X 170 )
+									</th>
+									<td>
+										<div class="MdFRM03File">
+											<img id="rewardCardListImage" th:src="@{/BCS/images/noImg_image.png}" style="height: 100px;" />
+											<div class="MdBtnUpload" style="cursor: pointer;">
+												<span class="mdBtnUploadTxt">上傳</span> <input accept="image/jpeg" class="mdBtnUploadInput" id="rewardCardListImageInput"
+												 name="rewardCardListImageInput" type="file" />
+											</div>
+											<p class="MdTxtNotice01">jpg格式的檔案。最大10MB。圖檔較大時，讀取時可能須花費一些時間。</p>
+											<input type="hidden" id="rewardCardListImageId" name="rewardCardListImageId" value="" />
+										</div>
+									</td>
+								</tr>
+								<tr >
+										<th>
+											集滿點數優惠<span style="color: red">*</span>
+											<br/>
+												<input id="addCoupon" class="btn_css" type="button" value="增加優惠券" style="cursor: pointer;">
+												<input id="deleteCoupon" class="btn_css" type="button" value="刪除優惠券" style="cursor: pointer;">
+                    					
+										</th>
+										<td class="couponList">
+											<div class="couponSetPoint">
+												<div th:replace="/BCS/Views/MsgFragment/MsgFragmentBase :: msgFrame"></div>
+												<div th:replace="/BCS/Views/MsgFragment/MsgFragmentBtn :: msgFrameBtn (${ {'COUPON'} })"></div>
+												<div th:replace="/BCS/Views/MsgFragment/DialogCouponSelect :: dialogCouponSelect"></div>
+												<div >
+													<p>優惠券點數<span style="color: red">*</span></p>
+				        							<div class="MdFRM01Input" style="border:1px solid;">
+				            							<input maxlength="5" type="text" id="couponPointInput" name="couponPointInput" placeholder="點數" >
+				        							</div>&nbsp;
+				        							
+												</div>
+												</br>
+											</div>
+											
+										</td>
+								</tr>
+								<tr>
+									<th>使用效期<span style="color: red">*</span></th>
+									<td><span>
+											<div class="option date">
+												<input type="text" class="datepicker"
+													id="rewardCardStartUsingTime"
+													name="rewardCardStartUsingTime" placeholder="YYYY-MM-DD" />
+											</div>
+											<div class="option time">
+												<div class="optionLabel">00</div>
+												<select id="rewardCardStartUsingTimeHour"
+													name="rewardCardStartUsingTimeHour" class="optionSelect">
+													<option th:each="i : ${#numbers.sequence( 0, 23, 1)}"
+														th:with="hour=${i < 10 ? '0' + i : i}" th:value="${hour}"
+														th:text="${hour}">
+												    </option>
+												</select>
+											</div> :
+											<div class="option time">
+												<div class="optionLabel">00</div>
+												<select id="rewardCardStartUsingTimeMinute"
+													name="rewardCardStartUsingTimeMinute" class="optionSelect">
+													<option th:each="i : ${#numbers.sequence( 0, 59, 1)}"
+														th:with="minute=${i < 10 ? '0' + i : i}"
+														th:value="${minute}" th:text="${minute}">
+												    </option>
+												</select>
+											</div>
+									</span> ～ <span>
+											<div class="option date">
+												<input type="text" class="datepicker"
+													id="rewardCardEndUsingTime" name="rewardCardEndUsingTime"
+													placeholder="YYYY-MM-DD" />
+											</div>
+											<div class="option time">
+												<div class="optionLabel">00</div>
+												<select id="rewardCardEndUsingTimeHour"
+													name="rewardCardEndUsingTimeHour" class="optionSelect">
+													<option th:each="i : ${#numbers.sequence( 0, 23, 1)}"
+														th:with="hour=${i < 10 ? '0' + i : i}" th:value="${hour}"
+														th:text="${hour}">
+												    </option>
+												</select>
+											</div> :
+											<div class="option time">
+												<div class="optionLabel">00</div>
+												<select id="rewardCardEndUsingTimeMinute"
+													name="rewardCardEndUsingTimeMinute" class="optionSelect">
+													<option th:each="i : ${#numbers.sequence( 0, 59, 1)}"
+														th:with="minute=${i < 10 ? '0' + i : i}"
+														th:value="${minute}" th:text="${minute}">
+												    </option>
+												</select>
+											</div>
+									</span></td>
+								</tr>
+								<tr>
+									<th>取卡回饋點數</th>
+									<td>
+										<div class="option">
+											<div id="optionLabelBlack1" class="optionLabel">0</div>
+											<select class="optionSelect pointList" id="bonus_point">
+												<option selected="selected" value="0">0</option>
+												<option value="1">1</option>
+												<option value="2">2</option>
+												<option value="3">3</option>
+												<option value="4">4</option>
+												<option value="5">5</option>
+												<option value="6">6</option>
+												<option value="7">7</option>
+												<option value="8">8</option>
+												<option value="9">9</option>
+												<option value="10">10</option>
+												<option value="11">11</option>
+												<option value="12">12</option>
+												<option value="13">13</option>
+												<option value="14">14</option>
+												<option value="15">15</option>
+												<option value="16">16</option>
+												<option value="17">17</option>
+												<option value="18">18</option>
+												<option value="19">19</option>
+												<option value="20">20</option>
+												<option value="21">21</option>
+												<option value="22">22</option>
+												<option value="23">23</option>
+												<option value="24">24</option>
+												<option value="25">25</option>
+												<option value="26">26</option>
+												<option value="27">27</option>
+												<option value="28">28</option>
+												<option value="29">29</option>
+												<option value="30">30</option>
+												<option value="31">31</option>
+												<option value="32">32</option>
+												<option value="33">33</option>
+												<option value="34">34</option>
+												<option value="35">35</option>
+												<option value="36">36</option>
+												<option value="37">37</option>
+												<option value="38">38</option>
+												<option value="39">39</option>
+												<option value="40">40</option>
+												<option value="41">41</option>
+												<option value="42">42</option>
+												<option value="43">43</option>
+												<option value="44">44</option>
+												<option value="45">45</option>
+												<option value="46">46</option>
+												<option value="47">47</option>
+												<option value="48">48</option>
+												<option value="49">49</option>
+												<option value="50">50</option>
+											</select>
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<th>防止不當使用設定</th>
+									<td>
+										<div>
+											<ul>
+												<li><label> <input type="radio"
+														name="give_limit_type" value="0" checked="checked">不設定
+												</label></li>
+												<li><label> <input type="radio"
+														name="give_limit_type" value="1">同一天內不贈送點數
+														<div class="option">
+                                                            <div class="optionLabel">1</div>
+                                                            <select id="give_limit_point"
+                                                                class="optionSelect limit_number" disabled="disabled">
+                                                                <option value="1">1</option>
+                                                                <option value="2">2</option>
+                                                                <option value="3">3</option>
+                                                                <option value="4">4</option>
+                                                                <option value="5">5</option>
+                                                                <option value="6">6</option>
+                                                                <option value="7">7</option>
+                                                                <option value="8">8</option>
+                                                                <option value="9">9</option>
+                                                                <option value="10">10</option>
+                                                                <option value="11">11</option>
+                                                                <option value="12">12</option>
+                                                                <option value="13">13</option>
+                                                                <option value="14">14</option>
+                                                                <option value="15">15</option>
+                                                                <option value="16">16</option>
+                                                                <option value="17">17</option>
+                                                                <option value="18">18</option>
+                                                                <option value="19">19</option>
+                                                                <option value="20">20</option>
+                                                                <option value="21">21</option>
+                                                                <option value="22">22</option>
+                                                                <option value="23">23</option>
+                                                                <option value="24">24</option>                                       <option value="24">24</option>
+				                                                <option value="25">25</option>
+				                                                <option value="26">26</option>
+				                                                <option value="27">27</option>
+				                                                <option value="28">28</option>
+				                                                <option value="29">29</option>
+				                                                <option value="30">30</option>
+				                                                <option value="31">31</option>
+				                                                <option value="32">32</option>
+				                                                <option value="33">33</option>
+				                                                <option value="34">34</option>
+				                                                <option value="35">35</option>
+				                                                <option value="36">36</option>
+				                                                <option value="37">37</option>
+				                                                <option value="38">38</option>
+				                                                <option value="39">39</option>
+				                                                <option value="40">40</option>
+				                                                <option value="41">41</option>
+				                                                <option value="42">42</option>
+				                                                <option value="43">43</option>
+				                                                <option value="44">44</option>
+				                                                <option value="45">45</option>
+				                                                <option value="46">46</option>
+				                                                <option value="47">47</option>
+				                                                <option value="48">48</option>
+				                                                <option value="49">49</option>
+				                                                <option value="50">50</option>
+                                                            </select>
+                                                        </div>點給同一位顧客（於0:00重置）
+												</label></li>
+												<li><label> <input type="radio"
+														name="give_limit_type" value="2"> 於指定時間
+														<div class="option">
+															<div class="optionLabel">1</div>
+															<select id="pointSetTime" name="give_limit_hours"
+																class="optionSelect limit_type" disabled="disabled">
+																<option value="1">1</option>
+																<option value="2">2</option>
+																<option value="3">3</option>
+																<option value="4">4</option>
+																<option value="5">5</option>
+																<option value="6">6</option>
+																<option value="7">7</option>
+																<option value="8">8</option>
+																<option value="9">9</option>
+																<option value="10">10</option>
+																<option value="11">11</option>
+																<option value="12">12</option>
+																<option value="13">13</option>
+																<option value="14">14</option>
+																<option value="15">15</option>
+																<option value="16">16</option>
+																<option value="17">17</option>
+																<option value="18">18</option>
+																<option value="19">19</option>
+																<option value="20">20</option>
+																<option value="21">21</option>
+																<option value="22">22</option>
+																<option value="23">23</option>
+															</select>
+														</div> <label>小時內不贈送點數給同一位顧客</label>
+													</label>
+												</li>
+												<input type="hidden" id="give_limit_branch_type" value="0">
+												<li>
+													<p class="MdTxtNotice01">此設定將影響所有「印刷用行動條碼」、「於智慧手機畫面所顯示的行動條碼」。</p>
+												</li>
+											</ul>
+											<!--/MdFRM05ChkList-->
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<th>領取期間</th>
+									<td><span>
+											<div class="option date">
+												<input type="text" class="datepicker"
+													id="rewardCardStartGetTime" name="rewardCardStartGetTime"
+													placeholder="YYYY-MM-DD" />
+											</div>
+											<div class="option time">
+												<div class="optionLabel">00</div>
+												<select id="rewardCardStartGetTimeHour"
+													name="rewardCardStartGetTimeHour" class="optionSelect">
+													<option th:each="i : ${#numbers.sequence( 0, 23, 1)}"
+														th:with="hour=${i < 10 ? '0' + i : i}" th:value="${hour}"
+														th:text="${hour}">
+												    </option>
+												</select>
+											</div> :
+											<div class="option time">
+												<div class="optionLabel">00</div>
+												<select id="rewardCardStartGetTimeMinute"
+													name="rewardCardStartGetTimeMinute" class="optionSelect">
+													<option th:each="i : ${#numbers.sequence( 0, 59, 1)}"
+														th:with="minute=${i < 10 ? '0' + i : i}"
+														th:value="${minute}" th:text="${minute}">
+												    </option>
+												</select>
+											</div>
+									</span> ～ <span>
+											<div class="option date">
+												<input type="text" class="datepicker"
+													id="rewardCardEndGetTime" name="rewardCardEndGetTime"
+													placeholder="YYYY-MM-DD" />
+											</div>
+											<div class="option time">
+												<div class="optionLabel">00</div>
+												<select id="rewardCardEndGetTimeHour"
+													name="rewardCardEndGetTimeHour" class="optionSelect">
+													<option th:each="i : ${#numbers.sequence( 0, 23, 1)}"
+														th:with="hour=${i < 10 ? '0' + i : i}" th:value="${hour}"
+														th:text="${hour}">
+												    </option>
+												</select>
+											</div> :
+											<div class="option time">
+												<div class="optionLabel">00</div>
+												<select id="rewardCardEndGetTimeMinute"
+													name="rewardCardEndGetTimeMinute" class="optionSelect">
+													<option th:each="i : ${#numbers.sequence( 0, 59, 1)}"
+														th:with="minute=${i < 10 ? '0' + i : i}"
+														th:value="${minute}" th:text="${minute}">
+												    </option>
+												</select>
+											</div>
+									</span></td>
+								</tr>
+								<tr>
+									<th>使用方法</th>
+									<td>
+										<div class="mdFRM05Inline">
+											<div class="TInput">
+												<textarea id="rewardCardUseDescription" name="rewardCardUseDescription" cols="80" rows="10" placeholder="請輸入" maxlength="500"
+												 class="jqCountString">&nbsp;</textarea>
+												<span class="MdTxtNotice01 floatRight">0/500</span>
+											</div>
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<th>注意事項</th>
+									<td>
+										<div class="mdFRM05Inline">
+											<div class="TInput">
+												<textarea id="rewardCardDescription" name="rewardCardDescription" cols="80" rows="10" placeholder="請輸入" maxlength="500" class="jqCountString">- 每次來店消費即贈送1點。
+														- 即使1天內來店消費數次，當天贈送的總點數仍為1點，敬請見諒。
+														- 如發現有不當使用情形，截至當下所收集的點數等，將全數失效。</textarea>
+												<span class="MdTxtNotice01 floatRight">0/500</span>
+											</div>
+										</div>
+									</td>
+								</tr>
+								<tr>
+                                    <th>集點卡其他設定 <p class="MdTxtNotice01">請根據需求設定集點卡</p></th>
+                                    <td>
+                                        <div class="option">
+                                            <div class="optionLabel">請選擇</div>
+                                            <select class="optionSelect rewardCardFlag" name="rewardCardFlag" id="rewardCardFlag">
+                                                <option value="">請選擇</option>
+                                                <option value="PRIVATE">隱藏集點卡</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+							</tbody>
+						</table>
+					</div>
+				</section>
+				<div class="BtnSet">
+					<div>
+						<input class="btn_query" style="cursor: pointer;" type="button" value="預覽"> <input class="btn_save" style="cursor: pointer;"
+						 type="button" value="儲存"> <input name="cancel" class="btn_cancel" type="button" value="取消" style="cursor: pointer;">
+					</div>
+				</div>
+			</form>
+			<div id="previewDialog"></div>
+		</div>
+	</div>
+</body>
+
+</html>

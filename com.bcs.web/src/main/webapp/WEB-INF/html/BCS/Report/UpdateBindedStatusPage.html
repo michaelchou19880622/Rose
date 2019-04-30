@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      th:with="strList = ${ {'/BCS/JS/lib/vis.min.js', '/BCS/JS/Report/updateUserStatus.base.js'} }" >
+<head th:replace="/BCS/Views/Common/Head :: head ('Mid To Uid Page', ${strList})" >
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page23')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formSendGroup">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">更新綁定狀態</h3>
+                        <p class="CHDesc">更新綁定狀態</p>
+                    </header>
+                    <div class="mainFrame">
+                        <table border="1" id="tableBody">
+                            <colgroup><col width="100"><col width="500"></colgroup>
+                            <tr class="tableHeader">
+                                <th>資料欄位</th>
+                                <th>資料內容</th>
+                            </tr>
+                            <tr >
+                                <td class="dataTitle">更新綁定狀態</td>
+                                <td class="dataContent">
+                                	<input accept="application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, text/plain"  id="upload_mid_btn" name="file" type="file" style="display:none">
+                                	<input class="btn_add upload_mid" style="cursor: pointer; margin-right: 3px;" type="button" value="更新綁定狀態">
+								</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

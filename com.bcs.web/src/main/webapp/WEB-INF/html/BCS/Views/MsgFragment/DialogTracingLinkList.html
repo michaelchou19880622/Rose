@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.springframework.org/security/tags">
+<body>
+	<!-- Dialog Tracing List Select  -->
+				<div id="dialogTracingListSelect" title="已產生連結" th:fragment="dialogTracingListSelect" >  
+					<div >
+	                    <div class="mainFrame">
+	                        <table border="1" id="tracingListTable">
+	                            <colgroup><col width="150"><col width="150"><col width="130"></colgroup>
+	                            <tr>
+	                                <th>追蹤連結</th>
+	                                <th>追蹤目標標題</th>
+	                                <th>追蹤目標</th>
+	                            </tr>
+	                            <tbody class="tracingTrTemplate">
+	                            <tr>
+	                                <td class="tracingLink"></td>
+	                                <td class="tracingTargetTitle"></td>
+	                                <td class="tracingTarget"><a target="_blank"></a></td>
+	                            </tr>
+	                            </tbody>
+	                        </table>
+	                    </div>
+					</div>
+				</div>
+				
+</body>
+</html>

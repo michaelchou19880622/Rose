@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Link Url Click Report Page', '/BCS/JS/page21.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page20')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">連結點擊 成效頁面 : <span id="linkUrl"></span></h3>
+                    </header>
+                    <div class="CHBtnSet">
+                    	<div style="float:left">
+	                    	<span>日期區間：</span>
+	                    	<div class="option date">
+	                        	<input type="text" 
+		                           	class="datepicker" 
+		                           	id="reportStartDate" 
+		                           	placeholder="YYYY-MM-DD"/>
+	                       	</div>
+	                       	<span>~</span>
+	                       	<div class="option date">
+	                        	<input type="text" 
+		                        	class="datepicker" 
+		                           	id="reportEndDate" 
+		                           	placeholder="YYYY-MM-DD"/>
+	                      	</div>
+	                      	<input class="btn_save query" type="button" value="查詢"  style="cursor: pointer;">
+	                    </div>
+                        <div class="CHRight">
+                        	<a class="btn_add exportMid" style="cursor: pointer; padding: 7px 12px; text-decoration: none; ">匯出UID</a>
+                        	<a class="btn_add exportToExcel" style="cursor: pointer; padding: 7px 12px; text-decoration: none">匯出EXCEL</a>
+                       		<iframe id="downloadReport" style='display:none' ></iframe>
+                       		<input class="btn_cancel" type="button" value="取消"  style="cursor: pointer;">
+                       	</div>
+                    </div>
+                    <p class="MdTxtNotice01 MdAC pad10">顯示以下來源的七天資料 2016-03-20 ~ 2016-03-26</p>
+                    <div class="mainFrame">
+                        <table border="1" id="reportList">
+                            <colgroup>
+                            	<col width="20%">
+                            	<col width="15%">
+                            	<col width="15%">
+                            </colgroup>
+                            <tr>
+                                <th>點擊日期</th>
+                                <th >點擊次數</th>
+                                <th >點擊人數</th>
+                            </tr>
+                            <tbody class="dataTemplate">
+                            	<tr>
+                            		<td class="clickDate"></td>
+                            		<td class="clickCount"></td>
+                            		<td class="clickUser"></td>
+	                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

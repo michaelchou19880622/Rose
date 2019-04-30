@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Campaign List Page', '/BCS/JS/page30.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page30')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">滿額活動列表</h3>
+                    </header>
+                    <div class="CHBtnSet">
+                        <div class="CHLeft">
+                            <ul>
+                                <li class="CHLeftBtn" id="active_li"><input class="ActiveBtn" type="button" value="生效" style="cursor: pointer;"></li>
+                                <li class="CHLeftBtn" id="inactive_li"><input class="DisableBtn" type="button" value="取消" style="cursor: pointer;"></li>
+                            </ul>
+                        </div>
+                        <div class="CHRight"><input class="btn_add" style="cursor: pointer;" type="button" value="建立滿額活動"></div>
+                    </div>
+                    <div class="mainFrame">
+                        <table border="1" id="tableBody">
+                            <colgroup><col width="180"><col width="150"><col width="100"><col width="100"><col width="130"></colgroup>
+                            <tr class="tableHeader">
+                                <th>活動名稱</th>
+                                <th>活動時間</th>
+                                <th>滿額金額</th>
+                                <th>狀態</th>
+                                <th>修改日期</th>
+                                <th>修改人員</th>
+                                <th>刪除</th>
+                            </tr>
+                            <tr class="dataTemplate">
+                                <td class="campaignName"><a href=""></a></td>
+                                <td class="time"></td>
+                                <td class="price"></td>
+                                <td class="isActive">
+                                    <span style="font-weight: bold;font-size: 16px;"></span>
+                                    <br/>
+                                    <br/>
+                                    <input class="btn_redeisgn" type="button" value="取消" style="cursor: pointer;">
+                                </td>
+                                <td class="modifyTime"></td>
+                                <td class="modifyUser"></td>
+                                <td>
+                                    <input class="btn_detele" style="cursor: pointer;" type="button" value="刪除">
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

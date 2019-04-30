@@ -1,0 +1,3 @@
+barcode4j-light.jar
+line-bot-model-1.5.0.jar
+TSIB.jar

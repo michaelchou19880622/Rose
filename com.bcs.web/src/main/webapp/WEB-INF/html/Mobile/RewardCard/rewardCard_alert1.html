@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=640, target-densitydpi=device-dpi, maximum-scale=2.0, user-scalable=yes" />
+		
+		<title>集點卡</title>
+		<link href="../Mobile/RewardCard/css/normalize.css" rel="stylesheet" type="text/css">
+		<link href="../Mobile/RewardCard/css/style.css" rel="stylesheet" type="text/css">
+		<script src="../Mobile/RewardCard/js/jquery-1.11.3.min.js"></script>
+		<script src="../Mobile/RewardCard/js/jquery-migrate-1.2.1.min.js"></script>
+		<script src="../Mobile/RewardCard/js/function.js"></script>
+		<!--[if lt IE 9]>
+		<script src="../Mobile/RewardCard/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+		<div class="wrapper">
+		    <section class="coupon_copywriter">
+		    </section>
+			<div th:switch="${errorMessage}" class="coupon_alert">
+				<strong th:case="'getTimeError'">此集點卡<br/>不在有效領取期限內<br/>不能領取</strong>
+				<strong th:case="'useTimeError'">此集點卡<br/>不在有效使用期限內<br/>無法使用</strong>
+				<strong th:case="showMessage"><span th:text="${showMessage}"></span></strong>
+				<strong th:case="'rewardCardError'">此集點卡<br/>限制使用</strong>
+				<strong th:case="*">錯誤發生<br/>請洽服務人員</strong>
+			</div>
+		</div>
+		<pre  style="white-space: pre-wrap;visibility: hidden;font-size: xx-small;">----------------------------------------------------------------------------------------------------------------------------------</pre>
+	</body>
+
+</html>

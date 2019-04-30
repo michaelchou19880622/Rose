@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Business Create Page', '/BCS/JS/page40.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page40')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formBusiness">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">建立通路</h3>
+                        <p class="CHDesc"></p>
+                    </header>
+                    <div class="CHBtnSet">
+                        <input accept="application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, text/plain"  id="upload_business" name="file" type="file" style="display:none">
+                        <div class="CHRight"><input class="btn_add btn_upload_business" style="cursor: pointer;" type="button" value="匯入通路清單"></div>
+                    </div>
+                    <div class="mainFrame">
+                        <table border="1">
+                            <colgroup><col width="190"><col></colgroup>
+                            <tbody >
+                                <tr>
+                                    <th>通路統編</th>
+                                    <td>
+                                        <input type="text" id="bizId" name="bizId" value="" maxlength="8" >
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </section>
+                <div class="BtnSet">
+                    <div>
+                        <input class="btn_save" style="cursor: pointer;" type="button" value="儲存">
+                        <input class="btn_cancel" style="cursor: pointer;" type="button" value="取消">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

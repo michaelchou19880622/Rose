@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.springframework.org/security/tags">
+<body>
+	<!-- Message Fragment Frame  -->
+	<div th:fragment="msgFragmentDialog (dialog_id, eventType)" th:id="${dialog_id}" style="display: none;">
+
+        <div th:replace="/BCS/Views/MsgFragment/MsgFragmentBase :: msgFrame"></div>
+        
+        <div th:replace="/BCS/Views/MsgFragment/MsgFragmentBtn :: msgFrameBtn (${ {'TEXT', 'STICKER', 'IMAGE', 'RICH_MSG', 'AUDIO', 'LINK', 'VIDEO', 'TEMPLATE'} })"></div>
+
+        <div class="BtnSet">
+            <div>
+                <input class="btn_draft" type="button" th:alt-event-type='${eventType}' value="設定" style="cursor: pointer;">
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

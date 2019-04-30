@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=640, target-densitydpi=device-dpi, maximum-scale=2.0, user-scalable=yes" />
+    
+	    <!-- CSRF token -->
+		<!--<meta name="_csrf" th:content="${_csrf.token}"/>-->
+		<!-- default header name is X-CSRF-TOKEN -->
+		<!--<meta name="_csrf_header" th:content="${_csrf.headerName}"/>-->
+		
+		<title>集點卡</title>
+		<link href="../Mobile/RewardCard/css/normalize.css" rel="stylesheet" type="text/css">
+		<link href="../Mobile/RewardCard/css/style.css" rel="stylesheet" type="text/css">
+		<link href="../Mobile/RewardCard/css/lineRewardCard.css" rel="stylesheet" type="text/css">
+		
+		<script type='text/javascript' src='../webjars/momentjs/2.13.0/min/moment.min.js'></script>
+		<script type='text/javascript' src='../webjars/jquery/2.2.3/jquery.min.js'></script>
+		
+		<script type='text/javascript' src="../Mobile/JS/lib/jquery.blockui.js"></script>
+
+		<script type='text/javascript' src='../Mobile/JS/core.js'></script>
+		
+		<script src="../Mobile/RewardCard/js/jquery-migrate-1.2.1.min.js"></script>
+		<script src="../Mobile/RewardCard/js/function.js"></script>
+		
+		<script src="../Mobile/RewardCard/js/content.base.js"></script>
+		
+		<!--[if lt IE 9]>
+		<script src="../../bcsrc/Mobile/RewardCard/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+			    <section class="coupon_copywriter">
+	           		<input type="hidden" class="havePoint" th:value="${havePoint}">
+	           		<input type="hidden" class="requirePoint" th:value="${contentRewardCard.requirePoint}">
+	           		
+			        <table border="0" style="width:100%;" align="center">
+			                <colgroup><col width="190"></colgroup>
+			                <tbody class="mdCMN03TblBody">
+			                    <tr>
+			                        <td>
+			                            <div id="profileHeader_bg" class="shop_hd owner" style="background-image:url(); background-size: cover;">
+			                                <div class="hd_con">
+			                                    <span class="thum">
+			                                        <img id="profileHeader_thum" th:src="@{/BCS/images/bcs_logo.png}">
+			                                    </span>
+			                                    <hgroup class="tit">
+			                                        <h1 class="rewardCardMainTitle" th:text="${contentRewardCard.rewardCardMainTitle}"></h1>
+			                                        <h2 class="rewardCardSubTitle" th:text="${contentRewardCard.rewardCardSubTitle}"></h2>
+			                                    </hgroup>
+			                                </div>
+			                            </div>
+			                            <div id="cre_stamp_template"></div>
+			                            <div id="sample_card_background" class="pc_cms stamp_wrap owner">
+			                                <div class="stamp_box">
+			                                    <!-- stamp_con = stamp.html참조 -->
+			                                    <!-- <div th:class="${contentRewardCard.rewardCardBackGround}"> -->
+			                                    <div 
+			                                    	th:class="${#strings.contains(contentRewardCard.rewardCardBackGround, 'stamp_con stamp_con_bg_color_') ? contentRewardCard.rewardCardBackGround : 'stamp_con'}"
+			                                    	th:style="${#strings.contains(contentRewardCard.rewardCardBackGround, 'stamp_con stamp_con_bg_color_') ? '' : rewardCardBackgroundImage}">
+			                                        <div class="bartang">
+			                                        	<!--點數欄位-->
+			                                            <div class="bang_area" id="stamp_list_render_area">
+			                                            	<ul id="bang_size">
+			                                            	</ul>
+			                                            </div>
+			                                        </div>
+			                                        <div class="bang_date">
+			                                        	使用期限：
+			                                        	<span th:text="${#dates.format(rewardCardStartUsingTime, 'yyyy/MM/dd HH:mm')} + '~' "></span>
+			                                        	<span th:text="${#dates.format(rewardCardEndUsingTime, 'yyyy/MM/dd HH:mm')}"></span>
+			                                        </div>
+			                                    </div>
+			                                </div>
+			                            </div>
+			                        </td>
+			                        
+			                    </tr>
+			                </tbody>
+			            </table>
+			    </section>
+		    <section class="coupon_notes">
+		        <ol>
+		            <li>
+						<div class="wrapper">
+							<ul class="coupon_list">
+								<li class="dataTemplate">
+									<a class="linkBody">
+										<img src="../Mobile/Coupon/images/index_thumb.png" class="coupon_thumb" style="width: 170px;height: 170px;">
+										<strong class="coupon_title"  style="word-wrap: break-word;"></strong>
+									</a>
+								</li>
+							</ul>   
+						</div>
+		            </li>
+		            <li><strong class="item2">使用方法</strong>
+		                <pre th:text="${contentRewardCard.rewardCardUseDescription}"></pre>
+		            </li> 
+		            <li><strong class="item2">注意事項</strong>
+		                <pre th:text="${contentRewardCard.rewardCardDescription}"></pre>
+		            </li>            
+		        </ol>
+		    </section>
+		<pre  style="white-space: pre-wrap;visibility: hidden;font-size: xx-small;">----------------------------------------------------------------------------------------------------------------------------------</pre>
+	    <input id="rewardCardResult" type="hidden" th:value="${session.rewardCardResult}" />
+	    
+	    <!-- popup area start-->
+        <div class="popup_wrapper" style="display:none">
+            <div class="popup_box">
+                <p class="popup_text">
+                	是否領取此優惠卷<br>
+                </p>
+                <div class="popup_btn">
+                    <a class="cancel">取消</a>
+                    <a class="confirm">確認</a>
+	                <a class="check" style="display:none; width: 98%;">確認</a>
+                </div>
+            </div>
+        </div>
+	</body>
+</html>
+
+<script type="text/javascript" th:inline="javascript">
+    var CONTENTCOUPONS = [[${contentCoupons}]];
+</script>

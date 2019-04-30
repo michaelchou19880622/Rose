@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Export Excel Test Page', '/BCS/JS/page100.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page100')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">匯出Excel測試頁面</h3>
+                    </header>
+                    <div class="CHBtnSet">
+                        <div>
+                            <span>日期區間：</span>
+                            <div class="option date">
+                                <input type="text" 
+                                    class="datepicker" 
+                                    id="reportStartDate" 
+                                    placeholder="YYYY-MM-DD"/>
+                            </div>
+                            <span>~</span>
+                            <div class="option date">
+                                <input type="text" 
+                                    class="datepicker" 
+                                    id="reportEndDate" 
+                                    placeholder="YYYY-MM-DD"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="CHBtnSet">
+                        <div class="CHRight">
+                        	<a class="btn_add " name="Management" style="cursor: pointer; padding: 7px 12px; text-decoration: none">管理報表</a>
+                       		<a class="btn_add " name="SharedCampaign" style="cursor: pointer; padding: 7px 12px; text-decoration: none">分享活動</a>
+                       		<a class="btn_add " name="Information" style="cursor: pointer; padding: 7px 12px; text-decoration: none">一般資訊</a>
+                       		<a class="btn_add " name="InformationS" style="cursor: pointer; padding: 7px 12px; text-decoration: none">一般資訊_統計</a>
+                       		<a class="btn_add " name="Keyword" style="cursor: pointer; padding: 7px 12px; text-decoration: none">關鍵字</a>
+                       		<a class="btn_add " name="KeywordUid" style="cursor: pointer; padding: 7px 12px; text-decoration: none">關鍵字_UID</a>
+                       		<a class="btn_add " name="KeywordS" style="cursor: pointer; padding: 7px 12px; text-decoration: none">關鍵字_統計</a>
+                       		<a class="btn_add " name="MarketingUrl" style="cursor: pointer; padding: 7px 12px; text-decoration: none">行銷連結</a>
+                       		<a class="btn_add " name="MarketingUrlUid" style="cursor: pointer; padding: 7px 12px; text-decoration: none">行銷連結_UID</a>
+                       		<a class="btn_add " name="MarketingUrlS" style="cursor: pointer; padding: 7px 12px; text-decoration: none">行銷連結_統計</a>
+                       		<iframe id="downloadReport" style='display:none' ></iframe>
+                       	</div>
+                    </div>
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

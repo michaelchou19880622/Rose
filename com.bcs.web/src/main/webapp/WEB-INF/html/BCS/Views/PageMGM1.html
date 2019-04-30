@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"  
+      th:with="strList = ${ {'/BCS/JS/pageMGM1.base.js'} }">
+<head th:replace="/BCS/Views/Common/Head :: head ('MGM Campaign Create Page', ${strList})" >
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('PageMGM1')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formContentCampaign">
+                <section>
+                    <header class="ContentHead">
+                        <h3 th:text="${param.actionType == null || param.actionType[0] == 'Create' ? '建立新MGM活動' : '更改MGM活動'}" class="CHTtl"></h3>
+                        <p class="CHDesc">請輸入MGM活動內容。</p>
+                    </header>
+                    <div class="CHBtnSet">
+                        <div class="CHRight"><input class="btn_save" style="cursor: pointer;" type="button" value="儲存"></div>
+                    </div>
+                    <div class="mainFrame CMsg Pre">
+                        <table border="1">
+                            <colgroup><col width="190"><col></colgroup>
+                            <tbody >
+                                <tr>
+                                    <th>MGM活動標題 <span style="color: red">*</span></th>
+                                    <td>
+                                        <div class="MdFRM01Input">
+                                        	<input type="text" id="campaignTitle" name="campaignTitle" placeholder="請輸入" maxlength="50">
+                                        </div>&nbsp; <span class="MdTxtInputCount">0/50</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>活動時間<span style="color: red">*</span></th>
+                                    <td>
+                                        <span>
+                                            <div class="option date">
+                                                <input type="text" 
+                                                	class="datepicker" 
+                                                	id="campaignStartTime" 
+                                                	name="campaignStartTime" 
+                                                	placeholder="YYYY-MM-DD"/>
+                                            </div>
+                                            <div class="option time">
+                                                <div class="optionLabel">00</div>
+                                                <select id="campaignStartTimeHour" name="campaignStartTimeHour" class="optionSelect">
+												    <option th:each="i : ${#numbers.sequence( 0, 23, 1)}"
+												    	th:with="hour=${i < 10 ? '0' + i : i}"
+												    	th:value="${hour}"
+												    	th:text="${hour}" >
+												    </option>
+                                                </select>
+                                            </div>
+                                            :
+                                            <div class="option time">
+                                                <div class="optionLabel">00</div>
+                                                <select id="campaignStartTimeMinute" name="campaignStartTimeMinute" class="optionSelect">
+												    <option th:each="i : ${#numbers.sequence( 0, 59, 1)}"
+												    	th:with="minute=${i < 10 ? '0' + i : i}"
+												    	th:value="${minute}"
+												    	th:text="${minute}" >
+												    </option>
+                                                </select>
+                                            </div>
+                                        </span>
+                                        ～
+                                        <span>
+                                            <div class="option date">
+                                                <input type="text" 
+                                                	class="datepicker" 
+                                                	id="campaignEndTime" 
+                                                	name="campaignEndTime" 
+                                                	placeholder="YYYY-MM-DD"/>
+                                            </div>
+                                            <div class="option time">
+                                                <div class="optionLabel">00</div>
+                                                <select id="campaignEndTimeHour" name="campaignEndTimeHour" class="optionSelect">
+												    <option th:each="i : ${#numbers.sequence( 0, 23, 1)}"
+												    	th:with="hour=${i < 10 ? '0' + i : i}"
+												    	th:value="${hour}"
+												    	th:text="${hour}" >
+												    </option>
+                                                </select>
+                                            </div>
+                                            :
+                                            <div class="option time">
+                                                <div class="optionLabel">00</div>
+                                                <select id="campaignEndTimeMinute" name="campaignEndTimeMinute" class="optionSelect">
+												    <option th:each="i : ${#numbers.sequence( 0, 59, 1)}"
+												    	th:with="minute=${i < 10 ? '0' + i : i}"
+												    	th:value="${minute}"
+												    	th:text="${minute}" >
+												    </option>
+                                                </select>
+                                            </div>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>分享次數 <span style="color: red">*</span></th>
+                                    <td>
+                                        <div class="MdFRM01Input">
+                                            <input type="text" id="shareTimes" name="shareTimes" placeholder="請輸入" maxlength="5">
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                	<th>活動標題圖片<span style="color: red">*</span></th>
+                                	<td colspan="2">
+                                    	<div class="MdFRM03File">
+                                    		<input type="hidden" id="actionImgId" name="actionImgId" value=""/>
+                                        	<div class="mdFRM03Img">
+                                        		<img id="actionImg" src="" style="height: 100%;">
+                                        	</div>
+                                        	<div class="MdBtnUpload">
+                                            	<span class="mdBtnUploadTxt">上傳</span>
+                                            	<input accept="image/jpeg, image/png" class="mdBtnUploadInput" name="actionImageUpload" type="file"  id="actionImageUpload">
+                                        	</div>
+                                        	<p class="MdTxtNotice01">上傳一張依據設計指南所製作的圖片。可支援的規格為750寬，可支援檔案格式為jpg/png。</p>
+                                    	</div>
+                                	</td>
+                            	</tr>
+                            	<tr>
+                                	<th>分享圖片<span style="color: red">*</span></th>
+                                	<td colspan="2">
+                                    	<div class="MdFRM03File">
+                                    		<input type="hidden" id="shareImgId" name="shareImgId" value=""/>
+                                        	<div class="mdFRM03Img">
+                                        		<img id="shareImg" src="" style="height: 100%;">
+                                        	</div>
+                                        	<div class="MdBtnUpload">
+                                            	<span class="mdBtnUploadTxt">上傳</span>
+                                            	<input accept="image/jpeg, image/png" class="mdBtnUploadInput" name="shareImageUpload" type="file"  id="shareImageUpload">
+                                        	</div>
+                                        	<p class="MdTxtNotice01">上傳一張依據設計指南所製作的圖片。可支援的規格為750寬，可支援檔案格式為jpg/png。</p>
+                                    	</div>
+                                	</td>
+                            	</tr>
+                            	<tr>
+                                	<th>說明圖片<span style="color: red">*</span></th>
+                                	<td colspan="2">
+                                    	<div class="MdFRM03File">
+                                    		<input type="hidden" id="descriptionImgId" name="descriptionImgId" value=""/>
+                                        	<div class="mdFRM03Img">
+                                        		<img id="descriptionImg" src="" style="height: 100%;">
+                                        	</div>
+                                        	<div class="MdBtnUpload">
+                                            	<span class="mdBtnUploadTxt">上傳</span>
+                                            	<input accept="image/jpeg, image/png" class="mdBtnUploadInput" name="descriptionImageUpload" type="file"  id="descriptionImageUpload">
+                                        	</div>
+                                        	<p class="MdTxtNotice01">上傳一張依據設計指南所製作的圖片。可支援的規格為750寬，可支援檔案格式為jpg/png。</p>
+                                    	</div>
+                                	</td>
+                            	</tr>
+                            	<tr>
+                                    <th>分享訊息</th>
+                                    <td>
+                                        <div class="TInput">
+                                            <textarea id="campaignShareMsg" 
+                                                name="campaignShareMsg" 
+                                                cols="80" 
+                                                rows="10" 
+                                                placeholder="請輸入" 
+                                                maxlength="500" 
+                                                class="jqCountString"></textarea>
+                                            <span class="MdTxtNotice01 floatRight">0/500</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <p class="MdTxtNotice01 MdAC">儲存後，至「MGM活動列表 生效」頁面，點擊「網址」按鈕即可取得活動連結。</p>
+                <div class="BtnSet">
+                    <div>
+                        <input class="btn_save" style="cursor: pointer;" type="button" value="儲存">
+                    	<input name="cancel" class="btn_cancel" type="button" value="取消" style="cursor: pointer;">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

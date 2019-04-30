@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"  th:with="strList = ${ {'/BCS/JS/MsgFragment/MsgFragment.js',  '/BCS/JS/Report/configCreate.base.js'} }" >
+<head th:replace="/BCS/Views/Common/Head :: head ('Config Create Page', ${strList})" >
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page0')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formSendGroup">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">參數建立</h3>
+                        <p class="CHDesc">參數建立。</p>
+                    </header>
+                    <div class="CHBtnSet">
+                        <div class="CHLeft">
+                            <ul>
+                                <li class="CHLeftBtn"><input type="button" class="CancelBtn" value="取消" style="cursor: pointer;"></li>
+                            </ul>
+                        </div>
+                        <div class="CHRight"><input class="btn_add" type="button" value="設定" style="cursor: pointer;"></div>
+                    </div>
+                    <div class="mainFrame CMsg">
+                        <table border="1">
+                            <colgroup><col width="190"><col></colgroup>
+                            <tbody >
+                                <tr>
+                                    <th>參數</th>
+                                    <td>
+                                        <div class="MdFRM01Input"><input type="text" placeholder="" id="configId" name="configId"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>說明</th>
+                                    <td>
+                                        <div class="MdFRM01Input"><input type="text" placeholder="" id="description" name="description"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>數值</th>
+                                    <td>
+                                        <div class="MdFRM01Input"><input type="text" placeholder="" id="value" name="value"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+					</div>
+                </section>
+                <div class="BtnSet">
+                    <div>
+                        <input class="btn_save" type="button" value="設定" style="cursor: pointer;">
+                        <input class="btn_cancel" type="button" value="取消" style="cursor: pointer;">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

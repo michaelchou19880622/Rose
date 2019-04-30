@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=640, target-densitydpi=device-dpi, maximum-scale=2.0, user-scalable=yes" />
+    
+	    <!-- CSRF token -->
+		<!-- default header name is X-CSRF-TOKEN -->
+		
+		
+		<title>優惠券</title>
+		<link href="../Mobile/Coupon/css/normalize.css" rel="stylesheet" type="text/css">
+		<link href="../Mobile/Coupon/css/style.css" rel="stylesheet" type="text/css">
+		
+		<script type='text/javascript' src='../webjars/momentjs/2.13.0/min/moment.min.js'></script>
+		<script type='text/javascript' src='../webjars/jquery/2.2.3/jquery.min.js'></script>
+		
+		<script type='text/javascript' src='../Mobile/JS/core.js'></script>
+		
+		<script src="../Mobile/Coupon/js/jquery-migrate-1.2.1.min.js"></script>
+		<script src="../Mobile/Coupon/js/function.js"></script>
+		
+		<script src="../Mobile/Coupon/js/content.base.js"></script>
+		
+		<!--[if lt IE 9]>
+		<script src="../Mobile/Coupon/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+		<div class="wrapper">
+			<div class="coupon_content">
+				<div class="used_alert">
+					已成功領取此優惠券<br>
+				</div>
+			    <div class="kv">
+			        <img  th:if="${!#strings.isEmpty(imageId)}"  th:src="${imageId}" style="width: 100%;">
+			        <img  th:if="${#strings.isEmpty(imageId)}"  src="../Mobile/Coupon/images/kv.png" style="width: 100%;">
+			    </div>
+			    <section class="coupon_copywriter">
+			        <h1 class="title"><span style="word-wrap: break-word;" th:text="${contentCoupon.couponTitle}">優惠券</span></h1>
+			        <pre th:text="${contentCoupon.couponDescription}"></pre>
+			        <ul class="redeem">
+			            <li class="sn" th:if="${unlimited}"  style="font-size: 1.8em;" >
+			            	優惠券序號：<span th:text="${couponSerialNumber}"></span>
+			            </li>
+	           			<li class="date"  style="font-size: 1.7em; line-height:1.1em" >
+	           				<div style="height:.5em" ></div>
+	           				使用效期開始：
+	           				<span th:text="${#dates.format(couponStartUsingTime, 'yyyy/MM/dd HH:mm')} + '~' "></span><br>
+	           				　　　　結束：
+	           				<span th:text="${#dates.format(couponEndUsingTime, 'yyyy/MM/dd HH:mm')}"></span>
+	           			</li>
+			        </ul>
+			    </section>
+			</div>
+		    <section class="coupon_notes">
+		        <ol>
+		            <li><strong class="item1">使用方法</strong>
+		                <pre th:text="${contentCoupon.couponUseDescription}"></pre>
+		            </li>
+		            <li><strong class="item2">注意事項</strong>
+		                <pre th:text="${contentCoupon.couponRuleDescription}"></pre>
+		            </li>            
+		        </ol>
+		    </section>
+		    <p class="coupon_notes_alert">
+		    	<a th:if="${inUsingTime and !disabledByUsingLimit and !unlimited and preview}">點選確認兌換後使用此優惠券</a><br>
+		    	<a class="btn" th:if="${inUsingTime and !disabledByUsingLimit and !unlimited and preview}" >確認兌換</a>
+		    	<a class="btn" th:href="'userCouponSelectStorePage?referenceId='  + ${contentCoupon.couponId}"  th:if="${inUsingTime and !disabledByUsingLimit and !unlimited and !preview}" >確認兌換</a>
+		    </p>
+		</div>
+		<pre  style="white-space: pre-wrap;visibility: hidden;font-size: xx-small;">----------------------------------------------------------------------------------------------------------------------------------</pre>
+	</body>
+</html>

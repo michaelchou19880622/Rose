@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"  
+      th:with="strList = ${ {'/BCS/JS/pageG5.base.js'} }">
+<head th:replace="/BCS/Views/Common/Head :: head ('Prize List Page', ${strList})">
+</head>
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+	
+	<div class="LyContents">
+    	<div th:replace="/BCS/Views/Common/Menu :: menu ('PageG2')"></div>
+    	
+    	<!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">獎品列表</h3>
+                    </header>
+                    <div class="mainFrame">
+                        <table border="1" id="prizeListTable">
+                            <colgroup><col width="100"><col width="100"><col width="100"><col width="100"></colgroup>
+                            <tr>
+                                <th>獎品名稱</th>
+                                <th>獎品總數</th>
+                                <th>已送出數量</th>
+                                <th>中獎人名單</th>
+                            </tr>
+                            <tbody class="prizeTrTemplate">
+                            <tr>
+                                <td class="prizeName">
+                                	<input type="hidden" class="couponPrizeId">
+                                    <div class="name"></div>
+                                </td>
+                                <td class="prizeQuantity"></td>
+                                <td class="acceptedCount"></td>
+                                <td>
+                                    <input class="btn_winner_list" type="button" value="中獎名單" style="cursor: pointer;">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

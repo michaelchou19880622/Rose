@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.springframework.org/security/tags">
+<body>
+	<!-- Message Fragment Base  -->
+						<div class="MsgPlace"  th:fragment="msgFrame" >  
+	                        <!-- 文字 -->
+	                        <div class="MsgFrame" style="display:none;"type="TEXT">
+	                            <div class="mdCMN07Head">
+	                                <h4 class="mdCMN07HeadTtl01">文字</h4>
+	                                <div class="MdCMN06BtnList">
+	                                    <ul class="mdCMN06Ul">
+	                                        <li class="mdCMN06Btn"><input class="MdBtn03Delete" type="button" value="" style="cursor: pointer;"></li>
+	                                    </ul>
+	                                </div>
+	                            </div>
+	                            <div class="mdCMN07Body">
+	                                <div class="MdFRM04MsgBox" countstring="">
+	                                    <div class="MdFRM01Input"><textarea name="body1" cols="" rows="4" placeholder="" lang-direction="" class="jqCountString"></textarea></div>
+	                                    <div class="MdTxtInputCount">0/500</div>
+	                                    <!--<div class="MdBtnEmoticon"><input class="mdBtnEmoticonTxt" type="button" value="表情" style="cursor: pointer;"></div>-->
+	                                </div>
+	                            </div>
+	                        </div>
+	
+	                        <!-- 貼圖 -->
+	                        <div class="MsgFrame" style="display:none;"type="STICKER">
+	                            <div class="mdCMN07Head">
+	                                <h4 class="mdCMN07HeadTtl01">貼圖</h4>
+	                                <div class="MdCMN06BtnList">
+	                                    <ul class="mdCMN06Ul">
+	                                        <li class="mdCMN06Btn"><input class="MdBtn03Delete" type="button" value="" style="cursor: pointer;"></li>
+	                                    </ul>
+	                                </div>
+	
+	                            </div>
+	                            <div class="mdCMN07Body">
+	                                <input class="STKID" type="hidden" value="408">
+	                                <input class="STKPKGID" type="hidden" value="1">
+	                                <input class="STKVER" type="hidden" value="100">
+	                                <img src="">
+	                            </div>
+	                        </div>
+	
+							<!-- 照片 -->
+	                        <div class="MsgFrame" style="display:none;"type="IMAGE">
+	                            <div class="mdCMN07Head">
+	                                <h4 class="mdCMN07HeadTtl01" >照片</h4>
+	                                <div class="MdCMN06BtnList">
+	                                    <ul class="mdCMN06Ul">
+	                                        <li class="mdCMN06Btn"><input class="MdBtn03Delete" type="button" value="" style="cursor: pointer;"></li>
+	                                    </ul>
+	                                </div>
+	                            </div>
+	                            <div class="mdCMN07Body">
+	                                <input class="resourceType" type="hidden" value="IMAGE">
+	                                <input class="resourceId" type="hidden" value="">
+	                                <div class="MdFRM03File">
+	                                    <a target="_blank">
+	                                        <div class="mdFRM03Img">
+	                                			<img src="" style="height: 100%;">
+	                                        </div>
+	                                    </a>
+	                                    <div class="MdBtnUpload">
+	                                        <span class="mdBtnUploadTxt">上傳</span>
+	                                        <input accept="image/jpeg" data-accept="jpeg" data-type="image" class="mdBtnUploadInput createResourceImage" name="file" type="file"  id="titleImage" data-index="1">
+	                                    </div>
+	                                </div>
+	                                <p class="MdTxtNotice01">系統可供您傳送1MB以內的照片，1024x1024。</p>
+	                            </div>
+	                        </div>
+	
+	                        <!-- 優惠券 -->
+	                        <div class="MsgFrame" style="display:none;"type="COUPON">
+	                            <div class="mdCMN07Head">
+	                                <h4 class="mdCMN07HeadTtl01">優惠劵</h4>
+	                                <div class="MdCMN06BtnList">
+	                                    <ul class="mdCMN06Ul">
+	                                        <li class="mdCMN06Btn"><input class="MdBtn03Delete" type="button" value="" style="cursor: pointer;"></li>
+	                                    </ul>
+	                                </div>
+	
+	                            </div>
+	                            <div class="mdCMN07Body">
+	                                <input class="COUPON_ID" type="hidden" value="">
+	                                <table style="border: none;">
+	                                	<tr>
+	                                		<td style="width: 100px; background: inherit; border: none;">
+	                                			<div><img src="" style="width: 100px;"></div>
+	                                		</td>
+	                                		<td class="COUPON_DESCRIPTION" style="background: inherit; border: none; vertical-align: text-top;">
+	                                		</td>
+	                                	</tr>
+	                                </table>
+	                            </div>
+	                        </div>
+	                        
+	                         <!-- 集點卡 -->
+	                        <div class="MsgFrame" style="display:none;"type="REWARDCARD">
+	                            <div class="mdCMN07Head">
+	                                <h4 class="mdCMN07HeadTtl01">集點卡</h4>
+	                                <div class="MdCMN06BtnList">
+	                                    <ul class="mdCMN06Ul">
+	                                        <li class="mdCMN06Btn"><input class="MdBtn03Delete" type="button" value="" style="cursor: pointer;"></li>
+	                                    </ul>
+	                                </div>
+	
+	                            </div>
+	                            <div class="mdCMN07Body">
+	                                <input class="REWARDCARD_ID" type="hidden" value="">
+	                                <table style="border: none;">
+	                                	<tr>
+	                                		<td style="width: 100px; background: inherit; border: none;">
+	                                			<div><img src="" style="width: 100px;"></div>
+	                                		</td>
+	                                		<td class="REWARDCARD_DESCRIPTION" style="background: inherit; border: none; vertical-align: text-top;">
+	                                		</td>
+	                                	</tr>
+	                                </table>
+	                            </div>
+	                        </div>
+	
+	                        <!-- 圖文訊息 -->
+	                        <div class="MsgFrame" style="display:none;"type="RICH_MSG">
+	                            <div class="mdCMN07Head">
+	                                <h4 class="mdCMN07HeadTtl01">圖文訊息</h4>
+	                                <div class="MdCMN06BtnList">
+	                                    <ul class="mdCMN06Ul">
+	                                        <li class="mdCMN06Btn"><input class="MdBtn03Delete" type="button" value="" style="cursor: pointer;"></li>
+	                                    </ul>
+	                                </div>
+	
+	                            </div>
+	                            <div class="mdCMN07Body">
+	                                <input class="RICH_ID" type="hidden" value="408">
+	                                <img src="" style="width: 100px;">
+	                            </div>
+	                        </div>
+	
+	                        <!-- 聲音 -->
+	                        <div class="MsgFrame" style="display:none;"type="AUDIO">
+	                            <div class="mdCMN07Head">
+	                                <h4 class="mdCMN07HeadTtl01">聲音</h4>
+	                                <div class="MdCMN06BtnList">
+	                                    <ul class="mdCMN06Ul">
+	                                        <li class="mdCMN06Btn"><input class="MdBtn03Delete" type="button" value="" style="cursor: pointer;"></li>
+	                                    </ul>
+	                                </div>
+	                            </div>
+	                            <div class="mdCMN07Body">
+	                                <input class="resourceType" type="hidden" value="AUDIO">
+	                                <input class="resourceId" type="hidden" value="">
+	                                <input class="resourceLength" type="hidden" value="">
+	                                <div class="MdFRM03File">
+	                                    <a target="_blank">
+	                                        <div class="mdFRM03Audio">
+	                                            <img alt="image" failover-image="" style="display: none;">
+	                                        </div>
+	                                    </a>
+	                                    <div class="MdBtnUpload">
+	                                        <span class="mdBtnUploadTxt">上傳</span>
+	                                        <input accept="audio/x-m4a" class="mdBtnUploadInput createResourceAudio" name="file" type="file" data-acceptext="m4a" data-type="audio" data-index="0">
+	                                    </div>
+	                                </div>
+	                                <p class="MdTxtNotice01">系統可供您傳送10MB且長度為1分鐘以內的聲音檔。</p>
+	                            </div>
+	                        </div>
+	
+	                        <!-- 連結 -->
+	                        <div class="MsgFrame" style="display:none;"type="LINK">
+	                            <div class="mdCMN07Head">
+	                                <h4 class="mdCMN07HeadTtl01">連結訊息</h4>
+	                                <div class="MdCMN06BtnList">
+	                                    <ul class="mdCMN06Ul">
+	                                        <li class="mdCMN06Btn"><input class="MdBtn03Delete" type="button" value="" style="cursor: pointer;"></li>
+	                                    </ul>
+	                                </div>
+	                            </div>
+	
+	                            <div class="mdCMN07Body">
+	                                <input class="resourceType" type="hidden" value="IMAGE">
+	                                <input class="resourceId" type="hidden" value="">
+	                                <div class="MdFRM03File">
+	                                    <a target="_blank">
+	                                        <div class="mdFRM03Img">
+	                                			<img src="" style="width: 100%;">
+	                                        </div>
+	                                    </a>
+	                                    <div class="MdBtnUpload">
+	                                        <span class="mdBtnUploadTxt">上傳</span>
+	                                        <input accept="image/jpeg" data-accept="jpeg" data-type="image" class="mdBtnUploadInput createResourceImage" name="file" type="file"  id="titleImage" data-index="1">
+	                                    </div>
+	                                </div>
+	                                <p class="MdTxtNotice01">系統可供您傳送1MB以內的照片，604x400。</p>
+	                                <div class="MdFRM04MsgBox" countstring="">
+	                                    <div class="MdFRM01Input">
+	                                        <input type="text" class="textParams" value="" placeholder="請輸入連結標題" style="width:100%" maxlength="50" />
+										</div>
+	                                    <div class="MdTxtInputCount">0/50</div>
+	                                    <div class="MdBtnEmoticon">
+	                                        連結
+	                                        <input type="text" placeholder="" value="" name="links" lang-direction="" class="linkInput" maxlength="500"  style=" width: 70%;">
+	                                        <br/>
+	                                        註記
+	                                        <div style="display: inline-block; vertical-align: middle; width: 80%;">
+	                                        	<input type="text" class="tagInput linkTag" value=""/>
+	                                        </div>
+	                                    </div>
+	                                </div>
+	                            </div>
+	                        </div>
+	
+	                        <!-- 影片 -->
+	                        <div class="MsgFrame" style="display:none;"type="VIDEO">
+	                            <div class="mdCMN07Head">
+	                                <h4 class="mdCMN07HeadTtl01">影片</h4>
+	                                <div class="MdCMN06BtnList">
+	                                    <ul class="mdCMN06Ul">
+	                                        <li class="mdCMN06Btn"><input class="MdBtn03Delete" type="button" value="" style="cursor: pointer;"></li>
+	                                    </ul>
+	                                </div>
+	                            </div>
+	                            <div class="mdCMN07Body">
+	                                <input class="resourceType" type="hidden" value="VIDEO">
+	                                <input class="resourceId" type="hidden" value="">
+	                                <input name="body2" type="hidden" value="">
+	                                <div class="MdFRM03File">
+	                                    <a target="_blank">
+	                                        <div class="mdFRM03Video">
+	                                			<img src="" style="height: 100%;">
+	                                        </div>
+	                                    </a>
+	                                    <div class="MdBtnUpload">
+	                                        <span class="mdBtnUploadTxt">上傳</span>
+	                                        <input accept="video/mp4" class="mdBtnUploadInput createResourceVideo" name="file" type="file" id="titleImage" data-accept="mp4" data-type="video" data-index="0">
+	                                    </div>
+	                                </div>
+	                                <p class="MdTxtNotice01">系統可供您傳送10MB且長度為1分鐘以內的影片。</p>
+	                            </div>
+	                        </div>
+
+	                        <!-- BCS -->
+	                        <div class="MsgFrame" style="display:none;"type="BCS_PAGE">
+	                            <div class="mdCMN07Head">
+	                                <h4 class="mdCMN07HeadTtl01">LINE BCS 卡友頁面</h4>
+	                                <div class="MdCMN06BtnList">
+	                                    <ul class="mdCMN06Ul">
+	                                        <li class="mdCMN06Btn"><input class="MdBtn03Delete" type="button" value="" style="cursor: pointer;"></li>
+	                                    </ul>
+	                                </div>
+	
+	                            </div>
+	                            <div class="mdCMN07Body">
+	                            </div>
+	                        </div>
+	
+	                        <!-- 位置 -->
+	                        <div class="MsgFrame" style="display:none;"type="LOCATION">
+	                            <div class="mdCMN07Head">
+	                                <h4 class="mdCMN07HeadTtl01">位置訊息</h4>
+	                                <div class="MdCMN06BtnList">
+	                                    <ul class="mdCMN06Ul">
+	                                        <li class="mdCMN06Btn"><input class="MdBtn03Delete" type="button" value="" style="cursor: pointer;"></li>
+	                                    </ul>
+	                                </div>
+	                            </div>
+	                            <div class="mdCMN07Body">
+	                                <div class="MdFRM04MsgBox" countstring="">
+	                                    <div class="MdFRM01Input">
+	                                        <input type="text" size="10" id="linkText" value="" placeholder="請輸入位置內容"/>
+										</div>
+	                                    <div class="MdTxtInputCount">0/500</div>
+	                                    <div class="MdBtnEmoticon">現在位置</div>
+	                                    map
+	                                </div>
+	                            </div>
+	                        </div>
+	                        
+	                        <!-- 樣板 -->
+	                        <div class="MsgFrame" style="display:none;" type="TEMPLATE">
+	                            <div class="mdCMN07Head">
+	                                <h4 class="mdCMN07HeadTtl01">樣板訊息</h4>
+	                                <div class="MdCMN06BtnList">
+	                                    <ul class="mdCMN06Ul">
+	                                        <li class="mdCMN06Btn"><input class="MdBtn03Delete" type="button" value="" style="cursor: pointer;"></li>
+	                                    </ul>
+	                                </div>
+	
+	                            </div>
+	                            <div class="mdCMN07Body">
+	                                <input class="TEMPLATE_ID" type="hidden" value="408">
+	                                <div id="templateType"></div>
+	                                <img src="" style="width: 100px;">
+	                                <div>
+	                                	<a id="templateTitle"></a>
+	                                </div>
+	                            </div>
+	                        </div>
+                        </div>
+</body>
+</html>

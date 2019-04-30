@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Report Create Page', '/BCS/JS/page16.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page16')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 th:text="${param.actionType == null || param.actionType[0] == 'Create' ? '建立發送成效' : '更改發送成效'}" class="CHTtl"></h3>
+                        <p class="CHDesc">請輸入發送成效內容。</p>
+                    </header>
+                    <div class="mainFrame CMsg Pre">
+                        <table border="1">
+                            <colgroup>
+                            	<col width="15%"><col width="35%">
+                            	<col width="15%"><col width="35%">
+                            </colgroup>
+                            <tbody>
+                            	<tr>
+                            		<th>圖文訊息識別碼</th>
+                            		<td colspan="3">
+                            			<div class="MdFRM01Input">
+	                                       	<input type="text" id="richId" placeholder="請輸入" maxlength="50">
+                                        </div>&nbsp; <span class="MdTxtNotice01"></span>
+                            		</td>
+                            	</tr>
+                            	<tr>
+                                    <th>發送時間<span style="color: red">*</span></th>
+                                    <td colspan="3">
+                                        <span>
+                                            <div class="option date">
+                                                <input type="text" 
+                                                	class="datepicker" 
+                                                	id="pushDate" 
+                                                	placeholder="YYYY-MM-DD"/>
+                                            </div>
+                                            <div class="option time">
+                                                <div class="optionLabel">00</div>
+                                                <select id="pushTimeHour" class="optionSelect">
+												    <option th:each="i : ${#numbers.sequence( 0, 23, 1)}"
+												    	th:with="hour=${i < 10 ? '0' + i : i}"
+												    	th:value="${hour}"
+												    	th:text="${hour}" >
+												    </option>
+                                                </select>
+                                            </div>
+                                            :
+                                            <div class="option time">
+                                                <div class="optionLabel">00</div>
+                                                <select id="pushTimeMinute" class="optionSelect">
+												    <option th:each="i : ${#numbers.sequence( 0, 59, 1)}"
+												    	th:with="minute=${i < 10 ? '0' + i : i}"
+												    	th:value="${minute}"
+												    	th:text="${minute}" >
+												    </option>
+                                                </select>
+                                            </div>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>訊息類別</th>
+                                    <td colspan="3">
+                                    	<div class="MdFRM01Input">
+                                       		<input type="text"  id="reportPushType" placeholder="請輸入">
+                                    	</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>主要圖片</th>
+                                    <td colspan="3">
+                                        <div class="MdFRM03File">
+                                        	<div class="mdFRM03Img">
+                                	        	<img id="pushImage" th:src="@{/BCS/images/noImg_image.png}" style="height: 100%;"/>
+                                        	</div>
+                                            <div class="MdBtnUpload">
+                                                <span class="mdBtnUploadTxt">上傳</span>
+                                                <input accept="image/*" class="mdBtnUploadInput" 
+                                                	id="pushImageInput" type="file"/>
+                                            </div>
+                                            <p class="MdTxtNotice01">png、jpg格式的檔案。最大1MB。圖檔較大時，讀取時可能須花費一些時間。</p>
+                                            <input type="hidden" id="pushImageId" value=""/>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>文字</th>
+                                    <td colspan="3">
+                                        <div class="TInput">
+                                            <textarea id="pushTxt" 
+                                            	cols="80" 
+                                            	rows="10" 
+                                            	placeholder="請輸入" 
+                                            	maxlength="500" 
+                                            	class="jqCountString txtInputCount"
+                                            	notValidate="true"
+                                            	style="resize: none;"></textarea>
+                                            <span class="MdTxtNotice01 floatRight"></span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>收訊人數<span style="color: red">*</span></th>
+                                    <td colspan="3">
+                                    	<div class="MdFRM01Input">
+                                       		<input type="text" name="numberInput" id="pushNumber" placeholder="請輸入">
+                                    	</div>
+                                    </td>
+                                </tr>
+                                <tr>
+	                            	<th>Clicks<span style="color: red">*</span></th>
+	                            	<td>
+                                       	<div class="MdFRM01Input">
+                                       		<input type="text" name="numberInput" class="clickNumber" id="urlClicks" placeholder="請輸入">
+                                   		</div>
+                                   	</td>
+                                    <th>TTL Clicks</th>
+                                    <td>
+                                       	<span id="totalClicks"></span>
+                                    </td>
+	                            </tr>
+                                <tr>
+                                    <th>CTR</th>
+                                    <td colspan="3">
+                                        <div>
+                                        	<span id="ctrValue"></span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+	                            	<th>網址<span style="color: red">*</span></th>
+	                            	<td colspan="3">
+                                       	<div class="MdFRM01Input">
+	                                       	<input type="text" class="txtInputCount" id="pushUrl" placeholder="請輸入" maxlength="100" value="http://">
+                                        </div>&nbsp; <span class="MdTxtNotice01"></span>
+                                    </td>
+	                            </tr>
+                                
+                                <tr>
+	                            	<th>Tracking Code</th>
+                            	 	<td colspan="3">
+                                       	<div class="MdFRM01Input">
+                                       		<input type="text" class="txtInputCount" notValidate="true" id="urlTrackingCode" placeholder="請輸入" maxlength="100">
+                                        </div>&nbsp; <span class="MdTxtNotice01"></span>
+                                    </td>
+	                            </tr>
+	                            
+                                <tr>
+	                            	<th>Click-throughs<span style="color: red">*</span></th>
+	                            	<td>
+                                       	<div class="MdFRM01Input">
+                                       		<input type="text" name="numberInput" class="clickThroughs" id="urlClickThroughs" placeholder="請輸入">
+                                    	</div>
+                                    </td>
+                                    <th>TTL Click-throughs</th>
+                                    <td>
+                                       	<span id="totalClickThroughs"></span>
+                                    </td>
+	                            </tr>
+                                
+                                <tr>
+	                            	<th>Visits<span style="color: red">*</span></th>
+	                            	<td>
+                                       	<div class="MdFRM01Input">
+                                       		<input type="text" name="numberInput" class="visits deep" id="urlVisits" placeholder="請輸入">
+                                    	</div>
+                                    </td>
+                                    <th>TTL Visits</th>
+                                    <td>
+                                    	<span id="totalVisits"></span>
+                                    </td>
+	                            </tr>
+                                
+                                <tr>
+	                            	<th>Product Views<span style="color: red">*</span></th>
+	                            	<td>
+                                       	<div class="MdFRM01Input">
+                                       		<input type="text" name="numberInput" class="productViews deep" id="urlProductViews" placeholder="請輸入">
+                                    	</div>
+                                    </td>
+                                    <th>TTL Product Views</th>
+                                    <td>
+                                       	<span id="totalProductViews"></span>
+                                    </td>
+	                            </tr>
+	                            
+                                <tr>
+	                            	<th>深度</th>
+	                            	<td>
+                                       	<span id="urlDeep"></span>
+                                    </td>
+                                    <th>TTL 深度</th>
+                                    <td>
+                                        <span id="totalDeep"></span>
+                                    </td>
+	                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <div class="BtnSet">
+                    <div>
+                        <input class="btn_save" type="button" value="儲存" style="cursor: pointer;">
+                        <input class="btn_cancel" type="button" value="取消" style="cursor: pointer;">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

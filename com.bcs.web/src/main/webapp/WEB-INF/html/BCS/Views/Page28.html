@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.springframework.org/security/tags"
+      th:with="strList = ${ {'/BCS/JS/page28.base.js'} }" >
+<head th:replace="/BCS/Views/Common/Head :: head ('Serial Setting Page', ${strList})" >
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page28')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formSendGroup">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">電子序號設定</h3>
+                        <p class="CHDesc">您可設定電子序號。</p>
+                    </header>
+                    <div class="CHBtnSet">
+						<input accept="application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, text/plain"  id="upload_Serial_btn" name="file" type="file" style="display:none">
+                        <div class="CHRight"><input class="btn_add" type="button" value="上傳電子序號設定" style="cursor: pointer;"></div>
+                    </div>
+
+                    <div class="mainFrame CMsg">
+                        <table border="1" id="tableBody">
+                            <colgroup><col width="100"><col width="500"></colgroup>
+                            <tr >
+                                <td>設定時間</td>
+                                <td class="settingTime">未設定</td>
+                            </tr>
+                            <tr >
+                                <td>設定檔案</td>
+                                <td class="settingFile">未設定</td>
+                            </tr>
+                            <tr >
+                                <td>設定比數</td>
+                                <td class="settingCount">未設定</td>
+                            </tr>
+						</table>
+                    </div>
+
+                </section>
+                <div class="BtnSet">
+                    <div>
+                        <input sec:authorize="hasAnyRole('ROLE_ADMIN')" class="btn_draft" type="button" value="刪除" style="cursor: pointer;">
+                        <input class="btn_save" type="button" value="上傳電子序號設定" style="cursor: pointer;">
+                    </div>
+                </div>
+            </form>
+
+            <div id="previewDialog" style="display: none;">
+			</div>
+        </div>
+    </div>
+</body>
+
+</html>

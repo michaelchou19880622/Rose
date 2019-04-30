@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"  
+      th:with="strList = ${ {'/BCS/JS/pageG2.base.js'} }">
+<head th:replace="/BCS/Views/Common/Head :: head ('Game List Page', ${strList})">
+</head>
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+	
+	<div class="LyContents">
+    	<div th:replace="/BCS/Views/Common/Menu :: menu ('PageG2')"></div>
+    	
+    	<!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">遊戲列表</h3>
+                    </header>
+
+                    <div class="CHBtnSet">
+                        <div class="CHRight"><input class="btn_add" type="button" value="建立遊戲"  style="cursor: pointer;"></div>
+                    </div>
+
+                    <div class="mainFrame">
+                        <table border="1" id="gameListTable">
+                            <colgroup>
+                            	<col width="100">
+                            	<col width="100">
+                            	<col width="100">
+                            	<col width="100">
+                            	<col width="100">
+                            	<col width="100">
+                            	<col width="100">
+                            	<col width="100">
+                            	<col width="100">
+                            </colgroup>
+                            <tr>
+                                <th>遊戲名稱</th>
+                                <th>遊戲類型</th>
+                                <th>遊戲內容</th>
+                                <th>建立時間</th>
+                                <th>建立人員</th>
+                                <th>複製/刪除</th>
+                                <th>中獎名單</th>
+                                <th>獎品列表</th>
+                                <th>行動條碼</th>
+                            </tr>
+                            <tbody class="gameTrTemplate">
+                            <tr>
+                                <td class="gameName">
+                                	<input type="hidden" class="gameId">
+                                    <div><a href="gameCreatePage" class="name"></a></div>
+                                </td>
+                                <td class="gameType"></td>
+                                <td class="gameContent"></td>
+                                <td class="gameCreateTime"></td>
+                                <td class="gameCreateUser"></td>
+                                <td>
+                                    <input class="btn_copy" type="button" value="複製" style="cursor: pointer;">
+                                    <input class="btn_detele" type="button" value="刪除" style="cursor: pointer;" sec:authorize="hasAnyRole('ROLE_ADMIN')">
+                                </td>
+                                <td>
+                                    <input class="btn_winner_list" type="button" value="中獎名單" style="cursor: pointer;">
+                                </td>
+                                <td>
+                                    <input class="btn_prize_list" type="button" value="獎品列表" style="cursor: pointer;">
+                                </td>
+                                <td>
+                                    <input class="btn_gen_qrcode" type="button" value="行動條碼" style="cursor: pointer;">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </form>
+            <!-- 顯示 QRcode 的彈出視窗 -->
+            <div class="qrcode_dialog" title="行動條碼">
+            	<img id="qrcode_image" src="" />
+            </div>
+        </div>
+    </div>
+</body>
+</html>

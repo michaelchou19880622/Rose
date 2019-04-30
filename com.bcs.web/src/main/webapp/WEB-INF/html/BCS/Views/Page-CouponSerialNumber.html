@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Coupon Serial Number Page', '/BCS/JS/page-CouponSerialNumber.js')">
+</head>
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+	<div class="LyContents">
+    	<div th:replace="/BCS/Views/Common/Menu :: menu ('Page8')"></div>
+        <div class="LyMain" role="main">
+            <form onSubmit="return false;">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">電子序號紀錄</h3>
+                    </header>
+                    <div class="CHBtnSet">
+                    	<div style="float:left">
+	                      	<ul>
+                                <li class="CHLeftBtn">
+                               		<input class="LeftBtn" type="button" value="<" style="cursor: pointer;">第 <input id="pageText" size="4" onkeyup="value=value.replace(/[^0-9]/g,'')"> 頁
+                                	<input class="RightBtn" type="button" value=">" style="cursor: pointer;">
+                                	共 <span id="pageTotalText"></span> 頁
+                                </li>
+                            </ul>
+	                    </div>
+                    </div>
+                    <div class="mainFrame">
+                        <table border="1" id="recordListTable">
+                            <colgroup><col width="200"><col width="100"><col width="100"><col width="100"><col width="100"></colgroup>
+                            <tr>
+                                <th>電子序號</th>
+                                <th>已使用/未使用</th>
+                                <th>上傳時間</th>
+                                <th>上傳者</th>
+                            </tr>
+                            <tbody class="recordTrTemplate">
+	                            <tr>
+	                            	 <td class="couponSerialNumber"></td>
+	                            	 <td class="isUsed"></td>
+	                            	 <td class="modifyTime"></td>
+	                            	 <td class="modifyUser"></td>
+	                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

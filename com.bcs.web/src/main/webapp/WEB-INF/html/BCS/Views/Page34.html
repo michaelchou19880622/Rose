@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Campaign Create Page', '/BCS/JS/page34.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page34')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formCampaign">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">建立滿額活動</h3>
+                        <p class="CHDesc"></p>
+                    </header>
+                    <div class="mainFrame alignLeft">
+                        <input id="isActive" type="hidden" value="true">
+                        <table border="1">
+                            <colgroup><col width="190"><col></colgroup>
+                            <tbody >
+                                <tr>
+                                    <th>活動名稱</th>
+                                    <td>
+                                        <input type="text" id="campaignName" name="campaignName" value="" maxlength="100" >
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>活動時間</th>
+                                    <td>
+                                        <span id="startTime">
+                                            <div class="option date">
+                                                <input class="datepicker" type="text" name="startTime" placeholder="YYYY-MM-DD" >
+                                            </div>
+                                            <div class="option time">
+                                                <div class="optionLabel">0</div>
+                                                <select class="optionSelect selectHour">
+                                                    <option value="00" >0</option>
+                                                    <option value="01">1</option>
+                                                    <option value="02">2</option>
+                                                    <option value="03">3</option>
+                                                    <option value="04">4</option>
+                                                    <option value="05">5</option>
+                                                    <option value="06">6</option>
+                                                    <option value="07">7</option>
+                                                    <option value="08">8</option>
+                                                    <option value="09">9</option>
+                                                    <option value="10">10</option>
+                                                    <option value="11">11</option>
+                                                    <option value="12">12</option>
+                                                    <option value="13">13</option>
+                                                    <option value="14">14</option>
+                                                    <option value="15">15</option>
+                                                    <option value="16">16</option>
+                                                    <option value="17">17</option>
+                                                    <option value="18">18</option>
+                                                    <option value="19">19</option>
+                                                    <option value="20">20</option>
+                                                    <option value="21">21</option>
+                                                    <option value="22">22</option>
+                                                    <option value="23">23</option>
+                                                </select>
+                                            </div>
+                                            :
+                                            <div class="option time">
+                                                <div class="optionLabel">0</div>
+                                                <select class="optionSelect selectMinuteOne">
+                                                    <option value="0">0</option>
+                                                    <option value="1">1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="4">4</option>
+                                                    <option value="5">5</option>
+                                                </select>
+                                            </div>
+                                            <div class="option time">
+                                                <div class="optionLabel">0</div>
+                                                <select class="optionSelect selectMinuteTwo">
+                                                    <option value="0">0</option>
+                                                    <option value="1">1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="4">4</option>
+                                                    <option value="5">5</option>
+                                                    <option value="6">6</option>
+                                                    <option value="7">7</option>
+                                                    <option value="8">8</option>
+                                                    <option value="9">9</option>
+                                                </select>
+                                            </div>
+                                        </span>
+                                        -
+
+                                        <span id="endTime">
+                                            <div class="option date">
+                                                <input class="datepicker" type="text" name="endTime" placeholder="YYYY-MM-DD" >
+                                            </div>
+                                            <div class="option time">
+                                                <div class="optionLabel">0</div>
+                                                <select class="optionSelect selectHour">
+                                                    <option value="00" >0</option>
+                                                    <option value="01">1</option>
+                                                    <option value="02">2</option>
+                                                    <option value="03">3</option>
+                                                    <option value="04">4</option>
+                                                    <option value="05">5</option>
+                                                    <option value="06">6</option>
+                                                    <option value="07">7</option>
+                                                    <option value="08">8</option>
+                                                    <option value="09">9</option>
+                                                    <option value="10">10</option>
+                                                    <option value="11">11</option>
+                                                    <option value="12">12</option>
+                                                    <option value="13">13</option>
+                                                    <option value="14">14</option>
+                                                    <option value="15">15</option>
+                                                    <option value="16">16</option>
+                                                    <option value="17">17</option>
+                                                    <option value="18">18</option>
+                                                    <option value="19">19</option>
+                                                    <option value="20">20</option>
+                                                    <option value="21">21</option>
+                                                    <option value="22">22</option>
+                                                    <option value="23">23</option>
+                                                </select>
+                                            </div>
+                                            :
+                                            <div class="option time">
+                                                <div class="optionLabel">0</div>
+                                                <select class="optionSelect selectMinuteOne">
+                                                    <option value="0">0</option>
+                                                    <option value="1">1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="4">4</option>
+                                                    <option value="5">5</option>
+                                                </select>
+                                            </div>
+                                            <div class="option time">
+                                                <div class="optionLabel">0</div>
+                                                <select class="optionSelect selectMinuteTwo">
+                                                    <option value="0">0</option>
+                                                    <option value="1">1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="4">4</option>
+                                                    <option value="5">5</option>
+                                                    <option value="6">6</option>
+                                                    <option value="7">7</option>
+                                                    <option value="8">8</option>
+                                                    <option value="9">9</option>
+                                                </select>
+                                            </div>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>滿額金額</th>
+                                    <td>
+                                        <input type="text" id="price" name="price" value="0" >
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>遊戲</th>
+                                    <td>
+                                        <div class="option">
+                                            <div class="optionLabel">請選擇</div>
+                                            <select class="optionSelect contentGame" id="gameId" name="gameId">
+                                                <option value="">請選擇</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>商品組合</th>
+                                    <td>
+                                        <div class="option">
+                                            <div class="optionLabel">請選擇</div>
+                                            <select class="optionSelect productGroup" id="groupId" name="groupId">
+                                                <option value="">請選擇</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </section>
+                <div class="BtnSet">
+                    <div>
+                        <input class="btn_save" style="cursor: pointer;" type="button" value="儲存">
+                        <input class="btn_cancel" style="cursor: pointer;" type="button" value="取消">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

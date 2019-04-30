@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width,initial-sale=1" />
+	<!-- CSRF token -->
+<!--     <meta name="_csrf" th:content="${_csrf.token}"/> -->
+    <!-- default header name is X-CSRF-TOKEN -->
+<!--     <meta name="_csrf_header" th:content="${_csrf.headerName}"/> -->
+	
+	<script type='text/javascript' src='../webjars/jquery/2.2.3/jquery.min.js'></script>
+	<script type='text/javascript' src='../Mobile/JS/core.js'></script>
+
+    <title>MGM Redirect Page</title>
+    <script th:inline="javascript" type="text/javascript">
+		var link =  /*[[${replaceLink}]]*/ '';
+		var msg = /*[[${msg}]]*/ '';
+		if(msg){
+			alert(msg);			
+		}
+		window.location.replace(link);
+    </script>
+</head>
+<body>
+</body>
+</html>

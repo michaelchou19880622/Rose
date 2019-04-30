@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.springframework.org/security/tags">
+<body>
+	<!-- Dialog Coupon Select  -->
+				<div id="dialogCouponSelect" title="選擇優惠劵" th:fragment="dialogCouponSelect" >  
+					<div >
+	                    <div class="mainFrame">
+	                        <table border="1" id="couponListTable">
+	                            <colgroup><col width="150"><col width="150"><col width="130"><col width="100"><col width="100"></colgroup>
+	                            <tr>
+	                                <th>標題</th>
+	                                <th>備註</th>
+	                                <th>使用說明</th>
+	                                <th>建立時間</th>
+	                                <th>建立人員</th>
+	                            </tr>
+	                            <tbody class="couponTrTemplate">
+	                            <tr>
+	                                <td class="couponImgTitle">
+	                                	<input type="hidden" class="couponId">
+	                                    <img src="" width="100px"  style="cursor: pointer;">
+	                                    <div><a class="couponTitle"  style="cursor: pointer;"></a></div>
+	                                </td>
+	                                <td class="couponRemark" style="text-align: left;"></td>
+	                                <td class="couponDescription" style="text-align: left;"></td>
+	                                <td class="couponCreateTime"></td>
+	                                <td class="couponCreateUser"></td>
+	                            </tr>
+	                            </tbody>
+	                        </table>
+	                    </div>
+					</div>
+				</div>
+				
+</body>
+</html>

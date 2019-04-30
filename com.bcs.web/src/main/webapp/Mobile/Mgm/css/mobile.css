@@ -1,0 +1,191 @@
+body a, body a:hover {
+  color: #0c8fe8;
+}
+body h1 {
+  margin: 2em 1em 1em;
+  color: #009e9c;
+  font-size: 20px;
+  text-align: center;
+}
+body h1 + img {
+  display: block;
+  width: 80%;
+  margin: 0 auto;
+}
+body > .notice {
+  width: 60%;
+  display: block;
+  position: relative;
+  line-height: 3em;
+  text-align: center;
+  border: 2px solid #9b9b9b;
+  margin: 2em auto;
+}
+body > .notice img {
+  width: 1.5em;
+  position: absolute;
+  top: -1em;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  padding: 0 5px;
+  background: #ffffff;
+}
+body > img.bg {
+  width: 100%;
+  margin-top: -1em;
+}
+body > div.content {
+  background-color: #b4dae8;
+  margin-top: -3px;
+  padding: 0 1em 1em;
+}
+body > div.content p {
+  font-size: 16px;
+  margin: 0 1em 1em;
+  line-height: 1.5em;
+}
+body > div.content p.title {
+  text-align: center;
+  font-weight: bold;
+}
+body > div.content h3 {
+  text-align: center;
+  font-size: 18px;
+  margin: 0.5em 0;
+}
+body > div.content input {
+  display: block;
+  background-color: #ffffff;
+  width: 60%;
+  margin: 0 auto;
+  padding: 10px;
+  text-align: center;
+  font-size: 18px;
+  border-radius: 99px;
+}
+body > div.content button.button {
+  display: block;
+  font-size: 18px;
+  color: gray;
+  border-radius: 99px;
+  border: 2px solid gray;
+  background-color: transparent;
+  margin: 1em auto;
+  padding: 7px 20px;
+}
+body > div.content button.check {
+  display: block;
+  font-size: 18px;
+  color: #ef2b51;
+  border-radius: 99px;
+  border: 2px solid #ef2b51;
+  background-color: transparent;
+  margin: 1em auto;
+  padding: 7px 20px;
+}
+body > div.content footer p {
+  font-size: 14px;
+  margin: 0;
+}
+body > div.content footer p.indent5 {
+  text-indent: -5em;
+  margin-left: 5em;
+}
+body > div.content footer p.indent7 {
+  text-indent: -7em;
+  margin-left: 7em;
+}
+
+.applyAns {
+  background-color: rgba(255, 255, 255, 0.65);
+  border-radius: 20px;
+  margin: 0 0.5em;
+  padding: 1em 2em;
+}
+.applyAns p.title {
+  font-size: 18px;
+  text-align: center;
+  margin: 0;
+}
+.applyAns > div img {
+  width: 40px;
+  float: left;
+  background-color: #e5f2f7;
+  border-radius: 99px;
+  position: relative;
+  top: 10px;
+  z-index: 10;
+}
+.applyAns > div > div {
+  position: relative;
+  margin-left: 1em;
+  padding: 10px 0 10px 3em;
+  border-left: 3px solid #bfbfbf;
+}
+.applyAns > div > div .triangle {
+  position: absolute;
+  left: 1.5em;
+  top: 15px;
+  bottom: 5px;
+  width: 0px;
+  height: 0px;
+  border-width: 15px;
+  border-style: solid;
+  border-color: transparent #ffffff transparent transparent;
+}
+.applyAns > div > div p {
+  margin: 0;
+  text-align: center;
+  font-size: 20px;
+  line-height: 48px;
+  background-color: #ffffff;
+  border-radius: 3px;
+}
+.applyAns > div > div .slider {
+  width: 4px;
+  border-radius: 99px;
+  position: absolute;
+  right: 0;
+  top: 10px;
+  bottom: 10px;
+}
+.applyAns > div.success .slider {
+  background-color: #35bc7b;
+}
+.applyAns > div.error .slider {
+  background-color: #ea546a;
+}
+
+.popup {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+.popup .content {
+  background-color: #ffffff;
+  position: absolute;
+  top: 5%;
+  left: 5%;
+  right: 5%;
+  border-radius: 20px;
+  padding: 1.5em;
+}
+.popup .content p.title {
+  font-size: 18px;
+  text-align: center;
+  margin-bottom: 1.5em;
+}
+.popup .content table {
+  border: 1px solid #ffffff;
+}
+.popup .content table td {
+  border: 1px dotted #cccccc;
+  padding: 10px;
+  min-width: 6em;
+}
+
+/*# sourceMappingURL=mobile.css.map */

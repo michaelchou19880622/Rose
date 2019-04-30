@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width,initial-sale=1" />
+    
+    <!-- CSRF token -->
+	 <!--<meta name="_csrf" th:content="${_csrf.token}"/>-->
+	<!-- default header name is X-CSRF-TOKEN -->
+	 <!--<meta name="_csrf_header" th:content="${_csrf.headerName}"/>-->
+    
+    <link href="../Mobile/Content/style.css" type="text/css" rel="stylesheet" />
+	<script type='text/javascript' src='../webjars/jquery/2.2.3/jquery.min.js'></script>
+	<script src="../Mobile/JS/lib/loadingoverlay.min.js"></script>
+	<script type='text/javascript' src='../Mobile/JS/core.js'></script>
+	<script type='text/javascript' src='../Mobile/JS/ScratchCardIndexPage.base.js'></script>
+    <title>刮刮卡</title>
+	<style>
+        .sratchCard-bg {
+		  width: 650px;
+		  height: 600px;
+		  margin: 0 0;
+		  position: relative;
+		}
+		.sratchCard-bg canvas {
+		  /* border: 1px solid gray; */
+		  cursor: crosshair;
+		  cursor: url(images/cursor.png) 15 15, crosshair;
+		  width: 450px;
+		  height: 450px;
+		  position: absolute;
+		  left: 99px;
+		  top: 60px;
+		}
+		.prizedetail {
+		  width: 650px;
+		  height: 600px;
+		  margin: 0 0;
+		  position: relative;
+		}
+		.prizedetail img {
+<<<<<<< HEAD
+		  /* border: 1px solid gray; */
+=======
+>>>>>>> master
+		  cursor: crosshair;
+		  cursor: url(images/cursor.png) 15 15, crosshair;
+		  width: 452px;
+		  height: 452px;
+		  position: absolute;
+		  left: 99px;
+		  top: 60px;
+		}
+		.show{
+		    display:block;   
+		}
+		.startGameButton {
+			position: absolute;
+			top: 712px;
+			width: 650px;
+		}
+		.startGameButton img {
+			position: absolute;
+			left: 98px;
+		}
+	</style>
+</head>
+<body>
+	<div class="headerImage" style="width:650px; height:648px"><img width="650" height="650"/></div>
+	
+    <div class="sratchCard-bg"> 
+  		<canvas id="scratcher1" class="demo-canvas shadow1light" width="450" height="450"></canvas>
+	</div>
+    
+    <div class="hidden" id="lamebrowser" style="display:none;">您的瀏覽器不支援</div>
+    
+    <div class="prizedetail" style="width:650; height:600; display:none;"><img id="prizeImage" width="450" height="450" style="cursor:pointer"/></div>
+    
+    <div class="footerImage" style="width:650px; height:3001px; margin-top: -1px"><img/></div>
+    
+    <div class="startGameButton">
+    	<img id="startGameButtonImage" width="452" height="452">
+    </div>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Report Page Visit Page', '/BCS/JS/page22.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page22')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">頁面訪問 成效列表</h3>
+                    </header>
+                    <div class="CHBtnSet">
+                        <div class="CHRight">
+                        </div>
+                    </div>
+                    <div class="mainFrame">
+                        <table border="1" id="tableBody">
+                            <colgroup><col width="180"><col width="150"><col width="100"><col width="100"></colgroup>
+                            <tr class="tableHeader">
+                                <th>頁面名稱</th>
+                                <th>頁面連結</th>
+                                <th>點擊次數</th>
+                                <th>點擊人數</th>
+                            </tr>
+                            <tr class="dataTemplate">
+                                <td class="pageTitle"><a href=""></a></td>
+                                <td class="pageUrl"></td>
+                                <td class="totalCount"><a></a></td>
+                                <td class="userCount"><a></a></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

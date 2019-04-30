@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"  th:with="strList = ${ {'/BCS/JS/MsgFragment/MsgFragment.js',  '/BCS/JS/page18.base.js'} }" >
+<head th:replace="/BCS/Views/Common/Head :: head ('Black Keyword Response Create Page', ${strList})" >
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page17')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formSendGroup">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">黑名單關鍵字</h3>
+                        <p class="CHDesc">設定用戶在聊天室輸入特定關鍵字時忽略傳送的訊息。</p>
+                    </header>
+                    <div class="CHBtnSet">
+                        <div class="CHLeft">
+                            <ul>
+                                <li class="CHLeftBtn"><input type="button" class="CancelBtn" value="取消" style="cursor: pointer;"></li>
+                            </ul>
+                        </div>
+                        <div class="CHRight"><input class="btn_add" type="button" value="設定" style="cursor: pointer;"></div>
+                    </div>
+                    <div class="mainFrame CMsg">
+						<input class="interactiveStatus" type="hidden" value="DISABLE">
+                        <table border="1">
+                            <colgroup><col width="190"><col></colgroup>
+                            <tbody >
+                                <tr>
+                                    <th>使用者狀態</th>
+                                    <td>
+                                        <div class="option">
+                                            <div class="optionLabel">請選擇</div>
+                                            <select class="optionSelect userStatus" name="userStatus">
+                                                <option value="">請選擇</option>
+                                                <option value="ALL">全部</option>
+                                                <option value="UNBIND">一般</option>
+                                                <option value="BINDED">已串聯</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>代表關鍵字</th>
+                                    <td>
+                                        <div class="MdFRM01Input"><input type="text" placeholder="" maxlength="30" id="keywordInput" name="keywordInput"></div>&nbsp; <span class="MdTxtInputCount">0/30</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>追加關鍵字</th>
+                                    <td>
+                                    	<div class="dataTemplate">
+	                                        <div class="MdFRM01Input"  style="margin-bottom: 10px;">
+	                                        	<input class="otherKeyword" type="text" placeholder="" maxlength="30">
+	                                        </div>
+											<div class="btn_delete" style="cursor: pointer;display: inline-block;"></div>
+                                        </div>
+                                    	<input type="button" value="追加關鍵字" class="addKeyword showMdFRM01Input" style="cursor: pointer;"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+					</div>
+                </section>
+                <div class="BtnSet">
+                    <div>
+                        <input class="btn_save" type="button" value="設定" style="cursor: pointer;">
+                        <input class="btn_cancel" type="button" value="取消" style="cursor: pointer;">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

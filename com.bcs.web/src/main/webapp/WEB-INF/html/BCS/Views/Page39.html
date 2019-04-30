@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Business Group List Page', '/BCS/JS/page39.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page39')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">通路群組列表</h3>
+                    </header>
+                    <div class="CHBtnSet">
+                        <div class="CHRight"><input class="btn_add" style="cursor: pointer;" type="button" value="建立通路群組"></div>
+                    </div>
+                    <div class="mainFrame">
+                        <table border="1" id="tableBody">
+                            <colgroup><col width="180"><col width="150"><col width="100"><col width="100"><col width="130"></colgroup>
+                            <tr class="tableHeader">
+                                <th>通路群組名稱</th>
+                                <th>修改日期</th>
+                                <th>建立人員</th>
+                                <th>刪除</th>
+                            </tr>
+                            <tr class="dataTemplate">
+                                <td class="groupName"><a href=""></a></td>
+                                <td class="modifyTime"></td>
+                                <td class="modifyUser"></td>
+                                <td>
+                                    <input class="btn_detele" style="cursor: pointer;" type="button" value="刪除">
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

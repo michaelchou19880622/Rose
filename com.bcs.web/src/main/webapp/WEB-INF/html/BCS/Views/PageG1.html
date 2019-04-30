@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"  
+      th:with="strList = ${ {'/BCS/JS/pageG1.base.js'} }">
+<head th:replace="/BCS/Views/Common/Head :: head ('Game Create Page', ${strList})">
+</head>
+<body>
+
+<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+    	<div th:replace="/BCS/Views/Common/Menu :: menu ('PageG1')"></div>
+    	
+		<!-- Right Content -->
+    	<div class="LyMain" role="main">
+         	<form>
+    			<section>
+    				<header class="ContentHead">
+                    	<input name="cancel" class="btn_cancel" type="button" value="返回" style="float: right; cursor: pointer;">
+                        <h3 class="CHTtl">建立遊戲</h3>
+                        <!-- <p class="CHDesc">您可以利。</p> -->
+                    </header>
+                    <div class="mainFrame">
+                    	<!-- <div class="typeMenu">
+                            <div class="mdFRM05Img">
+                            	<img id="turntable_option" th:src="@{/BCS/images/turntableExample.png}"style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Input">
+                                <div><a href="../../bcs/edit/gameCreatePage/turntable">轉盤抽獎</a></div>
+                            </div>
+                        </div> -->
+                        
+                        <div class="typeMenu">
+                            <div class="mdFRM05Img">
+                                <img id="scratchCard_option" th:src="@{/BCS/images/scratchCardExample.JPG}" style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Input">
+                                <div><a href="../../bcs/edit/gameCreatePage/scratchCard">刮刮樂</a></div>
+                            </div>
+                        </div>
+                        
+                    </div>
+    			</section>
+    		</form>
+		</div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"  th:with="strList = ${ {'/BCS/JS/lib/vis.min.js', '/BCS/JS/MsgFragment/MsgList.base.js', '/BCS/JS/page14-2.base.js'} }" >
+<head th:replace="/BCS/Views/Common/Head :: head ('Keyword Response Page', ${strList})" >
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page14')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">關鍵字回應 已過期</h3>
+                        <p class="CHDesc">設定用戶在聊天室輸入特定關鍵字時自動傳送的訊息。</p>
+                    </header>
+                    <div class="CHBtnSet">
+                        <div style="float:left">
+                            <span>生效日期：</span>
+                            <div class="option date">
+                                <input type="text" 
+                                    class="datepicker" 
+                                    id="pushDate" 
+                                    placeholder="YYYY-MM-DD"/>
+                            </div>
+                            
+                            <input class="searchInput" type="text" placeholder="請輸入關鍵字(選填)" maxlength="30" id="keywordInput" name="keywordInput">
+                            <input class="btn_save query" type="button" value="清空查詢"  style="cursor: pointer;">
+                        </div>
+                    </div>
+                    <div class="CHBtnSet">
+                        <div class="CHLeft">
+                            <div class="option">
+                                <div class="optionLabel">請選擇</div>
+                                <select id="keywordSelector" class="optionSelect" name="">
+                                    <option value="ActiveBtn">生效</option>
+                                    <option value="DisableBtn">取消</option>
+                                    <option value="ExpireBtn" selected>已過期</option>
+                                    <option value="IneffectiveBtn">未生效</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="CHRight"><input class="btn_upload_keywords" style="cursor: pointer;" type="button" value="匯入關鍵字清單">&nbsp;<input class="btn_add" type="button" value="建立回應" style="cursor: pointer;"></div>
+                        <input accept="application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"  id="upload_keywords" name="file" type="file" style="display:none">
+                    </div>
+                        <div class="mainFrame">
+                        <table border="1" id="tableBody">
+                                <colgroup><col width="100"><col width="60"><col width="120"><col width="80"><col width="100"><col width="50"><col width="70"><col width="90"><col width="80"><col width="80"></colgroup>
+                                <tr>
+                                    <th>關鍵字</th>
+                                    <th>使用者</th>
+                                    <th>生效時間</th>
+                                    <th>設定</th>
+                                    <th>訊息內容</th>
+                                    <th>狀態</th>
+									<th>回覆數量</th>
+                                    <th>存檔時間</th>
+                                    <th>建立人員</th>
+                                    <th>複製/刪除</th>
+                                </tr>
+	                            <tr class="dataTemplate">
+	                                <td class="mainKeyword"><a href=""></a></td>
+	                                <td class="userStatus"></td>
+	                                <td class="timeType"></td>
+	                                <td class="otherRole"></td>
+	                                <td class="msgContent"></td>
+	                                <td class="interactiveStatus">
+	                                	<span style="font-weight: bold;font-size: 16px;"></span>
+	                                	<br/>
+	                                	<br/>
+	                                    <input class="btn_redeisgn" type="button" value="生效" style="cursor: pointer;">
+	                                </td>
+	                                <td class="sendCount"><a href=""></a></td>
+	                                <td class="modifyTime"></td>
+	                                <td class="modifyUser"></td>
+	                                <td>
+	                                    <input class="btn_copy" type="button" value="複製" style="cursor: pointer;">
+	                                    <input class="btn_detele" type="button" value="刪除" style="cursor: pointer;">
+	                                </td>
+	                            </tr>
+                            </table>
+                        </div>
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

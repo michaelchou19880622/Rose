@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"  th:with="strList = ${ {'/BCS/JS/MsgFragment/MsgList.base.js', '/BCS/JS/page37.base.js'} }" >
+<head th:replace="/BCS/Views/Common/Head :: head ('Campaign User Page', ${strList})" >
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page37')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">活動發票清單</h3>
+                        <p class="CHDesc">關鍵字活動中已領獎的發票名單</p>
+                    </header>
+                    <div class="CHBtnSet">
+                        <div style="float:left">
+                            <span>日期區間：</span>
+                            <div class="option date">
+                                <input type="text" 
+                                    class="datepicker" 
+                                    id="startDate" 
+                                    placeholder="YYYY-MM-DD"/>
+                            </div>
+                            <span>~</span>
+                            <div class="option date">
+                                <input type="text" 
+                                    class="datepicker" 
+                                    id="endDate" 
+                                    placeholder="YYYY-MM-DD"/>
+                            </div>
+                            <input class="btn_save query" type="button" value="查詢"  style="cursor: pointer;">
+                        </div>
+                        <div class="CHRight">
+                            <input class="btn_add exportToExcel" type="button" value="匯出EXCEL"  style="cursor: pointer;">
+                            <iframe id="download" style='display:none' ></iframe>
+                        </div>
+                    </div>
+                    <div class="mainFrame">
+                    <table border="1" id="tableBody">
+                            <colgroup>
+                            	<col width="70">
+                            	<col width="70">
+                            	<col width="100">
+                            	<col width="100">
+                                <col width="100">
+                                <col width="100">
+                            	<col width="50">
+                            </colgroup>
+                            <tr>
+                                <th>姓名</th>
+                                <th>電話</th>
+                                <th>地址</th>
+                                <th>獎品</th>
+                                <th>發票</th>
+                                <th>發票狀態</th>
+                                <th>活動時間</th>
+                            </tr>
+                            <tr class="dataTemplate">
+                                <td class="userName"></td>
+                                <td class="mobile"></td>
+                                <td class="address"></td>
+                                <td class="prizeName"></td>
+                                <td>
+                                	<div class="invNum"></div>
+                                	<input class="btn_detail" type="button" value="發票照片" style="cursor: pointer;" alt-resource-id='' >
+                                </td>
+                                <td class="invStatus"></td>
+                                <td class="modifyTime"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </section>
+            </form>
+        </div>
+        <div id="detailDialog" title="發票照片" style="display: none;">
+     		<div class="mainFrame"></div>
+    	</div>
+    </div>
+</body>
+
+</html>

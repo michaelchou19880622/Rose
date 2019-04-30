@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Upload Line User Page', '/BCS/JS/page98.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page98')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formUploadLineUser">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">上傳使用者資料</h3>
+                        <p class="CHDesc"></p>
+                    </header>
+                    <div class="mainFrame alignLeft">
+                        <table border="1">
+                            <colgroup><col width="190"><col></colgroup>
+                            <tbody >
+                                <tr>
+                                    <th>資料檔案</th>
+                                    <td>
+                                        <input accept="application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, text/plain, .csv"  id="uploadLineUserCSVFile" name="uploadLineUserCSVFile" type="file" style="display:none">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </section>
+                <div class="BtnSet">
+                    <div>
+                        <input class="btn_add btn_upload_CSV" style="cursor: pointer;" type="button" value="CSV資料上傳">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=640, target-densitydpi=device-dpi, maximum-scale=2.0, user-scalable=yes" />
+		
+		<title>優惠券</title>
+		<link href="../Mobile/Coupon/css/normalize.css" rel="stylesheet" type="text/css">
+		<link href="../Mobile/Coupon/css/style.css" rel="stylesheet" type="text/css">
+		<script src="../Mobile/Coupon/js/jquery-1.11.3.min.js"></script>
+		<script src="../Mobile/Coupon/js/jquery-migrate-1.2.1.min.js"></script>
+		<script src="../Mobile/Coupon/js/function.js"></script>
+		<!--[if lt IE 9]>
+		<script src="../Mobile/Coupon/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+		<div class="wrapper">
+		 	<div class="kv">
+		        <img src="../Mobile/Coupon/images/kv.png" style="width: 100%;">
+		    </div>
+		    <div th:if="${errorMessage=='couponUse'}">
+		   	 	<section class="coupon_copywriter">
+		   	 		<h1 class="title"><span style="word-wrap: break-word;" th:text="${contentCoupon.couponTitle}">優惠券</span></h1>
+			     	<ul class="redeem">
+						<li class="sn" th:if="${!#strings.isEmpty(couponSerialNumber)}"  style="font-size: 1.8em;" >
+							優惠券序號：<span th:text="${couponSerialNumber}"></span>
+						</li>
+	           			<li class="date"  style="font-size: 1.7em; line-height:1.1em" >
+	           				<div style="height:.5em" ></div>
+	           				使用效期開始：
+	           				<span th:text="${#dates.format(couponStartUsingTime, 'yyyy/MM/dd HH:mm')} + '~' "></span><br>
+	           				　　　　結束：
+	           				<span th:text="${#dates.format(couponEndUsingTime, 'yyyy/MM/dd HH:mm')}"></span>
+	           			</li>
+			        </ul>
+		    	</section>
+		    </div>
+			<div th:switch="${errorMessage}" class="coupon_alert">
+				<strong th:case="'couponStoreError'">此優惠券<br/>限制使用</strong>
+				<strong th:case="'couponGroupError'">此優惠券<br/>限制使用</strong>
+				<strong th:case="'couponPrivateError'">此優惠券<br/>限制使用</strong>
+				<strong th:case="'unlimited'">此優惠券不限制使用</strong>
+				<strong th:case="'couponUse'">此優惠券已使用</strong>
+				<strong th:case="'getLimitNumberError'">優惠劵已被領完</strong>
+				<strong th:case="'getTimeError'">此優惠劵<br/>不在有效領取期限內<br/>不能領取</strong>
+				<strong th:case="'useTimeError'">此優惠券<br/>不在有效使用期限內<br/>無法使用</strong>
+				<strong th:case="showMessage"><span th:text="${showMessage}"></span></strong>
+				<strong th:case="*">錯誤發生<br/>請洽服務人員</strong>
+			</div>
+		</div>
+		<pre  style="white-space: pre-wrap;visibility: hidden;font-size: xx-small;">----------------------------------------------------------------------------------------------------------------------------------</pre>
+	</body>
+
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"  
+      th:with="strList = ${ {'/BCS/JS/MsgFragment/RichMsgPreviewContent.js', '/BCS/JS/MsgFragment/PreviewDialog.js', '/BCS/JS/page6.base.js'} }">
+<head th:replace="/BCS/Views/Common/Head :: head ('Rich Msg Create Page', ${strList})" >
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+    	<div th:replace="/BCS/Views/Common/Menu :: menu ('Page6')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                    	<input name="cancel" class="btn_cancel" type="button" value="返回" style="float: right; cursor: pointer;">
+                        <h3 class="CHTtl">建立圖文訊息</h3>
+                        <p class="CHDesc">您可以利用圖片傳送具有視覺效果訊息。</p>
+                    </header>
+                    <div class="mainFrame alignCenter">
+                        <div class="typeMenu">
+                            <div class="mdFRM05Img">
+                                <img th:src="@{/BCS/images/type_richmenu_01.png}" alt="Type1" style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Input">
+                                <input type="radio" name="templateFrameType" value="01"  style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Label">
+                                <a target="_blank" href="https://static.line.naver.jp/line_official_v2/img/MdFRM/type_1_guide_l.png">編排方式</a>
+                            </div>
+                        </div>
+                        <div class="typeMenu">
+                            <div class="mdFRM05Img">
+                                <img th:src="@{/BCS/images/type_richmenu_02.png}" alt="Type2" style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Input">
+                                <input type="radio" name="templateFrameType" value="02" style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Label">
+                                <a target="_blank" href="https://static.line.naver.jp/line_official_v2/img/MdFRM/type_2_guide_l.png">編排方式</a>
+                            </div>
+                        </div>
+                        <div class="typeMenu">
+                            <div class="mdFRM05Img">
+                                <img th:src="@{/BCS/images/type_richmenu_03.png}" alt="Type3" style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Input">
+                                <input type="radio" name="templateFrameType" value="03" style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Label">
+                                <a target="_blank" href="https://static.line.naver.jp/line_official_v2/img/MdFRM/type_3_guide_l.png">編排方式</a>
+                            </div>
+                        </div>
+                        <div class="typeMenu">
+                            <div class="mdFRM05Img">
+                                <img th:src="@{/BCS/images/type_richmenu_04.png}" alt="Type4" style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Input">
+                                <input type="radio" name="templateFrameType" value="04" style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Label">
+                                <a target="_blank" href="https://static.line.naver.jp/line_official_v2/img/MdFRM/type_4_guide_l.png">編排方式</a>
+                            </div>
+                        </div>
+                        <div class="typeMenu">
+                            <div class="mdFRM05Img">
+                                <img th:src="@{/BCS/images/type_richmenu_05.png}" alt="Type5" style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Input">
+                                <input type="radio" name="templateFrameType" value="05" style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Label">
+                                <a target="_blank" href="https://static.line.naver.jp/line_official_v2/img/MdFRM/type_5_guide_l.png">編排方式</a>
+                            </div>
+                        </div>
+                        <div class="typeMenu">
+                            <div class="mdFRM05Img">
+                                <img th:src="@{/BCS/images/type_richmenu_06.png}" alt="Type6" style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Input">
+                                <input type="radio" name="templateFrameType" value="06" style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Label">
+                                <a target="_blank" href="https://static.line.naver.jp/line_official_v2/img/MdFRM/type_6_guide_l.png">編排方式</a>
+                            </div>
+                        </div>
+                        <div class="typeMenu">
+                            <div class="mdFRM05Img">
+                                <img th:src="@{/BCS/images/type_richmenu_07.png}" alt="Type7" style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Input">
+                                <input type="radio" name="templateFrameType" value="07" style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Label">
+                                <a target="_blank" href="https://static.line.naver.jp/line_official_v2/img/MdFRM/type_7_guide_l.png">編排方式</a>
+                            </div>
+                        </div>
+                        <div class="typeMenu">
+                            <div class="mdFRM05Img">
+                                <img th:src="@{/BCS/images/type_richmenu_08.png}" alt="Type8" style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Input">
+                                <input type="radio" name="templateFrameType" value="08" style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Label">
+                                <a target="_blank" href="https://static.line.naver.jp/line_official_v2/img/MdFRM/type_8_guide_l.png">編排方式</a>
+                            </div>
+                        </div>
+                        <div class="typeMenu">
+                            <div class="mdFRM05Img">
+                                <img th:src="@{/BCS/images/type_richmenu_09.png}" alt="Type9" style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Input">
+                                <input type="radio" name="templateFrameType" value="09" style="cursor: pointer;">
+                            </div>
+                            <div class="mdFRM05Label"><br/></div>
+                        </div>
+                    </div>
+                </section>
+            </form>
+            <form id="ContentValidateForm">
+                <section>
+                    <header class="ContentHead">
+                   		<div id="customizeTypeBtn" style="float: right">
+	                        <input id="showCustomizeDialog" class="btn_save" type="button" value="設定連結區塊" style="cursor: pointer;">
+	                        <input id="addUrl" class="btn_save" type="button" value="增加連結" style="cursor: pointer;">
+	                        <input id="removeUrl" class="btn_cancel" type="button" value="刪除連結" style="cursor: pointer;">
+                        </div>
+                        <h3 class="CHTtl">設定背景圖像和連結</h3>
+                        <p class="CHDesc">請上傳您製作的背景圖像，並設定該圖像的連結。</p>
+                    </header>
+                    <div class="mainFrame alignLeft">
+                        <table id="richMsgTable">
+                            <colgroup><col width="120"><col></colgroup>
+                            <tr>
+                                <th>訊息標題<span style="color: red">*</span></th>
+                                <td colspan="2">
+	                                <div class="MdFRM01Input">
+	                                	<input type="text" placeholder="" maxlength="100" id="richMsgTitle" name="richMsgTitle">
+	                                </div>&nbsp; 
+	                                <span class="MdTxtInputCount ng-binding">0/100</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>背景圖像<span style="color: red">*</span></th>
+                                <td colspan="2">
+                                    <div class="MdFRM03File">
+                                    	<input type="hidden" class="imgId">
+                                        <div class="mdFRM03Img">
+                                        	<img src="" style="height: 100%;">
+                                        </div>
+                                        <div class="MdBtnUpload">
+                                            <span class="mdBtnUploadTxt">上傳</span>
+                                            <input accept="image/jpeg, image/png" class="mdBtnUploadInput" name="titleImage" type="file"  id="titleImage">
+                                        </div>
+                                        <p class="MdTxtNotice01">上傳一張依據設計指南所製作的圖片。可支援的規格為1040(固定) x 2080(最大)向量，可支援檔案格式為jpg, png。</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                            	<th rowspan="2" id="richMsgUrlTh">
+                                </th>
+                            </tr>
+                            <tr class="richMsgUrlPageTr">
+                                <td rowspan="2" width="1" style="text-align:center">
+                                    <span class="typeSideTxt">A</span><br/>
+                                    <label class="MdFRM02Check">
+                                        <input type="radio" name="actionType" class="actionType" value="web" >連結
+                                    </label>
+                                    <label class="MdFRM02Check">
+                                        <input type="radio" name="actionType" class="actionType" value="sendMessage" >文字
+                                    </label>
+                                </td>
+                                <td class="sendMessageTd" rowspan="2" style="display:none">
+                                    <p>文字訊息<span style="color: red">*</span></p>
+                                    <div class="MdFRM01Input">
+                                        <input type="text" maxlength="700">
+                                    </div>
+                                </td>
+                                <td class="webTd">
+                                    <p>URL<span style="color: red">*</span></p>
+                                    <div class="MdFRM01Input">
+                                        <input type="text" class="richMsgUrl" maxlength="700">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="richMsgUrlTxtTr">
+                                <td class="linkInput">
+                                    <p>連結文字</p>
+                                    <div class="MdFRM01Input">
+                                        <input type="text" maxlength="100" class="richMsgLinkTxt">
+                                    </div>&nbsp;
+                                    <span class="MdTxtInputCount">0/100</span>
+									&nbsp;註記
+                                    <div style="float: right; width: 35%;">
+										<input type="text" class="tagInput" id="linkTag" value=""/>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </section>
+            </form>
+            <div class="BtnSet">
+                <div>
+                    <input class="btn_query previewImg" type="button" value="圖片預覽" style="cursor: pointer;">
+                    <input class="btn_query previewTxt" type="button" value="文字預覽" style="cursor: pointer;">
+                    <input id="save" class="btn_save" type="button" value="儲存" style="cursor: pointer;">
+                    <input name="cancel" class="btn_cancel" type="button" value="取消" style="cursor: pointer;">
+                </div>
+            </div>
+            <div id="urlDialog" title="選擇連結">
+				<div id="urlSelection">
+					<table id="urlDialogTable">
+						<tr>
+							<th><span>連結</span></th>
+						</tr>
+						<tr class="urlDialogTr">
+							<td><span class="urls"></span></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div id="previewDialog">
+			</div>
+			<div id="customizeDialog" title="連結區塊設定">
+				<div id="customizeFrameTypeLimit">
+					<div id="customizeImg"></div>
+				</div>
+				<input id="savePosition" class="btn_save" type="button" value="確認"/>
+			</div>
+        </div>
+    </div>
+</body>
+
+</html>

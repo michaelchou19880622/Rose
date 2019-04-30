@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"  th:with="strList = ${ {'/BCS/JS/MsgFragment/MsgList.base.js', '/BCS/JS/page4-4.base.js'} }" >
+<head th:replace="/BCS/Views/Common/Head :: head ('Msg List Schedule Page', ${strList})" >
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page4-1')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">訊息列表</h3>
+                    </header>
+
+                    <div class="CHBtnSet">
+                        <div class="CHLeft">
+                            <ul>
+                                <li class="CHLeftBtn"><input class="DraftBtn" type="button" value="草稿" style="cursor: pointer;"></li>
+                                <li class="CHLeftBtn"><input class="DelayBtn" type="button" value="預約傳送" style="cursor: pointer;"></li>
+                                <li class="CHLeftBtn"><input class="SendedBtn" type="button" value="已傳送" style="cursor: pointer;"></li>
+                                <li class="CHLeftBtn ExSelected"><input class="ScheduleBtn" type="button" value="排程傳送" style="cursor: pointer;"></li>
+                            </ul>
+                        </div>
+                        <div class="CHRight"><input class="btn_add" type="button" value="建立訊息" style="cursor: pointer;"></div>
+                    </div>
+
+                    <div class="mainFrame">
+                        <table border="1" id="tableBody">
+                            <colgroup>
+                            	<col width="200">
+                            	<col width="100">
+                            	<col width="100">
+                            	<col width="130">
+                            	<col width="80">
+                            	<col width="80">
+                            </colgroup>
+                            <tr>
+                                <th>訊息內容</th>
+                                <th>訊息設定</th>
+                                <th>排程時間</th>
+                                <th>發送群組</th>
+                                <th>發送人員</th>
+                                <th>複製/重設</th>
+                            </tr>
+                            <tr class="dataTemplate">
+                                <td class="msgContent"><a href=""></a></td>
+                                <td class="msgType"></td>
+                                <td class="scheduleTime"></td>
+                                <td class="sendGroup"></td>
+                                <td class="modifyUser"></td>
+                                <td>
+                                    <input class="btn_copy" type="button" value="複製" style="cursor: pointer;">
+                                    <input class="btn_redeisgn" type="button" value="重設" style="cursor: pointer;">
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

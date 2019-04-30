@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width,initial-sale=1" />
+
+<!-- default header name is X-CSRF-TOKEN -->
+
+
+<link href="../Mobile/Content/style.css" type="text/css"
+	rel="stylesheet" />
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<!-- <script type='text/javascript' src='../webjars/jquery/2.2.3/jquery.min.js'></script> -->
+<script src="../Mobile/JS/lib/jquery-3_2_1.min.js"></script>
+<script src="../Mobile/JS/lib/loadingoverlay.min.js"></script>
+<script type='text/javascript' src='../Mobile/JS/core.js'></script>
+<script type='text/javascript'
+	src='../Mobile/JS/AcceptPrizePage.base.js'></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
+
+<title>獲獎頁面</title>
+<style type="text/css">
+input:not ([type="image" i] ), select {
+	box-sizing: border-box;
+	font-size: 12pt;
+}
+
+fieldset {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	vertical-align: baseline;
+}
+
+fieldset input {
+	display: block;
+	box-shadow: inset 0 1px 10px rgba(0, 0, 0, 0);
+	padding: 10px 10px;
+}
+
+fieldset select {
+	display: inline-block;
+	width: 97%;
+	color: #555;
+	text-align: center;
+	border-radius: 0 !important;
+	border: 1px solid #0082bb;
+	border-right: 1px solid #0082bb;
+	padding: 10px 0px !important;
+	margin: 7px 0px;
+}
+
+.form_field {
+	width: 97%;
+	border: 5px solid #0082bb;
+	border-radius: 4px;
+	color: #555;
+	margin: 7px 0;
+}
+
+.checkbox {
+	margin: 10px;
+	max-width: 42%;
+}
+
+#main {
+	font-size: 12pt;
+	background-image: url(../Mobile/images/AcceptPrizePage_background.jpg);
+	background-repeat: repeat-y;
+	background-size: 100%;
+}
+
+.grid {
+	max-width: 750px;
+	margin: 0 auto -10px;
+	position: relative;
+}
+</style>
+</head>
+<body>
+	<input id="gameId" type="hidden" th:value="${gameId}">
+	<div class="prizeImageShow grid">
+		<img />
+	</div>
+	<div class="gridContainer grid clearfix">
+		<hr>
+		<div class="container">
+			<h2>領獎資訊</h2>
+			<p>請填寫詳細資訊以成功兌換獎項</p>
+			<form>
+				<div class="form-group">
+					<label for="usr">姓名：</label> <input type="text"
+						class="form-control" id="winner_name" placeholder="請輸入...">
+				</div>
+				<div class="form-group">
+					<label for="pwd">身分證字號:</label> <input type="text"
+						class="form-control" id="winner_id_card" placeholder="請輸入...">
+				</div>
+				<div class="form-group">
+					<label for="pwd">電話:</label> <input type="text"
+						class="form-control" id="winner_phone" placeholder="請輸入...">
+				</div>
+				<div class="form-group">
+					<label for="pwd">地址:</label> <input type="text"
+						class="form-control" id="winner_address" placeholder="請輸入...">
+				</div>
+				<div class="text-center">
+					<button type="button" class="btn btn-primary btn-md" id="confirm"
+						style="text-align: center;">送出</button>
+				</div>
+			</form>
+		</div>
+		<hr>
+	</div>
+	</div>
+</body>
+</html>

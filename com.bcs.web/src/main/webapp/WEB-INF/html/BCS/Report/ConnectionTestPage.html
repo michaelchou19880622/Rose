@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	th:with="strList = ${ {'/BCS/JS/MsgFragment/PreviewDialog.js', '/BCS/JS/Report/connectionTestPage.base.js'} }">
+<head
+	th:replace="/BCS/Views/Common/Head :: head ('Coupon Create Page', ${strList})">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+	<div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page0')"></div>
+
+		<!-- Right Content -->
+		<div class="LyMain" role="main">
+			<form id="formContentCoupon">
+				<section>
+					<header class="ContentHead">
+						<h3 class="CHTtl">連線測試</h3>
+					</header>
+
+					<div class="CHBtnSet">
+						<div class="CHRight">
+							<input class="btn_add" type="button" value="Send"
+								style="cursor: pointer;">
+						</div>
+					</div>
+
+					<div class="mainFrame CMsg Pre">
+						<table border="1">
+							<colgroup>
+								<col width="190">
+								<col>
+							</colgroup>
+							<tbody>
+								<tr>
+									<th>Target URL</th>
+									<td>
+										<div class="MdFRM01Input">
+											<input type="text" id="targetURL" name="targetURL"
+												placeholder="請輸入目標網址" maxlength="512">
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<th>Request Method</th>
+									<td>
+										<div class="mdFRM05Inline">
+											<ul>
+												<li><label> <input id="requestMethod"
+														type="radio" name="requestMethod" value="get"
+														checked="checked">GET
+												</label></li>
+												<li><label> <input id="requestMethod"
+														type="radio" name="requestMethod" value="post">POST
+												</label></li>
+											</ul>
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<th>Use Proxy</th>
+									<td>
+										<div class="mdFRM05Inline">
+											<ul>
+												<li><label> <input id="useProxy" type="radio"
+														name="useProxy" value="1">Yes
+												</label></li>
+												<li><label> <input id="useProxy" type="radio"
+														name="useProxy" value="0" checked="checked">No
+												</label></li>
+											</ul>
+										</div>
+									</td>
+								</tr>
+								<tr id="proxySettings" style="display: none;">
+									<th>Proxy Settings</th>
+									<td>
+										<div class="MdFRM01Input">
+											<input type="text" id="proxyURL" name="proxyURL"
+												placeholder="請輸入Proxy Server Host" maxlength="100">
+										</div>
+										<div class="MdFRM01Input">
+											<input type="text" id="proxyPort" name="proxyPort"
+												placeholder="請輸入Proxy Server Port" maxlength="10">
+										</div>
+									</td>
+								</tr>
+								<tr id="requestBodyRow" style="display: none;">
+									<th>Request body</th>
+									<td>
+										<div class="TInput">
+											<textarea id="requestBody" name="requestBody" cols="80"
+												rows="10" placeholder="請輸入 JSON 格式的 Request Body"
+												maxlength="1000" class="jqCountString"></textarea>
+										</div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div>
+						<table>
+							<tr>
+								<td>
+									◎ Response status: <span id="statusCode"></span>
+								</td>
+							</tr>
+							<tr>
+								<td><textarea id="responseBody" style="width: 994px; height: 200px;"></textarea>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</section>
+			</form>
+		</div>
+	</div>
+</body>
+
+</html>

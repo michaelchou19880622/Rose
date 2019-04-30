@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,9,10"> 
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   	<meta name="viewport" content="width=device-width,initial-sale=1" />
+    <link href="../BCS/Content/reset.css" type="text/css" rel="stylesheet" />
+    <link href="../BCS/Content/style.css" type="text/css" rel="stylesheet" />
+	<script type='text/javascript' src='../webjars/jquery/2.2.3/jquery.min.js'></script>
+	<script type="text/javascript" src="js/jquery.url.min.js"></script>
+	<script type='text/javascript' th:src="@{${@mvcResourceUrlProvider.getForLookupPath('/BCS/JS/core.js')}}"></script>
+	<script type='text/javascript' th:src='@{/BCS/JS/loginSSOPage.base.js}'></script>
+    <title>Login Page new</title>
+</head>
+
+<body class="loginbg">
+    <!-- <a href="index" ><h1 class="loginLogo" style="background-color: #001d59;"></h1></a> -->
+    <a href="index"><h1 class="loginLogo"></h1></a>
+    <form th:action="@{/login}" method="post">
+        <div class="MdInputTxt01" style="display:none;">
+            <input type="text" id="id" name="tid" class="" placeholder="帳號" />
+        </div>
+        <div class="MdInputTxt01" style="display:none;">
+            <input type="password" id="passwd" name="tpasswd" class="" placeholder="密碼" autocomplete="off">
+        </div>
+
+        <input type="submit" id="login" class="MdBtn03Login" value="登入" style="display:none;">
+
+    </form>
+</body>
+
+</html>

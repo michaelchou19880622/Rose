@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Admin User Create Page', '/BCS/JS/page9.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page9')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formAdminUser">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl" id="fromTitle">建立管理權限者</h3>
+                        <p class="CHDesc">更改權限總管理者。</p>
+                    </header>
+
+                    <div class="mainFrame alignLeft AA">
+                        <table border="1">
+                            <colgroup><col width="200"></colgroup>
+                            <tr>
+                                <th>管理權限</th>
+                                <td>
+                                    <div class="option">
+                                        <div class="optionLabel">請選擇</div>
+                                        <select id="role" name="role" class="optionSelect">
+                                        	<option value="">請選擇</option>
+                                            <option value="ROLE_ADMIN">管理者</option>
+                                            <option value="ROLE_EDIT">編輯人員</option>
+                                            <option value="ROLE_MARKET">行銷人員</option>
+                                        </select>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>管理帳號</th>
+                                <td>
+                                    <div class="MdFRM01Input">
+                                        <input type="text" id="account" name="account" placeholder="Account" maxlength="50">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>帳號名稱</th>
+                                <td>
+                                    <div class="MdFRM01Input">
+                                        <input type="text" id="userName" name="userName" placeholder="UserName" maxlength="50">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>管理密碼</th>
+                                <td>
+                                    <div class="MdFRM01Input">
+                                        <input type="password" id="password" name="password" placeholder="Password" maxlength="50" autocomplete="off">
+                                    </div>
+                                    <div class="MdFRM01Input">
+                                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="ConfirmPassword" maxlength="50" autocomplete="off">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>LINE帳號</th>
+                                <td>
+                                    <div id="noBindLineAccount" class="MdFRM01Input">
+										<input type="text" id="lineAccount" name="lineAccount" placeholder="UID資料" maxlength="50">
+                                    </div>
+                                    <div id="hasBindLineAccount" style="display: none;">
+                                    	已綁訂　　<input class="btn_cancel" type="button" id="cancelBindLineAccount" value="取消綁訂" style="cursor: pointer; padding: 5px 5px;">
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="BtnSet">
+                        <div>
+                            <input class="btn_save" style="cursor: pointer;" type="button" value="儲存">
+                            <input class="btn_cancel" style="cursor: pointer;" id="cancel" type="button" value="取消">
+                        </div>
+                    </div>
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

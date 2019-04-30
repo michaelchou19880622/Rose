@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.springframework.org/security/tags"
+      xmlns:th="http://www.thymeleaf.org"  th:with="strList = ${ {'/BCS/JS/MsgFragment/MsgList.base.js'} }" >
+<head th:replace="/BCS/Views/Common/Head :: head ('Reward Card  QR Code Page', ${strList})" >
+</head>
+
+<body>
+    <div class="LyContents">
+        <div class="LyMain">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">集點卡QR Code</h3>
+                        <p class="CHDesc"></p>
+                    </header>
+                    <div class="mainFrame">
+                        <table border="1" id="tableBody">
+                            <colgroup>
+                            	<col width="150">
+                            	<col width="150">
+                            </colgroup>
+                            <tr>
+                                <th>集點連結</th>
+                                <th>QR Code</th>
+                            </tr>
+                            <tr th:each="QR : ${QRMap}" class="dataTemplate">
+                               <td th:text="${QR.key}"></td>
+                               <td><img th:src="@{/} + ${QR.value}" /></td>
+                            </tr>
+                        </table>
+                    </div>
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Refresh Invoice Page', '/BCS/JS/page97.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page97')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formRefreshInvoice">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">同步電子發票</h3>
+                        <p class="CHDesc">驗證發票是否已上傳是發票平台</p>
+                    </header>
+                    <div class="mainFrame alignLeft">
+                        <table border="1">
+                            <colgroup><col width="190"><col></colgroup>
+                            <tbody >
+                        </table>
+                    </div>
+
+                </section>
+                <div class="BtnSet">
+                    <div>
+                        <input class="btn_add btn_upload" style="cursor: pointer;" type="button" value="啟動批次">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.springframework.org/security/tags">
+<body>
+	<!-- Dialog RichMsg Select  -->
+				<div id="dialogRichMsgSelect" title="選擇圖文訊息" th:fragment="dialogRichMsgSelect" >  
+					<div >
+	                    <div class="mainFrame">
+	                        <table border="1" id="richMsgListTable">
+	                            <colgroup><col width="150"><col width="150"><col width="130"><col width="100"><col width="100"></colgroup>
+	                            <tr>
+	                                <th>標題</th>
+	                                <th>連結</th>
+	                                <th>建立時間</th>
+	                                <th>建立人員</th>
+	                            </tr>
+	                            <tbody class="richMsgTrTemplate">
+	                            <tr>
+	                                <td class="richMsgImgTitle">
+	                                	<input type="hidden" class="richMsgId">
+	                                    <img src="" width="100px"  style="cursor: pointer;">
+	                                    <div><a class="richMsgTitle"  style="cursor: pointer;"></a></div>
+	                                </td>
+	                                <td class="richMsgImgUrl" style="text-align: left;"></td>
+	                                <td class="richMsgCreateTime"></td>
+	                                <td class="richMsgCreateUser"></td>
+	                            </tr>
+	                            </tbody>
+	                        </table>
+	                    </div>
+					</div>
+				</div>
+				
+</body>
+</html>

@@ -43,6 +43,12 @@ public class FtpSetting {
 	public void addFileNames(String file) {
 		fileNames.add(file);
 	}
+	
+	public void removeFileNames(String file) {
+		if (fileNames.contains(file)) {
+			fileNames.remove(file);
+		}
+	}
 
 	public void clearFileNames() {
 		fileNames.clear();

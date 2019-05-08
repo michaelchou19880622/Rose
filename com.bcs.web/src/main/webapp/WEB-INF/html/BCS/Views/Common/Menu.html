@@ -195,7 +195,7 @@
                         <li th:classappend="${currentPage == 'Page23'} ? 'ExSelected'" sec:authorize="hasAnyRole('NotShowRole')">
                         	<a th:href="@{/bcs/admin/otherPage}"><span>其他頁面</span></a>
                         </li>
-                        <li th:classappend="${currentPage == 'Page-PushApiEffects'} ? 'ExSelected'" sec:authorize="hasAnyRole('NotShowRole')">
+                        <li th:classappend="${currentPage == 'Page-PushApiEffects'} ? 'ExSelected'">
                         	<a th:href="@{/bcs/admin/reportPushApiEffectsPage}"><span>Push API 成效頁面</span></a>
                         </li>
                     </ul>

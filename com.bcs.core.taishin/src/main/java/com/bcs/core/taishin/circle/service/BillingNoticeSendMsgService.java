@@ -165,7 +165,7 @@ public class BillingNoticeSendMsgService {
 			logger.info("sendingBillingNoticeMain handle Main:" + bnMain.getOrigFileName());
 			List<BillingNoticeDetail> details = new ArrayList<>();
 			for (BillingNoticeDetail detail : allDetails) {
-				if (detail.getNoticeMainId() == mainId ) {
+				if (detail.getNoticeMainId().longValue() == mainId.longValue() ) {
 					details.add(detail);
 				}
 			}

@@ -706,6 +706,7 @@ public class FtpService {
 				channelSftp.cd(pDirectory);
 				for (String lFileName : pFileNames) {
 					channelSftp.rm(lFileName);
+					setting.removeFileNames(lFileName);
 				}
 			}else {
 				logger.error("deleteFileInSFTP channelSftp: " + channelSftp.isConnected());
@@ -755,6 +756,7 @@ public class FtpService {
 					channelSftp.cd(pDirectory);
 					for (String lFileName : pFileNames) {
 						channelSftp.rm(lFileName);
+						setting.removeFileNames(lFileName);
 					}
 				}else {
 					logger.error("deleteFileInSFTPForDev channelSftp: " + channelSftp.isConnected());
@@ -801,6 +803,7 @@ public class FtpService {
 			FTPClient.changeWorkingDirectory(pDirectory);
 			for (String lFileName : pFileNames) {
 				boolean success = FTPClient.deleteFile(lFileName);
+				setting.removeFileNames(lFileName);
 				if (!success) {
 					logger.error(" deleteFileInFTPForDev remove fail: " + lFileName);
 				}
@@ -839,6 +842,7 @@ public class FtpService {
 				FTPClient.setFileType(FTP.BINARY_FILE_TYPE);
 				for (String lFileName : pFileNames) {
 					boolean success = FTPClient.deleteFile(lFileName);
+					setting.removeFileNames(lFileName);
 					if (!success) {
 						logger.error("deleteFileInFTP remove fail: " + lFileName);
 					}

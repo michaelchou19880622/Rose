@@ -113,7 +113,7 @@ public class InitController {
 		//PNP FTP flow
 		try {
 			//判斷WEB OR AP
-			if(CoreConfigReader.isBillingNoticeSendMsg()) {//WEB
+			if(CoreConfigReader.isPNPFtpDownload()) {//WEB
 				logger.info("init PNP FTP flow ");
 				loadFtbPnpDataTask.startCircle();
 			}
@@ -124,7 +124,7 @@ public class InitController {
 		//PNP pnpPushMsg flow
 		try {
 			//判斷WEB OR AP
-			if(CoreConfigReader.isBillingNoticeSendMsg()) {//WEB
+			if(CoreConfigReader.isPNPSendMsg()) {//WEB
 			logger.info("init pnpPushMsg flow ");
 			pnpPushMsgService.startCircle();
 			}
@@ -135,7 +135,7 @@ public class InitController {
 		//PNP PHONE NUMBER PUSH flow
 		try {
 			//判斷WEB OR AP
-			if(CoreConfigReader.isBillingNoticeSendMsg()) {//WEB
+			if(CoreConfigReader.isPNPSendMsg()) {//WEB
 				logger.info("init PNP PHONE NUMBER PUSH flow ");
 				pnpPNPMsgService.startCircle();
 			}
@@ -146,7 +146,7 @@ public class InitController {
 		//PNP transfer file to SMS flow
 		try {
 			//判斷WEB OR AP
-			if(CoreConfigReader.isBillingNoticeSendMsg()) {//WEB
+			if(CoreConfigReader.isPNPFtpDownload()) {//WEB
 				logger.info("init PNP transfer file to SMS flow ");
 				pnpSMSMsgService.startCircle();
 			}

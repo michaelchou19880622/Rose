@@ -104,7 +104,7 @@ public class PNPTester {
 		String ftpPass = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PASS_EVERY8D, true);
 		String downloadSavePath = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_EVERY8D, true);
 		String downloadPath = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_PATH_EVERY8D, true);
-		String uploadPath = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_UPLOAD_SMS_PATH_EVERY8D, true);
+		String uploadPath = CoreConfigReader.getString(CONFIG_STR.PNP_SMS_UPLOAD_PATH_EVERY8D, true);
 		
 		
 		FTPClient ftpClient = new FTPClient();
@@ -275,7 +275,7 @@ public class PNPTester {
 		String ftpPass = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PASS_MING, true);
 		String downloadSavePath = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_MING, true);
 		String downloadPath = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_PATH_MING, true);
-		String uploadPath = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_UPLOAD_SMS_PATH_MING, true);
+		String uploadPath = CoreConfigReader.getString(CONFIG_STR.PNP_SMS_UPLOAD_PATH_MING, true);
 		
 		
 		FTPClient ftpClient = new FTPClient();

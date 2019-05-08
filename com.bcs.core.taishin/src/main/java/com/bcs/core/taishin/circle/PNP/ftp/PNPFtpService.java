@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
@@ -37,9 +38,9 @@ public class PNPFtpService {
 	private static Logger logger = Logger.getLogger(PNPFtpService.class);
 //	private static String channelIds = CoreConfigReader.getString(CONFIG_STR.BN_FTP_CHANNELIDS, true);
 //	private static String downloadSavePath = CoreConfigReader.getString(CONFIG_STR.BN_FTP_DOWNLOAD_SAVEFILEPATH, true);
-//	private static String fileExtension = CoreConfigReader.getString(CONFIG_STR.BN_FTP_FILE_EXTENSION, true);
-	private static boolean is64Bit = CoreConfigReader.getBoolean(CONFIG_STR.BN_FTP_IS64BIT, true);
-	private List<PNPFtpSetting> ftpSettings = new ArrayList<>();
+	private static String fileExtension = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_FILE_EXTENSION, true);
+	private static boolean is64Bit = CoreConfigReader.getBoolean(CONFIG_STR.PNP_FTP_IS64BIT, true);
+	private Map<String,PNPFtpSetting> ftpSettings = new HashMap<>();
 
 	/**
 	 * FTP密碼系統載入dll的狀態，參數為false :系統照原本設計從系統參數檔取得帳號、密碼，<BR>
@@ -51,7 +52,7 @@ public class PNPFtpService {
 	 */
 	static {
 //		try {
-//			if (!CoreConfigReader.isBillingNoticeFtpTypeDevelop()) { // 正式環境時使用
+//			if (!CoreConfigReader.isPNPFtpTypeDevelop()) { // 正式環境時使用
 //				if (is64Bit) {
 //					System.loadLibrary("PwDllJV64");
 //				} else {
@@ -77,6 +78,8 @@ public class PNPFtpService {
 	}
 
 	public PNPFtpService() {
+		
+		logger.info("initFtpSettings..."+ (initFtpSettings() ? "OK" : "Fail"));
 //		logger.info("BN_FTP_CHANNELIDS:" + channelIds);
 //		if (StringUtils.isNotBlank(channelIds)) {
 //			for (String channel : channelIds.split(",")) {
@@ -109,7 +112,7 @@ public class PNPFtpService {
 //						ftpSetting.setFileEncoding(fileEncoding);
 //						ftpSetting.setServerHostName(serverHostName);
 //						ftpSetting.setServerHostNamePort(serverHostNamePort);
-//						if (!CoreConfigReader.isBillingNoticeFtpTypeDevelop()) { // 正式環境時使用
+//						if (!CoreConfigReader.isPNPFtpTypeDevelop()) { // 正式環境時使用
 //							if (!validateFtpHostData(ftpSetting)) {
 //								throw new RuntimeException("FTP setting error!");
 //							}
@@ -121,13 +124,170 @@ public class PNPFtpService {
 //
 //						ftpSettings.add(ftpSetting);
 //						// 正式環境時使用
-//						if (!CoreConfigReader.isBillingNoticeFtpTypeDevelop()) {
+//						if (!CoreConfigReader.isPNPFtpTypeDevelop()) {
 //							loadFtp(ftpSetting);
 //						}
 //					}
 //				}
 //			}
 //		}
+	}
+	
+	public boolean initFtpSettings() {
+		PNPFtpSetting pnpFtpSettingMTK = new PNPFtpSetting();
+		pnpFtpSettingMTK.setFileEncoding(CoreConfigReader.getString(CONFIG_STR.PNP_READLINES_ENCODE, true));
+		pnpFtpSettingMTK.setChannelId(AbstractPnpMainEntity.SOURCE_MITAKE);
+		pnpFtpSettingMTK.setServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_MITAKE, true));
+		pnpFtpSettingMTK.setServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_PORT_MITAKE, true));
+		pnpFtpSettingMTK.setAccount(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_USR_MITAKE, true));
+		pnpFtpSettingMTK.setPassword(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PASS_MITAKE, true));
+		pnpFtpSettingMTK.setHost(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_HOST_MITAKE, true));
+		pnpFtpSettingMTK.setPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_PORT_MITAKE, true));
+		pnpFtpSettingMTK.setAPPCode(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_APPCODE_MITAKE, true));
+		pnpFtpSettingMTK.setRESCode(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_RESCODE_MITAKE, true));
+		pnpFtpSettingMTK.setPath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_PATH_MITAKE, true));
+		pnpFtpSettingMTK.setUploadPath(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_UPLOAD_PATH_MITAKE, true));
+		pnpFtpSettingMTK.setDownloadSavePath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_MITAKE, true));
+		pnpFtpSettingMTK.setProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PROTOCOL_MITAKE, true));
+		pnpFtpSettingMTK.setFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_MITAKE, true));
+		//SMS setting
+		pnpFtpSettingMTK.setSmsServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_SERVERHOSTNAME_MITAKE, true));
+		pnpFtpSettingMTK.setSmsServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_SERVERHOSTNAME_PORT_MITAKE, true));
+		pnpFtpSettingMTK.setSmsAccount(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_USR_MITAKE, true));
+		pnpFtpSettingMTK.setSmsPassword(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PASS_MITAKE, true));
+		pnpFtpSettingMTK.setSmsHost(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_HOST_MITAKE, true));
+		pnpFtpSettingMTK.setSmsPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_PORT_MITAKE, true));
+		pnpFtpSettingMTK.setSmsAPPCode(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_APPCODE_MITAKE, true));
+		pnpFtpSettingMTK.setSmsRESCode(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_RESCODE_MITAKE, true));
+		pnpFtpSettingMTK.setSmsProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PROTOCOL_MITAKE, true));
+		if(!CoreConfigReader.isPNPFtpTypeDevelop()) {
+			pnpFtpSettingMTK = useTrendPwMgmt(pnpFtpSettingMTK);
+		}
+		ftpSettings.put(AbstractPnpMainEntity.SOURCE_MITAKE, pnpFtpSettingMTK);
+		
+		PNPFtpSetting pnpFtpSettingMI = new PNPFtpSetting();
+		pnpFtpSettingMI.setFileEncoding(CoreConfigReader.getString(CONFIG_STR.PNP_READLINES_ENCODE, true));
+		pnpFtpSettingMI.setChannelId(AbstractPnpMainEntity.SOURCE_MING);
+		pnpFtpSettingMI.setServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_MING, true));
+		pnpFtpSettingMI.setServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_PORT_MING, true));
+	    pnpFtpSettingMI.setAccount(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_USR_MING, true));
+		pnpFtpSettingMI.setPassword(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PASS_MING, true));
+		pnpFtpSettingMI.setHost(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_HOST_MING, true));
+		pnpFtpSettingMI.setPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_PORT_MING, true));
+		pnpFtpSettingMI.setAPPCode(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_APPCODE_MING, true));
+		pnpFtpSettingMI.setRESCode(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_RESCODE_MING, true));
+		pnpFtpSettingMI.setPath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_PATH_MING, true));
+		pnpFtpSettingMI.setUploadPath(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_UPLOAD_PATH_MING, true));
+		pnpFtpSettingMI.setDownloadSavePath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_MING, true));
+		pnpFtpSettingMI.setProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PROTOCOL_MING, true));
+		pnpFtpSettingMI.setFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_MING, true));
+		//SMS setting
+		pnpFtpSettingMI.setSmsServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_SERVERHOSTNAME_MING, true));
+		pnpFtpSettingMI.setSmsServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_SERVERHOSTNAME_PORT_MING, true));
+		pnpFtpSettingMI.setSmsAccount(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_USR_MING, true));
+		pnpFtpSettingMI.setSmsPassword(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PASS_MING, true));
+		pnpFtpSettingMI.setSmsHost(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_HOST_MING, true));
+		pnpFtpSettingMI.setSmsPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_PORT_MING, true));
+		pnpFtpSettingMI.setSmsAPPCode(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_APPCODE_MING, true));
+		pnpFtpSettingMI.setSmsRESCode(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_RESCODE_MING, true));
+		pnpFtpSettingMI.setSmsProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PROTOCOL_MING, true));
+		if(!CoreConfigReader.isPNPFtpTypeDevelop()) {
+			pnpFtpSettingMI = useTrendPwMgmt(pnpFtpSettingMI);
+		}
+		ftpSettings.put(AbstractPnpMainEntity.SOURCE_MING, pnpFtpSettingMI);	
+		
+		PNPFtpSetting pnpFtpSettingEV8D = new PNPFtpSetting();
+		pnpFtpSettingEV8D.setFileEncoding(CoreConfigReader.getString(CONFIG_STR.PNP_READLINES_ENCODE, true));
+		pnpFtpSettingEV8D.setChannelId(AbstractPnpMainEntity.SOURCE_EVERY8D);
+		pnpFtpSettingEV8D.setServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_EVERY8D, true));
+		pnpFtpSettingEV8D.setServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_PORT_EVERY8D, true));
+		pnpFtpSettingEV8D.setAccount(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_USR_EVERY8D, true));
+		pnpFtpSettingEV8D.setPassword(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PASS_EVERY8D, true));
+		pnpFtpSettingEV8D.setHost(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_HOST_EVERY8D, true));
+		pnpFtpSettingEV8D.setPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_PORT_EVERY8D, true));
+		pnpFtpSettingEV8D.setAPPCode(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_APPCODE_EVERY8D, true));
+		pnpFtpSettingEV8D.setRESCode(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_RESCODE_EVERY8D, true));
+		pnpFtpSettingEV8D.setPath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_PATH_EVERY8D, true));
+		pnpFtpSettingEV8D.setUploadPath(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_UPLOAD_PATH_EVERY8D, true));
+		pnpFtpSettingEV8D.setDownloadSavePath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_EVERY8D, true));
+		pnpFtpSettingEV8D.setProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PROTOCOL_EVERY8D, true));
+		pnpFtpSettingEV8D.setFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_EVERY8D, true));
+		//SMS setting
+		pnpFtpSettingEV8D.setSmsServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_SERVERHOSTNAME_EVERY8D, true));
+		pnpFtpSettingEV8D.setSmsServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_SERVERHOSTNAME_PORT_EVERY8D, true));
+		pnpFtpSettingEV8D.setSmsAccount(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_USR_EVERY8D, true));
+		pnpFtpSettingEV8D.setSmsPassword(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PASS_EVERY8D, true));
+		pnpFtpSettingEV8D.setSmsHost(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_HOST_EVERY8D, true));
+		pnpFtpSettingEV8D.setSmsPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_PORT_EVERY8D, true));
+		pnpFtpSettingEV8D.setSmsAPPCode(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_APPCODE_EVERY8D, true));
+		pnpFtpSettingEV8D.setSmsRESCode(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_RESCODE_EVERY8D, true));
+		pnpFtpSettingEV8D.setSmsProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PROTOCOL_EVERY8D, true));
+		if(!CoreConfigReader.isPNPFtpTypeDevelop()) {
+			pnpFtpSettingEV8D = useTrendPwMgmt(pnpFtpSettingEV8D);
+		}
+		ftpSettings.put(AbstractPnpMainEntity.SOURCE_EVERY8D, pnpFtpSettingEV8D);	
+		
+		
+		PNPFtpSetting pnpFtpSettingUNI = new PNPFtpSetting();
+		pnpFtpSettingUNI.setFileEncoding(CoreConfigReader.getString(CONFIG_STR.PNP_READLINES_ENCODE, true));
+		pnpFtpSettingUNI.setChannelId(AbstractPnpMainEntity.SOURCE_UNICA);
+		pnpFtpSettingUNI.setServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_UNICA, true));
+		pnpFtpSettingUNI.setServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_PORT_UNICA, true));
+		pnpFtpSettingUNI.setAccount(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_USR_UNICA, true));
+		pnpFtpSettingUNI.setPassword(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PASS_UNICA, true));
+		pnpFtpSettingUNI.setHost(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_HOST_UNICA, true));
+		pnpFtpSettingUNI.setPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_PORT_UNICA, true));
+		pnpFtpSettingUNI.setAPPCode(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_APPCODE_UNICA, true));
+		pnpFtpSettingUNI.setRESCode(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_RESCODE_UNICA, true));
+		pnpFtpSettingUNI.setPath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_PATH_UNICA, true));
+		pnpFtpSettingUNI.setUploadPath(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_UPLOAD_PATH_UNICA, true));
+		pnpFtpSettingUNI.setDownloadSavePath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_UNICA, true));
+		pnpFtpSettingUNI.setProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PROTOCOL_UNICA, true));
+		pnpFtpSettingUNI.setFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_UNICA, true));
+		//SMS setting
+		pnpFtpSettingUNI.setSmsServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_SERVERHOSTNAME_UNICA, true));
+		pnpFtpSettingUNI.setSmsServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_SERVERHOSTNAME_PORT_UNICA, true));
+		pnpFtpSettingUNI.setSmsAccount(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_USR_UNICA, true));
+		pnpFtpSettingUNI.setSmsPassword(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PASS_UNICA, true));
+		pnpFtpSettingUNI.setSmsHost(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_HOST_UNICA, true));
+		pnpFtpSettingUNI.setSmsPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_PORT_UNICA, true));
+		pnpFtpSettingUNI.setSmsAPPCode(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_APPCODE_UNICA, true));
+		pnpFtpSettingUNI.setSmsRESCode(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_RESCODE_UNICA, true));
+		pnpFtpSettingUNI.setSmsProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PROTOCOL_UNICA, true));
+		if(!CoreConfigReader.isPNPFtpTypeDevelop()) {
+			pnpFtpSettingUNI = useTrendPwMgmt(pnpFtpSettingUNI);
+		}
+		ftpSettings.put(AbstractPnpMainEntity.SOURCE_UNICA, pnpFtpSettingUNI);
+		
+		return true;
+	}
+	
+	public PNPFtpSetting useTrendPwMgmt(PNPFtpSetting pnpFtpSetting) {
+		
+		String host = pnpFtpSetting.getHost();
+		String serverHostName = pnpFtpSetting.getServerHostName();
+		int serverHostNamePort = pnpFtpSetting.getServerHostNamePort();
+		String APPCode = pnpFtpSetting.getAPPCode();
+		String RESCode = pnpFtpSetting.getRESCode();
+		
+		Map<String, String> trendPwMgmt = loadFtp(host, serverHostName, serverHostNamePort, APPCode, RESCode);
+		logger.info("loginFTP:" + trendPwMgmt.get("uid") + " PWD:" +  trendPwMgmt.get("pwd"));
+		pnpFtpSetting.setAccount(trendPwMgmt.get("uid"));
+		pnpFtpSetting.setPassword(trendPwMgmt.get("pwd"));
+		logger.info("下載段資源密碼系統的帳號密碼登入完成");
+		
+		String smsHost = pnpFtpSetting.getSmsHost();
+		String smsServerHostName = pnpFtpSetting.getSmsServerHostName();
+		int smsServerHostNamePort = pnpFtpSetting.getSmsServerHostNamePort();
+		String smsAPPCode = pnpFtpSetting.getSmsAPPCode();
+		String smsRESCode = pnpFtpSetting.getSmsRESCode();
+		Map<String, String> trendPwMgmtSMS = loadFtp(smsHost, smsServerHostName, smsServerHostNamePort, smsAPPCode, smsRESCode);
+		logger.info("loginFTP:" + trendPwMgmtSMS.get("uid") + " PWD:" +  trendPwMgmtSMS.get("pwd"));
+		pnpFtpSetting.setSmsAccount(trendPwMgmtSMS.get("uid"));
+		pnpFtpSetting.setSmsPassword(trendPwMgmtSMS.get("pwd"));
+		logger.info("上傳段資源密碼系統的帳號密碼登入完成");
+		
+		return pnpFtpSetting;
 	}
 
 	/**
@@ -136,113 +296,52 @@ public class PNPFtpService {
 	 * @return
 	 */
 	public PNPFtpSetting getFtpSettings(String source) {
-		PNPFtpSetting pnpFtpSetting = new PNPFtpSetting();
-		pnpFtpSetting.setFileEncoding(CoreConfigReader.getString(CONFIG_STR.PNP_READLINES_ENCODE, true));
-		
-		switch (source) {
-		case AbstractPnpMainEntity.SOURCE_MITAKE:
-			pnpFtpSetting.setChannelId(AbstractPnpMainEntity.SOURCE_MITAKE);
-			pnpFtpSetting.setServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_MITAKE, true));
-			pnpFtpSetting.setServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_PORT_MITAKE, true));
-			pnpFtpSetting.setAccount(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_USR_MITAKE, true));
-			pnpFtpSetting.setPassword(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PASS_MITAKE, true));
-			pnpFtpSetting.setHost(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_HOST_MITAKE, true));
-			pnpFtpSetting.setPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_PORT_MITAKE, true));
-			pnpFtpSetting.setPath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_PATH_MITAKE, true));
-			pnpFtpSetting.setUploadPath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_UPLOAD_SMS_PATH_MITAKE, true));
-			pnpFtpSetting.setDownloadSavePath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_MITAKE, true));
-			pnpFtpSetting.setProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PROTOCOL_MITAKE, true));
-//			ftpServerName = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_SERVER_NAME_MITAKE, true);
-//			ftpPort = CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_SERVER_PORT_MITAKE, true);
-//			ftpUsr = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_USR_MITAKE, true);
-//			ftpPass = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PASS_MITAKE, true);
-//			downloadPath = CoreConfigReader.getString(CONFIG_STR.PNP_FTPDOWNLOAD_PATH_MITAKE, true);
-//			uploadPath = CoreConfigReader.getString(CONFIG_STR.PNP_FTPUPLOAD_PATH_MITAKE, true);
-//			downloadSavePath = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_MITAKE, true);
-			break;
-		case AbstractPnpMainEntity.SOURCE_MING:
-			pnpFtpSetting.setChannelId(AbstractPnpMainEntity.SOURCE_MING);
-			pnpFtpSetting.setServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_MING, true));
-			pnpFtpSetting.setServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_PORT_MING, true));
-			pnpFtpSetting.setAccount(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_USR_MING, true));
-			pnpFtpSetting.setPassword(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PASS_MING, true));
-			pnpFtpSetting.setHost(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_HOST_MING, true));
-			pnpFtpSetting.setPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_PORT_MING, true));
-			pnpFtpSetting.setPath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_PATH_MING, true));
-			pnpFtpSetting.setUploadPath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_UPLOAD_SMS_PATH_MING, true));
-			pnpFtpSetting.setDownloadSavePath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_MING, true));
-			pnpFtpSetting.setProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PROTOCOL_MING, true));
-//			ftpServerName = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_SERVER_NAME_MING, true);
-//			ftpPort = CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_SERVER_PORT_MING, true);
-//			ftpUsr = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_USR_MING, true);
-//			ftpPass = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PASS_MING, true);
-//			downloadPath = CoreConfigReader.getString(CONFIG_STR.PNP_FTPDOWNLOAD_PATH_MING, true);
-//			uploadPath = CoreConfigReader.getString(CONFIG_STR.PNP_FTPUPLOAD_PATH_MING, true);
-//			downloadSavePath = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_MING, true);
-			break;
-		case AbstractPnpMainEntity.SOURCE_EVERY8D:
-			pnpFtpSetting.setChannelId(AbstractPnpMainEntity.SOURCE_EVERY8D);
-			pnpFtpSetting.setServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_EVERY8D, true));
-			pnpFtpSetting.setServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_PORT_EVERY8D, true));
-			pnpFtpSetting.setAccount(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_USR_EVERY8D, true));
-			pnpFtpSetting.setPassword(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PASS_EVERY8D, true));
-			pnpFtpSetting.setHost(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_HOST_EVERY8D, true));
-			pnpFtpSetting.setPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_PORT_EVERY8D, true));
-			pnpFtpSetting.setPath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_PATH_EVERY8D, true));
-			pnpFtpSetting.setUploadPath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_UPLOAD_SMS_PATH_EVERY8D, true));
-			pnpFtpSetting.setDownloadSavePath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_EVERY8D, true));
-			pnpFtpSetting.setProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PROTOCOL_EVERY8D, true));
-//			ftpServerName = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_SERVER_NAME_EVERY8D, true);
-//			ftpPort = CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_SERVER_PORT_EVERY8D, true);
-//			ftpUsr = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_USR_EVERY8D, true);
-//			ftpPass = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PASS_EVERY8D, true);
-//			downloadPath = CoreConfigReader.getString(CONFIG_STR.PNP_FTPDOWNLOAD_PATH_EVERY8D, true);
-//			uploadPath = CoreConfigReader.getString(CONFIG_STR.PNP_FTPUPLOAD_PATH_EVERY8D, true);
-//			downloadSavePath = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_EVERY8D, true);
-			break;
-		case AbstractPnpMainEntity.SOURCE_UNICA:
-			pnpFtpSetting.setChannelId(AbstractPnpMainEntity.SOURCE_UNICA);
-			pnpFtpSetting.setServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_UNICA, true));
-			pnpFtpSetting.setServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_PORT_UNICA, true));
-			pnpFtpSetting.setAccount(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_USR_UNICA, true));
-			pnpFtpSetting.setPassword(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PASS_UNICA, true));
-			pnpFtpSetting.setHost(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_HOST_UNICA, true));
-			pnpFtpSetting.setPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_PORT_UNICA, true));
-			pnpFtpSetting.setPath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_PATH_UNICA, true));
-			pnpFtpSetting.setUploadPath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_UPLOAD_SMS_PATH_UNICA, true));
-			pnpFtpSetting.setDownloadSavePath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_UNICA, true));
-			pnpFtpSetting.setProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PROTOCOL_UNICA, true));
-//			ftpServerName = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_SERVER_NAME_UNICA, true);
-//			ftpPort = CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_SERVER_PORT_UNICA, true);
-//			ftpUsr = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_USR_UNICA, true);
-//			ftpPass = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PASS_UNICA, true);
-//			downloadPath = CoreConfigReader.getString(CONFIG_STR.PNP_FTPDOWNLOAD_PATH_UNICA, true);
-//			uploadPath = CoreConfigReader.getString(CONFIG_STR.PNP_FTPUPLOAD_PATH_UNICA, true);
-//			downloadSavePath = CoreConfigReader.getString(CONFIG_STR.PNP_FTPDOWNLOAD_SAVEFILEPATH_UNICA, true);
-			break;
-
-		}
-		
-		// 正式環境時使用
-		if (!CoreConfigReader.isBillingNoticeFtpTypeDevelop()) {
-			loadFtp(pnpFtpSetting);
-		}
-		
-		return pnpFtpSetting;
-		
+		return ftpSettings.get(source);
 	}
+	
+	
 
 	/**
 	 * 重新載入參數設定資料
 	 */
 	private Map<String, String> loadFtp(PNPFtpSetting ftpSetting) {
 		Map<String, String> data = new HashMap<String, String>();
+		logger.info("ftpSetting.getChannelId() : "+ftpSetting.getChannelId());
+		logger.info("ftpSetting.getServerHostNamePort() : "+ftpSetting.getServerHostNamePort());
+		logger.info("ftpSetting.getAPPCode() : "+ftpSetting.getAPPCode());
+		logger.info("ftpSetting.getRESCode() : "+ftpSetting.getRESCode());
+		logger.info("is64Bit : " + is64Bit);
 		try {
 			TrendPwMgmt lPwMgmt = new TrendPwMgmt(ftpSetting.getServerHostName(), ftpSetting.getServerHostNamePort(),
 					ftpSetting.getAPPCode(), ftpSetting.getRESCode(), is64Bit);
 			data.put("uid", StringUtils.trimToEmpty(lPwMgmt.getUserId()));
 			data.put("pwd", StringUtils.trimToEmpty(lPwMgmt.getPassword()));
 			logger.info("getHost:" + ftpSetting.getHost() + " / GetUID:" + data.get("uid") + " / GetPWD:"
+					+ data.get("pwd"));
+			return data;
+		} catch (Exception e) {
+			logger.error("TrendPwMgmt exception:" + e.getMessage());
+			throw new RuntimeException(e);
+		}
+	}
+	
+	/**
+	 * 重新載入參數設定資料
+	 */
+	private Map<String, String> loadFtp(String host ,String serverHostName , int serverHostNamePort , String APPCode , String RESCode) {
+		Map<String, String> data = new HashMap<String, String>();
+		logger.info("host : "+host);
+		logger.info("serverHostName : "+serverHostName);
+		logger.info("serverHostNamePort : "+serverHostNamePort);
+		logger.info("APPCode : "+APPCode);
+		logger.info("RESCode : "+RESCode);
+		logger.info("is64Bit : " + is64Bit);
+		try {
+			TrendPwMgmt lPwMgmt = new TrendPwMgmt(serverHostName, serverHostNamePort,
+					APPCode, RESCode, is64Bit);
+			data.put("uid", StringUtils.trimToEmpty(lPwMgmt.getUserId()));
+			data.put("pwd", StringUtils.trimToEmpty(lPwMgmt.getPassword()));
+			logger.info("Host:" + host + " / GetUID:" + data.get("uid") + " / GetPWD:"
 					+ data.get("pwd"));
 			return data;
 		} catch (Exception e) {
@@ -257,26 +356,26 @@ public class PNPFtpService {
 	 * @return
 	 */
 	private boolean validateDevFtpHostData(PNPFtpSetting setting) {
-//		if (setting.getPort() <= 0) {
-//			logger.error("ftp port not setting");
-//			return false;
-//		}
-//
-//		if (StringUtils.isBlank(setting.getHost())) {
-//			logger.error("ftp setting error  host[" + setting.getHost() + "] ");
-//			return false;
-//		}
-//		if (StringUtils.isBlank(setting.getAccount()) || StringUtils.isBlank(setting.getPassword())) {
-//			logger.error(
-//					"ftp setting error  account[" + setting.getAccount() + "] password[" + setting.getPassword() + "]");
-//			return false;
-//		}
-//
-//		if (StringUtils.isBlank(downloadSavePath) || StringUtils.isBlank(fileExtension)) {
-//			logger.error("ftp setting error  downloadSavePath[" + downloadSavePath + "] fileExtension[" + fileExtension
-//					+ "]");
-//			return false;
-//		}
+		if (setting.getPort() <= 0) {
+			logger.error("ftp port not setting");
+			return false;
+		}
+
+		if (StringUtils.isBlank(setting.getHost())) {
+			logger.error("ftp setting error  host[" + setting.getHost() + "] ");
+			return false;
+		}
+		if (StringUtils.isBlank(setting.getAccount()) || StringUtils.isBlank(setting.getPassword())) {
+			logger.error(
+					"ftp setting error  account[" + setting.getAccount() + "] password[" + setting.getPassword() + "]");
+			return false;
+		}
+
+		if (StringUtils.isBlank(setting.getDownloadSavePath()) || StringUtils.isBlank(fileExtension)) {
+			logger.error("ftp setting error  downloadSavePath[" + setting.getDownloadSavePath() + "] fileExtension[" + fileExtension
+					+ "]");
+			return false;
+		}
 		return true;
 	}
 
@@ -387,6 +486,83 @@ public class PNPFtpService {
 		}
 		return false;
 	}
+	
+	/**
+	 * SMS進行FTPClient Login
+	 * 
+	 * @param pFTPClient 要進行登入的FTPClient
+	 * @param pType      FTPClient Type
+	 * @return Login 狀態
+	 * @throws FTPException FTP 連線異常
+	 */
+	private boolean smsLoginFTP(FTPClient pFTPClient, PNPFtpSetting setting) throws Exception {
+		try {
+			
+			pFTPClient.setDefaultTimeout(1000000);
+			pFTPClient.connect(setting.getHost(), setting.getPort());
+			
+			int replyCode = pFTPClient.getReplyCode();
+			if (!FTPReply.isPositiveCompletion(replyCode)) {
+				
+			}
+			// T 先以資源密碼系統取得的帳號密碼進行登入，登入失敗再以系統原本設定的帳號密碼登入系統
+			try {
+				boolean lStatus = false;
+				String account = setting.getSmsAccount();
+				String password = setting.getSmsPassword();
+				if ((account != null && account.length() > 0) && (password != null && password.length() > 0)) {
+					lStatus = pFTPClient.login(account, password);
+					if (lStatus) {
+						logger.info("smsLoginFTP:" + setting.getSmsHost() + "資源密碼系統的帳號密碼登入完成");
+					} else {
+						logger.error("smsLoginFTP:" + setting.getSmsHost() + "資源密碼系統的帳號密碼登入失敗 APP[" + setting.getSmsAPPCode() + "] RES["
+								+ setting.getSmsRESCode() + "]，重新載入FTP連線參數!");
+					}
+				}
+				
+				if (!lStatus) { // T 重新載入一次設定
+					
+					pFTPClient.disconnect();
+					// T 重新取得FTP 參數設定值
+					String host = setting.getSmsHost();
+					String serverHostName = setting.getSmsServerHostName();
+					int serverHostNamePort = setting.getSmsServerHostNamePort();
+					String APPCode = setting.getSmsAPPCode();
+					String RESCode = setting.getSmsRESCode();
+					
+					Map<String, String> trendPwMgmt = loadFtp(host, serverHostName, serverHostNamePort, APPCode, RESCode);
+					logger.info("重新載入設定 smsLoginFTP:" + trendPwMgmt.get("uid") + " PWD:" +  trendPwMgmt.get("pwd"));
+					pFTPClient.connect(setting.getSmsHost(), setting.getSmsPort());
+					lStatus = pFTPClient.login(trendPwMgmt.get("uid"), trendPwMgmt.get("pwd"));
+					if (lStatus) {
+						logger.info("重新載入設定 loginFTP:" + setting.getSmsHost() + "資源密碼系統的帳號密碼登入完成");
+					} else {
+						logger.error("loginFTP:" + setting.getSmsHost() + "資源密碼系統的帳號密碼登入失敗 APP[" + setting.getSmsAPPCode() + "] RES["
+								+ setting.getSmsRESCode() + "]，改以原系統記錄帳號密碼進行登入!");
+					}
+					
+					// T 以系統預設密碼登入
+					if (!lStatus) {
+						lStatus = pFTPClient.login("ACCOUNT", "PASSWORD");
+						if (lStatus) {
+							logger.info("smsLoginFTP:" +  setting.getHost() + "原系統記錄帳號密碼登入完成");
+						} else {
+							logger.error("smsLoginFTP:" + setting.getHost() + "原系統記錄帳號密碼登入失敗，停止執行");
+						}
+					}
+					return lStatus;
+				}
+				return lStatus;
+			} catch (Exception lIOE) {
+				lIOE.printStackTrace();
+				logger.error("smsLoginFTP:" +  lIOE.getMessage());
+			}
+		} catch (Exception lSE) {
+			lSE.printStackTrace();
+			logger.error("smsLoginFTP:" + lSE.getMessage()  );
+		}
+		return false;
+	}
 
 	/**
 	 * 進行SFTPClient Login
@@ -467,6 +643,92 @@ public class PNPFtpService {
 	}
 
 	/**
+	 * SMS 進行SFTPClient Login
+	 * 
+	 * 
+	 */
+	private Session smsLoginSFTP(PNPFtpSetting setting) throws Exception {
+		boolean lStatus = false;
+		Session session = null;
+		try {
+			JSch jsch = new JSch();
+			Properties sshConfig = new Properties();
+			sshConfig.put("StrictHostKeyChecking", "no");
+
+			// T 先以資源密碼系統取得的帳號密碼進行登入，登入失敗再以系統原本設定的帳號密碼登入系統
+			String account = setting.getSmsAccount();
+			String password = setting.getSmsPassword();
+			if ((account != null && account.length() > 0) && (password != null && password.length() > 0)) {
+				session = jsch.getSession(account, setting.getSmsHost(), setting.getSmsPort());
+				session.setPassword(password);
+				session.setConfig(sshConfig);
+				session.connect();
+				lStatus = session.isConnected();
+				if (lStatus) {
+					logger.info("SmsLoginSFTP:" + setting.getSmsHost() + "資源密碼系統的帳號密碼登入完成");
+				} else {
+					logger.error("SmsloginSFTP:" + setting.getSmsHost() + "資源密碼系統的帳號密碼登入失敗 APP[" + setting.getSmsAPPCode() + "] RES["
+							+ setting.getSmsRESCode() + "]，重新載入FTP連線參數!");
+				}
+			}
+
+			if (!lStatus) { // T 重新載入一次設定
+				if (session != null && session.isConnected()) {
+					session.disconnect();
+				}
+				session = null;
+				// T 重新取得FTP 參數設定值
+				String host = setting.getSmsHost();
+				String serverHostName = setting.getSmsServerHostName();
+				int serverHostNamePort = setting.getSmsServerHostNamePort();
+				String APPCode = setting.getSmsAPPCode();
+				String RESCode = setting.getSmsRESCode();
+				
+				Map<String, String> trendPwMgmt = loadFtp(host, serverHostName, serverHostNamePort, APPCode, RESCode);
+				logger.info("smsLoginSFTP:" + trendPwMgmt.get("uid") + " PWD:" +  trendPwMgmt.get("pwd"));
+				session = jsch.getSession(trendPwMgmt.get("uid"), setting.getHost(), setting.getPort());
+				session.setPassword(trendPwMgmt.get("pwd"));
+				session.setConfig(sshConfig);
+				session.connect();
+				lStatus = session.isConnected();
+				if (lStatus) {
+					logger.info("重新取得參數 smsLoginSFTP:" + setting.getSmsHost() + "資源密碼系統的帳號密碼登入完成");
+				} else {
+					logger.error("重新取得參數 smsLoginSFTP:" + setting.getSmsHost() + "資源密碼系統的帳號密碼登入失敗 APP[" + setting.getSmsAPPCode() + "] RES["
+							+ setting.getSmsRESCode() + "]，改以原系統記錄帳號密碼進行登入!");
+				}
+
+				// T 以系統預設密碼登入
+				if (!lStatus) {
+					session = jsch.getSession("ACCOUNT", setting.getSmsHost(), setting.getSmsPort());
+					session.setPassword("PASSWORD");
+					session.setConfig(sshConfig);
+					session.connect();
+					lStatus = session.isConnected();
+					if (lStatus) {
+						logger.info("smsLoginSFTP:" + setting.getHost() + "原系統記錄帳號密碼登入完成");
+					} else {
+						logger.error("smsLoginSFTP:" + setting.getHost() + "原系統記錄帳號密碼登入失敗，停止執行");
+					}
+				}
+			}
+		} catch (Exception ex) {
+			logger.error("smsLoginSFTP Error: " + ex.getMessage());
+			ex.printStackTrace();
+		}
+
+		if (lStatus) {
+			return session;
+		} else {
+			session = null;
+		}
+
+		return null;
+	}
+	
+	
+	
+	/**
 	 * 從FTP伺服器上下載指定數量檔案(下載檔案順序採檔案建立日期，先進先出) (測試環境用)
 	 * 
 	 * @param pDirectory 要下載檔案所在路徑
@@ -492,9 +754,9 @@ public class PNPFtpService {
 			FTPClient.enterLocalPassiveMode();
 			FTPClient.setFileType(FTP.BINARY_FILE_TYPE);
 			FTPClient.setAutodetectUTF8(true);
-			FTPClient.setControlEncoding("UTF-8");
+			FTPClient.setControlEncoding(setting.getFileEncoding());
 			FTPClient.changeWorkingDirectory(pDirectory);
-			
+			FTPClient.setStrictReplyParsing(true);// 新加設定解決org.apache.commons.net.MalformedServerReplyException: Truncated server reply: ).
 			// 取得FTP中的files
 			FTPFile[] files = FTPClient.listFiles();
 			
@@ -562,13 +824,13 @@ public class PNPFtpService {
 	 */
 	public Map<String, byte[]> downloadMutipleFileByType(String source , String directory, String extension, PNPFtpSetting setting) {
 		if (setting.getProtocol().equalsIgnoreCase("sftp")) {
-			if (!CoreConfigReader.isBillingNoticeFtpTypeDevelop()) { // 正式環境時使用
+			if (!CoreConfigReader.isPNPFtpTypeDevelop()) { // 正式環境時使用
 				return downloadMutipleFileInSFTP(directory, extension, setting);
 			} else {
 				return downloadMutipleFileInSFTPForDev(directory, extension, setting);
 			}
 		} else {
-			if (!CoreConfigReader.isBillingNoticeFtpTypeDevelop()) { // 正式環境時使用
+			if (!CoreConfigReader.isPNPFtpTypeDevelop()) { // 正式環境時使用
 				return downloadMutipleFileInFTP(directory, extension, setting);
 			} else {
 				return downloadMutipleFileInFTPForDev(directory, extension, setting);
@@ -609,7 +871,7 @@ public class PNPFtpService {
 					//三竹、明宣需要使用rename依現行簡訊平台檢核機制 若可以rename為.ok表示檔案上傳完畢即可抓走，若無法rename表示檔案正在上傳  >>by 志豪 20190422 mail【台新 Line PNP】相關問題
 					for (FTPFile file : lFiles) {
 						String fileName = file.getName();
-						if (!file.isDirectory() && fileName.endsWith("txt")) {
+						if (!file.isDirectory() && fileName.toUpperCase().endsWith("TXT")) {
 							logger.info("start rename!!!!");
 							logger.info("fileName :"+fileName);
 							logger.info("ftpClient.printWorkingDirectory() :"+FTPClient.printWorkingDirectory());
@@ -619,7 +881,7 @@ public class PNPFtpService {
 					FTPFile[] filesOK = FTPClient.listFiles();
 					for (FTPFile file : filesOK) {
 						String fileName = file.getName();
-						if (!file.isDirectory() && fileName.endsWith("txt.ok")) {
+						if (!file.isDirectory() && fileName.toUpperCase().endsWith("TXT.OK")) {
 							ByteArrayOutputStream lDataTemp = new ByteArrayOutputStream();
 							FTPClient.retrieveFile(fileName, lDataTemp);
 							lDataTemp.flush();
@@ -666,7 +928,7 @@ public class PNPFtpService {
 					for (FTPFile lFtpFile : lFiles) {
 						String fileName = lFtpFile.getName();
 						logger.info("downloadMutipleFileInFTP:" + pDirectory + " File :" + fileName);
-						if (!lFtpFile.isDirectory() && fileName.endsWith(extension+".ok")) {
+						if (!lFtpFile.isDirectory() && fileName.toUpperCase().endsWith(extension.toUpperCase()+".OK")) {
 							lDataTemp = new ByteArrayOutputStream();
 							fileName = fileName.substring(0, fileName.lastIndexOf("."));//ex:資料夾裡有123.txt 、123.txt.ok，要抓取123.txt所以把.ok去掉
 							FTPClient.retrieveFile(fileName, lDataTemp);
@@ -934,13 +1196,13 @@ public class PNPFtpService {
 	 */
 	public void deleteFileByType(String directory, String[] pFileNames, PNPFtpSetting setting) {
 		if (setting.getProtocol().equalsIgnoreCase("sftp")) {
-			if (!CoreConfigReader.isBillingNoticeFtpTypeDevelop()) { // 正式環境時使用
+			if (!CoreConfigReader.isPNPFtpTypeDevelop()) { // 正式環境時使用
 				deleteFileInSFTP(directory, pFileNames, setting);
 			} else {
 				deleteFileInSFTPForDev(directory, pFileNames, setting);
 			}
 		} else {
-			if (!CoreConfigReader.isBillingNoticeFtpTypeDevelop()) { // 正式環境時使用
+			if (!CoreConfigReader.isPNPFtpTypeDevelop()) { // 正式環境時使用
 				deleteFileInFTP(directory, pFileNames, setting);
 			} else {
 				deleteFileInFTPForDev(directory, pFileNames, setting);
@@ -1074,7 +1336,7 @@ public class PNPFtpService {
 			FTPClient.enterLocalPassiveMode();
 			FTPClient.setFileType(FTP.BINARY_FILE_TYPE);
 			FTPClient.setAutodetectUTF8(true);
-			FTPClient.setControlEncoding("UTF-8");
+			FTPClient.setControlEncoding(setting.getFileEncoding());
 			FTPClient.changeWorkingDirectory(pDirectory);
 			for (String procfileName : pFileNames) {
 				boolean success = false; 
@@ -1169,13 +1431,13 @@ public class PNPFtpService {
 	 */
 	public void uploadFileByType(InputStream uploadIs,String fileName,String targetDir,PNPFtpSetting setting) throws IOException {
 		if (setting.getProtocol().equalsIgnoreCase("sftp")) {
-			if (!CoreConfigReader.isBillingNoticeFtpTypeDevelop()) { // 正式環境時使用
+			if (!CoreConfigReader.isPNPFtpTypeDevelop()) { // 正式環境時使用
 				uploadFileInSFTP(uploadIs,fileName,targetDir, setting);
 			} else {
 				uploadFileInSFTP(uploadIs,fileName,targetDir, setting);
 			}
 		} else {
-			if (!CoreConfigReader.isBillingNoticeFtpTypeDevelop()) { // 正式環境時使用
+			if (!CoreConfigReader.isPNPFtpTypeDevelop()) { // 正式環境時使用
 				uploadFileInFTP(uploadIs,fileName,targetDir, setting);
 			} else {
 				uploadFileInFTP(uploadIs,fileName,targetDir, setting);
@@ -1190,12 +1452,12 @@ public class PNPFtpService {
 		
 		FTPClient FTPClient = new FTPClient();
 		try {
-			FTPClient.connect(setting.getHost(), setting.getPort());
-			FTPClient.login(setting.getAccount(), setting.getPassword());
+			FTPClient.connect(setting.getSmsHost(), setting.getSmsPort());
+			logger.info("loginFTP : " + (smsLoginFTP(FTPClient, setting) ? "OK" : "fail"));
 			FTPClient.enterLocalPassiveMode();
 			FTPClient.setFileType(FTP.BINARY_FILE_TYPE);
 			FTPClient.setAutodetectUTF8(true);
-			FTPClient.setControlEncoding("UTF-8");
+			FTPClient.setControlEncoding(setting.getFileEncoding());
 			FTPClient.changeWorkingDirectory(targetDir);
 			
             //上傳檔案
@@ -1204,8 +1466,8 @@ public class PNPFtpService {
             //關閉檔案
             targetStream.close();
 		}catch (Exception e) {
-			e.printStackTrace();
 			logger.error("uploadFileInFTP Exception" + e.getMessage());
+			e.printStackTrace();
 		}finally {
             if (FTPClient != null) {
                 //登出
@@ -1221,7 +1483,7 @@ public class PNPFtpService {
 		ChannelSftp channelSftp = null;
 		Session session = null;
 		try {
-			session = loginSFTP(setting);
+			session = smsLoginSFTP(setting);
 			if (session == null) {
 				logger.error("uploadFileInSFTP connection failed");
 				return;
@@ -1238,13 +1500,14 @@ public class PNPFtpService {
 			        this.mkdir(targetDir,channelSftp);
 			    }
 		        channelSftp.cd(targetDir);
-	            channelSftp.put(uploadIs, new String(fileName.getBytes(),"UTF-8"));
+	            channelSftp.put(uploadIs, new String(fileName.getBytes(),setting.getFileEncoding()));
 			}else {
 				logger.error("uploadFileInSFTP channelSftp: " + channelSftp.isConnected());
 			}
 		
 		}catch (Exception e) {
-			// TODO: handle exception
+			logger.error("uploadFileInSFTP Exception" + e.getMessage());
+			e.printStackTrace();
 		}
 	}
 	

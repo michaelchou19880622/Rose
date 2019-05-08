@@ -77,10 +77,10 @@ public class PnpDetailMing extends PnpDetail {
 	@Column(name = "SN" ,columnDefinition="nvarchar(15)")
 	private String SN;
 	//預約時間
-	@Column(name = "DETAIL_SCHEDULE_TIME")
-	private Date detailScheduleTime;
+	@Column(name = "DETAIL_SCHEDULE_TIME" ,columnDefinition="nvarchar(20)")
+	private String detailScheduleTime;
 	//批次帳號1
-	@Column(name = "ACCOUNT1" ,columnDefinition="nvarchar(10)")
+	@Column(name = "ACCOUNT1" ,columnDefinition="nvarchar(20)")
 	private String account1;
 	//批次帳號2
 	@Column(name = "ACCOUNT2" ,columnDefinition="nvarchar(20)")
@@ -210,11 +210,11 @@ public class PnpDetailMing extends PnpDetail {
 		this.uid = uid;
 	}
 
-	public Date getDetailScheduleTime() {
+	public String getDetailScheduleTime() {
 		return detailScheduleTime;
 	}
 
-	public void setDetailScheduleTime(Date detailScheduleTime) {
+	public void setDetailScheduleTime(String detailScheduleTime) {
 		this.detailScheduleTime = detailScheduleTime;
 	}
 

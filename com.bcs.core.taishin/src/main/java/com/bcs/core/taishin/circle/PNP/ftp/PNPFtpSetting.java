@@ -16,11 +16,22 @@ public class PNPFtpSetting {
 	private String RESCode;
 	public String account;
 	public String password;
+	public String protocol;
 	private String path;
 	private String uploadPath;
-	public String protocol;
 	private String fileEncoding;
 	private String downloadSavePath;
+	private String flow;
+	private String smsHost;
+	private int smsPort;
+	private int smsServerHostNamePort;
+	private String smsServerHostName;
+	private String smsAPPCode;
+	private String smsRESCode;
+	public String smsAccount;
+	public String smsPassword;
+	public String smsProtocol;
+	
 
 	private List<String> fileNames = new ArrayList<>();
 	
@@ -164,6 +175,86 @@ public class PNPFtpSetting {
 
 	public void setDownloadSavePath(String downloadSavePath) {
 		this.downloadSavePath = downloadSavePath;
+	}
+
+	public String getFlow() {
+		return flow;
+	}
+
+	public void setFlow(String flow) {
+		this.flow = flow;
+	}
+
+	public String getSmsHost() {
+		return smsHost;
+	}
+
+	public void setSmsHost(String smsHost) {
+		this.smsHost = smsHost;
+	}
+
+	public int getSmsPort() {
+		return smsPort;
+	}
+
+	public void setSmsPort(int smsPort) {
+		this.smsPort = smsPort;
+	}
+
+	public int getSmsServerHostNamePort() {
+		return smsServerHostNamePort;
+	}
+
+	public void setSmsServerHostNamePort(int smsServerHostNamePort) {
+		this.smsServerHostNamePort = smsServerHostNamePort;
+	}
+
+	public String getSmsServerHostName() {
+		return smsServerHostName;
+	}
+
+	public void setSmsServerHostName(String smsServerHostName) {
+		this.smsServerHostName = smsServerHostName;
+	}
+
+	public String getSmsAPPCode() {
+		return smsAPPCode;
+	}
+
+	public void setSmsAPPCode(String smsAPPCode) {
+		this.smsAPPCode = smsAPPCode;
+	}
+
+	public String getSmsRESCode() {
+		return smsRESCode;
+	}
+
+	public void setSmsRESCode(String smsRESCode) {
+		this.smsRESCode = smsRESCode;
+	}
+
+	public String getSmsAccount() {
+		return smsAccount;
+	}
+
+	public void setSmsAccount(String smsAccount) {
+		this.smsAccount = smsAccount;
+	}
+
+	public String getSmsPassword() {
+		return smsPassword;
+	}
+
+	public void setSmsPassword(String smsPassword) {
+		this.smsPassword = smsPassword;
+	}
+
+	public String getSmsProtocol() {
+		return smsProtocol;
+	}
+
+	public void setSmsProtocol(String smsProtocol) {
+		this.smsProtocol = smsProtocol;
 	}
 
 	

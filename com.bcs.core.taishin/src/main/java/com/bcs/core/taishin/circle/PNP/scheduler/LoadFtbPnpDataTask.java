@@ -155,28 +155,28 @@ public class LoadFtbPnpDataTask {
 			logger.info(" LoadFtbPnpDataTask ftpProcessHandler SOURCE_MITAKE....");
 				try {
 				ftpProcessHandler(AbstractPnpMainEntity.SOURCE_MITAKE);
-				} catch (InterruptedException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				
 				logger.info(" LoadFtbPnpDataTask ftpProcessHandler SOURCE_MING....");
 				try {
 					ftpProcessHandler(AbstractPnpMainEntity.SOURCE_MING);
-				} catch (InterruptedException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				
 				logger.info(" LoadFtbPnpDataTask ftpProcessHandler SOURCE_EVERY8D....");
 				try {
 					ftpProcessHandler(AbstractPnpMainEntity.SOURCE_EVERY8D);
-				} catch (InterruptedException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				 
 				logger.info(" LoadFtbPnpDataTask ftpProcessHandler SOURCE_UNICA....");
 				try {
 					ftpProcessHandler(AbstractPnpMainEntity.SOURCE_UNICA);
-				} catch (InterruptedException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -266,7 +266,7 @@ public class LoadFtbPnpDataTask {
 		
 			// 1. ftp get file
 			Map<String,byte[]> lReturnDatas = new HashMap<String,byte[]>();
-			Map<String,byte[]> returnDatas = pnpFtpService.downloadMutipleFileByType(source , pnpFtpSetting.getPath(), "txt", pnpFtpSetting);
+			Map<String,byte[]> returnDatas = pnpFtpService.downloadMutipleFileByType(source , pnpFtpSetting.getPath(), "TXT", pnpFtpSetting);
 			for(String fileName : returnDatas.keySet()) {
 				pnpFtpSetting.addFileNames(fileName);
 				logger.info(" FTP--" + pnpFtpSetting.getChannelId() + ":" + fileName );
@@ -361,7 +361,7 @@ public class LoadFtbPnpDataTask {
 			List<Object> mains = new ArrayList<Object>();
 			
 			for (String fileName : lReturnDatas.keySet()) {
-				String encoding = "UTF-8";
+				String encoding = pnpFtpSetting.getFileEncoding();
 				if (pnpFtpSetting.containsFileName(fileName)) {
 					encoding = pnpFtpSetting.getFileEncoding();
 					logger.info(fileName + " encoding:" +  encoding );
@@ -446,7 +446,7 @@ public class LoadFtbPnpDataTask {
 					detail.setPhone(detailData[1]);// 收訊人手機號碼，長度為20碼以內(格式為0933******或+886933******)
 					detail.setPhoneHash(toSHA256(detailData[1]));
 					detail.setMsg(detailData[2]);// Content 簡訊訊息內容
-					detail.setDetailScheduleTime(sdf.parse(detailData[3]));// 預約時間
+					detail.setDetailScheduleTime(detailData[3]);// 預約時間
 					detail.setAccount1(detailData[4]);// 批次帳號1
 					detail.setAccount2(detailData[5]);// 批次帳號2
 					detail.setVariable1(detailData[6]);// Variable1 擴充欄位1(可為空值)
@@ -581,13 +581,13 @@ public class LoadFtbPnpDataTask {
 			pnpMainMing.setOrigFileName(origFileName);
 			pnpMainMing.setSource(AbstractPnpMainEntity.SOURCE_MING);
 			pnpMainMing.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
-			pnpMainMing.setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW.toString(), true));
+			pnpMainMing.setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_MING, true));
 			pnpMainMing.setProcStage("BC");
 			// 明宣預約時間散在各detail中
 			// String sendType = StringUtils.isBlank(OrderTime) ?
 			// AbstractPnpMainEntity.SEND_TYPE_IMMEDIATE :
 			// AbstractPnpMainEntity.SEND_TYPE_DELAY;
-			String sendType = AbstractPnpMainEntity.SEND_TYPE_IMMEDIATE;
+			String sendType = AbstractPnpMainEntity.SEND_TYPE_IMMEDIATE;//TODO 
 			pnpMainMing.setSendType(sendType);
 			// //原生欄位
 			// pnpMainMing.setSubject(Subject);
@@ -628,7 +628,7 @@ public class LoadFtbPnpDataTask {
 			pnpMainMitake.setOrigFileName(origFileName);
 			pnpMainMitake.setSource(AbstractPnpMainEntity.SOURCE_MITAKE);
 			pnpMainMitake.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
-			pnpMainMitake.setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW.toString(), true));
+			pnpMainMitake.setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_MITAKE, true));
 			pnpMainMitake.setProcStage("BC");
 			String sendType = StringUtils.isBlank(orderTime) ? AbstractPnpMainEntity.SEND_TYPE_IMMEDIATE
 					: AbstractPnpMainEntity.SEND_TYPE_DELAY;
@@ -673,7 +673,7 @@ public class LoadFtbPnpDataTask {
 			pnpMainEvery8d.setOrigFileName(origFileName);
 			pnpMainEvery8d.setSource(AbstractPnpMainEntity.SOURCE_EVERY8D);
 			pnpMainEvery8d.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
-			pnpMainEvery8d.setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW.toString(), true));
+			pnpMainEvery8d.setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_EVERY8D, true));
 			pnpMainEvery8d.setProcStage("BC");
 			String sendType = StringUtils.isBlank(OrderTime) ? AbstractPnpMainEntity.SEND_TYPE_IMMEDIATE
 					: AbstractPnpMainEntity.SEND_TYPE_DELAY;
@@ -718,7 +718,7 @@ public class LoadFtbPnpDataTask {
 			pnpMainUnica.setOrigFileName(origFileName);
 			pnpMainUnica.setSource(AbstractPnpMainEntity.SOURCE_UNICA);
 			pnpMainUnica.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
-			pnpMainUnica.setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW.toString(), true));
+			pnpMainUnica.setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_UNICA, true));
 			pnpMainUnica.setProcStage("BC");
 			String sendType = StringUtils.isBlank(OrderTime) ? AbstractPnpMainEntity.SEND_TYPE_IMMEDIATE
 					: AbstractPnpMainEntity.SEND_TYPE_DELAY;
@@ -755,12 +755,12 @@ public class LoadFtbPnpDataTask {
 		PnpMainMitake pnpMainMitake = (PnpMainMitake) sourceMain;
 		List<? super PnpDetail> originalDetails = pnpMainMitake.getPnpDetails();
 		logger.info(" saveMitakeDB MitakeDetails size:" + originalDetails.size());
-		
+		pnpMainMitake.setOrigFileName(pnpMainMitake.getOrigFileName().replace(".ok", ""));
 		pnpMainMitake = pnpMainMitakeRepository.save(pnpMainMitake);
 		List<Object> details = new ArrayList<>();
 		for (Object detail : originalDetails) {
 			((PnpDetail) detail).setPnpMainId(pnpMainMitake.getPnpMainId());
-			((PnpDetail) detail).setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW.toString(), true));
+			((PnpDetail) detail).setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_MITAKE, true));
 			((PnpDetail) detail).setProcStage(AbstractPnpMainEntity.STAGE_BC);
 			((PnpDetail) detail).setSource(AbstractPnpMainEntity.SOURCE_MITAKE);
 			((PnpDetail) detail).setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
@@ -787,7 +787,7 @@ public class LoadFtbPnpDataTask {
 		List<Object> details = new ArrayList<>();
 		for (Object detail : originalDetails) {
 			((PnpDetail) detail).setPnpMainId(pnpMainUnica.getPnpMainId());
-			((PnpDetail) detail).setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW.toString(), true));
+			((PnpDetail) detail).setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_UNICA, true));
 			((PnpDetail) detail).setProcStage(AbstractPnpMainEntity.STAGE_BC);
 			((PnpDetail) detail).setSource(AbstractPnpMainEntity.SOURCE_UNICA);
 			((PnpDetail) detail).setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
@@ -814,7 +814,7 @@ public class LoadFtbPnpDataTask {
 		List<Object> details = new ArrayList<>();
 		for (Object detail : originalDetails) {
 			((PnpDetail) detail).setPnpMainId(pnpMainEvery8d.getPnpMainId());
-			((PnpDetail) detail).setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW.toString(), true));
+			((PnpDetail) detail).setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_EVERY8D, true));
 			((PnpDetail) detail).setProcStage(AbstractPnpMainEntity.STAGE_BC);
 			((PnpDetail) detail).setSource(AbstractPnpMainEntity.SOURCE_EVERY8D);
 			((PnpDetail) detail).setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
@@ -836,12 +836,12 @@ public class LoadFtbPnpDataTask {
 		PnpMainMing pnpMainMing = (PnpMainMing) sourceMain;
 		List<? super PnpDetail> originalDetails = pnpMainMing.getPnpDetails();
 		logger.info(" saveMingDB MingDetails size:" + originalDetails.size());
-
+		pnpMainMing.setOrigFileName(pnpMainMing.getOrigFileName().replace(".ok", ""));
 		pnpMainMing = pnpMainMingRepository.save(pnpMainMing);
 		List<Object> details = new ArrayList<>();
 		for (Object detail : originalDetails) {
 			((PnpDetail) detail).setPnpMainId(pnpMainMing.getPnpMainId());
-			((PnpDetail) detail).setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW.toString(), true));
+			((PnpDetail) detail).setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_MING, true));
 			((PnpDetail) detail).setProcStage(AbstractPnpMainEntity.STAGE_BC);
 			((PnpDetail) detail).setSource(AbstractPnpMainEntity.SOURCE_MING);
 			((PnpDetail) detail).setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);

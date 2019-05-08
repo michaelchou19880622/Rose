@@ -51,7 +51,7 @@ public class ExecuteSendPnpTask {
 		 * #通路參數 : 寄BC 失敗後寄PNP失敗後寄SMS結束 =3
 		 */
 		
-		String sendPath = CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW.toString(), true);
+		String sendPath = CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_MING.toString(), true);
 		switch (sendPath) {
 		case "1"://1=BC>PNP>SMS
 			

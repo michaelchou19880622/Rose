@@ -102,6 +102,7 @@ public class BillingNoticeFtpService {
 			Map<String,byte[]> lReturnDatas = new HashMap<String,byte[]>();
 			List<FtpSetting> ftpSettings = ftpService.getFtpSettings();
 			for(FtpSetting ftp : ftpSettings) {
+				ftp.clearFileNames();	
 				Map<String,byte[]> returnDatas = ftpService.downloadMutipleFileByType(ftp.getPath(), fileExtension, ftp);
 				for(String fileName : returnDatas.keySet()) {
 					ftp.addFileNames(fileName);

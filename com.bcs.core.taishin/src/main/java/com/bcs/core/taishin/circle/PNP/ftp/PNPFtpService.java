@@ -1,19 +1,13 @@
 package com.bcs.core.taishin.circle.PNP.ftp;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
@@ -1233,6 +1227,7 @@ public class PNPFtpService {
 				channelSftp.cd(pDirectory);
 				for (String lFileName : pFileNames) {
 					channelSftp.rm(lFileName);
+					setting.removeFileNames(lFileName);
 				}
 				if(source.equals(AbstractPnpMainEntity.SOURCE_EVERY8D)||source.equals(AbstractPnpMainEntity.SOURCE_UNICA)){
 					for (String lFileName : pFileNames) {
@@ -1288,6 +1283,7 @@ public class PNPFtpService {
 					channelSftp.cd(pDirectory);
 					for (String lFileName : pFileNames) {
 						channelSftp.rm(lFileName);
+						setting.removeFileNames(lFileName);
 					}
 					if(source.equals(AbstractPnpMainEntity.SOURCE_EVERY8D)||source.equals(AbstractPnpMainEntity.SOURCE_UNICA)){
 						for (String lFileName : pFileNames) {
@@ -1341,6 +1337,7 @@ public class PNPFtpService {
 			for (String procfileName : pFileNames) {
 				boolean success = false; 
 				success = FTPClient.deleteFile(procfileName);
+				setting.removeFileNames(procfileName);
 				if (!success) {
 					logger.error("remove fail: " + procfileName);
 				}
@@ -1386,6 +1383,7 @@ public class PNPFtpService {
 				for (String procfileName : pFileNames) {
 					boolean success = false; 
 					success = FTPClient.deleteFile(procfileName);
+					setting.removeFileNames(procfileName);
 					if (!success) {
 						logger.error("remove fail: " + procfileName);
 					}

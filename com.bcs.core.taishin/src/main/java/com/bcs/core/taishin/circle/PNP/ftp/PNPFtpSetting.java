@@ -52,6 +52,12 @@ public class PNPFtpSetting {
 	public List<String> getFileNames() {
 		return fileNames;
 	}
+	
+	public void removeFileNames(String file) {
+		if (fileNames.contains(file)) {
+			fileNames.remove(file);
+		}
+	}
 
 	public void addFileNames(String file) {
 		fileNames.add(file);

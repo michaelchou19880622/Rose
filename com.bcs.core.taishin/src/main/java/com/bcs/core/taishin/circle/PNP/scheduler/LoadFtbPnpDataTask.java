@@ -24,30 +24,20 @@ import javax.annotation.PreDestroy;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPFile;
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.formula.functions.T;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.resource.CoreConfigReader;
-import com.bcs.core.spring.ApplicationContextProvider;
-import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailEvery8d;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMing;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMitake;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailUnica;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainEvery8d;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainMing;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainMitake;
@@ -60,16 +50,11 @@ import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainEvery8dRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainMingRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainMitakeRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainUnicaRepository;
-import com.bcs.core.taishin.circle.PNP.db.service.PnpMainService;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpService;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpSetting;
-import com.bcs.core.taishin.circle.PNP.plugin.CircleImportDataFromText;
-import com.bcs.core.taishin.circle.PNP.plugin.SFTPUtil;
-import com.bcs.core.taishin.circle.PNP.scheduler.CircleSchedulerService;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeMain;
 import com.bcs.core.taishin.circle.db.entity.CircleEntityManagerControl;
-import com.bcs.core.taishin.circle.ftp.FtpSetting;
-import com.bcs.core.taishin.circle.service.BillingNoticeFtpDetail;
+import com.bcs.core.utils.ErrorRecord;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -267,6 +252,7 @@ public class LoadFtbPnpDataTask {
 			// 1. ftp get file
 			Map<String,byte[]> lReturnDatas = new HashMap<String,byte[]>();
 			Map<String,byte[]> returnDatas = pnpFtpService.downloadMutipleFileByType(source , pnpFtpSetting.getPath(), "TXT", pnpFtpSetting);
+			pnpFtpSetting.clearFileNames();
 			for(String fileName : returnDatas.keySet()) {
 				pnpFtpSetting.addFileNames(fileName);
 				logger.info(" FTP--" + pnpFtpSetting.getChannelId() + ":" + fileName );
@@ -351,6 +337,7 @@ public class LoadFtbPnpDataTask {
 		// 1. ftp get file
 			Map<String,byte[]> lReturnDatas = new HashMap<String,byte[]>();
 			Map<String,byte[]> returnDatas = pnpFtpService.downloadMutipleFileByType(source , pnpFtpSetting.getPath(), "txt", pnpFtpSetting);
+			pnpFtpSetting.clearFileNames();
 			for(String fileName : returnDatas.keySet()) {
 				pnpFtpSetting.addFileNames(fileName);
 				logger.info(" FTP--" + pnpFtpSetting.getChannelId() + ":" + fileName );

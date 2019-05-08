@@ -57,6 +57,42 @@ public class CoreConfigReader {
 		return false;
 	}
 	
+	/**
+	 * PNP akka 送訊息服務是否啟動
+	 * @return
+	 */
+	public static boolean isPNPSendMsg(){
+		String isPNPSendMsg = getString(CONFIG_STR.IS_PNP_SENDMSG);
+		if(StringUtils.isNotBlank(isPNPSendMsg) && "true".equals(isPNPSendMsg)){
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * PNP ftp download是否啟動
+	 * @return
+	 */
+	public static boolean isPNPFtpDownload(){
+		String isPNPFtpDownload = getString(CONFIG_STR.IS_PNP_FTPDOWNLOAD);
+		if(StringUtils.isNotBlank(isPNPFtpDownload) && "true".equals(isPNPFtpDownload)){
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 *  PNP ftp 是否為開發者模式
+	 * @return
+	 */
+	public static boolean isPNPFtpTypeDevelop(){
+		String systemType = getString(CONFIG_STR.PNP_FTP_TYPE);
+		if("DEVELOP".equals(systemType)){
+			return true;
+		}
+		return false;
+	}
+	
 	public static boolean isMainSystem(){
 		String isMain = getString(CONFIG_STR.IS_MAIN_SYSTEM);
 		if(StringUtils.isNotBlank(isMain) && "true".equals(isMain)){

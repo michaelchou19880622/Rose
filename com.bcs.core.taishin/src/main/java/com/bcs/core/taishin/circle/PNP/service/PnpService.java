@@ -91,61 +91,6 @@ public class PnpService {
 	private PnpAkkaService pnpAkkaService;
 	private DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 	
-//	/**
-//	 * 找尋開啟的templateId
-//	 * @return
-//	 */
-//	public List<String> findProductSwitchOnTemplateId(){
-//		return PnpContentTemplateMsgRepository.findProductSwitchOnTemplateId();
-//	}
-	
-//	/**
-//	 * 是否宵禁中
-//	 * @param template
-//	 * @return
-//	 */
-//	public boolean isCurfew(PnpContentTemplateMsg template, Calendar now) {
-//		boolean iscurfew = false;
-//		try {
-//			if (StringUtils.isNotBlank(template.getCurfewEndTime()) && StringUtils.isNotBlank(template.getCurfewStartTime())){
-//				Calendar curfewStartTime = (Calendar)now.clone();
-//				String[] startTime = template.getCurfewStartTime().split(":");
-//				curfewStartTime.set(Calendar.HOUR_OF_DAY, Integer.parseInt(startTime[0]));
-//				curfewStartTime.set(Calendar.MINUTE, Integer.parseInt(startTime[1]));
-//				curfewStartTime.set(Calendar.SECOND, Integer.parseInt(startTime[2]));
-//				curfewStartTime.set(Calendar.MILLISECOND, 0);
-//				Calendar curfewEndTime = (Calendar)now.clone();
-//				String[] endTime = template.getCurfewEndTime().split(":");
-//				curfewEndTime.set(Calendar.MILLISECOND, 0);
-//				curfewEndTime.set(Calendar.HOUR_OF_DAY,  Integer.parseInt(endTime[0]));
-//				curfewEndTime.set(Calendar.MINUTE,  Integer.parseInt(endTime[1]));
-//				curfewEndTime.set(Calendar.SECOND,  Integer.parseInt(endTime[2]));
-//				if (curfewStartTime.before(curfewEndTime)) { 
-//					//未跨日 EX: 09:00:00 ~ 13:00:00
-//				}else { 
-//					//跨日 EX: 3/19 23:00:00 ~ 3/20 01:00:00
-//					if (now.after(curfewStartTime))  {
-//						// 目前日期等於起始日 EX: now = 3/19 23:02:00
-//						curfewEndTime.add(Calendar.DATE, 1);
-//					}else {
-//						// 目前日期等於截止日 EX: now = 3/20 00:02:00
-//						curfewStartTime.add(Calendar.DATE, -1);
-//					}
-//				}
-//				
-//				if (now.getTime().before(curfewEndTime.getTime()) && now.getTime().after(curfewStartTime.getTime())) { 
-//					// 宵禁中
-//					iscurfew = true;
-//				}
-//				logger.info("iscurfew:" + curfewStartTime.getTime()  + "~" + curfewEndTime.getTime());
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			logger.error("CurfewEndTime/CurfewStartTime Parse Exception :" + e.getMessage());
-//		}
-//		return iscurfew;
-//	}
-	
 	public PnpDetail save(Object pnpDetail) {
 		String source = ((PnpDetail) pnpDetail).getSource();
 		if(StringUtils.isBlank(source)){
@@ -264,22 +209,6 @@ public class PnpService {
 	}
 	
 	
-//	/**
-//	 * update status 為不推送 並寄信
-//	 * 
-//	 * @param PnpMain
-//	 * @return
-//	 */
-//	public void updateStatusFailAndEmail(PnpMain PnpMain) {
-//		updateMainAndDetailStatus(PnpMain, PnpMain.NOTICE_STATUS_FAIL);
-//		//  send email Title , mailTemplate
-//		StringBuilder contextBuilder = new StringBuilder("帳務系統重試失敗 ");
-//		contextBuilder.append("\n 失敗ID:" + PnpMain.getNoticeMainId());
-//		if (PnpMain.getExpiryTime() != null) {
-//			contextBuilder.append( "\n EXPIRY_TIME:" + df.format(PnpMain.getExpiryTime()));
-//		}
-//		sendMail("帳務系統重試失敗", contextBuilder.toString());
-//	}
 
 	/**
 	 * update PnpMain and PnpDetail status 

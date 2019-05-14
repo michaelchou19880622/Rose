@@ -51,7 +51,7 @@ public class PnpMainActor extends UntypedActor {
 			if(AbstractPnpMainEntity.STAGE_BC.equals(stage)){
 				logger.info("PnpMainActor onReceive doing Line PUSH .");
 				
-				Integer buffer = 100;
+				Integer buffer = 19;
 				
 				List<? super PnpDetail> details = pnpMain.getPnpDetails();
 				
@@ -74,7 +74,7 @@ public class PnpMainActor extends UntypedActor {
 				}
 			}else if(AbstractPnpMainEntity.STAGE_PNP.equals(stage)){
 				logger.info("PnpMainActor onReceive doing Line PHONE NUMBER PUSH .");
-				Integer buffer = 100;
+				Integer buffer = 19;
 				
 				List<? super PnpDetail> details = pnpMain.getPnpDetails();
 				

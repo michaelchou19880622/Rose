@@ -55,6 +55,8 @@ $(function(){
 					
 					rowDOM.find('.createDate').html('<a>' + moment(element.createTime).format('YYYY-MM-DD HH:mm:ss') + '</a>').end().find('a').attr('href', exportUrl + element.createTime);
 					rowDOM.find('.department').text(element.department);
+					rowDOM.find('.serviceName').text(element.serviceName);
+					rowDOM.find('.pushTheme').text(element.pushTheme);
 					rowDOM.find('.successCount').text(element.successCount);
 					rowDOM.find('.failCount').text(element.failCount);
 					

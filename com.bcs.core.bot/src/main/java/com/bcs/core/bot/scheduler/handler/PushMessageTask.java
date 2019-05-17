@@ -18,14 +18,13 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.HttpClientErrorException;
 
 import com.bcs.core.api.service.model.PushApiModel;
+import com.bcs.core.bot.akka.service.PNPService;
 import com.bcs.core.db.entity.PushMessageRecord;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.enums.LINE_HEADER;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.spring.ApplicationContextProvider;
 import com.bcs.core.utils.RestfulUtil;
-
-import com.bcs.core.bot.akka.service.PNPService;
 
 public class PushMessageTask implements Job {	
 	PNPService PNPService = ApplicationContextProvider.getApplicationContext().getBean(PNPService.class);
@@ -76,6 +75,8 @@ public class PushMessageTask implements Job {
 				record.setSendType(pushApiModel.getSendTimeType());
 				record.setSendTime(new Date());
 				record.setCreateTime(pushApiModel.getTriggerTime());
+				record.setServiceName(pushApiModel.getServiceName());
+				record.setPushTheme(pushApiModel.getPushTheme());
 			} catch (KeyManagementException | NoSuchAlgorithmException e1) {
 				e1.printStackTrace();
 			} catch (Exception e) {
@@ -92,7 +93,8 @@ public class PushMessageTask implements Job {
 						record.setSendType(pushApiModel.getSendTimeType());
 						record.setSendTime(new Date());
 						record.setCreateTime(pushApiModel.getTriggerTime());
-						
+						record.setServiceName(pushApiModel.getServiceName());
+						record.setPushTheme(pushApiModel.getPushTheme());
 						if(errorMessage.has("details"))
 							record.setDetailMessage(errorMessage.getJSONArray("details").toString());
 					}

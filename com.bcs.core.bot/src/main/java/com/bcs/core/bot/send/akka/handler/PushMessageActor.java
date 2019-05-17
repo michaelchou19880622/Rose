@@ -65,6 +65,8 @@ public class PushMessageActor extends UntypedActor {
 						record.setSendType(pushApiModel.getSendTimeType());
 						record.setSendTime(new Date());
 						record.setCreateTime(pushApiModel.getTriggerTime());
+						record.setServiceName(pushApiModel.getServiceName());
+						record.setPushTheme(pushApiModel.getPushTheme());
 					} catch (HttpClientErrorException e) {
 						JSONObject errorMessage = new JSONObject(e.getResponseBodyAsString());
 						
@@ -77,7 +79,8 @@ public class PushMessageActor extends UntypedActor {
 							record.setSendType(pushApiModel.getSendTimeType());
 							record.setSendTime(new Date());
 							record.setCreateTime(pushApiModel.getTriggerTime());
-							
+							record.setServiceName(pushApiModel.getServiceName());
+							record.setPushTheme(pushApiModel.getPushTheme());
 							if(errorMessage.has("details"))
 								record.setDetailMessage(errorMessage.getJSONArray("details").toString());
 						}

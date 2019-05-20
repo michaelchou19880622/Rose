@@ -42,7 +42,9 @@ public enum BcsPageEnum {
 	ReportPageVisitPage("/BCS/Views/Page22"),
 	ReportPageVisitDetailPage("/BCS/Views/Page23"),
 	ReportPushApiEffectsPage("/BCS/Views/Page-PushApiEffects"),
-
+	ReportBNEffectsPage("/BCS/Views/PageBNEffects"),
+	ReportBNEffectsDetailPage("/BCS/Views/PageBNEffectsDetail"),
+	
 	InteractiveResponsePage("/BCS/Views/Page12"),
 	InteractiveResponseDisablePage("/BCS/Views/Page12-1"),
 	InteractiveResponseCreatePage("/BCS/Views/Page13"),
@@ -121,6 +123,10 @@ public enum BcsPageEnum {
 	TemplateMsgCreatePage("/BCS/Views/PageT1"),
 	TemplateMsgListPage("/BCS/Views/PageT2"),
 
+	// Billing Notice Page
+	BillingNoticeCreatePage("/BCS/Views/PageBN1"),
+	BillingNoticeListPage("/BCS/Views/PageBN2"),
+	
 	//Game
 	GameCreatePage("/BCS/Views/PageG1"),
 	GameListPage("/BCS/Views/PageG2"),

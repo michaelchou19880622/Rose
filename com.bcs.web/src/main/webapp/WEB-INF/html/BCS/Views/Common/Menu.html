@@ -39,6 +39,13 @@
                         <li th:classappend="${currentPage == 'PageT1'} ? 'ExSelected'">
                         	<a th:href="@{/bcs/edit/templateMsgCreatePage}"><span>建立樣板訊息</span></a>
                         </li>
+                        </li>
+                        <li th:classappend="${currentPage == 'PageBN2'} ? 'ExSelected'">
+                            <a th:href="@{/bcs/edit/billingNoticeListPage}"><span>帳務通知樣板列表</span></a>
+                        </li>
+                        <li th:classappend="${currentPage == 'PageBN1'} ? 'ExSelected'">
+                        	<a th:href="@{/bcs/edit/billingNoticeCreatePage}"><span>建立帳務通知樣板</span></a>
+                        </li>
                         <li th:classappend="${currentPage == 'Page26'} ? 'ExSelected'">
                         	<a th:href="@{/bcs/edit/tracingGenerateListPage}"><span>追蹤網址列表</span></a>
                         </li>
@@ -195,8 +202,11 @@
                         <li th:classappend="${currentPage == 'Page23'} ? 'ExSelected'" sec:authorize="hasAnyRole('NotShowRole')">
                         	<a th:href="@{/bcs/admin/otherPage}"><span>其他頁面</span></a>
                         </li>
-                        <li th:classappend="${currentPage == 'Page-PushApiEffects'} ? 'ExSelected'" sec:authorize="hasAnyRole('NotShowRole')">
+                         <li th:classappend="${currentPage == 'Page-PushApiEffects'} ? 'ExSelected'" sec:authorize="hasAnyRole('NotShowRole')">
                         	<a th:href="@{/bcs/admin/reportPushApiEffectsPage}"><span>Push API 成效頁面</span></a>
+                        </li>
+                        <li th:classappend="${currentPage == 'PageBNEffects'} ? 'ExSelected'">
+                        	<a th:href="@{/bcs/admin/reportBNEffectsPage}"><span>帳務通知推送成效頁面</span></a>
                         </li>
                     </ul>
                 </li>

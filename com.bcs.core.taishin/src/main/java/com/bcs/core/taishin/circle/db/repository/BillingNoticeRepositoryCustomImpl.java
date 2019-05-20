@@ -6,11 +6,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
 
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeDetail;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeMain;
+import com.bcs.core.taishin.circle.service.BillingNoticeService;
 
 @Repository
 public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositoryCustom {
@@ -18,17 +20,20 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
 	@PersistenceContext
 	private EntityManager entityManager;
 	
+	/** Logger */
+	private static Logger logger = Logger.getLogger(BillingNoticeService.class);
+	
 	/**
 	 * 找出第一個retry detail 準備更新用
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	@Transactional(rollbackFor=Exception.class, timeout = 3000)
-	public BillingNoticeDetail findFirstDetailByStatusForUpdate(String status, List<String> tempIds) {
-		
-		
+	public BillingNoticeDetail findFirstDetailByStatusForUpdate(String status, List<String> tempIds) {		
 		String sqlString = "select  b.* from BCS_BILLING_NOTICE_DETAIL b, BCS_BILLING_NOTICE_MAIN m  "
 				+ "where  m.NOTICE_MAIN_ID = b.NOTICE_MAIN_ID  and b.STATUS = :status and m.TEMP_ID in (:tempIds) Order by b.CREAT_TIME ";
+		//logger.info("sqlString1: " + sqlString);
+		
 		List<BillingNoticeDetail> details = entityManager.createNativeQuery(sqlString, BillingNoticeDetail.class)
 		.setParameter("status", status)
 		.setParameter("tempIds", tempIds).setMaxResults(1).getResultList();
@@ -37,6 +42,8 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
 		if (details != null && !details.isEmpty()) {
 			for(BillingNoticeDetail detail : details) {
 				entityManager.refresh(detail, LockModeType.PESSIMISTIC_WRITE);
+				
+				//logger.info("detail in update1: " + detail.toString());
 				return detail;
 			}
 	    }

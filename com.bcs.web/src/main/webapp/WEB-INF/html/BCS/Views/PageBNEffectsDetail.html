@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Push Api Effects Page', '/BCS/JS/PageBNEffectsDetail.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('PageBNEffects')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">帳務通知推送成效明細</h3>
+                    </header>
+                    <div class="CHBtnSet">
+	                    <div class="CHRight">
+	                    	<a class="btn_add back" style="cursor: pointer; padding: 7px 12px; text-decoration: none">返回</a>
+	                   		<a class="btn_add exportToExcel" style="cursor: pointer; padding: 7px 12px; text-decoration: none">匯出 EXCEL</a>
+	                   	</div>
+                    </div>
+                    <p class="MdTxtNotice01 MdAC pad10"></p>
+                    <div class="mainFrame" style="border: 0">
+                        <table border="1" id="tableBody">
+                            <colgroup>
+                            	<col width="150">
+                            	<col width="100">
+                            	<col width="100">
+                            	<col width="100">
+                            	<col width="60">
+                            	<col width="150">
+                           	</colgroup>
+                            <tr class="tableHeader">
+                                <th>產品名稱</th>
+                                <th>產生時間</th>
+                                <th>修改時間</th>
+                                <th>發送時間</th>
+                                <th>發送類型</th>
+                                <th>UID</th>
+                            </tr>
+                            <tr class="dataTemplate">
+                            	<td class="title" style="text-align:left;"></td>
+                                <td class="createTime"></td>
+                                <td class="modifyTime"></td>
+                                <td class="sendTime"></td>
+                                <td class="status"></td>
+                                <td class="uid"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

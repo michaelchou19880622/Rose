@@ -212,37 +212,46 @@ public class BillingNoticeFtpService {
 				String originalFileType = splitHeaderData[0];
 				String sendType = splitHeaderData[1].toUpperCase();
 				String scheduleTime = splitHeaderData[2];
+				
+				// TemplateTitle => Details
 				Map<String, List<BillingNoticeFtpDetail>> resultMap = parseDetail(fileContents);
+				
 				for (String key : resultMap.keySet()) {
-					List<BillingNoticeContentTemplateMsg> templates =  billingNoticeContentTemplateMsgRepository.findByTemplateTitle(key);
+					// get the Main Template
 					BillingNoticeContentTemplateMsg template = null;
+					List<BillingNoticeContentTemplateMsg> templates =  billingNoticeContentTemplateMsgRepository.findMainOnTemplateByTitle(key);
 					if (templates == null || templates.isEmpty()) {
 						logger.info("Template :" + key + " not exist!  Use Default");
 						// 拿不到範本取default
-						List<BillingNoticeContentTemplateMsg> defaultTemplates =  billingNoticeContentTemplateMsgRepository.findByTemplateTitle(DEFAULT_TEMPLATE);
+						List<BillingNoticeContentTemplateMsg> defaultTemplates =  billingNoticeContentTemplateMsgRepository.findByTemplateTitleAndProductSwitchOn(DEFAULT_TEMPLATE);
 						if (defaultTemplates == null || defaultTemplates.isEmpty()) {
 							logger.error("Default Template is not exist!");
 						}else {
 							template = defaultTemplates.get(0);
 						}
 					}else {
+						// carousel button
 						template = templates.get(0);
 					}
 					
 					if (template == null) {
 						logger.error("Template is not exist!:" + key);
 					}else {
+						// set Basics
 						BillingNoticeMain billingNoticeMain = new BillingNoticeMain();
 						billingNoticeMain.setGroupId(new Long(mains.size() + 1));
+						billingNoticeMain.setSendType(sendType);
 						billingNoticeMain.setOrigFileName(origFileName);
 						billingNoticeMain.setOrigFileType(originalFileType);
 						billingNoticeMain.setStatus(BillingNoticeMain.NOTICE_STATUS_DRAFT);
-						billingNoticeMain.setSendType(sendType);
 						billingNoticeMain.setExpiryTime(expiryTime.getTime());
 						billingNoticeMain.setTempId(template.getTemplateId()); 
 						if (sendType.equals(BillingNoticeMain.SENDING_MSG_TYPE_DELAY)) {
 							billingNoticeMain.setScheduleTime(scheduleTime);
 						}
+						billingNoticeMain.setTemplate(template);
+						
+						// set Details
 						List<BillingNoticeFtpDetail> ftpDetails = resultMap.get(key);
 						List<BillingNoticeDetail> details = new ArrayList<BillingNoticeDetail>();
 						for (BillingNoticeFtpDetail ftpDetail : ftpDetails) {

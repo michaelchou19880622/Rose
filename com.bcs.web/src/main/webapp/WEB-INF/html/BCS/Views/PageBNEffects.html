@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
-<head th:replace="/BCS/Views/Common/Head :: head ('Push Api Effects Page', '/BCS/JS/page-PushApiEffects.base.js')">
+<head th:replace="/BCS/Views/Common/Head :: head ('Push Api Effects Page', '/BCS/JS/PageBNEffects.base.js')">
 </head>
 
 <body>
 	<header th:replace="/BCS/Views/Common/Header :: header"></header>
 
     <div class="LyContents">
-		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page-PushApiEffects')"></div>
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('PageBNEffects')"></div>
 
         <!-- Right Content -->
         <div class="LyMain" role="main">
             <form>
                 <section>
                     <header class="ContentHead">
-                        <h3 class="CHTtl">Push API 成效列表</h3>
+                        <h3 class="CHTtl">帳務通知推送成效列表</h3>
                     </header>
                     <div class="CHBtnSet">
                     	<div>
@@ -43,25 +43,25 @@
                     <p class="MdTxtNotice01 MdAC pad10"></p>
                     <div class="mainFrame" style="border: 0">
                         <table border="1" id="tableBody">
-                            <colgroup><col width="180"><col width="100"><col width="150"><col width="100"><col width="100"></colgroup>
+                            <colgroup>
+                            	<col width="180">
+                            	<col width="150">
+                            	<col width="350">
+                            	<col width="100">
+                            	<col width="100">
+                           	</colgroup>
                             <tr class="tableHeader">
                                 <th>發送時間</th>
-                                <!-- <th>發送類型</th>
-                                <th>產品名稱</th> -->
-                                <th>部門名稱</th>
-                                <th>服務名稱</th>
-                                <th>推播主題</th>
+                                <th>發送類型</th>
+                                <th>產品名稱</th>
                                 <th>發送成功數</th>
                                 <th>發送失敗數</th>
                             </tr>
                             <tr class="dataTemplate">
-                                <td class="createDate"></td>
-                               <!-- <td class="sendType"></td>
-                                <td class="product"></td> --> 
-                                <td class="department"></td>
-                                <td class="serviceName"></td>
-                                <td class="pushTheme"></td>
-                                <td class="successCount"></td>
+                                <td class="sendDate"></td>
+                                <td class="sendType"></td>
+                                <td class="title" style="text-align:left;"></td>
+                                <td class="completeCount"></td>
                                 <td class="failCount"></td>
                             </tr>
                         </table>

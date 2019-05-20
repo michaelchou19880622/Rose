@@ -25,6 +25,7 @@ public enum CONFIG_STR {
 	ResourceBCS("bcs.base.url.resource.bcs"),
 	
 	FilePath("file.path"),
+	BillingNoticeExportFilePath("billing.notice.file.path"),
 	
 	Default("TaishinBank"),
 	//Default("HPiCC"),

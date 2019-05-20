@@ -42,6 +42,7 @@ import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsg;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsgAction;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeDetail;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeMain;
+import com.bcs.core.taishin.circle.db.repository.BillingNoticeContentTemplateMsgActionRepository;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeContentTemplateMsgRepository;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeDetailRepository;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeMainRepository;
@@ -60,7 +61,8 @@ public class BillingNoticeService {
 	private BillingNoticeDetailRepository billingNoticeDetailRepository;
 	@Autowired
 	private BillingNoticeContentTemplateMsgRepository billingNoticeContentTemplateMsgRepository;
-	
+	@Autowired
+	private BillingNoticeContentTemplateMsgActionRepository billingNoticeContentTemplateMsgActionRepository;
 	@Autowired
 	private BillingNoticeAkkaService billingNoticeAkkaService;
 	private DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
@@ -111,7 +113,7 @@ public class BillingNoticeService {
 					// 宵禁中
 					iscurfew = true;
 				}
-				logger.info("iscurfew:" + curfewStartTime.getTime()  + "~" + curfewEndTime.getTime());
+				logger.info("iscurfew: " + curfewStartTime.getTime()  + "~" + curfewEndTime.getTime());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -272,23 +274,27 @@ public class BillingNoticeService {
 				CONFIG_STR.ChannelToken.toString(), true);
 		String serviceCode = CoreConfigReader.getString(CONFIG_STR.AutoReply.toString(),
 				CONFIG_STR.ChannelServiceCode.toString(), true);
+		
 		/* 設定 request headers */
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
 		headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 		headers.set(LINE_HEADER.HEADER_BOT_ServiceCode.toString(), serviceCode);
+		
 		List<BillingNoticeDetail> details = billingNoticeMain.getDetails();
 		BillingNoticeContentTemplateMsg templateMsg = billingNoticeMain.getTemplate();
 		List<BillingNoticeContentTemplateMsgAction> actions = billingNoticeMain.getTemplateActions();
-		if (templateMsg == null || actions == null) {
+		
+		if (templateMsg == null) {
 			logger.error("Template Error : BillingNoticeContentTemplateMsg or BillingNoticeContentTemplateMsgAction is empty" );
 			return;
 		}
+		
 		for (BillingNoticeDetail detail : details) {
 			// only send wait & retry user
 			JSONObject requestBody = new JSONObject();
 			requestBody.put("to", detail.getUid());
-			JSONArray messageArray = combineLineMessage(templateMsg, actions, detail);
+			JSONArray messageArray = combineLineMessage(templateMsg, detail);
 			requestBody.put("messages", messageArray);
 
 			/* 將 headers 跟 body 塞進 HttpEntity 中 */
@@ -334,40 +340,116 @@ public class BillingNoticeService {
 	 * @param detail
 	 * @return
 	 */
-	private JSONArray combineLineMessage(BillingNoticeContentTemplateMsg templateMsg,
-			List<BillingNoticeContentTemplateMsgAction> actions, BillingNoticeDetail detail) {
-		JSONArray messageArray = new JSONArray();
-		JSONObject message = new JSONObject();
-		//  套用 template 發送
+	private JSONArray combineLineMessage(BillingNoticeContentTemplateMsg templateMsg, BillingNoticeDetail detail) {	
+		JSONArray actionsArray = null;
+		List<BillingNoticeContentTemplateMsgAction> actions = null;
 		JSONObject templateObject = new JSONObject();
-		JSONArray columnsArray = new JSONArray();
-		JSONArray actionsArray = new JSONArray();
-		JSONObject columnObject = new JSONObject();
-		for(BillingNoticeContentTemplateMsgAction action :actions){
-			BillingNoticeContentTemplateMsgActionType type = BillingNoticeContentTemplateMsgActionType.findActionType(action.getActionType());
-			if (type != null) {
-				JSONObject actionObject = type.getJSONObject(action);
-				actionsArray.put(actionObject);
-			}else {
-				logger.error("Template Error : BillingNoticeContentTemplateMsgActionType is not support . Type:"+ action.getActionType() );
-			}
+		String imageUrl = "";
+		JSONObject message = new JSONObject();
+		JSONArray messagesArray = new JSONArray();
+				
+		switch(templateMsg.getTemplateType()) {
+		case BillingNoticeContentTemplateMsg.TEMPLATE_TYPE_BUTTONS:
 			
+			// template
+			imageUrl = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, templateMsg.getTemplateImageId());
+			//imageUrl = "https://images.unsplash.com/photo-1556228720-9b1e04f13f63";
+			logger.info("imageUrl1: " + imageUrl);
+			
+			templateObject.put("type", templateMsg.getTemplateType()); // buttons
+			templateObject.put("thumbnailImageUrl",  imageUrl);
+			templateObject.put("title", detail.getTitle());
+			templateObject.put("text", detail.getText());
+			
+			
+			// action
+			actionsArray = new JSONArray();
+			actions = billingNoticeContentTemplateMsgActionRepository.findNotDeletedTemplateId(templateMsg.getTemplateId());
+			for(BillingNoticeContentTemplateMsgAction action : actions){
+				BillingNoticeContentTemplateMsgActionType type = BillingNoticeContentTemplateMsgActionType.findActionType(action.getActionType());
+				if (type != null) {
+					JSONObject actionObject = type.getJSONObject(action);
+					actionsArray.put(actionObject);
+				}else {
+					logger.error("Template Error : BillingNoticeContentTemplateMsgActionType is not support . Type:"+ action.getActionType() );
+				}
+			}
+			templateObject.put("actions", actionsArray);
+			
+			break;
+			
+		case BillingNoticeContentTemplateMsg.TEMPLATE_TYPE_CAROUSEL:
+			
+			// columns
+			JSONArray columnsArray = new JSONArray();
+			
+			// main column
+			JSONObject columnObject = new JSONObject();
+			imageUrl = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, templateMsg.getTemplateImageId());
+			//imageUrl = "https://images.unsplash.com/photo-1556228720-9b1e04f13f63";
+			logger.info("imageUrl1: " + imageUrl);
+			columnObject.put("thumbnailImageUrl",  imageUrl);
+			columnObject.put("title", detail.getTitle());
+			columnObject.put("text", detail.getText()); 
+			// action
+			actionsArray = new JSONArray();
+			actions = billingNoticeContentTemplateMsgActionRepository.findNotDeletedTemplateId(templateMsg.getTemplateId());
+			for(BillingNoticeContentTemplateMsgAction action : actions){
+				BillingNoticeContentTemplateMsgActionType type = BillingNoticeContentTemplateMsgActionType.findActionType(action.getActionType());
+				if (type != null) {
+					JSONObject actionObject = type.getJSONObject(action);
+					actionsArray.put(actionObject);
+				}else {
+					logger.error("Template Error : BillingNoticeContentTemplateMsgActionType is not support . Type:"+ action.getActionType() );
+				}
+			}
+			columnObject.put("actions", actionsArray);
+			columnsArray.put(columnObject);
+			
+			// child columns
+			List<BillingNoticeContentTemplateMsg> childs = billingNoticeContentTemplateMsgRepository.findByParentTemplateId(templateMsg.getTemplateId());
+			for(BillingNoticeContentTemplateMsg child : childs) {			
+				// column
+				columnObject = new JSONObject();
+				imageUrl = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, child.getTemplateImageId());
+				//imageUrl = "https://images.unsplash.com/photo-1556228720-9b1e04f13f63";
+				logger.info("imageUrl1: " + imageUrl);
+				columnObject.put("thumbnailImageUrl",  imageUrl);
+				columnObject.put("title", detail.getTitle());
+				columnObject.put("text", detail.getText());
+				// action
+				actionsArray = new JSONArray();
+				actions = billingNoticeContentTemplateMsgActionRepository.findNotDeletedTemplateId(child.getTemplateId());
+				for(BillingNoticeContentTemplateMsgAction action : actions){
+					BillingNoticeContentTemplateMsgActionType type = BillingNoticeContentTemplateMsgActionType.findActionType(action.getActionType());
+					if (type != null) {
+						JSONObject actionObject = type.getJSONObject(action);
+						actionsArray.put(actionObject);
+					}else {
+						logger.error("Template Error : BillingNoticeContentTemplateMsgActionType is not support . Type:"+ action.getActionType() );
+					}
+				}
+				columnObject.put("actions", actionsArray);
+				columnsArray.put(columnObject);
+			}
+
+			// template
+			templateObject.put("type", templateMsg.getTemplateType()); //carousel
+			templateObject.put("columns", columnsArray);
+			
+			break;
 		}
-		columnObject.put("title", detail.getTitle());  
-		columnObject.put("text", detail.getText());  
-		String imageUrl = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, templateMsg.getTemplateImageId());
-		columnObject.put("thumbnailImageUrl",  imageUrl);
-		columnObject.put("actions", actionsArray);
-		columnsArray.put(columnObject);
 		
-		templateObject.put("columns", columnsArray);
-		templateObject.put("type", templateMsg.getTemplateType()); //carousel
-		
-		message.put("type", detail.getMsgType()); //template
+		// message
+		message.put("type", detail.getMsgType());
 		message.put("altText", templateMsg.getAltText());
 		message.put("template", templateObject);
-		messageArray.put(message);
-		return messageArray;
+		
+		// messages
+		messagesArray.put(message);
+		
+		logger.info("messageArray1: " + messagesArray.toString());
+		return messagesArray;
 	}
 
 }

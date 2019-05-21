@@ -26,22 +26,22 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentLink;
-import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsg;
-import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsgAction;
-import com.bcs.core.taishin.circle.service.BillingNoticeContentTemplateMsgService;
-import com.bcs.core.taishin.service.ExportToExcelForBillingNoticePushBNApiEffects;
 import com.bcs.core.db.entity.SystemConfig;
 import com.bcs.core.db.service.SystemConfigService;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.resource.CoreConfigReader;
+import com.bcs.core.taishin.api.model.BillingNoticeTemplateMsgModel;
+import com.bcs.core.taishin.api.model.TemplateActionModel;
+import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentLink;
+import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsg;
+import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsgAction;
+import com.bcs.core.taishin.circle.service.BillingNoticeContentTemplateMsgService;
+import com.bcs.core.taishin.service.ExportToExcelForBillingNoticePushBNApiEffects;
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.web.security.CurrentUser;
 import com.bcs.core.web.security.CustomUser;
 import com.bcs.core.web.ui.page.enums.BcsPageEnum;
-import com.bcs.core.taishin.api.model.BillingNoticeTemplateMsgModel;
-import com.bcs.core.taishin.api.model.TemplateActionModel;
 import com.bcs.web.aop.ControllerLog;
 import com.bcs.web.ui.service.LoadFileUIService;
 
@@ -544,8 +544,8 @@ public class BCSBillingNoticeTemplateMsgController {
 	public ResponseEntity<?> getBillingNoticeBigSwitch(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		logger.info("getBillingNoticeBigSwitch");
 		try {
-			logger.info("bn.bigswitch = " + CONFIG_STR.BN_BIGSWITCH.toString());
-			SystemConfig systemConfig = systemConfigService.findSystemConfig(CONFIG_STR.BN_BIGSWITCH.toString());
+			logger.info(".bn.bigswitch = " + "." + CONFIG_STR.BN_BIGSWITCH.toString());
+			SystemConfig systemConfig = systemConfigService.findSystemConfig("." + CONFIG_STR.BN_BIGSWITCH.toString());
 			
 			logger.info("bigSwitch:" + systemConfig.getValue());
 			return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + systemConfig.getValue() + "\"}", HttpStatus.OK);
@@ -564,8 +564,8 @@ public class BCSBillingNoticeTemplateMsgController {
 	public ResponseEntity<?> setBillingNoticeBigSwitch(HttpServletRequest request, HttpServletResponse response,  @PathVariable String OnOff) {
 		logger.info("setBillingNoticeBigSwitch, OnOff=" + OnOff);
 		try {
-			logger.info("bn.bigswitch = " + CONFIG_STR.BN_BIGSWITCH.toString());
-			SystemConfig systemConfig = systemConfigService.findSystemConfig(CONFIG_STR.BN_BIGSWITCH.toString());
+			logger.info(".bn.bigswitch = " + "." + CONFIG_STR.BN_BIGSWITCH.toString());
+			SystemConfig systemConfig = systemConfigService.findSystemConfig("." + CONFIG_STR.BN_BIGSWITCH.toString());
 			systemConfig.setValue(OnOff);
 			systemConfigService.save(systemConfig);
 			

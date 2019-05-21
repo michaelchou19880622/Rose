@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -546,9 +547,12 @@ public class BCSBillingNoticeTemplateMsgController {
 		try {
 			logger.info(".bn.bigswitch = " + "." + CONFIG_STR.BN_BIGSWITCH.toString());
 			SystemConfig systemConfig = systemConfigService.findSystemConfig("." + CONFIG_STR.BN_BIGSWITCH.toString());
-			
-			logger.info("bigSwitch:" + systemConfig.getValue());
-			return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + systemConfig.getValue() + "\"}", HttpStatus.OK);
+			String bigSwitch = CoreConfigReader.getString(CONFIG_STR.BN_BIGSWITCH, false);
+			if (systemConfig != null) {
+				bigSwitch = systemConfig.getValue();
+			}
+			logger.info("bigSwitch:" + bigSwitch);
+			return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + bigSwitch + "\"}", HttpStatus.OK);
 		} catch(Exception e) {
 			logger.error(ErrorRecord.recordError(e));
 			return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -566,7 +570,13 @@ public class BCSBillingNoticeTemplateMsgController {
 		try {
 			logger.info(".bn.bigswitch = " + "." + CONFIG_STR.BN_BIGSWITCH.toString());
 			SystemConfig systemConfig = systemConfigService.findSystemConfig("." + CONFIG_STR.BN_BIGSWITCH.toString());
+			if (systemConfig == null) {
+				systemConfig = new SystemConfig();
+				systemConfig.setConfigId("." + CONFIG_STR.BN_BIGSWITCH.toString());
+				systemConfig.setDescription("BigSwitch");
+			}
 			systemConfig.setValue(OnOff);
+			systemConfig.setModifyTime(Calendar.getInstance().getTime());
 			systemConfigService.save(systemConfig);
 			
 			logger.info("bigSwitch:" + systemConfig.getValue());

@@ -71,6 +71,9 @@
     </bean>
     
     <!-- ======= JDBC connection pool start ======= -->
+     <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">  
+		<property name="dataSource" ref="dataSource"></property>  
+	</bean> 
 	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
 	    <constructor-arg ref="hikariConfig" />
 	</bean>

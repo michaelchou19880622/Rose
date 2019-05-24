@@ -63,6 +63,7 @@ public class PushMessageRecordService {
 			map.put("failCount", (o[3] == null) ? null : o[3].toString());
 			map.put("serviceName", (o[4] == null) ? null : o[4].toString());
 			map.put("pushTheme", (o[5] == null) ? null : o[5].toString());
+			map.put("sendType", (o[6] == null) ? null : (o[6].toString().equals("IMMEDIATE")) ? "立即" : "預約");
 			result.add(map);
 		}
 		

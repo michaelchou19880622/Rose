@@ -65,11 +65,12 @@ public class ExportToExcelForPushApiEffects {
 		Row row = sheet.createRow(0);
 		
 		row.createCell(0).setCellValue("發送時間");
-		row.createCell(1).setCellValue("發送部門");
-		row.createCell(2).setCellValue("發送服務名稱");
-		row.createCell(3).setCellValue("發送推播主題");
-		row.createCell(4).setCellValue("發送成功數");
-		row.createCell(5).setCellValue("發送失敗數");
+		row.createCell(1).setCellValue("發送類型");
+		row.createCell(2).setCellValue("部門名稱");
+		row.createCell(3).setCellValue("服務名稱");
+		row.createCell(4).setCellValue("推播主題");
+		row.createCell(5).setCellValue("發送成功數");
+		row.createCell(6).setCellValue("發送失敗數");
 		
 		List<Map<String, String>> pushEffects = pushMessageRecordService.getPushMessageEffects(startDateString, endDateString);
 		
@@ -85,12 +86,12 @@ public class ExportToExcelForPushApiEffects {
 			Cell createTimeCell = row.createCell(0);		
 			createTimeCell.setCellValue(pushEffect.get("createTime"));
 			createTimeCell.setCellStyle(cellStyle);
-			
-			row.createCell(1).setCellValue(pushEffect.get("department"));
-			row.createCell(2).setCellValue(pushEffect.get("serviceName"));
-			row.createCell(3).setCellValue(pushEffect.get("pushTheme"));
-			row.createCell(4).setCellValue(pushEffect.get("successCount"));
-			row.createCell(5).setCellValue(pushEffect.get("failCount"));
+			row.createCell(1).setCellValue(pushEffect.get("sendType"));
+			row.createCell(2).setCellValue(pushEffect.get("department"));
+			row.createCell(3).setCellValue(pushEffect.get("serviceName"));
+			row.createCell(4).setCellValue(pushEffect.get("pushTheme"));
+			row.createCell(5).setCellValue(pushEffect.get("successCount"));
+			row.createCell(6).setCellValue(pushEffect.get("failCount"));
 			
 			rowNumber += 1;
 		}
@@ -103,36 +104,31 @@ public class ExportToExcelForPushApiEffects {
 
 	private void getPushApiEffectDetail(Workbook workbook, Sheet sheet, String createTime) {
 		Row row = sheet.createRow(0);
-		
-		row.createCell(0).setCellValue("發送部門");
-		row.createCell(1).setCellValue("發送服務名稱");
-		row.createCell(2).setCellValue("發送推播主題");
-		row.createCell(3).setCellValue("發送類型");
-		row.createCell(4).setCellValue("發送時間");
+		row.createCell(0).setCellValue("發送時間");
+		row.createCell(1).setCellValue("發送類型");
+		row.createCell(2).setCellValue("部門名稱");
+		row.createCell(3).setCellValue("服務名稱");
+		row.createCell(4).setCellValue("推播主題");
 		row.createCell(5).setCellValue("UID");
 		row.createCell(6).setCellValue("訊息內容");
 		row.createCell(7).setCellValue("狀態");
 		
 		List<PushMessageRecord> records = pushMessageRecordService.getPushMessageRecordByCreateTime(createTime);
-		
+		CellStyle cellStyle = workbook.createCellStyle();
+		CreationHelper createHelper = workbook.getCreationHelper();
+		cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy/mm/dd hh:mm:ss"));
 		Integer rowNumber = 1;
 		for(PushMessageRecord record : records) {
 			row = sheet.createRow(rowNumber);
 			
-			row.createCell(0).setCellValue(record.getDepartment());
-			row.createCell(1).setCellValue(record.getServiceName());
-			row.createCell(2).setCellValue(record.getPushTheme());
-			row.createCell(3).setCellValue((record.getSendType().equals("IMMEDIATE")) ? "立即" : "預約");
 			
-			CellStyle cellStyle = workbook.createCellStyle();
-			CreationHelper createHelper = workbook.getCreationHelper();
-			
-			cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy/mm/dd hh:mm:ss"));
-			
-			Cell sendTimeCell = row.createCell(4);
+			Cell sendTimeCell = row.createCell(0);
 			sendTimeCell.setCellValue(record.getSendTime());
 			sendTimeCell.setCellStyle(cellStyle);
-			
+			row.createCell(1).setCellValue((record.getSendType().equals("IMMEDIATE")) ? "立即" : "預約");
+			row.createCell(2).setCellValue(record.getDepartment());
+			row.createCell(3).setCellValue(record.getServiceName());
+			row.createCell(4).setCellValue(record.getPushTheme());
 			row.createCell(5).setCellValue(record.getUID());
 			row.createCell(6).setCellValue(record.getSendMessage());
 			row.createCell(7).setCellValue(this.messageTranslate(record.getMainMessage()));

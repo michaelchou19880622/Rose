@@ -39,12 +39,17 @@ import com.bcs.core.json.AbstractBcsEntity;
 		"CASE " + 
 			"WHEN A.PUSH_THEME IS NULL THEN B.PUSH_THEME " + 
 			"ELSE A.PUSH_THEME " + 
-		"END 'PUSHTHEME' " + 
+		"END 'PUSHTHEME',  " + 
+		"CASE " + 
+			"WHEN A.SEND_TYPE IS NULL THEN B.SEND_TYPE " + 
+			"ELSE A.SEND_TYPE " + 
+		"END 'SEND_TYPE' " + 
 	"FROM " + 
 		"(" + 
 			"(" + 
 				"SELECT " + 
 					"CREATE_TIME, " + 
+					"SEND_TYPE, " + 
 					"DEPARTMENT,  " + 
 					"SERVICE_NAME, " + 
 					"PUSH_THEME, " + 
@@ -55,6 +60,7 @@ import com.bcs.core.json.AbstractBcsEntity;
 					"MAIN_MESSAGE = 'SUCCESS' " + 
 				"GROUP BY " + 
 					"CREATE_TIME, " + 
+					"SEND_TYPE, " + 
 					"DEPARTMENT, " + 
 					"SERVICE_NAME, " + 
 					"PUSH_THEME " + 
@@ -63,6 +69,7 @@ import com.bcs.core.json.AbstractBcsEntity;
 			"(" + 
 				"SELECT " + 
 					"CREATE_TIME, " + 
+					"SEND_TYPE, " + 
 					"DEPARTMENT, " + 
 					"SERVICE_NAME, " + 
 					"PUSH_THEME, " + 
@@ -73,6 +80,7 @@ import com.bcs.core.json.AbstractBcsEntity;
 					"MAIN_MESSAGE != 'SUCCESS' " + 
 				"GROUP BY " + 
 					"CREATE_TIME, " + 
+					"SEND_TYPE, " + 
 					"DEPARTMENT, " + 
 					"SERVICE_NAME, " + 
 					"PUSH_THEME " + 

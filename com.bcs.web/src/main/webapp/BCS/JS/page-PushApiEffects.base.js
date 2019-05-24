@@ -54,6 +54,7 @@ $(function(){
 					var rowDOM = clonedDOM.clone(true);
 					
 					rowDOM.find('.createDate').html('<a>' + moment(element.createTime).format('YYYY-MM-DD HH:mm:ss') + '</a>').end().find('a').attr('href', exportUrl + element.createTime);
+					rowDOM.find('.sendType').text(element.sendType);
 					rowDOM.find('.department').text(element.department);
 					rowDOM.find('.serviceName').text(element.serviceName);
 					rowDOM.find('.pushTheme').text(element.pushTheme);

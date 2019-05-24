@@ -372,58 +372,84 @@ public class BillingNoticeContentTemplateMsgService {
 		return map;
     }
     
-
     /**
 	 * 取得帳務通知成效清單
      */
     @SuppressWarnings("unchecked")
-    public  Map<String, List<String>> getBNEffects(String startDate, String endDate){
+    public String getBNEffectsTotalPages(String startDate, String endDate){
     	String queryString = 
-		"SELECT D.TITLE AS 'Title', "
-		+"FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') AS 'Day', "
-		+"M.SEND_TYPE AS 'Type', "
+//		"select count(*) from "
+//		+"(SELECT D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') AS 'Day', M.SEND_TYPE "
+//		+"FROM BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M  "
+//		+"ON D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
+//		+"WHERE FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') >= '" + startDate + "' "
+//		+"AND FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') <= '" + endDate + "' "
+//		+"GROUP BY D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd'), M.SEND_TYPE) as result; ";
+
+		"select count(*) from ( "
+		+"SELECT FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd') AS 'Day', D.TITLE, M.SEND_TYPE, "
 		+"SUM(case when D.STATUS = 'COMPLETE' then 1 else 0 end) AS 'Complete', "
-		+"SUM(case when D.STATUS = 'FAIL' then 1 else 0 end) AS 'Fail' "
-		+"FROM  BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M "
+		+"SUM(case when D.STATUS = 'FAIL' then 1 else 0 end) AS 'Fail', "
+		+"DENSE_RANK() OVER ( ORDER BY FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd') desc, D.TITLE, M.SEND_TYPE) AS RowNum "
+		+"FROM BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M "
 		+"ON D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
-		+"WHERE (case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end) >= '" + startDate + "' "
-		+"AND (case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end) <= '" + endDate + "' "
-		+"GROUP BY D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd'), M.SEND_TYPE "
-		+"ORDER BY 'Title', 'Day', 'Type'; ";
+		+"WHERE D.MODIFY_TIME >= '" + startDate + "' "
+		+"AND D.MODIFY_TIME < DATEADD(DAY, 1, '" + endDate + "') "
+		+"GROUP BY FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd'), D.TITLE, M.SEND_TYPE "
+		+") as result ";
     	logger.info("str1: " + queryString);
     	
     	Query query = entityManager.createNativeQuery(queryString);
 		List<Object[]> list = query.getResultList();
-    	logger.info("List1: " + list.toString());
-    		
-    	Map<String, List<String>> map = new LinkedHashMap<>();
-    	Integer count = 0;
-		for (Object[] o : list) {
-			count++;
-			logger.info("c:" + count);
-			List<String> dataList = new ArrayList<String>();
-			map.put(count.toString(), dataList);
-			for (int i=0, max=o.length; i<max; i++) {
-				if (o[i] == null) {
-					dataList.add("");
-					logger.info("i=" + i  + ", null");
-				} else {
-					dataList.add(o[i].toString());
-					logger.info("i=" + i  + ", " + o[i].toString());
-				}
-			}
-		}
-    	logger.info("map1: " + map.toString());
-    	
-		return map;
+		String listStr = list.toString();
+    	logger.info("List1:" + list.toString());
+		
+		// Total = Empty set,  []  => 0
+		if(listStr.length() <= 2) return "0"; 
+		
+		// Total < 10
+		char c1 = listStr.charAt(listStr.length() - 2); // 個位數
+		if(listStr.length() == 3) return (c1=='0') ? "0" : "1"; // [0] => 0 , [1] => 1
+		
+		// Total >= 10
+		if(c1 == '0') return listStr.substring(1, listStr.length() - 2); // [430] => 43
+		char c10 = listStr.charAt(listStr.length() - 3); // 十位數
+    	return listStr.substring(1, listStr.length() - 3) + (++c10); // [431] => 44
     }
+ 
+//    public static String getString(String listStr) {
+//		// Total = Empty set. []  => 0
+//		if(listStr.length() <= 2) return "0"; 
+//		
+//		// Total < 10
+//		char c1 = listStr.charAt(listStr.length() - 2); // 個位數
+//		if(listStr.length() == 3) return (c1=='0') ? "0" : "1"; // [0] => 0 , [x] => 1
+//		
+//		// Total >= 10
+//		if(c1 == '0') return listStr.substring(1, listStr.length() - 2); // [430] => 43
+//		char c10 = listStr.charAt(listStr.length() - 3); // 十位數
+//    	return listStr.substring(1, listStr.length() - 3) + (++c10); // [431] => 44
+//    }
+//    public static void main(String[] Args) {
+//		String listStr = "[431]";
+//    	System.out.println( getString(listStr));
+//    }
     
     /**
 	 * 取得帳務通知成效清單
      */
     @SuppressWarnings("unchecked")
-    public  Map<String, List<String>> getBNEffectsDetail(String date, String title, String sendType){
-    	logger.info("getBNEffectsDetail:");
+    public Map<String, List<String>> getBNEffects(String startDate, String endDate, Integer page){
+    	Integer rowStart, rowEnd;
+    	if(page == null) {
+    		rowStart = 1;
+    		rowEnd = Integer.MAX_VALUE; // get all data
+    	}else {
+    		page--; // 1~199 => 0~198
+    		rowStart = page * 10 + 1;
+    		rowEnd = rowStart + 10; // 10 as Size
+    	}
+    	
     	String queryString = 
 //		"SELECT D.TITLE AS 'Title', "
 //		+"FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') AS 'Day', "
@@ -436,18 +462,37 @@ public class BillingNoticeContentTemplateMsgService {
 //		+"AND (case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end) <= '" + endDate + "' "
 //		+"GROUP BY D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd'), M.SEND_TYPE "
 //		+"ORDER BY 'Title', 'Day', 'Type'; ";
-		"SELECT D.TITLE, D.CREAT_TIME, D.MODIFY_TIME, D.SEND_TIME, D.STATUS, D.UID "
+    			
+//		"select * from "
+//		+"(SELECT D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') AS 'Day', M.SEND_TYPE,  "
+//		+"SUM(case when D.STATUS = 'COMPLETE' then 1 else 0 end) AS 'Complete',  "
+//		+"SUM(case when D.STATUS = 'FAIL' then 1 else 0 end) AS 'Fail', "
+//		+"DENSE_RANK() OVER ( ORDER BY D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') desc, "
+//		+"M.SEND_TYPE) AS RowNum "
+//		+"FROM  BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M  "
+//		+"ON D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
+//		+"WHERE FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') >= '" + startDate + "' "
+//		+"AND FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') <= '" + endDate + "' "
+//		+"GROUP BY D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd'), M.SEND_TYPE  "
+//		+") as result where RowNum >= ?1 and RowNum <= ?2 ; ";
+
+		"select * from ( "
+		+"SELECT FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd') AS 'Day', D.TITLE, M.SEND_TYPE, "
+		+"SUM(case when D.STATUS = 'COMPLETE' then 1 else 0 end) AS 'Complete', "
+		+"SUM(case when D.STATUS = 'FAIL' then 1 else 0 end) AS 'Fail', "
+		+"DENSE_RANK() OVER ( ORDER BY FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd') desc, D.TITLE, M.SEND_TYPE) AS RowNum "
 		+"FROM BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M "
 		+"ON D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
-		+"WHERE (case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end) >= '" + date + "' "
-		+"AND (case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end) <  DATEADD(DAY, 1, '" + date + "') "
-		+"AND D.TITLE = N'" + title +"' "
-		+"AND M.SEND_TYPE = '"+ sendType +"' "
-		+"ORDER BY D.CREAT_TIME; ";
-
+		+"WHERE D.MODIFY_TIME >= '" + startDate + "' "
+		+"AND D.MODIFY_TIME < DATEADD(DAY, 1, '" + endDate + "') "
+		+"GROUP BY FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd'), D.TITLE, M.SEND_TYPE "
+		+") as result "
+		+"where RowNum >= ?1 and RowNum < ?2 ";
+    	
+    	
     	logger.info("str1: " + queryString);
     	
-    	Query query = entityManager.createNativeQuery(queryString);
+    	Query query = entityManager.createNativeQuery(queryString).setParameter(1, rowStart).setParameter(2, rowEnd);
 		List<Object[]> list = query.getResultList();
     	logger.info("List1: " + list.toString());
     		
@@ -455,16 +500,114 @@ public class BillingNoticeContentTemplateMsgService {
     	Integer count = 0;
 		for (Object[] o : list) {
 			count++;
-			logger.info("c:" + count);
+			//logger.info("c:" + count);
 			List<String> dataList = new ArrayList<String>();
 			map.put(count.toString(), dataList);
-			for (int i=0, max=o.length; i<max; i++) {
+			for (int i=0, max=5; i<max; i++) {
 				if (o[i] == null) {
 					dataList.add("");
-					logger.info("i=" + i  + ", null");
+					//logger.info("i=" + i  + ", null");
 				} else {
 					dataList.add(o[i].toString());
-					logger.info("i=" + i  + ", " + o[i].toString());
+					//logger.info("i=" + i  + ", " + o[i].toString());
+				}
+			}
+		}
+    	logger.info("map1: " + map.toString());
+    	
+		return map;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public String getBNEffectsDetailTotalPages(String date, String title, String sendType){
+    	String queryString = 
+//		"select count(*) from "
+//		+"(SELECT D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') AS 'Day', M.SEND_TYPE "
+//		+"FROM BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M  "
+//		+"ON D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
+//		+"WHERE FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') >= '" + startDate + "' "
+//		+"AND FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') <= '" + endDate + "' "
+//		+"GROUP BY D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd'), M.SEND_TYPE) as result; ";
+
+    			
+		"select count(*) from ( "	
+		+"SELECT D.TITLE, D.CREAT_TIME, D.MODIFY_TIME, D.SEND_TIME, D.STATUS, D.UID, "
+        +"DENSE_RANK() OVER ( ORDER BY D.MODIFY_TIME desc) AS RowNum "
+		+"FROM BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M "
+		+"ON D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
+		+"WHERE D.MODIFY_TIME >= '" + date + "' "
+		+"AND D.MODIFY_TIME <  DATEADD(DAY, 1, '" + date + "') "
+		+"AND D.TITLE = N'" + title +"' "
+		+"AND M.SEND_TYPE = '"+ sendType +"' "
+		+") as result ";
+    	logger.info("str1: " + queryString);
+    	
+    	Query query = entityManager.createNativeQuery(queryString);
+		List<Object[]> list = query.getResultList();
+		String listStr = list.toString();
+    	logger.info("List1:" + list.toString());
+		
+		// Total = Empty set,  []  => 0
+		if(listStr.length() <= 2) return "0"; 
+		
+		// Total < 10
+		char c1 = listStr.charAt(listStr.length() - 2); // 個位數
+		if(listStr.length() == 3) return (c1=='0') ? "0" : "1"; // [0] => 0 , [1] => 1
+		
+		// Total >= 10
+		if(c1 == '0') return listStr.substring(1, listStr.length() - 2); // [430] => 43
+		char c10 = listStr.charAt(listStr.length() - 3); // 十位數
+    	return listStr.substring(1, listStr.length() - 3) + (++c10); // [431] => 44
+    }
+    /**
+	 * 取得帳務通知成效清單
+     */
+    @SuppressWarnings("unchecked")
+    public  Map<String, List<String>> getBNEffectsDetail(String date, String title, String sendType, Integer page){
+    	Integer rowStart, rowEnd;
+    	if(page == null) {
+    		rowStart = 1;
+    		rowEnd = Integer.MAX_VALUE; // get all data
+    	}else {
+    		page--; // 1~199 => 0~198
+    		rowStart = page * 10 + 1;
+    		rowEnd = rowStart + 10; // 10 as Size
+    	}
+    	
+    	logger.info("getBNEffectsDetail:");
+    	String queryString = 
+		"select * from ( "    			
+		+"SELECT D.TITLE, D.CREAT_TIME, D.MODIFY_TIME, D.SEND_TIME, D.STATUS, D.UID, "
+        +"DENSE_RANK() OVER ( ORDER BY D.MODIFY_TIME desc, D.NOTICE_DETAIL_ID) AS RowNum "
+		+"FROM BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M "
+		+"ON D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
+		+"WHERE D.MODIFY_TIME >= '" + date + "' "
+		+"AND D.MODIFY_TIME <  DATEADD(DAY, 1, '" + date + "') "
+		+"AND D.TITLE = N'" + title +"' "
+		+"AND M.SEND_TYPE = '"+ sendType +"' "
+		+") as result "
+		+"where RowNum >= ?1 and RowNum < ?2 ";
+		
+    	logger.info("str1: " + queryString);
+    	
+    	Query query = entityManager.createNativeQuery(queryString).setParameter(1, rowStart).setParameter(2, rowEnd);
+		List<Object[]> list = query.getResultList();
+    	logger.info("List1: " + list.toString());
+    		
+    	Map<String, List<String>> map = new LinkedHashMap<>();
+    	Integer count = 0;
+		for (Object[] o : list) {
+			count++;
+			//logger.info("c:" + count);
+			List<String> dataList = new ArrayList<String>();
+			map.put(count.toString(), dataList);
+			for (int i=0, max=6; i<max; i++) {
+				if (o[i] == null) {
+					dataList.add("");
+					//logger.info("i=" + i  + ", null");
+				} else {
+					dataList.add(o[i].toString());
+					//logger.info("i=" + i  + ", " + o[i].toString());
 				}
 			}
 		}

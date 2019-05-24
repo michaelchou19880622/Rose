@@ -29,12 +29,9 @@ public class ExportToExcelForBillingNoticePushBNApiEffects {
 	public void exportExcel(String exportPath, String fileName, String startDate, String endDate) {
 		try {
 			Workbook workbook = new XSSFWorkbook();
-	
-			Sheet sheet = workbook.createSheet("成效報表");
-				
-			this.getBNPushApiEffects(workbook, sheet, startDate, endDate);
-			
 			FileOutputStream out = new FileOutputStream(exportPath + System.getProperty("file.separator") + fileName);
+			
+			this.getBNPushApiEffects(workbook, startDate, endDate);
 			workbook.write(out);
 			out.close();
 			workbook.close();
@@ -42,61 +39,74 @@ public class ExportToExcelForBillingNoticePushBNApiEffects {
 			logger.error(ErrorRecord.recordError(e));
 		}
 	}
-
-	private void getBNPushApiEffects(Workbook workbook, Sheet sheet, String startDate, String endDate) {
-		Row row = sheet.createRow(0);
-		
-		row.createCell(0).setCellValue("產品名稱");
-		row.createCell(1).setCellValue("發送時間");
-		row.createCell(2).setCellValue("發送類型");
-		row.createCell(3).setCellValue("發送成功數");
-		row.createCell(4).setCellValue("發送失敗數");
-		
-		Map<String, List<String>> bnEffects = billingNoticeContentTemplateMsgService.getBNEffects(startDate, endDate);
-		
-		Integer rowNumber = 1;
-		for(Object key : bnEffects.keySet()) {
-			List<String> list = bnEffects.get(key);
-			logger.info("list2:" + list.toString());
-			
-			row = sheet.createRow(rowNumber);
-			
-			row.createCell(0).setCellValue(list.get(0));
-			
-			// Time Cell Style
-			CellStyle cellStyle = workbook.createCellStyle();
-			CreationHelper createHelper = workbook.getCreationHelper();
-			cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-mm-dd"));
-			
-			Cell createTimeCell = row.createCell(1);
-			createTimeCell.setCellValue(list.get(1));
-			createTimeCell.setCellStyle(cellStyle);
-			
-			row.createCell(2).setCellValue(list.get(2));
-			row.createCell(3).setCellValue(list.get(3));
-			row.createCell(4).setCellValue(list.get(4));
-			rowNumber += 1;
-		}
-		
-		/* 自動調整欄寬 */
-		for (Integer col_index = 0; col_index < sheet.getRow(0).getPhysicalNumberOfCells(); col_index++) {
-			sheet.autoSizeColumn(col_index);
-		}
-		sheet.setColumnWidth(0, 50*256);
-		sheet.setColumnWidth(2, 15*256);
-		sheet.setColumnWidth(3, 15*256);
-		sheet.setColumnWidth(4, 15*256);
-	}
+	private void getBNPushApiEffects(Workbook workbook, String startDate, String endDate) {
+		try {
+			Map<String, List<String>> bnEffects = billingNoticeContentTemplateMsgService.getBNEffects(startDate, endDate, null);
 	
+			Integer sheetNumber = 1;
+			Sheet sheet = this.createBNPushApiEffectsSheet(workbook, sheetNumber++);
+			Integer rowNumber = 1; 
+			for(Object key : bnEffects.keySet()) {
+				List<String> list = bnEffects.get(key);
+				//logger.info("list2:" + list.toString());
+				Row row = sheet.createRow(rowNumber);
+				
+				// Time Cell Style
+				CellStyle cellStyle = workbook.createCellStyle();
+				CreationHelper createHelper = workbook.getCreationHelper();
+				cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-mm-dd"));
+				
+				Cell createTimeCell = row.createCell(0);
+				createTimeCell.setCellValue(list.get(0));
+				createTimeCell.setCellStyle(cellStyle);
+				
+				row.createCell(1).setCellValue(list.get(1));
+				row.createCell(2).setCellValue(list.get(2));
+				row.createCell(3).setCellValue(list.get(3));
+				row.createCell(4).setCellValue(list.get(4));
+				rowNumber += 1;
+				
+				if(rowNumber > 1048500) { // RowLimit = 1048576 
+					sheet = this.createBNPushApiEffectsSheet(workbook, sheetNumber++);
+					rowNumber = 1;
+				}
+			}
+		} catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+		}
+	}
+	private Sheet createBNPushApiEffectsSheet(Workbook workbook, Integer sheetNumber) {
+		Sheet sheet = null;
+		try {
+			sheet = workbook.createSheet("成效報表" + sheetNumber);
+		
+			// first row
+			Row row = sheet.createRow(0);
+			row.createCell(0).setCellValue("發送時間");
+			row.createCell(1).setCellValue("產品名稱");
+			row.createCell(2).setCellValue("發送類型");
+			row.createCell(3).setCellValue("發送成功數");
+			row.createCell(4).setCellValue("發送失敗數");
+			
+			// column width
+			sheet.setColumnWidth(0, 13*256);
+			sheet.setColumnWidth(1, 50*256);
+			sheet.setColumnWidth(2, 15*256);
+			sheet.setColumnWidth(3, 15*256);
+			sheet.setColumnWidth(4, 15*256);
+					
+		} catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+		}
+		return sheet;
+	}
+
 	public void exportExcel(String exportPath, String fileName, String date, String title, String sendType) {
 		try {
 			Workbook workbook = new XSSFWorkbook();
-	
-			Sheet sheet = workbook.createSheet("成效明細報表");
-				
-			this.getBNPushApiEffects(workbook, sheet, date, title, sendType);
-			
 			FileOutputStream out = new FileOutputStream(exportPath + System.getProperty("file.separator") + fileName);
+		
+			this.getBNPushApiEffects(workbook, date, title, sendType);
 			workbook.write(out);
 			out.close();
 			workbook.close();
@@ -104,60 +114,70 @@ public class ExportToExcelForBillingNoticePushBNApiEffects {
 			logger.error(ErrorRecord.recordError(e));
 		}
 	}
-	
-	private void getBNPushApiEffects(Workbook workbook, Sheet sheet, String date, String title, String sendType) {
-		Row row = sheet.createRow(0);
+	private void getBNPushApiEffects(Workbook workbook, String date, String title, String sendType) {
+		try {
+			Map<String, List<String>> bnEffects = billingNoticeContentTemplateMsgService.getBNEffectsDetail(date, title, sendType, null);
+			
+			Integer sheetNumber = 1;
+			Sheet sheet = this.createBNPushApiEffectsDetailSheet(workbook, sheetNumber++);
+			Integer rowNumber = 1; 
+			for(Object key : bnEffects.keySet()) {
+				List<String> list = bnEffects.get(key);
+				//logger.info("list2:" + list.toString());
+				Row row = sheet.createRow(rowNumber);
+				
+				row.createCell(0).setCellValue(list.get(0));
 		
-		row.createCell(0).setCellValue("產品名稱");
-		row.createCell(1).setCellValue("建立時間");
-		row.createCell(2).setCellValue("修改時間");
-		row.createCell(3).setCellValue("發送時間");
-		row.createCell(4).setCellValue("發送類型");
-		row.createCell(5).setCellValue("UID");
-		
-		Map<String, List<String>> bnEffects = billingNoticeContentTemplateMsgService.getBNEffectsDetail(date, title, sendType);
-		
-		Integer rowNumber = 1;
-		for(Object key : bnEffects.keySet()) {
-			List<String> list = bnEffects.get(key);
-			logger.info("list2:" + list.toString());
-			
-			row = sheet.createRow(rowNumber);
-			
-			row.createCell(0).setCellValue(list.get(0));
-			
-			
-			
-			// Time Cell Style
-			CellStyle cellStyle = workbook.createCellStyle();
-			CreationHelper createHelper = workbook.getCreationHelper();
-			cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("YYYY-MM-DD HH:mm:ss"));
-			
-			Cell createTimeCell = null;
-			
-			for(int i = 1; i <= 3; i++) {
-				createTimeCell = row.createCell(i);
-				createTimeCell.setCellValue(list.get(i).replaceFirst("\\.\\d*(Z)?$", "$1"));
-				createTimeCell.setCellStyle(cellStyle);
+				// Time Cell Style
+				CellStyle cellStyle = workbook.createCellStyle();
+				CreationHelper createHelper = workbook.getCreationHelper();
+				cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("YYYY-MM-DD HH:mm:ss"));
+				
+				Cell createTimeCell = null;
+				
+				for(int i = 1; i <= 3; i++) {
+					createTimeCell = row.createCell(i);
+					createTimeCell.setCellValue(list.get(i).replaceFirst("\\.\\d*(Z)?$", "$1"));
+					createTimeCell.setCellStyle(cellStyle);
+				}
+				row.createCell(4).setCellValue(list.get(4));
+				row.createCell(5).setCellValue(list.get(5));
+				
+				rowNumber += 1;
+				if(rowNumber > 1048500) { // RowLimit = 1048576 
+					sheet = this.createBNPushApiEffectsDetailSheet(workbook, sheetNumber++);
+					rowNumber = 1;
+				}
 			}
-			
-			row.createCell(4).setCellValue(list.get(4));
-			row.createCell(5).setCellValue(list.get(5));
-			
-			rowNumber += 1;
-		}
-		
-		/* 自動調整欄寬 */
-		for (Integer col_index = 0; col_index < sheet.getRow(0).getPhysicalNumberOfCells(); col_index++) {
-			sheet.autoSizeColumn(col_index);
-		}
-		sheet.setColumnWidth(0, 40*256);
-		sheet.setColumnWidth(4, 13*256);
+		} catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+		}	
 	}
-	
-//	public static void main(String[] args) {
-//		String time = "2019-03-08 15:24:20.0070000";
-//		time = time.replaceFirst("\\.\\d*(Z)?$", "$1"); // 刪去毫秒
-//		System.out.println(time);
-//	}
+	private Sheet createBNPushApiEffectsDetailSheet(Workbook workbook, Integer sheetNumber) {
+		Sheet sheet = null;
+		try {
+			sheet = workbook.createSheet("成效明細報表" + sheetNumber);
+		
+			// first row
+			Row row = sheet.createRow(0);
+			row.createCell(0).setCellValue("產品名稱");
+			row.createCell(1).setCellValue("建立時間");
+			row.createCell(2).setCellValue("修改時間");
+			row.createCell(3).setCellValue("發送時間");
+			row.createCell(4).setCellValue("發送類型");
+			row.createCell(5).setCellValue("UID");
+			
+			// column width
+			for (Integer col_index = 1; col_index <= 3; col_index++) {
+				sheet.setColumnWidth(col_index, 20*256);
+			}
+			sheet.setColumnWidth(0, 40*256);
+			sheet.setColumnWidth(4, 13*256);
+			sheet.setColumnWidth(5, 35*256);
+			
+		} catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+		}
+		return sheet;
+	}
 }

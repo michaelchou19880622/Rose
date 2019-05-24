@@ -24,7 +24,12 @@ indexes = {
 	       @Index(name = "INDEX_0", columnList = "NOTICE_DETAIL_ID"),
 	       @Index(name = "INDEX_1", columnList = "PARENT_TYPE"),
 	       @Index(name = "INDEX_2", columnList = "MSG_TYPE"),
-	       @Index(name = "INDEX_3", columnList = "NOTICE_MAIN_ID")
+	       @Index(name = "INDEX_3", columnList = "NOTICE_MAIN_ID"),
+	       @Index(name = "INDEX_4", columnList = "TITLE"),
+	       @Index(name = "INDEX_5", columnList = "STATUS"),
+	       @Index(name = "INDEX_6", columnList = "CREAT_TIME"),
+	       @Index(name = "INDEX_7", columnList = "SEND_TIME"),
+	       @Index(name = "INDEX_8", columnList = "MODIFY_TIME"),
 	})
 //BCS_BILLING_NOTICE_DETAIL與BCS_BILLING_NOTICE_MAIN為1對多關係
 public class BillingNoticeDetail extends AbstractBcsEntity {

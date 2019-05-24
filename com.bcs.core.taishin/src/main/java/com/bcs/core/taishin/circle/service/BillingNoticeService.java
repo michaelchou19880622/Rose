@@ -413,7 +413,7 @@ public class BillingNoticeService {
 				columnObject = new JSONObject();
 				imageUrl = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, child.getTemplateImageId());
 				//imageUrl = "https://images.unsplash.com/photo-1556228720-9b1e04f13f63";
-				logger.info("imageUrl1: " + imageUrl);
+				//logger.info("imageUrl1: " + imageUrl);
 				columnObject.put("thumbnailImageUrl",  imageUrl);
 				columnObject.put("title", detail.getTitle());
 				columnObject.put("text", detail.getText());
@@ -448,7 +448,7 @@ public class BillingNoticeService {
 		// messages
 		messagesArray.put(message);
 		
-		logger.info("messageArray1: " + messagesArray.toString());
+		//logger.info("messageArray1: " + messagesArray.toString());
 		return messagesArray;
 	}
 

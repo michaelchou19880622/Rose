@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -374,6 +373,34 @@ public class BCSBillingNoticeTemplateMsgController {
 		}
 	}
 	
+	
+	/**
+	 * 取得帳務通知成效Total
+	 */
+	@ControllerLog(description="取得帳務通知成效清單")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getBNEffectsTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> getBNEffectsTotalPages(
+			HttpServletRequest request, 
+			HttpServletResponse response,
+			@CurrentUser CustomUser customUser,
+			@RequestParam(value = "startDate", required=false) String startDate, 
+			@RequestParam(value = "endDate", required=false) String endDate) throws IOException {
+		logger.info("getBNEffectsTotalPages");
+
+		if(startDate == null) startDate = "1911-01-01";
+		if(endDate == null) endDate = "3099-01-01";
+		
+		try{
+			String count = contentTemplateMsgService.getBNEffectsTotalPages(startDate, endDate);
+			return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count + "\"}", HttpStatus.OK);
+		}
+		catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));
+			return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
 	/**
 	 * 取得帳務通知成效清單
 	 */
@@ -385,18 +412,14 @@ public class BCSBillingNoticeTemplateMsgController {
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser,
 			@RequestParam(value = "startDate", required=false) String startDate, 
-			@RequestParam(value = "endDate", required=false) String endDate) throws IOException {
-		logger.info("getBNEffectsList");
-
-		if(startDate == null) {
-			startDate = "1911-01-01";
-		}
-		if(endDate == null) {
-			endDate = "3099-01-01";
-		}
+			@RequestParam(value = "endDate", required=false) String endDate,
+			@RequestParam(value = "page", required=false) Integer page) throws IOException {
+		logger.info("page1:" + page);
+		if(startDate == null) startDate = "1911-01-01";
+		if(endDate == null) endDate = "3099-01-01";
 		
 		try{
-			Map<String, List<String>> result = contentTemplateMsgService.getBNEffects(startDate, endDate);
+			Map<String, List<String>> result = contentTemplateMsgService.getBNEffects(startDate, endDate, page);
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		}
 		catch(Exception e){
@@ -410,6 +433,30 @@ public class BCSBillingNoticeTemplateMsgController {
 	 * 取得帳務通知明細成效清單
 	 */
 	@ControllerLog(description="取得帳務通知成效清單")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getBNEffectsDetailTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> getBNEffectsDetailTotalPages(
+			HttpServletRequest request, 
+			HttpServletResponse response,
+			@CurrentUser CustomUser customUser,
+			@RequestParam  String date, 
+			@RequestParam  String title,
+			@RequestParam  String sendType) throws IOException {		
+		try{
+			String count = contentTemplateMsgService.getBNEffectsDetailTotalPages(date, title, sendType);
+			return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count + "\"}", HttpStatus.OK);
+		}
+		catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));
+			
+			return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	/**
+	 * 取得帳務通知明細成效清單
+	 */
+	@ControllerLog(description="取得帳務通知成效清單")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getBNEffectsDetailList")
 	@ResponseBody
 	public ResponseEntity<?> getBNEffectsDetailList(
@@ -418,11 +465,12 @@ public class BCSBillingNoticeTemplateMsgController {
 			@CurrentUser CustomUser customUser,
 			@RequestParam  String date, 
 			@RequestParam  String title,
-			@RequestParam  String sendType) throws IOException {
-		logger.info("getBNEffectsList: " + date +  title + sendType);
+			@RequestParam  String sendType,
+			@RequestParam(value = "page", required=false) Integer page) throws IOException {
+		logger.info("page1: " + page);
 		
 		try{
-			Map<String, List<String>> result = contentTemplateMsgService.getBNEffectsDetail(date, title, sendType);
+			Map<String, List<String>> result = contentTemplateMsgService.getBNEffectsDetail(date, title, sendType, page);
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		}
 		catch(Exception e){
@@ -547,12 +595,12 @@ public class BCSBillingNoticeTemplateMsgController {
 		try {
 			logger.info(".bn.bigswitch = " + "." + CONFIG_STR.BN_BIGSWITCH.toString());
 			SystemConfig systemConfig = systemConfigService.findSystemConfig("." + CONFIG_STR.BN_BIGSWITCH.toString());
-			String bigSwitch = CoreConfigReader.getString(CONFIG_STR.BN_BIGSWITCH, false);
-			if (systemConfig != null) {
-				bigSwitch = systemConfig.getValue();
-			}
-			logger.info("bigSwitch:" + bigSwitch);
-			return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + bigSwitch + "\"}", HttpStatus.OK);
+            String bigSwitch = CoreConfigReader.getString(CONFIG_STR.BN_BIGSWITCH, false);
+            if (systemConfig != null) {
+                bigSwitch = systemConfig.getValue();
+            }
+            logger.info("bigSwitch:" + bigSwitch);
+            return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + bigSwitch + "\"}", HttpStatus.OK);
 		} catch(Exception e) {
 			logger.error(ErrorRecord.recordError(e));
 			return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -570,13 +618,7 @@ public class BCSBillingNoticeTemplateMsgController {
 		try {
 			logger.info(".bn.bigswitch = " + "." + CONFIG_STR.BN_BIGSWITCH.toString());
 			SystemConfig systemConfig = systemConfigService.findSystemConfig("." + CONFIG_STR.BN_BIGSWITCH.toString());
-			if (systemConfig == null) {
-				systemConfig = new SystemConfig();
-				systemConfig.setConfigId("." + CONFIG_STR.BN_BIGSWITCH.toString());
-				systemConfig.setDescription("BigSwitch");
-			}
 			systemConfig.setValue(OnOff);
-			systemConfig.setModifyTime(Calendar.getInstance().getTime());
 			systemConfigService.save(systemConfig);
 			
 			logger.info("bigSwitch:" + systemConfig.getValue());
@@ -596,7 +638,6 @@ public class BCSBillingNoticeTemplateMsgController {
     public void exportToExcelForBNPushApiEffects(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, @RequestParam String startDate, @RequestParam String endDate) {
       
 		// file path
-        // String filePath = "C:\\bcs\\";
         String filePath = CoreConfigReader.getString("file.path");
         
         // file name

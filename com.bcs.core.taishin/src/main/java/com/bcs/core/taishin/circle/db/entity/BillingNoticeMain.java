@@ -35,7 +35,8 @@ import com.bcs.core.json.AbstractBcsEntity;
 @Table(name = "BCS_BILLING_NOTICE_MAIN",
 indexes = {
 	       @Index(name = "INDEX_0", columnList = "SEND_TYPE"),
-	       @Index(name = "INDEX_1", columnList = "STATUS")
+	       @Index(name = "INDEX_1", columnList = "STATUS"),
+	       @Index(name = "INDEX_3", columnList = "NOTICE_MAIN_ID")
 	})
 
 //與FTP的來源檔案為1對1關係

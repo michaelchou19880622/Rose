@@ -29,7 +29,6 @@ import com.bcs.core.taishin.circle.db.entity.BillingNoticeMain;
 import com.bcs.core.taishin.circle.db.entity.CircleEntityManagerControl;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeContentTemplateMsgActionRepository;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeContentTemplateMsgRepository;
-import com.bcs.core.taishin.circle.db.repository.BillingNoticeDetailRepository;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeMainRepository;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeRepositoryCustom;
 import com.google.common.collect.Lists;
@@ -49,8 +48,6 @@ public class BillingNoticeSendMsgService {
 	private BillingNoticeRepositoryCustom billingNoticeRepositoryCustom;
 	@Autowired
 	private BillingNoticeMainRepository billingNoticeMainRepository;
-	@Autowired
-	private BillingNoticeDetailRepository billingNoticeDetailRepository;
 	@Autowired
 	private BillingNoticeContentTemplateMsgRepository billingNoticeContentTemplateMsgRepository;
 	@Autowired

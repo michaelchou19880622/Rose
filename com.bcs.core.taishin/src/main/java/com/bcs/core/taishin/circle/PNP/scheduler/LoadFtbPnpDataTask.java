@@ -43,9 +43,13 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainMing;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainMitake;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainUnica;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailEvery8dRepository;
+import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailEvery8dRepositoryCustom;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMingRepository;
+import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMingRepositoryCustom;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMitakeRepository;
+import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMitakeRepositoryCustom;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailUnicaRepository;
+import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailUnicaRepositoryCustom;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainEvery8dRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainMingRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainMitakeRepository;
@@ -53,7 +57,6 @@ import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainUnicaRepository;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpService;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpSetting;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeMain;
-import com.bcs.core.taishin.circle.db.entity.CircleEntityManagerControl;
 import com.bcs.core.utils.ErrorRecord;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -74,7 +77,13 @@ public class LoadFtbPnpDataTask {
 	private PNPFtpService pnpFtpService;
 
 	@Autowired
-	private CircleEntityManagerControl entityManagerControl;
+	private PnpDetailMingRepositoryCustom pnpDetailMingRepositoryCustom;
+	@Autowired
+	private PnpDetailUnicaRepositoryCustom pnpDetailUnicaRepositoryCustom;
+	@Autowired
+	private PnpDetailEvery8dRepositoryCustom pnpDetailEvery8dRepositoryCustom;
+	@Autowired
+	private PnpDetailMitakeRepositoryCustom pnpDetailMitakeRepositoryCustom;
 
 	@Autowired
 	private PnpMainUnicaRepository pnpMainUnicaRepository;
@@ -744,19 +753,22 @@ public class LoadFtbPnpDataTask {
 		logger.info(" saveMitakeDB MitakeDetails size:" + originalDetails.size());
 		pnpMainMitake.setOrigFileName(pnpMainMitake.getOrigFileName().replace(".ok", ""));
 		pnpMainMitake = pnpMainMitakeRepository.save(pnpMainMitake);
-		List<Object> details = new ArrayList<>();
+		List<PnpDetailMitake> details = new ArrayList<>();
 		for (Object detail : originalDetails) {
-			((PnpDetail) detail).setPnpMainId(pnpMainMitake.getPnpMainId());
-			((PnpDetail) detail).setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_MITAKE, true));
-			((PnpDetail) detail).setProcStage(AbstractPnpMainEntity.STAGE_BC);
-			((PnpDetail) detail).setSource(AbstractPnpMainEntity.SOURCE_MITAKE);
-			((PnpDetail) detail).setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
-			details.add(detail);
+			PnpDetailMitake pnpDetailMitake = (PnpDetailMitake)detail;
+			pnpDetailMitake.setPnpMainId(pnpMainMitake.getPnpMainId());
+			pnpDetailMitake.setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_MITAKE, true));
+			pnpDetailMitake.setProcStage(AbstractPnpMainEntity.STAGE_BC);
+			pnpDetailMitake.setSource(AbstractPnpMainEntity.SOURCE_MITAKE);
+			pnpDetailMitake.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
+			details.add(pnpDetailMitake);
 		}
 		if (!details.isEmpty()) {
-			entityManagerControl.persistInsert(details);
+			pnpDetailMitakeRepositoryCustom.batchInsertPnpDetailMitake(details);
 		}
 	}
+	
+	
 	
 	/**
 	 * save db Status = DRAFT
@@ -771,19 +783,21 @@ public class LoadFtbPnpDataTask {
 		logger.info(" saveEvety8dDB UnicaDetails size:" + originalDetails.size());
 		
 		pnpMainUnica = pnpMainUnicaRepository.save(pnpMainUnica);
-		List<Object> details = new ArrayList<>();
+		List<PnpDetailUnica> details = new ArrayList<>();
 		for (Object detail : originalDetails) {
-			((PnpDetail) detail).setPnpMainId(pnpMainUnica.getPnpMainId());
-			((PnpDetail) detail).setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_UNICA, true));
-			((PnpDetail) detail).setProcStage(AbstractPnpMainEntity.STAGE_BC);
-			((PnpDetail) detail).setSource(AbstractPnpMainEntity.SOURCE_UNICA);
-			((PnpDetail) detail).setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
-			details.add(detail);
+			PnpDetailUnica pnpDetailUnica = (PnpDetailUnica)detail;
+			pnpDetailUnica.setPnpMainId(pnpMainUnica.getPnpMainId());
+			pnpDetailUnica.setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_UNICA, true));
+			pnpDetailUnica.setProcStage(AbstractPnpMainEntity.STAGE_BC);
+			pnpDetailUnica.setSource(AbstractPnpMainEntity.SOURCE_UNICA);
+			pnpDetailUnica.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
+			details.add(pnpDetailUnica);
 		}
 		if (!details.isEmpty()) {
-			entityManagerControl.persistInsert(details);
+			pnpDetailUnicaRepositoryCustom.batchInsertPnpDetailUnica(details);
 		}
 	}
+	
 	
 	/**
 	 * save db Status = DRAFT
@@ -798,19 +812,22 @@ public class LoadFtbPnpDataTask {
 		logger.info(" saveEvety8dDB Every8dDetails size:" + originalDetails.size());
 
 		pnpMainEvery8d = pnpMainEvery8dRepository.save(pnpMainEvery8d);
-		List<Object> details = new ArrayList<>();
+		List<PnpDetailEvery8d> details = new ArrayList<>();
 		for (Object detail : originalDetails) {
-			((PnpDetail) detail).setPnpMainId(pnpMainEvery8d.getPnpMainId());
-			((PnpDetail) detail).setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_EVERY8D, true));
-			((PnpDetail) detail).setProcStage(AbstractPnpMainEntity.STAGE_BC);
-			((PnpDetail) detail).setSource(AbstractPnpMainEntity.SOURCE_EVERY8D);
-			((PnpDetail) detail).setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
-			details.add(detail);
+			PnpDetailEvery8d pnpDetailEvery8d =(PnpDetailEvery8d)detail;
+			pnpDetailEvery8d.setPnpMainId(pnpMainEvery8d.getPnpMainId());
+			pnpDetailEvery8d.setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_EVERY8D, true));
+			pnpDetailEvery8d.setProcStage(AbstractPnpMainEntity.STAGE_BC);
+			pnpDetailEvery8d.setSource(AbstractPnpMainEntity.SOURCE_EVERY8D);
+			pnpDetailEvery8d.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
+			details.add(pnpDetailEvery8d);
 		}
 		if (!details.isEmpty()) {
-			entityManagerControl.persistInsert(details);
+			pnpDetailEvery8dRepositoryCustom.batchInsertPnpDetailEvery8d(details);
 		}
 	}
+	
+	
 
 	/**
 	 * save db Status = DRAFT
@@ -825,20 +842,23 @@ public class LoadFtbPnpDataTask {
 		logger.info(" saveMingDB MingDetails size:" + originalDetails.size());
 		pnpMainMing.setOrigFileName(pnpMainMing.getOrigFileName().replace(".ok", ""));
 		pnpMainMing = pnpMainMingRepository.save(pnpMainMing);
-		List<Object> details = new ArrayList<>();
+		logger.info(" saveMingDB pnpMainMing id:" + pnpMainMing.getPnpMainId());
+		List<PnpDetailMing> details = new ArrayList<>();
 		for (Object detail : originalDetails) {
-			((PnpDetail) detail).setPnpMainId(pnpMainMing.getPnpMainId());
-			((PnpDetail) detail).setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_MING, true));
-			((PnpDetail) detail).setProcStage(AbstractPnpMainEntity.STAGE_BC);
-			((PnpDetail) detail).setSource(AbstractPnpMainEntity.SOURCE_MING);
-			((PnpDetail) detail).setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
-			details.add(detail);
+			PnpDetailMing pnpDetail = (PnpDetailMing)detail;
+			pnpDetail.setPnpMainId(pnpMainMing.getPnpMainId());
+			pnpDetail.setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_MING, true));
+			pnpDetail.setProcStage(AbstractPnpMainEntity.STAGE_BC);
+			pnpDetail.setSource(AbstractPnpMainEntity.SOURCE_MING);
+			pnpDetail.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
+			details.add(pnpDetail);
 		}
 		if (!details.isEmpty()) {
-			entityManagerControl.persistInsert(details);
+			pnpDetailMingRepositoryCustom.batchInsertPnpDetailMing(details);
 		}
 	}
-
+	
+	
 	/**
 	 * 三竹
 	 * 資料解析完狀態改為retry or wait

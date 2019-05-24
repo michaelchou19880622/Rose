@@ -11,4 +11,6 @@ public interface BillingNoticeRepositoryCustom {
 	public BillingNoticeDetail findFirstDetailByStatusForUpdate(String status, List<String> tempIds);
 	
 	public BillingNoticeMain findFirstMainByStatusForUpdate(String status, List<String> tempIds);
+	
+	public void batchInsertBillingNoticeDetail(final List<BillingNoticeDetail> list);
 }

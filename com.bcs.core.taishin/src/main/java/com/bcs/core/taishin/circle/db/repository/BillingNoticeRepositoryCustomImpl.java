@@ -1,18 +1,27 @@
 package com.bcs.core.taishin.circle.db.repository;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeDetail;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeMain;
-import com.bcs.core.taishin.circle.service.BillingNoticeService;
+import com.bcs.core.taishin.circle.db.entity.CircleEntityManagerControl;
+import com.google.common.collect.Lists;
 
 @Repository
 public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositoryCustom {
@@ -20,8 +29,54 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
 	@PersistenceContext
 	private EntityManager entityManager;
 	
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+	
 	/** Logger */
-	private static Logger logger = Logger.getLogger(BillingNoticeService.class);
+	private static Logger logger = Logger.getLogger(BillingNoticeRepositoryCustomImpl.class);
+	
+	
+	/**
+	 * 批次新增BillingNoticeDetail
+	 */
+	@Transactional(rollbackFor = Exception.class, timeout = 3000)
+	public void batchInsertBillingNoticeDetail(final List<BillingNoticeDetail> list) {
+
+		if (CollectionUtils.isEmpty(list)) {
+			return;
+		}
+		final Timestamp now = new Timestamp(Calendar.getInstance().getTime().getTime());
+		logger.info(" batchInsertBillingNoticeDetail start");
+		String INSERT = "INSERT INTO BCS_BILLING_NOTICE_DETAIL " + 
+				"(CREAT_TIME, MODIFY_TIME, MSG_TYPE, NOTICE_MAIN_ID,  STATUS, [TEXT], TITLE, UID)" + 
+				"VALUES(?, ?, ?, ?, ?, ?, ?, ?);";
+		
+		int count = 0;
+		List<List<BillingNoticeDetail>> batchLists = Lists.partition(list, CircleEntityManagerControl.batchSize);
+		 for(final List<BillingNoticeDetail> batch : batchLists) {  
+			 jdbcTemplate.batchUpdate(INSERT, new BatchPreparedStatementSetter() {
+					@Override
+					public void setValues(PreparedStatement ps, int i) throws SQLException {
+						BillingNoticeDetail detail = batch.get(i);
+						ps.setTimestamp(1, now);
+						ps.setTimestamp(2, now);
+						ps.setString(3, detail.getMsgType());
+						ps.setLong(4, detail.getNoticeMainId());
+						ps.setString(5, detail.getStatus());
+						ps.setString(6, detail.getText());
+						ps.setString(7, detail.getTitle());
+						ps.setString(8, detail.getUid());
+					}
+					@Override
+					public int getBatchSize() {
+						return batch.size();
+					}
+				});
+			 count++;
+			 logger.info(" batchInsertBillingNoticeDetail batch:" + count);
+		 }
+		logger.info(" batchInsertBillingNoticeDetail end");
+	}
 	
 	/**
 	 * 找出第一個retry detail 準備更新用

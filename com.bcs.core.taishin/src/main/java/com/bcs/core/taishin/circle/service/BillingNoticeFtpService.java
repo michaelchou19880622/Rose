@@ -32,10 +32,10 @@ import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsg;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeDetail;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeMain;
-import com.bcs.core.taishin.circle.db.entity.CircleEntityManagerControl;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeContentTemplateMsgRepository;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeDetailRepository;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeMainRepository;
+import com.bcs.core.taishin.circle.db.repository.BillingNoticeRepositoryCustom;
 import com.bcs.core.taishin.circle.ftp.FtpService;
 import com.bcs.core.taishin.circle.ftp.FtpSetting;
 
@@ -46,7 +46,7 @@ public class BillingNoticeFtpService {
 	private static Logger logger = Logger.getLogger(BillingNoticeFtpService.class);
 	private DateFormat dataFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 	@Autowired
-	private CircleEntityManagerControl entityManagerControl;
+	private BillingNoticeRepositoryCustom billingNoticeRepositoryCustom;
 	@Autowired
 	private BillingNoticeMainRepository billingNoticeMainRepository;
 	@Autowired
@@ -283,15 +283,16 @@ public class BillingNoticeFtpService {
 		List<BillingNoticeDetail> originalDetails = billingNoticeMain.getDetails();
 		logger.info(" BillingNoticeFtpService BillingNoticeDetail size:" + originalDetails.size() );
 		billingNoticeMain = billingNoticeMainRepository.save(billingNoticeMain);
-		List<Object> details = new ArrayList<>();
+		List<BillingNoticeDetail> details = new ArrayList<>();
 		for( BillingNoticeDetail detail : originalDetails) {
 			detail.setNoticeMainId(billingNoticeMain.getNoticeMainId());
 			details.add(detail);
 		}
 		if (!details.isEmpty()) {
-			entityManagerControl.persistInsert(details);
+			billingNoticeRepositoryCustom.batchInsertBillingNoticeDetail(details);
 		}
 	}
+	
 	
 	/**
 	 * 資料解析完狀態改為retry or wait

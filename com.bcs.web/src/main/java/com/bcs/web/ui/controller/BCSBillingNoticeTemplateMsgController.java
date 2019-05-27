@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -618,7 +619,13 @@ public class BCSBillingNoticeTemplateMsgController {
 		try {
 			logger.info(".bn.bigswitch = " + "." + CONFIG_STR.BN_BIGSWITCH.toString());
 			SystemConfig systemConfig = systemConfigService.findSystemConfig("." + CONFIG_STR.BN_BIGSWITCH.toString());
+			if (systemConfig == null) {
+				systemConfig = new SystemConfig();
+				systemConfig.setConfigId("." + CONFIG_STR.BN_BIGSWITCH.toString());
+				systemConfig.setDescription("BigSwitch");
+			}
 			systemConfig.setValue(OnOff);
+			systemConfig.setModifyTime(Calendar.getInstance().getTime());
 			systemConfigService.save(systemConfig);
 			
 			logger.info("bigSwitch:" + systemConfig.getValue());

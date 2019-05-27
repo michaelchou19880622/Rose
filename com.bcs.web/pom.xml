@@ -68,25 +68,25 @@
 			</properties>
 		</profile>
 		<profile>
-			<id>taishinoa_api</id> <!-- 台新正式機api後台 -->
+			<id>api_taishinoa</id> <!-- 台新正式機api的後台 -->
 			<build>
 		            <directory>target/AP</directory>
 		        </build>
 			<properties>
-				<package.environment>taishinoa_api</package.environment>
+				<package.environment>api_taishinoa</package.environment>
 				<rp.build.warname>taishinoa</rp.build.warname>
-				<maven.war.webxml>src/main/resources/taishinoa_api/web/web.xml</maven.war.webxml> <!-- set up webxml location -->
+				<maven.war.webxml>src/main/resources/api_taishinoa/web/web.xml</maven.war.webxml> <!-- set up webxml location -->
 			</properties>
 		</profile>
 		<profile>
-			<id>taishinoaapi_backend</id> <!--  台新正式機後台 api -->
+			<id>backend_taishinoaapi</id> <!--  台新正式機後台 的 api -->
 			<build>
 		            <directory>target/backend</directory>
 		        </build>
 			<properties>
-				<package.environment>taishinoaapi_backend</package.environment>
+				<package.environment>backend_taishinoaapi</package.environment>
 				<rp.build.warname>taishinoaapi</rp.build.warname>
-				<maven.war.webxml>src/main/resources/taishinoaapi_backend/web/web.xml</maven.war.webxml> <!-- set up webxml location -->
+				<maven.war.webxml>src/main/resources/backend_taishinoaapi/web/web.xml</maven.war.webxml> <!-- set up webxml location -->
 			</properties>
 		</profile>
 		<profile>
@@ -136,8 +136,8 @@
 					<exclude>taishinuat/</exclude>
 					<exclude>taishinoaapi/</exclude>
 					<exclude>taishinoa/</exclude>
-					<exclude>taishinoa_api/</exclude>
-					<exclude>taishinoaapi_backend/</exclude>
+					<exclude>api_taishinoa/</exclude>
+					<exclude>backend_taishinoaapi/</exclude>
 				</excludes>
 			</resource>
 		</resources>

@@ -5,10 +5,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -18,21 +16,17 @@ import javax.annotation.PreDestroy;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.formula.functions.T;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.bcs.core.db.service.LineUserService;
-import com.bcs.core.enums.API_TYPE;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.resource.CoreConfigReader;
-import com.bcs.core.spring.ApplicationContextProvider;
 import com.bcs.core.taishin.circle.PNP.akka.PnpAkkaService;
 import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailEvery8d;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainEvery8d;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainMing;
@@ -40,19 +34,9 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainMitake;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainUnica;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainEvery8dRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpRepositoryCustom;
-import com.bcs.core.taishin.circle.PNP.service.PnpSendingMsgService;
-//import com.bcs.core.taishin.circle.PNP.service.PnpService;
-import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsg;
-import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsgAction;
-import com.bcs.core.taishin.circle.db.entity.BillingNoticeDetail;
-import com.bcs.core.taishin.circle.db.entity.BillingNoticeMain;
 import com.bcs.core.taishin.circle.db.entity.CircleEntityManagerControl;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeContentTemplateMsgActionRepository;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeContentTemplateMsgRepository;
-import com.bcs.core.taishin.circle.db.repository.BillingNoticeDetailRepository;
-import com.bcs.core.taishin.circle.db.repository.BillingNoticeMainRepository;
-import com.bcs.core.taishin.circle.db.repository.BillingNoticeRepositoryCustom;
-import com.google.common.collect.Lists;
 
 /**
  * 循環執行以Line push發送訊息
@@ -101,8 +85,8 @@ public class PnpPushMsgService {
 	 */
 	public void startCircle() throws SchedulerException, InterruptedException {
 
-		String unit = CoreConfigReader.getString(CONFIG_STR.PNP_SCHEDULE_UNIT, true);
-		int time = CoreConfigReader.getInteger(CONFIG_STR.PNP_SCHEDULE_TIME, true);
+		String unit = CoreConfigReader.getString(CONFIG_STR.PNP_SCHEDULE_UNIT, true, false);
+		int time = CoreConfigReader.getInteger(CONFIG_STR.PNP_SCHEDULE_TIME, true, false);
 		if (time == -1 || TimeUnit.valueOf(unit) == null) {
 			logger.error(" PNPSendMsgService TimeUnit error :" + time  + unit);
 			return;
@@ -113,7 +97,7 @@ public class PnpPushMsgService {
 				logger.debug(" PnpSendMsgService startCircle....");
 				
 				//#.pnp.bigswitch = 0(停止排程) 1(停止排程，並轉發SMS) 其他(正常運行)
-				int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true);
+				int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true, false);
 				if (1==bigSwitch || 0==bigSwitch) { //大流程關閉時不做
 					logger.warn("PNP_BIGSWITCH : "+bigSwitch +"PnpPushMsgService stop sendding...");
 					return;

@@ -170,24 +170,24 @@ public class BillingNoticeService {
 	 */
 	public void sendMail(String title, String content) {
 		logger.info("Billing Notice Send email : [" + title + "]" +  content);
-		String fromAddress = CoreConfigReader.getString(null, EMAIL_CONFIG.FROM.toString(),true);
+		String fromAddress = CoreConfigReader.getString(null, EMAIL_CONFIG.FROM.toString(),true, false);
 		if (StringUtils.isBlank(fromAddress)) {
 			logger.error("Billing Notice Send email from Address is null ");
 			return;
 		}
-		String host = CoreConfigReader.getString(null, EMAIL_CONFIG.HOST.toString(),true);
+		String host = CoreConfigReader.getString(null, EMAIL_CONFIG.HOST.toString(),true, false);
 		int port = -1;
 		try{
-			port = Integer.parseInt(CoreConfigReader.getString(null, EMAIL_CONFIG.PORT.toString(),true));
+			port = Integer.parseInt(CoreConfigReader.getString(null, EMAIL_CONFIG.PORT.toString(),true, false));
 		}
 		catch(Exception e){
 			logger.error("Billing Notice Send email smtp port is not number ");
 		}
-		final String username = CoreConfigReader.getString(null, EMAIL_CONFIG.USERNAME.toString(),true);
-		final String password = CoreConfigReader.getString(null, EMAIL_CONFIG.PASSWORD.toString(),true);// your password
-		String auth = CoreConfigReader.getString(null, EMAIL_CONFIG.AUTH.toString(),true);
-		String starttls = CoreConfigReader.getString(null, EMAIL_CONFIG.STARTTLS_ENABLE.toString(),true);
-		String debug = CoreConfigReader.getString(null, EMAIL_CONFIG.DEBUG.toString(),true);
+		final String username = CoreConfigReader.getString(null, EMAIL_CONFIG.USERNAME.toString(),true, false);
+		final String password = CoreConfigReader.getString(null, EMAIL_CONFIG.PASSWORD.toString(),true, false);// your password
+		String auth = CoreConfigReader.getString(null, EMAIL_CONFIG.AUTH.toString(),true, false);
+		String starttls = CoreConfigReader.getString(null, EMAIL_CONFIG.STARTTLS_ENABLE.toString(),true, false);
+		String debug = CoreConfigReader.getString(null, EMAIL_CONFIG.DEBUG.toString(),true, false);
 		Properties props = new Properties();
 		props.put("mail.smtp.host", host);
 		props.put("mail.smtp.auth", StringUtils.isBlank(auth) ? "false" : auth);
@@ -198,13 +198,13 @@ public class BillingNoticeService {
 			logger.error("Billing Notice Send email setting wrong ");
 			return;
 		}
-		String adminMail = CoreConfigReader.getString(null, EMAIL_CONFIG.TO_ADMIN.toString(),true);
+		String adminMail = CoreConfigReader.getString(null, EMAIL_CONFIG.TO_ADMIN.toString(),true, false);
 		if (StringUtils.isBlank(adminMail)) {
 			logger.error("Billing Notice Send email Recipients is empty ");
 			return;
 		}
-		String secret = CoreConfigReader.getString(CONFIG_STR.AES_SECRET_KEY, true);
-		String iv = CoreConfigReader.getString(CONFIG_STR.AES_INITIALIZATION_VECTOR, true);
+		String secret = CoreConfigReader.getString(CONFIG_STR.AES_SECRET_KEY, true, false);
+		String iv = CoreConfigReader.getString(CONFIG_STR.AES_INITIALIZATION_VECTOR, true, false);
 		
 
 		try {

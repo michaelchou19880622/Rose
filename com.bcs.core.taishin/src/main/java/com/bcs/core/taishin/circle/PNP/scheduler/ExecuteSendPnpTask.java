@@ -1,34 +1,11 @@
 package com.bcs.core.taishin.circle.PNP.scheduler;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainEvery8d;
-//import com.bcs.core.taishin.circle.PNP.db.service.PnpDetailService;
-import com.bcs.core.taishin.circle.PNP.db.service.PnpMainService;
-import com.bcs.core.taishin.circle.PNP.scheduler.CircleSchedulerService;
-import com.bcs.core.taishin.circle.PNP.service.PnpSendingMsgService;
-import com.bcs.core.taishin.circle.PNP.service.SendingPnpService;
-import com.bcs.core.api.msg.MsgGenerator;
-import com.bcs.core.api.msg.MsgGeneratorFactory;
-import com.bcs.core.bot.send.service.SendingMsgService;
 import com.bcs.core.db.service.LineUserService;
-import com.bcs.core.enums.API_TYPE;
 import com.bcs.core.enums.CONFIG_STR;
-import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.resource.CoreConfigReader;
-import com.bcs.core.spring.ApplicationContextProvider;
-import com.bcs.core.utils.ErrorRecord;
 
 
 public class ExecuteSendPnpTask {
@@ -51,7 +28,7 @@ public class ExecuteSendPnpTask {
 		 * #通路參數 : 寄BC 失敗後寄PNP失敗後寄SMS結束 =3
 		 */
 		
-		String sendPath = CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_MING.toString(), true);
+		String sendPath = CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_MING.toString(), true, false);
 		switch (sendPath) {
 		case "1"://1=BC>PNP>SMS
 			

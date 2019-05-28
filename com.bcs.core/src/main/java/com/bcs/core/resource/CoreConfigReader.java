@@ -145,6 +145,12 @@ public class CoreConfigReader {
 		return getString(key.toString(), fromDB);
 	}
 	
+	public static String getString(CONFIG_STR key, boolean fromDB, boolean fromCatch) {
+
+		return getString(key.toString(), fromDB, fromCatch);
+	}
+	
+	
 	public static int getInteger(String key){
 		try{
 			return Integer.parseInt(getString(key, false));
@@ -199,6 +205,16 @@ public class CoreConfigReader {
 		}
 	}
 	
+	
+	public static int getInteger(CONFIG_STR key, boolean fromDB, boolean fromCatch){
+		try{
+			return Integer.parseInt(getString(key, fromDB, fromCatch));
+		}
+		catch(Exception e){
+			return -1;
+		}
+	}
+	
 	public static boolean getBoolean(String key, boolean fromDB){
 		try{
 			return Boolean.parseBoolean(getString(key, fromDB));
@@ -211,6 +227,15 @@ public class CoreConfigReader {
 	public static boolean getBoolean(CONFIG_STR key, boolean fromDB){
 		try{
 			return Boolean.parseBoolean(getString(key, fromDB));
+		}
+		catch(Exception e){
+			return false;
+		}
+	}
+	
+	public static boolean getBoolean(CONFIG_STR key, boolean fromDB, boolean fromCatch){
+		try{
+			return Boolean.parseBoolean(getString(key, fromDB, fromCatch));
 		}
 		catch(Exception e){
 			return false;
@@ -235,6 +260,15 @@ public class CoreConfigReader {
 	public static int getInteger(String ChannelId, String key, boolean fromDB){
 		try{
 			return Integer.parseInt(getString(ChannelId, key, fromDB));
+		}
+		catch(Exception e){
+			return -1;
+		}
+	}
+	
+	public static int getInteger(String ChannelId, String key, boolean fromDB, boolean fromCatch){
+		try{
+			return Integer.parseInt(getString(ChannelId, key, fromDB, fromCatch));
 		}
 		catch(Exception e){
 			return -1;

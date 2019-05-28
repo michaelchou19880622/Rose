@@ -66,8 +66,8 @@ public class BillingNoticeSendMsgService {
 	 */
 	public void startCircle() throws SchedulerException, InterruptedException {
 
-		String unit = CoreConfigReader.getString(CONFIG_STR.BN_SCHEDULE_UNIT, true);
-		int time = CoreConfigReader.getInteger(CONFIG_STR.BN_SCHEDULE_TIME, true);
+		String unit = CoreConfigReader.getString(CONFIG_STR.BN_SCHEDULE_UNIT, true, false);
+		int time = CoreConfigReader.getInteger(CONFIG_STR.BN_SCHEDULE_TIME, true, false);
 		if (time == -1 || TimeUnit.valueOf(unit) == null) {
 			logger.error(" BillingNoticeSendMsgService TimeUnit error :" + time  + unit);
 			return;
@@ -83,7 +83,7 @@ public class BillingNoticeSendMsgService {
 	}
 	
 	private void sendingBillingNoticeMain() {
-		boolean bigSwitch = CoreConfigReader.getBoolean(CONFIG_STR.BN_BIGSWITCH, true);
+		boolean bigSwitch = CoreConfigReader.getBoolean(CONFIG_STR.BN_BIGSWITCH, true, false);
 		if (!bigSwitch) { //大流程關閉時不做
 			return;
 		}

@@ -29,10 +29,10 @@ import com.tsb.util.TrendPwMgmt;
 public class FtpService {
 	/** Logger */
 	private static Logger logger = Logger.getLogger(FtpService.class);
-	private static String channelIds = CoreConfigReader.getString(CONFIG_STR.BN_FTP_CHANNELIDS, true);
-	private static String downloadSavePath = CoreConfigReader.getString(CONFIG_STR.BN_FTP_DOWNLOAD_SAVEFILEPATH, true);
-	private static String fileExtension = CoreConfigReader.getString(CONFIG_STR.BN_FTP_FILE_EXTENSION, true);
-	private static boolean is64Bit = CoreConfigReader.getBoolean(CONFIG_STR.BN_FTP_IS64BIT, true);
+	private static String channelIds = CoreConfigReader.getString(CONFIG_STR.BN_FTP_CHANNELIDS, true, false);
+	private static String downloadSavePath = CoreConfigReader.getString(CONFIG_STR.BN_FTP_DOWNLOAD_SAVEFILEPATH, true, false);
+	private static String fileExtension = CoreConfigReader.getString(CONFIG_STR.BN_FTP_FILE_EXTENSION, true, false);
+	private static boolean is64Bit = CoreConfigReader.getBoolean(CONFIG_STR.BN_FTP_IS64BIT, true, false);
 	private List<FtpSetting> ftpSettings = new ArrayList<>();
 
 	/**
@@ -75,20 +75,20 @@ public class FtpService {
 		if (StringUtils.isNotBlank(channelIds)) {
 			for (String channel : channelIds.split(",")) {
 				if (StringUtils.isNotBlank(channel)) {
-					String host = CoreConfigReader.getString(channel, CONFIG_STR.BN_FTP_HOST.toString(), true);
-					int port = CoreConfigReader.getInteger(channel, CONFIG_STR.BN_FTP_PORT.toString(), true);
+					String host = CoreConfigReader.getString(channel, CONFIG_STR.BN_FTP_HOST.toString(), true, false);
+					int port = CoreConfigReader.getInteger(channel, CONFIG_STR.BN_FTP_PORT.toString(), true, false);
 					int serverHostNamePort = CoreConfigReader.getInteger(channel,
-							CONFIG_STR.BN_FTP_SERVER_HOSTNAME_PORT.toString(), true);
+							CONFIG_STR.BN_FTP_SERVER_HOSTNAME_PORT.toString(), true, false);
 					String serverHostName = CoreConfigReader.getString(channel,
-							CONFIG_STR.BN_FTP_SERVER_HOSTNAME.toString(), true);
-					String APPCode = CoreConfigReader.getString(channel, CONFIG_STR.BN_FTP_APP_CODE.toString(), true);
-					String RESCode = CoreConfigReader.getString(channel, CONFIG_STR.BN_FTP_RES_CODE.toString(), true);
-					String account = CoreConfigReader.getString(channel, CONFIG_STR.BN_FTP_ACCOUNT.toString(), true);
-					String password = CoreConfigReader.getString(channel, CONFIG_STR.BN_FTP_PASSWORD.toString(), true);
-					String path = CoreConfigReader.getString(channel, CONFIG_STR.BN_FTP_PATH.toString(), true);
+							CONFIG_STR.BN_FTP_SERVER_HOSTNAME.toString(), true, false);
+					String APPCode = CoreConfigReader.getString(channel, CONFIG_STR.BN_FTP_APP_CODE.toString(), true, false);
+					String RESCode = CoreConfigReader.getString(channel, CONFIG_STR.BN_FTP_RES_CODE.toString(), true, false);
+					String account = CoreConfigReader.getString(channel, CONFIG_STR.BN_FTP_ACCOUNT.toString(), true, false);
+					String password = CoreConfigReader.getString(channel, CONFIG_STR.BN_FTP_PASSWORD.toString(), true, false);
+					String path = CoreConfigReader.getString(channel, CONFIG_STR.BN_FTP_PATH.toString(), true, false);
 					String fileEncoding = CoreConfigReader.getString(channel,
-							CONFIG_STR.BN_FTP_FILE_ENCODING.toString(), true);
-					String protocol = CoreConfigReader.getString(channel, CONFIG_STR.BN_FTP_PROTOCOL.toString(), true);
+							CONFIG_STR.BN_FTP_FILE_ENCODING.toString(), true, false);
+					String protocol = CoreConfigReader.getString(channel, CONFIG_STR.BN_FTP_PROTOCOL.toString(), true, false);
 					if (StringUtils.isNotBlank(host)) {
 						FtpSetting ftpSetting = new FtpSetting();
 						ftpSetting.setProtocol(protocol);

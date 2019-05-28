@@ -69,8 +69,8 @@ public class BillingNoticeFtpService {
 	 * @throws InterruptedException
 	 */
 	public void startCircle() throws SchedulerException, InterruptedException {
-		String unit = CoreConfigReader.getString(CONFIG_STR.BN_SCHEDULE_UNIT, true);
-		int time = CoreConfigReader.getInteger(CONFIG_STR.BN_SCHEDULE_TIME, true);
+		String unit = CoreConfigReader.getString(CONFIG_STR.BN_SCHEDULE_UNIT, true, false);
+		int time = CoreConfigReader.getInteger(CONFIG_STR.BN_SCHEDULE_TIME, true, false);
 		if (time == -1 || TimeUnit.valueOf(unit) == null) {
 			logger.error(" BillingNoticeFtpService TimeUnit error :" + time  + unit);
 			return;
@@ -90,9 +90,9 @@ public class BillingNoticeFtpService {
 	 * 執行流程
 	 */
 	private void ftpProcessHandler() {
-		boolean bigSwitch = CoreConfigReader.getBoolean(CONFIG_STR.BN_BIGSWITCH, true);
-		String downloadSavePath = CoreConfigReader.getString(CONFIG_STR.BN_FTP_DOWNLOAD_SAVEFILEPATH, true);
-		String fileExtension = CoreConfigReader.getString(CONFIG_STR.BN_FTP_FILE_EXTENSION, true);
+		boolean bigSwitch = CoreConfigReader.getBoolean(CONFIG_STR.BN_BIGSWITCH, true, false);
+		String downloadSavePath = CoreConfigReader.getString(CONFIG_STR.BN_FTP_DOWNLOAD_SAVEFILEPATH, true, false);
+		String fileExtension = CoreConfigReader.getString(CONFIG_STR.BN_FTP_FILE_EXTENSION, true, false);
 		if (!bigSwitch) { //大流程關閉時不做
 			return;
 		}

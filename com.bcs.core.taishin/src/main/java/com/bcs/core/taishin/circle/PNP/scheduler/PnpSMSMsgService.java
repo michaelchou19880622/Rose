@@ -17,8 +17,6 @@ import javax.annotation.PreDestroy;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPClient;
 import org.apache.log4j.Logger;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,8 +90,8 @@ public class PnpSMSMsgService {
 	 * @throws InterruptedException
 	 */
 	public void startCircle() throws SchedulerException, InterruptedException {
-		String unit = CoreConfigReader.getString(CONFIG_STR.PNP_SCHEDULE_UNIT, true);
-		int time = CoreConfigReader.getInteger(CONFIG_STR.PNP_SCHEDULE_TIME, true);
+		String unit = CoreConfigReader.getString(CONFIG_STR.PNP_SCHEDULE_UNIT, true, false);
+		int time = CoreConfigReader.getInteger(CONFIG_STR.PNP_SCHEDULE_TIME, true, false);
 		if (time == -1 || TimeUnit.valueOf(unit) == null) {
 			logger.error(" PnpSMSMsgService TimeUnit error :" + time  + unit);
 			return;
@@ -104,7 +102,7 @@ public class PnpSMSMsgService {
 				logger.debug(" PnpSMSMsgService startCircle....");
 				
 				//#.pnp.bigswitch = 0(停止排程) 1(停止排程，並轉發SMS) 其他(正常運行)
-				int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true);
+				int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true, false);
 				if (1==bigSwitch || 0==bigSwitch) { //大流程關閉時不做
 					logger.warn("PNP_BIGSWITCH : "+bigSwitch +"PnpSMSMsgService stop transfer file to SMS FTP ...");
 					return;

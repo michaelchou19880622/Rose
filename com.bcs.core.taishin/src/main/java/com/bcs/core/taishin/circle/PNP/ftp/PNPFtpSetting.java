@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.bcs.core.enums.CONFIG_STR;
+import com.bcs.core.resource.CoreConfigReader;
+
 public class PNPFtpSetting {
 
 	private String channelId;
@@ -35,6 +38,35 @@ public class PNPFtpSetting {
 
 	private List<String> fileNames = new ArrayList<>();
 	
+	public static PNPFtpSetting build(PNPFTPType type, boolean isMitakeSMS){
+		PNPFtpSetting pnpFtpSetting = new PNPFtpSetting();
+		pnpFtpSetting.setFileEncoding(CoreConfigReader.getString(CONFIG_STR.PNP_READLINES_ENCODE, true, false));
+		pnpFtpSetting.setChannelId(type.getSource());
+		pnpFtpSetting.setServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_.toString() + type.toString(), true, false));
+		pnpFtpSetting.setServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_PORT_.toString() + type.toString(), true, false));
+		pnpFtpSetting.setAccount(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_USR_.toString() + type.toString(), true, false));
+		pnpFtpSetting.setPassword(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PASS_.toString() + type.toString(), true, false));
+		pnpFtpSetting.setHost(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_HOST_.toString() + type.toString(), true, false));
+		pnpFtpSetting.setPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_PORT_.toString() + type.toString(), true, false));
+		pnpFtpSetting.setAPPCode(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_APPCODE_.toString() + type.toString(), true, false));
+		pnpFtpSetting.setRESCode(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_RESCODE_.toString() + type.toString(), true, false));
+		pnpFtpSetting.setPath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_PATH_.toString() + type.toString(), true, false));
+		pnpFtpSetting.setUploadPath(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_UPLOAD_PATH_.toString() + type.toString(), true, false));
+		pnpFtpSetting.setDownloadSavePath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_.toString() + type.toString(), true, false));
+		pnpFtpSetting.setProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PROTOCOL_.toString() + type.toString(), true, false));
+		pnpFtpSetting.setFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_.toString() + type.toString(), true, false));
+		//SMS setting
+		pnpFtpSetting.setSmsServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_SERVERHOSTNAME_.toString() + type.toString(), true, false));
+		pnpFtpSetting.setSmsServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_SERVERHOSTNAME_PORT_.toString() + type.toString(), true, false));
+		pnpFtpSetting.setSmsAccount(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_USR_.toString() + type.toString(), true, false));
+		pnpFtpSetting.setSmsPassword(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PASS_.toString() + type.toString(), true, false));
+		pnpFtpSetting.setSmsHost(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_HOST_.toString() + type.toString(), true, false));
+		pnpFtpSetting.setSmsPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_PORT_.toString() + type.toString(), true, false));
+		pnpFtpSetting.setSmsAPPCode(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_APPCODE_.toString() + type.toString(), true, false));
+		pnpFtpSetting.setSmsRESCode(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_RESCODE_.toString() + type.toString(), true, false));
+		pnpFtpSetting.setSmsProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PROTOCOL_.toString() + type.toString(), true, false));
+		return pnpFtpSetting;
+	}
 	
 	
 	public String getProtocol() {

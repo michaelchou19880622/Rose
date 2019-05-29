@@ -196,6 +196,15 @@ public class CoreConfigReader {
 		}
 	}
 	
+	public static int getInteger(String key, boolean fromDB, boolean fromCatch){
+		try{
+			return Integer.parseInt(getString(key, fromDB, fromCatch));
+		}
+		catch(Exception e){
+			return -1;
+		}
+	}
+	
 	public static int getInteger(CONFIG_STR key, boolean fromDB){
 		try{
 			return Integer.parseInt(getString(key, fromDB));

@@ -13,7 +13,7 @@ import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsgActi
 public enum BillingNoticeContentTemplateMsgActionType {
 	MESSAGE{
 	    @Override
-	    public JSONObject getJSONObject(BillingNoticeContentTemplateMsgAction action) {
+	    public JSONObject getJSONObject(BillingNoticeContentTemplateMsgAction action, String MID) {
 	    	JSONObject actionObject = new JSONObject();
 			actionObject.put("type", action.getActionType());
             actionObject.put("label", action.getActionLabel());
@@ -23,8 +23,8 @@ public enum BillingNoticeContentTemplateMsgActionType {
 	    }
 	},  URI{
 		@Override
-	    public JSONObject getJSONObject(BillingNoticeContentTemplateMsgAction action) {
-			String uri = UriHelper.getLinkUri( action.getLinkId());
+	    public JSONObject getJSONObject(BillingNoticeContentTemplateMsgAction action, String MID) {
+			String uri = UriHelper.getLinkUri( action.getLinkId(), MID);
 	    	JSONObject actionObject = new JSONObject();
 			actionObject.put("type", action.getActionType());
             actionObject.put("label", action.getActionLabel());
@@ -33,7 +33,7 @@ public enum BillingNoticeContentTemplateMsgActionType {
 	    }
 	}, POSTBACK{
 		@Override
-	    public JSONObject getJSONObject(BillingNoticeContentTemplateMsgAction action) {
+	    public JSONObject getJSONObject(BillingNoticeContentTemplateMsgAction action, String MID) {
 	    	JSONObject actionObject = new JSONObject();
 			actionObject.put("type", action.getActionType());
             actionObject.put("label", action.getActionLabel());
@@ -43,7 +43,7 @@ public enum BillingNoticeContentTemplateMsgActionType {
 	    }
 	};
 	
-	public abstract JSONObject getJSONObject(BillingNoticeContentTemplateMsgAction action);
+	public abstract JSONObject getJSONObject(BillingNoticeContentTemplateMsgAction action, String MID);
 	
 	/**
 	 * find Action Type

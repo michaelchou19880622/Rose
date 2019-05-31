@@ -368,7 +368,7 @@ public class BillingNoticeService {
 			for(BillingNoticeContentTemplateMsgAction action : actions){
 				BillingNoticeContentTemplateMsgActionType type = BillingNoticeContentTemplateMsgActionType.findActionType(action.getActionType());
 				if (type != null) {
-					JSONObject actionObject = type.getJSONObject(action);
+					JSONObject actionObject = type.getJSONObject(action, detail.getUid());
 					actionsArray.put(actionObject);
 				}else {
 					logger.error("Template Error : BillingNoticeContentTemplateMsgActionType is not support . Type:"+ action.getActionType() );
@@ -397,7 +397,7 @@ public class BillingNoticeService {
 			for(BillingNoticeContentTemplateMsgAction action : actions){
 				BillingNoticeContentTemplateMsgActionType type = BillingNoticeContentTemplateMsgActionType.findActionType(action.getActionType());
 				if (type != null) {
-					JSONObject actionObject = type.getJSONObject(action);
+					JSONObject actionObject = type.getJSONObject(action, detail.getUid());
 					actionsArray.put(actionObject);
 				}else {
 					logger.error("Template Error : BillingNoticeContentTemplateMsgActionType is not support . Type:"+ action.getActionType() );
@@ -423,7 +423,7 @@ public class BillingNoticeService {
 				for(BillingNoticeContentTemplateMsgAction action : actions){
 					BillingNoticeContentTemplateMsgActionType type = BillingNoticeContentTemplateMsgActionType.findActionType(action.getActionType());
 					if (type != null) {
-						JSONObject actionObject = type.getJSONObject(action);
+						JSONObject actionObject = type.getJSONObject(action,detail.getUid());
 						actionsArray.put(actionObject);
 					}else {
 						logger.error("Template Error : BillingNoticeContentTemplateMsgActionType is not support . Type:"+ action.getActionType() );

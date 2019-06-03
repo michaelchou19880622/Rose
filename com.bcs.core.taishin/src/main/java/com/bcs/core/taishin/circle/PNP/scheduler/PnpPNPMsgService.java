@@ -96,7 +96,7 @@ public class PnpPNPMsgService {
 					//組裝資料
 					pnpMain = pnpRepositoryCustom.findMainByMainId(type, oneDetail.getPnpMainId());
 					if (null == pnpMain) {
-						logger.debug("pnpMain type :"+ type  +"sendingMain not data");
+						logger.info("pnpMain type :"+ type  +"sendingMain not data");
 					}else {
 						pnpMain.setProcStage(AbstractPnpMainEntity.STAGE_PNP);
 						pnpMain.setPnpDetails(details);

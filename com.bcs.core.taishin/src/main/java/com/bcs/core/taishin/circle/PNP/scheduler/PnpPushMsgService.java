@@ -100,7 +100,7 @@ public class PnpPushMsgService {
 				Set<Long>  allMainIds = new  HashSet<Long>(); 
 				List<? super PnpDetail>  details = pnpRepositoryCustom.updateStatusByStageBC(type, procApName, allMainIds);
 				if (details.isEmpty()) {
-					logger.debug("details not data type:" + type.toString());
+					logger.info("details not data type:" + type.toString());
 				}else {
 					details = findDetailUid(details);
 					Long[] mainIds = allMainIds.toArray(new Long[allMainIds.size()]);

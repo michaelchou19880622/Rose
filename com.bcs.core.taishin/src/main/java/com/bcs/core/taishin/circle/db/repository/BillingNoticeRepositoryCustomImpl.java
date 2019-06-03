@@ -87,12 +87,14 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
 	 */
 	@Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
 	public void updateStatus(String procApName, List<String> tempIds, Set<Long>  allMainIds, List<BillingNoticeDetail> allDetails) {
-		logger.info(" begin updateStatus:" + procApName);
+		logger.debug(" BCS_BILLING_NOTICE begin updateStatus:" + procApName);
 		try {
 			// 找出第一筆 WAIT BCS_BILLING_NOTICE_MAIN 並更新狀態
 			Long waitMainId = findAndUpdateFirstWaitMain(procApName, tempIds);
 			if (waitMainId != null) {
 				allMainIds.add(waitMainId);
+			}else {
+				logger.info("BCS_BILLING_NOTICE updateStatus waitMainId is null");
 			}
 			
 			// 找出第一筆 RETRY BillingNoticeDetail 的 BCS_BILLING_NOTICE_MAIN 並更新狀態
@@ -100,7 +102,7 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
 			if (retryMainId != null) {
 				allMainIds.add(retryMainId);
 			}
-			logger.info(" allMainIds:" + allMainIds);
+			logger.debug("BCS_BILLING_NOTICE updateStatus allMainIds:" + allMainIds);
 			if (!allMainIds.isEmpty()) {
 				//  根據NOTICE_MAIN_ID 更新 BillingNoticeDetail 狀態等於WAIT or RETRY 狀態
 				List<BigInteger>  detailIds = findAndUpdateDetailByMainAndStatus(allMainIds);
@@ -113,9 +115,13 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
 							allDetails.addAll(details);
 						}
 					}
+				}else {
+					logger.info("BCS_BILLING_NOTICE updateStatus BillingNoticeDetail is empty");
 				}
+			}else {
+				logger.info("BCS_BILLING_NOTICE updateStatus allMainIds is empty");
 			}
-			logger.info(" end updateStatus:" + procApName);
+			logger.debug(" BCS_BILLING_NOTICE end updateStatus:" + procApName);
 		}catch(Exception e) {
 			logger.error(e);
 			throw e;

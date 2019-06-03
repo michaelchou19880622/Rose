@@ -251,7 +251,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
 	 */
 	@Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
 	public List<? super PnpDetail>  updateStatus(PNPFTPType type , String procApName, String stage) {
-		logger.info(" begin PNP updateStatus:" + procApName + " type:" + type);
+		logger.debug(" begin PNP updateStatus:" + procApName + " type:" + type);
 		try {
 			List<BigInteger>  detailIds = findAndUpdateProcessForUpdate(type.getDetailTable(), stage);
 			if (!detailIds.isEmpty()) {
@@ -262,8 +262,10 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
 						return details;
 					}
 				}
+			}else {
+				logger.info( "stage:" + stage + " PNP updateStatus:" + procApName + " type:" + type + " detailIds isEmpty");
 			}
-			logger.info(" end PNP updateStatus:" + procApName + " type:" + type);
+			logger.debug(" end PNP updateStatus:" + procApName + " type:" + type);
 		}catch(Exception e) {
 			logger.error(e);
 			throw e;
@@ -303,14 +305,16 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
 	 */
 	@Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
 	public List<? super PnpDetail> updateStatusByStageBC(PNPFTPType type, String procApName, Set<Long>  allMainIds) {
-		logger.info(" begin updateStatusByStageBC:" + procApName + " type:" + type);
+		logger.debug(" begin updateStatusByStageBC:" + procApName + " type:" + type);
 		try {
 			// 找出第一筆 WAIT MAIN 並更新狀態
 			Long waitMainId = findAndUpdateFirstWaitMainByStageBC(procApName, type.getMainTable() );
 			if (waitMainId != null) {
 				allMainIds.add(waitMainId);
+			}else {
+				logger.info("updateStatusByStageBC waitMainId is null" + " type:" + type);
 			}
-			logger.info("updateStatusByStageBC allMainIds:" + allMainIds + " type:" + type);
+			logger.debug("updateStatusByStageBC allMainIds:" + allMainIds + " type:" + type);
 			if (!allMainIds.isEmpty()) {
 				//  根據MAIN_ID 更新 Detail
 				List<BigInteger>  detailIds = findAndUpdateDetailByMainAndStatus(allMainIds, type);
@@ -320,8 +324,10 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
 						 return findPnpDetailById(type, ids);
 					}
 				}
+			}else {
+				logger.info("updateStatusByStageBC:" + procApName + " type:" + type + " allMainIds isEmpty");
 			}
-			logger.info(" end updateStatusByStageBC:" + procApName + " type:" + type);
+			logger.debug(" end updateStatusByStageBC:" + procApName + " type:" + type);
 		}catch(Exception e) {
 			logger.error(e);
 			throw e;

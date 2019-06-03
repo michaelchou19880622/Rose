@@ -103,8 +103,9 @@ $(function(){
 					console.info('key title: ', key);
 					console.info('valueObj : ', valueObj);
 					
-					var link = bcs.bcsContextPath + '/admin/reportBNEffectsDetailPage?date=' + valueObj[0] + '&title=' + valueObj[1] + '&sendType=' + valueObj[2];
-
+					var encodeTitle = encodeURI(valueObj[1]);
+					var link = bcs.bcsContextPath + '/admin/reportBNEffectsDetailPage?date=' + valueObj[0] + '&title=' + encodeTitle + '&sendType=' + valueObj[2];
+					
 					rowDOM.find('.sendDate').html('<a>' + valueObj[0] + '</a>').end().find('a').attr('href', link);
 					rowDOM.find('.title').text(valueObj[1]);
 					rowDOM.find('.sendType').text(valueObj[2]);

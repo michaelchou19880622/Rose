@@ -2,8 +2,6 @@ package com.bcs.core.taishin.circle.service;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,7 +16,6 @@ import org.apache.log4j.Logger;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.resource.CoreConfigReader;
@@ -26,20 +23,16 @@ import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsg;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsgAction;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeDetail;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeMain;
-import com.bcs.core.taishin.circle.db.entity.CircleEntityManagerControl;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeContentTemplateMsgActionRepository;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeContentTemplateMsgRepository;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeMainRepository;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeRepositoryCustom;
-import com.google.common.collect.Lists;
 
 @Service
 public class BillingNoticeSendMsgService {
 
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BillingNoticeSendMsgService.class);
-	@Autowired
-	private CircleEntityManagerControl entityManagerControl;
 	@Autowired
 	private BillingNoticeService billingNoticeService;
 	@Autowired
@@ -126,35 +119,14 @@ public class BillingNoticeSendMsgService {
 			return billingNoticeMains;
 		}
 		Set<Long>  allMainIds = new  HashSet<Long>(); 
-		// search Main status = WAIT找一筆
-		BillingNoticeMain waitMain = billingNoticeRepositoryCustom.findFirstMainByStatusForUpdate(BillingNoticeMain.NOTICE_STATUS_WAIT, templateIds);
-		if (waitMain != null) {
-			allMainIds.add(waitMain.getNoticeMainId());
-			
-		}
+		List<BillingNoticeDetail> allDetails = new ArrayList<BillingNoticeDetail>();
 		
-		//Retry detail 找一筆
-		BillingNoticeDetail retryDetail  =  billingNoticeRepositoryCustom.findFirstDetailByStatusForUpdate(BillingNoticeMain.NOTICE_STATUS_RETRY, templateIds);
-		if (retryDetail != null) {
-			allMainIds.add(retryDetail.getNoticeMainId());
-		}
+		// 更新狀態
+		billingNoticeRepositoryCustom.updateStatus(procApName, templateIds, allMainIds, allDetails);
 		
 		if (allMainIds.isEmpty()) {
 			return  new ArrayList<>();
 		}
-		List<BillingNoticeDetail> allDetails = new ArrayList<BillingNoticeDetail>();
-		List<String>  statusList = new ArrayList<String>();
-		statusList.add(BillingNoticeMain.NOTICE_STATUS_WAIT);
-		statusList.add(BillingNoticeMain.NOTICE_STATUS_RETRY);
-		for (Long mainId : allMainIds) {
-			List<BillingNoticeDetail>  details = billingNoticeRepositoryCustom.findDetailByStatusForUpdate(statusList, mainId);
-			if (details != null) {
-				allDetails.addAll(details);
-			}
-		}
-		
-		//update待發送資料 status(Sending) &excuter name(hostname)
-		updateStatus(procApName, allMainIds, allDetails);
 		
 		//組裝資料
 		for (Long mainId : allMainIds) {
@@ -180,28 +152,6 @@ public class BillingNoticeSendMsgService {
 		}
 		
 		return billingNoticeMains;
-	}
-
-	/**
-	 * 
-	 * @param procApName
-	 * @param allMainIds
-	 */
-	@Transactional(rollbackFor=Exception.class, timeout = 3000)
-	private void updateStatus(String procApName, Set<Long> allMainIds, List<BillingNoticeDetail>  allDetails) {
-		Date  now = Calendar.getInstance().getTime();
-		if (allDetails != null) {
-			List<Object> details = new ArrayList<>();
-			for( BillingNoticeDetail detail : allDetails) {
-				detail.setStatus(BillingNoticeMain.NOTICE_STATUS_SENDING);
-				details.add(detail);
-			}
-			if (!details.isEmpty()) {
-				entityManagerControl.merge(details);
-			}
-		}
-		
-		billingNoticeMainRepository.updateStatusAndProcApName(BillingNoticeMain.NOTICE_STATUS_SENDING, procApName, now, Lists.newArrayList(allMainIds));
 	}
 
 

@@ -384,7 +384,7 @@ public class FtpService {
 			FTPClient.enterLocalPassiveMode();
 			FTPClient.setFileType(FTP.BINARY_FILE_TYPE);
 			FTPClient.setAutodetectUTF8(true);
-			FTPClient.setControlEncoding("UTF-8");
+			FTPClient.setControlEncoding(setting.getFileEncoding());
 			FTPClient.changeWorkingDirectory(pDirectory);
 			// 取得FTP中的files
 			FTPFile[] files = FTPClient.listFiles();
@@ -799,7 +799,7 @@ public class FtpService {
 			FTPClient.enterLocalPassiveMode();
 			FTPClient.setFileType(FTP.BINARY_FILE_TYPE);
 			FTPClient.setAutodetectUTF8(true);
-			FTPClient.setControlEncoding("UTF-8");
+			FTPClient.setControlEncoding(setting.getFileEncoding());
 			FTPClient.changeWorkingDirectory(pDirectory);
 			for (String lFileName : pFileNames) {
 				boolean success = FTPClient.deleteFile(lFileName);

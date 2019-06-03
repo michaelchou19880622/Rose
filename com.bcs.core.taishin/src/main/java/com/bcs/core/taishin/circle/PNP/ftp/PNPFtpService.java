@@ -128,131 +128,14 @@ public class PNPFtpService {
 	}
 	
 	public boolean initFtpSettings() {
-		PNPFtpSetting pnpFtpSettingMTK = new PNPFtpSetting();
-		pnpFtpSettingMTK.setFileEncoding(CoreConfigReader.getString(CONFIG_STR.PNP_READLINES_ENCODE, true, false));
-		pnpFtpSettingMTK.setChannelId(AbstractPnpMainEntity.SOURCE_MITAKE);
-		pnpFtpSettingMTK.setServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_MITAKE, true, false));
-		pnpFtpSettingMTK.setServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_PORT_MITAKE, true, false));
-		pnpFtpSettingMTK.setAccount(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_USR_MITAKE, true, false));
-		pnpFtpSettingMTK.setPassword(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PASS_MITAKE, true, false));
-		pnpFtpSettingMTK.setHost(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_HOST_MITAKE, true, false));
-		pnpFtpSettingMTK.setPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_PORT_MITAKE, true, false));
-		pnpFtpSettingMTK.setAPPCode(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_APPCODE_MITAKE, true, false));
-		pnpFtpSettingMTK.setRESCode(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_RESCODE_MITAKE, true, false));
-		pnpFtpSettingMTK.setPath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_PATH_MITAKE, true, false));
-		pnpFtpSettingMTK.setUploadPath(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_UPLOAD_PATH_MITAKE, true, false));
-		pnpFtpSettingMTK.setDownloadSavePath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_MITAKE, true, false));
-		pnpFtpSettingMTK.setProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PROTOCOL_MITAKE, true, false));
-		pnpFtpSettingMTK.setFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_MITAKE, true, false));
-		//SMS setting
-		pnpFtpSettingMTK.setSmsServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_SERVERHOSTNAME_MITAKE, true, false));
-		pnpFtpSettingMTK.setSmsServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_SERVERHOSTNAME_PORT_MITAKE, true, false));
-		pnpFtpSettingMTK.setSmsAccount(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_USR_MITAKE, true, false));
-		pnpFtpSettingMTK.setSmsPassword(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PASS_MITAKE, true, false));
-		pnpFtpSettingMTK.setSmsHost(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_HOST_MITAKE, true, false));
-		pnpFtpSettingMTK.setSmsPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_PORT_MITAKE, true, false));
-		pnpFtpSettingMTK.setSmsAPPCode(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_APPCODE_MITAKE, true, false));
-		pnpFtpSettingMTK.setSmsRESCode(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_RESCODE_MITAKE, true, false));
-		pnpFtpSettingMTK.setSmsProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PROTOCOL_MITAKE, true, false));
-		if(!CoreConfigReader.isPNPFtpTypeDevelop()) {
-			pnpFtpSettingMTK = useTrendPwMgmt(pnpFtpSettingMTK);
+		for (PNPFTPType type : PNPFTPType.values()) {
+			PNPFtpSetting pnpFtpSetting = PNPFtpSetting.build(type, true);
+			
+			if(!CoreConfigReader.isPNPFtpTypeDevelop()) {
+				pnpFtpSetting = useTrendPwMgmt(pnpFtpSetting);
+			}
+			ftpSettings.put(type.getSource(), pnpFtpSetting);
 		}
-		ftpSettings.put(AbstractPnpMainEntity.SOURCE_MITAKE, pnpFtpSettingMTK);
-		
-		PNPFtpSetting pnpFtpSettingMI = new PNPFtpSetting();
-		pnpFtpSettingMI.setFileEncoding(CoreConfigReader.getString(CONFIG_STR.PNP_READLINES_ENCODE, true, false));
-		pnpFtpSettingMI.setChannelId(AbstractPnpMainEntity.SOURCE_MING);
-		pnpFtpSettingMI.setServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_MING, true, false));
-		pnpFtpSettingMI.setServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_PORT_MING, true, false));
-	    pnpFtpSettingMI.setAccount(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_USR_MING, true, false));
-		pnpFtpSettingMI.setPassword(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PASS_MING, true, false));
-		pnpFtpSettingMI.setHost(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_HOST_MING, true, false));
-		pnpFtpSettingMI.setPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_PORT_MING, true, false));
-		pnpFtpSettingMI.setAPPCode(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_APPCODE_MING, true, false));
-		pnpFtpSettingMI.setRESCode(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_RESCODE_MING, true, false));
-		pnpFtpSettingMI.setPath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_PATH_MING, true, false));
-		pnpFtpSettingMI.setUploadPath(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_UPLOAD_PATH_MING, true, false));
-		pnpFtpSettingMI.setDownloadSavePath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_MING, true, false));
-		pnpFtpSettingMI.setProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PROTOCOL_MING, true, false));
-		pnpFtpSettingMI.setFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_MING, true, false));
-		//SMS setting
-		pnpFtpSettingMI.setSmsServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_SERVERHOSTNAME_MING, true, false));
-		pnpFtpSettingMI.setSmsServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_SERVERHOSTNAME_PORT_MING, true, false));
-		pnpFtpSettingMI.setSmsAccount(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_USR_MING, true, false));
-		pnpFtpSettingMI.setSmsPassword(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PASS_MING, true, false));
-		pnpFtpSettingMI.setSmsHost(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_HOST_MING, true, false));
-		pnpFtpSettingMI.setSmsPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_PORT_MING, true, false));
-		pnpFtpSettingMI.setSmsAPPCode(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_APPCODE_MING, true, false));
-		pnpFtpSettingMI.setSmsRESCode(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_RESCODE_MING, true, false));
-		pnpFtpSettingMI.setSmsProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PROTOCOL_MING, true, false));
-		if(!CoreConfigReader.isPNPFtpTypeDevelop()) {
-			pnpFtpSettingMI = useTrendPwMgmt(pnpFtpSettingMI);
-		}
-		ftpSettings.put(AbstractPnpMainEntity.SOURCE_MING, pnpFtpSettingMI);	
-		
-		PNPFtpSetting pnpFtpSettingEV8D = new PNPFtpSetting();
-		pnpFtpSettingEV8D.setFileEncoding(CoreConfigReader.getString(CONFIG_STR.PNP_READLINES_ENCODE, true, false));
-		pnpFtpSettingEV8D.setChannelId(AbstractPnpMainEntity.SOURCE_EVERY8D);
-		pnpFtpSettingEV8D.setServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_EVERY8D, true, false));
-		pnpFtpSettingEV8D.setServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_PORT_EVERY8D, true, false));
-		pnpFtpSettingEV8D.setAccount(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_USR_EVERY8D, true, false));
-		pnpFtpSettingEV8D.setPassword(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PASS_EVERY8D, true, false));
-		pnpFtpSettingEV8D.setHost(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_HOST_EVERY8D, true, false));
-		pnpFtpSettingEV8D.setPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_PORT_EVERY8D, true, false));
-		pnpFtpSettingEV8D.setAPPCode(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_APPCODE_EVERY8D, true, false));
-		pnpFtpSettingEV8D.setRESCode(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_RESCODE_EVERY8D, true, false));
-		pnpFtpSettingEV8D.setPath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_PATH_EVERY8D, true, false));
-		pnpFtpSettingEV8D.setUploadPath(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_UPLOAD_PATH_EVERY8D, true, false));
-		pnpFtpSettingEV8D.setDownloadSavePath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_EVERY8D, true, false));
-		pnpFtpSettingEV8D.setProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PROTOCOL_EVERY8D, true, false));
-		pnpFtpSettingEV8D.setFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_EVERY8D, true, false));
-		//SMS setting
-		pnpFtpSettingEV8D.setSmsServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_SERVERHOSTNAME_EVERY8D, true, false));
-		pnpFtpSettingEV8D.setSmsServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_SERVERHOSTNAME_PORT_EVERY8D, true, false));
-		pnpFtpSettingEV8D.setSmsAccount(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_USR_EVERY8D, true, false));
-		pnpFtpSettingEV8D.setSmsPassword(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PASS_EVERY8D, true, false));
-		pnpFtpSettingEV8D.setSmsHost(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_HOST_EVERY8D, true, false));
-		pnpFtpSettingEV8D.setSmsPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_PORT_EVERY8D, true, false));
-		pnpFtpSettingEV8D.setSmsAPPCode(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_APPCODE_EVERY8D, true, false));
-		pnpFtpSettingEV8D.setSmsRESCode(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_RESCODE_EVERY8D, true, false));
-		pnpFtpSettingEV8D.setSmsProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PROTOCOL_EVERY8D, true, false));
-		if(!CoreConfigReader.isPNPFtpTypeDevelop()) {
-			pnpFtpSettingEV8D = useTrendPwMgmt(pnpFtpSettingEV8D);
-		}
-		ftpSettings.put(AbstractPnpMainEntity.SOURCE_EVERY8D, pnpFtpSettingEV8D);	
-		
-		
-		PNPFtpSetting pnpFtpSettingUNI = new PNPFtpSetting();
-		pnpFtpSettingUNI.setFileEncoding(CoreConfigReader.getString(CONFIG_STR.PNP_READLINES_ENCODE, true, false));
-		pnpFtpSettingUNI.setChannelId(AbstractPnpMainEntity.SOURCE_UNICA);
-		pnpFtpSettingUNI.setServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_UNICA, true, false));
-		pnpFtpSettingUNI.setServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_SERVERHOSTNAME_PORT_UNICA, true, false));
-		pnpFtpSettingUNI.setAccount(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_USR_UNICA, true, false));
-		pnpFtpSettingUNI.setPassword(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PASS_UNICA, true, false));
-		pnpFtpSettingUNI.setHost(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_HOST_UNICA, true, false));
-		pnpFtpSettingUNI.setPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_PORT_UNICA, true, false));
-		pnpFtpSettingUNI.setAPPCode(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_APPCODE_UNICA, true, false));
-		pnpFtpSettingUNI.setRESCode(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_RESCODE_UNICA, true, false));
-		pnpFtpSettingUNI.setPath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_PATH_UNICA, true, false));
-		pnpFtpSettingUNI.setUploadPath(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_UPLOAD_PATH_UNICA, true, false));
-		pnpFtpSettingUNI.setDownloadSavePath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_UNICA, true, false));
-		pnpFtpSettingUNI.setProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PROTOCOL_UNICA, true, false));
-		pnpFtpSettingUNI.setFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_UNICA, true, false));
-		//SMS setting
-		pnpFtpSettingUNI.setSmsServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_SERVERHOSTNAME_UNICA, true, false));
-		pnpFtpSettingUNI.setSmsServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_SERVERHOSTNAME_PORT_UNICA, true, false));
-		pnpFtpSettingUNI.setSmsAccount(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_USR_UNICA, true, false));
-		pnpFtpSettingUNI.setSmsPassword(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PASS_UNICA, true, false));
-		pnpFtpSettingUNI.setSmsHost(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_HOST_UNICA, true, false));
-		pnpFtpSettingUNI.setSmsPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_PORT_UNICA, true, false));
-		pnpFtpSettingUNI.setSmsAPPCode(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_APPCODE_UNICA, true, false));
-		pnpFtpSettingUNI.setSmsRESCode(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_RESCODE_UNICA, true, false));
-		pnpFtpSettingUNI.setSmsProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PROTOCOL_UNICA, true, false));
-		if(!CoreConfigReader.isPNPFtpTypeDevelop()) {
-			pnpFtpSettingUNI = useTrendPwMgmt(pnpFtpSettingUNI);
-		}
-		ftpSettings.put(AbstractPnpMainEntity.SOURCE_UNICA, pnpFtpSettingUNI);
-		
 		return true;
 	}
 	

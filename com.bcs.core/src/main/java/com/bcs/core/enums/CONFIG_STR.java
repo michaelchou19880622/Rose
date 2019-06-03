@@ -167,6 +167,32 @@ public enum CONFIG_STR {
 	PNP_FTP_TYPE("pnp.ftp.type"),
 	PNP_FTP_FILE_EXTENSION(".pnp.ftp.fileExtension"),
 	
+	// DEFAULT PNP
+	PNP_FTP_SERVERHOSTNAME_("pnp.ftp.serverHostName."),
+	PNP_FTP_SERVERHOSTNAME_PORT_("pnp.ftp.serverHostName.port."),
+	PNP_FTP_HOST_("pnp.ftp.host."),
+	PNP_FTP_PORT_("pnp.ftp.port."),
+	PNP_FTP_USR_("pnp.ftp.usr."),
+	PNP_FTP_PASS_("pnp.ftp.pass."),
+	PNP_FTP_APPCODE_("pnp.ftp.APPCode."),
+	PNP_FTP_RESCODE_("pnp.ftp.RESCode."),
+	PNP_FTP_PROTOCOL_("pnp.ftp.protocol."),
+	PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_("pnp.ftp.download.to.local.path."),
+	PNP_FTP_DOWNLOAD_PATH_("pnp.ftp.download.path."),
+	PNP_PROC_FLOW_("pnp.proc.flow."),
+	
+	PNP_SMS_UPLOAD_PATH_("pnp.sms.upload.path."),
+	PNP_SMS_SERVERHOSTNAME_("pnp.sms.serverHostName."),
+	PNP_SMS_SERVERHOSTNAME_PORT_("pnp.sms.serverHostName.port."),
+	PNP_SMS_HOST_("pnp.sms.host."),
+	PNP_SMS_PORT_("pnp.sms.port."),
+	PNP_SMS_USR_("pnp.sms.usr."),
+	PNP_SMS_PASS_("pnp.sms.pass."),
+	PNP_SMS_APPCODE_("pnp.sms.APPCode."),
+	PNP_SMS_RESCODE_("pnp.sms.RESCode."),
+	PNP_SMS_PROTOCOL_("pnp.sms.protocol."),
+	
+	
 	//三竹
 	PNP_FTP_SERVERHOSTNAME_MITAKE("pnp.ftp.serverHostName.mitake"),
 	PNP_FTP_SERVERHOSTNAME_PORT_MITAKE("pnp.ftp.serverHostName.port.mitake"),

@@ -110,30 +110,7 @@ public class CircleEntityManagerControl {
 		logger.debug("CircleEntityManagerControl persistFlush end");
 	}
 
-	@Transactional(rollbackFor = Exception.class, timeout = 3000)
-	public void persistInsert(List<Object> list) {
-
-		if (CollectionUtils.isEmpty(list)) {
-			return;
-		}
-		logger.debug("CircleEntityManagerControl persistInsert start");
-		int i = 0;
-		for (Object obj : list) {
-			entityManager.persist(obj);
-			i++;
-			if (i % batchSize == 0) {
-
-				entityManager.flush();
-				entityManager.clear();
-			}
-		}
-
-		entityManager.flush();
-		entityManager.clear();
-
-		logger.debug("CircleEntityManagerControl persistInsert end");
-	}
-
+	
 	@Transactional(rollbackFor = Exception.class, timeout = 3000)
 	public void merge(List<Object> list) {
 

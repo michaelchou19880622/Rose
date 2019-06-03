@@ -1,52 +1,27 @@
 package com.bcs.core.taishin.circle.service;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.formula.functions.T;
-import org.apache.poi.util.SystemOutLogger;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.util.SystemPropertyUtils;
 
-import com.bcs.core.db.entity.LineUser;
-import com.bcs.core.db.entity.RecordReport;
 import com.bcs.core.db.service.LineUserService;
-import com.bcs.core.db.service.RecordReportService;
 import com.bcs.core.enums.CONFIG_STR;
-import com.bcs.core.enums.RECORD_REPORT_TYPE;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailEvery8d;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMing;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainEvery8d;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpRepositoryCustom;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpService;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpSetting;
@@ -54,8 +29,6 @@ import com.bcs.core.taishin.circle.PNP.scheduler.LoadFtbPnpDataTask;
 import com.bcs.core.taishin.circle.PNP.scheduler.PnpPushMsgService;
 import com.bcs.core.taishin.circle.PNP.scheduler.PnpSMSMsgService;
 import com.bcs.core.taishin.circle.PNP.service.PnpService;
-import com.bcs.core.taishin.circle.db.entity.BillingNoticeMain;
-import com.bcs.core.taishin.circle.ftp.FtpSetting;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
@@ -470,39 +443,39 @@ public class PNPTester {
 		
 	}
 	
-	@Test
-	public void findDetails() throws Exception {
-		PnpMainEvery8d waitMain = pnpRepositoryCustom.findFirstMainByStatusForUpdateEvery8d(AbstractPnpMainEntity.STAGE_BC,AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
-		logger.info("PnpMainEvery8d waitMain.getPnpMainId() :"+ waitMain.getPnpMainId());
-		List<String>  statusList = new ArrayList<String>();
-		statusList.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
-		List<? super PnpDetail>  details = pnpRepositoryCustom.findDetailByStatusForUpdateEvery8d(statusList, waitMain.getPnpMainId());
-		
-		logger.info("PnpDetailEvery8d details size :"+ details.size());
-		
-	}
+//	@Test
+//	public void findDetails() throws Exception {
+//		PnpMainEvery8d waitMain = pnpRepositoryCustom.findFirstMainByStatusForUpdateEvery8d(AbstractPnpMainEntity.STAGE_BC,AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
+//		logger.info("PnpMainEvery8d waitMain.getPnpMainId() :"+ waitMain.getPnpMainId());
+//		List<String>  statusList = new ArrayList<String>();
+//		statusList.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
+//		List<? super PnpDetail>  details = pnpRepositoryCustom.findDetailByStatusForUpdateEvery8d(statusList, waitMain.getPnpMainId());
+//		
+//		logger.info("PnpDetailEvery8d details size :"+ details.size());
+//		
+//	}
 	
 	@Test
 	public void pnpPushMsg() throws Exception {
-		pnpPushMsgService.sendingEvery8dMain("123");
+		pnpPushMsgService.sendingMain();
 		
 	}
-	@Test
-	public void testSendingEvery8dMain() throws Exception {
-		pnpPushMsgService.sendingEvery8dMain();
-		
-	}
+//	@Test
+//	public void testSendingEvery8dMain() throws Exception {
+//		pnpPushMsgService.sendingEvery8dMain();
+//		
+//	}
 	
-	@Test
-	public void testPushLineMessage() throws Exception {
-		PnpMainEvery8d pnpMain = pnpPushMsgService.sendingEvery8dMain("test");
-		pnpService.pushLineMessage(pnpMain, null, null);
-		
-	}
+//	@Test
+//	public void testPushLineMessage() throws Exception {
+//		PnpMainEvery8d pnpMain = pnpPushMsgService.sendingEvery8dMain("test");
+//		pnpService.pushLineMessage(pnpMain, null, null);
+//		
+//	}
 	
 	@Test
 	public void testPnpSMSMsg() throws Exception {
-		pnpSMSMsgService.smsEvery8dMain("TEST");
+		pnpSMSMsgService.sendingSMSMain();
 		
 	}
 	

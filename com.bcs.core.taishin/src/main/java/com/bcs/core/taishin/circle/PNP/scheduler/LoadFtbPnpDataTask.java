@@ -43,17 +43,14 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainMing;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainMitake;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainUnica;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailEvery8dRepository;
-import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailEvery8dRepositoryCustom;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMingRepository;
-import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMingRepositoryCustom;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMitakeRepository;
-import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMitakeRepositoryCustom;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailUnicaRepository;
-import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailUnicaRepositoryCustom;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainEvery8dRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainMingRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainMitakeRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainUnicaRepository;
+import com.bcs.core.taishin.circle.PNP.db.repository.PnpRepositoryCustom;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpService;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpSetting;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeMain;
@@ -77,14 +74,7 @@ public class LoadFtbPnpDataTask {
 	private PNPFtpService pnpFtpService;
 
 	@Autowired
-	private PnpDetailMingRepositoryCustom pnpDetailMingRepositoryCustom;
-	@Autowired
-	private PnpDetailUnicaRepositoryCustom pnpDetailUnicaRepositoryCustom;
-	@Autowired
-	private PnpDetailEvery8dRepositoryCustom pnpDetailEvery8dRepositoryCustom;
-	@Autowired
-	private PnpDetailMitakeRepositoryCustom pnpDetailMitakeRepositoryCustom;
-
+	private PnpRepositoryCustom pnpRepositoryCustom;
 	@Autowired
 	private PnpMainUnicaRepository pnpMainUnicaRepository;
 	
@@ -764,7 +754,7 @@ public class LoadFtbPnpDataTask {
 			details.add(pnpDetailMitake);
 		}
 		if (!details.isEmpty()) {
-			pnpDetailMitakeRepositoryCustom.batchInsertPnpDetailMitake(details);
+			pnpRepositoryCustom.batchInsertPnpDetailMitake(details);
 		}
 	}
 	
@@ -794,7 +784,7 @@ public class LoadFtbPnpDataTask {
 			details.add(pnpDetailUnica);
 		}
 		if (!details.isEmpty()) {
-			pnpDetailUnicaRepositoryCustom.batchInsertPnpDetailUnica(details);
+			pnpRepositoryCustom.batchInsertPnpDetailUnica(details);
 		}
 	}
 	
@@ -823,7 +813,7 @@ public class LoadFtbPnpDataTask {
 			details.add(pnpDetailEvery8d);
 		}
 		if (!details.isEmpty()) {
-			pnpDetailEvery8dRepositoryCustom.batchInsertPnpDetailEvery8d(details);
+			pnpRepositoryCustom.batchInsertPnpDetailEvery8d(details);
 		}
 	}
 	
@@ -854,7 +844,7 @@ public class LoadFtbPnpDataTask {
 			details.add(pnpDetail);
 		}
 		if (!details.isEmpty()) {
-			pnpDetailMingRepositoryCustom.batchInsertPnpDetailMing(details);
+			pnpRepositoryCustom.batchInsertPnpDetailMing(details);
 		}
 	}
 	

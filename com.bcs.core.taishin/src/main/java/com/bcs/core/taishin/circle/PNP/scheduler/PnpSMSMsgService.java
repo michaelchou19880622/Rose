@@ -3,7 +3,6 @@ package com.bcs.core.taishin.circle.PNP.scheduler;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -38,6 +37,7 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainMing;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainMitake;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainUnica;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpRepositoryCustom;
+import com.bcs.core.taishin.circle.PNP.ftp.PNPFTPType;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpService;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpSetting;
 //import com.bcs.core.taishin.circle.PNP.service.PnpService;
@@ -107,85 +107,77 @@ public class PnpSMSMsgService {
 					logger.warn("PNP_BIGSWITCH : "+bigSwitch +"PnpSMSMsgService stop transfer file to SMS FTP ...");
 					return;
 				}
-				
-				smsMitakeMain();
-				smsEvery8dMain();
-				smsUnicaMain();
-				smsMingMain();
+				sendingSMSMain();
 			}
 		}, 0, time, TimeUnit.valueOf(unit));
-		
-		
-
 	}
 	
-	public void smsMitakeMain(){
-		String procApName = null;
-		try {
-			InetAddress localAddress = InetAddress.getLocalHost();
-			if (localAddress != null) {
-				procApName = localAddress.getHostName();
+	/**
+	 * 根據PNPFTPType 依序發送SMS
+	 */
+	public void sendingSMSMain(){
+		String procApName = pnpAkkaService.getProcApName();
+		for (PNPFTPType type : PNPFTPType.values()) {
+			PnpMain pnpMain = null;
+			try {
+				//update待發送資料 status(Sending) &excuter name(hostname)
+				List<? super PnpDetail> details = pnpRepositoryCustom.updateStatus(type, procApName, AbstractPnpMainEntity.STAGE_SMS);
+				logger.info("SMS pnpMain details type :"+ type  +" details size:" + details.size());
+				if(CollectionUtils.isEmpty(details)) {
+					logger.error("SMS pnpMain type :"+ type  +" there is a main has no details!!!");
+				}else {
+					PnpDetail oneDetail = (PnpDetail)details.get(0);
+					pnpMain = pnpRepositoryCustom.findMainByMainId(type, oneDetail.getPnpMainId());
+					if (null == pnpMain) {
+						logger.info("SMS pnpMain type :"+ type  +" not data");
+					}else {
+						pnpMain.setPnpDetails(details);
+						//更換檔名(加L)
+						String origFileName = pnpMain.getOrigFileName();
+						String changedOrigFileName = origFileName.substring(0, origFileName.lastIndexOf("_"))+"_L"+origFileName.substring(origFileName.lastIndexOf("_"));
+						logger.info("==================================================");
+						logger.info(changedOrigFileName);
+						logger.info("==================================================");
+					
+						//傳檔案到SMS FTP
+						uploadFileToSMS(type.getSource() , smsGetTargetStream(type, pnpMain, details), changedOrigFileName);
+						//update待發送資料 status(Sending) &excuter name(hostname)
+						updateStatusSuccess(procApName,pnpMain , details);
+						pnpAkkaService.tell(pnpMain);
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				logger.error("SMS pnpMain type :"+ type  +" sendingMain error:" + e.getMessage());
 			}
 			
-		} catch (Exception e) {
-			logger.error("SMS MitakeMain getHostName error:" + e.getMessage());
-		}
-		try {
-			PnpMainMitake pnpMainMitake =smsMitakeMain(procApName);
-			if (null == pnpMainMitake) {
-				logger.debug("SMS MitakeMain not data");
-			}else {
-				pnpAkkaService.tell(pnpMainMitake);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("SMS MitakeMain error:" + e.getMessage());
 		}
 	}
 	
 	/**
-	 * Retry detail 找一筆後找出他的main + Main status = WAIT者找一筆
-	 * 更新BillingNoticeMain & BillingNoticeDetail status
-	 * @param limits
-	 * @param procApName
+	 * 根據類型取得SMS上傳到FTP需寫入的InputStream
+	 * @param type
+	 * @param pnpMain
+	 * @param details
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
-	public PnpMainMitake smsMitakeMain(String procApName) throws IOException{
-		PnpMainMitake pnpMainMitake = null;
-//		List<String> templateIds = pnpService.findProductSwitchOnTemplateId(); // find ProductSwitchOn template
-//		if (templateIds == null || templateIds.isEmpty()) {
-//			return pnpMainMitakes;
-//		}
-		
-		//找一筆需要SMS的Detail
-		PnpDetailMitake pnpDetail  =  pnpRepositoryCustom.findFirstDetailByStatusForUpdateMitake(
-				AbstractPnpMainEntity.STAGE_SMS,AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS);
-		if (null == pnpDetail) {
-			logger.info("smsMitakeMain : there is no data for PNP .");
-			return null;
+	private InputStream smsGetTargetStream(PNPFTPType type, PnpMain pnpMain, List<? super PnpDetail> details) throws IOException{
+		if (type.equals(PNPFTPType.MING)) {
+			return this.smsMingInputStream((PnpMainMing)pnpMain, details);
+		}else if (type.equals(PNPFTPType.MITAKE)) {
+			return smsMitakeInputStream((PnpMainMitake)pnpMain, details);
+		}else if (type.equals(PNPFTPType.EVERY8D)) {
+			return this.smsEvery8dInputStream((PnpMainEvery8d)pnpMain, details);
+		}else if (type.equals(PNPFTPType.UNICA)) {
+			return this.smsUnicaInputStream((PnpMainUnica)pnpMain, details);
 		}
 		
-		Long mainId = pnpDetail.getPnpMainId();
-		
-		List<? super PnpDetail> details = pnpRepositoryCustom.findDetailsWaitForPNPMitake(
-				AbstractPnpMainEntity.STAGE_SMS,AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS,mainId);
-		
-		logger.info("smsMitakeMain details size :"+ details.size());
-		
-		if(CollectionUtils.isEmpty(details)) {
-			logger.error("smsMitakeMain : there is a main has no details!!!");
-			return null;
-		}
-		
-		pnpMainMitake = pnpRepositoryCustom.findMainByMainIdMitake(mainId);
-		if(null == pnpMainMitake){
-			logger.error("smsMitakeMain : mainId mapping error ; no main correspond this  mainId : "+mainId);
-			return null;
-		}
-		//回組成來源資料格式
-		pnpMainMitake.setPnpDetails(details);
-		
+		return null;
+	}
+	
+	
+	private InputStream smsMitakeInputStream(PnpMainMitake pnpMain, List<? super PnpDetail> details) throws IOException{
 		/**
 		 *三竹 header
 
@@ -209,12 +201,12 @@ public class PnpSMSMsgService {
 		 */
 		//來源資料HEADER
 		StringBuilder header = new StringBuilder();
-		header.append(pnpMainMitake.getGroupIDSource()+"&");
-		header.append(pnpMainMitake.getUsername()+"&");
-		header.append(pnpMainMitake.getUserPassword()+"&");
-		header.append(pnpMainMitake.getOrderTime()+"&");
-		header.append(pnpMainMitake.getValidityTime()+"&");
-		header.append(pnpMainMitake.getMsgType()+"\r\n");
+		header.append(pnpMain.getGroupIDSource()+"&");
+		header.append(pnpMain.getUsername()+"&");
+		header.append(pnpMain.getUserPassword()+"&");
+		header.append(pnpMain.getOrderTime()+"&");
+		header.append(pnpMain.getValidityTime()+"&");
+		header.append(pnpMain.getMsgType()+"\r\n");
 		
 		logger.info(header.toString());
 		
@@ -245,91 +237,12 @@ public class PnpSMSMsgService {
 			body.append(pnpDetailMitake.getMsg()+"\r\n");
 		}
 		
-		//更換檔名(加L)
-		String origFileName = pnpMainMitake.getOrigFileName();
-		String changedOrigFileName = origFileName.substring(0, origFileName.lastIndexOf("_"))+"_L"+origFileName.substring(origFileName.lastIndexOf("_"));
-		
-		logger.info("==================================================");
-		logger.info(changedOrigFileName);
-		logger.info("==================================================");
-		
 		InputStream targetStream = new ByteArrayInputStream((header.toString()+body.toString()).getBytes());
-		
-		
-		//傳檔案到SMS FTP
-		uploadFileToSMS(AbstractPnpMainEntity.SOURCE_MITAKE ,targetStream, changedOrigFileName);
-		
-		//update待發送資料 status(Sending) &excuter name(hostname)
-		updateStatusSuccess(procApName,pnpMainMitake , details);
-		
-		return pnpMainMitake;
-	}
-	public void smsEvery8dMain(){
-		String procApName = null;
-		try {
-			InetAddress localAddress = InetAddress.getLocalHost();
-			if (localAddress != null) {
-				procApName = localAddress.getHostName();
-			}
-
-		} catch (Exception e) {
-			logger.error("SMS Every8dMain getHostName error:" + e.getMessage());
-		}
-		try {
-			PnpMainEvery8d pnpMainEvery8d =smsEvery8dMain(procApName);
-			if (null == pnpMainEvery8d) {
-				logger.debug("SMS Every8dMain not data");
-			}else {
-				pnpAkkaService.tell(pnpMainEvery8d);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("SMS Every8dMain error:" + e.getMessage());
-		}
+		return targetStream;
 	}
 	
-	/**
-	 * Retry detail 找一筆後找出他的main + Main status = WAIT者找一筆
-	 * 更新BillingNoticeMain & BillingNoticeDetail status
-	 * @param limits
-	 * @param procApName
-	 * @return
-	 * @throws IOException 
-	 */
-	public PnpMainEvery8d smsEvery8dMain(String procApName) throws IOException{
-		PnpMainEvery8d pnpMainEvery8d = null;
-//		List<String> templateIds = pnpService.findProductSwitchOnTemplateId(); // find ProductSwitchOn template
-//		if (templateIds == null || templateIds.isEmpty()) {
-//			return pnpMainEvery8ds;
-//		}
-		
-		//找一筆需要SMS的Detail
-		PnpDetailEvery8d pnpDetail  =  pnpRepositoryCustom.findFirstDetailByStatusForUpdateEvery8d(
-				AbstractPnpMainEntity.STAGE_SMS,AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS);
-		if (null == pnpDetail) {
-			logger.info("smsEvery8dMain : there is no data for PNP .");
-			return null;
-		}
-		
-		Long mainId = pnpDetail.getPnpMainId();
-		
-		List<? super PnpDetail> details = pnpRepositoryCustom.findDetailsWaitForPNPEvery8d(
-				AbstractPnpMainEntity.STAGE_SMS,AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS,mainId);
-		
-		logger.info("smsEvery8dMain details size :"+ details.size());
-
-		if(CollectionUtils.isEmpty(details)) {
-			logger.error("smsEvery8dMain : there is a main has no details!!!");
-			return null;
-		}
-		
-		pnpMainEvery8d = pnpRepositoryCustom.findMainByMainIdEvery8d(mainId);
-		if(null == pnpMainEvery8d){
-			logger.error("smsEvery8dMain : mainId mapping error ; no main correspond this  mainId : "+mainId);
-			return null;
-		}
-		//回組成來源資料格式
-		pnpMainEvery8d.setPnpDetails(details);
+	
+	private InputStream smsEvery8dInputStream(PnpMainEvery8d pnpMainEvery8d, List<? super PnpDetail> details) throws IOException{
 		
 		/**
 		 * 互動 header
@@ -392,93 +305,13 @@ public class PnpSMSMsgService {
 			body.append(pnpDetailEvery8d.getVariable2()+"\r\n");
 		}
 		
-		//更換檔名(加L)
-		String origFileName = pnpMainEvery8d.getOrigFileName();
-		String changedOrigFileName = origFileName.substring(0, origFileName.lastIndexOf("_"))+"_L"+origFileName.substring(origFileName.lastIndexOf("_"));
-		
-		logger.info("==================================================");
-		logger.info(changedOrigFileName);
-		logger.info("==================================================");
-		
 		InputStream targetStream = new ByteArrayInputStream((header.toString()+body.toString()).getBytes());
 		
-		
-		//傳檔案到SMS FTP
-		uploadFileToSMS(AbstractPnpMainEntity.SOURCE_EVERY8D,targetStream, changedOrigFileName);
-		
-		//update待發送資料 status(Sending) &excuter name(hostname)
-		updateStatusSuccess(procApName,pnpMainEvery8d , details);
-		
-		return pnpMainEvery8d;
+		return targetStream;
 	}
 	
-	public void smsUnicaMain(){
-		String procApName = null;
-		try {
-			InetAddress localAddress = InetAddress.getLocalHost();
-			if (localAddress != null) {
-				procApName = localAddress.getHostName();
-			}
-			
-		} catch (Exception e) {
-			logger.error("SMS UnicaMain getHostName error:" + e.getMessage());
-		}
-		try {
-			PnpMainUnica pnpMainUnica =smsUnicaMain(procApName);
-			if (null == pnpMainUnica) {
-				logger.debug("SMS UnicaMain not data");
-			}else {
-				pnpAkkaService.tell(pnpMainUnica);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("SMS UnicaMain error:" + e.getMessage());
-		}
-	}
 	
-	/**
-	 * Retry detail 找一筆後找出他的main + Main status = WAIT者找一筆
-	 * 更新Main & Detail status
-	 * @param limits
-	 * @param procApName
-	 * @return
-	 * @throws IOException 
-	 */
-	public PnpMainUnica smsUnicaMain(String procApName) throws IOException{
-		PnpMainUnica pnpMainUnica = null;
-//		List<String> templateIds = pnpService.findProductSwitchOnTemplateId(); // find ProductSwitchOn template
-//		if (templateIds == null || templateIds.isEmpty()) {
-//			return pnpMainUnicas;
-//		}
-		
-		//找一筆需要SMS的Detail
-		PnpDetailUnica pnpDetail  =  pnpRepositoryCustom.findFirstDetailByStatusForUpdateUnica(
-				AbstractPnpMainEntity.STAGE_SMS,AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS);
-		if (null == pnpDetail) {
-			logger.info("smsUnicaMain : there is no data for PNP .");
-			return null;
-		}
-		
-		Long mainId = pnpDetail.getPnpMainId();
-		
-		List<? super PnpDetail> details = pnpRepositoryCustom.findDetailsWaitForPNPUnica(
-				AbstractPnpMainEntity.STAGE_SMS,AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS,mainId);
-		
-		logger.info("smsUnicaMain details size :"+ details.size());
-		
-		if(CollectionUtils.isEmpty(details)) {
-			logger.error("smsUnicaMain : there is a main has no details!!!");
-			return null;
-		}
-		
-		pnpMainUnica = pnpRepositoryCustom.findMainByMainIdUnica(mainId);
-		if(null == pnpMainUnica){
-			logger.error("smsUnicaMain : mainId mapping error ; no main correspond this  mainId : "+mainId);
-			return null;
-		}
-		//回組成來源資料格式
-		pnpMainUnica.setPnpDetails(details);
-		
+	private InputStream smsUnicaInputStream(PnpMainUnica pnpMainUnica, List<? super PnpDetail> details) throws IOException{
 		/**
 		 * 互動 header
 		 *   &          char        1       N        分隔符號
@@ -540,93 +373,13 @@ public class PnpSMSMsgService {
 			body.append(pnpDetailUnica.getVariable2()+"\r\n");
 		}
 		
-		//更換檔名(加L)
-		String origFileName = pnpMainUnica.getOrigFileName();
-		String changedOrigFileName = origFileName.substring(0, origFileName.lastIndexOf("_"))+"_L"+origFileName.substring(origFileName.lastIndexOf("_"));
-		
-		logger.info("==================================================");
-		logger.info(changedOrigFileName);
-		logger.info("==================================================");
 		
 		InputStream targetStream = new ByteArrayInputStream((header.toString()+body.toString()).getBytes());
 		
-		
-		//傳檔案到SMS FTP
-		uploadFileToSMS(AbstractPnpMainEntity.SOURCE_UNICA,targetStream, changedOrigFileName);
-		
-		//update待發送資料 status(Sending) &excuter name(hostname)
-		updateStatusSuccess(procApName,pnpMainUnica , details);
-		
-		return pnpMainUnica;
+		return targetStream;
 	}
 
-	public void smsMingMain(){
-		String procApName = null;
-		try {
-			InetAddress localAddress = InetAddress.getLocalHost();
-			if (localAddress != null) {
-				procApName = localAddress.getHostName();
-			}
-
-		} catch (Exception e) {
-			logger.error("SMS MingMain getHostName error:" + e.getMessage());
-		}
-		try {
-			PnpMainMing pnpMainMing =smsMingMain(procApName);
-			if (null == pnpMainMing) {
-				logger.debug("SMS MingMain not data");
-			}else {
-				pnpAkkaService.tell(pnpMainMing);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("SMS MingMain error:" + e.getMessage());
-		}
-	}
-	
-	
-	/**
-	 * Retry detail 找一筆後找出他的main + Main status = WAIT者找一筆
-	 * 更新BillingNoticeMain & BillingNoticeDetail status
-	 * @param limits
-	 * @param procApName
-	 * @return
-	 * @throws IOException 
-	 */
-	public PnpMainMing smsMingMain(String procApName) throws IOException{
-		PnpMainMing pnpMainMing = null;
-//		List<String> templateIds = pnpService.findProductSwitchOnTemplateId(); // find ProductSwitchOn template
-//		if (templateIds == null || templateIds.isEmpty()) {
-//			return pnpMainMings;
-//		}
-		
-		//找一筆需要SMS的Detail
-		PnpDetailMing pnpDetail  =  pnpRepositoryCustom.findFirstDetailByStatusForUpdateMing(
-				AbstractPnpMainEntity.STAGE_SMS,AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS);
-		if (null == pnpDetail) {
-			logger.info("smsMingMain : there is no data for PNP .");
-			return null;
-		}
-		
-		Long mainId = pnpDetail.getPnpMainId();
-		
-		List<? super PnpDetail> details = pnpRepositoryCustom.findDetailsWaitForPNPMing(
-				AbstractPnpMainEntity.STAGE_SMS,AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS,mainId);
-		
-		logger.info("smsMingMain details size :"+ details.size());
-
-		if(CollectionUtils.isEmpty(details)) {
-			logger.error("smsMingMain : there is a main has no details!!!");
-			return null;
-		}
-		
-		pnpMainMing = pnpRepositoryCustom.findMainByMainIdMing(mainId);
-		if(null == pnpMainMing){
-			logger.error("smsMingMain : mainId mapping error ; no main correspond this  mainId : "+mainId);
-			return null;
-		}
-		//回組成來源資料格式
-		pnpMainMing.setPnpDetails(details);
+	private InputStream smsMingInputStream(PnpMainMing pnpMainMing, List<? super PnpDetail> details) throws IOException{
 		
 		/**
 		 * 明宣 header
@@ -668,28 +421,17 @@ public class PnpSMSMsgService {
 			body.append(pnpDetailMing.getKeepSecond()+"\r\n");
 		}
 		
-		//更換檔名(加L)
-		String origFileName = pnpMainMing.getOrigFileName();
-		String changedOrigFileName = origFileName.substring(0, origFileName.lastIndexOf("_"))+"_L"+origFileName.substring(origFileName.lastIndexOf("_"));
-		
-		logger.info("==================================================");
-		logger.info(changedOrigFileName);
-		logger.info("==================================================");
-		
 		InputStream targetStream = new ByteArrayInputStream((body.toString()).getBytes());
-		
-		//傳檔案到SMS FTP
-		uploadFileToSMS(AbstractPnpMainEntity.SOURCE_MING,targetStream, changedOrigFileName);
-		
-		//update待發送資料 status(Sending) &excuter name(hostname)
-		updateStatusSuccess(procApName, pnpMainMing,details);
-		
-		return pnpMainMing;
+		return targetStream;
 	}
 	
 	public void uploadFileToSMS(String source ,InputStream targetStream, String fileName) throws IOException {
 		logger.info("start uploadFileToSMS ");
 		
+		if (targetStream == null) {
+			logger.error("SMS uploadFileToSMS error: targetStream is null");
+			return ;
+		}
 		PNPFtpSetting setting = pnpFtpService.getFtpSettings(source);
 		
 		logger.info(" fileName...."+fileName);

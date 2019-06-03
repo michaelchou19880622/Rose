@@ -1,5 +1,6 @@
 package com.bcs.core.taishin.circle.PNP.akka;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -34,6 +35,20 @@ public class PnpAkkaService {
 	private ActorRef getRandomActor(List<ActorRef> actors){
         int index = new Random().nextInt(actors.size());
         return actors.get(index);
+	}
+	
+	public String getProcApName() {
+		String procApName = null;
+		try {
+			InetAddress localAddress = InetAddress.getLocalHost();
+			if (localAddress != null) {
+				procApName = localAddress.getHostName();
+			}
+			
+		} catch (Exception e) {
+			logger.error(" getHostName error:" + e.getMessage());
+		}
+		return procApName;
 	}
 	
 	@PreDestroy

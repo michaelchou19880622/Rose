@@ -5,15 +5,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
 
 import com.bcs.core.bot.db.entity.MsgBotReceive;
+import com.bcs.core.bot.db.service.MsgBotReceiveService;
 import com.bcs.core.bot.receive.utils.MsgBotReceiveParser;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.enums.LOG_TARGET_ACTION_TYPE;
 import com.bcs.core.log.util.SystemLogUtil;
 import com.bcs.core.receive.model.ReceivedModelOriginal;
 import com.bcs.core.resource.CoreConfigReader;
+import com.bcs.core.spring.ApplicationContextProvider;
 
 import akka.actor.UntypedActor;
 
@@ -44,6 +47,7 @@ public class ReceivingMsgHandlerEventType extends UntypedActor {
 					
 					String eventType = msg.getEventType();
 					logger.debug("eventType:" + eventType);
+					logger.info("eventType:" + eventType);
 					
 					String channelId = original.getChannelId();
 					String channelName = original.getChannelName();
@@ -92,6 +96,10 @@ public class ReceivingMsgHandlerEventType extends UntypedActor {
 						map.put("ApiType", apiType);
 						map.put("iMsgId", iMsgId);
 						getSender().tell(map, getSelf());
+					} else if (MsgBotReceive.EVENT_TYPE_DELIVERY.equals(eventType)){//for pnp DELIVERY notification
+						logger.debug("-------Get pnp DELIVERY notification-------");
+						logger.debug(ToStringBuilder.reflectionToString(msg));
+						ApplicationContextProvider.getApplicationContext().getBean(MsgBotReceiveService.class).bulkPersist(msg);
 					} else {
 						// Unknown eventType
 					}

@@ -118,9 +118,10 @@ public class BillingNoticeFtpService {
 				for(FtpSetting ftp : ftpSettings) {
 					if (ftp.containsFileName(fileName)) {
 						encoding = ftp.getFileEncoding();
-						logger.info(fileName + " encoding:" +  encoding );
+						logger.debug(fileName + " containsFileName encoding:" +  encoding );
 					}
 				}
+				logger.info(fileName + " encoding:" +  encoding );
 				byte[] fileData = lReturnDatas.get(fileName);
 				logger.info(" BillingNoticeFtpService handle file:" + downloadSavePath + File.separator + fileName );
 				File targetFile = new File(downloadSavePath + File.separator + fileName);

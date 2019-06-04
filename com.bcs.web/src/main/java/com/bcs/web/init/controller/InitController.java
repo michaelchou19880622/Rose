@@ -71,6 +71,7 @@ public class InitController {
 
 		try {
 			logger.info("init registerServer");
+			logger.info("init file.encoding:" + System.getProperty("file.encoding"));
 			DataSyncUtil.registerServer();
 		} catch (Throwable e) {
 			logger.error(ErrorRecord.recordError(e));

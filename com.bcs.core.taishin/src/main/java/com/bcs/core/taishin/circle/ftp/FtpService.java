@@ -425,6 +425,7 @@ public class FtpService {
 	 * @return 下載的檔案內容
 	 */
 	public Map<String, byte[]> downloadMutipleFileByType(String directory, String extension, FtpSetting setting) {
+		logger.info( setting.getHost() + " setting getFileEncoding:" + setting.getFileEncoding());
 		if (setting.getProtocol().equalsIgnoreCase("sftp")) {
 			if (!CoreConfigReader.isBillingNoticeFtpTypeDevelop()) { // 正式環境時使用
 				return downloadMutipleFileInSFTP(directory, extension, setting);

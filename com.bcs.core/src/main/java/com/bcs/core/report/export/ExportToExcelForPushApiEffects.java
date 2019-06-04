@@ -71,9 +71,11 @@ public class ExportToExcelForPushApiEffects {
 		row.createCell(4).setCellValue("推播主題");
 		row.createCell(5).setCellValue("發送成功數");
 		row.createCell(6).setCellValue("發送失敗數");
+		row.createCell(7).setCellValue("發送數量");
 		
 		List<Map<String, String>> pushEffects = pushMessageRecordService.getPushMessageEffects(startDateString, endDateString);
-		
+		long sumSuccess = 0;
+		long sumFail = 0 ;
 		Integer rowNumber = 1;
 		for(Map<String, String> pushEffect : pushEffects) {
 			row = sheet.createRow(rowNumber);
@@ -92,9 +94,23 @@ public class ExportToExcelForPushApiEffects {
 			row.createCell(4).setCellValue(pushEffect.get("pushTheme"));
 			row.createCell(5).setCellValue(pushEffect.get("successCount"));
 			row.createCell(6).setCellValue(pushEffect.get("failCount"));
+			long total =  Long.parseLong(pushEffect.get("failCount").toString()) +  Long.parseLong(pushEffect.get("successCount").toString());
+			row.createCell(7).setCellValue(String.valueOf(total));
 			
+			sumSuccess += Long.parseLong(pushEffect.get("successCount").toString());
+			sumFail += Long.parseLong(pushEffect.get("failCount").toString());
 			rowNumber += 1;
 		}
+		
+		Row sumRow = sheet.createRow(rowNumber);
+		sumRow.createCell(0).setCellValue("總計");
+		sumRow.createCell(1).setCellValue("");
+		sumRow.createCell(2).setCellValue("");
+		sumRow.createCell(3).setCellValue("");
+		sumRow.createCell(4).setCellValue("");
+		sumRow.createCell(5).setCellValue(String.valueOf(sumSuccess));
+		sumRow.createCell(6).setCellValue(String.valueOf(sumFail));
+		sumRow.createCell(7).setCellValue(String.valueOf(sumFail + sumSuccess));
 		
 		/* 自動調整欄寬 */
 		for (Integer col_index = 0; col_index < sheet.getRow(0).getPhysicalNumberOfCells(); col_index++) {

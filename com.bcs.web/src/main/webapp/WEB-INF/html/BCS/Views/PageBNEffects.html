@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
-<head th:replace="/BCS/Views/Common/Head :: head ('Push Api Effects Page', '/BCS/JS/PageBNEffects.base.js')">
+<head th:replace="/BCS/Views/Common/Head :: head ('帳務通知推送成效列表', '/BCS/JS/PageBNEffects.base.js')">
 </head>
 
 <body>
@@ -63,6 +63,7 @@
                             	<col width="150">
                             	<col width="100">
                             	<col width="100">
+                            	<col width="100">
                            	</colgroup>
                             <tr class="tableHeader">
                                 <th>發送時間</th>
@@ -70,13 +71,23 @@
                                 <th>發送類型</th>
                                 <th>發送成功數</th>
                                 <th>發送失敗數</th>
+                                <th>發送數量</th>
                             </tr>
+                            <tr class="sumTemplate" style="color:#3b4865;font-weight:bold;">
+                           		<td >總計</td>
+                           		<td ></td>
+                           		<td></td>
+                                <td class="completeSum"></td>
+                                <td class="failSum"></td>
+                                <td class="totalSum"></td>
+                           </tr>
                             <tr class="dataTemplate">
                                 <td class="sendDate"></td>
                                 <td class="title" style="text-align:left;"></td>
                                 <td class="sendType"></td>
                                 <td class="completeCount"></td>
                                 <td class="failCount"></td>
+                                <td class="total"></td>
                             </tr>
                         </table>
                     </div>

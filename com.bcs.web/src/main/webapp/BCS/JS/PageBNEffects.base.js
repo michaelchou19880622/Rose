@@ -1,5 +1,6 @@
 $(function(){
 	var originalTr = {};
+	var sumTr = {};
 	var startDate = null, endDate = null;
 	var hasData = false;
 	var page = 1, totalPages = 0;
@@ -14,7 +15,7 @@ $(function(){
 	$('.query').click(function(){
 		if(dataValidate()) {
 			$('.dataTemplate').remove();
-						
+			$('.sumTemplate').remove();
 			startDate = $('#startDate').val();
 			endDate = $('#endDate').val();
 			
@@ -78,7 +79,7 @@ $(function(){
 	var loadData = function(){
 		$('.LyMain').block($.BCS.blockMsgRead);
 		$('.dataTemplate').remove();
-		
+		$('.sumTemplate').remove();
 		console.info("firstFatch:", firstFatch);
 		if(firstFatch){
 			firstFatch = false;
@@ -94,7 +95,9 @@ $(function(){
 				hasData = false;
 			} else {
 				hasData = true;
-				
+				var completeSum = 0;
+				var failSum = 0;
+				var hasSum = false;
 				for(key in response){
 					var rowDOM = originalTr.clone(true);
 					
@@ -111,8 +114,20 @@ $(function(){
 					rowDOM.find('.sendType').text(valueObj[2]);
 					rowDOM.find('.completeCount').text(valueObj[3]);
 					rowDOM.find('.failCount').text(valueObj[4]);
+					rowDOM.find('.total').text( parseInt(valueObj[3], 10) +  parseInt(valueObj[4], 10));
 					
 					rowDOM.appendTo($('#tableBody'));
+					hasSum  = true;
+					completeSum = parseInt(valueObj[3], 10) + parseInt(completeSum, 10);
+					failSum = parseInt(valueObj[4], 10) + parseInt(failSum, 10);
+				}
+				
+				if (hasSum){
+					var sumRowDOM = sumTr.clone(true);
+					sumRowDOM.find('.completeSum').text(completeSum);
+					sumRowDOM.find('.failSum').text(failSum);
+					sumRowDOM.find('.totalSum').text( parseInt(failSum, 10) + parseInt(completeSum, 10));
+					sumRowDOM.appendTo($('#tableBody'));
 				}
 			}
 			
@@ -152,6 +167,8 @@ $(function(){
 	var initial = function(){
 		originalTr = $('.dataTemplate').clone(true);
 		$('.dataTemplate').remove();
+		sumTr = $('.sumTemplate').clone(true);
+		$('.sumTemplate').remove();
 		
 		startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
 		endDate = moment(new Date()).format('YYYY-MM-DD');

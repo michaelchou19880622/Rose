@@ -1,6 +1,5 @@
 package com.bcs.core.taishin.circle.service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,8 +11,6 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
-import javax.persistence.NamedNativeQueries;
-import javax.persistence.NamedNativeQuery;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
@@ -25,9 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentLink;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsg;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsgAction;
-import com.bcs.core.taishin.circle.db.repository.BillingNoticeContentTemplateMsgRepository;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeContentTemplateMsgActionRepository;
-import com.bcs.core.taishin.circle.service.BillingNoticeContentLinkService;
+import com.bcs.core.taishin.circle.db.repository.BillingNoticeContentTemplateMsgRepository;
 import com.bcs.core.utils.DataSyncUtil;
 import com.bcs.core.utils.ErrorRecord;
 import com.google.common.cache.CacheBuilder;

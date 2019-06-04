@@ -15,8 +15,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.taishin.circle.service.BillingNoticeContentTemplateMsgService;
+import com.bcs.core.utils.ErrorRecord;
 
 @Service
 public class ExportToExcelForBillingNoticePushBNApiEffects {
@@ -46,6 +46,8 @@ public class ExportToExcelForBillingNoticePushBNApiEffects {
 			Integer sheetNumber = 1;
 			Sheet sheet = this.createBNPushApiEffectsSheet(workbook, sheetNumber++);
 			Integer rowNumber = 1; 
+			long sumSuccess = 0;
+			long sumFail = 0 ;
 			for(Object key : bnEffects.keySet()) {
 				List<String> list = bnEffects.get(key);
 				//logger.info("list2:" + list.toString());
@@ -64,13 +66,26 @@ public class ExportToExcelForBillingNoticePushBNApiEffects {
 				row.createCell(2).setCellValue(list.get(2));
 				row.createCell(3).setCellValue(list.get(3));
 				row.createCell(4).setCellValue(list.get(4));
-				rowNumber += 1;
+				long total =  Long.parseLong(list.get(3).toString()) +  Long.parseLong(list.get(4).toString());
+				row.createCell(5).setCellValue(String.valueOf(total));
 				
+				rowNumber += 1;
+				sumSuccess += Long.parseLong(list.get(3).toString());
+				sumFail += Long.parseLong(list.get(4).toString());
 				if(rowNumber > 1048500) { // RowLimit = 1048576 
 					sheet = this.createBNPushApiEffectsSheet(workbook, sheetNumber++);
 					rowNumber = 1;
 				}
 			}
+			Row sumRow = sheet.createRow(rowNumber);
+			
+			sumRow.createCell(0).setCellValue("總計");
+			sumRow.createCell(1).setCellValue("");
+			sumRow.createCell(2).setCellValue("");
+			sumRow.createCell(3).setCellValue(String.valueOf(sumSuccess));
+			sumRow.createCell(4).setCellValue(String.valueOf(sumFail));
+			sumRow.createCell(5).setCellValue(String.valueOf(sumFail + sumSuccess));
+			
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
 		}
@@ -87,14 +102,14 @@ public class ExportToExcelForBillingNoticePushBNApiEffects {
 			row.createCell(2).setCellValue("發送類型");
 			row.createCell(3).setCellValue("發送成功數");
 			row.createCell(4).setCellValue("發送失敗數");
-			
+			row.createCell(5).setCellValue("發送數量");
 			// column width
 			sheet.setColumnWidth(0, 13*256);
 			sheet.setColumnWidth(1, 50*256);
 			sheet.setColumnWidth(2, 15*256);
 			sheet.setColumnWidth(3, 15*256);
 			sheet.setColumnWidth(4, 15*256);
-					
+			sheet.setColumnWidth(5, 15*256);
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
 		}

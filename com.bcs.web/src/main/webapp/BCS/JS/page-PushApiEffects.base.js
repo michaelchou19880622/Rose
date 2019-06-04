@@ -2,6 +2,7 @@ $(function(){
 	var clonedDOM = null;
 	var startDate = null, endDate = null;
 	var hasData = false;
+	var sumDOM = null;
 	
 	$(".datepicker").datepicker({
 		maxDate : 0,
@@ -12,7 +13,7 @@ $(function(){
 	$('.query').click(function(){
 		if(dataValidate()) {
 			$('.dataTemplate').remove();
-			
+			$('.sumTemplate').remove();
 			startDate = $('#startDate').val();
 			endDate = $('#endDate').val();
 
@@ -26,8 +27,9 @@ $(function(){
 		console.log('Push API 成效列表');
 		
 		clonedDOM = $('.dataTemplate').clone(true);
+		sumDOM = $('.sumTemplate').clone(true);
 		$('.dataTemplate').remove();
-		
+		$('.sumTemplate').remove();
 		startDate = moment(new Date()).format('YYYY-MM-DD');
 		endDate = moment(new Date()).format('YYYY-MM-DD');
 		
@@ -48,7 +50,9 @@ $(function(){
 				$('<tr class="dataTemplate"><td colspan="4">此日期區間無任何資料</td></tr>').appendTo($('#tableBody'));
 			} else {
 				hasData = true;
-				
+				var completeSum = 0;
+				var failSum = 0;
+				var hasSum = false;
 				response.forEach(function(element){
 					var exportUrl = '../edit/exportToExcelForPushApiEffectDetail?createTime=';
 					var rowDOM = clonedDOM.clone(true);
@@ -61,8 +65,21 @@ $(function(){
 					rowDOM.find('.successCount').text(element.successCount);
 					rowDOM.find('.failCount').text(element.failCount);
 					
+					rowDOM.find('.total').text( parseInt(element.failCount, 10) +  parseInt(element.successCount, 10));
+					
 					rowDOM.appendTo($('#tableBody'));
+					hasSum  = true;
+					completeSum = parseInt(element.successCount, 10) + parseInt(completeSum, 10);
+					failSum = parseInt(element.failCount, 10) + parseInt(failSum, 10);
 				});
+				
+				if (hasSum){
+					var sumRowDOM = sumDOM.clone(true);
+					sumRowDOM.find('.successSum').text(completeSum);
+					sumRowDOM.find('.failSum').text(failSum);
+					sumRowDOM.find('.totalSum').text( parseInt(failSum, 10) + parseInt(completeSum, 10));
+					sumRowDOM.appendTo($('#tableBody'));
+				}
 			}
 			
 			setExportButtonSource(startDate, endDate);

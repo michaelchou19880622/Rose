@@ -124,7 +124,7 @@ public class PnpSMSMsgService {
 				List<? super PnpDetail> details = pnpRepositoryCustom.updateStatus(type, procApName, AbstractPnpMainEntity.STAGE_SMS);
 				logger.info("SMS pnpMain details type :"+ type  +" details size:" + details.size());
 				if(CollectionUtils.isEmpty(details)) {
-					logger.error("SMS pnpMain type :"+ type  +" there is a main has no details!!!");
+					logger.debug("SMS pnpMain type :"+ type  +" there is a main has no details!!!");
 				}else {
 					PnpDetail oneDetail = (PnpDetail)details.get(0);
 					pnpMain = pnpRepositoryCustom.findMainByMainId(type, oneDetail.getPnpMainId());

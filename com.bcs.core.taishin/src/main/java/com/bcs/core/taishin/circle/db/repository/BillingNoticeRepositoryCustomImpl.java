@@ -94,7 +94,7 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
 			if (waitMainId != null) {
 				allMainIds.add(waitMainId);
 			}else {
-				logger.info("BCS_BILLING_NOTICE updateStatus waitMainId is null");
+				logger.debug("BCS_BILLING_NOTICE updateStatus waitMainId is null");
 			}
 			
 			// 找出第一筆 RETRY BillingNoticeDetail 的 BCS_BILLING_NOTICE_MAIN 並更新狀態
@@ -116,10 +116,10 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
 						}
 					}
 				}else {
-					logger.info("BCS_BILLING_NOTICE updateStatus BillingNoticeDetail is empty");
+					logger.debug("BCS_BILLING_NOTICE updateStatus BillingNoticeDetail is empty");
 				}
 			}else {
-				logger.info("BCS_BILLING_NOTICE updateStatus allMainIds is empty");
+				logger.debug("BCS_BILLING_NOTICE updateStatus allMainIds is empty");
 			}
 			logger.debug(" BCS_BILLING_NOTICE end updateStatus:" + procApName);
 		}catch(Exception e) {

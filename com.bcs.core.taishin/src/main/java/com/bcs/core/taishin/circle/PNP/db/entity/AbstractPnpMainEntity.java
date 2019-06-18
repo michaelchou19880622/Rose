@@ -18,6 +18,8 @@ public abstract class AbstractPnpMainEntity implements Serializable, Cloneable  
 	public static final String MSG_SENDER_STATUS_PROCESS = "PROCESS";
 	public static final String MSG_SENDER_STATUS_FINISH = "FINISH";
 	public static final String MSG_SENDER_STATUS_FAIL = "FAIL";
+	//發完PNP後進入此狀態   ，待web hook在24小時內收到DELIVERY則將該則訊息update成COMPLETE，若24小時內沒收到DELIVERY則將該訊息轉發SMS
+	public static final String MSG_SENDER_STATUS_CHECK_DELIVERY= "CHECK_DELIVERY";
 	
 	public static final String MSG_SENDER_STATUS_SENDING = "SENDING";
 	public static final String MSG_SENDER_STATUS_DELETE = "DELETE";

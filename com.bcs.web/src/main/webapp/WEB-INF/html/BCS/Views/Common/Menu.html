@@ -238,7 +238,23 @@
                         </li>
                     </ul>
                 </li>
-
+                <li sec:authorize="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN')">
+                    <a href="" style="cursor: pointer;"><span>PNP後台維護</span></a>
+                    <ul class="MdNonDisp subMenu" style="display:none">
+                        <li th:classappend="${currentPage == 'PagepnpNAL'} ? 'ExSelected'">
+                            <a th:href="@{/bcs/edit/pnpNormalAccountListPage}"><span>一般帳號維護</span></a>
+                        </li>
+                        <li th:classappend="${currentPage == 'PagepnpNAC'} ? 'ExSelected'" style="display:none">
+                            <a th:href="@{/bcs/edit/pnpNormalAccountCreatePage}"><span>建立一般帳號</span></a>
+                        </li>
+                        <li th:classappend="${currentPage == 'PagepnpUAL'} ? 'ExSelected'">
+                            <a th:href="@{/bcs/edit/pnpUnicaAccountListPage}"><span>Unica帳號維護</span></a>
+                        </li>
+                        <li th:classappend="${currentPage == 'PagepnpUAC'} ? 'ExSelected'" style="display:none">
+                            <a th:href="@{/bcs/edit/pnpUnicaAccountCreatePage}"><span>建立Unica帳號</span></a>
+                        </li>
+                    </ul>
+                </li>
             </ul>
         </nav>
     </div>

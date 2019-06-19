@@ -216,15 +216,27 @@ public class PnpService {
 	 * @param PnpMain
 	 */
 	@Transactional(rollbackFor = Exception.class, timeout = 30)
-	public void updateMainAndDetailStatus(PnpMain PnpMain, String status) {
-//		List<PnpDetail> details = PnpMain.getPnpDetails();
-//		for (PnpDetail detail : details) {
-//			detail.setStatus(status);
-//			save(detail);
-//		}
-//		Date  now = Calendar.getInstance().getTime();
-//		PnpMainRepository.updatePnpMainStatus(status,now,
-//				PnpMain.getNoticeMainId());
+	public void updateMainAndDetailStatus(PnpMain pnpMain, String status) {
+		List<PnpDetail> details = (List<PnpDetail>) pnpMain.getPnpDetails();
+		for (PnpDetail detail : details) {
+			detail.setStatus(status);
+			save(detail);
+		}
+		Date  now = Calendar.getInstance().getTime();
+		
+		String source = pnpMain.getSource();
+		
+		switch (source) {
+			case AbstractPnpMainEntity.SOURCE_MITAKE:
+				pnpMainMitakeRepository.updatePnpMainMitakeStatus(status, now, pnpMain.getPnpMainId());
+			case AbstractPnpMainEntity.SOURCE_MING:
+				pnpMainMingRepository.updatePnpMainMingStatus(status, now, pnpMain.getPnpMainId());
+			case AbstractPnpMainEntity.SOURCE_EVERY8D:
+				pnpMainEvery8dRepository.updatePnpMainEvery8dStatus(status, now, pnpMain.getPnpMainId());
+			case AbstractPnpMainEntity.SOURCE_UNICA:
+				pnpMainUnicaRepository.updatePnpMainUnicaStatus(status, now, pnpMain.getPnpMainId());
+		}
+		
 	}
 
 //	/**

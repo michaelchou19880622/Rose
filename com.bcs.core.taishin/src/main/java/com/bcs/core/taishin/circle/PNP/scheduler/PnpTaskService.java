@@ -38,8 +38,8 @@ public class PnpTaskService {
 		SchedulerFactory schedulerFactory = new StdSchedulerFactory();
 	    Scheduler scheduler = schedulerFactory.getScheduler();
 	    
-	    JobDetail jobDetail = newJob(PnpTask.class).withIdentity("billingNoticeMain", "BillingNotice").build();
-	    Trigger trigger = newTrigger().withIdentity("billingNoticeMain", "BillingNotice").startAt(scheduleTime).build();
+	    JobDetail jobDetail = newJob(PnpTask.class).withIdentity("PNPMain", "PNP").build();
+	    Trigger trigger = newTrigger().withIdentity("PNPMain", "PNP").startAt(scheduleTime).build();
 	    
 	    scheduler.getContext().put("PnpMain", pnpMain);
 	    

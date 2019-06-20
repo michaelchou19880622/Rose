@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
 
@@ -42,6 +43,7 @@ import com.bcs.core.taishin.circle.PNP.akka.PnpAkkaService;
 import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpContentTemplateMsg;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpContentTemplateMsgAction;
+import com.bcs.core.taishin.circle.PNP.db.entity.PnpDeliveryRecord;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailEvery8d;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMing;
@@ -447,6 +449,7 @@ public class PnpService {
 		headers.set(LINE_HEADER.HEADER_BOT_ServiceCode.toString(), serviceCode);
 		List<PnpDetail> details = (List<PnpDetail>) pnpMain.getPnpDetails();
 		
+		String source = pnpMain.getSource();
 		logger.info("pushLineMessage pnpMain.getProcFlow():" + pnpMain.getProcFlow());
 		//TODO 樣版
 //		PnpContentTemplateMsg templateMsg = PnpMain.getTemplate();
@@ -458,6 +461,24 @@ public class PnpService {
 		
 		boolean sendFailFlag = false;
 		for (PnpDetail detail : details) {
+			
+			StringBuffer sb = new StringBuffer();
+			sb.append(PnpDeliveryRecord.THIS_TYPE);
+			sb.append(";;");
+			sb.append(source);
+			sb.append(";;");
+			sb.append(detail.getPnpMainId().toString());
+			sb.append(";;");
+			sb.append(detail.getPnpDetailId().toString());
+			sb.append(";;");
+			sb.append(detail.getPhoneHash());
+	        // 64 <= tag length <= 100，不夠則補空格
+	        String deliveryTag = String.format("%1$-"+ 64 +"s", sb.toString());
+	        
+	        headers.set("X-Line-Delivery-Tag", deliveryTag);
+	        logger.debug("X-Line-Delivery-Tag : " + deliveryTag);
+			
+			
 			// only send wait & retry user
 			JSONObject requestBody = new JSONObject();
 			requestBody.put("to", detail.getPhoneHash());
@@ -499,7 +520,14 @@ public class PnpService {
 			}
 			detail.setPnpTime(Calendar.getInstance().getTime());
 			if(sendFailFlag) {
-				detail.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_COMPLETE);
+				//發完PNP後進入此狀態   ，待web hook在24小時內收到DELIVERY則將該則訊息update成COMPLETE，若24小時內沒收到DELIVERY則將該訊息轉發SMS
+				detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_CHECK_DELIVERY);
+				//設定PnpDeliveryExpireTime,SMS排程將抓取status = CHECK_DELIVERY 且 now date > PnpDeliveryExpireTime 的資料
+				Date date =new Date(); 
+				Calendar calendar = new GregorianCalendar(); 
+				calendar.setTime(date); 
+				calendar.add(calendar.DATE,1); //加24小時
+				detail.setPnpDeliveryExpireTime(calendar.getTime());
 			}else {
 				detail.setProcStage(AbstractPnpMainEntity.STAGE_SMS);
 				detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS);

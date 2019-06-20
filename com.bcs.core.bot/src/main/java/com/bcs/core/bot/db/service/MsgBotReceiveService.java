@@ -14,7 +14,7 @@ import com.bcs.core.bot.db.repository.MsgBotReceiveRepository;
 public class MsgBotReceiveService {
 	@Autowired
 	private MsgBotReceiveRepository msgBotReceiveRepository;
-
+	
 	public void save(MsgBotReceive msgReceive){
 		msgBotReceiveRepository.save(msgReceive);
 	}
@@ -62,4 +62,8 @@ public class MsgBotReceiveService {
 	public List<MsgBotReceive> findByReceiveDay(String start, String end){
 	    return msgBotReceiveRepository.findByReceiveDay(start, end);
 	}
+	
+	public void updatePnpStatus(String deliveryDatas) {
+		msgBotReceiveRepository.updateStatus(deliveryDatas);
+	} 
 }

@@ -219,35 +219,8 @@ public class LoadFtbPnpDataTask {
 		logger.info(" downloadPath...." + pnpFtpSetting.getPath());
 		logger.info(" uploadPath...." + pnpFtpSetting.getUploadPath());
 
-//		if (!validateFtpHostData(ftpServerName, ftpPort, ftpUsr, ftpPass, downloadSavePath)) {
-//			return;
-//		}
-//
-//		FTPClient ftpClient = new FTPClient();
 	try {
-//			ftpClient.connect(ftpServerName, ftpPort);
-//			boolean loginResult = ftpClient.login(ftpUsr, ftpPass);
-//			logger.info(loginResult ? "ftp login success!!" : "ftp login fail!!");
-//			ftpClient.enterLocalPassiveMode();
-//			ftpClient.changeWorkingDirectory(downloadPath);//
-//			ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
-//			ftpClient.setAutodetectUTF8(true);
-//			ftpClient.setControlEncoding("UTF-8");
-//			ftpClient.setStrictReplyParsing(false);// 新加設定解決org.apache.commons.net.MalformedServerReplyException:
-//													// Truncated server reply: ).
-//
-//			// 取得FTP中的files
-//			FTPFile[] files = ftpClient.listFiles();
-//			List<String> handleFiles = new ArrayList<String>();
-//			for (FTPFile file : files) {
-//				String fileName = file.getName();
-//				if (!file.isDirectory() && fileName.endsWith("txt")) {
-//					handleFiles.add(fileName);
-//				}
-//			}
 
-//			String fileExtension = CoreConfigReader.getString(CONFIG_STR.BN_FTP_FILE_EXTENSION, true);
-		
 			// 1. ftp get file
 			Map<String,byte[]> lReturnDatas = new HashMap<String,byte[]>();
 			Map<String,byte[]> returnDatas = pnpFtpService.downloadMutipleFileByType(source , pnpFtpSetting.getPath(), "TXT", pnpFtpSetting);

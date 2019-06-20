@@ -274,7 +274,6 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
 		return new ArrayList<>();
 	}
 	
-	
 	/**
 	 * 找出第一筆PNP detail (status = PROCESS and stage = 傳入參數)的 mainId
 	 * 並更新PNP detail 的 mainId 等於上述的值且status = PROCESS and stage = 傳入參數 者 更新 status = SENDING
@@ -297,6 +296,55 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
 		
 		return ids;
 	}
+	
+	
+	/**
+	 * 移至com.bcs.core.bot.db.repository.MsgBotReceiveRepositoryImpl
+	 */
+//	@Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
+//	public void updateStatus(String deliveryTags) {
+//		logger.info("received PNP delivery : "+ deliveryTags +" updateStatu to pnp send completed!");
+//		try {
+//			String[] deliveryData = deliveryTags.split("\\;;", 5);
+//			String source = deliveryData[1];
+//			String mainId = deliveryData[2];
+//			String detailId = deliveryData[3];
+//			String hashPhone = deliveryData[4];
+//			
+//			String detailTable="";
+//			switch (source) {
+//				case AbstractPnpMainEntity.SOURCE_MITAKE:
+//					detailTable = PNPFTPType.MITAKE.getDetailTable();
+//					break;
+//				case AbstractPnpMainEntity.SOURCE_EVERY8D:
+//					detailTable = PNPFTPType.EVERY8D.getDetailTable();
+//					break;
+//				case AbstractPnpMainEntity.SOURCE_MING:
+//					detailTable = PNPFTPType.MING.getDetailTable();
+//					break;
+//				case AbstractPnpMainEntity.SOURCE_UNICA:
+//					detailTable = PNPFTPType.UNICA.getDetailTable();
+//					break;
+//			}
+//			
+//			Date  now = Calendar.getInstance().getTime();
+//			String sqlString = 
+//					 "update " + detailTable + "  set STATUS = :newStatus  , MODIFY_TIME = :modifyTime ,PNP_DELIVERY_TIME = :deliveryTime"
+//					 + " where PNP_MAIN_ID =:mainId AND PNP_DETAIL_ID =:detailId";
+//			List<BigInteger> ids = (List<BigInteger>)entityManager.createNativeQuery(sqlString)
+//					.setParameter("mainId", mainId)
+//					.setParameter("detailId", detailId)
+//					.setParameter("newStatus", AbstractPnpMainEntity.DATA_CONVERTER_STATUS_COMPLETE)
+//					.setParameter("modifyTime", now)
+//					.setParameter("deliveryTime", now)
+//					.getResultList();
+//			
+//		}catch(Exception e) {
+//			logger.error(e);
+//			throw e;
+//		}
+//		
+//	}
 	
 
 	/**

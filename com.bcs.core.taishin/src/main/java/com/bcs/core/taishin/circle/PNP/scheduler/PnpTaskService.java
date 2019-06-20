@@ -27,7 +27,7 @@ public class PnpTaskService {
 	
 	/**
 	 * 排程通知
-	 * @param billingNoticeMain
+	 * @param PnpMain
 	 *  @param scheduleTime
 	 * @throws SchedulerException
 	 */

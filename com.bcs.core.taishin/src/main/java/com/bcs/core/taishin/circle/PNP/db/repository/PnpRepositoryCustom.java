@@ -17,6 +17,8 @@ public interface PnpRepositoryCustom {
 
 	public List<? super PnpDetail> updateStatus(PNPFTPType type, String procApName, String stage);
 
+//	public void updateStatus(String deliveryTags); 移至com.bcs.core.bot.db.repository.MsgBotReceiveRepositoryImpl
+
 	public PnpMain findMainByMainId(PNPFTPType type, Long mainId);
 
 	public void batchInsertPnpDetailEvery8d(final List<PnpDetailEvery8d> list);
@@ -26,4 +28,6 @@ public interface PnpRepositoryCustom {
 	public void batchInsertPnpDetailMing(final List<PnpDetailMing> list);
 
 	public void batchInsertPnpDetailUnica(final List<PnpDetailUnica> list);
+	
+	
 }

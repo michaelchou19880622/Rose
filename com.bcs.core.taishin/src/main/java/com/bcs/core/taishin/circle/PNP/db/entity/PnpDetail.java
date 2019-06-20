@@ -74,6 +74,13 @@ public class PnpDetail extends AbstractBcsEntity {
 	@Column(name = "PNP_TIME")
 	private Date pnpTime;
 	
+	@Column(name = "PNP_DELIVERY_TIME")
+	private Date pnpDeliveryTime;
+	
+	//web hook 送來 PNP DELIVERY的到期時間，20190620設定為24小時後過期(LINE提供的API文件規定為24小時) 
+	@Column(name = "PNP_DELIVERY_EXPIRE_TIME")
+	private Date pnpDeliveryExpireTime;
+	
 	@Column(name = "SMS_TIME")
 	private Date smsTime;
 	
@@ -215,5 +222,21 @@ public class PnpDetail extends AbstractBcsEntity {
 	public void setSource(String source) {
 		this.source = source;
 	}
-	
+
+	public Date getPnpDeliveryTime() {
+		return pnpDeliveryTime;
+	}
+
+	public void setPnpDeliveryTime(Date pnpDeliveryTime) {
+		this.pnpDeliveryTime = pnpDeliveryTime;
+	}
+
+	public Date getPnpDeliveryExpireTime() {
+		return pnpDeliveryExpireTime;
+	}
+
+	public void setPnpDeliveryExpireTime(Date pnpDeliveryExpireTime) {
+		this.pnpDeliveryExpireTime = pnpDeliveryExpireTime;
+	}
+
 }

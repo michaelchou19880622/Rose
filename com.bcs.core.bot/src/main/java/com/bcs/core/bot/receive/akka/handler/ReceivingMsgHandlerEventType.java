@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.bcs.core.bot.db.entity.MsgBotReceive;
 import com.bcs.core.bot.db.service.MsgBotReceiveService;
@@ -98,8 +98,10 @@ public class ReceivingMsgHandlerEventType extends UntypedActor {
 						getSender().tell(map, getSelf());
 					} else if (MsgBotReceive.EVENT_TYPE_DELIVERY.equals(eventType)){//for pnp DELIVERY notification
 						logger.debug("-------Get pnp DELIVERY notification-------");
-						logger.debug(ToStringBuilder.reflectionToString(msg));
 						ApplicationContextProvider.getApplicationContext().getBean(MsgBotReceiveService.class).bulkPersist(msg);
+						//收到delivery時update PNP status為complete
+						ApplicationContextProvider.getApplicationContext().getBean(MsgBotReceiveService.class).updatePnpStatus(msg.getDeliveryData());
+						
 					} else {
 						// Unknown eventType
 					}

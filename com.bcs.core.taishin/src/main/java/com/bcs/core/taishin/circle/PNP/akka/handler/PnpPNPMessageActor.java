@@ -45,7 +45,7 @@ public class PnpPNPMessageActor extends UntypedActor {
 			}
 		    if (scheduleTime != null && Calendar.getInstance().getTime().after(scheduleTime)) {
 		    	// 排程時間因為宵禁已過 立刻重發
-		    	pnpService.pushLineMessage(pnpMain, this.getSender(), this.getSelf());
+		    	pnpService.pushPNPMessage(pnpMain, this.getSender(), this.getSelf());
 		    }else {
 		    	PnpTaskService pnpTaskService = ApplicationContextProvider.getApplicationContext().getBean(PnpTaskService.class);
 		    	pnpTaskService.startTask(pnpMain, scheduleTime);

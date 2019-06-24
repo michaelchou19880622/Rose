@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" th:with="strList = ${ {'/BCS/JS/PagepnpNAL.base.js'} }">
+
+<head th:replace="/BCS/Views/Common/Head :: head ('PNP Normal Account Maintain Page', ${strList})">
+</head>
+
+<body>
+    <header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+        <div th:replace="/BCS/Views/Common/Menu :: menu ('PagepnpNAL')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">一般帳號維護</h3>
+                    </header>
+                    <div>
+                        單位名稱
+                        <font size="3" color="red">*</font>
+                        <input type="text" id="departmentName" name="departmentName" value="" maxlength="50" required="required"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PccCode
+                        <font size="3" color="red">*</font>
+                        <input type="text" id="pccCode" name="PccCode" value="" maxlength="50" required="required"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 帳號
+                        <font size="3" color="red">*</font>
+                        <input type="text" id="account" name="account" value="" maxlength="50" required="required"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 員工編號
+                        <font size="3" color="red">*</font>
+                        <input type="text" id="employeeId" name="employeeId" value="" maxlength="50" required="required">
+                    </div>
+                    <div class="CHBtnSet">
+                        <div class="CHRight"><input class="btn_add search" type="button" value="Search" style="cursor: pointer;"></div>
+                    </div>
+                    <div class="CHBtnSet">
+                        <div class="CHRight"><input class="btn_add create" type="button" value="Create" style="cursor: pointer;"></div>
+                    </div>
+                    <div class="mainFrame">
+                        <table border="1" id="templateMsgListTable">
+                            <colgroup>
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                            </colgroup>
+                            <tr>
+                                <th>帳號</th>
+                                <th>帳號屬性</th>
+                                <th>帳號型態</th>
+                                <th>前方來源系統</th>
+                                <th>員工編號</th>
+                                <th>單位代號</th>
+                                <th>單位名稱</th>
+                                <th>PccCode</th>
+                                <th>狀態</th>
+                                <th>通路</th>
+                                <th>樣板</th>
+                                <th>簡訊內容</th>
+                            </tr>
+                            <tbody class="searchTbody">
+                                <tr class="searchTr">
+                                    <td class="account"></td>
+                                    <td class="accountAttribute"></td>
+                                    <td class="accountType"></td>
+                                    <td class="sourceSystem"></td>
+                                    <td class="employeeId"></td>
+                                    <td class="departmentId"></td>
+                                    <td class="departmentName"></td>
+                                    <td class="pccCode"></td>
+                                    <td class="status"></td>
+                                    <td class="pathway"></td>
+                                    <td class="template"></td>
+                                    <td class="pnpContent"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="CHBtnSet">
+                        <div class="CHRight"><input class="btn_add download" type="button" value="Download" style="cursor: pointer;"></div>
+                    </div>
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

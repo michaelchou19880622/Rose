@@ -141,15 +141,18 @@ public class MobileMGMViewController extends BCSBaseController {
 
             mobilePageService.visitPageLog(MID, campaignId, "mgmPage");
             
-            String actionImgUrl = CoreConfigReader.getString(CONFIG_STR.MGM_ACTION_IMG_CDN_URL, true);
-            String shareImgUrl = CoreConfigReader.getString(CONFIG_STR.MGM_SHARE_IMG_CDN_URL, true);
-            String descriptionImgUrl = CoreConfigReader.getString(CONFIG_STR.MGM_DESCRIPTION_IMG_CDN_URL, true);
-            
-            if(StringUtils.isBlank(actionImgUrl) || StringUtils.isBlank(shareImgUrl) || StringUtils.isBlank(descriptionImgUrl)) {
-                actionImgUrl = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, shareCampaign.getActionImgReferenceId());
-                shareImgUrl = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, shareCampaign.getShareImgReferenceId());
-                descriptionImgUrl = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, shareCampaign.getDescriptionImgReferenceId());
-            }
+//          String actionImgUrl = CoreConfigReader.getString(CONFIG_STR.MGM_ACTION_IMG_CDN_URL, true);
+//          String shareImgUrl = CoreConfigReader.getString(CONFIG_STR.MGM_SHARE_IMG_CDN_URL, true);
+//          String descriptionImgUrl = CoreConfigReader.getString(CONFIG_STR.MGM_DESCRIPTION_IMG_CDN_URL, true);
+          
+//          if(StringUtils.isBlank(actionImgUrl) || StringUtils.isBlank(shareImgUrl) || StringUtils.isBlank(descriptionImgUrl)) {
+          String actionImgUrl = UriHelper.getCdnResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, shareCampaign.getActionImgReferenceId());
+          //actionImgUrl = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, shareCampaign.getActionImgReferenceId());
+          String shareImgUrl = UriHelper.getCdnResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, shareCampaign.getShareImgReferenceId());
+          //shareImgUrl = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, shareCampaign.getShareImgReferenceId());
+          String descriptionImgUrl = UriHelper.getCdnResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, shareCampaign.getDescriptionImgReferenceId());
+          //descriptionImgUrl = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, shareCampaign.getDescriptionImgReferenceId());
+//          }
             
             model.addAttribute("actionImgUrl", actionImgUrl);
             model.addAttribute("shareImgUrl", shareImgUrl);

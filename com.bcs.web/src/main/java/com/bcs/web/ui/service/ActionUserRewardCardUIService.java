@@ -261,7 +261,8 @@ public class ActionUserRewardCardUIService {
 			if (imageId.toLowerCase().startsWith("http")) {
 
 			} else {
-				imageId = UriHelper.getResourceUri("IMAGE", imageId, true);
+				imageId = UriHelper.getCdnResourceUri("IMAGE", imageId, true);
+				//imageId = UriHelper.getResourceUri("IMAGE", imageId, true);
 			}
 		}
 

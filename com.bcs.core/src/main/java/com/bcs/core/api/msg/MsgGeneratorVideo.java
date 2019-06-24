@@ -64,8 +64,10 @@ public class MsgGeneratorVideo extends MsgGeneratorAbstract {
 	
 	private void generatorContent(MsgDetail detail, int toType) throws Exception{
 
-		String originalContentUrl = UriHelper.getResourceUri(detail.getMsgType(), detail.getReferenceId());
-		String previewImageUrl = UriHelper.getResourcePreviewUri(detail.getMsgType(), "IMAGE", detail.getReferenceId());
+		String originalContentUrl = UriHelper.getCdnResourceUri(detail.getMsgType(), detail.getReferenceId());
+		//String originalContentUrl = UriHelper.getResourceUri(detail.getMsgType(), detail.getReferenceId());
+		String previewImageUrl = UriHelper.getCdnResourcePreviewUri(detail.getMsgType(), "IMAGE", detail.getReferenceId());
+		//String previewImageUrl = UriHelper.getResourcePreviewUri(detail.getMsgType(), "IMAGE", detail.getReferenceId());
 		
 		generatorContent(originalContentUrl, previewImageUrl, toType);
 	}

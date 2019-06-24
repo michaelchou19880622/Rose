@@ -10,11 +10,15 @@ import com.bcs.core.enums.BCS_PAGE_TYPE;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.utils.UrlUtil;
+import java.io.UnsupportedEncodingException;
 
 public class UriHelper {
 	/** Logger */
 	private static Logger logger = Logger.getLogger(UriHelper.class);
 	
+    public static final String TO_TYPE_MID = "MID";
+    public static final String TO_TYPE_PHONE = "PHONE";
+    
 	public static String bcsMPage = CoreConfigReader.getString(CONFIG_STR.M_PAGE);				// http://www.webcomm.com.tw
 
 	static String baseUrl_Https = CoreConfigReader.getString(CONFIG_STR.BaseUrlHTTPS);
@@ -636,6 +640,14 @@ public class UriHelper {
 						}
 					}
 					
+                    if(BCS_PAGE_TYPE.MGM_CAMPAIGN_PAGE.toString().equals(splits[1])){
+                        String resourceId = splits[2];
+                        // BcsPage:MgmPage:resourceId
+                        if(StringUtils.isNotBlank(resourceId)){
+                            return UriHelper.getLinkUriWithType(resourceId, MID, BCS_PAGE_TYPE.MGM_CAMPAIGN_PAGE.toString());
+                        }
+                    }
+                    
 					return UriHelper.getGoIndexUri(MID);
 				}
 			}
@@ -647,4 +659,9 @@ public class UriHelper {
 		
 		return patternUri;
 	}
+	
+    public static String getVIPNightAuth(){
+        return baseUrl_Https + "campaign/VIPNight/auth";
+    }
+    
 }

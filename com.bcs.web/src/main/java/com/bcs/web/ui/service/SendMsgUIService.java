@@ -743,15 +743,20 @@ public class SendMsgUIService {
 			String resourceType = node.get("resourceType").textValue();
 			String resourceId = node.get("resourceId").textValue();
 			if(ContentResource.RESOURCE_TYPE_IMAGE.equals(resourceType)){
-				node.put("originalContentUrl",UriHelper.getResourceUri(resourceType, resourceId));
-				node.put("previewImageUrl", UriHelper.getResourcePreviewUri(resourceType, "IMAGE", resourceId));
+				node.put("originalContentUrl",UriHelper.getCdnResourceUri(resourceType, resourceId));
+				//node.put("originalContentUrl",UriHelper.getResourceUri(resourceType, resourceId));
+				node.put("previewImageUrl", UriHelper.getCdnResourcePreviewUri(resourceType, "IMAGE", resourceId));
+				//node.put("previewImageUrl", UriHelper.getResourcePreviewUri(resourceType, "IMAGE", resourceId));
 			}
 			else if(ContentResource.RESOURCE_TYPE_VIDEO.equals(resourceType)){
-				node.put("originalContentUrl",UriHelper.getResourceUri(resourceType, resourceId));
-				node.put("previewImageUrl", UriHelper.getResourcePreviewUri(resourceType, "IMAGE", resourceId));
+				node.put("originalContentUrl",UriHelper.getCdnResourceUri(resourceType, resourceId));
+				//node.put("originalContentUrl",UriHelper.getResourceUri(resourceType, resourceId));
+				node.put("previewImageUrl", UriHelper.getCdnResourcePreviewUri(resourceType, "IMAGE", resourceId));
+				//node.put("previewImageUrl", UriHelper.getResourcePreviewUri(resourceType, "IMAGE", resourceId));
 			}
 			else if(ContentResource.RESOURCE_TYPE_AUDIO.equals(resourceType)){
-				node.put("originalContentUrl",UriHelper.getResourceUri(resourceType, resourceId));
+				node.put("originalContentUrl",UriHelper.getCdnResourceUri(resourceType, resourceId));
+				//node.put("originalContentUrl",UriHelper.getResourceUri(resourceType, resourceId));
 				node.put("AUDLEN", node.get("resourceLength").textValue());
 			}
 		}

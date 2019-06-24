@@ -75,7 +75,8 @@ public class MsgGeneratorTemplateMsg extends MsgGeneratorAbstract {
 			if(templateDetail.get(2) != null){
 				imageUrl = UriHelper.getStaticResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, templateDetail.get(2));
 				if(StringUtils.isBlank(imageUrl)){
-					imageUrl = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, templateDetail.get(2));
+					imageUrl = UriHelper.getCdnResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, templateDetail.get(2));
+					//imageUrl = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, templateDetail.get(2));
 				}
 			}
 			title = templateDetail.get(3);

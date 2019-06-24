@@ -16,6 +16,7 @@ public enum BcsPageEnum {
 	SendGroupListPage("/BCS/Views/Page2"),
 
 	MsgCreatePage("/BCS/Views/Page3"),
+    CdnMsgCreatePage("/BCS/Views/PageCdnMsg"),
 	MsgListDraftPage("/BCS/Views/Page4-1"),
 	MsgListDelayPage("/BCS/Views/Page4-2"),
 	MsgListSendedPage("/BCS/Views/Page4-3"),

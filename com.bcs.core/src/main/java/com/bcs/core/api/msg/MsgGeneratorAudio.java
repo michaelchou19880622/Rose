@@ -66,7 +66,8 @@ public class MsgGeneratorAudio extends MsgGeneratorAbstract {
 
 		String originalContentUrl = UriHelper.getStaticResourceUri(detail.getMsgType(), detail.getReferenceId());
 		if(StringUtils.isBlank(originalContentUrl)){
-			originalContentUrl = UriHelper.getResourceUri(detail.getMsgType(), detail.getReferenceId());
+			originalContentUrl = UriHelper.getCdnResourceUri(detail.getMsgType(), detail.getReferenceId());
+			//originalContentUrl = UriHelper.getResourceUri(detail.getMsgType(), detail.getReferenceId());
 		}
 		String AUDLEN = "3000";
 		

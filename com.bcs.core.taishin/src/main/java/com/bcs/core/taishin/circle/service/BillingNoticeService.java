@@ -352,7 +352,8 @@ public class BillingNoticeService {
 		case BillingNoticeContentTemplateMsg.TEMPLATE_TYPE_BUTTONS:
 			
 			// template
-			imageUrl = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, templateMsg.getTemplateImageId());
+			imageUrl = UriHelper.getCdnResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, templateMsg.getTemplateImageId());
+			//imageUrl = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, templateMsg.getTemplateImageId());
 			//imageUrl = "https://images.unsplash.com/photo-1556228720-9b1e04f13f63";
 			logger.info("imageUrl1: " + imageUrl);
 			
@@ -385,7 +386,8 @@ public class BillingNoticeService {
 			
 			// main column
 			JSONObject columnObject = new JSONObject();
-			imageUrl = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, templateMsg.getTemplateImageId());
+			imageUrl = UriHelper.getCdnResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, templateMsg.getTemplateImageId());
+			//imageUrl = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, templateMsg.getTemplateImageId());
 			//imageUrl = "https://images.unsplash.com/photo-1556228720-9b1e04f13f63";
 			logger.info("imageUrl1: " + imageUrl);
 			columnObject.put("thumbnailImageUrl",  imageUrl);
@@ -411,7 +413,8 @@ public class BillingNoticeService {
 			for(BillingNoticeContentTemplateMsg child : childs) {			
 				// column
 				columnObject = new JSONObject();
-				imageUrl = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, child.getTemplateImageId());
+				imageUrl = UriHelper.getCdnResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, child.getTemplateImageId());
+				//imageUrl = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, child.getTemplateImageId());
 				//imageUrl = "https://images.unsplash.com/photo-1556228720-9b1e04f13f63";
 				//logger.info("imageUrl1: " + imageUrl);
 				columnObject.put("thumbnailImageUrl",  imageUrl);

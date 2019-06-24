@@ -1,7 +1,6 @@
 package com.bcs.core.resource;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import org.apache.commons.lang3.StringUtils;
@@ -16,45 +15,131 @@ public class UriHelper {
 	/** Logger */
 	private static Logger logger = Logger.getLogger(UriHelper.class);
 	
-	public static final String TO_TYPE_MID = "MID";
-	public static final String TO_TYPE_PHONE = "PHONE";
-	
-	public static String bcsMPage = CoreConfigReader.getString(CONFIG_STR.M_PAGE);
+	public static String bcsMPage = CoreConfigReader.getString(CONFIG_STR.M_PAGE);				// http://www.webcomm.com.tw
 
 	static String baseUrl_Https = CoreConfigReader.getString(CONFIG_STR.BaseUrlHTTPS);
-//	static String baseUrl_Http = CoreConfigReader.getString(CONFIG_STR.BaseUrlHTTP);
+	static String cdnUrl_Https = CoreConfigReader.getString(CONFIG_STR.CdnUrlHTTPS);
+	static String baseUrl_Http = CoreConfigReader.getString(CONFIG_STR.BaseUrlHTTP);
 	
-	static String pageBcs = CoreConfigReader.getString(CONFIG_STR.PageBCS);
-	static String resourceBCS = CoreConfigReader.getString(CONFIG_STR.ResourceBCS);
+	static String pageBcs = CoreConfigReader.getString(CONFIG_STR.PageBCS);						// bcs/
+	static String resourceBCS = CoreConfigReader.getString(CONFIG_STR.ResourceBCS);				// BCS/
 	
-	static String pageMobile = CoreConfigReader.getString(CONFIG_STR.PageMobile);
-	static String resourceMobile = CoreConfigReader.getString(CONFIG_STR.ResourceMobile);
+	static String pageMobile = CoreConfigReader.getString(CONFIG_STR.PageMobile);				// m/
+	static String resourceMobile = CoreConfigReader.getString(CONFIG_STR.ResourceMobile);		// Mobile/
 	
-	static String resourceApi = CoreConfigReader.getString("rest.api.path.resource");
-	static String resourceLink = CoreConfigReader.getString("rest.api.path.link.resource");
+	static String resourceApi = CoreConfigReader.getString("rest.api.path.resource");			// getResource/ v
+	static String resourceLink = CoreConfigReader.getString("rest.api.path.link.resource");		// getLink/
 
-	static String tracingUrl = CoreConfigReader.getString("rest.api.path.tracing.link");
-	static String oauthUrl = CoreConfigReader.getString("rest.api.path.oauth");
+	static String tracingUrl = CoreConfigReader.getString("rest.api.path.tracing.link");		// l/
+	static String oauthUrl = CoreConfigReader.getString("rest.api.path.oauth");					// l/validate
 	
-	static String previewImage = CoreConfigReader.getString("rest.api.path.bcs.preview.image");
-	static String bcsLogo = CoreConfigReader.getString("rest.api.path.bcs.logo");
+	static String previewImage = CoreConfigReader.getString("rest.api.path.bcs.preview.image"); // images/noImg_video.png  v
+	static String bcsLogo = CoreConfigReader.getString("rest.api.path.bcs.logo");			    // images/logo_bot.jpg v
 
-	static String staticSrcUrl = CoreConfigReader.getString("bcs.base.url.static.src");
+	static String staticSrcUrl = CoreConfigReader.getString("bcs.base.url.static.src");			// null
 
+	// Rich Menu
+	static String msgTracingUrl = CoreConfigReader.getString("rest.api.path.tracing.msg.link");
+	static String mlOauthUrl = CoreConfigReader.getString("rest.api.path.msg.link.oauth");
+	
+	public static String getMsgTracingUrl(Long tracingId){
+
+		return baseUrl_Https + msgTracingUrl + tracingId;
+	}
+	
+	public static String getMlOauthUrl(){
+
+		return baseUrl_Https + mlOauthUrl;
+	}
+	
+    /**
+     * Link Page Pattern Create
+     * @param id
+     * @return
+     */
+    public static String getMgmPagePattern(String campaignId){
+
+        return BCS_PAGE_TYPE.PATTERN_START  + ":"+ BCS_PAGE_TYPE.MGM_CAMPAIGN_PAGE + ":" + campaignId;
+    }
+	public static String getMgmClickOauth(){
+        return baseUrl_Https + "c/" + "validate";
+    }
+    public static String getMgmClickTracingUrl(){
+        return baseUrl_Https + "c/";
+    }
+    public static String getMgmOauth(){
+        return baseUrl_Https + "c/m/" + "validate";
+    }
+    public static String getMgmTracingUrl(){
+        return baseUrl_Https + "c/m/";
+    }
+    public static String getMgmPage(){
+        return baseUrl_Https + pageMobile + "mgmPage";
+    }
+    public static String getGoMgmPage(String campaignId){
+        return baseUrl_Https + pageMobile + "goMgmPage?campaignId=" + campaignId;
+    }
+    public static String getMgmRedirectPage(String originalRedirectUrl, String originalMsg) {
+        StringBuffer sb = new StringBuffer(baseUrl_Https + pageMobile + "mgmRedirectPage?");
+        
+        try {
+            if(StringUtils.isNotBlank(originalRedirectUrl)) {
+                sb.append("replaceLink="+ URLEncoder.encode(originalRedirectUrl, "UTF-8").replace("+", "%20") +"&");
+            }
+            
+            if(StringUtils.isNotBlank(originalMsg)) {
+                sb.append("msg="+ URLEncoder.encode(originalMsg, "UTF-8").replace("+", "%20"));
+            }
+            
+        }catch(Exception e) {}
+        
+        return sb.toString();
+    }
+    
+    // ---- Resource ----
+    // Using CDN
+    
+	public static String getCdnResourceUri(String type, String id){
+		return cdnUrl_Https + pageBcs + resourceApi + type + "/" + id;
+	}
+	public static String getCdnResourceUri(String type, String id, boolean isSSL){
+		return getResourceUri(type, id, true);
+	}
+	public static String getCdnResourcePreviewUri(String type, String preview, String id){
+		return cdnUrl_Https + pageBcs + resourceApi + type + "/" + preview + "/" + id;
+	}
+	public static String getCdnResourcePreviewImageUri(){
+		return cdnUrl_Https + resourceBCS + previewImage;
+	}
+	public static String getCdnResourceBcsLogoUri(){	
+		return cdnUrl_Https + resourceMobile + bcsLogo;
+	}
+	
+	// Original Resource
 	public static String getResourceUri(String type, String id){
 		return getResourceUri(type, id, true);
 	}
 	public static String getResourceUri(String type, String id, boolean isSSL){
-
 		if(isSSL){
 			return baseUrl_Https + pageBcs + resourceApi + type + "/" + id;
 		}
 		else{
 			return baseUrl_Https + pageBcs + resourceApi + type + "/" + id;
 		}
+	}	
+	public static String getResourcePreviewUri(String type, String preview, String id){
+		return baseUrl_Https + pageBcs + resourceApi + type + "/" + preview + "/" + id;
+	}
+	public static String getResourcePreviewImageUri(){
+		return baseUrl_Https + resourceBCS + previewImage;
+	}
+	public static String getResourceBcsLogoUri(){	
+		return baseUrl_Https + resourceMobile + bcsLogo;
 	}
 	
-	public static String getStaticResourceUri(String type, String id){
+	// ------------------------------ //
+
+	public static String getStaticResourceUri(String type, String id){ // Not Using
 		
 		boolean useStaticSrc = CoreConfigReader.getBoolean(CONFIG_STR.SRC_USE_STATIC, true);
 
@@ -140,22 +225,7 @@ public class UriHelper {
 
 		return baseUrl_Https + oauthUrl;
 	}
-	
-	public static String getResourcePreviewUri(String type, String preview, String id){
-		
-		return baseUrl_Https + pageBcs + resourceApi + type + "/" + preview + "/" + id;
-	}
-	
-	public static String getResourcePreviewImageUri(){
-		
-		return baseUrl_Https + resourceBCS + previewImage;
-	}
-	
-	public static String getResourceBcsLogoUri(){
-		
-		return baseUrl_Https + resourceMobile + bcsLogo;
-	}
-	
+
 	public static String getIndexUri(){
 
 		return baseUrl_Https + pageMobile + "index";
@@ -298,55 +368,6 @@ public class UriHelper {
 	public static String getScratchCardValidateUri() {
 	    return baseUrl_Https + pageMobile + "Game/ScratchCard/validate";
 	}
-	
-	public static String getVIPNightAuth(){
-        return baseUrl_Https + "campaign/VIPNight/auth";
-    }
-	
-	public static String getMgmClickOauth(){
-        return baseUrl_Https + "c/" + "validate";
-    }
-    public static String getMgmClickTracingUrl(){
-        return baseUrl_Https + "c/";
-    }
-    public static String getMgmOauth(){
-        return baseUrl_Https + "c/m/" + "validate";
-    }
-    public static String getMgmTracingUrl(){
-        return baseUrl_Https + "c/m/";
-    }
-    public static String getMgmPage(){
-        return baseUrl_Https + pageMobile + "mgmPage";
-    }
-    public static String getGoMgmPage(String campaignId){
-        return baseUrl_Https + pageMobile + "goMgmPage?campaignId=" + campaignId;
-    }
-    public static String getMgmRedirectPage(String originalRedirectUrl, String originalMsg) {
-        StringBuffer sb = new StringBuffer(baseUrl_Https + pageMobile + "mgmRedirectPage?");
-        
-        try {
-            if(StringUtils.isNotBlank(originalRedirectUrl)) {
-                sb.append("replaceLink="+ URLEncoder.encode(originalRedirectUrl, "UTF-8").replace("+", "%20") +"&");
-            }
-            
-            if(StringUtils.isNotBlank(originalMsg)) {
-                sb.append("msg="+ URLEncoder.encode(originalMsg, "UTF-8").replace("+", "%20"));
-            }
-            
-        }catch(Exception e) {}
-        
-        return sb.toString();
-    }
-    
-    /**
-     * Link Page Pattern Create
-     * @param id
-     * @return
-     */
-    public static String getMgmPagePattern(String campaignId){
-
-        return BCS_PAGE_TYPE.PATTERN_START  + ":"+ BCS_PAGE_TYPE.MGM_CAMPAIGN_PAGE + ":" + campaignId;
-    }
 //	
 //	public static String getUserDoBindingFailPageUri(){
 //		return baseUrl_Https + pageMobile + "userDoBindingFailPage";
@@ -613,14 +634,6 @@ public class UriHelper {
 								return UriHelper.getLinkUri(resourceId, MID);
 							}
 						}
-					}
-					
-					if(BCS_PAGE_TYPE.MGM_CAMPAIGN_PAGE.toString().equals(splits[1])){
-                        String resourceId = splits[2];
-                        // BcsPage:MgmPage:resourceId
-                        if(StringUtils.isNotBlank(resourceId)){
-                            return UriHelper.getLinkUriWithType(resourceId, MID, BCS_PAGE_TYPE.MGM_CAMPAIGN_PAGE.toString());
-                        }
 					}
 					
 					return UriHelper.getGoIndexUri(MID);

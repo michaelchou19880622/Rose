@@ -68,9 +68,11 @@ public class MsgGeneratorImage extends MsgGeneratorAbstract {
 
 		String originalContentUrl = UriHelper.getStaticResourceUri(detail.getMsgType(), detail.getReferenceId());
 		if(StringUtils.isBlank(originalContentUrl)){
-			originalContentUrl = UriHelper.getResourceUri(detail.getMsgType(), detail.getReferenceId());
+			originalContentUrl = UriHelper.getCdnResourceUri(detail.getMsgType(), detail.getReferenceId());
+			//originalContentUrl = UriHelper.getResourceUri(detail.getMsgType(), detail.getReferenceId());
 		}
-		String previewImageUrl = UriHelper.getResourcePreviewUri(detail.getMsgType(), "IMAGE", detail.getReferenceId());
+		String previewImageUrl = UriHelper.getCdnResourcePreviewUri(detail.getMsgType(), "IMAGE", detail.getReferenceId());
+		//String previewImageUrl = UriHelper.getResourcePreviewUri(detail.getMsgType(), "IMAGE", detail.getReferenceId());
 		
 		generatorContent(originalContentUrl, previewImageUrl, toType);
 	}

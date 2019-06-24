@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -569,6 +570,22 @@ public class LoadFtbPnpDataTask {
 		return mains;
 	}
 
+	private String getSendType(String orderTime) throws ParseException {
+		String sendType = AbstractPnpMainEntity.SEND_TYPE_IMMEDIATE;
+		if(StringUtils.isNotBlank(orderTime)){
+			Date nowDate = new Date();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+			Date ot = sdf.parse(orderTime);
+			if(ot.before(nowDate)) {//排程時間小於現在時間則視為立即發送
+				sendType = AbstractPnpMainEntity.SEND_TYPE_SCHEDULE_TIME_EXPIRED;
+			}else {
+				sendType = AbstractPnpMainEntity.SEND_TYPE_DELAY;
+			}
+		}
+		
+		return sendType;
+	}
+	
 	private List<Object> praseMitakeFiles(String origFileName, List<String> fileContents) throws Exception {
 		
 		List<Object> mains = new ArrayList<Object>();
@@ -589,8 +606,7 @@ public class LoadFtbPnpDataTask {
 			pnpMainMitake.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
 			pnpMainMitake.setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_MITAKE, true, false));
 			pnpMainMitake.setProcStage("BC");
-			String sendType = StringUtils.isBlank(orderTime) ? AbstractPnpMainEntity.SEND_TYPE_IMMEDIATE
-					: AbstractPnpMainEntity.SEND_TYPE_DELAY;
+			String sendType = getSendType(orderTime);
 			pnpMainMitake.setSendType(sendType);
 			// 原生欄位
 			pnpMainMitake.setGroupIDSource(groupID);
@@ -634,8 +650,7 @@ public class LoadFtbPnpDataTask {
 			pnpMainEvery8d.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
 			pnpMainEvery8d.setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_EVERY8D, true, false));
 			pnpMainEvery8d.setProcStage("BC");
-			String sendType = StringUtils.isBlank(OrderTime) ? AbstractPnpMainEntity.SEND_TYPE_IMMEDIATE
-					: AbstractPnpMainEntity.SEND_TYPE_DELAY;
+			String sendType = getSendType(OrderTime);
 			pnpMainEvery8d.setSendType(sendType);
 			// 原生欄位
 			pnpMainEvery8d.setSubject(Subject);
@@ -679,8 +694,7 @@ public class LoadFtbPnpDataTask {
 			pnpMainUnica.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
 			pnpMainUnica.setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_UNICA, true, false));
 			pnpMainUnica.setProcStage("BC");
-			String sendType = StringUtils.isBlank(OrderTime) ? AbstractPnpMainEntity.SEND_TYPE_IMMEDIATE
-					: AbstractPnpMainEntity.SEND_TYPE_DELAY;
+			String sendType = getSendType(OrderTime);
 			pnpMainUnica.setSendType(sendType);
 			// 原生欄位
 			pnpMainUnica.setSubject(Subject);

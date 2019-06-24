@@ -12,7 +12,8 @@ public abstract class AbstractPnpMainEntity implements Serializable, Cloneable  
 
 	public static final String SEND_TYPE_IMMEDIATE = "IMMEDIATE";
 	public static final String SEND_TYPE_DELAY = "DELAY";
-	public static final String SEND_TYPE_SCHEDULE  = "SCHEDULE";
+	//排程時間小於現在時間則視為立即發送，為了好追查，多設一個type，SCHEDULE_EXPIRED，針對排程時間過期使用
+	public static final String SEND_TYPE_SCHEDULE_TIME_EXPIRED  = "SCHEDULE_EXPIRED";
 	
 	//未發送 ：已存進DB未開始發送
 	public static final String MSG_SENDER_STATUS_PROCESS = "PROCESS";

@@ -35,7 +35,9 @@ public class PnpPNPMessageActor extends UntypedActor {
 		PnpService pnpService = ApplicationContextProvider.getApplicationContext().getBean(PnpService.class);
 		if (pnpMain.getSendType().equals(AbstractPnpMainEntity.SEND_TYPE_IMMEDIATE)) {	// 立即發送
 			pnpService.pushPNPMessage(pnpMain, this.getSender(), this.getSelf());
-		} else if (pnpMain.getSendType().equals(AbstractPnpMainEntity.SEND_TYPE_DELAY)) {	// 預約發送
+		}else if(pnpMain.getSendType().equals(AbstractPnpMainEntity.SEND_TYPE_SCHEDULE_TIME_EXPIRED)) {//排程時間小於現在時間則視為立即發送
+			pnpService.pushPNPMessage(pnpMain, this.getSender(), this.getSelf());
+		}else if (pnpMain.getSendType().equals(AbstractPnpMainEntity.SEND_TYPE_DELAY)) {	// 預約發送
 		    Date scheduleTime = null;
 		    try {
 				scheduleTime = dataFormat.parse(pnpMain.getScheduleTime());
@@ -44,7 +46,7 @@ public class PnpPNPMessageActor extends UntypedActor {
 				logger.error("ScheduleTime format Error :" + pnpMain.getScheduleTime());
 			}
 		    if (scheduleTime != null && Calendar.getInstance().getTime().after(scheduleTime)) {
-		    	// 排程時間因為宵禁已過 立刻重發
+		    	// 排程時間因為已過現在時間， 立刻發送
 		    	pnpService.pushPNPMessage(pnpMain, this.getSender(), this.getSelf());
 		    }else {
 		    	PnpTaskService pnpTaskService = ApplicationContextProvider.getApplicationContext().getBean(PnpTaskService.class);

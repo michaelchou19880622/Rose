@@ -57,7 +57,7 @@ public class PnpMain extends AbstractBcsEntity {
 	private Long groupId;
 	
 	//DELAY :預約發送；IMMEDIATE：立即發送
-	@Column(name = "SEND_TYPE", columnDefinition="nvarchar(10)")
+	@Column(name = "SEND_TYPE", columnDefinition="nvarchar(20)")
 	private String sendType;
 	
 	@Column(name = "TOTAL_COUNT")

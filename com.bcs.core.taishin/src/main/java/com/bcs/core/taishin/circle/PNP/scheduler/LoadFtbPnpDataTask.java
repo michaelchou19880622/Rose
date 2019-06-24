@@ -421,6 +421,33 @@ public class LoadFtbPnpDataTask {
 
 		return details;
 	}
+	
+	private List<? super PnpDetail> parsePnpDetailMing(String fileContent) throws Exception {
+		List<? super PnpDetail> details = new ArrayList();
+		PnpDetailMing detail = new PnpDetailMing();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		// 明宣沒有header所以從0開始
+		if (StringUtils.isNotBlank(fileContent)) {
+			String[] detailData = fileContent.split("\\;;", 9);
+			if (detailData.length == 9) {
+				detail.setSN(detailData[0]);// SN 流水號
+				detail.setPhone(detailData[1]);// 收訊人手機號碼，長度為20碼以內(格式為0933******或+886933******)
+				detail.setPhoneHash(toSHA256(detailData[1]));
+				detail.setMsg(detailData[2]);// Content 簡訊訊息內容
+				detail.setDetailScheduleTime(detailData[3]);// 預約時間
+				detail.setAccount1(detailData[4]);// 批次帳號1
+				detail.setAccount2(detailData[5]);// 批次帳號2
+				detail.setVariable1(detailData[6]);// Variable1 擴充欄位1(可為空值)
+				detail.setVariable2(detailData[7]);// Variable2 擴充欄位2(可為空值)
+				detail.setKeepSecond(detailData[8]);// 有效秒數
+				details.add(detail);
+			} else {
+				logger.error("parsePnpDetailMing error Data:" + detailData);
+			}
+		}
+		
+		return details;
+	}
 
 	private List<? super PnpDetail> parsePnpDetailMitake(List<String> fileContents) throws Exception {
 		List<? super PnpDetail> details = new ArrayList();
@@ -526,7 +553,7 @@ public class LoadFtbPnpDataTask {
 		List<Object> mains = new ArrayList<Object>();
 
 		if (!fileContents.isEmpty()) {
-			// 明宣沒有header
+			// 明宣沒有header所以一筆content等於一筆main+一筆detail
 			// String header = fileContents.get(0);
 			// String[] splitHeaderData = header.split("\\&",7);
 			// String Subject = splitHeaderData[0];
@@ -536,19 +563,36 @@ public class LoadFtbPnpDataTask {
 			// String ExprieTime = splitHeaderData[4];
 			// String MsgType = splitHeaderData[5];
 			// String BatchID = splitHeaderData[6];//簡訊平台保留欄位，請勿填入資料
-			PnpMainMing pnpMainMing = new PnpMainMing();
-			// pnpMainEvery8d.setGroupId(new Long(mains.size() + 1)); 分堆用
-			pnpMainMing.setOrigFileName(origFileName);
-			pnpMainMing.setSource(AbstractPnpMainEntity.SOURCE_MING);
-			pnpMainMing.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
-			pnpMainMing.setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_MING, true, false));
-			pnpMainMing.setProcStage("BC");
+			for(String content : fileContents) {
+				PnpMainMing pnpMainMing = new PnpMainMing();
+				pnpMainMing.setOrigFileName(origFileName);
+				pnpMainMing.setSource(AbstractPnpMainEntity.SOURCE_MING);
+				pnpMainMing.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
+				pnpMainMing.setProcFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_MING, true, false));
+				pnpMainMing.setProcStage("BC");
+				String[] detailData = content.split("\\;;", 9);
+				String orderTime = detailData[3];
+				String sendType = AbstractPnpMainEntity.SEND_TYPE_IMMEDIATE;
+				if(StringUtils.isNotBlank(orderTime)){
+					Date nowDate = new Date();
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					Date ot = sdf.parse(orderTime);
+					if(ot.before(nowDate)) {//排程時間小於現在時間則視為立即發送
+						sendType = AbstractPnpMainEntity.SEND_TYPE_SCHEDULE_TIME_EXPIRED;
+					}else {
+						sendType = AbstractPnpMainEntity.SEND_TYPE_DELAY;
+					}
+				}
+				
+				pnpMainMing.setSendType(sendType);
+				pnpMainMing.setScheduleTime(orderTime);
+				pnpMainMing.setPnpDetails(parsePnpDetailMing(content));
+				mains.add(pnpMainMing);
+			}
 			// 明宣預約時間散在各detail中
 			// String sendType = StringUtils.isBlank(OrderTime) ?
 			// AbstractPnpMainEntity.SEND_TYPE_IMMEDIATE :
 			// AbstractPnpMainEntity.SEND_TYPE_DELAY;
-			String sendType = AbstractPnpMainEntity.SEND_TYPE_IMMEDIATE;//TODO 
-			pnpMainMing.setSendType(sendType);
 			// //原生欄位
 			// pnpMainMing.setSubject(Subject);
 			// pnpMainMing.setUserID(UserID);
@@ -562,13 +606,12 @@ public class LoadFtbPnpDataTask {
 			// pnpMainMing.setScheduleTime(OrderTime);
 			// }
 
-			pnpMainMing.setPnpDetails(parsePnpDetailMing(fileContents));
-			mains.add(pnpMainMing);
 		} else {
 			logger.error("praseMingFiles fileContents.isEmpty");
 		}
 		return mains;
 	}
+	
 
 	private String getSendType(String orderTime) throws ParseException {
 		String sendType = AbstractPnpMainEntity.SEND_TYPE_IMMEDIATE;

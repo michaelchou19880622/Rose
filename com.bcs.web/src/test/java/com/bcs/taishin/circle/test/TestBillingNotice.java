@@ -423,17 +423,35 @@ public class TestBillingNotice {
 ////	}
 //	
 	
+//	public static void main(String[] args) throws ParseException {
+//		String orderTime = "20190624144032";
+//		Date date = new Date();
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+//		if(orderTime.compareTo(sdf.format(date))<0){
+//			
+//		}
+//		Date a  = sdf.parse(orderTime);
+//		
+//		System.out.println(sdf.format(date));
+//		System.out.println(a.before(date));
+//		
+//	}
+	
 	public static void main(String[] args) throws ParseException {
-		String orderTime = "20190624144032";
-		Date date = new Date();
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-		if(orderTime.compareTo(sdf.format(date))<0){
-			
-		}
-		Date a  = sdf.parse(orderTime);
+		String fileName = "O_PRMSMS_250102OCSPENDING_20190509171101000.txt";
+
+		String[] fileNameSP = fileName.split("_");
+		String accountClass = fileNameSP[0];
+		String sourceSystem = fileNameSP[1];
+		String account = fileNameSP[2];
+		String comeTime = fileNameSP[3];
 		
-		System.out.println(sdf.format(date));
-		System.out.println(a.before(date));
+		
+		
+		System.out.println(accountClass);
+		System.out.println(sourceSystem);
+		System.out.println(account);
+		System.out.println(comeTime);
 		
 	}
 	

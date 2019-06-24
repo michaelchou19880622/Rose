@@ -30,8 +30,6 @@ import com.tsb.util.TrendPwMgmt;
 public class PNPFtpService {
 	/** Logger */
 	private static Logger logger = Logger.getLogger(PNPFtpService.class);
-//	private static String channelIds = CoreConfigReader.getString(CONFIG_STR.BN_FTP_CHANNELIDS, true);
-//	private static String downloadSavePath = CoreConfigReader.getString(CONFIG_STR.BN_FTP_DOWNLOAD_SAVEFILEPATH, true);
 	private static String fileExtension = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_FILE_EXTENSION, true, false);
 	private static boolean is64Bit = CoreConfigReader.getBoolean(CONFIG_STR.PNP_FTP_IS64BIT, true, false);
 	private Map<String,PNPFtpSetting> ftpSettings = new HashMap<>();
@@ -45,86 +43,11 @@ public class PNPFtpService {
 	 * Initial Method
 	 */
 	static {
-//		try {
-//			if (!CoreConfigReader.isPNPFtpTypeDevelop()) { // 正式環境時使用
-//				if (is64Bit) {
-//					System.loadLibrary("PwDllJV64");
-//				} else {
-//					System.loadLibrary("PwDllJV");
-//				}
-//				JNI_LIBRARY_STATUS = true;
-//			}
-//		} catch (SecurityException lSE) {
-//			JNI_LIBRARY_STATUS = false;
-//			logger.error("SecurityException:" + lSE.getMessage());
-//		} catch (UnsatisfiedLinkError lUE) {
-//			JNI_LIBRARY_STATUS = false;
-//			logger.error("UnsatisfiedLinkError:" + lUE.getMessage());
-//		} catch (NullPointerException lNPE) {
-//			JNI_LIBRARY_STATUS = false;
-//			logger.error("NullPointerException:" + lNPE.getMessage());
-//		} catch (Exception lEXP) {
-//			JNI_LIBRARY_STATUS = false;
-//			logger.error("Exception:" + lEXP.getMessage());
-//		}
-
 		logger.info("JNI_LIBRARY_STATUS:" + JNI_LIBRARY_STATUS);
 	}
 
 	public PNPFtpService() {
-		
 		logger.info("initFtpSettings..."+ (initFtpSettings() ? "OK" : "Fail"));
-//		logger.info("BN_FTP_CHANNELIDS:" + channelIds);
-//		if (StringUtils.isNotBlank(channelIds)) {
-//			for (String channel : channelIds.split(",")) {
-//				if (StringUtils.isNotBlank(channel)) {
-//					String host = CoreConfigReader.getString(channel, CONFIG_STR.BN_FTP_HOST.toString(), true);
-//					int port = CoreConfigReader.getInteger(channel, CONFIG_STR.BN_FTP_PORT.toString(), true);
-//					int serverHostNamePort = CoreConfigReader.getInteger(channel,
-//							CONFIG_STR.BN_FTP_SERVER_HOSTNAME_PORT.toString(), true);
-//					String serverHostName = CoreConfigReader.getString(channel,
-//							CONFIG_STR.BN_FTP_SERVER_HOSTNAME.toString(), true);
-//					String APPCode = CoreConfigReader.getString(channel, CONFIG_STR.BN_FTP_APP_CODE.toString(), true);
-//					String RESCode = CoreConfigReader.getString(channel, CONFIG_STR.BN_FTP_RES_CODE.toString(), true);
-//					String account = CoreConfigReader.getString(channel, CONFIG_STR.BN_FTP_ACCOUNT.toString(), true);
-//					String password = CoreConfigReader.getString(channel, CONFIG_STR.BN_FTP_PASSWORD.toString(), true);
-//					String path = CoreConfigReader.getString(channel, CONFIG_STR.BN_FTP_PATH.toString(), true);
-//					String fileEncoding = CoreConfigReader.getString(channel,
-//							CONFIG_STR.BN_FTP_FILE_ENCODING.toString(), true);
-//					String protocol = CoreConfigReader.getString(channel, CONFIG_STR.BN_FTP_PROTOCOL.toString(), true);
-//					if (StringUtils.isNotBlank(host)) {
-//						PNPFtpSetting ftpSetting = new PNPFtpSetting();
-//						ftpSetting.setProtocol(protocol);
-//						ftpSetting.setChannelId(channel);
-//						ftpSetting.setPath(path);
-//						ftpSetting.setAccount(account);
-//						ftpSetting.setPassword(password);
-//						ftpSetting.setAPPCode(APPCode);
-//						ftpSetting.setRESCode(RESCode);
-//						ftpSetting.setHost(host);
-//						ftpSetting.setPort(port);
-//						ftpSetting.setFileEncoding(fileEncoding);
-//						ftpSetting.setServerHostName(serverHostName);
-//						ftpSetting.setServerHostNamePort(serverHostNamePort);
-//						if (!CoreConfigReader.isPNPFtpTypeDevelop()) { // 正式環境時使用
-//							if (!validateFtpHostData(ftpSetting)) {
-//								throw new RuntimeException("FTP setting error!");
-//							}
-//						} else {
-//							if (!validateDevFtpHostData(ftpSetting)) {
-//								throw new RuntimeException("FTP setting error!");
-//							}
-//						}
-//
-//						ftpSettings.add(ftpSetting);
-//						// 正式環境時使用
-//						if (!CoreConfigReader.isPNPFtpTypeDevelop()) {
-//							loadFtp(ftpSetting);
-//						}
-//					}
-//				}
-//			}
-//		}
 	}
 	
 	public boolean initFtpSettings() {
@@ -225,58 +148,6 @@ public class PNPFtpService {
 			logger.error("TrendPwMgmt exception:" + e.getMessage());
 			throw new RuntimeException(e);
 		}
-	}
-
-	/**
-	 * 檢查ftpserver setting
-	 * 
-	 * @return
-	 */
-	private boolean validateDevFtpHostData(PNPFtpSetting setting) {
-		if (setting.getPort() <= 0) {
-			logger.error("ftp port not setting");
-			return false;
-		}
-
-		if (StringUtils.isBlank(setting.getHost())) {
-			logger.error("ftp setting error  host[" + setting.getHost() + "] ");
-			return false;
-		}
-		if (StringUtils.isBlank(setting.getAccount()) || StringUtils.isBlank(setting.getPassword())) {
-			logger.error(
-					"ftp setting error  account[" + setting.getAccount() + "] password[" + setting.getPassword() + "]");
-			return false;
-		}
-
-		if (StringUtils.isBlank(setting.getDownloadSavePath()) || StringUtils.isBlank(fileExtension)) {
-			logger.error("ftp setting error  downloadSavePath[" + setting.getDownloadSavePath() + "] fileExtension[" + fileExtension
-					+ "]");
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * 檢查ftpserver setting
-	 * 
-	 * @return
-	 */
-	private boolean validateFtpHostData(PNPFtpSetting setting) {
-//		if (setting.getPort() <= 0) {
-//			logger.error("ftp port not setting");
-//			return false;
-//		}
-//		if (StringUtils.isBlank(setting.getHost())) {
-//			logger.error("ftp setting error  host[" + setting.getHost() + "] ");
-//			return false;
-//		}
-//
-//		if (StringUtils.isBlank(downloadSavePath) || StringUtils.isBlank(fileExtension)) {
-//			logger.error("ftp setting error  downloadSavePath[" + downloadSavePath + "] fileExtension[" + fileExtension
-//					+ "]");
-//			return false;
-//		}
-		return true;
 	}
 
 	/**

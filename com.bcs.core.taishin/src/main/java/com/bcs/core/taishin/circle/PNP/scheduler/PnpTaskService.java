@@ -35,17 +35,17 @@ public class PnpTaskService {
 		if (scheduleTime == null) {
 			return;
 		}
-		SchedulerFactory schedulerFactory = new StdSchedulerFactory();
-	    Scheduler scheduler = schedulerFactory.getScheduler();
-	    
-	    JobDetail jobDetail = newJob(PnpTask.class).withIdentity("PNPMain", "PNP").build();
-	    Trigger trigger = newTrigger().withIdentity("PNPMain", "PNP").startAt(scheduleTime).build();
-	    
-	    scheduler.getContext().put("PnpMain", pnpMain);
-	    
-	    scheduler.scheduleJob(jobDetail, trigger);
-	    pnpService.updateMainAndDetailStatus(pnpMain, AbstractPnpMainEntity.SEND_TYPE_SCHEDULE);
-	    scheduler.start();
-	    
+//		SchedulerFactory schedulerFactory = new StdSchedulerFactory();
+//	    Scheduler scheduler = schedulerFactory.getScheduler();
+//	    
+//	    JobDetail jobDetail = newJob(PnpTask.class).withIdentity("PNPMain", "PNP").build();
+//	    Trigger trigger = newTrigger().withIdentity("PNPMain", "PNP").startAt(scheduleTime).build();
+//	    
+//	    scheduler.getContext().put("PnpMain", pnpMain);
+//	    
+//	    scheduler.scheduleJob(jobDetail, trigger);
+//	    pnpService.updateMainAndDetailStatus(pnpMain, AbstractPnpMainEntity.SEND_TYPE_SCHEDULE);
+//	    scheduler.start();
+//	    
 	}
 }

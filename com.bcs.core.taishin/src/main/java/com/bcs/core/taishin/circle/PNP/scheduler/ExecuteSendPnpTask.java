@@ -10,41 +10,32 @@ import com.bcs.core.resource.CoreConfigReader;
 
 public class ExecuteSendPnpTask {
 
-    private static final int pageSize = 9000;
-    private static final int sendSize = 150;
-    private static final int sleepCount = 10;
-    
-	/** Logger */
-	private static Logger logger = Logger.getLogger(ExecuteSendPnpTask.class);
-
-	@Autowired
-	private LineUserService lineUserService;
-	
+   
 	
 	public void executeSendTask() throws Exception{
-		/**
-		 * #通路參數 : 寄BC 失敗直接結束 = 1
-		 * #通路參數 : 寄BC 失敗轉發SMS後結束 =2
-		 * #通路參數 : 寄BC 失敗後寄PNP失敗後寄SMS結束 =3
-		 */
-		
-		String sendPath = CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_MING.toString(), true, false);
-		switch (sendPath) {
-		case "1"://1=BC>PNP>SMS
-			
-			break;
-        case "2"://2=BC>>SMS
-			
-			break;
-        case "3"://3=BC
-	
-        	break;
-
-		default:
-			break;
-		}
-		
-		
+//		/**
+//		 * #通路參數 : 寄BC 失敗直接結束 = 1
+//		 * #通路參數 : 寄BC 失敗轉發SMS後結束 =2
+//		 * #通路參數 : 寄BC 失敗後寄PNP失敗後寄SMS結束 =3
+//		 */
+//		
+//		String sendPath = CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW_MING.toString(), true, false);
+//		switch (sendPath) {
+//		case "1"://1=BC>PNP>SMS
+//			
+//			break;
+//        case "2"://2=BC>>SMS
+//			
+//			break;
+//        case "3"://3=BC
+//	
+//        	break;
+//
+//		default:
+//			break;
+//		}
+//		
+//		
 	}
 	
 	public void executeSendPnp(Long pnpMainId) throws Exception{

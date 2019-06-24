@@ -25,10 +25,10 @@ public class SendPnpJob extends QuartzJobBean {
 	@Override
 	protected void executeInternal(JobExecutionContext context)
 			throws JobExecutionException {
-		try {
-		    sendPnpTask.executeSendPnp(pnpMainId);
-		} catch (Throwable e) {
-			logger.error(ErrorRecord.recordError(e));
-		}
+//		try {
+//		    sendPnpTask.executeSendPnp(pnpMainId);
+//		} catch (Throwable e) {
+//			logger.error(ErrorRecord.recordError(e));
+//		}
 	}
 }

@@ -25,40 +25,46 @@ public class PNPMaintainAccountModel extends AbstractBcsEntity{
 	@Column(name = "ACCOUNT_TYPE", columnDefinition="nvarchar(50)") // Normal/Unica
 	private String accountType;
 	
-	@Column(name = "ACCOUNT", columnDefinition="nvarchar(50)")
+	@Column(name = "ACCOUNT", columnDefinition="nvarchar(50)") //帳號
 	private String account;
 
-	@Column(name = "ACCOUNT_ATTRIBUTE", columnDefinition="nvarchar(50)")
+	@Column(name = "ACCOUNT_ATTRIBUTE", columnDefinition="nvarchar(50)") //帳號屬性
 	private String accountAttribute;
 	
-	@Column(name = "ACCOUNT_CLASS", columnDefinition="nvarchar(50)")
+	@Column(name = "ACCOUNT_CLASS", columnDefinition="nvarchar(50)")  //帳號類別
 	private String accountClass;
 	
-	@Column(name = "SOURCE_SYSTEM", columnDefinition="nvarchar(50)")
+	@Column(name = "SOURCE_SYSTEM", columnDefinition="nvarchar(50)")  //前方來源系統
 	private String sourceSystem;
 
-	@Column(name = "DEPARTMENT_ID", columnDefinition="nvarchar(50)")
+	@Column(name = "DEPARTMENT_ID", columnDefinition="nvarchar(50)")  //單位代號
 	private String departmentId;
 	
-	@Column(name = "EMPLOYEE_ID", columnDefinition="nvarchar(50)")
+	@Column(name = "EMPLOYEE_ID", columnDefinition="nvarchar(50)")  //員工編號
 	private String employeeId;
 
-	@Column(name = "DEPARTMENT_NAME", columnDefinition="nvarchar(50)")
+	@Column(name = "DIVISION_NAME", columnDefinition="nvarchar(50)")	// 處
+	private String divisionName;
+	
+	@Column(name = "DEPARTMENT_NAME", columnDefinition="nvarchar(50)")  // 部
 	private String departmentName;
-
+	
+	@Column(name = "GROUP_NAME", columnDefinition="nvarchar(50)")		// 組
+	private String groupName;
+	
 	@Column(name = "PCC_CODE", columnDefinition="nvarchar(50)")
 	private String pccCode;
 
-	@Column(name = "PATHWAY", columnDefinition="nvarchar(50)")
+	@Column(name = "PATHWAY", columnDefinition="nvarchar(50)")   //通路流
 	private String pathway;
 	
-	@Column(name = "TEMPLATE", columnDefinition="nvarchar(50)")
+	@Column(name = "TEMPLATE", columnDefinition="nvarchar(50)")  //樣板ID
 	private String template;	
 
-	@Column(name = "PNP_CONTENT", columnDefinition="nvarchar(500)")
+	@Column(name = "PNP_CONTENT", columnDefinition="nvarchar(500)") //簡訊內容
 	private String pnpContent;
 	
-	@Column(name = "STATUS")
+	@Column(name = "STATUS")  //帳號狀態
 	private Boolean status;
 	
 	public String getEmployeeId() {
@@ -168,4 +174,21 @@ public class PNPMaintainAccountModel extends AbstractBcsEntity{
 	public void setAccountClass(String accountClass) {
 		this.accountClass = accountClass;
 	}
+
+	public String getDivisionName() {
+		return divisionName;
+	}
+
+	public void setDivisionName(String divisionName) {
+		this.divisionName = divisionName;
+	}
+
+	public String getGroupName() {
+		return groupName;
+	}
+
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
+	}
+	
 }

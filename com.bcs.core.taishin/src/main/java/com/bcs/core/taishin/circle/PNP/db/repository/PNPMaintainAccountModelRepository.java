@@ -14,4 +14,5 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
 public interface PNPMaintainAccountModelRepository extends EntityRepository<PNPMaintainAccountModel, Long> {	
 	public List<PNPMaintainAccountModel> findByDepartmentNameAndPccCodeAndAccountAndEmployeeIdAndAccountType(String departmentName, String pccCode, String account, String employeeId, String accountType);
 	public List<PNPMaintainAccountModel> findByAccountAndSourceSystemAndPnpContent(String account, String sourceSystem, String pnpContent);
+	public List<PNPMaintainAccountModel> findByAccountAndSourceSystem(String account, String sourceSystem);
 }

@@ -13,6 +13,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -240,7 +241,16 @@ public class TestBillingNotice {
 //	
 //	
 //	public static void main(String[] args) throws NoSuchAlgorithmException {
-//		String phone = "0963009799";
+////		String phone = "0930882559";//59fe6cf511391ac23a29cd32ce5c361aae1909be3f22baaf2e6dd07f8bed9a04
+////		String phone = "0938181332";//d01883913f09dc3e7505f22dbd7c93b1cb4f140fce77fb5d6ddacef804c69550
+////		String phone = "0911248364";//afd95f0628f37a5545d080bf24ced699eb3930e53885736c41f0258bc971355b
+////		String phone = "0928082842";//7db7dc635cde55a05bdd17c5bfe6a104f9b91715a24eee8425581c59d726c080
+////		String phone = "0918202200";//28a9cf5212ac975acd7276ef608a4df9af29a3280d91b6151031ae1fda65b736
+////		String phone = "0902286758";//abe691c7719f6f812ebd34f44317f10d026bef5744195f0e7bc5556c45ed081c
+////		String phone = "0983647234";//4ba8d3f9ed81f083a9895f6c084309b05f6836c25f926f554d93eea9f8d1cd85
+////		String phone = "0936848484";//aa3718cf458069259942103e2c0a15367ecf31aee6863c9500a1281a4a669f3e
+//		String phone = "0977612591";//932636f457b8c4380f34ce0b8bd85d0d2ba53f6e27457d3db6d4c42097075111
+//
 //		MessageDigest digest = MessageDigest.getInstance("SHA-256");
 //
 //		if ("0".equals(phone.substring(0, 1))) {// phone有些可能已轉成e.164格式，0開頭的再做轉換
@@ -260,6 +270,38 @@ public class TestBillingNotice {
 //
 //		System.out.println( hexString.toString());
 //	}
+	
+	
+	
+//	public static void main(String[] args) {
+////		String s = "封鎖測試「台新貴賓您好,謝謝您使用台新信用卡消費30元，若您在國外需要台新銀行的服務，500請利用當地國際台轉接撥打信用卡背面之客服電話確";
+////		String s = "  ";
+//		String s = "天地玄黃宇宙洪荒日月盈昃>><<  ";
+//		String p = "封鎖測試「台新貴賓您好,謝謝您使用台新信用卡消費>><<元，若您在國外需要台新銀行的服務，>><<請利用當地國際台轉接撥打信用卡背面之客服電話確";
+//		p = p.replace(">><<", "¿¡");
+//		System.out.println(p);
+//		System.out.println(isMatch(s, p));
+//
+//	}
+	public static boolean isMatch(String s, String p) {
+        int i = 0, j = 0, iStar = -1, jStar = -1;
+        
+        while (i < s.length()) {
+            if (j < p.length() && (s.charAt(i) == p.charAt(j) || p.charAt(j) == '¿')) {//倒立問號
+                ++i; ++j;
+            }else if (j < p.length() && p.charAt(j) == '¡') {//倒立驚嘆號
+                iStar = i;
+                jStar = j++;
+            } else if (iStar >= 0) {
+                i = ++iStar; 
+                j = jStar + 1;
+            } else  return false;
+        }
+        while (j < p.length() && p.charAt(j) == '¡') ++j;//倒立驚嘆號
+        return j == p.length();
+    }
+	
+	
 //	
 //	
 //	@Test
@@ -381,6 +423,31 @@ public class TestBillingNotice {
 ////	}
 //	
 	
+	public static void main(String[] args) throws ParseException {
+		String orderTime = "20190624144032";
+		Date date = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+		if(orderTime.compareTo(sdf.format(date))<0){
+			
+		}
+		Date a  = sdf.parse(orderTime);
+		
+		System.out.println(sdf.format(date));
+		System.out.println(a.before(date));
+		
+	}
 	
+	
+	
+//	public static void main(String[] args) {
+//		String deliveryTags = "PNP_DELIVERY;;3;;85;;6352;;0938181332";
+//		
+//		String[] deliveryData = deliveryTags.split("\\;;", 5);
+//		
+//		for(int i = 0;i<deliveryData.length;i++) {
+//			System.out.println(deliveryData[i]);
+//		}
+//		
+//	}
 	
 }

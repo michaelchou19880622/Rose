@@ -108,6 +108,7 @@ public class PnpSMSMsgService {
 					return;
 				}
 				sendingSMSMain();
+				sendingSMSMainForDeliveryExpired();
 			}
 		}, 0, time, TimeUnit.valueOf(unit));
 	}
@@ -175,6 +176,52 @@ public class PnpSMSMsgService {
 		
 		return null;
 	}
+	
+	/**
+	 * 查詢Delivery expire date已過24小時的資料
+	 * 根據PNPFTPType 依序發送SMS
+	 * 
+	 */
+	public void sendingSMSMainForDeliveryExpired(){
+		logger.info("===========sendingSMSMainForDeliveryExpired===========");
+		String procApName = pnpAkkaService.getProcApName();
+		for (PNPFTPType type : PNPFTPType.values()) {
+			PnpMain pnpMain = null;
+			try {
+				//update待發送資料 status(Sending) &excuter name(hostname)
+				List<? super PnpDetail> details = pnpRepositoryCustom.updateDelivertExpiredStatus(type, procApName, AbstractPnpMainEntity.STAGE_SMS);
+				logger.info("SMS PNP PUSH DeliveryExpired pnpMain details type :"+ type  +" details size:" + details.size());
+				if(CollectionUtils.isEmpty(details)) {
+					logger.debug("SMS PNP PUSH DeliveryExpired pnpMain type :"+ type  +" there is a main has no details!!!");
+				}else {
+					PnpDetail oneDetail = (PnpDetail)details.get(0);
+					pnpMain = pnpRepositoryCustom.findMainByMainId(type, oneDetail.getPnpMainId());
+					if (null == pnpMain) {
+						logger.info("SMS PNP PUSH DeliveryExpired pnpMain type :"+ type  +" not data");
+					}else {
+						pnpMain.setPnpDetails(details);
+						//更換檔名(加L)
+						String origFileName = pnpMain.getOrigFileName();
+						String changedOrigFileName = origFileName.substring(0, origFileName.lastIndexOf("_"))+"_L"+origFileName.substring(origFileName.lastIndexOf("_"));
+						logger.info("==================================================");
+						logger.info(changedOrigFileName);
+						logger.info("==================================================");
+					
+						//傳檔案到SMS FTP
+						uploadFileToSMS(type.getSource() , smsGetTargetStream(type, pnpMain, details), changedOrigFileName);
+						//update待發送資料 status(Sending) &excuter name(hostname)
+						updateStatusSuccess(procApName,pnpMain , details);
+						pnpAkkaService.tell(pnpMain);
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				logger.error("SMS PNP PUSH DeliveryExpired pnpMain type :"+ type  +" sendingMain error:" + e.getMessage());
+			}
+			
+		}
+	}
+	
 	
 	
 	private InputStream smsMitakeInputStream(PnpMainMitake pnpMain, List<? super PnpDetail> details) throws IOException{

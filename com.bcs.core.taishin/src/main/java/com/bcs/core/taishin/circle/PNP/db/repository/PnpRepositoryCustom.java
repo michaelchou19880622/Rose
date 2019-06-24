@@ -16,6 +16,8 @@ public interface PnpRepositoryCustom {
 	public List<? super PnpDetail> updateStatusByStageBC(PNPFTPType type, String procApName, Set<Long> allMainIds);
 
 	public List<? super PnpDetail> updateStatus(PNPFTPType type, String procApName, String stage);
+	
+	public List<? super PnpDetail> updateDelivertExpiredStatus(PNPFTPType type, String procApName, String stage);
 
 //	public void updateStatus(String deliveryTags); 移至com.bcs.core.bot.db.repository.MsgBotReceiveRepositoryImpl
 

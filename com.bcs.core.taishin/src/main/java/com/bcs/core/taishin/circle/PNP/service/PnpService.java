@@ -526,7 +526,15 @@ public class PnpService {
 				Date date =new Date(); 
 				Calendar calendar = new GregorianCalendar(); 
 				calendar.setTime(date); 
-				calendar.add(calendar.DATE,1); //加24小時
+				
+				int expiredUnit =  CoreConfigReader.getInteger(CONFIG_STR.PNP_DELIVERY_EXPIRED_TIME_UNIT, true, false);
+				int expired =  CoreConfigReader.getInteger(CONFIG_STR.PNP_DELIVERY_EXPIRED_TIME, true, false);
+				
+				logger.info("==================PNP_DELIVERY_EXPIRED_TIME==================");
+				logger.info("expiredUnit :"+expiredUnit +" expired :"+expired);
+				logger.info("==================PNP_DELIVERY_EXPIRED_TIME==================");
+//				calendar.add(calendar.DATE,1); //加24小時
+				calendar.add(expiredUnit,expired); //參數化時間
 				detail.setPnpDeliveryExpireTime(calendar.getTime());
 			}else {
 				detail.setProcStage(AbstractPnpMainEntity.STAGE_SMS);

@@ -167,6 +167,8 @@ public enum CONFIG_STR {
 	PNP_FTP_IS64BIT("pnp.ftp.is64Bit"),
 	PNP_FTP_TYPE("pnp.ftp.type"),
 	PNP_FTP_FILE_EXTENSION(".pnp.ftp.fileExtension"),
+	PNP_DELIVERY_EXPIRED_TIME_UNIT(".pnp.delivery.expired.time.unit"),
+	PNP_DELIVERY_EXPIRED_TIME(".pnp.delivery.expired.time"),
 	
 	// DEFAULT PNP
 	PNP_FTP_SERVERHOSTNAME_("pnp.ftp.serverHostName."),
@@ -298,6 +300,7 @@ public enum CONFIG_STR {
 	PNP_SMS_PROTOCOL_UNICA("pnp.sms.protocol.unica"),
 	
 	//PNP白名單
+	PNP_WHITELIST_VALIDATE("pnp.whitelist.validate"),
 	PNP_WHITELIST_ACCOUNT_PCCCODE_MITAKE(""),
 	PNP_WHITELIST_ACCOUNT_PCCCODE_EVERY8D(""),
 	PNP_WHITELIST_ACCOUNT_PCCCODE_MING(""),

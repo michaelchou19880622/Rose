@@ -106,6 +106,8 @@ public class LoadFtbPnpDataTask {
 	@Autowired
 	private PNPMaintainAccountModelRepository pnpMaintainAccountModelRepository;    
 	
+	boolean whiteListValidate = CoreConfigReader.getBoolean(CONFIG_STR.PNP_WHITELIST_VALIDATE, true, false);
+	
 //	String ftpServerName = null;
 //	int ftpPort = 0;
 //	String ftpUsr = null;
@@ -1059,7 +1061,10 @@ public class LoadFtbPnpDataTask {
 	// 白名單帳號檢核，比對檔名上的帳號與白名單設定上的帳號是否相同
 	// 20190624後台設計沒有來源格式的對應先預留這個位置將來如果有來源格式的對應可以在這裡做分段檢核 
 	private boolean validateWhiteListAccountPccode(String source , String fileName) {
-		
+		if(whiteListValidate==false) {
+			logger.info("======跳過白名單AccountPccode檢核======");
+			return true;
+		}
 		String[] fileNameSP = fileName.split("_");
 		String accountClass = fileNameSP[0];
 		String sourceSystem = fileNameSP[1];
@@ -1078,6 +1083,14 @@ public class LoadFtbPnpDataTask {
 	
 	// 白名單帳號檢核，比對簡訊內容是否相同
 	private PNPMaintainAccountModel validateWhiteListContent(String source , String fileName , String content) {
+		
+		if(whiteListValidate==false) {
+			logger.info("======跳過白名單Content檢核======");
+			PNPMaintainAccountModel accountModel = new PNPMaintainAccountModel();
+			accountModel.setPathway("3");
+			return accountModel;
+		}
+		
 		String[] fileNameSP = fileName.split("_");
 		String accountClass = fileNameSP[0];
 		String sourceSystem = fileNameSP[1];

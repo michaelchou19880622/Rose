@@ -63,10 +63,10 @@ public class LinePointPushMessageActor extends UntypedActor {
 
 				// initialize detail
 				LinePointDetail detail = new LinePointDetail();
-				detail.setLinePointMainId(eventId);
+				//detail.setLinePointMainId(eventId);
 				detail.setAmount(pushApiModel.getAmount());
 				detail.setTriggerTime(pushApiModel.getTriggerTime());
-				detail.setSource(pushApiModel.getSource());
+				//detail.setSource(pushApiModel.getSource());
 				
 				if(linePointMain.getSuccessfulCount() >= linePointMain.getTotalCount()) {
 					linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
@@ -75,9 +75,9 @@ public class LinePointPushMessageActor extends UntypedActor {
 				
 					detail.setUid(uids.get(i).toString());
 					detail.setSendTime(new Date());
-					detail.setDescription(LinePointDetail.DESCRIPTION_OVERFLOW);
+					//detail.setDescription(LinePointDetail.DESCRIPTION_OVERFLOW);
 					detail.setStatus(LinePointDetail.STATUS_FAIL);
-					linePointDetailService.save(detail);
+					//linePointDetailService.save(detail);
 					continue;
 				}
 				
@@ -126,13 +126,13 @@ public class LinePointPushMessageActor extends UntypedActor {
 					detail.setTranscationTime(Time);
 					detail.setTranscationType(Type);
 					detail.setTransactionAmount(Amount);
-					detail.setTransactionBalance(Balance);
-					detail.setDescription("");
+					//detail.setTransactionBalance(Balance);
+					//detail.setDescription("");
 					detail.setStatus(LinePointDetail.STATUS_SUCCESS);
 				} catch (HttpClientErrorException e) {
 					linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
 					linePointMainRepository.save(linePointMain);
-					detail.setDescription(e.getResponseBodyAsString());
+					//detail.setDescription(e.getResponseBodyAsString());
 					detail.setStatus(LinePointDetail.STATUS_FAIL);
 				}
 				
@@ -142,7 +142,7 @@ public class LinePointPushMessageActor extends UntypedActor {
 				detail.setSendTime(new Date());
 
 				Logger.info("detail1: " + detail.toString());
-				linePointDetailService.save(detail);
+				//linePointDetailService.save(detail);
 			}
 		}
 	}

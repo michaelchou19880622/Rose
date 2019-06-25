@@ -20,20 +20,34 @@ import com.bcs.core.utils.ObjectUtil;
 public class LinePointDetail extends AbstractBcsEntity {
 	private static final long serialVersionUID = 1L;
 
-	//public static final String STATUS_WAIT = "WAIT";
-	public static final String STATUS_SUCCESS = "SUCCESS";
-	public static final String STATUS_FAIL = "FAIL";
+	public static final String STATUS_WAIT = "WAIT";
+ 	public static final String STATUS_SUCCESS = "SUCCESS";
+ 	public static final String STATUS_FAIL = "FAIL";
 	public static final String TRANSCATION_TYPE_ISSUE = "ISSUE";
-	public static final String DESCRIPTION_OVERFLOW = "OVERFLOW";
+	public static final String SOURCE_ISSUE_API = "ISSUE_API";
+ 	public static final String DESCRIPTION_OVERFLOW = "OVERFLOW";
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name = "DETAIL_ID")
 	private Long detailId;
-
 	@Column(name = "LINE_POINT_MAIN_ID")
 	private Long linePointMainId;
-
+	@Column(name = "DETAIL_TYPE", columnDefinition="varchar(20)")
+	private String detailType;
+	
+	// API Request Data
+	@Column(name = "DEPARTMENT", columnDefinition="nvarchar(50)")
+	private String department;
+	@Column(name = "SERVICE_NAME", columnDefinition="nvarchar(50)")
+	private String serviceName;
+	@Column(name = "PCC_CODE", columnDefinition="nvarchar(50)")
+	private String pccCode;
+	@Column(name = "CAMP_NAME", columnDefinition="nvarchar(50)")
+	private String campName;
+	@Column(name = "CUSTID", columnDefinition="nvarchar(20)")
+	private String custid;
+	
 	// Post Model
 	@Column(name = "UID", columnDefinition="varchar(50)")
 	private String uid;
@@ -45,8 +59,6 @@ public class LinePointDetail extends AbstractBcsEntity {
 	private Long amount;
 	
 	// Push Information
-	@Column(name = "SOURCE", columnDefinition="varchar(10)")
-	private String source;
 	@Column(name = "STATUS", columnDefinition="nvarchar(50)")
 	private String status;
 	@Column(name = "TRIGGER_TIME")
@@ -54,9 +66,7 @@ public class LinePointDetail extends AbstractBcsEntity {
 	@Column(name = "SEND_TIME")
 	private Date sendTime;
 
-	// Response Model
-	@Column(name = "DESCRIPTION", columnDefinition="nvarchar(200)")
-	private String description;
+	// Success Response Model
 	@Column(name = "TRANSCATION_ID", columnDefinition="varchar(20)")
 	private String transcationId;
 	@Column(name = "TRANSCATION_TIME")
@@ -65,17 +75,19 @@ public class LinePointDetail extends AbstractBcsEntity {
 	private String transcationType;	
 	@Column(name = "TRANSCATION_AMOUNT")
 	private Integer transactionAmount;
-	@Column(name = "TRANSCATION_BALANCE")
-	private Integer transactionBalance;
+	@Column(name = "BALANCE")
+	private Integer balance;
+	
+	// Fail Response Model
+	@Column(name = "ERROR", columnDefinition="nvarchar(50)")
+	private String error;
+	@Column(name = "MESSAGE", columnDefinition="nvarchar(200)")
+	private String message;
+	@Column(name = "DETAILS", columnDefinition="nvarchar(200)")
+	private String details;
 	
 	public Long getDetailId() {
 		return detailId;
-	}
-	public Long getLinePointMainId() {
-		return linePointMainId;
-	}
-	public void setLinePointMainId(Long linePointMainId) {
-		this.linePointMainId = linePointMainId;
 	}
 	public String getUid() {
 		return uid;
@@ -101,12 +113,6 @@ public class LinePointDetail extends AbstractBcsEntity {
 	public void setAmount(Long amount) {
 		this.amount = amount;
 	}
-	public String getSource() {
-		return source;
-	}
-	public void setSource(String source) {
-		this.source = source;
-	}
 	public String getStatus() {
 		return status;
 	}
@@ -124,12 +130,6 @@ public class LinePointDetail extends AbstractBcsEntity {
 	}
 	public void setSendTime(Date sendTime) {
 		this.sendTime = sendTime;
-	}
-	public String getDescription() {
-		return description;
-	}
-	public void setDescription(String description) {
-		this.description = description;
 	}
 	public String getTranscationId() {
 		return transcationId;
@@ -155,10 +155,73 @@ public class LinePointDetail extends AbstractBcsEntity {
 	public void setTransactionAmount(Integer transactionAmount) {
 		this.transactionAmount = transactionAmount;
 	}
-	public Integer getTransactionBalance() {
-		return transactionBalance;
+	public Integer getBalance() {
+		return balance;
 	}
-	public void setTransactionBalance(Integer transactionBalance) {
-		this.transactionBalance = transactionBalance;
+	public void setBalance(Integer balance) {
+		this.balance = balance;
+	}
+	public String getDepartment() {
+		return department;
+	}
+	public void setDepartment(String department) {
+		this.department = department;
+	}
+	public String getServiceName() {
+		return serviceName;
+	}
+	public void setServiceName(String serviceName) {
+		this.serviceName = serviceName;
+	}
+	public String getPccCode() {
+		return pccCode;
+	}
+	public void setPccCode(String pccCode) {
+		this.pccCode = pccCode;
+	}
+	public String getCampName() {
+		return campName;
+	}
+	public void setCampName(String campName) {
+		this.campName = campName;
+	}
+	public String getCustid() {
+		return custid;
+	}
+	public void setCustid(String custid) {
+		this.custid = custid;
+	}
+	public void setDetailId(Long detailId) {
+		this.detailId = detailId;
+	}
+	public String getError() {
+		return error;
+	}
+	public void setError(String error) {
+		this.error = error;
+	}
+	public String getMessage() {
+		return message;
+	}
+	public void setMessage(String message) {
+		this.message = message;
+	}
+	public String getDetails() {
+		return details;
+	}
+	public void setDetails(String details) {
+		this.details = details;
+	}
+	public String getDetailType() {
+		return detailType;
+	}
+	public void setDetailType(String detailType) {
+		this.detailType = detailType;
+	}
+	public Long getLinePointMainId() {
+		return linePointMainId;
+	}
+	public void setLinePointMainId(Long linePointMainId) {
+		this.linePointMainId = linePointMainId;
 	}
 }

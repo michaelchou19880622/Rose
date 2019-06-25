@@ -2,20 +2,17 @@
  * 
  */
 $(function(){	
-	//全域變數
+	// Global Variables
 	var generalActionTr = {};    	//action的列
 	var generalTemplateTable = {};  //templateTable
-	
 	var templateId = "";			//templateId
 	var actionType = "";			//紀錄是編輯或新增
-	
 	var trCount = 0;				//產生的Tr數量
-	var actionNumber = 0;			//每個template的action數
 	var templateCount = 0;			//目前template數量
-	
+	var actionNumber = 0;			//每個template的action數
 	var templateType = "";			// templateType Radio
 	
-	//-------初始化頁面----------
+	// initialize
 	var initPage = function(){
 		generalActionTr = $('.actionTr').clone(true); //取下action格式
 		$('.actionTr').remove();//刪除action
@@ -137,9 +134,7 @@ $(function(){
     				$('#tab'+templateCount).append(templateTable);
     				$("#tabs").tabs({active: 0});
     			}
-    			
-    			
-    			
+
     			setTemplateOperationButtonsVisable();
     			setActionOperationButtonsVisable();
     			initButtonsVisable(templateType);
@@ -173,7 +168,6 @@ $(function(){
 			$("input[name='curfewSwitch']:checked").trigger("click");
 			
 			initButtonsVisable(templateType);
-			
 		}
 	}
 	
@@ -573,10 +567,6 @@ $(function(){
 	
 	//取得template的資料
 	var getTemplateTableInformation = function(templateTable){
-
-
-
-		
 		var actionTypeTds = templateTable.find('.actionTypeTd');
 		var actions = [];
 		var templateData = {};

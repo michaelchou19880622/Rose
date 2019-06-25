@@ -1,5 +1,7 @@
 package com.bcs.core.taishin.circle.PNP.db.entity;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -22,7 +24,7 @@ public class PNPMaintainAccountModel extends AbstractBcsEntity{
 	@Column(name = "ID")
 	private Long id;
 
-	@Column(name = "ACCOUNT_TYPE", columnDefinition="nvarchar(50)") // Normal/Unica
+	@Column(name = "ACCOUNT_TYPE", columnDefinition="nvarchar(50)") // Normal / Unica
 	private String accountType;
 	
 	@Column(name = "ACCOUNT", columnDefinition="nvarchar(50)")
@@ -43,8 +45,14 @@ public class PNPMaintainAccountModel extends AbstractBcsEntity{
 	@Column(name = "EMPLOYEE_ID", columnDefinition="nvarchar(50)")
 	private String employeeId;
 
-	@Column(name = "DEPARTMENT_NAME", columnDefinition="nvarchar(50)")
+	@Column(name = "DIVISION_NAME", columnDefinition="nvarchar(50)")	// 處
+	private String divisionName;
+	
+	@Column(name = "DEPARTMENT_NAME", columnDefinition="nvarchar(50)")  // 部
 	private String departmentName;
+	
+	@Column(name = "GROUP_NAME", columnDefinition="nvarchar(50)")		// 組
+	private String groupName;
 
 	@Column(name = "PCC_CODE", columnDefinition="nvarchar(50)")
 	private String pccCode;
@@ -61,6 +69,12 @@ public class PNPMaintainAccountModel extends AbstractBcsEntity{
 	@Column(name = "STATUS")
 	private Boolean status;
 	
+	@Column(name = "MODIFY_TIME")
+	private Date modifyTime;
+	
+	@Column(name = "MODIFY_USER", columnDefinition="nvarchar(50)")
+	private String modifyUser;
+
 	public String getEmployeeId() {
 		return employeeId;
 	}
@@ -167,5 +181,37 @@ public class PNPMaintainAccountModel extends AbstractBcsEntity{
 
 	public void setAccountClass(String accountClass) {
 		this.accountClass = accountClass;
+	}
+
+	public String getDivisionName() {
+		return divisionName;
+	}
+
+	public void setDivisionName(String divisionName) {
+		this.divisionName = divisionName;
+	}
+
+	public String getGroupName() {
+		return groupName;
+	}
+
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
+	}
+
+	public Date getModifyTime() {
+		return modifyTime;
+	}
+
+	public void setModifyTime(Date modifyTime) {
+		this.modifyTime = modifyTime;
+	}
+
+	public String getModifyUser() {
+		return modifyUser;
+	}
+
+	public void setModifyUser(String modifyUser) {
+		this.modifyUser = modifyUser;
 	}
 }

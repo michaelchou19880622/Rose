@@ -29,6 +29,11 @@
 			<artifactId>com.bcs.core.taishin</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.bcs</groupId>
+			<artifactId>com.bcs.core.linepoint</artifactId>
+			<version>${project.version}</version>
+		</dependency>		
 	</dependencies>
 
 	<packaging>war</packaging>

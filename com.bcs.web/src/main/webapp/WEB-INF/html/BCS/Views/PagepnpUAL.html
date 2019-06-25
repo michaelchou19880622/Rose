@@ -18,14 +18,20 @@
                         <h3 class="CHTtl">Unica帳號維護</h3>
                     </header>
                     <div>
-                        單位名稱
-                        <font size="3" color="red">*</font>
-                        <input type="text" id="departmentName" name="departmentName" value="" maxlength="50" required="required"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PccCode
-                        <font size="3" color="red">*</font>
-                        <input type="text" id="pccCode" name="PccCode" value="" maxlength="50" required="required"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 帳號
-                        <font size="3" color="red">*</font>
-                        <input type="text" id="account" name="account" value="" maxlength="50" required="required"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 員工編號
-                        <font size="3" color="red">*</font>
+                        處<!-- <font size="3" color="red">*</font> -->
+                        <input type="text" id="divisionName" name="divisionName" value="" maxlength="50" required="required"> 
+                        
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 部<!-- <font size="3" color="red">*</font> -->
+                        <input type="text" id="departmentName" name="departmentName" value="" maxlength="50" required="required"> 
+
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 組<!-- <font size="3" color="red">*</font> -->
+                        <input type="text" id="groupName" name="groupName" value="" maxlength="50" required="required"> 
+                                                
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PccCode<!-- <font size="3" color="red">*</font> -->
+                        <input type="text" id="pccCode" name="PccCode" value="" maxlength="50" required="required"> 
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 帳號<!-- <font size="3" color="red">*</font> -->
+                        <input type="text" id="account" name="account" value="" maxlength="50" required="required"> 
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 員工編號<!-- <font size="3" color="red">*</font> -->
                         <input type="text" id="employeeId" name="employeeId" value="" maxlength="50" required="required">
                     </div>
                     <div class="CHBtnSet">
@@ -43,12 +49,14 @@
                                 <col width="100">
                                 <col width="100">
                                 <col width="100">
+                                <col width="70">
+                                <col width="70">
+                                <col width="70">
                                 <col width="100">
                                 <col width="100">
                                 <col width="100">
                                 <col width="100">
-                                <col width="100">
-                                <col width="100">
+                                <col width="200">
                             </colgroup>
                             <tr>
                                 <th>帳號</th>
@@ -57,7 +65,9 @@
                                 <th>前方來源系統</th>
                                 <th>員工編號</th>
                                 <th>單位代號</th>
-                                <th>單位名稱</th>
+                                <th>處</th>
+                                <th>部</th>
+                                <th>組</th>
                                 <th>PccCode</th>
                                 <th>狀態</th>
                                 <th>通路</th>
@@ -68,11 +78,13 @@
                                 <tr class="searchTr">
                                     <td class="account"></td>
                                     <td class="accountAttribute"></td>
-                                    <td class="accountType"></td>
+                                    <td class="accountClass"></td>
                                     <td class="sourceSystem"></td>
                                     <td class="employeeId"></td>
                                     <td class="departmentId"></td>
+                                    <td class="divisionName"></td>
                                     <td class="departmentName"></td>
+                                    <td class="groupName"></td>
                                     <td class="pccCode"></td>
                                     <td class="status"></td>
                                     <td class="pathway"></td>
@@ -83,7 +95,9 @@
                         </table>
                     </div>
                     <div class="CHBtnSet">
-                        <div class="CHRight"><input class="btn_add download" type="button" value="Download" style="cursor: pointer;"></div>
+                        <div class="CHRight">
+                        	<a class="btn_add download" style="cursor: pointer; padding: 7px 12px; text-decoration: none">Download</a>
+                        </div>
                     </div>
                 </section>
             </form>

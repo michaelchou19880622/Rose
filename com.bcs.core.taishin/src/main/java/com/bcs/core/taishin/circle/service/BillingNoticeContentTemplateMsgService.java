@@ -186,6 +186,7 @@ public class BillingNoticeContentTemplateMsgService {
     	
     	Query query = entityManager.createNativeQuery(queryString).setParameter(1, templateId);
 		List<Object[]> list = query.getResultList();
+		logger.info("list:"+list);
 		
 		Map<String, List<String>> map = new LinkedHashMap<>();
 		for (Object[] o : list) {
@@ -196,11 +197,13 @@ public class BillingNoticeContentTemplateMsgService {
 						map.put(o[0].toString(), new ArrayList<String>());
 						continue;
 					}else{ //重覆的templateId，因為有多個action
-						for(int j=7;j<13;j++){
+						for(int j=8;j<=13;j++){
 							if (o[j] == null) {
 								dataList.add(null);
+								//logger.info("j=" + j  + ", null");
 							} else {
 								dataList.add(o[j].toString());
+								//logger.info("j=" + j  + ", " + o[j].toString());
 							}
 						}
 						break;
@@ -211,13 +214,15 @@ public class BillingNoticeContentTemplateMsgService {
 				
 				if (o[i] == null) {
 					dataList.add(null);
+					//logger.info("i=" + i  + ", null");
 				} else {
 					dataList.add(o[i].toString());
+					//logger.info("i=" + i  + ", " + o[i].toString());
 				}		
 			}
 		}
 		
-    	logger.debug(map);
+    	//logger.info("map:"+map);
 		if(map != null){
 			dataCache.put(templateId, map);
 		}

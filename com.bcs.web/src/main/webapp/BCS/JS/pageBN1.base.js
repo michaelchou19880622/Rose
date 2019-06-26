@@ -40,6 +40,7 @@ $(function(){
     				templateCount++;
     				addTab();
     				console.info("key :  ", key, "     response :  ", response[key]);
+    				console.info(response[key].length);
     				templateData = response[key]; //取出template資料
     				
     				templateTable = generateTemplateTable();
@@ -101,16 +102,19 @@ $(function(){
     				
     				// 7-12 ACTIONS
     				actionNumber = (templateData.length-7)/6;
+    				console.info('actionNumber:', actionNumber);
+    				
     				templateTable.find(".actionTh").prop("rowspan", actionNumber * 3 + 3);
-    				    				
+    	    				
     				for(var i=0; i<actionNumber; i++){
     					actionTr = generateActionTr(i);
     					    					
-    					actionType = templateData[7+6*i];
+    					actionType1 = templateData[7+6*i];
+    					
     					actionTypes = actionTr.find('.actionType');
     					
     					actionTr.find("input[name='label']").val(templateData[8+6*i]);
-    					switch(actionType){
+    					switch(actionType1){
 							case 'postback':
 								actionTr.find("input[name='data']").val(templateData[9+6*i]);
 								break;
@@ -124,8 +128,8 @@ $(function(){
     					
     					templateTable.append(actionTr);
     					$.each(actionTypes, function(i, o) {
-    						if ($(o).val() == actionType) {
-    							console.info("click   ",actionType);
+    						if ($(o).val() == actionType1) {
+    							console.info("click   ",actionType1);
     							$(o).click();
     						}
     					});

@@ -166,9 +166,9 @@ public enum CONFIG_STR {
 	IS_PNP_SENDMSG("pnp.sendMsg"),
 	PNP_FTP_IS64BIT("pnp.ftp.is64Bit"),
 	PNP_FTP_TYPE("pnp.ftp.type"),
-	PNP_FTP_FILE_EXTENSION(".pnp.ftp.fileExtension"),
-	PNP_DELIVERY_EXPIRED_TIME_UNIT(".pnp.delivery.expired.time.unit"),
-	PNP_DELIVERY_EXPIRED_TIME(".pnp.delivery.expired.time"),
+	PNP_FTP_FILE_EXTENSION("pnp.ftp.fileExtension"),
+	PNP_DELIVERY_EXPIRED_TIME_UNIT("pnp.delivery.expired.time.unit"),
+	PNP_DELIVERY_EXPIRED_TIME("pnp.delivery.expired.time"),
 	
 	// DEFAULT PNP
 	PNP_FTP_SERVERHOSTNAME_("pnp.ftp.serverHostName."),

@@ -263,6 +263,7 @@ public class LoadFtbPnpDataTask {
 					if (pnpMains != null) {
 						mains.addAll(pnpMains);
 					}else {//白名單檢核失敗
+						logger.error("=======白名單內容檢核失敗，轉傳SMS===========");	
 						logger.error("=======pnpMains is null !!!===========");	
 						// 因為路徑可用UI換，所以每次都要重拿連線資訊
 						String changedOrigFileName = fileName.substring(0, fileName.lastIndexOf("_")) + "_L"
@@ -273,7 +274,7 @@ public class LoadFtbPnpDataTask {
 				} else {
 					// 1.2.1 白名單檢核錯誤
 						// 1.1 將檔案rename(加L)放到SMS只定路徑
-					logger.error("=======白名單檢核失敗，轉傳SMS===========");	
+					logger.error("=======白名單AccountPccode檢核失敗，轉傳SMS===========");	
 						// 因為路徑可用UI換，所以每次都要重拿連線資訊
 					String changedOrigFileName = fileName.substring(0, fileName.lastIndexOf("_")) + "_L"
 							+ fileName.substring(fileName.lastIndexOf("_"));
@@ -1097,7 +1098,7 @@ public class LoadFtbPnpDataTask {
 		String account = fileNameSP[2];
 		String comeTime = fileNameSP[3];
 		
-		List<PNPMaintainAccountModel> accountList = pnpMaintainAccountModelRepository.findByAccountAndSourceSystem(account, sourceSystem);
+		List<PNPMaintainAccountModel> accountList = pnpMaintainAccountModelRepository.findByAccountAndSourceSystemAndStatus(account, sourceSystem, true);
 		if(CollectionUtils.isNotEmpty(accountList)){
 			for(PNPMaintainAccountModel accountModel :accountList){
 				String pnpContentPattern = accountModel.getPnpContent();
@@ -1117,6 +1118,10 @@ public class LoadFtbPnpDataTask {
 	}
 	
 	public static boolean isMatch(String s, String p) {
+		logger.info("content :"+s);
+		logger.info("pnpContentPattern :"+p);
+		p = p.replace(">><<", "¿¡");//>><<為規定好的萬用字元
+		
         int i = 0, j = 0, iStar = -1, jStar = -1;
         
         while (i < s.length()) {

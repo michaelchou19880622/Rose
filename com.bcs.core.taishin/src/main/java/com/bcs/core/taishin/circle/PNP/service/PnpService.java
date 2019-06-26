@@ -527,23 +527,14 @@ public class PnpService {
 				Calendar calendar = new GregorianCalendar(); 
 				calendar.setTime(date); 
 				
-//				int expiredUnit =  CoreConfigReader.getInteger(CONFIG_STR.PNP_DELIVERY_EXPIRED_TIME_UNIT, true, false);
-//				int expired =  CoreConfigReader.getInteger(CONFIG_STR.PNP_DELIVERY_EXPIRED_TIME, true, false);
-//				
+				int expiredUnit =  CoreConfigReader.getInteger(CONFIG_STR.PNP_DELIVERY_EXPIRED_TIME_UNIT, true, false);
+				int expired =  CoreConfigReader.getInteger(CONFIG_STR.PNP_DELIVERY_EXPIRED_TIME, true, false);
+				
 //				logger.info("==================PNP_DELIVERY_EXPIRED_TIME==================");
 //				logger.info("expiredUnit :"+expiredUnit +" expired :"+expired);
 //				logger.info("==================PNP_DELIVERY_EXPIRED_TIME==================");
 				
-				boolean whiteListValidate = CoreConfigReader.getBoolean(CONFIG_STR.PNP_WHITELIST_VALIDATE, true, false);
-				logger.info("==================whiteListValidate_DELIVERY_EXPIRED_TIME==================");
-				logger.info("whiteListValidate :"+whiteListValidate);
-				logger.info("==================whiteListValidate_DELIVERY_EXPIRED_TIME==================");
-				if(whiteListValidate) {
-					calendar.add(calendar.DATE,1); //加24小時
-				}else {
-					calendar.add(calendar.MINUTE,5); //參數化時間
-//					calendar.add(expiredUnit,expired); //參數化時間
-				}
+				calendar.add(expiredUnit,expired); //參數化時間
 				detail.setPnpDeliveryExpireTime(calendar.getTime());
 			}else {
 				detail.setProcStage(AbstractPnpMainEntity.STAGE_SMS);

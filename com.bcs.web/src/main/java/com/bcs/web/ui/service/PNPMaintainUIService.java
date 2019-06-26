@@ -50,8 +50,8 @@ public class PNPMaintainUIService {
 				divisionName, departmentName, groupName, pccCode, account, employeeId, accountType);
 	}
 	public List<PNPMaintainAccountModel> queryUsePageCoditions(
-			String divisionName, String departmentName, String groupName, String pccCode, String account, String employeeId, String accountType){
-		return PNPMaintainAccountModelCustom.queryUseConditions(divisionName, departmentName, groupName, pccCode, account, employeeId, accountType);
+			String divisionName, String departmentName, String groupName, String pccCode, String account, String employeeId, String accountType, Boolean status){
+		return PNPMaintainAccountModelCustom.queryUseConditions(divisionName, departmentName, groupName, pccCode, account, employeeId, accountType, status);
 	}
 	
 	public List<PNPMaintainAccountModel> findByAccountAndSourceSystemAndPnpContent(String account, String sourceSystem, String pnpContent){

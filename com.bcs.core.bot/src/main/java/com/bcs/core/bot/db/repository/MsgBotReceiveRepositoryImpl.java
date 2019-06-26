@@ -58,6 +58,7 @@ public class MsgBotReceiveRepositoryImpl  implements MsgBotReceiveRepositoryCust
 			String hashPhone = deliveryData[4];
 			
 			String detailTable="";
+			String mainTable="";
 			switch (source) {
 			/**
 			 * 	//三竹來源
@@ -78,15 +79,19 @@ public class MsgBotReceiveRepositoryImpl  implements MsgBotReceiveRepositoryCust
 			 */
 				case "1":
 					detailTable = "BCS_PNP_DETAIL_MITAKE";
+					mainTable = "BCS_PNP_MAIN_MITAKE";
 					break;
 				case "2":
 					detailTable = "BCS_PNP_DETAIL_EVERY8D";
+					mainTable = "BCS_PNP_MAIN_EVERY8D";
 					break;
 				case "3":
 					detailTable = "BCS_PNP_DETAIL_MING";
+					mainTable = "BCS_PNP_MAIN_MING";
 					break;
 				case "4":
 					detailTable = "BCS_PNP_DETAIL_UNICA";
+					mainTable = "BCS_PNP_MAIN_UNICA";
 					break;
 			}
 			
@@ -101,6 +106,24 @@ public class MsgBotReceiveRepositoryImpl  implements MsgBotReceiveRepositoryCust
 					.setParameter("modifyTime", now)
 					.setParameter("deliveryTime", now)
 					.executeUpdate();
+			
+					
+			//判斷是否所有的detail都complete，若都complete則更新main狀態		
+//			String judgeCompleteSQL = "select (case when a.complateCount = b.detailCount then 'true' else 'false' end)  from "
+//					+ "( select count(0) as complateCount from " + detailTable + " where PNP_MAIN_ID =:mainId and status = 'COMPLETE' ) a ,"
+//					+ "( select count(0) as complateCount from " + detailTable + " where PNP_MAIN_ID =:mainId ) b ";
+//			       boolean judge =  (boolean) entityManager.createNativeQuery(judgeCompleteSQL).setParameter("mainId", mainId).getSingleResult();
+//					
+//	        if(judge){
+//	        	String updateMainSQL = "update " + mainTable + "  set STATUS = :newStatus  , MODIFY_TIME = :modifyTime "
+//						 + " where PNP_MAIN_ID =:mainId  ";
+//	        	entityManager.createNativeQuery(updateMainSQL)
+//				.setParameter("mainId", mainId)
+//				.setParameter("newStatus", "COMPLETE")
+//				.setParameter("modifyTime", now)
+//				.executeUpdate();
+//	        }
+			       
 		}catch(Exception e) {
 			logger.error(e);
 			throw e;

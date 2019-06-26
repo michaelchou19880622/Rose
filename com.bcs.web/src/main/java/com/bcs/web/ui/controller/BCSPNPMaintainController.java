@@ -144,17 +144,20 @@ public class BCSPNPMaintainController extends BCSBaseController {
 			String employeeId = pnpMaintainAccountModel.getEmployeeId();
 			String accountType = pnpMaintainAccountModel.getAccountType();
 			
-			// is blank
-			if(StringUtils.isBlank(divisionName) && StringUtils.isBlank(departmentName) && StringUtils.isBlank(groupName) &&
-					StringUtils.isBlank(account) && StringUtils.isBlank(employeeId)) {
-				List<PNPMaintainAccountModel> list = pnpMaintainUIService.findByAccountType(accountType);
-				int Length = Math.min(list.size(), 10);
-				list = list.subList(0, Length);
-				return new ResponseEntity<>(list, HttpStatus.OK);
-			}
+//			// is blank
+//			if(StringUtils.isBlank(divisionName) && StringUtils.isBlank(departmentName) && StringUtils.isBlank(groupName) &&
+//					StringUtils.isBlank(account) && StringUtils.isBlank(employeeId)) {
+//				List<PNPMaintainAccountModel> list = pnpMaintainUIService.findByAccountType(accountType);
+//				int Length = Math.min(list.size(), 10);
+//				list = list.subList(0, Length);
+//				return new ResponseEntity<>(list, HttpStatus.OK);
+//			}
+//			
+//			// is not blank
+//			List<PNPMaintainAccountModel> list = pnpMaintainUIService.findByDivisionNameAndDepartmentNameAndGroupNameAndPccCodeAndAccountAndEmployeeIdAndAccountType(
+//					divisionName, departmentName, groupName, pccCode, account, employeeId, accountType);
 			
-			// is not blank
-			List<PNPMaintainAccountModel> list = pnpMaintainUIService.findByDivisionNameAndDepartmentNameAndGroupNameAndPccCodeAndAccountAndEmployeeIdAndAccountType(
+			List<PNPMaintainAccountModel> list = pnpMaintainUIService.queryUsePageCoditions(
 					divisionName, departmentName, groupName, pccCode, account, employeeId, accountType);
 			return new ResponseEntity<>(list, HttpStatus.OK);
 		} catch (Exception e) {

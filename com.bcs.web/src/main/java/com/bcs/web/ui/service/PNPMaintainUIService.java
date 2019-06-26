@@ -21,6 +21,7 @@ import com.bcs.core.db.service.CampaignService;
 import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.log.util.SystemLogUtil;
 import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
+import com.bcs.core.taishin.circle.PNP.db.repository.PNPMaintainAccountModelCustom;
 import com.bcs.core.taishin.circle.PNP.db.repository.PNPMaintainAccountModelRepository;
 import com.bcs.core.utils.DataSyncUtil;
 import com.bcs.core.utils.ErrorRecord;
@@ -35,6 +36,9 @@ public class PNPMaintainUIService {
 	private static Logger logger = Logger.getLogger(PNPMaintainUIService.class);
 	@Autowired
 	private PNPMaintainAccountModelRepository pnpMaintainAccountModelRepository;    
+	
+	@Autowired
+    private PNPMaintainAccountModelCustom PNPMaintainAccountModelCustom;
 
 	public void save(PNPMaintainAccountModel pnpMaintainAccountModel) {
 		pnpMaintainAccountModelRepository.save(pnpMaintainAccountModel);
@@ -44,6 +48,10 @@ public class PNPMaintainUIService {
 			String divisionName, String departmentName, String groupName, String pccCode, String account, String employeeId, String accountType){
 		return pnpMaintainAccountModelRepository.findByDivisionNameAndDepartmentNameAndGroupNameAndPccCodeAndAccountAndEmployeeIdAndAccountType(
 				divisionName, departmentName, groupName, pccCode, account, employeeId, accountType);
+	}
+	public List<PNPMaintainAccountModel> queryUsePageCoditions(
+			String divisionName, String departmentName, String groupName, String pccCode, String account, String employeeId, String accountType){
+		return PNPMaintainAccountModelCustom.queryUseConditions(divisionName, departmentName, groupName, pccCode, account, employeeId, accountType);
 	}
 	
 	public List<PNPMaintainAccountModel> findByAccountAndSourceSystemAndPnpContent(String account, String sourceSystem, String pnpContent){

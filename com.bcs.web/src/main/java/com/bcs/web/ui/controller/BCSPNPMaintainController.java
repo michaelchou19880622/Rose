@@ -1,6 +1,8 @@
 package com.bcs.web.ui.controller;
 
+import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -42,7 +44,9 @@ import com.bcs.core.db.service.MsgSendMainService;
 import com.bcs.core.db.service.MsgSendRecordService;
 import com.bcs.core.db.service.SendGroupService;
 import com.bcs.core.exception.BcsNoticeException;
+import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
+import com.bcs.core.taishin.service.PNPMaintainExcelService;
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.utils.ObjectUtil;
 import com.bcs.core.web.security.CurrentUser;
@@ -55,6 +59,7 @@ import com.bcs.web.ui.model.SendMsgModel;
 import com.bcs.web.ui.model.TemplateActionModel;
 import com.bcs.web.ui.model.TemplateMsgModel;
 import com.bcs.web.ui.service.ExportExcelUIService;
+import com.bcs.web.ui.service.LoadFileUIService;
 import com.bcs.web.ui.service.PNPMaintainUIService;
 import com.bcs.web.ui.service.SendMsgUIService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,27 +68,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @Controller
 @RequestMapping("/bcs")
-public class BCSPNPMaintainController extends BCSBaseController {
-//	@Autowired
-//	private SendGroupService sendGroupService;
-//	@Autowired
-//	private AdminUserService adminUserService;
-//	@Autowired
-//	private SendMsgUIService sendMsgUIService;
-//	@Autowired
-//	private MsgMainService msgMainService;
-//	@Autowired
-//	private MsgSendMainService msgSendMainService;
-//	@Autowired
-//	private MsgDetailService msgDetailService;
-//	@Autowired
-//	private ExportExcelUIService exportExcelUIService;
-//	@Autowired
-//	private MsgSendRecordService msgSendRecordService;
-	
+public class BCSPNPMaintainController extends BCSBaseController {	
 	@Autowired
 	private PNPMaintainUIService pnpMaintainUIService;
 	
+	@Autowired	
+	private PNPMaintainExcelService pnpMaintainExcelService;
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSPNPMaintainController.class);
 	
@@ -116,6 +106,7 @@ public class BCSPNPMaintainController extends BCSBaseController {
 	public ResponseEntity<?> createPNPMaintainAccount(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser, @RequestBody PNPMaintainAccountModel pnpMaintainAccountModel) throws IOException {		
 		try{
+			// check duplicate
 			String account = pnpMaintainAccountModel.getAccount();
 			String sourceSystem = pnpMaintainAccountModel.getSourceSystem();
 			String pnpContent = pnpMaintainAccountModel.getPnpContent();
@@ -124,6 +115,9 @@ public class BCSPNPMaintainController extends BCSBaseController {
 				throw new BcsNoticeException("帳號、前方來源系統、簡訊內容不可與之前資料重複！"); 
 			}
 			
+			// save
+			pnpMaintainAccountModel.setModifyTime(new Date());
+			pnpMaintainAccountModel.setModifyUser(customUser.getAccount());
 			pnpMaintainUIService.save(pnpMaintainAccountModel);
 			return new ResponseEntity<>("save success", HttpStatus.OK);
 		}catch(Exception e){
@@ -136,14 +130,32 @@ public class BCSPNPMaintainController extends BCSBaseController {
 		}
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getPNPMaintainAccountList", produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.POST, value = "/edit/getPNPMaintainAccountList", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> getPNPMaintainAccountList(
-			HttpServletRequest request,  HttpServletResponse response, @CurrentUser CustomUser customUser,
-			@RequestParam String departmentName, @RequestParam String pccCode, @RequestParam String account, 
-			@RequestParam String employeeId, @RequestParam String accountType) throws IOException {		
+			HttpServletRequest request,  HttpServletResponse response, 
+			@CurrentUser CustomUser customUser, @RequestBody PNPMaintainAccountModel pnpMaintainAccountModel) throws IOException {		
 		try {
-			List<PNPMaintainAccountModel> list = pnpMaintainUIService.findByDepartmentNameAndPccCodeAndAccountAndEmployeeIdAndAccountType(departmentName, pccCode, account, employeeId, accountType);
+			String divisionName = pnpMaintainAccountModel.getDivisionName();
+			String departmentName = pnpMaintainAccountModel.getDepartmentName();
+			String groupName = pnpMaintainAccountModel.getGroupName();
+			String pccCode = pnpMaintainAccountModel.getPccCode();
+			String account = pnpMaintainAccountModel.getAccount();
+			String employeeId = pnpMaintainAccountModel.getEmployeeId();
+			String accountType = pnpMaintainAccountModel.getAccountType();
+			
+			// is blank
+			if(StringUtils.isBlank(divisionName) && StringUtils.isBlank(departmentName) && StringUtils.isBlank(groupName) &&
+					StringUtils.isBlank(account) && StringUtils.isBlank(employeeId)) {
+				List<PNPMaintainAccountModel> list = pnpMaintainUIService.findByAccountType(accountType);
+				int Length = Math.min(list.size(), 10);
+				list = list.subList(0, Length);
+				return new ResponseEntity<>(list, HttpStatus.OK);
+			}
+			
+			// is not blank
+			List<PNPMaintainAccountModel> list = pnpMaintainUIService.findByDivisionNameAndDepartmentNameAndGroupNameAndPccCodeAndAccountAndEmployeeIdAndAccountType(
+					divisionName, departmentName, groupName, pccCode, account, employeeId, accountType);
 			return new ResponseEntity<>(list, HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
@@ -155,6 +167,38 @@ public class BCSPNPMaintainController extends BCSBaseController {
 		}
 	}
 	
+	// 匯出 EXCEL
+	@ControllerLog(description="匯出 EXCEL")
+    @RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForPNPMaintainAccount")
+    @ResponseBody
+    public void exportToExcelForBNPushApiEffects(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, 
+    		@RequestParam String divisionName, @RequestParam String departmentName, @RequestParam String groupName, @RequestParam String pccCode,
+    		@RequestParam String account, @RequestParam String employeeId, @RequestParam String accountType) throws IOException {
+		
+		// file path
+        String filePath = CoreConfigReader.getString("file.path");
+        
+        // file name
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
+		Date date = new Date();
+        String fileName = "PNPMaintainAccount_" + sdf.format(date) + ".xlsx";
+        
+        try {
+            File folder = new File(filePath);
+            if(!folder.exists()){
+                folder.mkdirs();
+            }
+            pnpMaintainExcelService.exportExcel(filePath, fileName, divisionName, departmentName, groupName, pccCode, account, employeeId, accountType);
+        } catch (Exception e) {
+            logger.error(ErrorRecord.recordError(e));
+        }
+
+        try {
+			LoadFileUIService.loadFileToResponse(filePath, fileName, response);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
 	
 //	/**
 //	 * 建立訊息 導頁

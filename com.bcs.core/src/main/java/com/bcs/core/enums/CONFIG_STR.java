@@ -309,6 +309,11 @@ public enum CONFIG_STR {
 	PNP_SCHEDULE_UNIT("pnp.schedule.unit"),
 	PNP_READLINES_ENCODE("pnp.readLines.encode"),
 	LINE_PNP_PUSH_VERIFIED("line.pnp.push.verified"),
+	
+	// Line Point
+	LINE_POINT_API_CLIENT_ID("line.point.api.client.id"),
+	LINE_POINT_MESSAGE_PUSH_URL("line.point.push.url"),
+	
 	//PNP監控
 //	PNP_PROC_FLOW("pnp.proc.flow"),
 	

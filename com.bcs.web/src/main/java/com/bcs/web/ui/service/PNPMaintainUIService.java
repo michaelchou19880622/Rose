@@ -40,13 +40,20 @@ public class PNPMaintainUIService {
 		pnpMaintainAccountModelRepository.save(pnpMaintainAccountModel);
 	}
 
-	public List<PNPMaintainAccountModel> findByDepartmentNameAndPccCodeAndAccountAndEmployeeIdAndAccountType(String departmentName, String pccCode, String account, String employeeId, String accountType){
-		return pnpMaintainAccountModelRepository.findByDepartmentNameAndPccCodeAndAccountAndEmployeeIdAndAccountType(departmentName, pccCode, account, employeeId, accountType);
+	public List<PNPMaintainAccountModel> findByDivisionNameAndDepartmentNameAndGroupNameAndPccCodeAndAccountAndEmployeeIdAndAccountType(
+			String divisionName, String departmentName, String groupName, String pccCode, String account, String employeeId, String accountType){
+		return pnpMaintainAccountModelRepository.findByDivisionNameAndDepartmentNameAndGroupNameAndPccCodeAndAccountAndEmployeeIdAndAccountType(
+				divisionName, departmentName, groupName, pccCode, account, employeeId, accountType);
 	}
+	
 	public List<PNPMaintainAccountModel> findByAccountAndSourceSystemAndPnpContent(String account, String sourceSystem, String pnpContent){
 		return pnpMaintainAccountModelRepository.findByAccountAndSourceSystemAndPnpContent(account, sourceSystem, pnpContent);
 	}
    
+	public List<PNPMaintainAccountModel> findByAccountType(String accountType){
+		return pnpMaintainAccountModelRepository.findByAccountType(accountType);
+	}
+	
 //    protected LoadingCache<String, Campaign> dataCache;
 //    
 //	private Timer flushTimer = new Timer();

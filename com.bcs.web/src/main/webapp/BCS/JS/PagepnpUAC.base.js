@@ -15,7 +15,7 @@ $(function(){
 		// add options
 		appendOption('pathwayList', 0, 'BC->PNP->SMS');
 		appendOption('pathwayList', 1, 'BC->SMS');
-		appendOption('pathwayList', 2, 'PNP->SMS');
+		appendOption('pathwayList', 2, 'BC');
 		appendOption('templateList', 0, 'TestTemplate');
 		
 		originalTr = $('.popTr').clone(true);
@@ -51,7 +51,19 @@ $(function(){
 		
 	$('.btn_add.confirm').click(function(){
 		postData = {};
-		postData.pathway = pathway;
+
+		console.info('pathway:', pathway);
+		
+		// postData.pathway = pathway;
+		if(pathway == 'BC-&gt;PNP-&gt;SMS'){
+			postData.pathway = '3';
+		}else if(pathway == 'BC-&gt;SMS'){
+			postData.pathway = '2';
+		}else if(pathway == 'BC'){
+			postData.pathway = '1';
+		}
+		console.info('postData.pathway:', postData.pathway);
+		
 		postData.template = template;
 		postData.pnpContent = PNPContent;
 		postData.account = $('#account').val();
@@ -60,7 +72,9 @@ $(function(){
 		postData.sourceSystem = $('#sourceSystem').val();
 		postData.employeeId = $('#employeeId').val();
 		postData.departmentId = $('#departmentId').val();
+		postData.divisionName = $('#divisionName').val();
 		postData.departmentName = $('#departmentName').val();
+		postData.groupName = $('#groupName').val();
 		postData.pccCode = $('#PccCode').val();
 		postData.accountType = 'Unica';
 		if($('.status')[0].checked){

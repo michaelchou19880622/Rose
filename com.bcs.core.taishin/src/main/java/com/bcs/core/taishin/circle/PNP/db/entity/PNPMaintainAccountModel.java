@@ -1,5 +1,7 @@
 package com.bcs.core.taishin.circle.PNP.db.entity;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -22,7 +24,7 @@ public class PNPMaintainAccountModel extends AbstractBcsEntity{
 	@Column(name = "ID")
 	private Long id;
 
-	@Column(name = "ACCOUNT_TYPE", columnDefinition="nvarchar(50)") // Normal/Unica
+	@Column(name = "ACCOUNT_TYPE", columnDefinition="nvarchar(50)") // Normal / Unica
 	private String accountType;
 	
 	@Column(name = "ACCOUNT", columnDefinition="nvarchar(50)") //帳號
@@ -67,6 +69,12 @@ public class PNPMaintainAccountModel extends AbstractBcsEntity{
 	@Column(name = "STATUS")  //帳號狀態
 	private Boolean status;
 	
+	@Column(name = "MODIFY_TIME")
+	private Date modifyTime;
+	
+	@Column(name = "MODIFY_USER", columnDefinition="nvarchar(50)")
+	private String modifyUser;
+
 	public String getEmployeeId() {
 		return employeeId;
 	}
@@ -190,5 +198,21 @@ public class PNPMaintainAccountModel extends AbstractBcsEntity{
 	public void setGroupName(String groupName) {
 		this.groupName = groupName;
 	}
-	
+
+	public Date getModifyTime() {
+		return modifyTime;
+	}
+
+	public void setModifyTime(Date modifyTime) {
+		this.modifyTime = modifyTime;
+	}
+
+	public String getModifyUser() {
+		return modifyUser;
+	}
+
+	public void setModifyUser(String modifyUser) {
+		this.modifyUser = modifyUser;
+	}
+
 }

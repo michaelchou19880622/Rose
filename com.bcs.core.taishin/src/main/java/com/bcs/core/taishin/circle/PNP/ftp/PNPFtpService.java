@@ -1209,6 +1209,7 @@ public class PNPFtpService {
 			FTPClient.enterLocalPassiveMode();
 			FTPClient.setFileType(FTP.BINARY_FILE_TYPE);
 			FTPClient.setAutodetectUTF8(true);
+			logger.info(setting.getFileEncoding());
 			FTPClient.setControlEncoding(setting.getFileEncoding());
 			FTPClient.changeWorkingDirectory(targetDir);
 			

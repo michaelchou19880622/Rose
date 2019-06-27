@@ -243,7 +243,7 @@ public class LoadFtbPnpDataTask {
 			List<Object> mains = new ArrayList<Object>();
 			
 			for (String fileName : lReturnDatas.keySet()) {
-				String encoding = "UTF-8";
+				String encoding = "";
 				if (pnpFtpSetting.containsFileName(fileName)) {
 					encoding = pnpFtpSetting.getFileEncoding();
 					logger.info(fileName + " encoding:" +  encoding );
@@ -266,9 +266,9 @@ public class LoadFtbPnpDataTask {
 						logger.error("=======白名單內容檢核失敗，轉傳SMS===========");	
 						logger.error("=======pnpMains is null !!!===========");	
 						// 因為路徑可用UI換，所以每次都要重拿連線資訊
-						String changedOrigFileName = fileName.substring(0, fileName.lastIndexOf("_")) + "_L"
-								+ fileName.substring(fileName.lastIndexOf("_"));
-						uploadFileToSMS(source, targetStream,changedOrigFileName);
+//						String changedOrigFileName = fileName.substring(0, fileName.lastIndexOf("_")) + "_L"
+//								+ fileName.substring(fileName.lastIndexOf("_")); 20190627志豪取消檔名加_L
+						uploadFileToSMS(source, targetStream,fileName);
 					}
 					targetStream.close();
 				} else {
@@ -276,9 +276,10 @@ public class LoadFtbPnpDataTask {
 						// 1.1 將檔案rename(加L)放到SMS只定路徑
 					logger.error("=======白名單AccountPccode檢核失敗，轉傳SMS===========");	
 						// 因為路徑可用UI換，所以每次都要重拿連線資訊
-					String changedOrigFileName = fileName.substring(0, fileName.lastIndexOf("_")) + "_L"
-							+ fileName.substring(fileName.lastIndexOf("_"));
-					uploadFileToSMS(source, targetStream,changedOrigFileName);
+//					String changedOrigFileName = fileName.substring(0, fileName.lastIndexOf("_")) + "_L"
+//							+ fileName.substring(fileName.lastIndexOf("_")); 20190627志豪取消檔名加_L
+					
+					uploadFileToSMS(source, targetStream,fileName);
 				}
 			}
 			// 3. save data to db = Status = DRAFT
@@ -349,11 +350,11 @@ public class LoadFtbPnpDataTask {
 				InputStream targetStream = new FileInputStream(targetFile);
 				// 1.1 將檔案rename(加L)放到SMS只定路徑
 				// 因為路徑可用UI換，所以每次都要重拿連線資訊
-				String changedOrigFileName = fileName.substring(0, fileName.lastIndexOf("_")) + "_L"
-						+ fileName.substring(fileName.lastIndexOf("_"));
-				uploadFileToSMS(source, targetStream,changedOrigFileName);
+//				String changedOrigFileName = fileName.substring(0, fileName.lastIndexOf("_")) + "_L"
+//						+ fileName.substring(fileName.lastIndexOf("_")); 20190627志豪取消檔名加_L
+				logger.info("uploadFileToSMS : "+fileName);
+				uploadFileToSMS(source, targetStream,fileName);
 
-				logger.info("uploadFileToSMS : "+changedOrigFileName);
 			}
 
 			// 4. remove file

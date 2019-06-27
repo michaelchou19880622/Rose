@@ -184,7 +184,7 @@ public class PNPFtpSetting {
 	
 	public String getFileEncoding() {
 		if (StringUtils.isBlank(fileEncoding)) {
-			fileEncoding = "UTF-8";
+			fileEncoding = "big5";
 		}
 		return fileEncoding;
 	}

@@ -3,6 +3,7 @@ package com.bcs.core.taishin.circle.PNP.scheduler;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -164,6 +165,7 @@ public class PnpSMSMsgService {
 	 * @throws IOException
 	 */
 	private InputStream smsGetTargetStream(PNPFTPType type, PnpMain pnpMain, List<? super PnpDetail> details) throws IOException{
+		logger.info("====================convertEncodeToBig5====================");
 		if (type.equals(PNPFTPType.MING)) {
 			return this.smsMingInputStream((PnpMainMing)pnpMain, details);
 		}else if (type.equals(PNPFTPType.MITAKE)) {
@@ -249,7 +251,7 @@ public class PnpSMSMsgService {
 		//來源資料HEADER
 		StringBuilder header = new StringBuilder();
 		header.append(pnpMain.getGroupIDSource()+"&");
-		header.append(pnpMain.getUsername()+"&");
+		header.append(pnpMain.getUsername()+"_L&");//20190627志豪新加需求，檔名帳號修改為XXXXX_L時，也要置換內容帳號為XXXXX_L
 		header.append(pnpMain.getUserPassword()+"&");
 		header.append(pnpMain.getOrderTime()+"&");
 		header.append(pnpMain.getValidityTime()+"&");
@@ -307,7 +309,7 @@ public class PnpSMSMsgService {
 		//來源資料HEADER
 		StringBuilder header = new StringBuilder();
 		header.append(pnpMainEvery8d.getSubject()+"&");
-		header.append(pnpMainEvery8d.getUserID()+"&");
+		header.append(pnpMainEvery8d.getUserID()+"_L&");//20190627志豪新加需求，檔名帳號修改為XXXXX_L時，也要置換內容帳號為XXXXX_L
 		header.append(pnpMainEvery8d.getPassword()+"&");
 		header.append(pnpMainEvery8d.getOrderTime()+"&");
 		header.append(pnpMainEvery8d.getExprieTime()+"&");
@@ -375,7 +377,7 @@ public class PnpSMSMsgService {
 		//來源資料HEADER
 		StringBuilder header = new StringBuilder();
 		header.append(pnpMainUnica.getSubject()+"&");
-		header.append(pnpMainUnica.getUserID()+"&");
+		header.append(pnpMainUnica.getUserID()+"_L&");//20190627志豪新加需求，檔名帳號修改為XXXXX_L時，也要置換內容帳號為XXXXX_L
 		header.append(pnpMainUnica.getPassword()+"&");
 		header.append(pnpMainUnica.getOrderTime()+"&");
 		header.append(pnpMainUnica.getExprieTime()+"&");
@@ -461,16 +463,19 @@ public class PnpSMSMsgService {
 			body.append(pnpDetailMing.getPhone()+";;");
 			body.append(pnpDetailMing.getMsg()+";;");
 			body.append(pnpDetailMing.getDetailScheduleTime()+";;");
-			body.append(pnpDetailMing.getAccount1()+";;");
-			body.append(pnpDetailMing.getAccount2()+";;");
+			body.append(pnpDetailMing.getAccount1()+"_L;;");//20190627志豪新加需求，檔名帳號修改為XXXXX_L時，也要置換內容帳號為XXXXX_L
+			body.append(pnpDetailMing.getAccount2()+"_L;;");
 			body.append(pnpDetailMing.getVariable1()+";;");
 			body.append(pnpDetailMing.getVariable2()+";;");
 			body.append(pnpDetailMing.getKeepSecond()+"\r\n");
 		}
-		
 		InputStream targetStream = new ByteArrayInputStream((body.toString()).getBytes());
 		return targetStream;
 	}
+	
+//	private String convertEncodeToBig5(String str) throws UnsupportedEncodingException {
+//		return  new String(str.getBytes("UTF-8"),"big5");
+//	}
 	
 	public void uploadFileToSMS(String source ,InputStream targetStream, String fileName) throws IOException {
 		logger.info("start uploadFileToSMS ");

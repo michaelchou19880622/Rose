@@ -27,7 +27,8 @@ public class PNPMaintainAccountModelCustomImpl implements PNPMaintainAccountMode
 	private EntityManager entityManager;
 	
 	@SuppressWarnings("unchecked")
-	public List<PNPMaintainAccountModel> queryUseConditions(String divisionName, String departmentName, String groupName, String pccCode, String account, String employeeId, String accountType) {
+	public List<PNPMaintainAccountModel> queryUseConditions(String divisionName, String departmentName, String groupName, 
+			String pccCode, String account, String employeeId, String accountType, Boolean status) {
 		Date  now = Calendar.getInstance().getTime();
 		StringBuffer sqlString = new StringBuffer();
 		sqlString.append("select * from BCS_PNP_MAINTAIN_ACCOUNT where 1=1 ");
@@ -52,6 +53,10 @@ public class PNPMaintainAccountModelCustomImpl implements PNPMaintainAccountMode
 		if(StringUtils.isNotBlank(accountType)){
 			sqlString.append("AND ACCOUNT_TYPE = :accountType ");
 		}
+		if(status != null){
+			sqlString.append("AND STATUS = :status ");
+		}
+		
 		Query query = (Query) entityManager.createNativeQuery(sqlString.toString(),PNPMaintainAccountModel.class);
 		if(StringUtils.isNotBlank(divisionName)){
 			((javax.persistence.Query) query).setParameter("divisionName", divisionName);
@@ -74,7 +79,9 @@ public class PNPMaintainAccountModelCustomImpl implements PNPMaintainAccountMode
 		if(StringUtils.isNotBlank(accountType)){
 			((javax.persistence.Query) query).setParameter("accountType", accountType);
 		}
-		
+		if(status != null){
+			((javax.persistence.Query) query).setParameter("status", status);
+		}
 		List<PNPMaintainAccountModel> ResultList = ((javax.persistence.Query) query).getResultList();
 		
 		return ResultList;

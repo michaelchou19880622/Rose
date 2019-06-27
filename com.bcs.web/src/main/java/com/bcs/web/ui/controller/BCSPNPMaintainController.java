@@ -133,8 +133,8 @@ public class BCSPNPMaintainController extends BCSBaseController {
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/getPNPMaintainAccountList", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> getPNPMaintainAccountList(
-			HttpServletRequest request,  HttpServletResponse response, 
-			@CurrentUser CustomUser customUser, @RequestBody PNPMaintainAccountModel pnpMaintainAccountModel) throws IOException {		
+			HttpServletRequest request,  HttpServletResponse response,  @CurrentUser CustomUser customUser, 
+			@RequestBody PNPMaintainAccountModel pnpMaintainAccountModel, @RequestParam Boolean status) throws IOException {		
 		try {
 			String divisionName = pnpMaintainAccountModel.getDivisionName();
 			String departmentName = pnpMaintainAccountModel.getDepartmentName();
@@ -144,21 +144,8 @@ public class BCSPNPMaintainController extends BCSBaseController {
 			String employeeId = pnpMaintainAccountModel.getEmployeeId();
 			String accountType = pnpMaintainAccountModel.getAccountType();
 			
-//			// is blank
-//			if(StringUtils.isBlank(divisionName) && StringUtils.isBlank(departmentName) && StringUtils.isBlank(groupName) &&
-//					StringUtils.isBlank(account) && StringUtils.isBlank(employeeId)) {
-//				List<PNPMaintainAccountModel> list = pnpMaintainUIService.findByAccountType(accountType);
-//				int Length = Math.min(list.size(), 10);
-//				list = list.subList(0, Length);
-//				return new ResponseEntity<>(list, HttpStatus.OK);
-//			}
-//			
-//			// is not blank
-//			List<PNPMaintainAccountModel> list = pnpMaintainUIService.findByDivisionNameAndDepartmentNameAndGroupNameAndPccCodeAndAccountAndEmployeeIdAndAccountType(
-//					divisionName, departmentName, groupName, pccCode, account, employeeId, accountType);
-			
 			List<PNPMaintainAccountModel> list = pnpMaintainUIService.queryUsePageCoditions(
-					divisionName, departmentName, groupName, pccCode, account, employeeId, accountType);
+					divisionName, departmentName, groupName, pccCode, account, employeeId, accountType, status);
 			return new ResponseEntity<>(list, HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));

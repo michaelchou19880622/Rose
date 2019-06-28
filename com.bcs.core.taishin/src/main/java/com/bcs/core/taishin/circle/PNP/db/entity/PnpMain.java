@@ -93,9 +93,14 @@ public class PnpMain extends AbstractBcsEntity {
 	@Column(name = "ORIG_FILE_NAME", columnDefinition="nvarchar(200)")
 	private String origFileName;
 	
+	
 	@Column(name = "MODIFY_TIME")
 	private Date modifyTime;
 		
+	// 不會異動ＤＢ 物件傳遞暫存用，資料會存在Detail中
+	@Transient
+	private String smsFileName;
+	
 	// 不會異動ＤＢ 物件傳遞暫存用
 	@Transient
 	private List<? super PnpDetail> pnpDetails;
@@ -320,6 +325,16 @@ public class PnpMain extends AbstractBcsEntity {
 
 	public void setTemplateActions(List<PnpContentTemplateMsgAction> templateActions) {
 		this.templateActions = templateActions;
+	}
+
+
+	public String getSmsFileName() {
+		return smsFileName;
+	}
+
+
+	public void setSmsFileName(String smsFileName) {
+		this.smsFileName = smsFileName;
 	}
 
 }

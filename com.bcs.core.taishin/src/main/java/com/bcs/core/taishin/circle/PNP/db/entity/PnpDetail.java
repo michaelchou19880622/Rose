@@ -84,6 +84,10 @@ public class PnpDetail extends AbstractBcsEntity {
 	@Column(name = "SMS_TIME")
 	private Date smsTime;
 	
+	//轉SMS使用的檔名 ；因為轉SMS時，是抓當下資料庫發送失敗的資料，組成一個檔案來轉送SMS，有可能一個原檔轉到SMS時變成多個檔案(發送時間問題)，所以在detail紀錄對應的SMS檔案
+	@Column(name = "SMS_FILE_NAME", columnDefinition="nvarchar(200)")
+	private String smsFileName;
+	
 	@PrePersist
 	public void prePersist() {
 		createTime = Calendar.getInstance().getTime();
@@ -239,4 +243,12 @@ public class PnpDetail extends AbstractBcsEntity {
 		this.pnpDeliveryExpireTime = pnpDeliveryExpireTime;
 	}
 
+	public String getSmsFileName() {
+		return smsFileName;
+	}
+
+	public void setSmsFileName(String smsFileName) {
+		this.smsFileName = smsFileName;
+	}
+	
 }

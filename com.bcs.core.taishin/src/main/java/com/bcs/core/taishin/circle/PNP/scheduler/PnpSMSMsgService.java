@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -135,14 +136,21 @@ public class PnpSMSMsgService {
 					}else {
 						pnpMain.setPnpDetails(details);
 						//更換檔名(加L)
+						//20190628志豪修改檔名邏輯，發送失敗的資料檔名(O_PRMSMS_250102OCSPENDING_20190624155433000.txt)之yyyyMMddHHmmssSSS置換為現在的時間後轉發SMS
 						String origFileName = pnpMain.getOrigFileName();
-						String changedOrigFileName = origFileName.substring(0, origFileName.lastIndexOf("_"))+"_L"+origFileName.substring(origFileName.lastIndexOf("_"));
+						SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+						Calendar calendar = Calendar.getInstance();
+						calendar.setTime(new Date());
+						String smsFileName = origFileName.substring(0, origFileName.lastIndexOf("_"))+"_L_"+sdf.format(calendar.getTime())+".txt";
+						pnpMain.setSmsFileName(smsFileName);
+//						String changedOrigFileName = origFileName.substring(0, origFileName.lastIndexOf("_"))+"_L"+origFileName.substring(origFileName.lastIndexOf("_"));
 						logger.info("==================================================");
-						logger.info(changedOrigFileName);
+						logger.info("origFileName :"+origFileName);
+						logger.info("smsFileName :"+smsFileName);
 						logger.info("==================================================");
 					
 						//傳檔案到SMS FTP
-						uploadFileToSMS(type.getSource() , smsGetTargetStream(type, pnpMain, details), changedOrigFileName);
+						uploadFileToSMS(type.getSource() , smsGetTargetStream(type, pnpMain, details), smsFileName);
 						//update待發送資料 status(Sending) &excuter name(hostname)
 						updateStatusSuccess(procApName,pnpMain , details);
 						pnpAkkaService.tell(pnpMain);
@@ -203,14 +211,22 @@ public class PnpSMSMsgService {
 					}else {
 						pnpMain.setPnpDetails(details);
 						//更換檔名(加L)
+						//20190628志豪修改檔名邏輯，發送失敗的資料檔名(O_PRMSMS_250102OCSPENDING_20190624155433000.txt)之yyyyMMddHHmmssSSS置換為現在的時間後轉發SMS
 						String origFileName = pnpMain.getOrigFileName();
-						String changedOrigFileName = origFileName.substring(0, origFileName.lastIndexOf("_"))+"_L"+origFileName.substring(origFileName.lastIndexOf("_"));
+						
+						SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+						Calendar calendar = Calendar.getInstance();
+						calendar.setTime(new Date());
+						String smsFileName = origFileName.substring(0, origFileName.lastIndexOf("_"))+"_L_"+sdf.format(calendar.getTime())+".txt";
+						pnpMain.setSmsFileName(smsFileName);
+//						String changedOrigFileName = origFileName.substring(0, origFileName.lastIndexOf("_"))+"_L"+origFileName.substring(origFileName.lastIndexOf("_"));
 						logger.info("==================================================");
-						logger.info(changedOrigFileName);
+						logger.info("origFileName :"+origFileName);
+						logger.info("smsFileName :"+smsFileName);
 						logger.info("==================================================");
 					
 						//傳檔案到SMS FTP
-						uploadFileToSMS(type.getSource() , smsGetTargetStream(type, pnpMain, details), changedOrigFileName);
+						uploadFileToSMS(type.getSource() , smsGetTargetStream(type, pnpMain, details), smsFileName);
 						//update待發送資料 status(Sending) &excuter name(hostname)
 						updateStatusSuccess(procApName,pnpMain , details);
 						pnpAkkaService.tell(pnpMain);
@@ -520,6 +536,7 @@ public class PnpSMSMsgService {
 		if (allDetails != null) {
 			List<Object> details = new ArrayList<>();
 			for(Object detail : allDetails) {
+				((PnpDetail) detail).setSmsFileName(main.getSmsFileName());
 				((PnpDetail) detail).setSmsTime(now);
 				((PnpDetail) detail).setSendTime(now);
 				((PnpDetail) detail).setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_COMPLETE);

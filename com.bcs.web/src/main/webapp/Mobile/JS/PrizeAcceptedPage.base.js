@@ -15,8 +15,8 @@ $(function(){
 			var gameData = response[gameId];
 			console.info("response :  ",response[gameId]);
 			
-			$('.headerImage').find('img').attr('src', '../bcs/getResource/IMAGE/' + gameData[2]);
-			$('.footerImage').find('img').attr('src', '../bcs/getResource/IMAGE/' + gameData[3]);
+			$('.headerImage').find('img').attr('src', '../bcs/getCdnResource/IMAGE/' + gameData[2]);
+			$('.footerImage').find('img').attr('src', '../bcs/getCdnResource/IMAGE/' + gameData[3]);
 		}).fail(function(response){
 			console.info(response);
 			$.FailResponse(response);

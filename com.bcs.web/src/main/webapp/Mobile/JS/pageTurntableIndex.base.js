@@ -31,9 +31,9 @@ $(function (){
 				});
 			}
 			
-			$('.turntable-bg').css('background', 'url(../bcs/getResource/IMAGE/' + gameData[3] + ')');
-			$('#pointer').attr('src', '../bcs/getResource/IMAGE/' + gameData[4]);
-			$('#rotate').attr('src', '../bcs/getResource/IMAGE/' + gameData[2]);
+			$('.turntable-bg').css('background', 'url(../bcs/getCdnResource/IMAGE/' + gameData[3] + ')');
+			$('#pointer').attr('src', '../bcs/getCdnResource/IMAGE/' + gameData[4]);
+			$('#rotate').attr('src', '../bcs/getCdnResource/IMAGE/' + gameData[2]);
 		}).fail(function(response){
 			console.info(response);
 		}).done(function(){
@@ -54,7 +54,7 @@ $(function (){
 				bRotate = !bRotate;
 				
 				var prizeTr = prizeTrTemplate.clone(true);
-				prizeTr.find('.prizeImage img').attr('src', "../bcs/getResource/IMAGE/" + prizeList[awards].imgId);
+				prizeTr.find('.prizeImage img').attr('src', "../bcs/getCdnResource/IMAGE/" + prizeList[awards].imgId);
 				prizeTr.find('.prizeName').html(prizeList[awards].prizeName);
 				prizeTr.find('.prizeContent').html(prizeList[awards].prizeContent);
 				

@@ -44,6 +44,10 @@ public class PNPMaintainUIService {
 		pnpMaintainAccountModelRepository.save(pnpMaintainAccountModel);
 	}
 
+	public void delete(PNPMaintainAccountModel pnpMaintainAccountModel) {
+		pnpMaintainAccountModelRepository.delete(pnpMaintainAccountModel);
+	}
+	
 	public List<PNPMaintainAccountModel> findByDivisionNameAndDepartmentNameAndGroupNameAndPccCodeAndAccountAndEmployeeIdAndAccountType(
 			String divisionName, String departmentName, String groupName, String pccCode, String account, String employeeId, String accountType){
 		return pnpMaintainAccountModelRepository.findByDivisionNameAndDepartmentNameAndGroupNameAndPccCodeAndAccountAndEmployeeIdAndAccountType(

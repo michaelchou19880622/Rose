@@ -172,6 +172,7 @@ public class BillingNoticeContentTemplateMsgService {
         				+ "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TITLE,"
         				+ "BCS_BN_CONTENT_TEMPLATE.CURFEW_START_TIME, "
         				+ "BCS_BN_CONTENT_TEMPLATE.CURFEW_END_TIME, "
+        				+ "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TEXT, "
         				+ "BCS_BN_CONTENT_TEMPLATE_ACTION.ACTION_TYPE,"
         				+ "BCS_BN_CONTENT_TEMPLATE_ACTION.ACTION_LABEL,"
         				+ "BCS_BN_CONTENT_TEMPLATE_ACTION.ACTION_DATA,"
@@ -197,7 +198,7 @@ public class BillingNoticeContentTemplateMsgService {
 						map.put(o[0].toString(), new ArrayList<String>());
 						continue;
 					}else{ //重覆的templateId，因為有多個action
-						for(int j=8;j<=13;j++){
+						for(int j=9;j<=14;j++){
 							if (o[j] == null) {
 								dataList.add(null);
 								//logger.info("j=" + j  + ", null");

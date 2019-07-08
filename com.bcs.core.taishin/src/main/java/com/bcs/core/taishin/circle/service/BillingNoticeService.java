@@ -410,6 +410,7 @@ public class BillingNoticeService {
 			
 			// child columns
 			List<BillingNoticeContentTemplateMsg> childs = billingNoticeContentTemplateMsgRepository.findByParentTemplateId(templateMsg.getTemplateId());
+			logger.info("childs:" + childs);
 			for(BillingNoticeContentTemplateMsg child : childs) {			
 				// column
 				columnObject = new JSONObject();
@@ -419,7 +420,7 @@ public class BillingNoticeService {
 				//logger.info("imageUrl1: " + imageUrl);
 				columnObject.put("thumbnailImageUrl",  imageUrl);
 				columnObject.put("title", detail.getTitle());
-				columnObject.put("text", detail.getText());
+				columnObject.put("text", child.getTemplateText());
 				// action
 				actionsArray = new JSONArray();
 				actions = billingNoticeContentTemplateMsgActionRepository.findNotDeletedTemplateId(child.getTemplateId());
@@ -451,7 +452,7 @@ public class BillingNoticeService {
 		// messages
 		messagesArray.put(message);
 		
-		//logger.info("messageArray1: " + messagesArray.toString());
+		logger.info("messageArray1: " + messagesArray.toString());
 		return messagesArray;
 	}
 

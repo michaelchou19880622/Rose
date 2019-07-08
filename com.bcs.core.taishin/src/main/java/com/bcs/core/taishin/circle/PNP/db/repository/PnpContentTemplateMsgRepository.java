@@ -17,4 +17,12 @@ public interface PnpContentTemplateMsgRepository extends EntityRepository<PnpCon
 	
 	@Query("select  b from PnpContentTemplateMsg b  where b.templateTitle = ?1 and b.status <> 'DELETE' ")
 	public List<PnpContentTemplateMsg> findByTemplateTitle(String templateTitle);
+	
+	//20190708
+	@Query("select  b from PnpContentTemplateMsg b  where b.templateId = ?1 and b.status <> 'DELETE' ")
+	public List<PnpContentTemplateMsg> findByTemplateId(String templateId);	
+	
+	@Query("select  b from PnpContentTemplateMsg b  where b.templateParentId = ?1 and b.status <> 'DELETE' ")
+	public List<PnpContentTemplateMsg> findByParentTemplateId(String parentTemplateId);	
+	//20190708
 }

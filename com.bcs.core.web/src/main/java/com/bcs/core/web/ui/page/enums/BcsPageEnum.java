@@ -129,6 +129,8 @@ public enum BcsPageEnum {
 	BillingNoticeListPage("/BCS/Views/PageBN2"),
 	
     // PNP Maintain
+   	PnpCreatePage("/BCS/Views/PagePNP1"),
+	PnpListPage("/BCS/Views/PagePNP2"), 
     PNPNormalAccountListPage("/BCS/Views/PagepnpNAL"),
     PNPNormalAccountCreatePage("/BCS/Views/PagepnpNAC"),
     PNPUnicaAccountListPage("/BCS/Views/PagepnpUAL"),

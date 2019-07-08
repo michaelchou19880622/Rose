@@ -52,6 +52,12 @@
                         <li th:classappend="${currentPage == 'Page25'} ? 'ExSelected'">
                         	<a th:href="@{/bcs/edit/tracingGeneratePage}"><span>建立追蹤網址</span></a>
                         </li>
+                        <li th:classappend="${currentPage == 'PagePNP2'} ? 'ExSelected'">
+                            <a th:href="@{/bcs/edit/pnpListPage}"><span>PNP訊息樣板列表</span></a>
+                        </li>
+                        <li th:classappend="${currentPage == 'PagePNP1'} ? 'ExSelected'">
+                        	<a th:href="@{/bcs/edit/pnpCreatePage}"><span>建立PNP訊息樣板</span></a>
+                        </li>
                     </ul>
                 </li>
                 <li sec:authorize="hasAnyRole('NotShowRole')">

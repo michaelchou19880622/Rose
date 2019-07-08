@@ -93,15 +93,26 @@ $(function(){
 	    				}
     				}
     				
+    				// 7	TEMPLATE_TEXT
+    				if(templateCount > 1){
+    					templateTable.find('#contentText').val(templateData[7]);
+    				}
+    				
+    				
     				// Hide Tr
+    				
+    				if(templateCount <= 1){
+    					templateTable.find('.contentTextTr').css('display','none');
+    				}
+    				
     				if(templateCount > 1){
     					templateTable.find('.templateSwitchTr').css('display','none');
     					templateTable.find('.curfewSwitchTr').css('display','none');
     					templateTable.find('.altTextTr').css('display','none');
     				}
     				
-    				// 7-12 ACTIONS
-    				actionNumber = (templateData.length-7)/6;
+    				// 8-13 ACTIONS
+    				actionNumber = (templateData.length-8)/6;
     				console.info('actionNumber:', actionNumber);
     				
     				templateTable.find(".actionTh").prop("rowspan", actionNumber * 3 + 3);
@@ -109,20 +120,20 @@ $(function(){
     				for(var i=0; i<actionNumber; i++){
     					actionTr = generateActionTr(i);
     					    					
-    					actionType1 = templateData[7+6*i];
+    					actionType1 = templateData[8+6*i];
     					
     					actionTypes = actionTr.find('.actionType');
     					
-    					actionTr.find("input[name='label']").val(templateData[8+6*i]);
+    					actionTr.find("input[name='label']").val(templateData[9+6*i]);
     					switch(actionType1){
 							case 'postback':
-								actionTr.find("input[name='data']").val(templateData[9+6*i]);
+								actionTr.find("input[name='data']").val(templateData[10+6*i]);
 								break;
 							case 'message':
-								actionTr.find("input[name='text']").val(templateData[10+6*i]);
+								actionTr.find("input[name='text']").val(templateData[11+6*i]);
 								break;
 							case 'uri':
-								actionTr.find("input[name='text']").val(templateData[11+6*i]);
+								actionTr.find("input[name='text']").val(templateData[12+6*i]);
 								break;
     					}
     					
@@ -602,6 +613,8 @@ $(function(){
 		templateData.templateSwitch = templateSwitches[0].checked;
 		
 		templateData.altText = templateTable.find('#altText').val();
+		console.info("contentText:", templateTable.find('#contentText').val());
+		templateData.templateText = templateTable.find('#contentText').val();
 		templateData.templateType = templateType;
 		templateData.templateImageId = templateTable.find('.imgId').val();
 		templateData.templateActions = actions;

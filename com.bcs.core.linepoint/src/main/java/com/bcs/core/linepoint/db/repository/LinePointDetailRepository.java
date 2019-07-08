@@ -17,6 +17,9 @@ public interface LinePointDetailRepository extends EntityRepository<LinePointDet
     @Query(value = "select x from LinePointDetail x where x.status = ?1 and x.linePointMainId = ?2 order by x.triggerTime desc")
 	public List<LinePointDetail> findByStatusAndLinePointMainId(String status, Long linePointMainId);
     
+    @Transactional(timeout = 30)
+    public LinePointDetail findByOrderKeyAndStatus(String orderKey, String status);
+    
 //	public LinePointDetail findBySerialId(String serialId);
 //	
 //	public List<LinePointDetail> findByStatus(String status);

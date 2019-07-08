@@ -3,6 +3,7 @@ package com.bcs.core.linepoint.akka.handler;
 import org.json.JSONArray;
 
 import com.bcs.core.linepoint.api.model.LinePointPushModel;
+import com.bcs.core.linepoint.db.entity.LinePointDetail;
 import com.bcs.core.spring.ApplicationContextProvider;
 import com.bcs.core.utils.AkkaRouterFactory;
 
@@ -11,13 +12,15 @@ import akka.actor.UntypedActor;
 
 public class LinePointPushMasterActor extends UntypedActor {
 	private final ActorRef pushMessageRouterActor;
+	private final ActorRef pushApiRouterActor;
 //	private final ActorRef pushMessageRecordRouterActor;
 //	private final ActorRef ftpTaskRouterActor;
 	
 	public LinePointPushMasterActor(){
 	    pushMessageRouterActor = new AkkaRouterFactory<LinePointPushMessageActor>(getContext(), LinePointPushMessageActor.class, true).routerActor;
-//	    pushMessageRecordRouterActor = new AkkaRouterFactory<LinePointPushMessageRecordActor>(getContext(), LinePointPushMessageRecordActor.class, true).routerActor;
-//	    ftpTaskRouterActor = new AkkaRouterFactory<LinePointFtpTaskActor>(getContext(), LinePointFtpTaskActor.class, true).routerActor;
+	    pushApiRouterActor = new AkkaRouterFactory<LinePointPushApiActor>(getContext(), LinePointPushApiActor.class, true).routerActor;
+	    //pushMessageRecordRouterActor = new AkkaRouterFactory<LinePointPushMessageRecordActor>(getContext(), LinePointPushMessageRecordActor.class, true).routerActor;
+	    //ftpTaskRouterActor = new AkkaRouterFactory<LinePointFtpTaskActor>(getContext(), LinePointFtpTaskActor.class, true).routerActor;
 	}
 
 	@Override
@@ -44,7 +47,10 @@ public class LinePointPushMasterActor extends UntypedActor {
 				pushMessageRouterActor.tell(pushApiModel_clone, this.getSelf());
 			}
 			
-		} 
+		}else if (object instanceof LinePointDetail) {
+			LinePointDetail linePointDetail = (LinePointDetail) object;
+			pushApiRouterActor.tell(linePointDetail, this.getSelf());
+		}
 //		else if(object instanceof FtpTaskModel) {
 //			FtpTaskModel ftpTaskModel = (FtpTaskModel) object;
 //			

@@ -91,6 +91,7 @@ public enum CONFIG_STR {
 	SSO_LOGIN_URL("sso.login.url"),
 	
 	API_ORIGINAL_TOKEN("api.original.token"),
+	LINE_POINT_API_ORIGINAL_TOKEN("line.point.api.original.token"),
 	AES_SECRET_KEY("aes.secret.key"),
 	AES_INITIALIZATION_VECTOR("aes.initialization.vector"),
 
@@ -313,6 +314,7 @@ public enum CONFIG_STR {
 	// Line Point
 	LINE_POINT_API_CLIENT_ID("line.point.api.client.id"),
 	LINE_POINT_MESSAGE_PUSH_URL("line.point.push.url"),
+	LINE_POINT_MESSAGE_CANCEL_URL("line.point.cancel.url"),
 	
 	//PNP監控
 //	PNP_PROC_FLOW("pnp.proc.flow"),

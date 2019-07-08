@@ -38,6 +38,10 @@ public class LinePointDetailService {
 	public LinePointDetail findOne(Long msgId){
 		return linePointDetailRepository.findOne(msgId);
 	}
+
+	public LinePointDetail findByOrderKeyAndStatus(String orderKey, String status){
+		return linePointDetailRepository.findByOrderKeyAndStatus(orderKey, status);
+	}
     
 	public List<LinePointDetail> findSuccess(Long linePointMainId){
 		return linePointDetailRepository.findByStatusAndLinePointMainId(LinePointDetail.STATUS_SUCCESS, linePointMainId);

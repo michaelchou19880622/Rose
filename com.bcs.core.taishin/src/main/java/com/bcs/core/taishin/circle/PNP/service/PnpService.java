@@ -610,4 +610,13 @@ public class PnpService {
 		return messageArray;
 	}
 
+	private JSONArray combineLineTemplateMessage() {
+		
+		
+		
+		
+		
+		
+		return null;
+	}
 }

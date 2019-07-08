@@ -52,6 +52,47 @@ $(function(){
 		
 	};
 
+	$('.btn_delete.search').click(function(){
+		divisionName = $('#divisionName').val();
+		departmentName = $('#departmentName').val();
+		groupName = $('#groupName').val();
+		pccCode = $('#pccCode').val();
+		account = $('#account').val();
+		employeeId = $('#employeeId').val();
+		
+		var postData = {
+				divisionName: divisionName,
+				departmentName: departmentName,
+				groupName: groupName,
+				pccCode: pccCode,
+				account: account,
+				employeeId: employeeId,
+				accountType: 'Normal'
+		};
+		console.info('postData:', postData);
+	        
+		$.ajax({
+			type : 'DELETE',
+			url : bcs.bcsContextPath + '/edit/deletePNPMaintainAccount',
+            cache: false,
+            contentType: 'application/json',
+            processData: false,
+			data : JSON.stringify(postData)
+		}).success(function(response) {
+			console.info(response);
+			if(response == 'User No Delete Right'){
+				alert("無權限刪除");
+			}else{
+				alert("刪除成功");
+			}
+		}).fail(function(response) {
+			console.info(response);
+			$.FailResponse(response);
+		}).done(function() {
+			window.location.replace('pnpNormalAccountListPage');
+        });
+	});
+	
 	$('.btn_add.search').click(function(){
 		if(templateCount > 0){
 			deleteTemplate();

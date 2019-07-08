@@ -88,6 +88,8 @@ public class BCSBillingNoticeTemplateMsgController {
 			@RequestParam String actionType, 
 			@RequestParam String templateId) throws IOException {
 		
+		logger.info("createTemplateMsgModels:"+createTemplateMsgModels);
+		
 		try {
 				
 			if (!validateData(createTemplateMsgModels)) {
@@ -164,7 +166,7 @@ public class BCSBillingNoticeTemplateMsgController {
 				contentTemplateMsg.setProductSwitch(createTemplateMsgModel.getTemplateSwitch());
 				
 				//
-				// 1	ALT_TEXT
+				// 1 ALT_TEXT
 				if(!createTemplateMsgModel.getAltText().isEmpty()){
 					contentTemplateMsg.setAltText(createTemplateMsgModel.getAltText());
 				}
@@ -176,6 +178,9 @@ public class BCSBillingNoticeTemplateMsgController {
 				contentTemplateMsg.setCurfewStartTime(createTemplateMsgModel.getCurfewStartTime());
 				contentTemplateMsg.setCurfewEndTime(createTemplateMsgModel.getCurfewEndTime());
 				//logger.info("Curfew Time: " + contentTemplateMsg.getCurfewStartTime().toString() + ", " + contentTemplateMsg.getCurfewEndTime().toString());
+				
+				// 7 TEMPLATE_TEXT
+				contentTemplateMsg.setTemplateText(createTemplateMsgModel.getTemplateText());
 				
 				contentTemplateMsg.setTemplateLevel(createTemplateMsgModel.getTemplateLevel());
 				

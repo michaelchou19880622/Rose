@@ -23,8 +23,8 @@ public class LinePointDetail extends AbstractBcsEntity {
 	public static final String STATUS_WAIT = "WAIT";
  	public static final String STATUS_SUCCESS = "SUCCESS";
  	public static final String STATUS_FAIL = "FAIL";
-	public static final String TRANSCATION_TYPE_ISSUE = "ISSUE";
 	public static final String SOURCE_ISSUE_API = "ISSUE_API";
+	public static final String SOURCE_CANCEL_API = "CANCEL_API";
  	public static final String DESCRIPTION_OVERFLOW = "OVERFLOW";
 	
 	@Id
@@ -47,6 +47,10 @@ public class LinePointDetail extends AbstractBcsEntity {
 	private String campName;
 	@Column(name = "CUSTID", columnDefinition="nvarchar(20)")
 	private String custid;
+	@Column(name = "NOTE", columnDefinition="nvarchar(100)")
+	private String note;
+	@Column(name = "CANCEL_TRANSCATION_ID", columnDefinition="varchar(20)")
+	private String cancelTranscationId;	
 	
 	// Post Model
 	@Column(name = "UID", columnDefinition="varchar(50)")
@@ -65,7 +69,7 @@ public class LinePointDetail extends AbstractBcsEntity {
 	private Date triggerTime;
 	@Column(name = "SEND_TIME")
 	private Date sendTime;
-
+	
 	// Success Response Model
 	@Column(name = "TRANSCATION_ID", columnDefinition="varchar(20)")
 	private String transcationId;
@@ -75,6 +79,10 @@ public class LinePointDetail extends AbstractBcsEntity {
 	private String transcationType;	
 	@Column(name = "TRANSCATION_AMOUNT")
 	private Integer transactionAmount;
+	@Column(name = "CANCELLED_AMOUNT")
+	private Integer cancelledAmount;
+	@Column(name = "REMAINING_AMOUNT")
+	private Integer remainingAmount;
 	@Column(name = "BALANCE")
 	private Integer balance;
 	
@@ -223,5 +231,29 @@ public class LinePointDetail extends AbstractBcsEntity {
 	}
 	public void setLinePointMainId(Long linePointMainId) {
 		this.linePointMainId = linePointMainId;
+	}
+	public String getNote() {
+		return note;
+	}
+	public void setNote(String note) {
+		this.note = note;
+	}
+	public Integer getCancelledAmount() {
+		return cancelledAmount;
+	}
+	public void setCancelledAmount(Integer cancelledAmount) {
+		this.cancelledAmount = cancelledAmount;
+	}
+	public Integer getRemainingAmount() {
+		return remainingAmount;
+	}
+	public void setRemainingAmount(Integer remainingAmount) {
+		this.remainingAmount = remainingAmount;
+	}
+	public String getCancelTranscationId() {
+		return cancelTranscationId;
+	}
+	public void setCancelTranscationId(String cancelTranscationId) {
+		this.cancelTranscationId = cancelTranscationId;
 	}
 }

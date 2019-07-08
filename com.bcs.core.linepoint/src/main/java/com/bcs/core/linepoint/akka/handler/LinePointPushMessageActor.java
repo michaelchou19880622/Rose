@@ -36,17 +36,15 @@ public class LinePointPushMessageActor extends UntypedActor {
 	public void onReceive(Object object) throws Exception {
 		if(object instanceof LinePointPushModel) {
 			// get bean
-			LinePointMainRepository linePointMainRepository = ApplicationContextProvider.getApplicationContext().getBean(LinePointMainRepository.class);
 			LinePointDetailService linePointDetailService = ApplicationContextProvider.getApplicationContext().getBean(LinePointDetailService.class);
 			
 			// get push data
 			LinePointPushModel pushApiModel = (LinePointPushModel) object;
-			Long eventId = pushApiModel.getEventId();
 			JSONArray uids = pushApiModel.getUid();
 			
 			// initialize request header
 			HttpHeaders headers = new HttpHeaders();
-			String accessToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelToken.toString(), true); // TaishinBank.ChannelToken
+			String accessToken = CoreConfigReader.getString("LinePoint", CONFIG_STR.ChannelToken.toString(), true); // LinePoint.ChannelToken
 			headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
 			headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 			
@@ -58,8 +56,6 @@ public class LinePointPushMessageActor extends UntypedActor {
 			requestBody.put("amount", pushApiModel.getAmount());
 			
 			for(Integer i = 0; i < uids.length(); i++) {
-				// count examine
-				LinePointMain linePointMain = linePointMainRepository.findOne(eventId);
 
 				// initialize detail
 				LinePointDetail detail = new LinePointDetail();
@@ -68,18 +64,6 @@ public class LinePointPushMessageActor extends UntypedActor {
 				detail.setTriggerTime(pushApiModel.getTriggerTime());
 				//detail.setSource(pushApiModel.getSource());
 				
-				if(linePointMain.getSuccessfulCount() >= linePointMain.getTotalCount()) {
-					linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
-					linePointMain.setStatus(LinePointMain.STATUS_COMPLETE);
-					linePointMainRepository.save(linePointMain);
-				
-					detail.setUid(uids.get(i).toString());
-					detail.setSendTime(new Date());
-					//detail.setDescription(LinePointDetail.DESCRIPTION_OVERFLOW);
-					detail.setStatus(LinePointDetail.STATUS_FAIL);
-					//linePointDetailService.save(detail);
-					continue;
-				}
 				
 				// memberId
 				requestBody.put("memberId", uids.get(i));
@@ -115,12 +99,6 @@ public class LinePointPushMessageActor extends UntypedActor {
 //					Logger.info(Type);					
 //					Logger.info(Amount.toString());					
 //					Logger.info(Balance.toString());
-					
-					linePointMain.setSuccessfulCount(linePointMain.getSuccessfulCount() + 1);
-					if(linePointMain.getSuccessfulCount() >= linePointMain.getTotalCount()) {
-						linePointMain.setStatus(LinePointMain.STATUS_COMPLETE);
-					}
-					linePointMainRepository.save(linePointMain);
 
 					detail.setTranscationId(Id);
 					detail.setTranscationTime(Time);
@@ -130,8 +108,6 @@ public class LinePointPushMessageActor extends UntypedActor {
 					//detail.setDescription("");
 					detail.setStatus(LinePointDetail.STATUS_SUCCESS);
 				} catch (HttpClientErrorException e) {
-					linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
-					linePointMainRepository.save(linePointMain);
 					//detail.setDescription(e.getResponseBodyAsString());
 					detail.setStatus(LinePointDetail.STATUS_FAIL);
 				}

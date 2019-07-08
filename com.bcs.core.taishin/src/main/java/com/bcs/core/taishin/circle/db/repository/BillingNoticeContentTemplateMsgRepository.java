@@ -27,6 +27,6 @@ public interface BillingNoticeContentTemplateMsgRepository extends EntityReposit
 	@Query("select  b from BillingNoticeContentTemplateMsg b  where b.templateId = ?1 and b.status <> 'DELETE' ")
 	public List<BillingNoticeContentTemplateMsg> findByTemplateId(String templateId);
 	
-	@Query("select  b from BillingNoticeContentTemplateMsg b  where b.templateParentId = ?1 and b.status <> 'DELETE' ")
+	@Query("select  b from BillingNoticeContentTemplateMsg b  where b.templateParentId = ?1 and b.status <> 'DELETE' order by b.templateLetter")
 	public List<BillingNoticeContentTemplateMsg> findByParentTemplateId(String parentTemplateId);
 }

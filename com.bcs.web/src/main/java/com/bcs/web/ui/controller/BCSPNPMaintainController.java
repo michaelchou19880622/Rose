@@ -130,6 +130,35 @@ public class BCSPNPMaintainController extends BCSBaseController {
 		}
 	}
 	
+	@RequestMapping(method = RequestMethod.DELETE, value = "/edit/deletePNPMaintainAccount", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> deletePNPMaintainAccount(HttpServletRequest request, HttpServletResponse response,
+			@CurrentUser CustomUser customUser, @RequestBody PNPMaintainAccountModel pnpMaintainAccountModel) throws IOException {
+		// Check Delete Right
+		boolean isAdmin = customUser.isAdmin();
+		if(isAdmin){
+			try{
+				if(pnpMaintainAccountModel != null){
+					logger.info("delete pnpMaintainAccountModel:" + pnpMaintainAccountModel);
+					pnpMaintainUIService.delete(pnpMaintainAccountModel);					
+					return new ResponseEntity<>("Delete Success", HttpStatus.OK);
+				}else{
+//					throw new Exception("pnpMaintainAccountModel is null");
+					logger.error("pnpMaintainAccountModel is null");
+					throw new BcsNoticeException("pnpMaintainAccountModel is null");
+				}
+			}catch(Exception e){
+				logger.error(ErrorRecord.recordError(e));
+				if(e instanceof BcsNoticeException)
+					return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+				else
+					return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		}else{
+			return new ResponseEntity<>("User No Delete Right", HttpStatus.OK);
+		}
+	}
+	
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/getPNPMaintainAccountList", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> getPNPMaintainAccountList(

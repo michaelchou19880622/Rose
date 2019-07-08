@@ -99,7 +99,7 @@ public class LinePointPushApiController {
 				String originalToken = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_API_ORIGINAL_TOKEN, true);
 				
 				if(!CryptUtil.Decrypt(CryptUtil.AES, token, secret, iv).equals(originalToken)) {
-					return new ResponseEntity<>("{\"result\": 0, \"msg\": \"Invalid API_KEY_STRING.\"}", HttpStatus.UNAUTHORIZED);
+					return new ResponseEntity<>("{\"result\": 0, \"msg\": \"invalid token.\"}", HttpStatus.UNAUTHORIZED);
 				}
 			}
 			
@@ -149,12 +149,8 @@ public class LinePointPushApiController {
 		    requestBody.put("clientId", clientId);
 			requestBody.put("amount", linePointDetail.getAmount());
 			requestBody.put("memberId", linePointDetail.getUid());
+			requestBody.put("orderKey", linePointDetail.getOrderKey());
 			
-			// orderKey
-			String orderKey = linePointDetail.getOrderKey();
-		    requestBody.put("orderKey", orderKey);
-		    linePointDetail.setOrderKey(orderKey);
-		    
 		    // applicationTime
 		    Long applicationTime = System.currentTimeMillis();
 		    requestBody.put("applicationTime", applicationTime);
@@ -197,13 +193,145 @@ public class LinePointPushApiController {
 		} catch(Exception e) {
 			logger.info("e:"+e.toString());
 			if(e instanceof IllegalArgumentException)
-				return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.BAD_REQUEST);
+				return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"" + e.getMessage() + "\"}", HttpStatus.BAD_REQUEST);
 			else if(e instanceof BadPaddingException || e instanceof IllegalBlockSizeException || e instanceof IllegalArgumentException)
 				return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"invalid token\"}", HttpStatus.UNAUTHORIZED);
-			return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-    
+
+	@RequestMapping(method = RequestMethod.POST, value = "/linePoint/cancel", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity<?> cancelLinePoint(HttpServletRequest request, HttpServletResponse response, @RequestBody LinePointDetail linePointDetail) {
+		try {
+			logger.info("-------------------- api linePoint cancel --------------------");
+			
+			if(request.getHeader(HttpHeaders.AUTHORIZATION) == null) {
+				return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"Missing 'Authorization' header.\"}", HttpStatus.BAD_REQUEST);
+			} else {
+				String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+				
+				if(authorization.split("key=").length != 2) {
+					return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"Invalid 'Authorization' format.\"}", HttpStatus.UNAUTHORIZED);
+				}
+				
+				String token = authorization.split("key=")[1];
+				String secret = CoreConfigReader.getString(CONFIG_STR.AES_SECRET_KEY, true);
+				String iv = CoreConfigReader.getString(CONFIG_STR.AES_INITIALIZATION_VECTOR, true);
+				String originalToken = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_API_ORIGINAL_TOKEN, true);
+				
+				if(!CryptUtil.Decrypt(CryptUtil.AES, token, secret, iv).equals(originalToken)) {
+					return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"invalid token.\"}", HttpStatus.UNAUTHORIZED);
+				}
+			}
+			
+			logger.info("[LinePoint API] Request Body:" + linePointDetail);
+			linePointDetail.setDetailType(LinePointDetail.SOURCE_CANCEL_API);
+			linePointDetail.setTriggerTime(new Date());
+			
+			// ----------- validation --------------
+			try {
+			    if(linePointDetail.getDepartment() == null) throw new IllegalArgumentException("Request Department is NULL");
+			    if(linePointDetail.getServiceName() == null) throw new IllegalArgumentException("Request ServiceName is NULL");
+			    if(linePointDetail.getPccCode() == null) throw new IllegalArgumentException("Request PccCode is NULL");
+			    if(linePointDetail.getCampName() == null) throw new IllegalArgumentException("Request CampName is NULL");
+			    if(linePointDetail.getUid() == null) throw new IllegalArgumentException("Request Uid is NULL");
+			    if(linePointDetail.getOrderKey() == null) throw new IllegalArgumentException("Request OrderKey is NULL");
+			    if(linePointDetail.getCancelTranscationId() == null) throw new IllegalArgumentException("Request CancelTranscationId is NULL");
+			    
+			    if(linePointDetail.getDepartment().length() > 50) { linePointDetail.setDepartment("NG"); throw new IllegalArgumentException("Request Department out of boundary");}
+			    if(linePointDetail.getServiceName().length() > 50) { linePointDetail.setServiceName("NG"); throw new IllegalArgumentException("Request ServiceName out of boundary");}
+			    if(linePointDetail.getPccCode().length() > 50) { linePointDetail.setPccCode("NG"); throw new IllegalArgumentException("Request PccCode out of boundary");}
+			    if(linePointDetail.getCampName().length() > 50) { linePointDetail.setCampName("NG"); throw new IllegalArgumentException("Request CampName out of boundary");}
+			    if(linePointDetail.getUid().length() > 33) { linePointDetail.setUid("NG"); throw new IllegalArgumentException("Request Uid out of boundary");}
+			    if(linePointDetail.getCustid().length() > 10) { linePointDetail.setUid("NG"); throw new IllegalArgumentException("Request Custid out of boundary");}
+			    if(linePointDetail.getOrderKey().length() > 50) { linePointDetail.setOrderKey("NG"); throw new IllegalArgumentException("Request OrderKey out of boundary");}
+			    if(linePointDetail.getCancelTranscationId().length() > 15) { linePointDetail.setCancelTranscationId("NG"); throw new IllegalArgumentException("Request CancelTranscationId out of boundary");}
+			    
+			    if(linePointDetail.getNote() != null) {
+			    	if(linePointDetail.getNote().length() > 50) { linePointDetail.setNote("NG"); throw new IllegalArgumentException("Request Note out of boundary");}
+			    }
+			    if(linePointDetail.getAmount() != null) {
+				    if(linePointDetail.getAmount() <= 0L || linePointDetail.getAmount() > 2147483647L) { 
+				    	linePointDetail.setAmount(0L); throw new IllegalArgumentException("Request Amount out of boundary");
+				    }
+			    }
+			    
+			}catch(Exception e) {
+				linePointDetail.setMessage(e.toString());
+				linePointDetail.setStatus(LinePointDetail.STATUS_FAIL);
+				linePointDetail.setSendTime(new Date());
+				linePointDetailService.save(linePointDetail);
+				throw e;
+			}
+			
+			// ---------------------------------------
+			// initialize request header
+			HttpHeaders headers = new HttpHeaders();
+			String accessToken = CoreConfigReader.getString("LinePoint", CONFIG_STR.ChannelToken.toString(), true); // LinePoint.ChannelToken
+			headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+			headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+			
+			// initialize request body
+			JSONObject requestBody = new JSONObject();
+			String url = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_MESSAGE_CANCEL_URL.toString(), true); // https://api.line.me/pointConnect/v1/issue
+			url = url.replace("{transactionId}", linePointDetail.getCancelTranscationId());
+			String clientId = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_API_CLIENT_ID.toString(), true); // 10052
+		    requestBody.put("clientId", clientId);
+		    requestBody.put("memberId", linePointDetail.getUid());
+			requestBody.put("orderKey", linePointDetail.getOrderKey());
+		    if(linePointDetail.getAmount() != null) {
+		    	requestBody.put("amount", linePointDetail.getAmount());
+		    }
+		    if(linePointDetail.getNote() != null) {
+		    	requestBody.put("note", linePointDetail.getNote());
+		    }
+		    
+			// HttpEntity by header and body
+			HttpEntity<String> httpEntity = new HttpEntity<String>(requestBody.toString(), headers);
+			RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
+			JSONObject responseObject = null;
+			try {
+				responseObject = restfulUtil.execute();
+				logger.info("responseObject:"+responseObject.toString());
+				
+				String Id = responseObject.getString("transactionId");
+				Long Time = responseObject.getLong("transactionTime");
+				String Type = responseObject.getString("transactionType");
+				Integer cancelledAmount = responseObject.getInt("cancelledAmount");					
+				Integer remainingAmount = responseObject.getInt("remainingAmount");					
+				Integer Balance = responseObject.getInt("balance");
+
+				linePointDetail.setTranscationId(Id);
+				linePointDetail.setTranscationTime(Time);
+				linePointDetail.setTranscationType(Type);
+				linePointDetail.setCancelledAmount(cancelledAmount);
+				linePointDetail.setRemainingAmount(remainingAmount);
+				linePointDetail.setBalance(Balance);
+				linePointDetail.setMessage("SUCCESS");
+				linePointDetail.setStatus(LinePointDetail.STATUS_SUCCESS);
+				linePointDetail.setSendTime(new Date());
+				linePointDetailService.save(linePointDetail);
+			} catch (HttpClientErrorException e) {
+				logger.info("[LinePointApi] Status code: " + e.getStatusCode());
+				logger.info("[LinePointApi]  Response body: " + e.getResponseBodyAsString());
+				
+				linePointDetail.setMessage(e.getResponseBodyAsString());
+				linePointDetail.setStatus(LinePointDetail.STATUS_FAIL);
+				linePointDetail.setSendTime(new Date());
+				linePointDetailService.save(linePointDetail);
+				return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+			}
+			return new ResponseEntity<>(responseObject.toString(), HttpStatus.OK);
+		} catch(Exception e) {
+			logger.info("e:"+e.toString());
+			if(e instanceof IllegalArgumentException)
+				return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"" + e.getMessage() + "\"}", HttpStatus.BAD_REQUEST);
+			else if(e instanceof BadPaddingException || e instanceof IllegalBlockSizeException || e instanceof IllegalArgumentException)
+				return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"invalid token\"}", HttpStatus.UNAUTHORIZED);
+			return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
 //	private String bytesToHex(byte[] hash) {
 //		  StringBuffer hexString = new StringBuffer();
 //		  for (int i = 0; i < hash.length; i++) {
@@ -214,39 +342,39 @@ public class LinePointPushApiController {
 //		  return hexString.toString();
 //		}
 	
-	@RequestMapping(method = RequestMethod.POST, value = "/pushtest", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<?> pushtest( HttpServletRequest request, HttpServletResponse response ) {
-		try {
-			logger.info("-------------------- pushtest --------------------");
-//			@CurrentUser CustomUser setUpUser ,
-			String myUid = "Ud167f3b44952f8e940ab85d18084fa29";
-			Integer limit = 10;
-			Integer pointPerPerson = 7;
-			for(int i = 1; i <= limit; i++) {
-				LinePointPushModel pushLinePointModel = new LinePointPushModel();
-				String message = "你獲得：" + pointPerPerson + "個Line Point, 你是第" + i + "//" + limit + "個獲得的人!";
-				logger.info(message);
-				//PushLinePointApiController.validate(myUid, message, pushLinePointModel);
-				AkkaLinePointPushService.tell(pushLinePointModel);
-			}
-			
-			//====================== 寫進資料庫=======================
-			return new ResponseEntity<>("{\"result\": 1, \"msg\": \"Success.\"}", HttpStatus.OK);
-			
-		} catch(Exception e) {
-			if(e instanceof IllegalArgumentException)
-				return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.BAD_REQUEST);
-			else if(e instanceof BadPaddingException || e instanceof IllegalBlockSizeException || e instanceof IllegalArgumentException)
-				return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"invalid token\"}", HttpStatus.UNAUTHORIZED);
-			return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
-		}}
-
-	@RequestMapping(method = RequestMethod.POST, value = "/message/test", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public  ResponseEntity<?> pushMessage1(HttpServletRequest request, HttpServletResponse response) {
-		logger.info("-------------------- test --------------------");
-		return new ResponseEntity<>("{\"result\": 1, \"msg\": \"Success.\"}", HttpStatus.OK);
-
-	}
+//	@RequestMapping(method = RequestMethod.POST, value = "/pushtest", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	public ResponseEntity<?> pushtest( HttpServletRequest request, HttpServletResponse response ) {
+//		try {
+//			logger.info("-------------------- pushtest --------------------");
+////			@CurrentUser CustomUser setUpUser ,
+//			String myUid = "Ud167f3b44952f8e940ab85d18084fa29";
+//			Integer limit = 10;
+//			Integer pointPerPerson = 7;
+//			for(int i = 1; i <= limit; i++) {
+//				LinePointPushModel pushLinePointModel = new LinePointPushModel();
+//				String message = "你獲得：" + pointPerPerson + "個Line Point, 你是第" + i + "//" + limit + "個獲得的人!";
+//				logger.info(message);
+//				//PushLinePointApiController.validate(myUid, message, pushLinePointModel);
+//				AkkaLinePointPushService.tell(pushLinePointModel);
+//			}
+//			
+//			//====================== 寫進資料庫=======================
+//			return new ResponseEntity<>("{\"result\": 1, \"msg\": \"Success.\"}", HttpStatus.OK);
+//			
+//		} catch(Exception e) {
+//			if(e instanceof IllegalArgumentException)
+//				return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.BAD_REQUEST);
+//			else if(e instanceof BadPaddingException || e instanceof IllegalBlockSizeException || e instanceof IllegalArgumentException)
+//				return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"invalid token\"}", HttpStatus.UNAUTHORIZED);
+//			return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
+//		}}
+//
+//	@RequestMapping(method = RequestMethod.POST, value = "/message/test", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	public  ResponseEntity<?> pushMessage1(HttpServletRequest request, HttpServletResponse response) {
+//		logger.info("-------------------- test --------------------");
+//		return new ResponseEntity<>("{\"result\": 1, \"msg\": \"Success.\"}", HttpStatus.OK);
+//
+//	}
 
 //	  private static Logger logger = Logger.getLogger(LinePointApiController.class);
 //	  @Autowired

@@ -52,6 +52,9 @@ $(function(){
 		
 	};
 
+	// edit
+	
+	// delete
 	$('.btn_delete.search').click(function(){
 		divisionName = $('#divisionName').val();
 		departmentName = $('#departmentName').val();

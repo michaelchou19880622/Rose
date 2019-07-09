@@ -37,10 +37,9 @@ import com.bcs.core.taishin.api.model.TemplateActionModel;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentLink;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsg;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsgAction;
+import com.bcs.core.taishin.circle.db.entity.OdsSystemConfig;
+import com.bcs.core.taishin.circle.db.service.OdsSystemConfigService;
 import com.bcs.core.taishin.circle.service.BillingNoticeContentTemplateMsgService;
-import com.bcs.core.taishin.jdbc.db.component.SystemConfigJDBC;
-import com.bcs.core.taishin.jdbc.db.repository.SystemConfigJDBCDAO;
-import com.bcs.core.taishin.jdbc.db.service.SystemConfigJDBCService;
 import com.bcs.core.taishin.service.ExportToExcelForBillingNoticePushBNApiEffects;
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.web.security.CurrentUser;
@@ -52,6 +51,7 @@ import com.bcs.web.ui.service.LoadFileUIService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+// this is for testing
 @Controller
 @RequestMapping("/bcs")
 public class BCSDoubleDatabaseController {
@@ -60,7 +60,7 @@ public class BCSDoubleDatabaseController {
 	@Autowired
 	private SystemConfigService systemConfigService;
 	@Autowired
-	private SystemConfigJDBCService systemConfigJDBCService;
+	private OdsSystemConfigService odsSystemConfigService;
 	
 	@ControllerLog(description="Set Controller Test")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/setDoubleSystemConfig")
@@ -69,11 +69,13 @@ public class BCSDoubleDatabaseController {
 			@CurrentUser CustomUser customUser) throws IOException {
 		logger.info("setDoubleSystemConfig");
 		try{
+			OdsSystemConfig odsSystemConfig = new OdsSystemConfig();
+			odsSystemConfig.setConfigId("mopack1003");
+			odsSystemConfig.setDescription("mopack1003desc");
+			odsSystemConfig.setModifyTime(new Date());
+			odsSystemConfig.setValue("mopack1003value");
 
-	    	SystemConfigJDBC systemConfigJDBC = new SystemConfigJDBC();
-	    	systemConfigJDBCService.addMember(systemConfigJDBC);
-
-			
+			odsSystemConfigService.save(odsSystemConfig);
 			return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
 		}
 		catch(Exception e){
@@ -81,8 +83,6 @@ public class BCSDoubleDatabaseController {
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
-	
 	
 //	@Autowired
 //	private BillingNoticeContentTemplateMsgService contentTemplateMsgService;

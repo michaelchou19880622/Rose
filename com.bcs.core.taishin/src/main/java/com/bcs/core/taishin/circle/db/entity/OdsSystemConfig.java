@@ -1,11 +1,11 @@
-package com.bcs.core.taishin.jdbc.db.component;
+package com.bcs.core.taishin.circle.db.entity;
 
 import java.util.Date;
 
 import org.springframework.stereotype.Component;
 
 @Component
-public class SystemConfigJDBC{
+public class OdsSystemConfig{
 	private static final long serialVersionUID = 1L;
 	
 	private String configId;

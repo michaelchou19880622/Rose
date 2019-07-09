@@ -139,27 +139,4 @@
         </tx:attributes>
     </tx:advice>
 	-->
-	
-	<!-- ======= JDBC database pool start ======= -->
-<!--    	<bean id="dataSourceJDBC" class="org.springframework.jdbc.datasource.DriverManagerDataSource"> 
-        <property name="driverClassName"> 
-            <value>com.mysql.jdbc.Driver</value> 
-        </property> 
-        <property name="url"> 
-            <value>jdbc:sqlserver://172.104.113.123:1433;databaseName=Taishin_Customer_Connect</value> 
-        </property> 
-        <property name="username"> 
-            <value>sa</value> 
-        </property> 
-        <property name="password"> 
-            <value>XtremeApp53811062</value> 
-        </property> 
-    </bean>
-	    
-	<bean id="SystemConfigJDBCDAO" class="com.bcs.core.taishin.jdbc.db.repository.SystemConfigJDBCDAO">
-      	<property name="dataSource">
-          	<ref bean="dataSourceJDBC"/>
-      	</property>
-    </bean> -->
-	<!-- ======= JDBC database pool end ======= -->
 </beans>

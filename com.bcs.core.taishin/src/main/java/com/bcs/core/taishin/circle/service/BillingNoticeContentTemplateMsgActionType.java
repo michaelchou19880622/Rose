@@ -1,9 +1,13 @@
 package com.bcs.core.taishin.circle.service;
 
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.bcs.core.resource.UriHelper;
+import com.bcs.core.spring.ApplicationContextProvider;
+import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentLink;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsgAction;
+import com.bcs.core.taishin.circle.db.repository.BillingNoticeContentLinkRepository;
 
 /**
  * 根據 BillingNoticeContentTemplateMsgActionType 組出JSONObject
@@ -19,12 +23,17 @@ public enum BillingNoticeContentTemplateMsgActionType {
             actionObject.put("label", action.getActionLabel());
             actionObject.put("text", action.getActionText());
             return actionObject;
-            
 	    }
 	},  URI{
 		@Override
 	    public JSONObject getJSONObject(BillingNoticeContentTemplateMsgAction action, String MID) {
-			String uri = UriHelper.getLinkUri( action.getLinkId(), MID);
+			BillingNoticeContentLinkRepository billingNoticeContentLinkRepository = ApplicationContextProvider.getApplicationContext().getBean(BillingNoticeContentLinkRepository.class);
+			BillingNoticeContentLink billingNoticeContentLink = billingNoticeContentLinkRepository.findOne(action.getLinkId());
+			String uri = billingNoticeContentLink.getLinkUrl();
+			
+			// Original
+			//String uri = UriHelper.getLinkUri( action.getLinkId(), MID);
+			
 	    	JSONObject actionObject = new JSONObject();
 			actionObject.put("type", action.getActionType());
             actionObject.put("label", action.getActionLabel());

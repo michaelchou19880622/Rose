@@ -3,7 +3,8 @@
  */
 
 $(function(){
-	var hasData = false;
+	// ---- Global Variables ----
+	// input data
 	var divisionName = "";
 	var departmentName = "";
 	var groupName = "";
@@ -11,105 +12,24 @@ $(function(){
 	var account = "";
 	var employeeId = "";
 	
+	// result
+	var hasData = false;
 	var templateCount = 0;
 	var oringinalTr = {};
 	var originalTable = {};
-	
-	$('.btn_add.download').click(function(){
-		divisionName = $('#divisionName').val();
-		departmentName = $('#departmentName').val();
-		groupName = $('#groupName').val();
-		pccCode = $('#pccCode').val();
-		account = $('#account').val();
-		employeeId = $('#employeeId').val();
-		
-//		if (!divisionName||!departmentName||!groupName||!pccCode||!account||!employeeId){
-//			alert("必填欄位不可為空");
-//			return;
-//		}
-		
-		var exportUrl = '../edit/exportToExcelForPNPMaintainAccount?' + 
-		'divisionName='+ divisionName + '&departmentName='+ departmentName + '&groupName='+ groupName + 
-		'&pccCode=' + pccCode + '&account=' + account + '&employeeId=' + employeeId + '&accountType=Normal';
-	
-		$('.btn_add.download').attr('href', exportUrl);
-	});
 
 	
-	$('.btn_add.create').click(function(){
-		window.location.replace('pnpNormalAccountCreatePage');
-	});
-	
-	
-	// -----------------------
-	
+	// ---- Import Data ----
+	// initialize Page
 	var initPage = function(){
 		// clone & remove
 	    originalTr = $('.searchTr').clone(true);
 	    $('.searchTr').remove();
 		originalTable = $('.searchTable').clone(true);
 		$('.searchTable').remove();
-		
 	};
 
-	// edit
-	
-	// delete
-	$('.btn_delete.search').click(function(){
-		divisionName = $('#divisionName').val();
-		departmentName = $('#departmentName').val();
-		groupName = $('#groupName').val();
-		pccCode = $('#pccCode').val();
-		account = $('#account').val();
-		employeeId = $('#employeeId').val();
-		
-		var postData = {
-				divisionName: divisionName,
-				departmentName: departmentName,
-				groupName: groupName,
-				pccCode: pccCode,
-				account: account,
-				employeeId: employeeId,
-				accountType: 'Normal'
-		};
-		console.info('postData:', postData);
-	        
-		$.ajax({
-			type : 'DELETE',
-			url : bcs.bcsContextPath + '/edit/deletePNPMaintainAccount',
-            cache: false,
-            contentType: 'application/json',
-            processData: false,
-			data : JSON.stringify(postData)
-		}).success(function(response) {
-			console.info(response);
-			if(response == 'User No Delete Right'){
-				alert("無權限刪除");
-			}else{
-				alert("刪除成功");
-			}
-		}).fail(function(response) {
-			console.info(response);
-			$.FailResponse(response);
-		}).done(function() {
-			window.location.replace('pnpNormalAccountListPage');
-        });
-	});
-	
-	$('.btn_add.search').click(function(){
-		if(templateCount > 0){
-			deleteTemplate();
-			deleteTemplate();
-		}
-		//templateCount = 0;
-		
-		// block
-		$('.LyMain').block($.BCS.blockMsgRead);
-		// get all list data
-		getListData('啟用', '/edit/getPNPMaintainAccountList?status=true');
-	});
-		
-    // get list data
+    // get List Data
 	var getListData = function(name, url){
 		divisionName = $('#divisionName').val();
 		departmentName = $('#departmentName').val();
@@ -146,6 +66,8 @@ $(function(){
 				console.info(trData);
 				var searchTr = originalTr.clone(true);
 
+				console.info("id:", trData.id);
+				searchTr.find('.pnpMaintainAccountId').val(trData.id);
 				searchTr.find('.account').html(trData.account);
 				searchTr.find('.accountAttribute').html(trData.accountAttribute);
 				searchTr.find('.accountClass').html(trData.accountClass);
@@ -219,6 +141,7 @@ $(function(){
 		deleteTab();
 	}
 	
+	//  delete tab
 	var deleteTab = function(){
         $('.tabLi:last').remove();
         $('.tabDiv:last').remove();
@@ -227,6 +150,76 @@ $(function(){
         $("#tabs").tabs({ active: templateCount-1 });
     };
     
+    
+	// ---- Functions ----
+	// do Delete
+	$('.btn_delete.search').click(function(){
+		var deleteConfirm = confirm("請確認是否刪除");
+		if (!deleteConfirm) return; //點擊取消		
+		
+		var editAndDeleteTr = $(this).parent();
+		var pnpMaintainAccountId = editAndDeleteTr.find('.pnpMaintainAccountId').val();
+		console.info("id:", pnpMaintainAccountId);
+		
+		$.ajax({
+			type : 'DELETE',
+			url : bcs.bcsContextPath + '/edit/deletePNPMaintainAccount?id=' + pnpMaintainAccountId,
+		}).success(function(response) {
+			console.info(response);
+		}).fail(function(response) {
+			console.info(response);
+			$.FailResponse(response);
+		}).done(function() {
+			confirm("刪除成功");
+			window.location.replace('pnpNormalAccountListPage');
+        });
+	});
+
+	// to Edit Page
+	$('.btn_edit.search').click(function(){
+		var editAndDeleteTr = $(this).parent();
+		var pnpMaintainAccountId = editAndDeleteTr.find('.pnpMaintainAccountId').val();
+		console.info("id:", pnpMaintainAccountId);
+		window.location.replace('pnpNormalAccountCreatePage?pnpMaintainAccountId=' + pnpMaintainAccountId);
+	});
+	
+	// do Search
+	$('.btn_add.search').click(function(){
+		if(templateCount > 0){
+			deleteTemplate();
+			deleteTemplate();
+		}
+		//templateCount = 0;
+		
+		// block
+		$('.LyMain').block($.BCS.blockMsgRead);
+		// get all list data
+		getListData('啟用', '/edit/getPNPMaintainAccountList?status=true');
+	});
+	
+	// do Download
+	$('.btn_add.download').click(function(){
+		divisionName = $('#divisionName').val();
+		departmentName = $('#departmentName').val();
+		groupName = $('#groupName').val();
+		pccCode = $('#pccCode').val();
+		account = $('#account').val();
+		employeeId = $('#employeeId').val();
+		
+		var exportUrl = '../edit/exportToExcelForPNPMaintainAccount?' + 
+		'divisionName='+ divisionName + '&departmentName='+ departmentName + '&groupName='+ groupName + 
+		'&pccCode=' + pccCode + '&account=' + account + '&employeeId=' + employeeId + '&accountType=Normal';
+	
+		$('.btn_add.download').attr('href', exportUrl);
+	});
+
+	// to Create Page
+	$('.btn_add.create').click(function(){
+		window.location.replace('pnpNormalAccountCreatePage');
+	});
+	
+	
+	// ---- Initialize Page & Load Data ----
 	initPage();
 	$("#tabs").tabs();
 	//loadDataFunc();

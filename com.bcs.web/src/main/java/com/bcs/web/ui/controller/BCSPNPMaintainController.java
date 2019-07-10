@@ -130,32 +130,28 @@ public class BCSPNPMaintainController extends BCSBaseController {
 		}
 	}
 	
-	@RequestMapping(method = RequestMethod.DELETE, value = "/edit/deletePNPMaintainAccount", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.DELETE, value = "/edit/deletePNPMaintainAccount")
 	@ResponseBody
 	public ResponseEntity<?> deletePNPMaintainAccount(HttpServletRequest request, HttpServletResponse response,
-			@CurrentUser CustomUser customUser, @RequestBody PNPMaintainAccountModel pnpMaintainAccountModel) throws IOException {
-		// Check Delete Right
-		boolean isAdmin = customUser.isAdmin();
-		if(isAdmin){
-			try{
-				if(pnpMaintainAccountModel != null){
-					logger.info("delete pnpMaintainAccountModel:" + pnpMaintainAccountModel);
-					pnpMaintainUIService.delete(pnpMaintainAccountModel);					
-					return new ResponseEntity<>("Delete Success", HttpStatus.OK);
-				}else{
-//					throw new Exception("pnpMaintainAccountModel is null");
-					logger.error("pnpMaintainAccountModel is null");
-					throw new BcsNoticeException("pnpMaintainAccountModel is null");
-				}
-			}catch(Exception e){
-				logger.error(ErrorRecord.recordError(e));
-				if(e instanceof BcsNoticeException)
-					return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-				else
-					return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			@CurrentUser CustomUser customUser, @RequestParam Long id) throws IOException {
+		try{
+			if(!customUser.isAdmin()) {
+				throw new BcsNoticeException("您無權限刪除");
 			}
-		}else{
-			return new ResponseEntity<>("User No Delete Right", HttpStatus.OK);
+
+			PNPMaintainAccountModel pnpMaintainAccountModel = pnpMaintainUIService.findOne(id);			
+			if(pnpMaintainAccountModel == null){
+				throw new BcsNoticeException("刪除搜查錯誤");
+			}
+			
+			pnpMaintainUIService.delete(pnpMaintainAccountModel);					
+			return new ResponseEntity<>("刪除成功", HttpStatus.OK);
+		}catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));
+			if(e instanceof BcsNoticeException)
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			else
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	

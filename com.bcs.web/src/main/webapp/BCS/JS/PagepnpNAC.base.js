@@ -4,16 +4,17 @@
 
 $(function(){
 	// ---- Global Variables ----
-	// input data
-	var pathway = "";
-	var template = "";
-	var PNPContent = "";
-	
 	// parameters
-	var pnpMaintainAccountId = null;
+	var pnpMaintainAccountModelId = null;
+	var pnpMaintainAccountActionType = null;
 	
 	// original Template
 	var originalPopTr = {};
+	
+	// pop data
+	var pathway = "";
+	var template = "";
+	var PNPContent = "";
 	
 	
 	// ---- Import Data ----
@@ -30,12 +31,18 @@ $(function(){
 		appendOption('templateList', 0, 'TestTemplate');
 		
 		// parameter
-		pnpMaintainAccountId = $.urlParam("pnpMaintainAccountId"); //從列表頁導過來的參數
+		pnpMaintainAccountModelId = $.urlParam("pnpMaintainAccountModelId"); //從列表頁導過來的參數
 		
-		if(pnpMaintainAccountId != null){
+		if(pnpMaintainAccountModelId != null){
+			// change UI
+			pnpMaintainAccountActionType = 'Edit';
+			$('.CHTtl').html('編輯一般帳號');
+			$('.btn_add.add').val('Edit');
+			
+			// get Data
 			$.ajax({
                 type: 'POST',
-                url: bcs.bcsContextPath + "/edit/getPNPMaintainAccount?id=" + pnpMaintainAccountId,
+                url: bcs.bcsContextPath + "/edit/getPNPMaintainAccount?id=" + pnpMaintainAccountModelId,
     		}).success(function(response){
     			console.info("response:", response);
     			$('#account').val(response.account);
@@ -57,26 +64,32 @@ $(function(){
     			
     			$('#PNPContent').val(response.pnpContent);
     			
-//    			// response.pathway = pathway;
-//    			if(pathway == 'BC-&gt;PNP-&gt;SMS'){
-//    				response.pathway = '3';
-//    			}else if(pathway == 'BC-&gt;SMS'){
-//    				response.pathway = '2';
-//    			}else if(pathway == 'BC'){
-//    				response.pathway = '1';
-//    			}
-//    			console.info('response.pathway:', response.pathway);
-//    			
-//    			response.template = template;
-//    			
-	
+    			// Pop data
+    			template = response.template;
+    			PNPContent = response.pnpContent;
+    			if(response.pathway == '3'){
+    				pathway = 'BC-&gt;PNP-&gt;SMS';
+    			}else if(response.pathway == '2'){
+    				pathway = 'BC-&gt;SMS';
+    			}else if(pathway == '1'){
+    				pathway = 'BC';
+    			}
     			
+    			$('.popTr').remove();
+    			var popTr = originalPopTr.clone(true);
+    			popTr.find('.pathway').html(pathway);
+    			popTr.find('.template').html(template);
+    			popTr.find('.PNPContent').html(PNPContent);
+    			
+    			$('.popTbody').append(popTr);
     			
     		}).fail(function(response){
     			console.info(response);
     			$.FailResponse(response);
     		}).done(function(){
     		});
+		}else{
+			pnpMaintainAccountActionType = 'Create';
 		}
 	};
 	
@@ -104,21 +117,7 @@ $(function(){
 	// do Confirm
 	$('.btn_add.confirm').click(function(){
 		postData = {};
-		
-		console.info('pathway:', pathway);
-		
-		// postData.pathway = pathway;
-		if(pathway == 'BC-&gt;PNP-&gt;SMS'){
-			postData.pathway = '3';
-		}else if(pathway == 'BC-&gt;SMS'){
-			postData.pathway = '2';
-		}else if(pathway == 'BC'){
-			postData.pathway = '1';
-		}
-		console.info('postData.pathway:', postData.pathway);
-		
-		postData.template = template;
-		postData.pnpContent = PNPContent;
+				
 		postData.account = $('#account').val();
 		postData.accountAttribute = $('#accountAttribute').val();
 		postData.accountClass = $('#accountClass').val();
@@ -130,22 +129,35 @@ $(function(){
 		postData.groupName = $('#groupName').val();
 		postData.pccCode = $('#PccCode').val();
 		postData.accountType = 'Normal';
-		
 		if($('.status')[0].checked){
 			postData.status = true;
 		}else{
 			postData.status = false;
 		}
 		
+		if(pathway == 'BC-&gt;PNP-&gt;SMS'){
+			postData.pathway = '3';
+		}else if(pathway == 'BC-&gt;SMS'){
+			postData.pathway = '2';
+		}else if(pathway == 'BC'){
+			postData.pathway = '1';
+		}
+		postData.template = template;
+		postData.pnpContent = PNPContent;
+		
+		
 		console.info('postData: ', postData);
+		var postList = [];
+		postList.push(postData);
+		console.info('postList: ', postList);
 		
 		$.ajax({
-			type : "POST",
-			url : bcs.bcsContextPath + '/edit/createPNPMaintainAccount',
+			type : 'POST',
+			url : bcs.bcsContextPath + '/edit/createPNPMaintainAccount?actionType=Edit',
 			cache : false,
 			contentType : 'application/json',
 			processData : false,
-			data : JSON.stringify(postData)
+			data : JSON.stringify(postList)
 		}).success(function(response) {
 			console.info(response);
 			alert('儲存成功');
@@ -181,9 +193,6 @@ $(function(){
     });
 	
 
-
-	
-	
 //		$('.LyMain').block($.BCS.blockMsgRead);
 //		
 //		$.ajax({

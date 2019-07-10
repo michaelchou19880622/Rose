@@ -179,7 +179,7 @@ $(function(){
 		var editAndDeleteTr = $(this).parent();
 		var pnpMaintainAccountId = editAndDeleteTr.find('.pnpMaintainAccountId').val();
 		console.info("id:", pnpMaintainAccountId);
-		window.location.replace('pnpNormalAccountCreatePage?pnpMaintainAccountId=' + pnpMaintainAccountId);
+		window.location.replace('pnpNormalAccountCreatePage?pnpMaintainAccountModelId=' + pnpMaintainAccountId);
 	});
 	
 	// do Search

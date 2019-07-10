@@ -3,43 +3,95 @@
  */
 
 $(function(){
-	// global variables
+	// ---- Global Variables ----
+	// input data
 	var pathway = "";
 	var template = "";
 	var PNPContent = "";
 	
-	var originalTr = {};
+	// parameters
+	var pnpMaintainAccountId = null;
 	
-	// inits
+	// original Template
+	var originalPopTr = {};
+	
+	
+	// ---- Import Data ----
+	// initialize Page
 	var initPage = function(){
+		// clone & remove
+		originalPopTr = $('.popTr').clone(true);
+		$('.popTr').remove();
+		
 		// add options
 		appendOption('pathwayList', 0, 'BC->PNP->SMS');
 		appendOption('pathwayList', 1, 'BC->SMS');
 		appendOption('pathwayList', 2, 'BC');
 		appendOption('templateList', 0, 'TestTemplate');
 		
-		originalTr = $('.popTr').clone(true);
-		$('.popTr').remove();
+		// parameter
+		pnpMaintainAccountId = $.urlParam("pnpMaintainAccountId"); //從列表頁導過來的參數
+		
+		if(pnpMaintainAccountId != null){
+			$.ajax({
+                type: 'POST',
+                url: bcs.bcsContextPath + "/edit/getPNPMaintainAccount?id=" + pnpMaintainAccountId,
+    		}).success(function(response){
+    			console.info("response:", response);
+    			$('#account').val(response.account);
+    			$('#accountAttribute').val(response.accountAttribute);
+    			$('#accountClass').val(response.accountClass);
+    			$('#sourceSystem').val(response.sourceSystem);
+    			$('#employeeId').val(response.employeeId);
+    			$('#departmentId').val(response.departmentId);
+    			$('#divisionName').val(response.divisionName);
+    			$('#departmentName').val(response.departmentName);
+    			$('#groupName').val(response.groupName);
+    			$('#PccCode').val(response.pccCode);
+    			
+    			if(response.status = true){
+					$('.status')[0].checked = true;
+				}else{
+					$('.status')[1].checked = true;
+				}
+    			
+    			$('#PNPContent').val(response.pnpContent);
+    			
+//    			// response.pathway = pathway;
+//    			if(pathway == 'BC-&gt;PNP-&gt;SMS'){
+//    				response.pathway = '3';
+//    			}else if(pathway == 'BC-&gt;SMS'){
+//    				response.pathway = '2';
+//    			}else if(pathway == 'BC'){
+//    				response.pathway = '1';
+//    			}
+//    			console.info('response.pathway:', response.pathway);
+//    			
+//    			response.template = template;
+//    			
+	
+    			
+    			
+    		}).fail(function(response){
+    			console.info(response);
+    			$.FailResponse(response);
+    		}).done(function(){
+    		});
+		}
 	};
 	
-	// buttons
-	$('#popConfirm').click(function(){
-		var list = document.getElementById('pathwayList');
-		pathway = list.options[list.selectedIndex].innerHTML;
-		template = 'TestTemplate';
-		PNPContent = $('#PNPContent')[0].value;
-		
-		$('.popTr').remove();
-		var popTr = originalTr.clone(true);
-		popTr.find('.pathway').html(pathway);
-		popTr.find('.template').html(template);
-		popTr.find('.PNPContent').html(PNPContent);
-		
-		$('.popTbody').append(popTr);
-		
-    	$('#dialog-modal').dialog("close");
-    });
+	// add option
+	var appendOption = function(listName, value, text){
+		var opt = document.createElement('option');
+		var list = document.getElementById(listName);
+		opt.value = value;
+		opt.innerHTML = text;
+		list.appendChild(opt);
+	};
 	
+	
+	// ---- Functions ----
+	// do Add
 	$('.btn_add.add').click(function(){
 	    $('#dialog-modal').dialog({
 	 	   	width: 960,
@@ -48,7 +100,8 @@ $(function(){
 	    });
     	$('#dialog-modal').show();
 	});
-		
+	
+	// do Confirm
 	$('.btn_add.confirm').click(function(){
 		postData = {};
 		
@@ -109,13 +162,26 @@ $(function(){
 		})
 	});
 	
-	var appendOption = function(listName, value, text){
-		var opt = document.createElement('option');
-		var list = document.getElementById(listName);
-		opt.value = value;
-		opt.innerHTML = text;
-		list.appendChild(opt);
-	};
+	// do Pop Confirm
+	$('#popConfirm').click(function(){
+		var list = document.getElementById('pathwayList');
+		pathway = list.options[list.selectedIndex].innerHTML;
+		template = 'TestTemplate';
+		PNPContent = $('#PNPContent')[0].value;
+		
+		$('.popTr').remove();
+		var popTr = originalPopTr.clone(true);
+		popTr.find('.pathway').html(pathway);
+		popTr.find('.template').html(template);
+		popTr.find('.PNPContent').html(PNPContent);
+		
+		$('.popTbody').append(popTr);
+		
+    	$('#dialog-modal').dialog("close");
+    });
+	
+
+
 	
 	
 //		$('.LyMain').block($.BCS.blockMsgRead);
@@ -216,7 +282,9 @@ $(function(){
 //		templateMsgTrTemplate = $('.templateMsgTrTemplate').clone(true);
 //		$('.templateMsgTrTemplate').remove();
 //	}
-//	
+
+	
+	// ---- Initialize Page & Load Data ----
 	initPage();
 //	loadDataFunc();
 });

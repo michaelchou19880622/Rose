@@ -66,7 +66,6 @@ $(function(){
 				console.info(trData);
 				var searchTr = originalTr.clone(true);
 
-				console.info("id:", trData.id);
 				searchTr.find('.pnpMaintainAccountId').val(trData.id);
 				searchTr.find('.account').html(trData.account);
 				searchTr.find('.accountAttribute').html(trData.accountAttribute);

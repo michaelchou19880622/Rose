@@ -155,6 +155,27 @@ public class BCSPNPMaintainController extends BCSBaseController {
 		}
 	}
 	
+	@RequestMapping(method = RequestMethod.POST, value = "/edit/getPNPMaintainAccount", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> getPNPMaintainAccount(
+			HttpServletRequest request,  HttpServletResponse response, 
+			@CurrentUser CustomUser customUser, @RequestParam Long id) throws IOException {		
+		try {
+			PNPMaintainAccountModel pnpMaintainAccountModel = pnpMaintainUIService.findOne(id);			
+			if(pnpMaintainAccountModel == null){
+				throw new BcsNoticeException("刪除搜查錯誤");
+			}
+			return new ResponseEntity<>(pnpMaintainAccountModel, HttpStatus.OK);
+		}catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));
+			if(e instanceof BcsNoticeException){
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			}else{
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		}
+	}
+	
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/getPNPMaintainAccountList", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> getPNPMaintainAccountList(

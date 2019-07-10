@@ -154,8 +154,7 @@ $(function(){
     			setActionOperationButtonsVisable();
     			initButtonsVisable(templateType);
     			
-    		}
-    		).fail(function(response){
+    		}).fail(function(response){
     			console.info(response);
     			$.FailResponse(response);
     		}).done(function(){

@@ -170,7 +170,7 @@ $(function(){
 			$.FailResponse(response);
 		}).done(function() {
 			confirm("刪除成功");
-			window.location.replace('pnpNormalAccountListPage');
+			window.location.replace('pnpUnicaAccountListPage');
         });
 	});
 

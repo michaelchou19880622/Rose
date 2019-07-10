@@ -104,39 +104,35 @@ public class BCSPNPMaintainController extends BCSBaseController {
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/createPNPMaintainAccount", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createPNPMaintainAccount(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, 
-			@RequestBody List<PNPMaintainAccountModel> pnpMaintainAccountModels,
-			@RequestParam String actionType) throws IOException {
+			@RequestBody PNPMaintainAccountModel pnpMaintainAccountModel) throws IOException {
 		try{
+			logger.info("pnpMaintainAccountModel:"+pnpMaintainAccountModel);
 			// Check Duplication
-			for(PNPMaintainAccountModel pnpMaintainAccountModel: pnpMaintainAccountModels) {
-				String account = pnpMaintainAccountModel.getAccount();
-				String sourceSystem = pnpMaintainAccountModel.getSourceSystem();
-				String pnpContent = pnpMaintainAccountModel.getPnpContent();
-				List<PNPMaintainAccountModel> sameCheck = pnpMaintainUIService.findByAccountAndSourceSystemAndPnpContent(account, sourceSystem, pnpContent);
-				if(sameCheck.size() >= 2) {
+			String account = pnpMaintainAccountModel.getAccount();
+			String sourceSystem = pnpMaintainAccountModel.getSourceSystem();
+			String pnpContent = pnpMaintainAccountModel.getPnpContent();
+			List<PNPMaintainAccountModel> sameCheck = pnpMaintainUIService.findByAccountAndSourceSystemAndPnpContent(account, sourceSystem, pnpContent);
+			if(sameCheck.size() >= 2) {
+				throw new BcsNoticeException("帳號、前方來源系統、簡訊內容不可與之前資料重複！"); 
+			}else if(sameCheck.size() == 1) {
+				Long addId = pnpMaintainAccountModel.getId();
+				logger.info("addId:"+addId);
+				if(addId==null) { // Create Mode
 					throw new BcsNoticeException("帳號、前方來源系統、簡訊內容不可與之前資料重複！"); 
-				}else if(sameCheck.size() == 1 && sameCheck.get(0).getId().equals(pnpMaintainAccountModel.getId())) {
+				}
+				
+				Long sameId = sameCheck.get(0).getId();
+				logger.info("sameId:"+sameId);
+				
+				if(sameId!=addId) { //  Edit Mode & Not same Id
 					throw new BcsNoticeException("帳號、前方來源系統、簡訊內容不可與之前資料重複！"); 
 				}
 			}
 			
-			
-			if (actionType.equals("Create")){
-				// Create
-				for(PNPMaintainAccountModel pnpMaintainAccountModel: pnpMaintainAccountModels) {
-					// save
-					pnpMaintainAccountModel.setModifyTime(new Date());
-					pnpMaintainAccountModel.setModifyUser(customUser.getAccount());
-					pnpMaintainUIService.save(pnpMaintainAccountModel);
-				}
-			}else{
-				// Edit
-				PNPMaintainAccountModel pnpMaintainAccountModel = pnpMaintainAccountModels.get(0);
-				// save
-				pnpMaintainAccountModel.setModifyTime(new Date());
-				pnpMaintainAccountModel.setModifyUser(customUser.getAccount());
-				pnpMaintainUIService.save(pnpMaintainAccountModel);
-			}
+			// save
+			pnpMaintainAccountModel.setModifyTime(new Date());
+			pnpMaintainAccountModel.setModifyUser(customUser.getAccount());
+			pnpMaintainUIService.save(pnpMaintainAccountModel);
 
 			return new ResponseEntity<>("save success", HttpStatus.OK);
 		}catch(Exception e){

@@ -145,19 +145,16 @@ $(function(){
 		postData.template = template;
 		postData.pnpContent = PNPContent;
 		
+		postData.id = pnpMaintainAccountModelId;
 		
-		console.info('postData: ', postData);
-		var postList = [];
-		postList.push(postData);
-		console.info('postList: ', postList);
 		
 		$.ajax({
 			type : 'POST',
-			url : bcs.bcsContextPath + '/edit/createPNPMaintainAccount?actionType=Edit',
+			url : bcs.bcsContextPath + '/edit/createPNPMaintainAccount',
 			cache : false,
 			contentType : 'application/json',
 			processData : false,
-			data : JSON.stringify(postList)
+			data : JSON.stringify(postData)
 		}).success(function(response) {
 			console.info(response);
 			alert('儲存成功');

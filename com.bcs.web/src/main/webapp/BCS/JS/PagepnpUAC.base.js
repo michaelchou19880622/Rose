@@ -3,43 +3,108 @@
  */
 
 $(function(){
-	// global variables
+	// ---- Global Variables ----
+	// parameters
+	var pnpMaintainAccountModelId = null;
+	var pnpMaintainAccountActionType = null;
+	
+	// original Template
+	var originalPopTr = {};
+	
+	// pop data
 	var pathway = "";
 	var template = "";
 	var PNPContent = "";
 	
-	var originalTr = {};
 	
-	// inits
+	// ---- Import Data ----
+	// initialize Page
 	var initPage = function(){
+		// clone & remove
+		originalPopTr = $('.popTr').clone(true);
+		$('.popTr').remove();
+		
 		// add options
 		appendOption('pathwayList', 0, 'BC->PNP->SMS');
 		appendOption('pathwayList', 1, 'BC->SMS');
 		appendOption('pathwayList', 2, 'BC');
 		appendOption('templateList', 0, 'TestTemplate');
 		
-		originalTr = $('.popTr').clone(true);
-		$('.popTr').remove();
+		// parameter
+		pnpMaintainAccountModelId = $.urlParam("pnpMaintainAccountModelId"); //從列表頁導過來的參數
+		
+		if(pnpMaintainAccountModelId != null){
+			// change UI
+			pnpMaintainAccountActionType = 'Edit';
+			$('.CHTtl').html('編輯一般帳號');
+			$('.btn_add.add').val('Edit');
+			
+			// get Data
+			$.ajax({
+                type: 'POST',
+                url: bcs.bcsContextPath + "/edit/getPNPMaintainAccount?id=" + pnpMaintainAccountModelId,
+    		}).success(function(response){
+    			console.info("response:", response);
+    			$('#account').val(response.account);
+    			$('#accountAttribute').val(response.accountAttribute);
+    			$('#accountClass').val(response.accountClass);
+    			$('#sourceSystem').val(response.sourceSystem);
+    			$('#employeeId').val(response.employeeId);
+    			$('#departmentId').val(response.departmentId);
+    			$('#divisionName').val(response.divisionName);
+    			$('#departmentName').val(response.departmentName);
+    			$('#groupName').val(response.groupName);
+    			$('#PccCode').val(response.pccCode);
+    			
+    			if(response.status = true){
+					$('.status')[0].checked = true;
+				}else{
+					$('.status')[1].checked = true;
+				}
+    			
+    			$('#PNPContent').val(response.pnpContent);
+    			
+    			// Pop data
+    			template = response.template;
+    			PNPContent = response.pnpContent;
+    			if(response.pathway == '3'){
+    				pathway = 'BC-&gt;PNP-&gt;SMS';
+    			}else if(response.pathway == '2'){
+    				pathway = 'BC-&gt;SMS';
+    			}else if(pathway == '1'){
+    				pathway = 'BC';
+    			}
+    			
+    			$('.popTr').remove();
+    			var popTr = originalPopTr.clone(true);
+    			popTr.find('.pathway').html(pathway);
+    			popTr.find('.template').html(template);
+    			popTr.find('.PNPContent').html(PNPContent);
+    			
+    			$('.popTbody').append(popTr);
+    			
+    		}).fail(function(response){
+    			console.info(response);
+    			$.FailResponse(response);
+    		}).done(function(){
+    		});
+		}else{
+			pnpMaintainAccountActionType = 'Create';
+		}
 	};
 	
-	// buttons
-	$('#popConfirm').click(function(){
-		var list = document.getElementById('pathwayList');
-		pathway = list.options[list.selectedIndex].innerHTML;
-		template = 'TestTemplate';
-		PNPContent = $('#PNPContent')[0].value;
-		
-		$('.popTr').remove();
-		var popTr = originalTr.clone(true);
-		popTr.find('.pathway').html(pathway);
-		popTr.find('.template').html(template);
-		popTr.find('.PNPContent').html(PNPContent);
-		
-		$('.popTbody').append(popTr);
-		
-    	$('#dialog-modal').dialog("close");
-    });
+	// add option
+	var appendOption = function(listName, value, text){
+		var opt = document.createElement('option');
+		var list = document.getElementById(listName);
+		opt.value = value;
+		opt.innerHTML = text;
+		list.appendChild(opt);
+	};
 	
+	
+	// ---- Functions ----
+	// do Add
 	$('.btn_add.add').click(function(){
 	    $('#dialog-modal').dialog({
 	 	   	width: 960,
@@ -48,24 +113,11 @@ $(function(){
 	    });
     	$('#dialog-modal').show();
 	});
-		
+	
+	// do Confirm
 	$('.btn_add.confirm').click(function(){
 		postData = {};
-
-		console.info('pathway:', pathway);
-		
-		// postData.pathway = pathway;
-		if(pathway == 'BC-&gt;PNP-&gt;SMS'){
-			postData.pathway = '3';
-		}else if(pathway == 'BC-&gt;SMS'){
-			postData.pathway = '2';
-		}else if(pathway == 'BC'){
-			postData.pathway = '1';
-		}
-		console.info('postData.pathway:', postData.pathway);
-		
-		postData.template = template;
-		postData.pnpContent = PNPContent;
+				
 		postData.account = $('#account').val();
 		postData.accountAttribute = $('#accountAttribute').val();
 		postData.accountClass = $('#accountClass').val();
@@ -82,10 +134,22 @@ $(function(){
 		}else{
 			postData.status = false;
 		}
-		console.info('postData: ', postData);
+		
+		if(pathway == 'BC-&gt;PNP-&gt;SMS'){
+			postData.pathway = '3';
+		}else if(pathway == 'BC-&gt;SMS'){
+			postData.pathway = '2';
+		}else if(pathway == 'BC'){
+			postData.pathway = '1';
+		}
+		postData.template = template;
+		postData.pnpContent = PNPContent;
+		
+		postData.id = pnpMaintainAccountModelId;
+		
 		
 		$.ajax({
-			type : "POST",
+			type : 'POST',
 			url : bcs.bcsContextPath + '/edit/createPNPMaintainAccount',
 			cache : false,
 			contentType : 'application/json',
@@ -107,15 +171,25 @@ $(function(){
 		})
 	});
 	
-	var appendOption = function(listName, value, text){
-		var opt = document.createElement('option');
-		var list = document.getElementById(listName);
-		opt.value = value;
-		opt.innerHTML = text;
-		list.appendChild(opt);
-	};
+	// do Pop Confirm
+	$('#popConfirm').click(function(){
+		var list = document.getElementById('pathwayList');
+		pathway = list.options[list.selectedIndex].innerHTML;
+		template = 'TestTemplate';
+		PNPContent = $('#PNPContent')[0].value;
+		
+		$('.popTr').remove();
+		var popTr = originalPopTr.clone(true);
+		popTr.find('.pathway').html(pathway);
+		popTr.find('.template').html(template);
+		popTr.find('.PNPContent').html(PNPContent);
+		
+		$('.popTbody').append(popTr);
+		
+    	$('#dialog-modal').dialog("close");
+    });
 	
-	
+
 //		$('.LyMain').block($.BCS.blockMsgRead);
 //		
 //		$.ajax({
@@ -214,7 +288,9 @@ $(function(){
 //		templateMsgTrTemplate = $('.templateMsgTrTemplate').clone(true);
 //		$('.templateMsgTrTemplate').remove();
 //	}
-//	
+
+	
+	// ---- Initialize Page & Load Data ----
 	initPage();
 //	loadDataFunc();
 });

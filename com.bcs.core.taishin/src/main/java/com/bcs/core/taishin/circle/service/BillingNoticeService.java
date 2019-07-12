@@ -419,7 +419,7 @@ public class BillingNoticeService {
 				//imageUrl = "https://images.unsplash.com/photo-1556228720-9b1e04f13f63";
 				//logger.info("imageUrl1: " + imageUrl);
 				columnObject.put("thumbnailImageUrl",  imageUrl);
-				columnObject.put("title", detail.getTitle());
+				columnObject.put("title", child.getTemplateTitle());
 				columnObject.put("text", child.getTemplateText());
 				// action
 				actionsArray = new JSONArray();

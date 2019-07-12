@@ -2,7 +2,7 @@
  * 
  */
 $(function(){	
-	// Global Variables
+	// ---- Global Variables ----
 	var generalActionTr = {};    	//action的列
 	var generalTemplateTable = {};  //templateTable
 	var templateId = "";			//templateId
@@ -100,11 +100,10 @@ $(function(){
     				
     				
     				// Hide Tr
-    				
     				if(templateCount <= 1){
+    					//templateTable.find('.titleTr').css('display','none');
     					templateTable.find('.contentTextTr').css('display','none');
     				}
-    				
     				if(templateCount > 1){
     					templateTable.find('.templateSwitchTr').css('display','none');
     					templateTable.find('.curfewSwitchTr').css('display','none');
@@ -185,7 +184,7 @@ $(function(){
 		}
 	}
 	
-	//------選擇template-----------
+	// select templateType
 	$("input[name='templateType']").click(function(e){
 		templateType = e.currentTarget.value;
 		templateCount=0;
@@ -263,6 +262,11 @@ $(function(){
 		var actionTr;
 		
 		templateTable.find(".actionTh").prop("rowspan", actionNumber * 3 + 3);
+
+		if(templateCount<=1){
+			//templateTable.find('.titleTr').css('display','none');
+			templateTable.find('.contentTextTr').css('display','none');
+		}
 		
 		if(templateCount>1){
 			templateTable.find('.templateSwitchTr').css('display','none');
@@ -349,7 +353,7 @@ $(function(){
 		return actionTr;
 	}
 	
-	//動態增加tab
+	// add Tab
 	var addTab = function(){
         var target;
         
@@ -365,7 +369,7 @@ $(function(){
         $("#tabs").tabs({ active: templateCount-1 });
     };
     
-    //刪除tab
+    // delete Tab
 	var deleteTab = function(){
         $('.tabLi:last').remove();
         $('.tabDiv:last').remove();
@@ -428,7 +432,53 @@ $(function(){
 		}
 	}
 	
-	//---------儲存template
+	//取得template的資料
+	var getTemplateTableInformation = function(templateTable){
+		var actionTypeTds = templateTable.find('.actionTypeTd');
+		var actions = [];
+		var templateData = {};
+		
+		for(var i=0; i<actionNumber; i++){
+			actions.push({
+					actionLetter : $(actionTypeTds[i]).find('.typeSideTxt').text(),
+					actionType : $(actionTypeTds[i]).find('.actionType:checked').val(),
+					actionLabel : $(actionTypeTds[i]).closest('.actionTr').find("input[name='label']").val(),
+					actionData : $(actionTypeTds[i]).closest('.actionTr').next().next().find("input[name='data']").val(),
+					actionText : $(actionTypeTds[i]).closest('.actionTr').next().find("input[name='text']").val()
+			});
+		}
+		
+		templateData.templateTitle = templateTable.find('#templateMsgTitle').val();
+		
+		templateData.curfewStartTime = templateTable.find('#curfewStartTime').val();
+		templateData.curfewEndTime = templateTable.find('#curfewEndTime').val();
+		var curfewSwitches = templateTable.find('.curfewSwitch');
+		if(curfewSwitches[0].checked){
+			templateData.curfewStartTime = "";
+			templateData.curfewEndTime = "";			
+		}
+		
+		// templateSwitches
+		var templateSwitches = templateTable.find('.templateSwitch');
+		//console.log(templateSwitches[0].checked); //on == true
+		//console.log(templateSwitches[1].checked);
+		templateData.templateSwitch = templateSwitches[0].checked;
+		
+		templateData.altText = templateTable.find('#altText').val();
+		console.info("contentText:", templateTable.find('#contentText').val());
+		templateData.templateText = templateTable.find('#contentText').val();
+		templateData.templateType = templateType;
+		templateData.templateImageId = templateTable.find('.imgId').val();
+		templateData.templateActions = actions;
+		
+		console.log(templateData);
+		
+		return templateData;
+	}	
+	
+	
+	// ---- Functions ----
+	// do Save
 	$('#save').click(function(){
 		var templateTables = $('.templateTable');
 		var actions = [];
@@ -479,7 +529,7 @@ $(function(){
 		});
 	});
 	
-	// Time Check
+	// validate Time
 	var checkTimeValid = function(timeString){
 		console.log("timeString:", timeString);
 		var aDate = moment(timeString, 'HH:mm:ss', true);
@@ -487,7 +537,7 @@ $(function(){
 		return aDate.isValid();
 	}
 	
-	//檢查是否有不合法資料
+	// validate Table
 	var checkTemplateTableValid = function(templateTables){
 		var templateTable;
 		var actionTypeTds;
@@ -529,13 +579,14 @@ $(function(){
 				alert("必須所有column都有圖片或都沒有!");
 				return false;
 			}
-			
-			if(i == 0){
-				titleIsEmpty = (templateTable.find('#templateMsgTitle').val() == "");
-			}else if(templateTable.find('#templateMsgTitle').val() == "" ^ titleIsEmpty){
-				alert("必須所有column都有標題或都沒有!");
-				return false;
-			}
+
+			// skip title check
+//			if(i == 0){
+//				titleIsEmpty = (templateTable.find('#templateMsgTitle').val() == "");
+//			}else if(templateTable.find('#templateMsgTitle').val() == "" ^ titleIsEmpty){
+//				alert("必須所有column都有標題或都沒有!");
+//				return false;
+//			}
 			
 			if(templateTable.find('#altText').val() == "" && i==0){
 				alert("Column"+ (i+1) + "必須輸入非手機顯示訊息！");
@@ -579,51 +630,7 @@ $(function(){
 		return true;
 	}
 	
-	//取得template的資料
-	var getTemplateTableInformation = function(templateTable){
-		var actionTypeTds = templateTable.find('.actionTypeTd');
-		var actions = [];
-		var templateData = {};
-		
-		for(var i=0; i<actionNumber; i++){
-			actions.push({
-					actionLetter : $(actionTypeTds[i]).find('.typeSideTxt').text(),
-					actionType : $(actionTypeTds[i]).find('.actionType:checked').val(),
-					actionLabel : $(actionTypeTds[i]).closest('.actionTr').find("input[name='label']").val(),
-					actionData : $(actionTypeTds[i]).closest('.actionTr').next().next().find("input[name='data']").val(),
-					actionText : $(actionTypeTds[i]).closest('.actionTr').next().find("input[name='text']").val()
-			});
-		}
-		
-		templateData.templateTitle = templateTable.find('#templateMsgTitle').val();
-		
-		templateData.curfewStartTime = templateTable.find('#curfewStartTime').val();
-		templateData.curfewEndTime = templateTable.find('#curfewEndTime').val();
-		var curfewSwitches = templateTable.find('.curfewSwitch');
-		if(curfewSwitches[0].checked){
-			templateData.curfewStartTime = "";
-			templateData.curfewEndTime = "";			
-		}
-		
-		// templateSwitches
-		var templateSwitches = templateTable.find('.templateSwitch');
-		//console.log(templateSwitches[0].checked); //on == true
-		//console.log(templateSwitches[1].checked);
-		templateData.templateSwitch = templateSwitches[0].checked;
-		
-		templateData.altText = templateTable.find('#altText').val();
-		console.info("contentText:", templateTable.find('#contentText').val());
-		templateData.templateText = templateTable.find('#contentText').val();
-		templateData.templateType = templateType;
-		templateData.templateImageId = templateTable.find('.imgId').val();
-		templateData.templateActions = actions;
-		
-		console.log(templateData);
-		
-		return templateData;
-	}	
-	
-	//取消鈕
+	// do Cancel
 	$('input[name="cancel"]').click(function() {
 		var r = confirm("請確認是否取消");
 		if (r) {
@@ -635,7 +642,7 @@ $(function(){
 		window.location.replace(bcs.bcsContextPath + '/edit/billingNoticeListPage');
 	});
 	
-	//--------上傳圖片------------------
+	// do Upload Image
 	$("#titleImage").on("change", function(e) {
 		var input = e.currentTarget;
     	if (input.files && input.files[0]) {
@@ -671,6 +678,7 @@ $(function(){
         } 
 	});
 	
+	// ---- Initialize & LoadDataFunction ----
 	$("#tabs").tabs();
 	initPage();
 });

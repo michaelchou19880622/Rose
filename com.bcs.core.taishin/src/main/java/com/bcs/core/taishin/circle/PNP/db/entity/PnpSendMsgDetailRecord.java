@@ -17,7 +17,7 @@ import javax.persistence.Table;
 
 /**
  * 
-欄位名稱                                                                                                欄位型態                                   欄位說明                                      說明                                                                                    PRIMARY KEY / INDEX        資料範例                         NOT NULL (必填欄位)
+欄位名稱                                              欄位型態                          欄位說明                         說明                                                     PRIMARY KEY / INDEX        資料範例                         NOT NULL (必填欄位)
 RECORD_ID                        nvarchar(128)        序號 資料ID           自己定義(main id、detail id)        PRIMARY KEY                 0                Y
 FRONTEND_SYSTEM                  nvarchar(30)        前方來源系統                                     檔名                                                                                                                                                                   PRMSMS              Y
 DELIVERY_PATHWAY                 nvarchar(200)        通路流                                            後台設定檢核(白名單)                                          BC->PNP->SMS          Y
@@ -34,7 +34,7 @@ PROGR_CD                         nvarchar(20)        行銷活動階段         
 SEG_CD                           nvarchar(10)        行銷活動客群代碼                            互動(Body-ProgramID) ，若無則空白                                                                                                                    1001        Y
 CUSTOMER_ID                      nvarchar(64)        客戶ID                身分證字號(先帶空白)                d1d51a4ce43a970ff1b23e45a50a5b4a58ed45a8b37fe1e551385f9997f470e0        Y
 CUSTOMER_CellPhone_Number        nvarchar(64)        客戶手機號碼                                                        d1d51a4ce43a970ff1b23e45a50a5b4a58ed45a8b37fe1e551385f9997f470e0        Y
-Lin_BC_UUID                                          Line BC UUID              BC發送才會有                        
+Line_BC_UID                                          Line BC UID              BC發送才會有                        
 SCHEDULE_DATE                    nvarchar(18)        預約日期 (YYYYMMDD)         檔案上                                                                                                                                                               20190311         Y
 SCHEDULE_TIME                    nvarchar(18)        預約時間 (HHmmss)           檔案上                                                                                                                                                              182220         
 DELIVERY_DATE                    nvarchar(18)        發送日期 (YYYYMMDD)         實際                                                                     INDEX_DELIVERY_DATE             20190311         Y
@@ -62,7 +62,7 @@ indexes = {
 	       @Index(name = "INDEX_5", columnList = "DELIVERY_DATE")
 	})
 public class PnpSendMsgDetailRecord extends PnpDetail {
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUid = 1L;
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -101,8 +101,8 @@ public class PnpSendMsgDetailRecord extends PnpDetail {
 	private String customerId;
 	@Column(name = "CUSTOMER_CellPhone_Number"        , columnDefinition="nvarchar(64) ") 
 	private String customerCellPhoneNumber;
-	@Column(name = "Lin_BC_UUID"                      , columnDefinition="nvarchar(50) ") 
-	private String lineBcUUID;
+	@Column(name = "Line_BC_UID"                      , columnDefinition="nvarchar(50) ") 
+	private String lineBcUid;
 	@Column(name = "SCHEDULE_DATE"                    , columnDefinition="nvarchar(18) ") 
 	private String scheduleDate;
 	@Column(name = "SCHEDULE_TIME"                    , columnDefinition="nvarchar(18) ") 
@@ -223,11 +223,11 @@ public class PnpSendMsgDetailRecord extends PnpDetail {
 	public void setCustomerCellPhoneNumber(String customerCellPhoneNumber) {
 		this.customerCellPhoneNumber = customerCellPhoneNumber;
 	}
-	public String getLineBcUUID() {
-		return lineBcUUID;
+	public String getLineBcUid() {
+		return lineBcUid;
 	}
-	public void setLineBcUUID(String lineBcUUID) {
-		this.lineBcUUID = lineBcUUID;
+	public void setLineBcUid(String lineBcUid) {
+		this.lineBcUid = lineBcUid;
 	}
 	public String getScheduleDate() {
 		return scheduleDate;

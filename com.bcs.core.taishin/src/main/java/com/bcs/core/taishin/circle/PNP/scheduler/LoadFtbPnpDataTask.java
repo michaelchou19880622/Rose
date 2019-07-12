@@ -147,7 +147,7 @@ public class LoadFtbPnpDataTask {
 				// 排程工作
 			logger.info(" LoadFtbPnpDataTask ftpProcessHandler SOURCE_MITAKE....");
 				try {
-				ftpProcessHandler(AbstractPnpMainEntity.SOURCE_MITAKE);
+					ftpProcessHandler(AbstractPnpMainEntity.SOURCE_MITAKE);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

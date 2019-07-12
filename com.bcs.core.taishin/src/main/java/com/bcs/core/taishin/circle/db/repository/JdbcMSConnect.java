@@ -8,9 +8,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 @Repository
-public class JdbcConnect {
+public class JdbcMSConnect {
 	/** Logger */
-	private static Logger logger = Logger.getLogger(JdbcConnect.class);
+	private static Logger logger = Logger.getLogger(JdbcMSConnect.class);
 	
 	public void execute(String sql){
 		Connection conn = null;

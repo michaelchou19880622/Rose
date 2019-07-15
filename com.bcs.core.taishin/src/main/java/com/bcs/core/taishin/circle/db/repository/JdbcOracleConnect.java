@@ -14,9 +14,43 @@ public class JdbcOracleConnect {
 	private static Logger logger = Logger.getLogger(JdbcOracleConnect.class);
 		
 //	public static void main(String[] args) {
-//		getEmpDataByEmpId("1000588");
+//		//getEmpDataByEmpId("1000588");
 //		//getEmpDataByEmpId("MOPACK");
+//		findAll();
 //	}
+//	public static void findAll() {
+//	System.out.println("findAll");
+//	try{
+//		//step1 load the driver class  
+//		Class.forName("oracle.jdbc.driver.OracleDriver");  
+//
+//		//step2 create  the connection object  
+//		Connection con=DriverManager.getConnection("jdbc:oracle:thin:@192.168.1.195:1521/XEPDB1","SYSTEM","123");  //thin/oci
+//
+//		//step3 create the statement object  
+//		Statement stmt=con.createStatement();  
+//		
+//		String HR = "HR";
+//	
+//		
+//		//step4 execute query
+//		String sqlString = "select * from " + HR + ".HR_EMP_SW";
+//		System.out.println(sqlString);
+//		ResultSet rs=stmt.executeQuery(sqlString);
+//
+//		while(rs.next()) {
+//			String s = "";
+//			for(int i = 1; i <= 4; i++) {
+//				s += rs.getString(i)+",";
+//			}
+//			System.out.println(s); 
+//		}
+//		//step5 close the connection object  
+//		con.close();  
+//	}catch(Exception e){ 
+//		System.out.println(e);
+//	}  	
+//}	
 //	public static void getEmpDataByEmpId(String empId) {
 //		System.out.println("getEmpDataByEmpId. EMP_ID="+empId);
 //		try{

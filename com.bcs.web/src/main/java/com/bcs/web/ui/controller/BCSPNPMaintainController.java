@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -103,6 +104,24 @@ public class BCSPNPMaintainController extends BCSBaseController {
 	public String pnpUnicaAccountCreatePage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("pnpUnicaAccountCreatePage");
 		return BcsPageEnum.PNPUnicaAccountCreatePage.toString();
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/findAll/{maxRange}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> findAll(HttpServletRequest request,  HttpServletResponse response, 
+			@CurrentUser CustomUser customUser, @PathVariable Integer maxRange) throws IOException {		
+		try {
+			logger.info("findAll maxRange=" + maxRange);
+			oraclePnpService.findAll(maxRange);	
+			return new ResponseEntity<>("{}", HttpStatus.OK);
+		}catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));
+			if(e instanceof BcsNoticeException){
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			}else{
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		}
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getEmpAccount", produces = MediaType.APPLICATION_JSON_VALUE)

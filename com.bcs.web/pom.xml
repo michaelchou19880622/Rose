@@ -178,7 +178,7 @@
 					<!-- web.xml is not mandatory since JavaEE 5 -->
 					<failOnMissingWebXml>true</failOnMissingWebXml>
 					<!-- com.bcs.X jar & log jar 要包進去 -->
-					<packagingExcludes>%regex[WEB-INF/lib/(?!log4j.*\.jar)(?!slf4j.*\.jar)(?!logging.*\.jar)(?!com.bcs.*\.jar).*\.jar]</packagingExcludes> <!-- remove third party jar -->
+					<packagingExcludes>%regex[WEB-INF/lib/(?!ojdbc.*\.jar)(?!log4j.*\.jar)(?!slf4j.*\.jar)(?!logging.*\.jar)(?!com.bcs.*\.jar).*\.jar]</packagingExcludes> <!-- remove third party jar -->
 					<warName>${rp.build.warname}</warName> <!-- set up war name -->
 				</configuration>
 			</plugin>

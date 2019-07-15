@@ -30,9 +30,13 @@ $(function(){
 		appendOption('pathwayList', 2, 'BC');
 		appendOption('templateList', 0, 'TestTemplate');
 		
+		// block
+		$('.LyMain').block($.BCS.blockMsgRead);
+		
 		// parameter
 		pnpMaintainAccountModelId = $.urlParam("pnpMaintainAccountModelId"); //從列表頁導過來的參數
 		
+		// Edit Mode
 		if(pnpMaintainAccountModelId != null){
 			// change UI
 			pnpMaintainAccountActionType = 'Edit';
@@ -87,9 +91,31 @@ $(function(){
     			console.info(response);
     			$.FailResponse(response);
     		}).done(function(){
+    			$('.LyMain').unblock();
     		});
 		}else{
 			pnpMaintainAccountActionType = 'Create';
+			
+			// Create Mode
+			$.ajax({
+				type : 'GET',
+				url : bcs.bcsContextPath + '/edit/getEmpAccount',
+	            contentType: 'application/json',
+			}).success(function(response) {
+				console.info("response:", response);
+				$('#account').val(response.account);
+				$('#employeeId').val(response.employeeId);
+				$('#divisionName').val(response.divisionName);
+				$('#departmentName').val(response.departmentName);
+				$('#groupName').val(response.groupName);
+				$('#PccCode').val(response.pccCode);
+				employeeId = response.employeeId;
+			}).fail(function(response) {
+				console.info(response);
+				$.FailResponse(response);
+			}).done(function() {
+				$('.LyMain').unblock();
+	        });
 		}
 	};
 	

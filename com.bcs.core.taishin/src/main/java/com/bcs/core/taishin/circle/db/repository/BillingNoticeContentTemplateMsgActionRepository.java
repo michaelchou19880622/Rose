@@ -9,6 +9,6 @@ import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsgActi
 
 public interface BillingNoticeContentTemplateMsgActionRepository extends EntityRepository<BillingNoticeContentTemplateMsgAction, String>{
 
-	@Query("select  b from BillingNoticeContentTemplateMsgAction b  where b.templateId = ?1 and b.status <> 'DELETE'  ")
+	@Query("select  b from BillingNoticeContentTemplateMsgAction b  where b.templateId = ?1 and b.status <> 'DELETE' order by b.actionLetter ")
 	public List<BillingNoticeContentTemplateMsgAction> findNotDeletedTemplateId(String templateId);
 }

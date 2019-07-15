@@ -372,6 +372,20 @@
     		<artifactId>mssql-jdbc</artifactId>
     		<version>6.4.0.jre8</version>
 		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/com.oracle/ojdbc8 -->
+		<dependency>
+		    <groupId>com.oracle</groupId>
+		    <artifactId>ojdbc8</artifactId>
+		    <version>19.3</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/com.oracle/ojdbc14 -->
+<!-- 		<dependency>
+		    <groupId>com.oracle</groupId>
+		    <artifactId>ojdbc14</artifactId>
+		    <version>10.2.0.1.0</version>
+		</dependency> -->
 	</dependencies>
 	<build>
 		<pluginManagement>

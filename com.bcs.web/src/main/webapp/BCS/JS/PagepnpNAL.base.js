@@ -5,6 +5,7 @@
 $(function(){
 	// ---- Global Variables ----
 	// input data
+	var employeeRecordId = "";
 	var divisionName = "";
 	var departmentName = "";
 	var groupName = "";
@@ -27,6 +28,30 @@ $(function(){
 	    $('.searchTr').remove();
 		originalTable = $('.searchTable').clone(true);
 		$('.searchTable').remove();
+		
+		// block
+		$('.LyMain').block($.BCS.blockMsgRead);
+		
+		$.ajax({
+			type : 'GET',
+			url : bcs.bcsContextPath + '/edit/getEmpAccount',
+            contentType: 'application/json',
+		}).success(function(response) {
+			console.info("response:", response);
+			$('#account').val(response.account);
+			$('#employeeId').val(response.employeeId);
+			$('#divisionName').val(response.divisionName);
+			$('#departmentName').val(response.departmentName);
+			$('#groupName').val(response.groupName);
+			$('#pccCode').val(response.pccCode);
+			employeeId = response.employeeId;
+		}).fail(function(response) {
+			console.info(response);
+			$.FailResponse(response);
+		}).done(function() {
+			$('.LyMain').unblock();
+        });
+		
 	};
 
     // get List Data
@@ -173,14 +198,6 @@ $(function(){
 			window.location.replace('pnpUnicaAccountListPage');
         });
 	});
-
-	// to Edit Page
-	$('.btn_edit.search').click(function(){
-		var editAndDeleteTr = $(this).parent();
-		var pnpMaintainAccountId = editAndDeleteTr.find('.pnpMaintainAccountId').val();
-		console.info("id:", pnpMaintainAccountId);
-		window.location.replace('pnpNormalAccountCreatePage?pnpMaintainAccountModelId=' + pnpMaintainAccountId);
-	});
 	
 	// do Search
 	$('.btn_add.search').click(function(){
@@ -212,6 +229,14 @@ $(function(){
 		$('.btn_add.download').attr('href', exportUrl);
 	});
 
+	// to Edit Page
+	$('.btn_edit.search').click(function(){
+		var editAndDeleteTr = $(this).parent();
+		var pnpMaintainAccountId = editAndDeleteTr.find('.pnpMaintainAccountId').val();
+		console.info("id:", pnpMaintainAccountId);
+		window.location.replace('pnpNormalAccountCreatePage?pnpMaintainAccountModelId=' + pnpMaintainAccountId);
+	});
+	
 	// to Create Page
 	$('.btn_add.create').click(function(){
 		window.location.replace('pnpNormalAccountCreatePage');

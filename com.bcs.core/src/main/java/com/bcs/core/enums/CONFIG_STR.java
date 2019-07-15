@@ -316,12 +316,13 @@ public enum CONFIG_STR {
 	LINE_POINT_MESSAGE_PUSH_URL("line.point.push.url"),
 	LINE_POINT_MESSAGE_CANCEL_URL("line.point.cancel.url"),
 	
-//	// ODS Database
-//	TAISHIN_ODS_SERVER_IP("taishin.ods.server.ip"),
-//	TAISHIN_ODS_SERVER_USER("taishin.ods.server.user"),
-//	TAISHIN_ODS_SERVER_PASSWORD("taishin.ods.server.password"),
-//	TAISHIN_ODS_SERVER_PORT_NUMBER("taishin.ods.server.port.number"),
-//	TAISHIN_ODS_SERVER_DATABASE_NAME("taishin.ods.server.database.name"),
+//	// Oracle Database
+	ORACLE_DATASOURCE_URL("oracle.datasource.url"),
+	ORACLE_DATASOURCE_USERNAME("oracle.datasource.username"),
+	ORACLE_DATASOURCE_PASSWORD("oracle.datasource.password"),
+	ORACLE_DATASOURCE_DRIVER_NAME("oracle.datasource.driver.name"),
+	ORACLE_SCHEMA_HR("oracle.schema.hr"),
+	ORACLE_SCHEMA_CMM("oracle.schema.cmm"),
 	
 	//PNP監控
 //	PNP_PROC_FLOW("pnp.proc.flow"),

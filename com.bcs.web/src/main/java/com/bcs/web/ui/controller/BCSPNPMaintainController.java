@@ -45,7 +45,9 @@ import com.bcs.core.db.service.MsgSendRecordService;
 import com.bcs.core.db.service.SendGroupService;
 import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.resource.CoreConfigReader;
+import com.bcs.core.taishin.circle.PNP.db.entity.EmployeeRecord;
 import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
+import com.bcs.core.taishin.circle.db.service.OraclePnpService;
 import com.bcs.core.taishin.service.PNPMaintainExcelService;
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.utils.ObjectUtil;
@@ -71,9 +73,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class BCSPNPMaintainController extends BCSBaseController {	
 	@Autowired
 	private PNPMaintainUIService pnpMaintainUIService;
-	
 	@Autowired	
 	private PNPMaintainExcelService pnpMaintainExcelService;
+	@Autowired	
+	private OraclePnpService oraclePnpService;
+	
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSPNPMaintainController.class);
 	
@@ -99,6 +103,32 @@ public class BCSPNPMaintainController extends BCSBaseController {
 	public String pnpUnicaAccountCreatePage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("pnpUnicaAccountCreatePage");
 		return BcsPageEnum.PNPUnicaAccountCreatePage.toString();
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getEmpAccount", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> getEmpAccount(HttpServletRequest request,  HttpServletResponse response, 
+			@CurrentUser CustomUser customUser) throws IOException {		
+		try {
+			String empId = customUser.getAccount().toUpperCase();
+			logger.info("getEmpAccount empId=" + empId);
+			EmployeeRecord result = oraclePnpService.findByEmployeeId(empId);		
+			
+			if(result == null){
+				throw new BcsNoticeException("Not Found Result for this Employee Id!");
+			}
+			result.setModifyTime(new Date());
+			result.setModifyUser(empId);
+			oraclePnpService.save(result);
+			return new ResponseEntity<>(result, HttpStatus.OK);
+		}catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));
+			if(e instanceof BcsNoticeException){
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			}else{
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		}
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/createPNPMaintainAccount", consumes = MediaType.APPLICATION_JSON_VALUE)

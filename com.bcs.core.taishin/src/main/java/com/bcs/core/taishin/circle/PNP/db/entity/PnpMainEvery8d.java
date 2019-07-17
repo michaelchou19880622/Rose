@@ -34,7 +34,10 @@ import javax.persistence.Table;
 @Table(name = "BCS_PNP_MAIN_EVERY8D",
 indexes = {
 		   @Index(name = "INDEX_0", columnList = "SEND_TYPE"),
-	       @Index(name = "INDEX_1", columnList = "STATUS")
+	       @Index(name = "INDEX_1", columnList = "STATUS"),
+	       @Index(name = "INDEX_2", columnList = "PROC_FLOW"),	       
+	       @Index(name = "INDEX_3", columnList = "SOURCE"),
+	       @Index(name = "INDEX_4", columnList = "PROC_STAGE"),
 	})
 //與FTP的來源檔案為1對1關係
 public class PnpMainEvery8d extends PnpMain {

@@ -31,7 +31,10 @@ import com.bcs.core.json.AbstractBcsEntity;
 @Entity
 @Table(name = "BCS_PNP_DETAIL_MING",
 indexes = {
-	       @Index(name = "INDEX_0", columnList = "PNP_MAIN_ID")
+	       @Index(name = "INDEX_0", columnList = "PNP_MAIN_ID"),
+	       @Index(name = "INDEX_1", columnList = "STATUS"),
+	       @Index(name = "INDEX_2", columnList = "PROC_STAGE"),	       
+	       @Index(name = "INDEX_3", columnList = "PNP_DELIVERY_EXPIRE_TIME"),
 	})
 public class PnpDetailMing extends PnpDetail {
 	private static final long serialVersionUID = 1L;

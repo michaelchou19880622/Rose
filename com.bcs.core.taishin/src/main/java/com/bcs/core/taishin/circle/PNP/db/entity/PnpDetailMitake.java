@@ -35,7 +35,10 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "BCS_PNP_DETAIL_MITAKE",
 indexes = {
-	       @Index(name = "INDEX_0", columnList = "PNP_MAIN_ID")
+	       @Index(name = "INDEX_0", columnList = "PNP_MAIN_ID"),
+	       @Index(name = "INDEX_1", columnList = "STATUS"),
+	       @Index(name = "INDEX_2", columnList = "PROC_STAGE"),	       
+	       @Index(name = "INDEX_3", columnList = "PNP_DELIVERY_EXPIRE_TIME"),
 	})
 public class PnpDetailMitake extends PnpDetail {
 	private static final long serialVersionUID = 1L;

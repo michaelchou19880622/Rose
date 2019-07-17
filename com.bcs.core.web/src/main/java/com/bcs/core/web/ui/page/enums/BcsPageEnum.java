@@ -128,14 +128,19 @@ public enum BcsPageEnum {
 	BillingNoticeCreatePage("/BCS/Views/PageBN1"),
 	BillingNoticeListPage("/BCS/Views/PageBN2"),
 	
-    // PNP Maintain
+	// PNP Template
    	PnpCreatePage("/BCS/Views/PagePNP1"),
 	PnpListPage("/BCS/Views/PagePNP2"), 
+	
+    // PNP Maintain
     PNPNormalAccountListPage("/BCS/Views/PagepnpNAL"),
     PNPNormalAccountCreatePage("/BCS/Views/PagepnpNAC"),
     PNPUnicaAccountListPage("/BCS/Views/PagepnpUAL"),
     PNPUnicaAccountCreatePage("/BCS/Views/PagepnpUAC"),
 	
+    // PNP Report
+    PnpDetailReportPage("/BCS/Views/PagepnpDetailReport"),
+    
 	//Game
 	GameCreatePage("/BCS/Views/PageG1"),
 	GameListPage("/BCS/Views/PageG2"),

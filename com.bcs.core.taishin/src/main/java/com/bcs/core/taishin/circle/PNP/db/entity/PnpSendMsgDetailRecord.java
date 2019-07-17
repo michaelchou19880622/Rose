@@ -68,59 +68,59 @@ public class PnpSendMsgDetailRecord extends PnpDetail {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name = "ID")
 	private Long id;
-
-	@Column(name = "RECORD_ID"                        , columnDefinition="nvarchar(128)") 
+	@Column(name = "RECORD_ID", columnDefinition="nvarchar(128)") 
 	private String recordId;
-	@Column(name = "FRONTEND_SYSTEM"                  , columnDefinition="nvarchar(30) ") 
+	@Column(name = "FRONTEND_SYSTEM", columnDefinition="nvarchar(30)") 
 	private String frontendSystem;
-	@Column(name = "DELIVERY_PATHWAY"                 , columnDefinition="nvarchar(200)") 
-	private String deliveryPathway;
-	@Column(name = "CHANNEL"                          , columnDefinition="nvarchar(30) ") 
-	private String channel;
-	@Column(name = "ACCOUNT"                          , columnDefinition="nvarchar(30) ") 
-	private String account;
-	@Column(name = "ACCOUNT_PCCCODE"                  , columnDefinition="nvarchar(10) ") 
-	private String accountPccCode;
-	@Column(name = "BATCH_NO"                         , columnDefinition="nvarchar(64) ") 
-	private String batchNo;
-	@Column(name = "SERIAL_NO"                        , columnDefinition="nvarchar(64) ")
-	private String serialNo;
-	@Column(name = "MESSAGE_TEMPLATE"                 , columnDefinition="nvarchar(30) ")
-	private String messageTemplate;
-	@Column(name = "MESSAGE"                          , columnDefinition="nvarchar(700)")
-	private String message;
-	@Column(name = "MESSAGE_POINT"                    , columnDefinition="nvarchar(10) ")
-	private int messagePoint;
-	@Column(name = "CAMPAIGN_ID"                      , columnDefinition="nvarchar(30) ")
-	private String campaignId; 
-	@Column(name = "PROGR_CD"                         , columnDefinition="nvarchar(20) ")
-	private String progrCd;
-	@Column(name = "SEG_CD"                           , columnDefinition="nvarchar(10) ") 
-	private String segCd;
-	@Column(name = "CUSTOMER_ID"                      , columnDefinition="nvarchar(64) ") 
-	private String customerId;
-	@Column(name = "CUSTOMER_CellPhone_Number"        , columnDefinition="nvarchar(64) ") 
-	private String customerCellPhoneNumber;
-	@Column(name = "Line_BC_UID"                      , columnDefinition="nvarchar(50) ") 
-	private String lineBcUid;
-	@Column(name = "SCHEDULE_DATE"                    , columnDefinition="nvarchar(18) ") 
-	private String scheduleDate;
-	@Column(name = "SCHEDULE_TIME"                    , columnDefinition="nvarchar(18) ") 
-	private String scheduleTime;
-	@Column(name = "DELIVERY_DATE"                    , columnDefinition="nvarchar(18) ") 
-	private String deliveryDate;
-	@Column(name = "DELIVERY_TIME"                    , columnDefinition="nvarchar(18) ") 
+	@Column(name = "DELIVERY_PATHWAY", columnDefinition="nvarchar(200)")
+	private String deliveryPathway;	
+	@Column(name = "CHANNEL", columnDefinition="nvarchar(30)")
+	private String channel;	
+	@Column(name = "ACCOUNT", columnDefinition="nvarchar(30)")
+	private String account;	
+	@Column(name = "ACCOUNT_PCCCODE", columnDefinition="nvarchar(10)")
+	private String accountPccCode;	
+	@Column(name = "BATCH_NO", columnDefinition="nvarchar(64)")
+	private String batchNo;	
+	@Column(name = "SERIAL_NO", columnDefinition="nvarchar(64)")
+	private String serialNo;	
+	@Column(name = "MESSAGE_TEMPLATE", columnDefinition="nvarchar(30)")
+	private String messageTemplate;	
+	@Column(name = "MESSAGE", columnDefinition="nvarchar(700)")
+	private String message;	
+	@Column(name = "MESSAGE_POINT", columnDefinition="nvarchar(10)")
+	private int messagePoint;	
+	@Column(name = "CAMPAIGN_ID", columnDefinition="nvarchar(30)")
+	private String campaignId;	
+	@Column(name = "PROGR_CD", columnDefinition="nvarchar(20)")
+	private String progrCd;	
+	@Column(name = "SEG_CD", columnDefinition="nvarchar(10)")
+	private String segCd;	
+	@Column(name = "CUSTOMER_ID", columnDefinition="nvarchar(64)")
+	private String customerId;	
+	@Column(name = "CUSTOMER_CellPhone_Number", columnDefinition="nvarchar(64)")
+	private String customerCellPhoneNumber;	
+	@Column(name = "Line_BC_UID", columnDefinition="nvarchar(50)")
+	private String lineBcUid;	
+	@Column(name = "SCHEDULE_DATE", columnDefinition="nvarchar(18)")
+	private String scheduleDate;	
+	@Column(name = "SCHEDULE_TIME", columnDefinition="nvarchar(18)")
+	private String scheduleTime;	
+	@Column(name = "DELIVERY_DATE", columnDefinition="nvarchar(18)")
+	private String deliveryDate;	
+	@Column(name = "DELIVERY_TIME", columnDefinition="nvarchar(18)")
 	private String deliveryTime;
-	@Column(name = "STATUS_CODE"                      , columnDefinition="nvarchar(10) ") 
+	@Column(name = "STATUS_CODE", columnDefinition="nvarchar(10)") 
 	private String statusCode;
-	@Column(name = "STATUS_INFO"                      , columnDefinition="nvarchar(30) ") 
+	@Column(name = "STATUS_INFO", columnDefinition="nvarchar(30)") 
 	private String statusInfo;
-	@Column(name = "STATUS_SUCCESS"                   , columnDefinition="nvarchar(1)  ") 
+	@Column(name = "STATUS_SUCCESS", columnDefinition="nvarchar(1)") 
 	private String statusSuccess;
-	@Column(name = "CREATE_DATE"                      , columnDefinition="nvarchar(8)  ") 
+	@Column(name = "CREATE_DATE", columnDefinition="nvarchar(8)") 
 	private String createDate;
-	@Column(name = "UPDATE_DATE"                      , columnDefinition="nvarchar(8)  ") 
+	@Column(name = "UPDATE_DATE", columnDefinition="nvarchar(8)") 
 	private String updateDate;
+	
 	public Long getId() {
 		return id;
 	}

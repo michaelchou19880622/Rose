@@ -28,7 +28,6 @@ $(function(){
 			page--;
 			loadData();
 			// set pageAndTotalPage
-			//console.info(page + '/' + totalPages);
 			$('#pageAndTotalPages').text(page + '/' + totalPages);
 		}
 	});
@@ -37,7 +36,6 @@ $(function(){
 			page++;
 			loadData();
 			// set pageAndTotalPage
-			console.info(page + '/' + totalPages);
 			$('#pageAndTotalPages').text(page + '/' + totalPages);
 		}
 	});
@@ -172,7 +170,6 @@ $(function(){
 		
 		startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
 		endDate = moment(new Date()).format('YYYY-MM-DD');
-		
 		$('#startDate').val(startDate);
 		$('#endDate').val(endDate);
 	}

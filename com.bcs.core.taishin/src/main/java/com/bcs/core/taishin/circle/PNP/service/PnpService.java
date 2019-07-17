@@ -88,7 +88,7 @@ public class PnpService {
 	private PnpDetailMingRepository pnpDetailMingRepository;
 //	@Autowired
 //	private PnpContentTemplateMsgRepository PnpContentTemplateMsgRepository;
-//	
+	
 	@Autowired
 	private PnpAkkaService pnpAkkaService;
 	private DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
@@ -367,6 +367,8 @@ public class PnpService {
 				HttpEntity<String> httpEntity = new HttpEntity<String>(requestBody.toString(), headers);
 				try {
 					RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
+					// BEAN
+					
 					restfulUtil.execute();
 					if("200".equals(restfulUtil.getStatusCode())){
 						sendFailFlag = true;

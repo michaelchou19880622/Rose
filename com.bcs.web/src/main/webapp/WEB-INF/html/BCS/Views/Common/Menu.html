@@ -259,6 +259,9 @@
                         <li th:classappend="${currentPage == 'PagepnpUAC'} ? 'ExSelected'" style="display:none">
                             <a th:href="@{/bcs/edit/pnpUnicaAccountCreatePage}"><span>建立Unica帳號</span></a>
                         </li>
+                        <li th:classappend="${currentPage == 'PagepnpDetailReport'} ? 'ExSelected'">
+                            <a th:href="@{/bcs/edit/pnpDetailReportPage}"><span>PNP明細報表</span></a>
+                        </li>
                     </ul>
                 </li>
             </ul>

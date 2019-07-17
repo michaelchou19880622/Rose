@@ -1,13 +1,19 @@
 package com.bcs.web.ui.service;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PreDestroy;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -36,10 +42,11 @@ public class PNPMaintainUIService {
 	private static Logger logger = Logger.getLogger(PNPMaintainUIService.class);
 	@Autowired
 	private PNPMaintainAccountModelRepository pnpMaintainAccountModelRepository;    
-	
 	@Autowired
     private PNPMaintainAccountModelCustom PNPMaintainAccountModelCustom;
-
+	@PersistenceContext
+    EntityManager entityManager;
+	
 	public void save(PNPMaintainAccountModel pnpMaintainAccountModel) {
 		pnpMaintainAccountModelRepository.save(pnpMaintainAccountModel);
 	}
@@ -70,6 +77,65 @@ public class PNPMaintainUIService {
 		return pnpMaintainAccountModelRepository.findByAccountType(accountType);
 	}
 	
+    @SuppressWarnings("unchecked")
+    public Map<String, List<String>> getPNPDetailReport(String startDate, String endDate){
+//    	Integer rowStart, rowEnd;
+//    	if(page == null) {
+//    		rowStart = 1;
+//    		rowEnd = Integer.MAX_VALUE; // get all data
+//    	}else {
+//    		page--; // 1~199 => 0~198
+//    		rowStart = page * 10 + 1;
+//    		rowEnd = rowStart + 10; // 10 as Size
+//    	}
+//    	
+    	String queryString = 
+			"( "
+			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_TIME, PNP_DELIVERY_TIME, D.MODIFY_TIME "
+			+"FROM BCS_PNP_DETAIL_MING AS D LEFT JOIN BCS_PNP_MAIN_MING AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
+			+"WHERE D.MODIFY_TIME >= ?1 AND D.MODIFY_TIME < DATEADD(DAY, 1, ?2) "
+			+"UNION "
+			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_TIME, PNP_DELIVERY_TIME, D.MODIFY_TIME "
+			+"FROM BCS_PNP_DETAIL_MITAKE AS D LEFT JOIN BCS_PNP_MAIN_MITAKE AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
+			+"WHERE D.MODIFY_TIME >= ?1 AND D.MODIFY_TIME < DATEADD(DAY, 1, ?2) "
+			+"UNION "
+			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_TIME, PNP_DELIVERY_TIME, D.MODIFY_TIME "
+			+"FROM BCS_PNP_DETAIL_UNICA AS D LEFT JOIN BCS_PNP_MAIN_UNICA AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
+			+"WHERE D.MODIFY_TIME >= ?1 AND D.MODIFY_TIME < DATEADD(DAY, 1, ?2) "
+			+"UNION "
+			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_TIME, PNP_DELIVERY_TIME, D.MODIFY_TIME "
+			+"FROM BCS_PNP_DETAIL_EVERY8D AS D LEFT JOIN BCS_PNP_MAIN_EVERY8D AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
+			+"WHERE D.MODIFY_TIME >= ?1 AND D.MODIFY_TIME < DATEADD(DAY, 1, ?2) "
+			+") order by MODIFY_TIME desc ";
+    	logger.info("str1: " + queryString);
+    	
+    	Query query = entityManager.createNativeQuery(queryString).setParameter(1, startDate).setParameter(2, endDate);
+		List<Object[]> list = query.getResultList();
+    	//logger.info("List1: " + list.toString());
+    		
+    	Map<String, List<String>> map = new LinkedHashMap<>();
+    	
+    	Integer count = 0;
+		for (Object[] o : list) {
+			count++;
+			logger.info("c:" + count);
+			List<String> dataList = new ArrayList<String>();
+			map.put(count.toString(), dataList);
+			for (int i=0, max=8; i<max; i++) {
+				if (o[i] == null) {
+					dataList.add("");
+					logger.info("i=" + i  + ", null");
+				} else {
+					dataList.add(o[i].toString());
+					logger.info("i=" + i  + ", " + o[i].toString());
+				}
+			}
+		}
+    	logger.info("map1: " + map.toString());
+    	
+		return map;
+    }
+    
 //    protected LoadingCache<String, Campaign> dataCache;
 //    
 //	private Timer flushTimer = new Timer();

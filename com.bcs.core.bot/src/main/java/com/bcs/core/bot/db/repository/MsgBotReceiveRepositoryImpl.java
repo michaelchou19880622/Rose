@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.bcs.core.bot.db.entity.MsgBotReceive;
 import com.bcs.core.db.repository.EntityManagerControl;
-
 @Repository
 public class MsgBotReceiveRepositoryImpl  implements MsgBotReceiveRepositoryCustom {
 
@@ -107,7 +106,11 @@ public class MsgBotReceiveRepositoryImpl  implements MsgBotReceiveRepositoryCust
 					.setParameter("deliveryTime", now)
 					.executeUpdate();
 			
-					
+		    // insert into PnpSendMsgDetailRecord
+			//sqlString = "insert into BCS_PNP_SEND_MSG_DETAIL_RECORD values()";
+			//logger.info("sqlString1:" + sqlString);
+			
+			
 			//判斷是否所有的detail都complete，若都complete則更新main狀態		
 //			String judgeCompleteSQL = "select (case when a.complateCount = b.detailCount then 'true' else 'false' end)  from "
 //					+ "( select count(0) as complateCount from " + detailTable + " where PNP_MAIN_ID =:mainId and status = 'COMPLETE' ) a ,"

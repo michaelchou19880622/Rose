@@ -31,11 +31,13 @@ import com.bcs.core.utils.ErrorRecord;
 @Service
 public class PnpMainService {
 	private static final String INIT_FLAG = "INIT_FLAG";
-	
 	private static final String twFormatPre = "+886";
 	
 	/** Logger */
 	private static Logger logger = Logger.getLogger(PnpMainService.class);
+	
+	
+	
 //	
 //	@Autowired
 //	private PnpMainRepository pnpMainRepository;

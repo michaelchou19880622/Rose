@@ -16,6 +16,7 @@ indexes = {
 	       @Index(name = "INDEX_0", columnList = "STATUS"),
 	       @Index(name = "INDEX_1", columnList = "PHONE"),
 	       @Index(name = "INDEX_2", columnList = "MOBILE"),
+	       @Index(name = "INDEX_3", columnList = "MID"),
 	})
 public class LineUser extends AbstractBcsEntity{
 	private static final long serialVersionUID = 1L;

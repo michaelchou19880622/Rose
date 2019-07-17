@@ -95,9 +95,50 @@ $(function(){
 			for(key in response){
 				var searchTr = originalTr.clone(true);
 				var valueObj = response[key];
-				console.info('valueObj : ', valueObj);
-				searchTr.
-				searchTr.appendTo($('#searchTbody'));
+				//console.info('valueObj : ', valueObj);
+				
+				//0	ORIG_FILE_NAME
+				var splits = valueObj[0].split('_');
+				 // 前方來源系統 PRMSMS		splits[1]
+				 searchTr.find('.sourceSystem').html(splits[1]);
+				 // 發送帳號				splits[2]
+				 searchTr.find('.account').html(splits[2]);
+				
+				//1	PROC_FLOW
+				if(valueObj[1] == '3'){
+					searchTr.find('.pathway').html('BC-&gt;PNP-&gt;SMS');
+				}else if(valueObj[1] == '2'){
+					searchTr.find('.pathway').html('BC-&gt;SMS');
+				}else if(valueObj[1] == '1'){
+					searchTr.find('.pathway').html('BC');
+				}
+				
+				//2	SOURCE
+				if(valueObj[2] == '4'){
+					searchTr.find('.deliveryPathway').html('UNICA');
+				}else if(valueObj[2] == '3'){
+					searchTr.find('.deliveryPathway').html('明宣');
+				}else if(valueObj[2] == '2'){
+					searchTr.find('.deliveryPathway').html('互動');
+				}else if(valueObj[2] == '1'){
+					searchTr.find('.deliveryPathway').html('三竹');
+				}
+				
+				//3	MSG
+				searchTr.find('.pnpContent').html(valueObj[3]);
+				
+				//4	PHONE
+				searchTr.find('.customerCellPhoneNumber').html(valueObj[4]);
+				
+				//5	PNP_TIME
+				searchTr.find('.scheduleDate').html(moment(valueObj[5], 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD'));
+				searchTr.find('.scheduleTime').html(moment(valueObj[5], 'YYYY-MM-DD HH:mm:ss').format('HH:mm:ss'));
+				
+				//6	PNP_DELIVERY_TIME
+				searchTr.find('.deliveryDate').html(moment(valueObj[6], 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD'));
+				searchTr.find('.deliveryTime').html(moment(valueObj[6], 'YYYY-MM-DD HH:mm:ss').format('HH:mm:ss'));				
+				
+				$('.searchTable').append(searchTr);
 			}
 		}).fail(function(response) {
 			console.info(response);

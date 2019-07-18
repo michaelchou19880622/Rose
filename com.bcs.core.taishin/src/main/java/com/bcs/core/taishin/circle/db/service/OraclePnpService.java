@@ -85,7 +85,8 @@ public class OraclePnpService {
 			Statement stmt=con.createStatement();  
 			  
 			//step4 execute query  
-			String sqlString = "select * from " + HR + ".HR_EMP_SW LEFT OUTER JOIN " + HR + ".HR_DEPT_SW " + 
+			String sqlString = "select EMP_ID, DEPT_SER_NO_ACT, ACCT_DEPT_CD, ACCT_GRP_CD, CARD_DIV, CARD_DEPT, DEPT_EASY_NM from " +
+					HR + ".HR_EMP_SW LEFT OUTER JOIN " + HR + ".HR_DEPT_SW " + 
 					"on (HR_EMP_SW.DEPT_SER_NO_ACT = HR_DEPT_SW.DEPT_SERIAL_NO)" + 
 					"where EMP_ID = '" + empId + "'";
 			logger.info("sqlString:"+sqlString);
@@ -95,15 +96,16 @@ public class OraclePnpService {
 			EmployeeRecord result = new EmployeeRecord();
 			
 			while(rs.next()) {
-				for(int i = 1; i <= 8; i++) {
+				for(int i = 1; i <= 5; i++) {
 					logger.info(rs.getString(i)+"  "); 
 				}
 				result.setAccount(empId);
 				result.setEmployeeId(empId);
 				result.setDepartmentId(rs.getString(2));
-				result.setDivisionName(rs.getString(6));
-				result.setDepartmentName(rs.getString(7));
-				result.setGroupName(rs.getString(8));
+				
+				result.setDivisionName(rs.getString(5));
+				result.setDepartmentName(rs.getString(6));
+				result.setGroupName(rs.getString(7));
 				result.setPccCode(rs.getString(3).trim() + rs.getString(4).trim());
 			}
 			

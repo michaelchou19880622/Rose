@@ -11,5 +11,5 @@ public interface MsgBotReceiveRepositoryCustom{
 	
 	public void bulkPersist(MsgBotReceive msgReceive);
 	
-	public void updateStatus(String deliveryTags);
+	public void updateStatus(String detailTable, String detailId);
 }

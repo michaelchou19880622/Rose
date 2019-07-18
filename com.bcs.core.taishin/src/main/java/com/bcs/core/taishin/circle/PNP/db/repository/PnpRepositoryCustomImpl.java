@@ -111,6 +111,8 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
 					@Override
 					public void setValues(PreparedStatement ps, int i) throws SQLException {
 						PnpDetailMing detail = batch.get(i);
+						//logger.info("batchInsertPnpDetailMing detail:" + detail);
+						
 						ps.setTimestamp(1, now);
 						ps.setTimestamp(2, detail.getLinePushTime() != null ? new Timestamp(detail.getLinePushTime().getTime()) : null);
 						ps.setTimestamp(3, now);

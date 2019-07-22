@@ -102,24 +102,37 @@ public class BCSPnpReportController extends BCSBaseController {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getPNPDetailReport")
 	@ResponseBody
-	public ResponseEntity<?> getPNPDetailReport(
-			HttpServletRequest request, 
-			HttpServletResponse response,
-			@CurrentUser CustomUser customUser,
+	public ResponseEntity<?> getPNPDetailReport(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
 			@RequestParam(value = "startDate", required=false) String startDate, 
-			@RequestParam(value = "endDate", required=false) String endDate) throws IOException {
-
+			@RequestParam(value = "endDate", required=false) String endDate,
+			@RequestParam(value = "page", required=false) Integer page) throws IOException {
 		if(startDate == null) startDate = "2019-03-01";
 		if(endDate == null) endDate = "2019-07-30";
+		logger.info("page:"+page);
+		try{
+			Map<String, List<String>> result = pnpMaintainUIService.getPNPDetailReport(startDate, endDate, page);
+			return new ResponseEntity<>(result, HttpStatus.OK);
+		}catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));	
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getPNPDetailReportTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> getPNPDetailReportTotalPages(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+			@RequestParam(value = "startDate", required=false) String startDate, 
+			@RequestParam(value = "endDate", required=false) String endDate) throws IOException {
+		logger.info("getPNPDetailReportTotalPages");
+		if(startDate == null) startDate = "1911-01-01";
+		if(endDate == null) endDate = "3099-01-01";
 		
 		try{
-			Map<String, List<String>> result = pnpMaintainUIService.getPNPDetailReport(startDate, endDate);
-			return new ResponseEntity<>(result, HttpStatus.OK);
-		}
-		catch(Exception e){
+			String count = pnpMaintainUIService.getPNPDetailReportTotalPages(startDate, endDate);
+			return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count + "\"}", HttpStatus.OK);
+		}catch(Exception e){
 			logger.error(ErrorRecord.recordError(e));
-			
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	

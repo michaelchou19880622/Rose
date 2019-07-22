@@ -82,7 +82,6 @@ $(function(){
 		if(firstFatch){
 			firstFatch = false;
 			setTotal();
-
 		}
 		
 		$.ajax({

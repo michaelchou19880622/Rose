@@ -121,6 +121,8 @@ public class PnpMainUnica extends PnpMain {
 	@Column(name = "MODIFY_TIME")
 	private Date modifyTime;
 	
+	@Column(name = "PNP_MAINTAIN_ACCOUNT_ID")
+	private Long pnpMaintainAccountId;
 	
 	//來源資料原生欄位
 	@Column(name = "SUBJECT", columnDefinition="nvarchar(200)")
@@ -360,4 +362,11 @@ public class PnpMainUnica extends PnpMain {
 		this.smsTime = smsTime;
 	}
 	
+	public Long getPnpMaintainAccountId() {
+		return pnpMaintainAccountId;
+	}
+
+	public void setPnpMaintainAccountId(Long pnpMaintainAccountId) {
+		this.pnpMaintainAccountId = pnpMaintainAccountId;
+	}
 }

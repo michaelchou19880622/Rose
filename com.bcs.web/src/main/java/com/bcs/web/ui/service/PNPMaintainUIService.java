@@ -78,38 +78,46 @@ public class PNPMaintainUIService {
 	}
 	
     @SuppressWarnings("unchecked")
-    public Map<String, List<String>> getPNPDetailReport(String startDate, String endDate){
-//    	Integer rowStart, rowEnd;
-//    	if(page == null) {
-//    		rowStart = 1;
-//    		rowEnd = Integer.MAX_VALUE; // get all data
-//    	}else {
-//    		page--; // 1~199 => 0~198
-//    		rowStart = page * 10 + 1;
-//    		rowEnd = rowStart + 10; // 10 as Size
-//    	}
-//    	
-    	String queryString = 
-			"( "
-			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_TIME, PNP_DELIVERY_TIME, D.MODIFY_TIME "
-			+"FROM BCS_PNP_DETAIL_MING AS D LEFT JOIN BCS_PNP_MAIN_MING AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
-			+"WHERE D.MODIFY_TIME >= ?1 AND D.MODIFY_TIME < DATEADD(DAY, 1, ?2) "
-			+"UNION "
-			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_TIME, PNP_DELIVERY_TIME, D.MODIFY_TIME "
-			+"FROM BCS_PNP_DETAIL_MITAKE AS D LEFT JOIN BCS_PNP_MAIN_MITAKE AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
-			+"WHERE D.MODIFY_TIME >= ?1 AND D.MODIFY_TIME < DATEADD(DAY, 1, ?2) "
-			+"UNION "
-			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_TIME, PNP_DELIVERY_TIME, D.MODIFY_TIME "
-			+"FROM BCS_PNP_DETAIL_UNICA AS D LEFT JOIN BCS_PNP_MAIN_UNICA AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
-			+"WHERE D.MODIFY_TIME >= ?1 AND D.MODIFY_TIME < DATEADD(DAY, 1, ?2) "
-			+"UNION "
-			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_TIME, PNP_DELIVERY_TIME, D.MODIFY_TIME "
-			+"FROM BCS_PNP_DETAIL_EVERY8D AS D LEFT JOIN BCS_PNP_MAIN_EVERY8D AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
-			+"WHERE D.MODIFY_TIME >= ?1 AND D.MODIFY_TIME < DATEADD(DAY, 1, ?2) "
-			+") order by MODIFY_TIME desc ";
-    	logger.info("str1: " + queryString);
+    public Map<String, List<String>> getPNPDetailReport(String startDate, String endDate, Integer page){
+    	Integer rowStart, rowEnd;
+    	if(page == null) {
+    		rowStart = 1;
+    		rowEnd = Integer.MAX_VALUE; // get all data
+    	}else {
+    		page--; // 1~199 => 0~198
+    		rowStart = page * 10 + 1;
+    		rowEnd = rowStart + 10; // 10 as Size
+    	}
     	
-    	Query query = entityManager.createNativeQuery(queryString).setParameter(1, startDate).setParameter(2, endDate);
+    	String queryString = 
+			"SELECT * FROM ( "
+			+"SELECT ORIG_FILE_NAME, PROC_FLOW, SOURCE, MSG, PHONE, PNP_DELIVERY_EXPIRE_TIME, DETAIL_SCHEDULE_TIME, MODIFY_TIME, STATUS, "
+			+"ROW_NUMBER() OVER ( ORDER BY MODIFY_TIME desc) AS RowNum "
+			+"FROM ( "
+			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, D.DETAIL_SCHEDULE_TIME, D.MODIFY_TIME, D.STATUS "
+			+"FROM BCS_PNP_DETAIL_MING AS D LEFT JOIN BCS_PNP_MAIN_MING AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
+			+"UNION "
+			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, NULL, D.MODIFY_TIME, D.STATUS "
+			+"FROM BCS_PNP_DETAIL_MITAKE AS D LEFT JOIN BCS_PNP_MAIN_MITAKE AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
+			+"UNION "
+			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, NULL, D.MODIFY_TIME, D.STATUS "
+			+"FROM BCS_PNP_DETAIL_UNICA AS D LEFT JOIN BCS_PNP_MAIN_UNICA AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
+			+"UNION "
+			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, NULL, D.MODIFY_TIME, D.STATUS "
+			+"FROM BCS_PNP_DETAIL_EVERY8D AS D LEFT JOIN BCS_PNP_MAIN_EVERY8D AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
+			+") AS R1 "
+			+"WHERE MODIFY_TIME >= ?1 "
+			+"AND MODIFY_TIME <  DATEADD(DAY, 1, ?2) "
+			+") AS R2 "
+			+"WHERE RowNum >= ?3 AND RowNum < ?4 ";
+
+    	logger.info("str1: " + queryString);
+    	logger.info("rowStart:"+rowStart);
+    	logger.info("rowEnd:"+rowEnd);
+    	Query query = entityManager.createNativeQuery(queryString).setParameter(1, startDate).setParameter(2, endDate)
+    			.setParameter(3, rowStart).setParameter(4, rowEnd);
+    	logger.info("query:"+query.toString());
+    	
 		List<Object[]> list = query.getResultList();
     	//logger.info("List1: " + list.toString());
     		
@@ -121,7 +129,7 @@ public class PNPMaintainUIService {
 			logger.info("c:" + count);
 			List<String> dataList = new ArrayList<String>();
 			map.put(count.toString(), dataList);
-			for (int i=0, max=8; i<max; i++) {
+			for (int i=0, max=9; i<max; i++) {
 				if (o[i] == null) {
 					dataList.add("");
 					logger.info("i=" + i  + ", null");
@@ -134,6 +142,48 @@ public class PNPMaintainUIService {
     	logger.info("map1: " + map.toString());
     	
 		return map;
+    }
+
+    @SuppressWarnings("unchecked")
+    public String getPNPDetailReportTotalPages(String startDate, String endDate){
+    	String queryString = 
+			"SELECT COUNT(*)FROM ( "
+			+"SELECT ORIG_FILE_NAME, PROC_FLOW, SOURCE, MSG, PHONE, PNP_DELIVERY_EXPIRE_TIME, DETAIL_SCHEDULE_TIME, MODIFY_TIME, STATUS, "
+			+"ROW_NUMBER() OVER ( ORDER BY MODIFY_TIME desc) AS RowNum "
+			+"FROM ( "
+			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, D.DETAIL_SCHEDULE_TIME, D.MODIFY_TIME, D.STATUS "
+			+"FROM BCS_PNP_DETAIL_MING AS D LEFT JOIN BCS_PNP_MAIN_MING AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
+			+"UNION "
+			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, NULL, D.MODIFY_TIME, D.STATUS "
+			+"FROM BCS_PNP_DETAIL_MITAKE AS D LEFT JOIN BCS_PNP_MAIN_MITAKE AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
+			+"UNION "
+			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, NULL, D.MODIFY_TIME, D.STATUS "
+			+"FROM BCS_PNP_DETAIL_UNICA AS D LEFT JOIN BCS_PNP_MAIN_UNICA AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
+			+"UNION "
+			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, NULL, D.MODIFY_TIME, D.STATUS "
+			+"FROM BCS_PNP_DETAIL_EVERY8D AS D LEFT JOIN BCS_PNP_MAIN_EVERY8D AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
+			+") AS R1 "
+			+"WHERE MODIFY_TIME >= ?1 "
+			+"AND MODIFY_TIME <  DATEADD(DAY, 1, ?2) "
+			+") AS R2 ";
+    	logger.info("str1: " + queryString);
+    	
+    	Query query = entityManager.createNativeQuery(queryString).setParameter(1, startDate).setParameter(2, endDate);
+		List<Object[]> list = query.getResultList();
+		String listStr = list.toString();
+    	logger.info("List1:" + list.toString());
+		
+		// Total = Empty set,  []  => 0
+		if(listStr.length() <= 2) return "0"; 
+		
+		// Total < 10
+		char c1 = listStr.charAt(listStr.length() - 2); // 個位數
+		if(listStr.length() == 3) return (c1=='0') ? "0" : "1"; // [0] => 0 , [1] => 1
+		
+		// Total >= 10
+		if(c1 == '0') return listStr.substring(1, listStr.length() - 2); // [430] => 43
+		char c10 = listStr.charAt(listStr.length() - 3); // 十位數
+    	return listStr.substring(1, listStr.length() - 3) + (++c10); // [431] => 44
     }
     
 //    protected LoadingCache<String, Campaign> dataCache;

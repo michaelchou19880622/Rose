@@ -14,43 +14,49 @@
         <div class="LyMain" role="main">
             <form>
                 <section>
+	                <!-- Title -->
                     <header class="ContentHead">
                         <h3 class="CHTtl">PNP明細報表</h3>
                     </header>
+                    
+                    <!-- Input Boxes -->
                     <div>                      
-               		       前方來源系統
-                        <input type="text" id="sourceSystemTb" name="sourceSystemTb" value="" maxlength="50" required="required"> 
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  PccCode
-                        <input type="text" id="pccCodeTb" name="pccCodeTb" value="" maxlength="50" required="required"> 
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  帳號
+               		    <span>前方來源系統</span>
+                        <input type="text" id="sourceSystemTb" name="sourceSystemTb" value="" maxlength="50" required="required">
+                        <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  PccCode</span>
+                        <input type="text" id="pccCodeTb" name="pccCodeTb" value="" maxlength="50" required="required">
+                        <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  帳號</span>
                         <input type="text" id="accountTb" name="accountTb" value="" maxlength="50" required="required"> 
-                    </div>
-                    <div>   
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    </div>
-                    <div>
-                    	<span>發送時間：</span>
+                        <br></br>
+                        
+                        <span>發送時間：</span>
                     	<div class="option date">
-                        	<input type="text" 
-	                           	class="datepicker" 
-	                           	id="startDate" 
-	                           	placeholder="YYYY-MM-DD"/>
+                        	<input type="text" class="datepicker" id="startDate" placeholder="YYYY-MM-DD"/>
                        	</div>
                        	<span>~</span>
                        	<div class="option date">
-                        	<input type="text" 
-	                        	class="datepicker" 
-	                           	id="endDate" 
-	                           	placeholder="YYYY-MM-DD"/>
+                        	<input type="text" class="datepicker" id="endDate" placeholder="YYYY-MM-DD"/>
                       	</div>
+                      	<br></br>
                     </div>
+
                     <div class="CHBtnSet">
-                        <div class="CHRight"><input class="btn_add search" type="button" value="Search" style="cursor: pointer;"></div>
+                    	<div class="CHLeft">
+                           <ul>
+                               <li class="CHLeftBtn">
+                                <input class="btn prev" type="button" value="<" style="cursor: pointer;">
+                                <span id="pageAndTotalPages">1/0</span>
+                                <input class="btn next" type="button" value=">" style="cursor: pointer;">
+                               </li>
+                           </ul>
+                       </div>
+                        <div class="CHRight">
+                        	<input class="btn_add search" type="button" value="Search" style="cursor: pointer;">
+                        	<a class="btn_add exportToExcel" style="cursor: pointer; padding: 7px 12px; text-decoration: none">匯出 EXCEL</a>
+                        </div>
                     </div>
                     <div class="mainFrame">
-                    
-                        
-                        <table border="1" class="searchTable">
+                        <table border="1" class="resultTable">
                             <colgroup>
                                 <col width="100">
                                 <col width="100">
@@ -79,8 +85,8 @@
                                 <th>發送時間</th>
                                 <th>發送狀態</th>
                             </tr>
-                            <tbody class="searchTbody">
-                                <tr class="searchTr">
+                            <tbody class="resultTbody">
+                                <tr class="resultTr">
                                 	<td class="sourceSystem"></td>
                                 	<td class="pathway"></td>
                                     <td class="deliveryPathway"></td>
@@ -97,11 +103,6 @@
                             </tbody>
                         </table>
                     </div>
-                   <!--  <div class="CHBtnSet">
-                        <div class="CHRight">
-                        	<a class="btn_add download" style="cursor: pointer; padding: 7px 12px; text-decoration: none">Download</a>
-                        </div> 
-                    </div>-->
                 </section>
             </form>
         </div>

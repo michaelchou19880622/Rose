@@ -596,6 +596,9 @@ public class LoadFtbPnpDataTask {
 //				pnpMainMing.setProcStage("BC");
 				pnpMainMing.setProcFlow(accountModel.getPathway());
 				pnpMainMing.setProcStage(getDefultStage(accountModel.getPathway()));
+				
+				pnpMainMing.setPnpMaintainAccountId(accountModel.getId());
+				
 				String[] detailData = content.split("\\;;", 9);
 				String orderTime = detailData[3];
 				String sendType = AbstractPnpMainEntity.SEND_TYPE_IMMEDIATE;
@@ -696,6 +699,7 @@ public class LoadFtbPnpDataTask {
 //			pnpMainMitake.setProcStage("BC");
 			pnpMainMitake.setProcFlow(accountModel.getPathway());
 			pnpMainMitake.setProcStage(getDefultStage(accountModel.getPathway()));
+			pnpMainMitake.setPnpMaintainAccountId(accountModel.getId());
 			String sendType = getSendType(orderTime);
 			pnpMainMitake.setSendType(sendType);
 			// 原生欄位
@@ -750,6 +754,7 @@ public class LoadFtbPnpDataTask {
 //			pnpMainEvery8d.setProcStage("BC");
 			pnpMainEvery8d.setProcFlow(accountModel.getPathway());
 			pnpMainEvery8d.setProcStage(getDefultStage(accountModel.getPathway()));
+			pnpMainEvery8d.setPnpMaintainAccountId(accountModel.getId());
 			String sendType = getSendType(OrderTime);
 			pnpMainEvery8d.setSendType(sendType);
 			// 原生欄位
@@ -805,6 +810,8 @@ public class LoadFtbPnpDataTask {
 //			pnpMainUnica.setProcStage("BC");
 			pnpMainUnica.setProcFlow(accountModel.getPathway());
 			pnpMainUnica.setProcStage(getDefultStage(accountModel.getPathway()));
+			pnpMainUnica.setPnpMaintainAccountId(accountModel.getId());
+
 			String sendType = getSendType(OrderTime);
 			pnpMainUnica.setSendType(sendType);
 			// 原生欄位

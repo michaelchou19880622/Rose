@@ -572,6 +572,7 @@ public class LoadFtbPnpDataTask {
 			String[] contentSp = fileContents.get(0).split("\\;;", 9);
 			String content1 = contentSp[2];
 			PNPMaintainAccountModel accountModel = validateWhiteListContent(AbstractPnpMainEntity.SOURCE_MING, origFileName , content1);
+			logger.info("accountModel1:"+accountModel);
 			if(null == accountModel) {
 				logger.error("praseMingFiles fileContents validate is failed");
 				return null;
@@ -1105,12 +1106,15 @@ public class LoadFtbPnpDataTask {
 		String sourceSystem = fileNameSP[1];
 		String account = fileNameSP[2];
 		String comeTime = fileNameSP[3];
+		logger.info("fileNameSP1:"+fileNameSP);
 		
 		List<PNPMaintainAccountModel> accountList = pnpMaintainAccountModelRepository.findByAccountAndSourceSystemAndStatus(account, sourceSystem, true);
+		logger.info("accountList1:"+accountList);
 		if(CollectionUtils.isNotEmpty(accountList)){
 			for(PNPMaintainAccountModel accountModel :accountList){
 				String pnpContentPattern = accountModel.getPnpContent();
-				logger.debug("accountModel ID :"+accountModel.getId());
+				logger.info("accountModel ID :"+accountModel.getId());
+				logger.info("isMatch(content, pnpContentPattern):"+ isMatch(content, pnpContentPattern));
 				if(isMatch(content, pnpContentPattern)) {
 					return accountModel;
 				}

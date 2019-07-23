@@ -112,10 +112,13 @@ $(function(){
 	$('.btn_add.add').click(function(){
 		// block
 		$('.LyMain').block($.BCS.blockMsgRead);
+
+		var employeeId1 = $('#employeeId').val();
+		console.info("employeeId1:", employeeId1);
 		
 		$.ajax({
 			type : 'GET',
-			url : bcs.bcsContextPath + '/edit/getEmpAccount',
+			url : bcs.bcsContextPath + '/edit/getEmpAccount?empId=' + employeeId1,
             contentType: 'application/json',
 		}).success(function(response) {
 			console.info("response:", response);
@@ -224,6 +227,17 @@ $(function(){
     });
 	
 
+	// do Cancel
+	$('input[name="cancel"]').click(function() {
+		var r = confirm("請確認是否取消");
+		if (r) {
+			// confirm true
+		} else {
+		    return;
+		}
+		window.location.replace(bcs.bcsContextPath + '/edit/pnpUnicaAccountListPage');
+	});
+	
 //		$('.LyMain').block($.BCS.blockMsgRead);
 //		
 //		$.ajax({

@@ -126,10 +126,12 @@ public class BCSPNPMaintainController extends BCSBaseController {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getEmpAccount", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public ResponseEntity<?> getEmpAccount(HttpServletRequest request,  HttpServletResponse response, 
-			@CurrentUser CustomUser customUser) throws IOException {		
+	public ResponseEntity<?> getEmpAccount(HttpServletRequest request,  HttpServletResponse response, @CurrentUser CustomUser customUser,
+			@RequestParam(required=false) String empId) throws IOException {		
 		try {
-			String empId = customUser.getAccount().toUpperCase();
+			if(empId==null) {
+				empId = customUser.getAccount().toUpperCase();
+			}
 			logger.info("getEmpAccount empId=" + empId);
 			EmployeeRecord result = oraclePnpService.findByEmployeeId(empId);		
 			

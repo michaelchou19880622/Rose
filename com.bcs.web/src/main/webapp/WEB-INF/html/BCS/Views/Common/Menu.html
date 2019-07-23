@@ -244,7 +244,7 @@
                         </li>
                     </ul>
                 </li>
-                <li sec:authorize="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN')">
+                <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_PNP_ADMIN', 'ROLE_PNP_REPORT_ALMIGHTY', 'ROLE_PNP_REPORT_EMP')">
                     <a href="" style="cursor: pointer;"><span>PNP後台維護</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
                         <li th:classappend="${currentPage == 'PagepnpNAL'} ? 'ExSelected'">

@@ -29,28 +29,28 @@ $(function(){
 		originalTable = $('.searchTable').clone(true);
 		$('.searchTable').remove();
 		
-		// block
-		$('.LyMain').block($.BCS.blockMsgRead);
-		
-		$.ajax({
-			type : 'GET',
-			url : bcs.bcsContextPath + '/edit/getEmpAccount',
-            contentType: 'application/json',
-		}).success(function(response) {
-			console.info("response:", response);
-			$('#account').val(response.account);
-			$('#employeeId').val(response.employeeId);
-			$('#divisionName').val(response.divisionName);
-			$('#departmentName').val(response.departmentName);
-			$('#groupName').val(response.groupName);
-			$('#pccCode').val(response.pccCode);
-			employeeId = response.employeeId;
-		}).fail(function(response) {
-			console.info(response);
-			$.FailResponse(response);
-		}).done(function() {
-			$('.LyMain').unblock();
-        });
+//		// block
+//		$('.LyMain').block($.BCS.blockMsgRead);
+//		
+//		$.ajax({
+//			type : 'GET',
+//			url : bcs.bcsContextPath + '/edit/getEmpAccount',
+//            contentType: 'application/json',
+//		}).success(function(response) {
+//			console.info("response:", response);
+//			$('#account').val(response.account);
+//			$('#employeeId').val(response.employeeId);
+//			$('#divisionName').val(response.divisionName);
+//			$('#departmentName').val(response.departmentName);
+//			$('#groupName').val(response.groupName);
+//			$('#pccCode').val(response.pccCode);
+//			employeeId = response.employeeId;
+//		}).fail(function(response) {
+//			console.info(response);
+//			$.FailResponse(response);
+//		}).done(function() {
+//			$('.LyMain').unblock();
+//        });
 		
 	};
 
@@ -195,7 +195,7 @@ $(function(){
 			$.FailResponse(response);
 		}).done(function() {
 			confirm("刪除成功");
-			window.location.replace('pnpUnicaAccountListPage');
+			window.location.replace('pnpNormalAccountListPage');
         });
 	});
 	

@@ -30,13 +30,13 @@ $(function(){
 		appendOption('pathwayList', 2, 'BC');
 		appendOption('templateList', 0, 'TestTemplate');
 		
-		// block
-		$('.LyMain').block($.BCS.blockMsgRead);
-		
 		// parameter
 		pnpMaintainAccountModelId = $.urlParam("pnpMaintainAccountModelId"); //從列表頁導過來的參數
 		
 		if(pnpMaintainAccountModelId != null){
+			// block
+			$('.LyMain').block($.BCS.blockMsgRead);
+			
 			// change UI
 			pnpMaintainAccountActionType = 'Edit';
 			$('.CHTtl').html('編輯一般帳號');
@@ -92,28 +92,8 @@ $(function(){
     		}).done(function(){
     		});
 		}else{
-			pnpMaintainAccountActionType = 'Create';
-			
 			// Create Mode
-			$.ajax({
-				type : 'GET',
-				url : bcs.bcsContextPath + '/edit/getEmpAccount',
-	            contentType: 'application/json',
-			}).success(function(response) {
-				console.info("response:", response);
-				$('#account').val(response.account);
-				$('#employeeId').val(response.employeeId);
-				$('#divisionName').val(response.divisionName);
-				$('#departmentName').val(response.departmentName);
-				$('#groupName').val(response.groupName);
-				$('#PccCode').val(response.pccCode);
-				employeeId = response.employeeId;
-			}).fail(function(response) {
-				console.info(response);
-				$.FailResponse(response);
-			}).done(function() {
-				$('.LyMain').unblock();
-	        });
+			pnpMaintainAccountActionType = 'Create';
 		}
 	};
 	
@@ -130,12 +110,35 @@ $(function(){
 	// ---- Functions ----
 	// do Add
 	$('.btn_add.add').click(function(){
-	    $('#dialog-modal').dialog({
-	 	   	width: 960,
-	        height: 480,
-	        modal: true
-	    });
-    	$('#dialog-modal').show();
+		// block
+		$('.LyMain').block($.BCS.blockMsgRead);
+		
+		$.ajax({
+			type : 'GET',
+			url : bcs.bcsContextPath + '/edit/getEmpAccount',
+            contentType: 'application/json',
+		}).success(function(response) {
+			console.info("response:", response);
+			$('#account').val(response.account);
+			$('#employeeId').val(response.employeeId);
+			$('#divisionName').val(response.divisionName);
+			$('#departmentName').val(response.departmentName);
+			$('#groupName').val(response.groupName);
+			$('#PccCode').val(response.pccCode);
+			$('#accountAttribute').val('批次');
+			employeeId = response.employeeId;
+		}).fail(function(response) {
+			console.info(response);
+			$.FailResponse(response);
+		}).done(function() {
+		    $('#dialog-modal').dialog({
+		 	   	width: 960,
+		        height: 480,
+		        modal: true
+		    });
+	    	$('#dialog-modal').show();
+			$('.LyMain').unblock();
+        });
 	});
 	
 	// do Confirm
@@ -153,6 +156,13 @@ $(function(){
 		postData.groupName = $('#groupName').val();
 		postData.pccCode = $('#PccCode').val();
 		postData.accountType = 'Unica';
+		
+		if($('.accountClass')[0].checked){
+			postData.accountClass = 'O';
+		}else{
+			postData.accountClass = 'M';
+		}
+		
 		if($('.status')[0].checked){
 			postData.status = true;
 		}else{

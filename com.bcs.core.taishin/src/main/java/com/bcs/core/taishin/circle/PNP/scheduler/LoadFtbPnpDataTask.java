@@ -1128,7 +1128,7 @@ public class LoadFtbPnpDataTask {
 	public static boolean isMatch(String s, String p) {
 		logger.info("content :"+s);
 		logger.info("pnpContentPattern :"+p);
-		p = p.replace(">><<", "¿¡");//>><<為規定好的萬用字元
+		p = p.replace("(*)", "¿¡");//>><<為規定好的萬用字元
 		
         int i = 0, j = 0, iStar = -1, jStar = -1;
         

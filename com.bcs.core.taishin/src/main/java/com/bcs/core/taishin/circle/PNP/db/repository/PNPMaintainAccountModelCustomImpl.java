@@ -8,6 +8,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.hibernate.query.Query;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,9 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
 @Repository
 public class PNPMaintainAccountModelCustomImpl implements PNPMaintainAccountModelCustom{	
 	
+	/** Logger */
+	private static Logger logger = Logger.getLogger(PNPMaintainAccountModelCustomImpl.class);
+	
 	@PersistenceContext
 	private EntityManager entityManager;
 	
@@ -31,7 +35,11 @@ public class PNPMaintainAccountModelCustomImpl implements PNPMaintainAccountMode
 			String pccCode, String account, String employeeId, String accountType, Boolean status) {
 		Date  now = Calendar.getInstance().getTime();
 		StringBuffer sqlString = new StringBuffer();
+		
+		//sqlString.append("select * from BCS_PNP_MAINTAIN_ACCOUNT where ");
+		// Original (All Blank = All Show)
 		sqlString.append("select * from BCS_PNP_MAINTAIN_ACCOUNT where 1=1 ");
+		
 		if(StringUtils.isNotBlank(divisionName)){
 			sqlString.append("AND DIVISION_NAME = :divisionName ");
 		}
@@ -56,6 +64,7 @@ public class PNPMaintainAccountModelCustomImpl implements PNPMaintainAccountMode
 		if(status != null){
 			sqlString.append("AND STATUS = :status ");
 		}
+		logger.info("sqlString11:"+sqlString.toString());
 		
 		Query query = (Query) entityManager.createNativeQuery(sqlString.toString(),PNPMaintainAccountModel.class);
 		if(StringUtils.isNotBlank(divisionName)){

@@ -1,4 +1,4 @@
-package com.bcs.web.ui.service;
+package com.bcs.core.taishin.circle.PNP.db.service;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,10 +36,10 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 @Service
-public class PNPMaintainUIService {
+public class PNPMaintainAccountModelService {
 
 	/** Logger */
-	private static Logger logger = Logger.getLogger(PNPMaintainUIService.class);
+	private static Logger logger = Logger.getLogger(PNPMaintainAccountModelService.class);
 	@Autowired
 	private PNPMaintainAccountModelRepository pnpMaintainAccountModelRepository;    
 	@Autowired

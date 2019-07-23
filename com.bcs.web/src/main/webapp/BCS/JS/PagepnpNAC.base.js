@@ -30,14 +30,15 @@ $(function(){
 		appendOption('pathwayList', 2, 'BC');
 		appendOption('templateList', 0, 'TestTemplate');
 		
-		// block
-		$('.LyMain').block($.BCS.blockMsgRead);
 		
 		// parameter
 		pnpMaintainAccountModelId = $.urlParam("pnpMaintainAccountModelId"); //從列表頁導過來的參數
 		
 		// Edit Mode
 		if(pnpMaintainAccountModelId != null){
+			// block
+			$('.LyMain').block($.BCS.blockMsgRead);
+			
 			// change UI
 			pnpMaintainAccountActionType = 'Edit';
 			$('.CHTtl').html('編輯一般帳號');
@@ -51,7 +52,6 @@ $(function(){
     			console.info("response:", response);
     			$('#account').val(response.account);
     			$('#accountAttribute').val(response.accountAttribute);
-    			$('#accountClass').val(response.accountClass);
     			$('#sourceSystem').val(response.sourceSystem);
     			$('#employeeId').val(response.employeeId);
     			$('#departmentId').val(response.departmentId);
@@ -59,6 +59,12 @@ $(function(){
     			$('#departmentName').val(response.departmentName);
     			$('#groupName').val(response.groupName);
     			$('#PccCode').val(response.pccCode);
+    			
+    			if(response.accountClass == 'O'){
+					$('.accountClass')[0].checked = true;
+				}else{
+					$('.accountClass')[1].checked = true;
+				}   			
     			
     			if(response.status = true){
 					$('.status')[0].checked = true;
@@ -94,28 +100,8 @@ $(function(){
     			$('.LyMain').unblock();
     		});
 		}else{
-			pnpMaintainAccountActionType = 'Create';
-			
 			// Create Mode
-			$.ajax({
-				type : 'GET',
-				url : bcs.bcsContextPath + '/edit/getEmpAccount',
-	            contentType: 'application/json',
-			}).success(function(response) {
-				console.info("response:", response);
-				$('#account').val(response.account);
-				$('#employeeId').val(response.employeeId);
-				$('#divisionName').val(response.divisionName);
-				$('#departmentName').val(response.departmentName);
-				$('#groupName').val(response.groupName);
-				$('#PccCode').val(response.pccCode);
-				employeeId = response.employeeId;
-			}).fail(function(response) {
-				console.info(response);
-				$.FailResponse(response);
-			}).done(function() {
-				$('.LyMain').unblock();
-	        });
+			pnpMaintainAccountActionType = 'Create';
 		}
 	};
 	
@@ -132,12 +118,36 @@ $(function(){
 	// ---- Functions ----
 	// do Add
 	$('.btn_add.add').click(function(){
-	    $('#dialog-modal').dialog({
-	 	   	width: 960,
-	        height: 480,
-	        modal: true
-	    });
-    	$('#dialog-modal').show();
+		// block
+		$('.LyMain').block($.BCS.blockMsgRead);
+		
+		$.ajax({
+			type : 'GET',
+			url : bcs.bcsContextPath + '/edit/getEmpAccount',
+            contentType: 'application/json',
+		}).success(function(response) {
+			console.info("response:", response);
+			$('#account').val(response.account);
+			$('#employeeId').val(response.employeeId);
+			$('#divisionName').val(response.divisionName);
+			$('#departmentName').val(response.departmentName);
+			$('#groupName').val(response.groupName);
+			$('#PccCode').val(response.pccCode);
+			$('#accountAttribute').val('批次');
+			employeeId = response.employeeId;
+		}).fail(function(response) {
+			console.info(response);
+			$.FailResponse(response);
+		}).done(function() {
+			$('.LyMain').unblock();
+			
+		    $('#dialog-modal').dialog({
+		 	   	width: 960,
+		        height: 480,
+		        modal: true
+		    });
+	    	$('#dialog-modal').show();
+        });
 	});
 	
 	// do Confirm
@@ -146,7 +156,6 @@ $(function(){
 				
 		postData.account = $('#account').val();
 		postData.accountAttribute = $('#accountAttribute').val();
-		postData.accountClass = $('#accountClass').val();
 		postData.sourceSystem = $('#sourceSystem').val();
 		postData.employeeId = $('#employeeId').val();
 		postData.departmentId = $('#departmentId').val();
@@ -155,6 +164,13 @@ $(function(){
 		postData.groupName = $('#groupName').val();
 		postData.pccCode = $('#PccCode').val();
 		postData.accountType = 'Normal';
+		
+		if($('.accountClass')[0].checked){
+			postData.accountClass = 'O';
+		}else{
+			postData.accountClass = 'M';
+		}
+		
 		if($('.status')[0].checked){
 			postData.status = true;
 		}else{

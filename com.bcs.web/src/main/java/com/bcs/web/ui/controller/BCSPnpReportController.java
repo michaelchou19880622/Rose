@@ -54,6 +54,7 @@ import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMingRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMitakeRepository;
 import com.bcs.core.taishin.circle.db.service.OraclePnpService;
 import com.bcs.core.taishin.service.PNPMaintainExcelService;
+import com.bcs.core.taishin.service.PnpReportExcelService;
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.utils.ObjectUtil;
 import com.bcs.core.web.security.CurrentUser;
@@ -82,7 +83,8 @@ public class BCSPnpReportController extends BCSBaseController {
 	private PNPMaintainExcelService pnpMaintainExcelService;
 	@Autowired	
 	private OraclePnpService oraclePnpService;
-	
+	@Autowired
+	private PnpReportExcelService pnpReportExcelService;
 	@Autowired 
 	private PnpDetailMingRepository pnpDetailMingRepository;
 	@Autowired 
@@ -105,12 +107,15 @@ public class BCSPnpReportController extends BCSBaseController {
 	public ResponseEntity<?> getPNPDetailReport(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
 			@RequestParam(value = "startDate", required=false) String startDate, 
 			@RequestParam(value = "endDate", required=false) String endDate,
+			@RequestParam(value = "account", required=false) String account, 
+			@RequestParam(value = "pccCode", required=false) String pccCode, 
+			@RequestParam(value = "sourceSystem", required=false) String sourceSystem, 
 			@RequestParam(value = "page", required=false) Integer page) throws IOException {
 		if(startDate == null) startDate = "2019-03-01";
 		if(endDate == null) endDate = "2019-07-30";
 		logger.info("page:"+page);
 		try{
-			Map<String, List<String>> result = pnpMaintainUIService.getPNPDetailReport(startDate, endDate, page);
+			Map<String, List<String>> result = pnpMaintainUIService.getPNPDetailReport(startDate, endDate, account, pccCode, sourceSystem, page);
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		}catch(Exception e){
 			logger.error(ErrorRecord.recordError(e));	
@@ -122,13 +127,17 @@ public class BCSPnpReportController extends BCSBaseController {
 	@ResponseBody
 	public ResponseEntity<?> getPNPDetailReportTotalPages(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
 			@RequestParam(value = "startDate", required=false) String startDate, 
-			@RequestParam(value = "endDate", required=false) String endDate) throws IOException {
+			@RequestParam(value = "endDate", required=false) String endDate,
+			@RequestParam(value = "account", required=false) String account, 
+			@RequestParam(value = "pccCode", required=false) String pccCode, 
+			@RequestParam(value = "sourceSystem", required=false) String sourceSystem) throws IOException {
+	
 		logger.info("getPNPDetailReportTotalPages");
 		if(startDate == null) startDate = "1911-01-01";
 		if(endDate == null) endDate = "3099-01-01";
 		
 		try{
-			String count = pnpMaintainUIService.getPNPDetailReportTotalPages(startDate, endDate);
+			String count = pnpMaintainUIService.getPNPDetailReportTotalPages(startDate, endDate, account, pccCode, sourceSystem);
 			return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count + "\"}", HttpStatus.OK);
 		}catch(Exception e){
 			logger.error(ErrorRecord.recordError(e));
@@ -136,6 +145,62 @@ public class BCSPnpReportController extends BCSBaseController {
 		}
 	}
 	
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getPNPDetailReportExcelList")
+	@ResponseBody
+	public ResponseEntity<?> getPNPDetailReportExcelList(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+			@RequestParam(value = "startDate", required=false) String startDate, 
+			@RequestParam(value = "endDate", required=false) String endDate,
+			@RequestParam(value = "account", required=false) String account, 
+			@RequestParam(value = "pccCode", required=false) String pccCode, 
+			@RequestParam(value = "sourceSystem", required=false) String sourceSystem) throws IOException {
+		if(startDate == null) startDate = "2019-03-01";
+		if(endDate == null) endDate = "2019-07-30";
+		try{
+			Map<String, List<String>> result = pnpMaintainUIService.getPNPDetailReportExcelList(startDate, endDate, account, pccCode, sourceSystem);
+			return new ResponseEntity<>(result, HttpStatus.OK);
+		}catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));	
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+    @RequestMapping(method = RequestMethod.GET, value = "/edit/exportPNPDetailReportExcel")
+    @ResponseBody
+    public void exportPNPDetailReportExcel(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, 
+			@RequestParam(value = "startDate", required=false) String startDate, 
+			@RequestParam(value = "endDate", required=false) String endDate,
+			@RequestParam(value = "account", required=false) String account, 
+			@RequestParam(value = "pccCode", required=false) String pccCode, 
+			@RequestParam(value = "sourceSystem", required=false) String sourceSystem) throws IOException {
+      
+		// file path
+        String filePath = CoreConfigReader.getString("file.path");
+        
+        // file name
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
+		Date date = new Date();
+        String fileName = "PNPDetailReport_" + sdf.format(date) + ".xlsx";
+        
+        try {
+            File folder = new File(filePath);
+            if(!folder.exists()){
+                folder.mkdirs();
+            }
+            pnpReportExcelService.exportPNPDetailReportExcel(filePath, fileName, startDate, endDate, account, pccCode, sourceSystem);
+        } catch (Exception e) {
+            logger.error(ErrorRecord.recordError(e));
+        }
+
+        try {
+			LoadFileUIService.loadFileToResponse(filePath, fileName, response);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    
+    
+    // Only For Testing
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/findAllPnpDetailMing", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> findAllPnpDetailMing(HttpServletRequest request,  HttpServletResponse response, 

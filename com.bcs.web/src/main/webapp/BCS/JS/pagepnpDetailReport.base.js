@@ -31,16 +31,30 @@ $(function(){
 		 dateFormat : 'yy-mm-dd',
 		 changeMonth: true
 	});
-	$('.query').click(function(){
-		if(dataValidate()) {
-			$('.dataTemplate').remove();
-			$('.sumTemplate').remove();
-			startDate = $('#startDate').val();
-			endDate = $('#endDate').val();
-			
-			loadData();
+	
+	var dataValidate = function() {
+		startDate = $('#startDate').val();
+		endDate = $('#endDate').val();
+		if(!startDate) {
+			alert('請填寫起始日期！');
+			return false;
 		}
-	});
+		if(!endDate) {
+			alert('請填寫結束日期！');
+			return false;
+		}
+		if(!moment(startDate).add(31, 'days').isAfter(moment(endDate))){
+			alert('起始日期與結束日期之間不可相隔超過一個月！');
+			return false;
+		}
+		if(moment(startDate).isAfter(moment(endDate))){
+			alert('起始日期不可大於結束日期！');
+			return false;
+		}
+		firstFatch = true;
+		return true;
+	}
+	
 	$('.btn.prev').click(function(){
 		if(page > 1) {
 			page--;
@@ -60,131 +74,32 @@ $(function(){
 	
 	// do Search
 	$('.btn_add.search').click(function(){
-		// block
-		$('.LyMain').block($.BCS.blockMsgRead);
-		// get all list data
-		loadData();
+		if(dataValidate()) {
+			$('.resultTr').remove();
+			startDate = $('#startDate').val();
+			endDate = $('#endDate').val();
+			
+			// get all list data
+			loadData();
+		}
 	});
+	
 	
 	// do Download
-	$('.btn_add.download').click(function(){
-		divisionName = $('#divisionName').val();
-		departmentName = $('#departmentName').val();
-		groupName = $('#groupName').val();
-		pccCode = $('#pccCode').val();
-		account = $('#account').val();
-		employeeId = $('#employeeId').val();
-		
-		var exportUrl = '../edit/exportToExcelForPNPMaintainAccount?' + 
-		'divisionName='+ divisionName + '&departmentName='+ departmentName + '&groupName='+ groupName + 
-		'&pccCode=' + pccCode + '&account=' + account + '&employeeId=' + employeeId + '&accountType=Normal';
-	
-		$('.btn_add.download').attr('href', exportUrl);
-	});
-	
-//	var setExportButtonSource = function() {
-//		if(hasData) {
-//			var exportUrl = '../edit/exportToExcelForBNPushApiEffects?startDate='+ startDate + '&endDate=' + endDate;	
-//			$('.btn_add.exportToExcel').attr('href', exportUrl);
-//		} else {
-//			$('.btn_add.exportToExcel').attr('href', '#');
-//		}
-//	}
-	
-	// get Employee Account Information
-//	$('.LyMain').block($.BCS.blockMsgRead);
-//	$.ajax({
-//		type : 'GET',
-//		url : bcs.bcsContextPath + '/edit/getEmpAccount',
-//        contentType: 'application/json',
-//	}).success(function(response) {
-//		console.info("response:", response);
-//		$('#accountTb').val(response.account);
-//		$('#pccCodeTb').val(response.pccCode);
-//		employeeId = response.employeeId;
-//	}).fail(function(response) {
-//		console.info(response);
-//		$.FailResponse(response);
-//	}).done(function() {
-//		$('.LyMain').unblock();
-//    });
-
-//	divisionName = $('#divisionName').val();
-//	departmentName = $('#departmentName').val();
-//	groupName = $('#groupName').val();
-//	pccCode = $('#pccCode').val();
-//	account = $('#account').val();
-//	employeeId = $('#employeeId').val();
-//	
-//	var postData = {
-//			divisionName: divisionName,
-//			departmentName: departmentName,
-//			groupName: groupName,
-//			pccCode: pccCode,
-//			account: account,
-//			employeeId: employeeId,
-//			accountType: 'Normal'
-//	};
-//	console.info('postData:', postData);
-//        
-//	$.ajax({
-//		type : 'POST',
-//		url : bcs.bcsContextPath + url,
-//        cache: false,
-//        contentType: 'application/json',
-//        processData: false,
-//		data : JSON.stringify(postData)
-//	}).success(function(response) {
-//		var resultTable = originalTable.clone(true);
-//		
-//		console.info("response:", response);
-//		$.each(response, function(i, trData){
-//			console.info(trData);
-//			var resultTr = originalTr.clone(true);
-//
-//			resultTr.find('.pnpMaintainAccountId').val(trData.id);
-//			resultTr.find('.account').html(trData.account);
-//			resultTr.find('.accountAttribute').html(trData.accountAttribute);
-//			resultTr.find('.accountClass').html(trData.accountClass);
-//			resultTr.find('.departmentId').html(trData.departmentId);
-//			resultTr.find('.divisionName').html(trData.divisionName);
-//			resultTr.find('.departmentName').html(trData.departmentName);
-//			resultTr.find('.groupName').html(trData.groupName);
-//			resultTr.find('.employeeId').html(trData.employeeId);
-//			resultTr.find('.id').html(trData.id);
-//			resultTr.find('.pccCode').html(trData.pccCode);
-//			resultTr.find('.pnpContent').html(trData.pnpContent);
-//			resultTr.find('.sourceSystem').html(trData.sourceSystem);
-//			resultTr.find('.status').html(trData.status);
-//			resultTr.find('.template').html(trData.template);
-//			
-//			//resultTr.find('.pathway').html(trData.pathway);
-//			if(trData.pathway == '3'){
-//				resultTr.find('.pathway').html('BC-&gt;PNP-&gt;SMS');
-//			}else if(trData.pathway == '2'){
-//				resultTr.find('.pathway').html('BC-&gt;SMS');
-//			}else if(trData.pathway == '1'){
-//				resultTr.find('.pathway').html('BC');
-//			}
-//			
-//			// Append to Table
-//			console.info(resultTr);
-//			//resultTable.append(resultTr);
-//			resultTr.appendTo($('#resultTbody'));
-//		});
-//		
-//        // set attribute
-//        resultTable.attr('name', 'templateTable' + templateCount);
-//        
-//		
-//	}).fail(function(response) {
-//		console.info(response);
-//		$.FailResponse(response);
-//	}).done(function() {
-//		$('.LyMain').unblock();
-//    });
-	
-	
+	var setExportButtonSource = function() {
+		if(hasData) {
+			var sourceSystemInput = $('#sourceSystemInput').val();
+			var pccCodeInput = $('#pccCodeInput').val();
+			var accountInput = $('#accountInput').val();
+			var getUrl = bcs.bcsContextPath + '/edit/exportPNPDetailReportExcel?startDate=' + startDate + '&endDate=' + endDate 
+				+ '&sourceSystem=' + sourceSystemInput + '&pccCodeInput=' + pccCode + '&account=' + accountInput;
+			console.info('getUrl', getUrl);
+			
+			$('.btn_add.exportToExcel').attr('href', getUrl);
+		} else {
+			$('.btn_add.exportToExcel').attr('href', '#');
+		}
+	}
 	
 	// ---- Initialize Page & Load Data ----
     // get List Data
@@ -196,13 +111,25 @@ $(function(){
 			firstFatch = false;
 			setTotal();
 		}
+		var sourceSystemInput = $('#sourceSystemInput').val();
+		var pccCodeInput = $('#pccCodeInput').val();
+		var accountInput = $('#accountInput').val();
+		var getUrl = bcs.bcsContextPath + '/edit/getPNPDetailReport?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page + '&sourceSystem=' + sourceSystemInput 
+			+ '&pccCodeInput=' + pccCode + '&account=' + accountInput;
+		console.info('getUrl', getUrl);
 		
 		$.ajax({
 			type : 'GET',
-			url : bcs.bcsContextPath + '/edit/getPNPDetailReport?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page,
+			url : getUrl,
             contentType: 'application/json',
 		}).success(function(response) {
 			console.info("response:", response);
+			if(response.length === 0) {
+				hasData = false;
+			} else {
+				hasData = true;
+			}
+			
 			for(key in response){
 				var resultTr = originalTr.clone(true);
 				var valueObj = response[key];
@@ -254,8 +181,13 @@ $(function(){
 				// 8 STATUS
 				resultTr.find('.statusCode').html(valueObj[8]);
 				
+				// 9 PCC_CODE
+				resultTr.find('.accountPccCode').html(valueObj[9]);
+				
 				$('.resultTable').append(resultTr);
 			}
+			
+			setExportButtonSource();
 		}).fail(function(response) {
 			console.info(response);
 			$.FailResponse(response);
@@ -270,9 +202,17 @@ $(function(){
 	var setTotal = function(){
 		// get Total
 		$('.LyMain').block($.BCS.blockMsgRead);
+		
+		var sourceSystemInput = $('#sourceSystemInput').val();
+		var pccCodeInput = $('#pccCodeInput').val();
+		var accountInput = $('#accountInput').val();
+		var getUrl = bcs.bcsContextPath + '/edit/getPNPDetailReportTotalPages?startDate=' + startDate + '&endDate=' + endDate + '&sourceSystem=' + sourceSystemInput 
+			+ '&pccCodeInput=' + pccCode + '&account=' + accountInput;
+		console.info('getUrl', getUrl);
+		
 		$.ajax({
-			type : "GET",
-			url : bcs.bcsContextPath + '/edit/getPNPDetailReportTotalPages?startDate=' + startDate + '&endDate=' + endDate
+			type : 'GET',
+			url : getUrl
 		}).success(function(response){
 			console.info('msg1: ', response['msg']);
 			totalPages = parseInt(response['msg']);

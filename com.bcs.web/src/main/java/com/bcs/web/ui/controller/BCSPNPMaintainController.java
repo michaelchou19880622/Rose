@@ -161,6 +161,7 @@ public class BCSPNPMaintainController extends BCSBaseController {
 			String sourceSystem = pnpMaintainAccountModel.getSourceSystem();
 			String pnpContent = pnpMaintainAccountModel.getPnpContent();
 			List<PNPMaintainAccountModel> sameCheck = pnpMaintainUIService.findByAccountAndSourceSystemAndPnpContent(account, sourceSystem, pnpContent);
+			logger.info("sameCheck:"+sameCheck);
 			if(sameCheck.size() >= 2) {
 				throw new BcsNoticeException("帳號、前方來源系統、簡訊內容不可與之前資料重複！"); 
 			}else if(sameCheck.size() == 1) {
@@ -246,6 +247,7 @@ public class BCSPNPMaintainController extends BCSBaseController {
 			HttpServletRequest request,  HttpServletResponse response,  @CurrentUser CustomUser customUser, 
 			@RequestBody PNPMaintainAccountModel pnpMaintainAccountModel, @RequestParam Boolean status) throws IOException {		
 		try {
+			logger.info("pnpMaintainAccountModel1:"+pnpMaintainAccountModel);
 			String divisionName = pnpMaintainAccountModel.getDivisionName();
 			String departmentName = pnpMaintainAccountModel.getDepartmentName();
 			String groupName = pnpMaintainAccountModel.getGroupName();

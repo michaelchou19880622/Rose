@@ -47,7 +47,7 @@ $(function(){
 			// get Data
 			$.ajax({
                 type: 'POST',
-                url: bcs.bcsContextPath + "/edit/getPNPMaintainAccount?id=" + pnpMaintainAccountModelId,
+                url: bcs.bcsContextPath + "/pnpAdmin/getPNPMaintainAccount?id=" + pnpMaintainAccountModelId,
     		}).success(function(response){
     			console.info("response:", response);
     			$('#account').val(response.account);
@@ -126,7 +126,7 @@ $(function(){
 		
 		$.ajax({
 			type : 'GET',
-			url : bcs.bcsContextPath + '/edit/getEmpAccount?empId=' + employeeId1,
+			url : bcs.bcsContextPath + '/pnpEmployee/getEmpAccount?empId=' + employeeId1,
             contentType: 'application/json',
 		}).success(function(response) {
 			console.info("response:", response);
@@ -195,7 +195,7 @@ $(function(){
 		
 		$.ajax({
 			type : 'POST',
-			url : bcs.bcsContextPath + '/edit/createPNPMaintainAccount',
+			url : bcs.bcsContextPath + '/pnpAdmin/createPNPMaintainAccount',
 			cache : false,
 			contentType : 'application/json',
 			processData : false,
@@ -242,7 +242,7 @@ $(function(){
 		} else {
 		    return;
 		}
-		window.location.replace(bcs.bcsContextPath + '/edit/pnpNormalAccountListPage');
+		window.location.replace(bcs.bcsContextPath + '/pnpAdmin/pnpNormalAccountListPage');
 	});
 	
 //		$('.LyMain').block($.BCS.blockMsgRead);

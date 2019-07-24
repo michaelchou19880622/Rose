@@ -65,7 +65,7 @@ public class EmployeeRecord extends AbstractBcsEntity{
 		this.departmentId = departmentId;
 	}
 
-	public String getDepartmentName() {
+	public String 部() {
 		return departmentName;
 	}
 
@@ -87,6 +87,10 @@ public class EmployeeRecord extends AbstractBcsEntity{
 
 	public void setDivisionName(String divisionName) {
 		this.divisionName = divisionName;
+	}
+
+	public String getDepartmentName() {
+		return departmentName;
 	}
 
 	public String getGroupName() {

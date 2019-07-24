@@ -134,7 +134,7 @@ $(function(){
 		}).done(function() {
 			switch(name){
 			case '啟用':
-				getListData('停用', '/edit/getPNPMaintainAccountList?status=false');
+				getListData('停用', '/pnpAdmin/getPNPMaintainAccountList?status=false');
 				break;
 			case '停用':	
 				$('.LyMain').unblock();
@@ -187,7 +187,7 @@ $(function(){
 		
 		$.ajax({
 			type : 'DELETE',
-			url : bcs.bcsContextPath + '/edit/deletePNPMaintainAccount?id=' + pnpMaintainAccountId,
+			url : bcs.bcsContextPath + '/pnpAdmin/deletePNPMaintainAccount?id=' + pnpMaintainAccountId,
 		}).success(function(response) {
 			console.info(response);
 		}).fail(function(response) {
@@ -210,7 +210,7 @@ $(function(){
 		// block
 		$('.LyMain').block($.BCS.blockMsgRead);
 		// get all list data
-		getListData('啟用', '/edit/getPNPMaintainAccountList?status=true');
+		getListData('啟用', '/pnpAdmin/getPNPMaintainAccountList?status=true');
 	});
 	
 	// do Download
@@ -222,7 +222,7 @@ $(function(){
 		account = $('#account').val();
 		employeeId = $('#employeeId').val();
 		
-		var exportUrl = '../edit/exportToExcelForPNPMaintainAccount?' + 
+		var exportUrl = '../pnpAdmin/exportToExcelForPNPMaintainAccount?' + 
 		'divisionName='+ divisionName + '&departmentName='+ departmentName + '&groupName='+ groupName + 
 		'&pccCode=' + pccCode + '&account=' + account + '&employeeId=' + employeeId + '&accountType=Normal';
 	

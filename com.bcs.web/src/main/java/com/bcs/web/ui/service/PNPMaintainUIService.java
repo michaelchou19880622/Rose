@@ -29,6 +29,7 @@ import com.bcs.core.log.util.SystemLogUtil;
 import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
 import com.bcs.core.taishin.circle.PNP.db.repository.PNPMaintainAccountModelCustom;
 import com.bcs.core.taishin.circle.PNP.db.repository.PNPMaintainAccountModelRepository;
+import com.bcs.core.taishin.circle.db.service.OraclePnpService;
 import com.bcs.core.utils.DataSyncUtil;
 import com.bcs.core.utils.ErrorRecord;
 import com.google.common.cache.CacheBuilder;
@@ -44,6 +45,8 @@ public class PNPMaintainUIService {
 	private PNPMaintainAccountModelRepository pnpMaintainAccountModelRepository;    
 	@Autowired
     private PNPMaintainAccountModelCustom PNPMaintainAccountModelCustom;
+	@Autowired
+	private OraclePnpService oraclePnpService;
 	@PersistenceContext
     EntityManager entityManager;
 	
@@ -78,7 +81,7 @@ public class PNPMaintainUIService {
 	}
 	
     @SuppressWarnings("unchecked")
-    public Map<String, List<String>> getPNPDetailReport(String startDate, String endDate, String account, String pccCode, String sourceSystem, Integer page){
+    public Map<String, List<String>> getPNPDetailReport(String startDate, String endDate, String account, String pccCode, String sourceSystem, Integer page, String empId){
     	Integer rowStart, rowEnd;
     	if(page == null) {
     		rowStart = 1;
@@ -91,22 +94,22 @@ public class PNPMaintainUIService {
     	
     	String queryString = 
 			"SELECT * FROM ( "
-			+"SELECT ORIG_FILE_NAME, PROC_FLOW, SOURCE, MSG, PHONE, PNP_DELIVERY_EXPIRE_TIME, DETAIL_SCHEDULE_TIME, MODIFY_TIME, STATUS, PCC_CODE, ACCOUNT, SOURCE_SYSTEM, "
+			+"SELECT ORIG_FILE_NAME, PROC_FLOW, SOURCE, MSG, PHONE, PNP_DELIVERY_EXPIRE_TIME, DETAIL_SCHEDULE_TIME, MODIFY_TIME, STATUS, PCC_CODE, ACCOUNT, SOURCE_SYSTEM, EMPLOYEE_ID, "
 			+"ROW_NUMBER() OVER ( ORDER BY MODIFY_TIME desc) AS RowNum "
 			+"FROM ( "
-			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, D.DETAIL_SCHEDULE_TIME, D.MODIFY_TIME, D.STATUS, A.PCC_CODE, A.ACCOUNT, A.SOURCE_SYSTEM "
+			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, D.DETAIL_SCHEDULE_TIME, D.MODIFY_TIME, D.STATUS, A.PCC_CODE, A.ACCOUNT, A.SOURCE_SYSTEM, A.EMPLOYEE_ID "
 			+"FROM BCS_PNP_DETAIL_MING AS D LEFT JOIN BCS_PNP_MAIN_MING AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
 			+"LEFT JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID "
 			+"UNION "
-			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, NULL, D.MODIFY_TIME, D.STATUS, A.PCC_CODE, A.ACCOUNT, A.SOURCE_SYSTEM "
+			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, NULL, D.MODIFY_TIME, D.STATUS, A.PCC_CODE, A.ACCOUNT, A.SOURCE_SYSTEM, A.EMPLOYEE_ID "
 			+"FROM BCS_PNP_DETAIL_MITAKE AS D LEFT JOIN BCS_PNP_MAIN_MITAKE AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
 			+"LEFT JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID "
 			+"UNION "
-			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, NULL, D.MODIFY_TIME, D.STATUS, A.PCC_CODE, A.ACCOUNT, A.SOURCE_SYSTEM "
+			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, NULL, D.MODIFY_TIME, D.STATUS, A.PCC_CODE, A.ACCOUNT, A.SOURCE_SYSTEM, A.EMPLOYEE_ID "
 			+"FROM BCS_PNP_DETAIL_UNICA AS D LEFT JOIN BCS_PNP_MAIN_UNICA AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
 			+"LEFT JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID "
 			+"UNION "
-			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, NULL, D.MODIFY_TIME, D.STATUS, A.PCC_CODE, A.ACCOUNT, A.SOURCE_SYSTEM "
+			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, NULL, D.MODIFY_TIME, D.STATUS, A.PCC_CODE, A.ACCOUNT, A.SOURCE_SYSTEM, A.EMPLOYEE_ID "
 			+"FROM BCS_PNP_DETAIL_EVERY8D AS D LEFT JOIN BCS_PNP_MAIN_EVERY8D AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
 			+"LEFT JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID "
 			+") AS R1 "
@@ -116,7 +119,8 @@ public class PNPMaintainUIService {
 		if(StringUtils.isNotBlank(account)) queryString += "AND ACCOUNT = '" + account + "' ";
 		if(StringUtils.isNotBlank(pccCode)) queryString += "AND PCC_CODE = '" + pccCode + "' ";
 		if(StringUtils.isNotBlank(sourceSystem)) queryString += "AND SOURCE_SYSTEM = '" + sourceSystem + "' ";
-		
+		String empAva = oraclePnpService.getAvailableEmpIdsByEmpId(empId);
+		if(StringUtils.isNotBlank(empAva)) queryString += empAva;
 		
     	queryString	+=
     		") AS R2 "
@@ -156,25 +160,25 @@ public class PNPMaintainUIService {
     }
 
     @SuppressWarnings("unchecked")
-    public String getPNPDetailReportTotalPages(String startDate, String endDate, String account, String pccCode, String sourceSystem){
+    public String getPNPDetailReportTotalPages(String startDate, String endDate, String account, String pccCode, String sourceSystem, String empId){
     	String queryString = 
     		"SELECT COUNT(*) FROM ( "
-			+"SELECT ORIG_FILE_NAME, PROC_FLOW, SOURCE, MSG, PHONE, PNP_DELIVERY_EXPIRE_TIME, DETAIL_SCHEDULE_TIME, MODIFY_TIME, STATUS, PCC_CODE, ACCOUNT, SOURCE_SYSTEM, "
+			+"SELECT ORIG_FILE_NAME, PROC_FLOW, SOURCE, MSG, PHONE, PNP_DELIVERY_EXPIRE_TIME, DETAIL_SCHEDULE_TIME, MODIFY_TIME, STATUS, PCC_CODE, ACCOUNT, SOURCE_SYSTEM, EMPLOYEE_ID, "
 			+"ROW_NUMBER() OVER ( ORDER BY MODIFY_TIME desc) AS RowNum "
 			+"FROM ( "
-			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, D.DETAIL_SCHEDULE_TIME, D.MODIFY_TIME, D.STATUS, A.PCC_CODE, A.ACCOUNT, A.SOURCE_SYSTEM "
+			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, D.DETAIL_SCHEDULE_TIME, D.MODIFY_TIME, D.STATUS, A.PCC_CODE, A.ACCOUNT, A.SOURCE_SYSTEM, A.EMPLOYEE_ID "
 			+"FROM BCS_PNP_DETAIL_MING AS D LEFT JOIN BCS_PNP_MAIN_MING AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
 			+"LEFT JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID "
 			+"UNION "
-			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, NULL, D.MODIFY_TIME, D.STATUS, A.PCC_CODE, A.ACCOUNT, A.SOURCE_SYSTEM "
+			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, NULL, D.MODIFY_TIME, D.STATUS, A.PCC_CODE, A.ACCOUNT, A.SOURCE_SYSTEM, A.EMPLOYEE_ID "
 			+"FROM BCS_PNP_DETAIL_MITAKE AS D LEFT JOIN BCS_PNP_MAIN_MITAKE AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
 			+"LEFT JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID "
 			+"UNION "
-			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, NULL, D.MODIFY_TIME, D.STATUS, A.PCC_CODE, A.ACCOUNT, A.SOURCE_SYSTEM "
+			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, NULL, D.MODIFY_TIME, D.STATUS, A.PCC_CODE, A.ACCOUNT, A.SOURCE_SYSTEM, A.EMPLOYEE_ID "
 			+"FROM BCS_PNP_DETAIL_UNICA AS D LEFT JOIN BCS_PNP_MAIN_UNICA AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
 			+"LEFT JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID "
 			+"UNION "
-			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, NULL, D.MODIFY_TIME, D.STATUS, A.PCC_CODE, A.ACCOUNT, A.SOURCE_SYSTEM "
+			+"SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, NULL, D.MODIFY_TIME, D.STATUS, A.PCC_CODE, A.ACCOUNT, A.SOURCE_SYSTEM, A.EMPLOYEE_ID "
 			+"FROM BCS_PNP_DETAIL_EVERY8D AS D LEFT JOIN BCS_PNP_MAIN_EVERY8D AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
 			+"LEFT JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID "
 			+") AS R1 "
@@ -184,7 +188,8 @@ public class PNPMaintainUIService {
 		if(StringUtils.isNotBlank(account)) queryString += "AND ACCOUNT = '" + account + "' ";
 		if(StringUtils.isNotBlank(pccCode)) queryString += "AND PCC_CODE = '" + pccCode + "' ";
 		if(StringUtils.isNotBlank(sourceSystem)) queryString += "AND SOURCE_SYSTEM = '" + sourceSystem + "' ";
-		
+		String empAva = oraclePnpService.getAvailableEmpIdsByEmpId(empId);
+		if(StringUtils.isNotBlank(empAva)) queryString += empAva;		
 		
     	queryString	+=
     		") AS R2 ";
@@ -207,86 +212,6 @@ public class PNPMaintainUIService {
 		if(c1 == '0') return listStr.substring(1, listStr.length() - 2); // [430] => 43
 		char c10 = listStr.charAt(listStr.length() - 3); // 十位數
     	return listStr.substring(1, listStr.length() - 3) + (++c10); // [431] => 44
-    }
-    
-    @SuppressWarnings("unchecked")
-    public Map<String, List<String>> getPNPDetailReportExcelList(String startDate, String endDate, String account, String pccCode, String sourceSystem){
-    	
-    	String queryString = 
-			"SELECT * "
-			+"FROM (  "
-			+"SELECT CONCAT(D.PNP_MAIN_ID, '.', D.PNP_DETAIL_ID) AS 'ID', A.SOURCE_SYSTEM, A.PATHWAY, D.PROC_STAGE, A.ACCOUNT,  "
-			+"A.PCC_CODE, M.PNP_MAIN_ID, D.SN, A.TEMPLATE, D.MSG,  "
-			+"1 AS MESSAGE_POINT, NULL AS CAMPAIGN_ID, NULL AS SEGMENT_ID, NULL AS PROGRAM_ID, NULL AS PID,  "
-			+"D.PHONE, D.UID, D.DETAIL_SCHEDULE_TIME AS DETAIL_SCHEDULE_TIME1, D.DETAIL_SCHEDULE_TIME AS DETAIL_SCHEDULE_TIME2, D.PNP_DELIVERY_EXPIRE_TIME AS PNP_DELIVERY_EXPIRE_TIME1, "
-			+"D.PNP_DELIVERY_EXPIRE_TIME AS PNP_DELIVERY_EXPIRE_TIME2, D.STATUS AS STATUS1, D.STATUS AS STATUS2, D.STATUS AS STATUS3, NULL AS IS_INTERNATIONAL, "
-			+"D.CREAT_TIME, D.MODIFY_TIME "
-			+"FROM BCS_PNP_DETAIL_MING AS D LEFT JOIN BCS_PNP_MAIN_MING AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID  "
-			+"LEFT JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID "
-			+"UNION  "
-			+"SELECT CONCAT(D.PNP_MAIN_ID, '.', D.PNP_DETAIL_ID) AS 'ID', A.SOURCE_SYSTEM, A.PATHWAY, D.PROC_STAGE, A.ACCOUNT,  "
-			+"A.PCC_CODE, M.PNP_MAIN_ID, D.DEST_NAME, A.TEMPLATE, D.MSG,  "
-			+"1 AS MESSAGE_POINT, NULL AS CAMPAIGN_ID, NULL AS SEGMENT_ID, NULL AS PROGRAM_ID, NULL AS PID,  "
-			+"D.PHONE, D.UID, NULL AS DETAIL_SCHEDULE_TIME1, NULL AS DETAIL_SCHEDULE_TIME2, D.PNP_DELIVERY_EXPIRE_TIME AS PNP_DELIVERY_EXPIRE_TIME1, "
-			+"D.PNP_DELIVERY_EXPIRE_TIME AS PNP_DELIVERY_EXPIRE_TIME2, D.STATUS AS STATUS1, D.STATUS AS STATUS2, D.STATUS AS STATUS3, NULL AS IS_INTERNATIONAL, "
-			+"D.CREAT_TIME, D.MODIFY_TIME "
-			+"FROM BCS_PNP_DETAIL_MITAKE AS D LEFT JOIN BCS_PNP_MAIN_MITAKE AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID  "
-			+"LEFT JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID "
-			+"UNION  "
-			+"SELECT CONCAT(D.PNP_MAIN_ID, '.', D.PNP_DETAIL_ID) AS 'ID', A.SOURCE_SYSTEM, A.PATHWAY, D.PROC_STAGE, A.ACCOUNT,  "
-			+"A.PCC_CODE, M.PNP_MAIN_ID, D.SN, A.TEMPLATE, D.MSG,  "
-			+"1 AS MESSAGE_POINT, D.CAMPAIGN_ID, D.SEGMENT_ID, D.PROGRAM_ID, D.PID,  "
-			+"D.PHONE, D.UID, NULL AS DETAIL_SCHEDULE_TIME1, NULL AS DETAIL_SCHEDULE_TIME2, D.PNP_DELIVERY_EXPIRE_TIME AS PNP_DELIVERY_EXPIRE_TIME1, "
-			+"D.PNP_DELIVERY_EXPIRE_TIME AS PNP_DELIVERY_EXPIRE_TIME2, D.STATUS AS STATUS1, D.STATUS AS STATUS2, D.STATUS AS STATUS3, NULL AS IS_INTERNATIONAL, "
-			+"D.CREAT_TIME, D.MODIFY_TIME "
-			+"FROM BCS_PNP_DETAIL_UNICA AS D LEFT JOIN BCS_PNP_MAIN_UNICA AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID  "
-			+"LEFT JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID "
-			+"UNION  "
-			+"SELECT CONCAT(D.PNP_MAIN_ID, '.', D.PNP_DETAIL_ID) AS 'ID', A.SOURCE_SYSTEM, A.PATHWAY, D.PROC_STAGE, A.ACCOUNT,  "
-			+"A.PCC_CODE, M.PNP_MAIN_ID, D.SN, A.TEMPLATE, D.MSG,  "
-			+"1 AS MESSAGE_POINT, D.CAMPAIGN_ID, D.SEGMENT_ID, D.PROGRAM_ID, D.PID,  "
-			+"D.PHONE, D.UID, NULL AS DETAIL_SCHEDULE_TIME1, NULL AS DETAIL_SCHEDULE_TIME2, D.PNP_DELIVERY_EXPIRE_TIME AS PNP_DELIVERY_EXPIRE_TIME1, "
-			+"D.PNP_DELIVERY_EXPIRE_TIME AS PNP_DELIVERY_EXPIRE_TIME2, D.STATUS AS STATUS1, D.STATUS AS STATUS2, D.STATUS AS STATUS3, NULL AS IS_INTERNATIONAL, "
-			+"D.CREAT_TIME, D.MODIFY_TIME "
-			+"FROM BCS_PNP_DETAIL_EVERY8D AS D LEFT JOIN BCS_PNP_MAIN_EVERY8D AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID  "
-			+"LEFT JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID "
-			+") AS R1 "
-			+"WHERE MODIFY_TIME >= ?1  "
-			+"AND MODIFY_TIME <  DATEADD(DAY, 1, ?2) ";
-
-    	
-		if(StringUtils.isNotBlank(account)) queryString += "AND ACCOUNT = '" + account + "' ";
-		if(StringUtils.isNotBlank(pccCode)) queryString += "AND PCC_CODE = '" + pccCode + "' ";
-		if(StringUtils.isNotBlank(sourceSystem)) queryString += "AND SOURCE_SYSTEM = '" + sourceSystem + "' ";
-		
-    	logger.info("str1: " + queryString);
-    	Query query = entityManager.createNativeQuery(queryString).setParameter(1, startDate).setParameter(2, endDate);
-    	logger.info("query:"+query.toString());
-    	
-		List<Object[]> list = query.getResultList();
-    	//logger.info("List1: " + list.toString());
-    		
-    	Map<String, List<String>> map = new LinkedHashMap<>();
-    	
-    	Integer count = 0;
-		for (Object[] o : list) {
-			count++;
-			logger.info("c:" + count);
-			List<String> dataList = new ArrayList<String>();
-			map.put(count.toString(), dataList);
-			for (int i=0, max=27; i<max; i++) {
-				if (o[i] == null) {
-					dataList.add("");
-					//logger.info("i=" + i  + ", null");
-				} else {
-					dataList.add(o[i].toString());
-					//logger.info("i=" + i  + ", " + o[i].toString());
-				}
-			}
-		}
-    	logger.info("map1: " + map.toString());
-    	
-		return map;
     }
     
 //    protected LoadingCache<String, Campaign> dataCache;

@@ -32,12 +32,12 @@ public class PnpReportExcelService {
 	private PNPMaintainAccountModelService pnpMaintainAccountModelService; 
 
 	public void exportPNPDetailReportExcel(String exportPath, String fileName, 
-			String startDate, String endDate, String account, String pccCode, String sourceSystem){
+			String startDate, String endDate, String account, String pccCode, String sourceSystem, String empId){
 		try {
 			Workbook workbook = new XSSFWorkbook();
 			FileOutputStream out = new FileOutputStream(exportPath + System.getProperty("file.separator") + fileName);
 			
-			this.getDetailReportExcel(workbook, startDate, endDate, account, pccCode, sourceSystem);
+			this.getDetailReportExcel(workbook, startDate, endDate, account, pccCode, sourceSystem, empId);
 			workbook.write(out);
 			out.close();
 			workbook.close();
@@ -46,8 +46,8 @@ public class PnpReportExcelService {
 		}
 	}
 	
-	private void getDetailReportExcel(Workbook workbook, String startDate, String endDate, String account, String pccCode, String sourceSystem){
-		Map<String, List<String>> lists = pnpMaintainAccountModelService.getPNPDetailReportExcelList(startDate, endDate, account, pccCode, sourceSystem);					
+	private void getDetailReportExcel(Workbook workbook, String startDate, String endDate, String account, String pccCode, String sourceSystem, String empId){
+		Map<String, List<String>> lists = pnpMaintainAccountModelService.getPNPDetailReportExcelList(startDate, endDate, account, pccCode, sourceSystem, empId);					
 		try {
 			Integer sheetNumber = 1;
 			Sheet sheet = this.createDetailReportSheet(workbook, sheetNumber++);
@@ -63,7 +63,7 @@ public class PnpReportExcelService {
 					}else if(i == 18 || i == 20) {					// Time
 						row.createCell(i).setCellValue(dateTimeToDateOrTime(list.get(i), "Time"));
 					}else if(i == 21){								// 發送狀態(PNP代碼)
-						row.createCell(i).setCellValue(list.get(i)=="COMPLETE"?"200":"501");
+						row.createCell(i).setCellValue((list.get(i)=="COMPLETE"||list.get(i)=="FINISH")?"200":"501");
 					}else if(i == 22){								// 發送狀態(PNP說明)
 						row.createCell(i).setCellValue(englishStatusToChinese(list.get(i)));
 					}else if(i == 23){								// 發送狀態(簡訊)

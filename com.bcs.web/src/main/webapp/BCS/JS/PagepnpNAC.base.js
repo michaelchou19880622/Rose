@@ -126,7 +126,7 @@ $(function(){
 		
 		$.ajax({
 			type : 'GET',
-			url : bcs.bcsContextPath + '/pnpEmployee/getEmpAccount?empId=' + employeeId1,
+			url : bcs.bcsContextPath + '/pnpAdmin/getEmpAccount?empId=' + employeeId1,
             contentType: 'application/json',
 		}).success(function(response) {
 			console.info("response:", response);

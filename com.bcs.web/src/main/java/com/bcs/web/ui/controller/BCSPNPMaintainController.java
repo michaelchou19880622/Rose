@@ -106,6 +106,33 @@ public class BCSPNPMaintainController extends BCSBaseController {
 		return BcsPageEnum.PNPUnicaAccountCreatePage.toString();
 	}
 	
+	@RequestMapping(method = RequestMethod.GET, value = "/pnpAdmin/getEmpAccount", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> getEmpAccount(HttpServletRequest request,  HttpServletResponse response, @CurrentUser CustomUser customUser,
+			@RequestParam(required=false) String empId) throws IOException {		
+		try {
+			if(empId==null) {
+				empId = customUser.getAccount().toUpperCase();
+			}
+			logger.info("getEmpAccount empId=" + empId);
+			EmployeeRecord result = oraclePnpService.findByEmployeeId(empId);		
+			
+			if(result == null){
+				throw new BcsNoticeException("Not Found Result for this Employee Id!");
+			}
+			result.setModifyTime(new Date());
+			result.setModifyUser(empId);
+			oraclePnpService.save(result);
+			return new ResponseEntity<>(result, HttpStatus.OK);
+		}catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));
+			if(e instanceof BcsNoticeException){
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			}else{
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		}
+	}
 	@RequestMapping(method = RequestMethod.POST, value = "/pnpAdmin/createPNPMaintainAccount", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createPNPMaintainAccount(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, 

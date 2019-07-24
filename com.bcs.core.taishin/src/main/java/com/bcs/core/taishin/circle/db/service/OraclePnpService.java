@@ -81,6 +81,8 @@ public class OraclePnpService {
 	
 	public String getAvailableEmpIdsByEmpId(String empId) {
 		logger.info("[getAvailableEmpIdsByEmpId] EMP_ID="+empId);
+		if(StringUtils.isBlank(empId)) return "";
+		
 		try{
 			String ORACLE_DATASOURCE_URL = CoreConfigReader.getString(CONFIG_STR.ORACLE_DATASOURCE_URL, true);
 			String ORACLE_DATASOURCE_USERNAME = CoreConfigReader.getString(CONFIG_STR.ORACLE_DATASOURCE_USERNAME, true);
@@ -112,25 +114,27 @@ public class OraclePnpService {
 			
 			// get List of EmpIds
 			List<String> EmpIds = new ArrayList();
-			sqlString = "SELECT EMP_ID, DEPT_SER_NO_ACT, ACCT_DEPT_CD, ACCT_GRP_CD, CARD_DIV, CARD_DEPT, DEPT_EASY_NM FROM " +
+			sqlString = "SELECT EMP_ID FROM " +
 					HR + ".HR_EMP_SW LEFT OUTER JOIN " + HR + ".HR_DEPT_SW " + 
 					"ON (HR_EMP_SW.DEPT_SER_NO_ACT = HR_DEPT_SW.DEPT_SERIAL_NO) ";
 			if(StringUtils.isNotBlank(emp.getGroupName())) { // 組權限
-				sqlString += "WHERE DEPT_EASY_NM = '" + emp.getGroupName() + "'";
+				sqlString += "WHERE CARD_DIV = '" + emp.getDivisionName() + "' AND CARD_DEPT = '" + emp.getDepartmentName() + "' AND DEPT_EASY_NM = '" + emp.getGroupName() + "' ";
 			}else if(StringUtils.isNotBlank(emp.getDepartmentName()))  { // 部權限
-				sqlString += "WHERE DEPT_EASY_NM = '" + emp.getDepartmentName() + "'";
+				sqlString += "WHERE CARD_DIV = '" + emp.getDivisionName() + "' AND CARD_DEPT = '" + emp.getDepartmentName() + "' ";
 			}else { // 處權限
-				sqlString += "WHERE DEPT_EASY_NM = '" + emp.getDivisionName() + "'";
+				sqlString += "WHERE CARD_DIV = '" + emp.getDivisionName() + "' ";
 			}
 			
 			Statement stmt2=con.createStatement(); 
 			ResultSet rs2=stmt2.executeQuery(sqlString);
 			while(rs2.next()) {
-				EmpIds.add(rs.getString(1));
+				EmpIds.add(rs2.getString(1));
 			}
+			logger.info("EmpIds:"+EmpIds);
 			
 			// Merge to IN('', '') String
-			String mergeStr = "IN ('" + StringUtils.join(EmpIds, "', '") + "') ";
+			String mergeStr = "AND EMPLOYEE_ID IN ('" + StringUtils.join(EmpIds, "', '") + "') ";
+			logger.info("mergeStr:"+mergeStr);
 			con.close();
 			return mergeStr;
 		}catch(Exception e){

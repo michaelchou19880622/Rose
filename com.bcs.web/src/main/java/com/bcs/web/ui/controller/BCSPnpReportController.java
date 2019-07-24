@@ -79,14 +79,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class BCSPnpReportController extends BCSBaseController {	
 	@Autowired
 	private PNPMaintainUIService pnpMaintainUIService;
-	@Autowired	
-	private PNPMaintainExcelService pnpMaintainExcelService;
-	@Autowired	
-	private OraclePnpService oraclePnpService;
 	@Autowired
 	private PnpReportExcelService pnpReportExcelService;
-	@Autowired 
-	private PnpDetailMingRepository pnpDetailMingRepository;
+	@Autowired	
+	private OraclePnpService oraclePnpService;
+
 	
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSPnpReportController.class);
@@ -95,34 +92,6 @@ public class BCSPnpReportController extends BCSBaseController {
 	public String pnpDetailReportPage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("pnpDetailReportPage");
 		return BcsPageEnum.PnpDetailReportPage.toString();
-	}
-
-	@RequestMapping(method = RequestMethod.GET, value = "/pnpEmployee/getEmpAccount", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public ResponseEntity<?> getEmpAccount(HttpServletRequest request,  HttpServletResponse response, @CurrentUser CustomUser customUser,
-			@RequestParam(required=false) String empId) throws IOException {		
-		try {
-			if(empId==null) {
-				empId = customUser.getAccount().toUpperCase();
-			}
-			logger.info("getEmpAccount empId=" + empId);
-			EmployeeRecord result = oraclePnpService.findByEmployeeId(empId);		
-			
-			if(result == null){
-				throw new BcsNoticeException("Not Found Result for this Employee Id!");
-			}
-			result.setModifyTime(new Date());
-			result.setModifyUser(empId);
-			oraclePnpService.save(result);
-			return new ResponseEntity<>(result, HttpStatus.OK);
-		}catch(Exception e){
-			logger.error(ErrorRecord.recordError(e));
-			if(e instanceof BcsNoticeException){
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			}else{
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-		}
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/pnpEmployee/getPNPDetailReport")
@@ -136,10 +105,9 @@ public class BCSPnpReportController extends BCSBaseController {
 			@RequestParam(value = "page", required=false) Integer page) throws IOException {
 		if(startDate == null) startDate = "2019-03-01";
 		if(endDate == null) endDate = "2019-07-30";
-		logger.info("page:"+page);
 		try{
-			logger.info("getRole:" + customUser.getRole());
-			Map<String, List<String>> result = pnpMaintainUIService.getPNPDetailReport(startDate, endDate, account, pccCode, sourceSystem, page);
+			String empId =  customUser.getUsername().toUpperCase();
+			Map<String, List<String>> result = pnpMaintainUIService.getPNPDetailReport(startDate, endDate, account, pccCode, sourceSystem, page, empId);
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		}catch(Exception e){
 			logger.error(ErrorRecord.recordError(e));	
@@ -161,30 +129,12 @@ public class BCSPnpReportController extends BCSBaseController {
 		if(endDate == null) endDate = "3099-01-01";
 		
 		try{
-			String count = pnpMaintainUIService.getPNPDetailReportTotalPages(startDate, endDate, account, pccCode, sourceSystem);
+			String empId =  customUser.getUsername().toUpperCase();
+			String count = pnpMaintainUIService.getPNPDetailReportTotalPages(startDate, endDate, account, pccCode, sourceSystem, empId);
 			return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count + "\"}", HttpStatus.OK);
 		}catch(Exception e){
 			logger.error(ErrorRecord.recordError(e));
 			return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-	
-	@RequestMapping(method = RequestMethod.GET, value = "/pnpEmployee/getPNPDetailReportExcelList")
-	@ResponseBody
-	public ResponseEntity<?> getPNPDetailReportExcelList(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
-			@RequestParam(value = "startDate", required=false) String startDate, 
-			@RequestParam(value = "endDate", required=false) String endDate,
-			@RequestParam(value = "account", required=false) String account, 
-			@RequestParam(value = "pccCode", required=false) String pccCode, 
-			@RequestParam(value = "sourceSystem", required=false) String sourceSystem) throws IOException {
-		if(startDate == null) startDate = "2019-03-01";
-		if(endDate == null) endDate = "2019-07-30";
-		try{
-			Map<String, List<String>> result = pnpMaintainUIService.getPNPDetailReportExcelList(startDate, endDate, account, pccCode, sourceSystem);
-			return new ResponseEntity<>(result, HttpStatus.OK);
-		}catch(Exception e){
-			logger.error(ErrorRecord.recordError(e));	
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
@@ -210,7 +160,8 @@ public class BCSPnpReportController extends BCSBaseController {
             if(!folder.exists()){
                 folder.mkdirs();
             }
-            pnpReportExcelService.exportPNPDetailReportExcel(filePath, fileName, startDate, endDate, account, pccCode, sourceSystem);
+            String empId =  customUser.getUsername().toUpperCase();
+            pnpReportExcelService.exportPNPDetailReportExcel(filePath, fileName, startDate, endDate, account, pccCode, sourceSystem, empId);
         } catch (Exception e) {
             logger.error(ErrorRecord.recordError(e));
         }
@@ -223,9 +174,28 @@ public class BCSPnpReportController extends BCSBaseController {
     }
     
     
+    // Only for Testing
+//	@RequestMapping(method = RequestMethod.GET, value = "/pnpEmployee/getPNPDetailReportExcelList")
+//	@ResponseBody
+//	public ResponseEntity<?> getPNPDetailReportExcelList(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+//			@RequestParam(value = "startDate", required=false) String startDate, 
+//			@RequestParam(value = "endDate", required=false) String endDate,
+//			@RequestParam(value = "account", required=false) String account, 
+//			@RequestParam(value = "pccCode", required=false) String pccCode, 
+//			@RequestParam(value = "sourceSystem", required=false) String sourceSystem) throws IOException {
+//		if(startDate == null) startDate = "2019-03-01";
+//		if(endDate == null) endDate = "2019-07-30";
+//		try{
+//			Map<String, List<String>> result = pnpMaintainUIService.getPNPDetailReportExcelList(startDate, endDate, account, pccCode, sourceSystem);
+//			return new ResponseEntity<>(result, HttpStatus.OK);
+//		}catch(Exception e){
+//			logger.error(ErrorRecord.recordError(e));	
+//			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+//		}
+//	}
     
     // Only For Testing
-//	@RequestMapping(method = RequestMethod.GET, value = "/edit/findAllPnpDetailMing", produces = MediaType.APPLICATION_JSON_VALUE)
+//  @RequestMapping(method = RequestMethod.GET, value = "/edit/findAllPnpDetailMing", produces = MediaType.APPLICATION_JSON_VALUE)
 //	@ResponseBody
 //	public ResponseEntity<?> findAllPnpDetailMing(HttpServletRequest request,  HttpServletResponse response, 
 //			@CurrentUser CustomUser customUser) throws IOException {		

@@ -18,9 +18,9 @@ public class AdminUser extends AbstractBcsEntity{
 		ROLE_ADMIN("ROLE_ADMIN","管理者", "manager"),
 		ROLE_EDIT("ROLE_EDIT", "編輯人員", "editor"),
 		ROLE_MARKET("ROLE_MARKET", "行銷人員", "marketing"),
-		ROLE_PNP_ADMIN("ROLE_PNP_ADMIN", "PNP管理者", "pnpManager"),
-		ROLE_PNP_REPORT_ALMIGHTY("ROLE_PNP_REPORT_ALMIGHTY", "PNP報表全覽者", "pnpReportAlmighty"),
-		ROLE_PNP_REPORT_EMP("ROLE_PNP_REPORT_EMP", "PNP報表員工", "pnpReportEmp"),
+		ROLE_PNP_ADMIN("ROLE_PNP_ADMIN", "PNP系統管理者", "pnpAdmin"),
+		ROLE_PNP_INQUIRER("ROLE_PNP_INQUIRER", "PNP查詢者", "pnpInquirer"),
+		ROLE_PNP_EMPLOYEE("ROLE_PNP_EMPLOYEE", "PNP單位發送暨查詢者", "pnpEmployee"),
 		;
 		
 		private String roleId;

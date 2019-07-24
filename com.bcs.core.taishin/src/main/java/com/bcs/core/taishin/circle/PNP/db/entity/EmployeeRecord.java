@@ -21,9 +21,6 @@ public class EmployeeRecord extends AbstractBcsEntity{
 	@Column(name = "ID")
 	private Long id;
 	
-	@Column(name = "ACCOUNT", columnDefinition="nvarchar(100)") //帳號
-	private String account;
-
 	@Column(name = "EMPLOYEE_ID", columnDefinition="nvarchar(100)")  //員工編號
 	private String employeeId;
 	
@@ -58,14 +55,6 @@ public class EmployeeRecord extends AbstractBcsEntity{
 
 	public Long getId() {
 		return id;
-	}
-
-	public String getAccount() {
-		return account;
-	}
-
-	public void setAccount(String accout) {
-		this.account = accout;
 	}
 
 	public String getDepartmentId() {

@@ -18,10 +18,11 @@
                         </li>
                     </ul>
                 </li>
+                
                 <li sec:authorize="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN')">
                     <a href="" style="cursor: pointer;"><span>訊息</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
-                        <li th:classappend="${currentPage == 'Page4-1'} ? 'ExSelected'">
+                         <li th:classappend="${currentPage == 'Page4-1'} ? 'ExSelected'">
                         	<a th:href="@{/bcs/edit/msgListPage}"><span>訊息列表</span></a>
                         </li>
                         <li th:classappend="${currentPage == 'Page3'} ? 'ExSelected'">
@@ -38,7 +39,6 @@
                         </li>
                         <li th:classappend="${currentPage == 'PageT1'} ? 'ExSelected'">
                         	<a th:href="@{/bcs/edit/templateMsgCreatePage}"><span>建立樣板訊息</span></a>
-                        </li>
                         </li>
                         <li th:classappend="${currentPage == 'PageBN2'} ? 'ExSelected'">
                             <a th:href="@{/bcs/edit/billingNoticeListPage}"><span>帳務通知樣板列表</span></a>
@@ -60,6 +60,7 @@
                         </li>
                     </ul>
                 </li>
+                
                 <li sec:authorize="hasAnyRole('NotShowRole')">
                     <a href="" style="cursor: pointer;"><span>活動</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
@@ -113,6 +114,7 @@
                         </li> -->
                     </ul>
                 </li>
+                
                 <li class="fnMenu" sec:authorize="hasAnyRole('NotShowRole')">
                     <a href="" style="cursor: pointer;"><span>滿額活動</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
@@ -135,6 +137,7 @@
                         </li>
                     </ul>
                 </li>
+                
                 <li class="fnMenu" sec:authorize="hasAnyRole('NotShowRole')">
                     <a href="" style="cursor: pointer;"><span>商品管理</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
@@ -146,6 +149,7 @@
                         </li>
                     </ul>
                 </li>
+                
                 <li sec:authorize="hasAnyRole('NotShowRole')">
                     <a href="" style="cursor: pointer;"><span>遊戲</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
@@ -157,6 +161,7 @@
                         </li>
                     </ul>
                 </li>
+                
                 <li sec:authorize="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN')">
                     <a href="" style="cursor: pointer;"><span>MGM活動</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
@@ -168,6 +173,7 @@
                         </li>
                     </ul>
                 </li>
+                
                 <li sec:authorize="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN')">
                     <a href="" style="cursor: pointer;"><span>電子序號</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
@@ -179,6 +185,7 @@
                         </li>
                     </ul>
                 </li>
+                
                 <li sec:authorize="hasRole('ROLE_ADMIN')">
                     <a href="" style="cursor: pointer;"><span>權限管理</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
@@ -190,6 +197,7 @@
                         </li>
                     </ul>
                 </li>
+                
                 <li class="fnMenu" sec:authorize="hasRole('ROLE_ADMIN')">
                     <a href="" style="cursor: pointer;"><span>發送成效檢視</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
@@ -216,6 +224,7 @@
                         </li>
                     </ul>
                 </li>
+                
                 <li class="fnMenu" sec:authorize="hasRole('ROLE_ADMIN')">
                     <a href="" style="cursor: pointer;"><span>其他</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
@@ -227,6 +236,7 @@
                         </li>
                     </ul>
                 </li>
+                
                 <li class="fnMenu" sec:authorize="hasAnyRole('NotShowRole')">
                     <a href="" style="cursor: pointer;"><span>測試區</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
@@ -244,26 +254,39 @@
                         </li>
                     </ul>
                 </li>
-                <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_PNP_ADMIN', 'ROLE_PNP_REPORT_ALMIGHTY', 'ROLE_PNP_REPORT_EMP')">
-                    <a href="" style="cursor: pointer;"><span>PNP後台維護</span></a>
+
+                <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_PNP_ADMIN', 'ROLE_PNP_INQUIRER', 'ROLE_PNP_EMPLOYEE')">
+                    <a href="" style="cursor: pointer;"><span>PNP成效報表</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
-                        <li th:classappend="${currentPage == 'PagepnpNAL'} ? 'ExSelected'">
-                            <a th:href="@{/bcs/edit/pnpNormalAccountListPage}"><span>一般帳號維護</span></a>
-                        </li>
-                        <li th:classappend="${currentPage == 'PagepnpNAC'} ? 'ExSelected'" style="display:none">
-                            <a th:href="@{/bcs/edit/pnpNormalAccountCreatePage}"><span>建立一般帳號</span></a>
-                        </li>
-                        <li th:classappend="${currentPage == 'PagepnpUAL'} ? 'ExSelected'">
-                            <a th:href="@{/bcs/edit/pnpUnicaAccountListPage}"><span>Unica帳號維護</span></a>
-                        </li>
-                        <li th:classappend="${currentPage == 'PagepnpUAC'} ? 'ExSelected'" style="display:none">
-                            <a th:href="@{/bcs/edit/pnpUnicaAccountCreatePage}"><span>建立Unica帳號</span></a>
-                        </li>
                         <li th:classappend="${currentPage == 'PagepnpDetailReport'} ? 'ExSelected'">
                             <a th:href="@{/bcs/edit/pnpDetailReportPage}"><span>PNP明細報表</span></a>
                         </li>
                     </ul>
                 </li>
+                               
+                <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_PNP_ADMIN')">
+                    <a href="" style="cursor: pointer;"><span>PNP後台維護</span></a>
+                    <ul class="MdNonDisp subMenu" style="display:none">
+                        <li th:classappend="${currentPage == 'PagepnpNAL'} ? 'ExSelected'">
+                            <a th:href="@{/bcs/edit/pnpNormalAccountListPage}"><span>一般帳號維護</span></a>
+                        </li>
+                        <li th:classappend="${currentPage == 'PagepnpNAC'} ? 'ExSelected'">
+                            <a th:href="@{/bcs/edit/pnpNormalAccountCreatePage}"><span>建立一般帳號</span></a>
+                        </li>
+                        <li th:classappend="${currentPage == 'PagepnpUAL'} ? 'ExSelected'">
+                            <a th:href="@{/bcs/edit/pnpUnicaAccountListPage}"><span>Unica帳號維護</span></a>
+                        </li>
+                        <li th:classappend="${currentPage == 'PagepnpUAC'} ? 'ExSelected'">
+                            <a th:href="@{/bcs/edit/pnpUnicaAccountCreatePage}"><span>建立Unica帳號</span></a>
+                        </li>
+                    </ul>
+                </li>
+                
+                <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_PNP_ADMIN')">
+                    <a href="" style="cursor: pointer;"><span>PNP監控管理</span></a>
+                    <ul class="MdNonDisp subMenu" style="display:none">
+                    </ul>
+                </li>                
             </ul>
         </nav>
     </div>

@@ -91,7 +91,7 @@ $(function(){
 			var sourceSystemInput = $('#sourceSystemInput').val();
 			var pccCodeInput = $('#pccCodeInput').val();
 			var accountInput = $('#accountInput').val();
-			var getUrl = bcs.bcsContextPath + '/edit/exportPNPDetailReportExcel?startDate=' + startDate + '&endDate=' + endDate 
+			var getUrl = bcs.bcsContextPath + '/pnpEmployee/exportPNPDetailReportExcel?startDate=' + startDate + '&endDate=' + endDate 
 				+ '&sourceSystem=' + sourceSystemInput + '&pccCodeInput=' + pccCode + '&account=' + accountInput;
 			console.info('getUrl', getUrl);
 			
@@ -114,7 +114,7 @@ $(function(){
 		var sourceSystemInput = $('#sourceSystemInput').val();
 		var pccCodeInput = $('#pccCodeInput').val();
 		var accountInput = $('#accountInput').val();
-		var getUrl = bcs.bcsContextPath + '/edit/getPNPDetailReport?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page + '&sourceSystem=' + sourceSystemInput 
+		var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPDetailReport?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page + '&sourceSystem=' + sourceSystemInput 
 			+ '&pccCodeInput=' + pccCode + '&account=' + accountInput;
 		console.info('getUrl', getUrl);
 		
@@ -206,8 +206,8 @@ $(function(){
 		var sourceSystemInput = $('#sourceSystemInput').val();
 		var pccCodeInput = $('#pccCodeInput').val();
 		var accountInput = $('#accountInput').val();
-		var getUrl = bcs.bcsContextPath + '/edit/getPNPDetailReportTotalPages?startDate=' + startDate + '&endDate=' + endDate + '&sourceSystem=' + sourceSystemInput 
-			+ '&pccCodeInput=' + pccCode + '&account=' + accountInput;
+		var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPDetailReportTotalPages?startDate=' + startDate + '&endDate=' + endDate + '&sourceSystem=' + sourceSystemInput 
+			+ '&pccCode=' + pccCode + '&account=' + accountInput;
 		console.info('getUrl', getUrl);
 		
 		$.ajax({

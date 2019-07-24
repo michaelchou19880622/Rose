@@ -87,22 +87,17 @@ public class BCSPnpReportController extends BCSBaseController {
 	private PnpReportExcelService pnpReportExcelService;
 	@Autowired 
 	private PnpDetailMingRepository pnpDetailMingRepository;
-	@Autowired 
-	private PnpDetailMitakeRepository pnpDetailMitakeRepository;
-	@Autowired 
-	private PnpDetailEvery8dRepository pnpDetailEvery8dRepository;
-	
 	
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSPnpReportController.class);
 	
-	@RequestMapping(method = RequestMethod.GET, value ="/edit/pnpDetailReportPage")
+	@RequestMapping(method = RequestMethod.GET, value ="/pnpEmployee/pnpDetailReportPage")
 	public String pnpDetailReportPage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("pnpDetailReportPage");
 		return BcsPageEnum.PnpDetailReportPage.toString();
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getPNPDetailReport")
+	@RequestMapping(method = RequestMethod.GET, value = "/pnpEmployee/getPNPDetailReport")
 	@ResponseBody
 	public ResponseEntity<?> getPNPDetailReport(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
 			@RequestParam(value = "startDate", required=false) String startDate, 
@@ -115,6 +110,7 @@ public class BCSPnpReportController extends BCSBaseController {
 		if(endDate == null) endDate = "2019-07-30";
 		logger.info("page:"+page);
 		try{
+			logger.info("getRole:" + customUser.getRole());
 			Map<String, List<String>> result = pnpMaintainUIService.getPNPDetailReport(startDate, endDate, account, pccCode, sourceSystem, page);
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		}catch(Exception e){
@@ -123,7 +119,7 @@ public class BCSPnpReportController extends BCSBaseController {
 		}
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getPNPDetailReportTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(method = RequestMethod.GET, value = "/pnpEmployee/getPNPDetailReportTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> getPNPDetailReportTotalPages(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
 			@RequestParam(value = "startDate", required=false) String startDate, 
@@ -145,7 +141,7 @@ public class BCSPnpReportController extends BCSBaseController {
 		}
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getPNPDetailReportExcelList")
+	@RequestMapping(method = RequestMethod.GET, value = "/pnpEmployee/getPNPDetailReportExcelList")
 	@ResponseBody
 	public ResponseEntity<?> getPNPDetailReportExcelList(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
 			@RequestParam(value = "startDate", required=false) String startDate, 
@@ -164,7 +160,7 @@ public class BCSPnpReportController extends BCSBaseController {
 		}
 	}
 	
-    @RequestMapping(method = RequestMethod.GET, value = "/edit/exportPNPDetailReportExcel")
+    @RequestMapping(method = RequestMethod.GET, value = "/pnpEmployee/exportPNPDetailReportExcel")
     @ResponseBody
     public void exportPNPDetailReportExcel(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, 
 			@RequestParam(value = "startDate", required=false) String startDate, 
@@ -201,23 +197,23 @@ public class BCSPnpReportController extends BCSBaseController {
     
     
     // Only For Testing
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/findAllPnpDetailMing", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public ResponseEntity<?> findAllPnpDetailMing(HttpServletRequest request,  HttpServletResponse response, 
-			@CurrentUser CustomUser customUser) throws IOException {		
-		try {
-			List<PnpDetailMing> list = new ArrayList();
-			list = pnpDetailMingRepository.findAll();
-			return new ResponseEntity<>(list, HttpStatus.OK);
-		}catch(Exception e){
-			logger.error(ErrorRecord.recordError(e));
-			if(e instanceof BcsNoticeException){
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			}else{
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-		}
-	}
+//	@RequestMapping(method = RequestMethod.GET, value = "/edit/findAllPnpDetailMing", produces = MediaType.APPLICATION_JSON_VALUE)
+//	@ResponseBody
+//	public ResponseEntity<?> findAllPnpDetailMing(HttpServletRequest request,  HttpServletResponse response, 
+//			@CurrentUser CustomUser customUser) throws IOException {		
+//		try {
+//			List<PnpDetailMing> list = new ArrayList();
+//			list = pnpDetailMingRepository.findAll();
+//			return new ResponseEntity<>(list, HttpStatus.OK);
+//		}catch(Exception e){
+//			logger.error(ErrorRecord.recordError(e));
+//			if(e instanceof BcsNoticeException){
+//				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+//			}else{
+//				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+//			}
+//		}
+//	}
 	
 //	@RequestMapping(method = RequestMethod.GET, value ="/edit/pnpNormalAccountCreatePage")
 //	public String pnpNormalAccountCreatePage(HttpServletRequest request, HttpServletResponse response) {

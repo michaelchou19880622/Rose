@@ -7,7 +7,7 @@
     <div th:fragment="menu (currentPage)" class="LySub">    
         <nav class="Nav">
             <ul>
-                <li>
+                <li sec:authorize="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN', 'ROLE_MARKET')">
                     <a href="" style="cursor: pointer;"><span>發送群組</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
                         <li th:classappend="${currentPage == 'Page2'} ? 'ExSelected'">
@@ -259,7 +259,7 @@
                     <a href="" style="cursor: pointer;"><span>PNP成效報表</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
                         <li th:classappend="${currentPage == 'PagepnpDetailReport'} ? 'ExSelected'">
-                            <a th:href="@{/bcs/edit/pnpDetailReportPage}"><span>PNP明細報表</span></a>
+                            <a th:href="@{/bcs/pnpEmployee/pnpDetailReportPage}"><span>PNP明細報表</span></a>
                         </li>
                     </ul>
                 </li>

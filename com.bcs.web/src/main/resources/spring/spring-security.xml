@@ -36,6 +36,9 @@
 		<intercept-url pattern="/bcs/admin/**" access="hasRole('ROLE_ADMIN')" />
 		<intercept-url pattern="/bcs/edit/**" access="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN')" />
 		<intercept-url pattern="/bcs/market/**" access="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN', 'ROLE_MARKET')" />
+		<intercept-url pattern="/bcs/pnpAdmin/**" access="hasAnyRole('ROLE_ADMIN', 'ROLE_PNP_ADMIN')" />
+		<intercept-url pattern="/bcs/pnpInquirer/**" access="hasAnyRole('ROLE_PNP_INQUIRER', 'ROLE_PNP_ADMIN', 'ROLE_ADMIN')" />
+		<intercept-url pattern="/bcs/pnpEmployee/**" access="hasAnyRole('ROLE_PNP_EMPLOYEE', 'ROLE_PNP_ADMIN', 'ROLE_ADMIN')" />
 
 		<!-- 此 pattern 要擺在最後面 -->
 		<intercept-url pattern="/**" access="authenticated"/>

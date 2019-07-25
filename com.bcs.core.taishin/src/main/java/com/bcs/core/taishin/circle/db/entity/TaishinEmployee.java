@@ -1,4 +1,4 @@
-package com.bcs.core.taishin.circle.PNP.db.entity;
+package com.bcs.core.taishin.circle.db.entity;
 
 import java.util.Date;
 
@@ -12,8 +12,8 @@ import javax.persistence.Table;
 import com.bcs.core.json.AbstractBcsEntity;
 
 @Entity
-@Table(name = "BCS_EMPLOYEE_RECORD")
-public class EmployeeRecord extends AbstractBcsEntity{
+@Table(name = "BCS_TAISHIN_EMPLOYEE")
+public class TaishinEmployee extends AbstractBcsEntity{
 	private static final long serialVersionUID = 1L;
 	
 	@Id
@@ -35,6 +35,9 @@ public class EmployeeRecord extends AbstractBcsEntity{
 	
 	@Column(name = "GROUP_NAME", columnDefinition="nvarchar(100)")		// 組
 	private String groupName;
+
+	@Column(name = "EASY_NAME", columnDefinition="nvarchar(100)")
+	private String easyName;
 	
 	@Column(name = "PCC_CODE", columnDefinition="nvarchar(100)")
 	private String pccCode;
@@ -65,14 +68,14 @@ public class EmployeeRecord extends AbstractBcsEntity{
 		this.departmentId = departmentId;
 	}
 
-	public String 部() {
-		return departmentName;
-	}
-
 	public void setDepartmentName(String departmentName) {
 		this.departmentName = departmentName;
 	}
 
+	public void getDepartmentName(String departmentName) {
+		this.departmentName = departmentName;
+	}
+	
 	public String getPccCode() {
 		return pccCode;
 	}
@@ -115,5 +118,13 @@ public class EmployeeRecord extends AbstractBcsEntity{
 
 	public void setModifyUser(String modifyUser) {
 		this.modifyUser = modifyUser;
+	}
+
+	public String getEasyName() {
+		return easyName;
+	}
+
+	public void setEasyName(String easyName) {
+		this.easyName = easyName;
 	}
 }

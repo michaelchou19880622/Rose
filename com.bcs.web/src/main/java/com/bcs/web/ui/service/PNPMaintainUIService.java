@@ -29,7 +29,7 @@ import com.bcs.core.log.util.SystemLogUtil;
 import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
 import com.bcs.core.taishin.circle.PNP.db.repository.PNPMaintainAccountModelCustom;
 import com.bcs.core.taishin.circle.PNP.db.repository.PNPMaintainAccountModelRepository;
-import com.bcs.core.taishin.circle.db.service.OraclePnpService;
+import com.bcs.core.taishin.circle.db.service.OracleService;
 import com.bcs.core.utils.DataSyncUtil;
 import com.bcs.core.utils.ErrorRecord;
 import com.google.common.cache.CacheBuilder;
@@ -46,7 +46,7 @@ public class PNPMaintainUIService {
 	@Autowired
     private PNPMaintainAccountModelCustom PNPMaintainAccountModelCustom;
 	@Autowired
-	private OraclePnpService oraclePnpService;
+	private OracleService oraclePnpService;
 	@PersistenceContext
     EntityManager entityManager;
 	

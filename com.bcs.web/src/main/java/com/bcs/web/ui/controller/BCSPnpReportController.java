@@ -46,13 +46,12 @@ import com.bcs.core.db.service.MsgSendRecordService;
 import com.bcs.core.db.service.SendGroupService;
 import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.resource.CoreConfigReader;
-import com.bcs.core.taishin.circle.PNP.db.entity.EmployeeRecord;
 import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMing;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailEvery8dRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMingRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMitakeRepository;
-import com.bcs.core.taishin.circle.db.service.OraclePnpService;
+import com.bcs.core.taishin.circle.db.service.OracleService;
 import com.bcs.core.taishin.service.PNPMaintainExcelService;
 import com.bcs.core.taishin.service.PnpReportExcelService;
 import com.bcs.core.utils.ErrorRecord;
@@ -82,7 +81,7 @@ public class BCSPnpReportController extends BCSBaseController {
 	@Autowired
 	private PnpReportExcelService pnpReportExcelService;
 	@Autowired	
-	private OraclePnpService oraclePnpService;
+	private OracleService oraclePnpService;
 
 	
 	/** Logger */

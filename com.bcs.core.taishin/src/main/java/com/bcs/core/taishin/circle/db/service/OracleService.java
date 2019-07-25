@@ -10,23 +10,24 @@ import org.springframework.stereotype.Service;
 
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.resource.CoreConfigReader;
-import com.bcs.core.taishin.circle.PNP.db.entity.EmployeeRecord;
-import com.bcs.core.taishin.circle.PNP.db.repository.EmployeeRecordRepository;
+import com.bcs.core.taishin.circle.db.entity.TaishinEmployee;
+import com.bcs.core.taishin.circle.db.repository.TaishinEmployeeRepository;
+
 import org.apache.commons.lang3.StringUtils;
 
 @Service
-public class OraclePnpService {
+public class OracleService {
 	/** Logger */
-	private static Logger logger = Logger.getLogger(OraclePnpService.class);	
+	private static Logger logger = Logger.getLogger(OracleService.class);	
 	@Autowired
-	private EmployeeRecordRepository employeeRecordRepository;
+	private TaishinEmployeeRepository taishinEmployeeRepository;
 
-	public void save(EmployeeRecord employeeRecord) {
-		employeeRecordRepository.save(employeeRecord);
+	public void save(TaishinEmployee employeeRecord) {
+		taishinEmployeeRepository.save(employeeRecord);
 	}
 	
-	public EmployeeRecord findByEmployeeId(String empId) {
-		logger.info("[get HR_EMP_SW] EMP_ID="+empId);
+	public TaishinEmployee findByEmployeeId(String empId) {
+		logger.info("[findByEmployeeId] EMP_ID="+empId);
 		try{
 			String ORACLE_DATASOURCE_URL = CoreConfigReader.getString(CONFIG_STR.ORACLE_DATASOURCE_URL, true);
 			String ORACLE_DATASOURCE_USERNAME = CoreConfigReader.getString(CONFIG_STR.ORACLE_DATASOURCE_USERNAME, true);
@@ -37,44 +38,35 @@ public class OraclePnpService {
 			logger.info(ORACLE_DATASOURCE_PASSWORD);
 			logger.info(HR);
 			
-			//step1 load the driver class  
 			Class.forName("oracle.jdbc.driver.OracleDriver");  
-
-			//step2 create  the connection object  
 			Connection con=DriverManager.getConnection(ORACLE_DATASOURCE_URL,ORACLE_DATASOURCE_USERNAME,ORACLE_DATASOURCE_PASSWORD);  
-
-			//step3 create the statement object  
-			Statement stmt=con.createStatement();  
-			  
-			//step4 execute query  
+			Statement stmt=con.createStatement();  			  
 			String sqlString = "select EMP_ID, DEPT_SER_NO_ACT, ACCT_DEPT_CD, ACCT_GRP_CD, CARD_DIV, CARD_DEPT, DEPT_EASY_NM from " +
 					HR + ".HR_EMP_SW LEFT OUTER JOIN " + HR + ".HR_DEPT_SW " + 
 					"on (HR_EMP_SW.DEPT_SER_NO_ACT = HR_DEPT_SW.DEPT_SERIAL_NO)" + 
 					"where EMP_ID = '" + empId + "'";
 			logger.info("sqlString:"+sqlString);
 			
+			TaishinEmployee emp = new TaishinEmployee();
 			ResultSet rs=stmt.executeQuery(sqlString);
-			
-			EmployeeRecord result = new EmployeeRecord();
-			
 			while(rs.next()) {
-				for(int i = 1; i <= 5; i++) {
-					logger.info(rs.getString(i)+"  "); 
+				for(int i = 1; i <= 7; i++) {
+					logger.info("[findByEmployeeId] i="+ i + ", s=" + rs.getString(i)); 
 				}
-				result.setEmployeeId(empId);
-				result.setDepartmentId(rs.getString(2));
-				
-				result.setDivisionName(rs.getString(5));
-				result.setDepartmentName(rs.getString(6));
-				result.setGroupName(rs.getString(7));
-				result.setPccCode(rs.getString(3).trim() + rs.getString(4).trim());
+				emp.setEmployeeId(empId);
+				emp.setDepartmentId(trim(rs.getString(2)));
+				emp.setPccCode(trim(rs.getString(3)) + trim(rs.getString(4)));
+				emp.setDivisionName(trim(rs.getString(5)));
+				emp.setDepartmentName(trim(rs.getString(6)));
+				emp.setEasyName(trim(rs.getString(7)));
+				emp.setGroupName(extractGroupName(emp));
 			}
+			logger.info("[findByEmployeeId] emp:"+emp);
 			
-			//step5 close the connection object
 			con.close(); 
-			return result;
+			return emp;
 		}catch(Exception e){
-			logger.info("[get HR_EMP_SW] error:" + e);
+			logger.info("[findByEmployeeId] error:" + e);
 			return null;
 		}
 	}
@@ -96,21 +88,24 @@ public class OraclePnpService {
 					HR + ".HR_EMP_SW LEFT OUTER JOIN " + HR + ".HR_DEPT_SW " + 
 					"ON (HR_EMP_SW.DEPT_SER_NO_ACT = HR_DEPT_SW.DEPT_SERIAL_NO) " + 
 					"WHERE EMP_ID = '" + empId + "'";
+			logger.info("sqlString:"+sqlString);
+			
 			Statement stmt=con.createStatement();  
 			ResultSet rs=stmt.executeQuery(sqlString);
-			EmployeeRecord emp = new EmployeeRecord();
+			TaishinEmployee emp = new TaishinEmployee();
 			while(rs.next()) {
-				for(int i = 1; i <= 5; i++) {
-					logger.info(rs.getString(i)+"  "); 
+				for(int i = 1; i <= 7; i++) {
+					logger.info("[findByEmployeeId] i="+ i + ", s=" + rs.getString(i)); 
 				}
 				emp.setEmployeeId(empId);
-				emp.setDepartmentId(rs.getString(2));
-				emp.setDivisionName(rs.getString(5));
-				emp.setDepartmentName(rs.getString(6));
-				emp.setGroupName(rs.getString(7));
-				emp.setPccCode(rs.getString(3).trim() + rs.getString(4).trim());
+				emp.setDepartmentId(trim(rs.getString(2)));
+				emp.setPccCode(trim(rs.getString(3)) + trim(rs.getString(4)));
+				emp.setDivisionName(trim(rs.getString(5)));
+				emp.setDepartmentName(trim(rs.getString(6)));
+				emp.setEasyName(trim(rs.getString(7)));
+				emp.setGroupName(extractGroupName(emp));
 			}
-			logger.info("emp:"+emp);
+			logger.info("[findByEmployeeId] emp:"+emp);
 			
 			// get List of EmpIds
 			List<String> EmpIds = new ArrayList();
@@ -118,12 +113,16 @@ public class OraclePnpService {
 					HR + ".HR_EMP_SW LEFT OUTER JOIN " + HR + ".HR_DEPT_SW " + 
 					"ON (HR_EMP_SW.DEPT_SER_NO_ACT = HR_DEPT_SW.DEPT_SERIAL_NO) ";
 			if(StringUtils.isNotBlank(emp.getGroupName())) { // 組權限
-				sqlString += "WHERE CARD_DIV = '" + emp.getDivisionName() + "' AND CARD_DEPT = '" + emp.getDepartmentName() + "' AND DEPT_EASY_NM = '" + emp.getGroupName() + "' ";
+				sqlString += "WHERE TRIM(CARD_DIV) = '" + emp.getDivisionName() + "' "
+					+ "AND TRIM(CARD_DEPT) = '" + emp.getDepartmentName() + "' "
+					+ "AND DEPT_EASY_NM LIKE '%" + emp.getGroupName() + "%' ";
 			}else if(StringUtils.isNotBlank(emp.getDepartmentName()))  { // 部權限
-				sqlString += "WHERE CARD_DIV = '" + emp.getDivisionName() + "' AND CARD_DEPT = '" + emp.getDepartmentName() + "' ";
+				sqlString += "WHERE TRIM(CARD_DIV) = '" + emp.getDivisionName() + "' "
+					+ "AND TRIM(CARD_DEPT) = '" + emp.getDepartmentName() + "' ";
 			}else { // 處權限
-				sqlString += "WHERE CARD_DIV = '" + emp.getDivisionName() + "' ";
+				sqlString += "WHERE TRIM(CARD_DIV) = '" + emp.getDivisionName() + "' ";
 			}
+			logger.info("sqlString2:"+sqlString);
 			
 			Statement stmt2=con.createStatement(); 
 			ResultSet rs2=stmt2.executeQuery(sqlString);
@@ -143,6 +142,18 @@ public class OraclePnpService {
 		}
 	}
 	
+	public static String extractGroupName(TaishinEmployee emp) {
+		String s = emp.getEasyName();
+		s = s.replaceAll(emp.getDivisionName(), "");	// cut 處
+		s = s.replaceAll(emp.getDepartmentName(), "");	// cut 部
+		logger.info("extractGroupName:" + s);
+		return s;
+	}
+	
+	public static String trim(String s) {
+		if(StringUtils.isBlank(s)) return "";
+		return s.trim();
+	}
 //	public void findAll(Integer maxRange) {
 //		logger.info("[findAll]");
 //		try{

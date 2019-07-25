@@ -6,71 +6,58 @@ import org.springframework.stereotype.Repository;
 
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.resource.CoreConfigReader;
-import com.bcs.core.taishin.circle.PNP.db.entity.EmployeeRecord;
+import com.bcs.core.taishin.circle.db.entity.TaishinEmployee;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;  
 
+/* This is for Oracle Local Testing */
 @Repository
 public class JdbcOracleConnect {
-	/** Logger */
-	private static Logger logger = Logger.getLogger(JdbcOracleConnect.class);
-		
-	public static void main(String[] args) {
-		System.out.println(getAvailableEmpIdsByEmpId("MOPACK"));
-	}
-	public EmployeeRecord findByEmployeeId(String empId) {
-		logger.info("[get HR_EMP_SW] EMP_ID="+empId);
+
+//	public static void main(String[] args) {
+//		System.out.println(findByEmployeeId("MOPACK"));
+//		//System.out.println(getAvailableEmpIdsByEmpId("MOPACK"));
+//	}
+	public static TaishinEmployee findByEmployeeId(String empId) {
+		System.out.println("[get HR_EMP_SW] EMP_ID="+empId);
 		try{
-			String ORACLE_DATASOURCE_URL = CoreConfigReader.getString(CONFIG_STR.ORACLE_DATASOURCE_URL, true);
-			String ORACLE_DATASOURCE_USERNAME = CoreConfigReader.getString(CONFIG_STR.ORACLE_DATASOURCE_USERNAME, true);
-			String ORACLE_DATASOURCE_PASSWORD = CoreConfigReader.getString(CONFIG_STR.ORACLE_DATASOURCE_PASSWORD, true);
-			String HR = CoreConfigReader.getString(CONFIG_STR.ORACLE_SCHEMA_HR, true);
-			logger.info(ORACLE_DATASOURCE_URL);
-			logger.info(ORACLE_DATASOURCE_USERNAME);
-			logger.info(ORACLE_DATASOURCE_PASSWORD);
-			logger.info(HR);
-			
-			//step1 load the driver class  
+			String HR = "HR";
 			Class.forName("oracle.jdbc.driver.OracleDriver");  
+			Connection con=DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521/XEPDB1","SYSTEM","123");  
 
-			//step2 create  the connection object  
-			Connection con=DriverManager.getConnection(ORACLE_DATASOURCE_URL,ORACLE_DATASOURCE_USERNAME,ORACLE_DATASOURCE_PASSWORD);  
 
-			//step3 create the statement object  
-			Statement stmt=con.createStatement();  
-			  
-			//step4 execute query  
+			Statement stmt=con.createStatement();  			  
 			String sqlString = "select EMP_ID, DEPT_SER_NO_ACT, ACCT_DEPT_CD, ACCT_GRP_CD, CARD_DIV, CARD_DEPT, DEPT_EASY_NM from " +
 					HR + ".HR_EMP_SW LEFT OUTER JOIN " + HR + ".HR_DEPT_SW " + 
 					"on (HR_EMP_SW.DEPT_SER_NO_ACT = HR_DEPT_SW.DEPT_SERIAL_NO)" + 
 					"where EMP_ID = '" + empId + "'";
-			logger.info("sqlString:"+sqlString);
+			System.out.println("sqlString:"+sqlString);
 			
 			ResultSet rs=stmt.executeQuery(sqlString);
 			
-			EmployeeRecord result = new EmployeeRecord();
-			
+			TaishinEmployee emp = new TaishinEmployee();
 			while(rs.next()) {
-				for(int i = 1; i <= 5; i++) {
-					logger.info(rs.getString(i)+"  "); 
+				for(int i = 1; i <= 7; i++) {
+					System.out.println(rs.getString(i)+"  "); 
 				}
-				result.setEmployeeId(empId);
-				result.setDepartmentId(rs.getString(2));
-				
-				result.setDivisionName(rs.getString(5));
-				result.setDepartmentName(rs.getString(6));
-				result.setGroupName(rs.getString(7));
-				result.setPccCode(rs.getString(3).trim() + rs.getString(4).trim());
+				emp.setEmployeeId(empId);
+				emp.setDepartmentId(trim(rs.getString(2)));
+				emp.setPccCode(trim(rs.getString(3)) + trim(rs.getString(4)));
+				emp.setDivisionName(trim(rs.getString(5)));
+				emp.setDepartmentName(trim(rs.getString(6)));
+				emp.setEasyName(trim(rs.getString(7)));
+				emp.setGroupName(extractGroupName(emp));
 			}
+			System.out.println("emp:"+emp);
 			
 			//step5 close the connection object
 			con.close(); 
-			return result;
+			return emp;
 		}catch(Exception e){
-			logger.info("[get HR_EMP_SW] error:" + e);
+			System.out.println("[get HR_EMP_SW] error:" + e);
 			return null;
 		}
 	}
@@ -89,19 +76,21 @@ public class JdbcOracleConnect {
 					HR + ".HR_EMP_SW LEFT OUTER JOIN " + HR + ".HR_DEPT_SW " + 
 					"ON (HR_EMP_SW.DEPT_SER_NO_ACT = HR_DEPT_SW.DEPT_SERIAL_NO) " + 
 					"WHERE EMP_ID = '" + empId + "'";
-			Statement stmt=con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);  
+			Statement stmt=con.createStatement();  
 			ResultSet rs=stmt.executeQuery(sqlString);
-			EmployeeRecord emp = new EmployeeRecord();
+			TaishinEmployee emp = new TaishinEmployee();
 			while(rs.next()) {
-				for(int i = 1; i <= 5; i++) {
+				for(int i = 1; i <= 7; i++) {
 					System.out.println(rs.getString(i)+"  "); 
 				}
 				emp.setEmployeeId(empId);
-				emp.setDepartmentId(rs.getString(2));
-				emp.setDivisionName(rs.getString(5));
-				emp.setDepartmentName(rs.getString(6));
-				emp.setGroupName(rs.getString(7));
-				emp.setPccCode(rs.getString(3).trim() + rs.getString(4).trim());
+				emp.setDepartmentId(trim(rs.getString(2)));
+				emp.setPccCode(trim(rs.getString(3)) + trim(rs.getString(4)));
+				emp.setDivisionName(trim(rs.getString(5)));
+				emp.setDepartmentName(trim(rs.getString(6)));
+				emp.setEasyName(trim(rs.getString(7)));
+				emp.setGroupName(extractGroupName(emp));
+				
 			}
 			System.out.println("emp:"+emp);
 			
@@ -141,37 +130,49 @@ public class JdbcOracleConnect {
 	}
 
 	public static void getEmpDataByEmpId(String empId) {
-	System.out.println("getEmpDataByEmpId. EMP_ID="+empId);
-	try{
-		//step1 load the driver class  
-		Class.forName("oracle.jdbc.driver.OracleDriver");  
-
-		//step2 create  the connection object  
-		Connection con=DriverManager.getConnection("jdbc:oracle:thin:@192.168.1.195:1521/XEPDB1","SYSTEM","123");  //thin/oci
-
-		//step3 create the statement object  
-		Statement stmt=con.createStatement();  
-		
-		String HR = "HR";
-		
-		//step4 execute query
-		String sqlString = "select * from " + HR + ".HR_EMP_SW LEFT OUTER JOIN " + HR + ".HR_DEPT_SW " + 
-				"on (HR_EMP_SW.DEPT_SER_NO_ACT = HR_DEPT_SW.DEPT_SERIAL_NO)" + 
-				"where EMP_ID = '" + empId + "'";
-		System.out.println(sqlString);
-		ResultSet rs=stmt.executeQuery(sqlString);
-
-		while(rs.next()) {
-			for(int i = 1; i <= 8; i++) {
-				System.out.println(rs.getString(i)+"  "); 
+		System.out.println("getEmpDataByEmpId. EMP_ID="+empId);
+		try{
+			//step1 load the driver class  
+			Class.forName("oracle.jdbc.driver.OracleDriver");  
+	
+			//step2 create  the connection object  
+			Connection con=DriverManager.getConnection("jdbc:oracle:thin:@192.168.1.195:1521/XEPDB1","SYSTEM","123");  //thin/oci
+	
+			//step3 create the statement object  
+			Statement stmt=con.createStatement();  
+			
+			String HR = "HR";
+			
+			//step4 execute query
+			String sqlString = "select * from " + HR + ".HR_EMP_SW LEFT OUTER JOIN " + HR + ".HR_DEPT_SW " + 
+					"on (HR_EMP_SW.DEPT_SER_NO_ACT = HR_DEPT_SW.DEPT_SERIAL_NO)" + 
+					"where EMP_ID = '" + empId + "'";
+			System.out.println(sqlString);
+			ResultSet rs=stmt.executeQuery(sqlString);
+	
+			while(rs.next()) {
+				for(int i = 1; i <= 8; i++) {
+					System.out.println(rs.getString(i)+"  "); 
+				}
 			}
+			//step5 close the connection object  
+			con.close();  
+		}catch(Exception e){ 
+			System.out.println(e);
 		}
-		//step5 close the connection object  
-		con.close();  
-	}catch(Exception e){ 
-		System.out.println(e);
-	}  	
-}	
+	}	
+	public static String trim(String s) {
+		if(StringUtils.isBlank(s)) return "";
+		return s.trim();
+	}
+	public static String extractGroupName(TaishinEmployee emp) {
+		String s = emp.getEasyName();
+		s = s.replaceAll(emp.getDivisionName(), "");	// cut 處
+		s = s.replaceAll(emp.getDepartmentName(), "");	// cut 部
+		System.out.println("extractGroupName:" + s);
+		return s;
+	}
+
 	
 //	public static void findAll() {
 //	System.out.println("findAll");

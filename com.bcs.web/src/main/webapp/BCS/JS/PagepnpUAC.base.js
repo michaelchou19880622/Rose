@@ -122,8 +122,10 @@ $(function(){
             contentType: 'application/json',
 		}).success(function(response) {
 			console.info("response:", response);
+			
 			$('#account').val(response.account);
 			$('#employeeId').val(response.employeeId);
+			$('#departmentId').val(response.departmentId);
 			$('#divisionName').val(response.divisionName);
 			$('#departmentName').val(response.departmentName);
 			$('#groupName').val(response.groupName);
@@ -133,6 +135,7 @@ $(function(){
 		}).fail(function(response) {
 			console.info(response);
 			$.FailResponse(response);
+			window.location.replace('pnpUnicaAccountCreatePage');
 		}).done(function() {
 		    $('#dialog-modal').dialog({
 		 	   	width: 960,

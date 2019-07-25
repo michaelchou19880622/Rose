@@ -46,9 +46,9 @@ import com.bcs.core.db.service.MsgSendRecordService;
 import com.bcs.core.db.service.SendGroupService;
 import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.resource.CoreConfigReader;
-import com.bcs.core.taishin.circle.PNP.db.entity.EmployeeRecord;
 import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
-import com.bcs.core.taishin.circle.db.service.OraclePnpService;
+import com.bcs.core.taishin.circle.db.entity.TaishinEmployee;
+import com.bcs.core.taishin.circle.db.service.OracleService;
 import com.bcs.core.taishin.service.PNPMaintainExcelService;
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.utils.ObjectUtil;
@@ -75,14 +75,12 @@ public class BCSPNPMaintainController extends BCSBaseController {
 	@Autowired
 	private PNPMaintainUIService pnpMaintainUIService;
 	@Autowired	
-	private PNPMaintainExcelService pnpMaintainExcelService;
-	@Autowired	
-	private OraclePnpService oraclePnpService;
+	private OracleService oraclePnpService;
 	
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSPNPMaintainController.class);
 	
-	@RequestMapping(method = RequestMethod.GET, value ="/pnpEmployee/pnpNormalAccountListPage")
+	@RequestMapping(method = RequestMethod.GET, value ="/pnpAdmin/pnpNormalAccountListPage")
 	public String pnpNormalAccountListPage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("pnpNormalAccountListPage");
 		return BcsPageEnum.PNPNormalAccountListPage.toString();
@@ -111,15 +109,18 @@ public class BCSPNPMaintainController extends BCSBaseController {
 	public ResponseEntity<?> getEmpAccount(HttpServletRequest request,  HttpServletResponse response, @CurrentUser CustomUser customUser,
 			@RequestParam(required=false) String empId) throws IOException {		
 		try {
-			if(empId==null) {
-				empId = customUser.getAccount().toUpperCase();
+			if(StringUtils.isBlank(empId)) {
+				logger.info("empId is blank");
+				return new ResponseEntity<>("{}", HttpStatus.OK);
 			}
-			logger.info("getEmpAccount empId=" + empId);
-			EmployeeRecord result = oraclePnpService.findByEmployeeId(empId);		
 			
-			if(result == null){
+			logger.info("getEmpAccount empId=" + empId);
+			TaishinEmployee result = oraclePnpService.findByEmployeeId(empId);		
+			
+			if(result == null || StringUtils.isBlank(result.getDivisionName())){
 				throw new BcsNoticeException("Not Found Result for this Employee Id!");
 			}
+			
 			result.setModifyTime(new Date());
 			result.setModifyUser(empId);
 			oraclePnpService.save(result);

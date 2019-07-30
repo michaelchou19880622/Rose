@@ -105,7 +105,7 @@ public class BCSPnpReportController extends BCSBaseController {
 		if(startDate == null) startDate = "2019-03-01";
 		if(endDate == null) endDate = "2019-07-30";
 		try{
-			String empId =  customUser.getUsername().toUpperCase();
+			String empId =  customUser.getAccount().toUpperCase();
 			Map<String, List<String>> result = pnpMaintainUIService.getPNPDetailReport(startDate, endDate, account, pccCode, sourceSystem, page, empId);
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		}catch(Exception e){
@@ -128,7 +128,7 @@ public class BCSPnpReportController extends BCSBaseController {
 		if(endDate == null) endDate = "3099-01-01";
 		
 		try{
-			String empId =  customUser.getUsername().toUpperCase();
+			String empId =  customUser.getAccount().toUpperCase();
 			String count = pnpMaintainUIService.getPNPDetailReportTotalPages(startDate, endDate, account, pccCode, sourceSystem, empId);
 			return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count + "\"}", HttpStatus.OK);
 		}catch(Exception e){
@@ -159,7 +159,7 @@ public class BCSPnpReportController extends BCSBaseController {
             if(!folder.exists()){
                 folder.mkdirs();
             }
-            String empId =  customUser.getUsername().toUpperCase();
+            String empId =  customUser.getAccount().toUpperCase();
             pnpReportExcelService.exportPNPDetailReportExcel(filePath, fileName, startDate, endDate, account, pccCode, sourceSystem, empId);
         } catch (Exception e) {
             logger.error(ErrorRecord.recordError(e));

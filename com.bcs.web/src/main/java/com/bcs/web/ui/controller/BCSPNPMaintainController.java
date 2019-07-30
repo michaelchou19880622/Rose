@@ -109,6 +109,7 @@ public class BCSPNPMaintainController extends BCSBaseController {
 	public ResponseEntity<?> getEmpAccount(HttpServletRequest request,  HttpServletResponse response, @CurrentUser CustomUser customUser,
 			@RequestParam(required=false) String empId) throws IOException {		
 		try {
+			
 			if(StringUtils.isBlank(empId)) {
 				logger.info("empId is blank");
 				return new ResponseEntity<>("{}", HttpStatus.OK);
@@ -118,7 +119,7 @@ public class BCSPNPMaintainController extends BCSBaseController {
 			TaishinEmployee result = oraclePnpService.findByEmployeeId(empId);		
 			
 			if(result == null || StringUtils.isBlank(result.getDivisionName())){
-				throw new BcsNoticeException("Not Found Result for this Employee Id!");
+				throw new BcsNoticeException("此員工編號不合法！");
 			}
 			
 			result.setModifyTime(new Date());
@@ -184,7 +185,8 @@ public class BCSPNPMaintainController extends BCSBaseController {
 	public ResponseEntity<?> deletePNPMaintainAccount(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser, @RequestParam Long id) throws IOException {
 		try{
-			if(!customUser.isAdmin()) {
+			
+			if(!customUser.isAdmin() && !AdminUser.RoleCode.ROLE_PNP_ADMIN.toString().equals(customUser.getRole())) {
 				throw new BcsNoticeException("您無權限刪除");
 			}
 

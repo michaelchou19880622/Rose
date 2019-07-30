@@ -1200,8 +1200,11 @@ public class PNPFtpService {
 	public void uploadFileInFTP(InputStream targetStream,String fileName,String targetDir,PNPFtpSetting setting) throws IOException {
 		logger.info("start uploadFileInFTP ");
 		
+		logger.info(" targetStream...."+targetStream);
 		logger.info(" fileName...."+fileName);
-		
+		logger.info(" targetDir...."+targetDir);
+		logger.info(" PNPFtpSetting...."+setting);
+
 		FTPClient FTPClient = new FTPClient();
 		try {
 			FTPClient.connect(setting.getSmsHost(), setting.getSmsPort());
@@ -1214,7 +1217,12 @@ public class PNPFtpService {
 			FTPClient.changeWorkingDirectory(targetDir);
 			
             //上傳檔案
-            FTPClient.storeFile(fileName, targetStream);
+			try {
+				FTPClient.storeFile(fileName, targetStream);
+			}catch(IOException e) {
+				logger.error("uploadFileInFTP error:"+e.toString());
+			}
+            
 
             //關閉檔案
             targetStream.close();

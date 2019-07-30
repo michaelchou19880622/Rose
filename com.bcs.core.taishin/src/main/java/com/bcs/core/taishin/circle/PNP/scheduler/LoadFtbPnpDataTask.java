@@ -1181,7 +1181,12 @@ public class LoadFtbPnpDataTask {
 		
 		logger.info(" fileName...."+fileName);
 		
-		pnpFtpService.uploadFileByType(targetStream, fileName, setting.getUploadPath(), setting);
+		try {
+			pnpFtpService.uploadFileByType(targetStream, fileName, setting.getUploadPath(), setting);
+		}catch (Exception e) {
+			e.printStackTrace();
+			logger.error("SMS uploadFileToSMS error:" + e.getMessage());
+		} 
 	}
 
 	private static class ExecuteSendPnpRunnable implements Runnable {

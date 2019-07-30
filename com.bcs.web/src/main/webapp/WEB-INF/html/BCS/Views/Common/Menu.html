@@ -255,7 +255,7 @@
                     </ul>
                 </li>
 
-                <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_PNP_ADMIN', 'ROLE_PNP_INQUIRER', 'ROLE_PNP_EMPLOYEE')">
+                <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_PNP_ADMIN', 'ROLE_PNP_INQUIRER', 'ROLE_PNP_EMPLOYEE', 'ROLE_MARKET')">
                     <a href="" style="cursor: pointer;"><span>PNP成效報表</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
                         <li th:classappend="${currentPage == 'PagepnpDetailReport'} ? 'ExSelected'">

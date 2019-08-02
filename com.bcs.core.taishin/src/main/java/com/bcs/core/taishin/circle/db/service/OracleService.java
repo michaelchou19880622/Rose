@@ -12,6 +12,8 @@ import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.circle.db.entity.TaishinEmployee;
 import com.bcs.core.taishin.circle.db.repository.TaishinEmployeeRepository;
+import com.bcs.core.utils.ErrorRecord;
+import com.tsib.RunBat;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -26,20 +28,58 @@ public class OracleService {
 		taishinEmployeeRepository.save(employeeRecord);
 	}
 	
+
+	
 	public TaishinEmployee findByEmployeeId(String empId) {
 		logger.info("[findByEmployeeId] EMP_ID="+empId);
 		try{
-			String ORACLE_DATASOURCE_URL = CoreConfigReader.getString(CONFIG_STR.ORACLE_DATASOURCE_URL, true);
-			String ORACLE_DATASOURCE_USERNAME = CoreConfigReader.getString(CONFIG_STR.ORACLE_DATASOURCE_USERNAME, true);
-			String ORACLE_DATASOURCE_PASSWORD = CoreConfigReader.getString(CONFIG_STR.ORACLE_DATASOURCE_PASSWORD, true);
-			String HR = CoreConfigReader.getString(CONFIG_STR.ORACLE_SCHEMA_HR, true);
-			logger.info(ORACLE_DATASOURCE_URL);
-			logger.info(ORACLE_DATASOURCE_USERNAME);
-			logger.info(ORACLE_DATASOURCE_PASSWORD);
-			logger.info(HR);
+			String ldapHost = CoreConfigReader.getString("oracleLdapHost");
+			String apName = CoreConfigReader.getString("oracleApName");
+			Integer apGroup = CoreConfigReader.getInteger("oracleApGroup");
+			String searchBase = CoreConfigReader.getString("oracleSearchBase");
+			String connection = getDBConnectionInfo(ldapHost, apName, apGroup, searchBase);
+			logger.info("connection:" + connection);
 			
-			Class.forName("oracle.jdbc.driver.OracleDriver");  
-			Connection con=DriverManager.getConnection(ORACLE_DATASOURCE_URL,ORACLE_DATASOURCE_USERNAME,ORACLE_DATASOURCE_PASSWORD);  
+			String[] split = connection.split(";");
+			String USER = "";
+			String PASSWORD = "";
+			String DATABASENAME = "";
+			for(String str : split){
+				if(StringUtils.isNotBlank(str)){
+					String[] keyvalue = str.split("=");
+				
+					if(keyvalue != null && keyvalue.length == 2){
+						if("uid".equals(keyvalue[0])){
+							USER = keyvalue[1];
+						}
+						if("pwd".equals(keyvalue[0])){
+							PASSWORD = keyvalue[1];
+						}
+						if("database".equals(keyvalue[0])){
+							DATABASENAME = keyvalue[1];
+						}
+					}
+				}
+			}
+			USER = USER.toUpperCase();
+			PASSWORD = PASSWORD.toUpperCase();
+			DATABASENAME = DATABASENAME.toUpperCase();
+			logger.info("USER:"+USER);
+			logger.info("PASSWORD:"+PASSWORD);
+
+			String HR = CoreConfigReader.getString(CONFIG_STR.ORACLE_SCHEMA_HR, true);
+			logger.info("HR:"+HR);
+			
+			
+			String oracleUrl = CoreConfigReader.getString("oracleUrl");
+			logger.info("oracleUrl:"+oracleUrl);
+			
+			String ORACLE_DATASOURCE_URL = "jdbc:oracle:thin:@"+oracleUrl+":1521/" + DATABASENAME;
+			logger.info("ORACLE_DATASOURCE_URL:"+ORACLE_DATASOURCE_URL);
+			
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			Connection con=DriverManager.getConnection(ORACLE_DATASOURCE_URL,USER,PASSWORD);
+			
 			Statement stmt=con.createStatement();  			  
 			String sqlString = "select EMP_ID, DEPT_SER_NO_ACT, ACCT_DEPT_CD, ACCT_GRP_CD, CARD_DIV, CARD_DEPT, DEPT_EASY_NM from " +
 					HR + ".HR_EMP_SW LEFT OUTER JOIN " + HR + ".HR_DEPT_SW " + 
@@ -142,6 +182,8 @@ public class OracleService {
 		}
 	}
 	
+	
+	// ---- Tools ----
 	public static String extractGroupName(TaishinEmployee emp) {
 		String s = emp.getEasyName();
 		s = s.replaceAll(emp.getDivisionName(), "");	// cut 處
@@ -153,6 +195,19 @@ public class OracleService {
 	public static String trim(String s) {
 		if(StringUtils.isBlank(s)) return "";
 		return s.trim();
+	}
+	
+	private String getDBConnectionInfo(String ldapHost, String apName, int apGroup, String searchBase) {
+		try {
+			RunBat ap1 = new RunBat();
+			ap1.SSL = false;
+			ap1.ldapHost = ldapHost;
+			ap1.searchBase = searchBase;
+			return ap1.GetRunBat(apName, apGroup);
+		} catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+		}
+		return "";
 	}
 //	public void findAll(Integer maxRange) {
 //		logger.info("[findAll]");

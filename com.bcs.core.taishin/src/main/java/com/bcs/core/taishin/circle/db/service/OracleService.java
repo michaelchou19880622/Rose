@@ -27,12 +27,11 @@ public class OracleService {
 	public void save(TaishinEmployee employeeRecord) {
 		taishinEmployeeRepository.save(employeeRecord);
 	}
-	
 
-	
 	public TaishinEmployee findByEmployeeId(String empId) {
 		logger.info("[findByEmployeeId] EMP_ID="+empId);
 		try{
+			// connect to database
 			String ldapHost = CoreConfigReader.getString("oracleLdapHost");
 			String apName = CoreConfigReader.getString("oracleApName");
 			Integer apGroup = CoreConfigReader.getInteger("oracleApGroup");
@@ -41,6 +40,7 @@ public class OracleService {
 			logger.info("connection:" + connection);
 			
 			String[] split = connection.split(";");
+			String SERVER = "";
 			String USER = "";
 			String PASSWORD = "";
 			String DATABASENAME = "";
@@ -49,6 +49,9 @@ public class OracleService {
 					String[] keyvalue = str.split("=");
 				
 					if(keyvalue != null && keyvalue.length == 2){
+						if("server".equals(keyvalue[0])){
+							SERVER = keyvalue[1];
+						}
 						if("uid".equals(keyvalue[0])){
 							USER = keyvalue[1];
 						}
@@ -64,21 +67,22 @@ public class OracleService {
 			USER = USER.toUpperCase();
 			PASSWORD = PASSWORD.toUpperCase();
 			DATABASENAME = DATABASENAME.toUpperCase();
+			SERVER = SERVER.toUpperCase();
+			
+			logger.info("SERVER:"+SERVER);
 			logger.info("USER:"+USER);
 			logger.info("PASSWORD:"+PASSWORD);
+			logger.info("DATABASENAME:"+DATABASENAME);
 
-			String HR = CoreConfigReader.getString(CONFIG_STR.ORACLE_SCHEMA_HR, true);
-			logger.info("HR:"+HR);
-			
-			
-			String oracleUrl = CoreConfigReader.getString("oracleUrl");
-			logger.info("oracleUrl:"+oracleUrl);
-			
-			String ORACLE_DATASOURCE_URL = "jdbc:oracle:thin:@"+oracleUrl+":1521/" + DATABASENAME;
+			String ORACLE_DATASOURCE_URL = "jdbc:oracle:thin:@"+ SERVER +":1521/" + DATABASENAME;
 			logger.info("ORACLE_DATASOURCE_URL:"+ORACLE_DATASOURCE_URL);
 			
 			Class.forName("oracle.jdbc.driver.OracleDriver");
 			Connection con=DriverManager.getConnection(ORACLE_DATASOURCE_URL,USER,PASSWORD);
+			
+			// get data from table
+			String HR = CoreConfigReader.getString(CONFIG_STR.ORACLE_SCHEMA_HR, true);
+			logger.info("HR:"+HR);
 			
 			Statement stmt=con.createStatement();  			  
 			String sqlString = "select EMP_ID, DEPT_SER_NO_ACT, ACCT_DEPT_CD, ACCT_GRP_CD, CARD_DIV, CARD_DEPT, DEPT_EASY_NM from " +
@@ -116,14 +120,60 @@ public class OracleService {
 		if(StringUtils.isBlank(empId)) return "";
 		
 		try{
-			String ORACLE_DATASOURCE_URL = CoreConfigReader.getString(CONFIG_STR.ORACLE_DATASOURCE_URL, true);
-			String ORACLE_DATASOURCE_USERNAME = CoreConfigReader.getString(CONFIG_STR.ORACLE_DATASOURCE_USERNAME, true);
-			String ORACLE_DATASOURCE_PASSWORD = CoreConfigReader.getString(CONFIG_STR.ORACLE_DATASOURCE_PASSWORD, true);
-			String HR = CoreConfigReader.getString(CONFIG_STR.ORACLE_SCHEMA_HR, true);
-			Class.forName("oracle.jdbc.driver.OracleDriver");  
-			Connection con=DriverManager.getConnection(ORACLE_DATASOURCE_URL,ORACLE_DATASOURCE_USERNAME,ORACLE_DATASOURCE_PASSWORD);  
+			// connect to database
+			String ldapHost = CoreConfigReader.getString("oracleLdapHost");
+			String apName = CoreConfigReader.getString("oracleApName");
+			Integer apGroup = CoreConfigReader.getInteger("oracleApGroup");
+			String searchBase = CoreConfigReader.getString("oracleSearchBase");
+			String connection = getDBConnectionInfo(ldapHost, apName, apGroup, searchBase);
+			logger.info("connection:" + connection);
+			
+			String[] split = connection.split(";");
+			String SERVER = "";
+			String USER = "";
+			String PASSWORD = "";
+			String DATABASENAME = "";
+			for(String str : split){
+				if(StringUtils.isNotBlank(str)){
+					String[] keyvalue = str.split("=");
+				
+					if(keyvalue != null && keyvalue.length == 2){
+						if("server".equals(keyvalue[0])){
+							SERVER = keyvalue[1];
+						}
+						if("uid".equals(keyvalue[0])){
+							USER = keyvalue[1];
+						}
+						if("pwd".equals(keyvalue[0])){
+							PASSWORD = keyvalue[1];
+						}
+						if("database".equals(keyvalue[0])){
+							DATABASENAME = keyvalue[1];
+						}
+					}
+				}
+			}
+			USER = USER.toUpperCase();
+			PASSWORD = PASSWORD.toUpperCase();
+			DATABASENAME = DATABASENAME.toUpperCase();
+			SERVER = SERVER.toUpperCase();
+			
+			logger.info("SERVER:"+SERVER);
+			logger.info("USER:"+USER);
+			logger.info("PASSWORD:"+PASSWORD);
+			logger.info("DATABASENAME:"+DATABASENAME);
 
+			String ORACLE_DATASOURCE_URL = "jdbc:oracle:thin:@"+ SERVER +":1521/" + DATABASENAME;
+			logger.info("ORACLE_DATASOURCE_URL:"+ORACLE_DATASOURCE_URL);
+			
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			Connection con=DriverManager.getConnection(ORACLE_DATASOURCE_URL,USER,PASSWORD);
+			
+			
 			// get Employee Data by Id
+			String HR = CoreConfigReader.getString(CONFIG_STR.ORACLE_SCHEMA_HR, true);
+			logger.info("HR:"+HR);
+			
 			String sqlString = "SELECT EMP_ID, DEPT_SER_NO_ACT, ACCT_DEPT_CD, ACCT_GRP_CD, CARD_DIV, CARD_DEPT, DEPT_EASY_NM FROM " +
 					HR + ".HR_EMP_SW LEFT OUTER JOIN " + HR + ".HR_DEPT_SW " + 
 					"ON (HR_EMP_SW.DEPT_SER_NO_ACT = HR_DEPT_SW.DEPT_SERIAL_NO) " + 

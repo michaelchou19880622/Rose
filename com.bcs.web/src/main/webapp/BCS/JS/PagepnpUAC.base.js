@@ -110,12 +110,41 @@ $(function(){
 	// ---- Functions ----
 	// do Add
 	$('.btn_add.add').click(function(){
-	    $('#dialog-modal').dialog({
-	 	   	width: 960,
-	        height: 480,
-	        modal: true
-	    });
-    	$('#dialog-modal').show();
+        // block
+        $('.LyMain').block($.BCS.blockMsgRead);
+
+        var employeeId1 = $('#employeeId').val();
+        console.info("employeeId1:", employeeId1);
+        
+        $.ajax({
+            type : 'GET',
+            url : bcs.bcsContextPath + '/pnpAdmin/getEmpAccount?empId=' + employeeId1,
+            contentType: 'application/json',
+        }).success(function(response) {
+            console.info("response:", response);
+            
+            $('#account').val(response.account);
+            $('#employeeId').val(response.employeeId);
+            $('#departmentId').val(response.departmentId);
+            $('#divisionName').val(response.divisionName);
+            $('#departmentName').val(response.departmentName);
+            $('#groupName').val(response.groupName);
+            $('#PccCode').val(response.pccCode);
+            $('#accountAttribute').val('批次');
+            employeeId = response.employeeId;
+        }).fail(function(response) {
+            console.info(response);
+            $.FailResponse(response);
+            window.location.replace('pnpUnicaAccountCreatePage');
+        }).done(function() {
+            $('#dialog-modal').dialog({
+                    width: 960,
+                height: 480,
+                modal: true
+            });
+            $('#dialog-modal').show();
+            $('.LyMain').unblock();
+        });
 	});
 	
 	// do Confirm

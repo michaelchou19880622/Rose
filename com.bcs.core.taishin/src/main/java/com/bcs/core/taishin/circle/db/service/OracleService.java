@@ -1,6 +1,5 @@
 package com.bcs.core.taishin.circle.db.service;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import java.sql.*;
@@ -31,44 +30,54 @@ public class OracleService {
 	public TaishinEmployee findByEmployeeId(String empId) {
 		logger.info("[findByEmployeeId] EMP_ID="+empId);
 		try{
-			// connect to database
-			String ldapHost = CoreConfigReader.getString("oracleLdapHost");
-			String apName = CoreConfigReader.getString("oracleApName");
-			Integer apGroup = CoreConfigReader.getInteger("oracleApGroup");
-			String searchBase = CoreConfigReader.getString("oracleSearchBase");
-			String connection = getDBConnectionInfo(ldapHost, apName, apGroup, searchBase);
-			logger.info("connection:" + connection);
-			
-			String[] split = connection.split(";");
+			// use LDAP or Local Database
+			String useLDAP = CoreConfigReader.getString("oracleUseLdap");
 			String SERVER = "";
 			String USER = "";
 			String PASSWORD = "";
 			String DATABASENAME = "";
-			for(String str : split){
-				if(StringUtils.isNotBlank(str)){
-					String[] keyvalue = str.split("=");
+			
+			if(useLDAP.equals("false")) {
+				USER = "SYSTEM";
+				PASSWORD = "123";
+				DATABASENAME = "XEPDB1";
+				SERVER = "LOCALHOST";
+			}else {
+				// connect to database
+				String ldapHost = CoreConfigReader.getString("oracleLdapHost");
+				String apName = CoreConfigReader.getString("oracleApName");
+				Integer apGroup = CoreConfigReader.getInteger("oracleApGroup");
+				String searchBase = CoreConfigReader.getString("oracleSearchBase");
+				String connection = getDBConnectionInfo(ldapHost, apName, apGroup, searchBase);
+				logger.info("connection:" + connection);
 				
-					if(keyvalue != null && keyvalue.length == 2){
-						if("server".equals(keyvalue[0])){
-							SERVER = keyvalue[1];
-						}
-						if("uid".equals(keyvalue[0])){
-							USER = keyvalue[1];
-						}
-						if("pwd".equals(keyvalue[0])){
-							PASSWORD = keyvalue[1];
-						}
-						if("database".equals(keyvalue[0])){
-							DATABASENAME = keyvalue[1];
+				String[] split = connection.split(";");
+
+				for(String str : split){
+					if(StringUtils.isNotBlank(str)){
+						String[] keyvalue = str.split("=");
+					
+						if(keyvalue != null && keyvalue.length == 2){
+							if("server".equals(keyvalue[0])){
+								SERVER = keyvalue[1];
+							}
+							if("uid".equals(keyvalue[0])){
+								USER = keyvalue[1];
+							}
+							if("pwd".equals(keyvalue[0])){
+								PASSWORD = keyvalue[1];
+							}
+							if("database".equals(keyvalue[0])){
+								DATABASENAME = keyvalue[1];
+							}
 						}
 					}
 				}
+				USER = USER.toUpperCase();
+				PASSWORD = PASSWORD.toUpperCase();
+				DATABASENAME = DATABASENAME.toUpperCase();
+				SERVER = SERVER.toUpperCase();				
 			}
-			USER = USER.toUpperCase();
-			PASSWORD = PASSWORD.toUpperCase();
-			DATABASENAME = DATABASENAME.toUpperCase();
-			SERVER = SERVER.toUpperCase();
-			
 			logger.info("SERVER:"+SERVER);
 			logger.info("USER:"+USER);
 			logger.info("PASSWORD:"+PASSWORD);
@@ -87,8 +96,8 @@ public class OracleService {
 			Statement stmt=con.createStatement();  			  
 			String sqlString = "select EMP_ID, DEPT_SER_NO_ACT, ACCT_DEPT_CD, ACCT_GRP_CD, CARD_DIV, CARD_DEPT, DEPT_EASY_NM from " +
 					HR + ".HR_EMP_SW LEFT OUTER JOIN " + HR + ".HR_DEPT_SW " + 
-					"on (HR_EMP_SW.DEPT_SER_NO_ACT = HR_DEPT_SW.DEPT_SERIAL_NO)" + 
-					"where EMP_ID = '" + empId + "'";
+					"on (HR_EMP_SW.DEPT_SER_NO_ACT = HR_DEPT_SW.DEPT_SERIAL_NO) " + 
+					"where TRIM(EMP_ID) = '" + empId + "'";
 			logger.info("sqlString:"+sqlString);
 			
 			TaishinEmployee emp = new TaishinEmployee();
@@ -177,7 +186,7 @@ public class OracleService {
 			String sqlString = "SELECT EMP_ID, DEPT_SER_NO_ACT, ACCT_DEPT_CD, ACCT_GRP_CD, CARD_DIV, CARD_DEPT, DEPT_EASY_NM FROM " +
 					HR + ".HR_EMP_SW LEFT OUTER JOIN " + HR + ".HR_DEPT_SW " + 
 					"ON (HR_EMP_SW.DEPT_SER_NO_ACT = HR_DEPT_SW.DEPT_SERIAL_NO) " + 
-					"WHERE EMP_ID = '" + empId + "'";
+					"WHERE TRIM(EMP_ID) = '" + empId + "'";
 			logger.info("sqlString:"+sqlString);
 			
 			Statement stmt=con.createStatement();  
@@ -195,7 +204,7 @@ public class OracleService {
 				emp.setEasyName(trim(rs.getString(7)));
 				emp.setGroupName(extractGroupName(emp));
 			}
-			logger.info("[findByEmployeeId] emp:"+emp);
+			logger.info("[getAvailableEmpIdsByEmpId] emp:"+emp);
 			
 			// get List of EmpIds
 			List<String> EmpIds = new ArrayList();
@@ -217,7 +226,7 @@ public class OracleService {
 			Statement stmt2=con.createStatement(); 
 			ResultSet rs2=stmt2.executeQuery(sqlString);
 			while(rs2.next()) {
-				EmpIds.add(rs2.getString(1));
+				EmpIds.add(trim(rs2.getString(1)));
 			}
 			logger.info("EmpIds:"+EmpIds);
 			

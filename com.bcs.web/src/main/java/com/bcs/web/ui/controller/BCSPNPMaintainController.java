@@ -116,10 +116,15 @@ public class BCSPNPMaintainController extends BCSBaseController {
 			}
 			
 			logger.info("getEmpAccount empId=" + empId);
-			TaishinEmployee result = oraclePnpService.findByEmployeeId(empId);		
+			TaishinEmployee result = null;
+			try {
+				result = oraclePnpService.findByEmployeeId(empId);		
+			}catch(Exception e){
+				throw new BcsNoticeException("The Employee Id Is Not Correct!"); 
+			}
 			
 			if(result == null || StringUtils.isBlank(result.getDivisionName())){
-				throw new BcsNoticeException("此員工編號不合法！");
+				throw new BcsNoticeException("The Employee Id Is Not Correct!");
 			}
 			
 			result.setModifyTime(new Date());

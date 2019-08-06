@@ -17,31 +17,35 @@ import java.util.List;
 @Repository
 public class JdbcOracleConnect {
 
-//	public static void main(String[] args) {
-//		System.out.println(findByEmployeeId("MOPACK"));
-//		//System.out.println(getAvailableEmpIdsByEmpId("MOPACK"));
-//	}
+	public static void main(String[] args) {
+		//System.out.println(findByEmployeeId("MOPACK"));
+		System.out.println(findByEmployeeId("123"));
+		//System.out.println(getAvailableEmpIdsByEmpId("123"));
+		//System.out.println(getAvailableEmpIdsByEmpId("MOPACK"));
+	}
 	public static TaishinEmployee findByEmployeeId(String empId) {
 		System.out.println("[get HR_EMP_SW] EMP_ID="+empId);
 		try{
-			String HR = "HR";
+			// connect to database
 			Class.forName("oracle.jdbc.driver.OracleDriver");  
-			Connection con=DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521/XEPDB1","SYSTEM","123");  
+			Connection con=DriverManager.getConnection("jdbc:oracle:thin:@LOCALHOST:1521/XEPDB1","SYSTEM","123");
 
-
-			Statement stmt=con.createStatement();  			  
+			
+			// get data from table
+			String HR = "HR";
 			String sqlString = "select EMP_ID, DEPT_SER_NO_ACT, ACCT_DEPT_CD, ACCT_GRP_CD, CARD_DIV, CARD_DEPT, DEPT_EASY_NM from " +
 					HR + ".HR_EMP_SW LEFT OUTER JOIN " + HR + ".HR_DEPT_SW " + 
-					"on (HR_EMP_SW.DEPT_SER_NO_ACT = HR_DEPT_SW.DEPT_SERIAL_NO)" + 
+					"on (HR_EMP_SW.DEPT_SER_NO_ACT = HR_DEPT_SW.DEPT_SERIAL_NO) " + 
 					"where EMP_ID = '" + empId + "'";
 			System.out.println("sqlString:"+sqlString);
 			
+			Statement stmt=con.createStatement();  	
 			ResultSet rs=stmt.executeQuery(sqlString);
-			
+
 			TaishinEmployee emp = new TaishinEmployee();
 			while(rs.next()) {
 				for(int i = 1; i <= 7; i++) {
-					System.out.println(rs.getString(i)+"  "); 
+					System.out.println("[findByEmployeeId] i="+ i + ", s=" + rs.getString(i)); 
 				}
 				emp.setEmployeeId(empId);
 				emp.setDepartmentId(trim(rs.getString(2)));
@@ -266,9 +270,6 @@ public class JdbcOracleConnect {
 //			System.out.println(e);
 //		}
 //	}
-	
-
-	
 //	public static void getHRJOBS() {
 //		System.out.println("HR.JOBS SQL");
 //		// TODO Auto-generated method stub
@@ -296,34 +297,34 @@ public class JdbcOracleConnect {
 //		}  	
 //	}
 //	
-	private static ComboPooledDataSource oracleDataSource = null;
-	public void execute(String sql){
-		Connection conn = null;
-//		String sql = "INSERT INTO BCS_SYSTEM_CONFIG (CONFIG_ID, DESCRIPTION, MODIFY_TIME, VALUE) VALUES (?,?,GETDATE(),?)";
-		
-		try{
-			//step1 load the driver class  
-			Class.forName("oracle.jdbc.driver.OracleDriver");  
-
-			//step2 create the connection object  
-			conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XEPDB1","system","oracle");  
-			
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.executeUpdate();
-			ps.close();
-		}catch(Exception e){
-			System.out.println("JdbcConnect Error!");
-			System.out.println(e.getMessage());
-			throw new RuntimeException(e);			
-		}finally{
-			if (conn != null){
-				try{
-					conn.close();
-				}catch(SQLException e){
-					System.out.println("JdbcConnect Error!");
-					System.out.println(e.getMessage());
-				}
-			}
-		}
-	}
+//	private static ComboPooledDataSource oracleDataSource = null;
+//	public void execute(String sql){
+//		Connection conn = null;
+////		String sql = "INSERT INTO BCS_SYSTEM_CONFIG (CONFIG_ID, DESCRIPTION, MODIFY_TIME, VALUE) VALUES (?,?,GETDATE(),?)";
+//		
+//		try{
+//			//step1 load the driver class  
+//			Class.forName("oracle.jdbc.driver.OracleDriver");  
+//
+//			//step2 create the connection object  
+//			conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XEPDB1","system","oracle");  
+//			
+//			PreparedStatement ps = conn.prepareStatement(sql);
+//			ps.executeUpdate();
+//			ps.close();
+//		}catch(Exception e){
+//			System.out.println("JdbcConnect Error!");
+//			System.out.println(e.getMessage());
+//			throw new RuntimeException(e);			
+//		}finally{
+//			if (conn != null){
+//				try{
+//					conn.close();
+//				}catch(SQLException e){
+//					System.out.println("JdbcConnect Error!");
+//					System.out.println(e.getMessage());
+//				}
+//			}
+//		}
+//	}
 }

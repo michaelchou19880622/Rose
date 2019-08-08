@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head
+	th:replace="/BCS/Views/Common/Head :: head ('Line Point Create Page','/BCS/JS/PageLPC.base.js')">
+</head>
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+	<div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('PageLPC')"></div>
+
+		<!-- Right Content -->
+		<div class="LyMain" role="main">
+			<form id="formCampaignGroupAdd">
+				<section>
+					<header class="ContentHead">
+						<h3 class="CHTtl">建立發送專案</h3>						
+					</header>
+					<div class="mainFrame">
+						<table border="1">
+							<colgroup>
+								<col width="190"> 
+								<col>
+							</colgroup>
+							<tbody>
+								<tr>
+									<th>專案名稱</th>
+									<td>
+										<input type="text" id="title" value="" maxlength="50"  required="required">
+									</td>
+								</tr>
+								<tr>
+									<th>掛帳PCC</th>
+									<td>
+										<input type="text" id="pccCode"value="" maxlength="50"  required="required">
+									</td>
+								</tr>
+								<tr>
+									<th>campaign code</th>
+									<td>
+										<input type="text" id="serialId" value="" maxlength="50"  required="required">
+									</td>
+								</tr>
+								<tr>
+									<th>發送時間</th>
+									<td>
+	                                    <label class="mdFRM05Input" style="text-align:left;float:left;">
+	                						<input type="radio" class="sendTimingType" name="sendTimingType" value="IMMEDIATE" style="cursor: pointer;" checked=true>立即
+	            						</label>
+	                                    <label class="mdFRM05Input" style="text-align:left;float:left;">
+	                						<input type="radio" class="sendTimingType" name="sendTimingType" value="SCHEDULE" style="cursor: pointer;">預約發送
+	            						</label>
+	            						
+                                        <label id="timePickView" style="text-align:left;float:left;">
+                                        	<span>&nbsp;</span>
+                                            <div class="option date">
+                                                <input type="text" class="datepicker" id="campaignTime" name="campaignTime" placeholder="YYYY-MM-DD"/>
+                                            </div>
+                                            <div class="option time">
+                                                <div class="optionLabel">00</div>
+                                                <select id="campaignTimeHour" name="campaignTimeHour" class="optionSelect">
+												    <option th:each="i : ${#numbers.sequence( 0, 23, 1)}"
+												    	th:with="hour=${i < 10 ? '0' + i : i}"
+												    	th:value="${hour}"
+												    	th:text="${hour}" >
+												    </option>
+                                                </select>
+                                            </div>：
+                                            <div class="option time">
+                                                <div class="optionLabel">00</div>
+                                                <select id="campaignTimeMinute" name="campaignTimeMinute" class="optionSelect">
+												    <option th:each="i : ${#numbers.sequence( 0, 59, 1)}"
+												    	th:with="minute=${i < 10 ? '0' + i : i}"
+												    	th:value="${minute}"
+												    	th:text="${minute}" >
+												    </option>
+                                                </select>
+                                            </div>
+                                        </label>
+									</td>
+								</tr>
+								<tr>
+									<th>發送數量(每人)</th>
+									<td>
+	                                    <label class="mdFRM05Input" style="text-align:left;float:left;">
+	                						<input type="radio" class="sendAmountType" name="sendAmountType" value="UNIVERSAL" style="cursor: pointer;" checked=true>每人
+	                						<input type="text" id="amount" value="" maxlength="10"  required="required">點
+	            						</label>
+	                                    <label class="mdFRM05Input" style="text-align:left;float:left;">
+	                						<input type="radio" class="sendAmountType" name="sendAmountType" value="INDIVIDUAL" style="cursor: pointer;">變動數量
+	            						</label>
+									</td>
+								</tr>
+								<tr>
+									<th>發送名單</th>
+									<td>
+                                        <input type="file" id="fileupload" accept=".csv" style="text-align:left;float:left;">
+									</td>
+								</tr>
+								<tr>
+									<th>檢核加入官方帳號</th>
+									<td>
+	                                    <label class="mdFRM05Input" style="text-align:left;float:left;">
+	                						<input type="radio" class="doCheckFollowage" value="true" style="cursor: pointer;" checked=true>是
+	            						</label>
+	                                    <label class="mdFRM05Input" style="text-align:left;float:left;">
+	                						<input type="radio" class="doCheckFollowage" value="false" style="cursor: pointer;">否
+	            						</label>
+									</td>								
+								</tr>
+								<tr>
+									<th>是否發送推播</th>
+									<td>
+	                                    <label class="mdFRM05Input" style="text-align:left;float:left;">
+	                						<input type="radio" class="doAppendMessage" value="false" style="cursor: pointer;" checked=true>否
+	            						</label>
+	                                    <label class="mdFRM05Input" style="text-align:left;float:left;">
+	                						<input type="radio" class="doAppendMessage" value="true" style="cursor: pointer;">是 選取發送內容
+	            						</label>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+<!--					
+                    <div class="mainFrame CMsg">
+						<div th:replace="/BCS/Views/MsgFragment/MsgFragmentBase :: msgFrame"></div>
+						<div th:replace="/BCS/Views/MsgFragment/MsgFragmentBtn :: msgFrameBtn (${ {'TEXT', 'STICKER', 'IMAGE', 'COUPON','REWARDCARD', 'RICH_MSG', 'AUDIO', 'LINK', 'VIDEO', 'TEMPLATE'} })"></div>
+                    </div>
+                    -->
+                </section>
+
+<!-- 				<div th:replace="/BCS/Views/MsgFragment/DialogStickerSelect :: dialogStickerSelect"></div>
+				<div th:replace="/BCS/Views/MsgFragment/DialogRichMsgSelect :: dialogRichMsgSelect"></div>
+				<div th:replace="/BCS/Views/MsgFragment/DialogLinkListSelect :: dialogLinkListSelect"></div>
+				<div th:replace="/BCS/Views/MsgFragment/DialogEmoticonSelect :: dialogEmoticonSelect"></div>
+				<div th:replace="/BCS/Views/MsgFragment/DialogCouponSelect :: dialogCouponSelect"></div>
+				<div th:replace="/BCS/Views/MsgFragment/DialogRewardCardSelect :: dialogRewardCardSelect"></div>
+				<div th:replace="/BCS/Views/MsgFragment/DialogTemplateMsgSelect :: dialogTemplateMsgSelect"></div> -->
+
+            
+				<div class="BtnSet">
+					<div>
+						<input class="btn_save" style="cursor: pointer;" type="button"	value="建立">  
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+
+</body>
+
+</html>

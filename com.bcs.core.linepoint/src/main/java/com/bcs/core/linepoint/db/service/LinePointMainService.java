@@ -52,6 +52,7 @@ public class LinePointMainService {
 		return linePointMainRepository.findAll(searchText);
 	}
 	
+
 	public List<LinePointMain> findManual(){
 		return linePointMainRepository.findBySendType(LinePointMain.SEND_TYPE_MANUAL);
 	}

@@ -128,6 +128,13 @@ public enum BcsPageEnum {
 	BillingNoticeCreatePage("/BCS/Views/PageBN1"),
 	BillingNoticeListPage("/BCS/Views/PageBN2"),
 	
+	// Line Point Page
+	LinePointListPage("/BCS/Views/PageLPL"),
+	LinePointCreatePage("/BCS/Views/PageLPC"),
+	LinePointSendPage("/BCS/Views/PageLPS"),
+	LinePointReportPage("/BCS/Views/PageLPR"),
+	LinePointDetailPage("/BCS/Views/PageLPD"),
+	
 	// PNP Template
    	PnpCreatePage("/BCS/Views/PagePNP1"),
 	PnpListPage("/BCS/Views/PagePNP2"), 

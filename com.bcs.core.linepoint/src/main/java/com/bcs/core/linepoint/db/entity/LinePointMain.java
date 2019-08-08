@@ -28,131 +28,162 @@ import com.bcs.core.json.AbstractBcsEntity;
 @Table(name = "BCS_LINE_POINT_MAIN")
 public class LinePointMain extends AbstractBcsEntity {
 	private static final long serialVersionUID = 1L;
+
+	public static final String SEND_TYPE_MANUAL = "MANUAL"; // FOR BCS
+	public static final String SEND_TYPE_AUTO = "AUTO"; // FOR MGM
+	
+	public static final String SEND_TIMING_TYPE_IMMEDIATE = "IMMEDIATE";
+	public static final String SEND_TIMING_TYPE_SCHEDULE = "SCHEDULE";
+
+	public static final String SEND_AMOUNT_TYPE_UNIVERSAL = "UNIVERSAL";
+	public static final String SEND_AMOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
 	
 	public static final String STATUS_DELETE = "DELETE";
 	public static final String STATUS_IDLE = "IDLE";
 	public static final String STATUS_SCHEDULED = "SCHEDULED";
 	public static final String STATUS_COMPLETE = "COMPLETE";
+	public static final String STATUS_ROTTEN = "ROTTEN";
 	
-	public static final String SEND_TYPE_MANUAL = "MANUAL"; // BY BCS 
-	public static final String SEND_TYPE_AUTO = "AUTO"; // BY MGM
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name = "ID")
 	private Long id;
+	@Column(name = "SEND_TYPE", columnDefinition="varchar(50)")
+	private String sendType;
+	@Column(name = "MODIFY_USER", columnDefinition="nvarchar(50)")
+	private String modifyUser;
+	@Column(name = "MODIFY_TIME")
+	private Date modifyTime;
 
-	@Column(name = "SERIAL_ID", columnDefinition="nvarchar(50)")
-	private String serialId;
 	
 	@Column(name = "TITLE", columnDefinition="nvarchar(50)")
 	private String title;
-	
-	@Column(name = "MODIFY_TIME")
-	private Date modifyTime;
-	
-	@Column(name = "AMOUNT")
+	@Column(name = "PCC_CODE", columnDefinition="nvarchar(50)")
+	private String pccCode;
+	@Column(name = "SERIAL_ID", columnDefinition="nvarchar(50)")
+	private String serialId;
+	@Column(name = "SEND_TIMING_TYPE", columnDefinition="varchar(50)")
+	private String sendTimingType;
+	@Column(name = "SEND_TIMING_TIME")  // only for sendTimingType = SCHEDULE
+	private Date sendTimingTime;
+	@Column(name = "SEND_AMOUNT_TYPE", columnDefinition="varchar(50)")
+	private String sendAmountType;	
+	@Column(name = "AMOUNT")     // only for sendAmountType = UNIVERSAL
 	private Long amount;
+	@Column(name = "DO_CHECK_FOLLOWAGE")
+	private Boolean doCheckFollowage;
+	@Column(name = "DO_APPEND_MESSAGE")
+	private Boolean doAppendMessage;
+	
 	
 	@Column(name = "TOTAL_COUNT")
 	private Long totalCount;
-	
-	@Column(name = "SEND_TYPE", columnDefinition="varchar(50)")
-	private String sendType;
-
 	@Column(name = "SUCCESSFUL_COUNT")
 	private Long successfulCount;
-	
 	@Column(name = "FAILED_COUNT")
 	private Long failedCount;
-	
-	@Column(name = "MODIFY_USER", columnDefinition="nvarchar(50)")
-	private String modifyUser;
-
 	@Column(name = "STATUS", columnDefinition="nvarchar(50)")
 	private String status;
-
-	public String getSerialId() {
-		return serialId;
-	}
-
-	public void setSerialId(String serialId) {
-		this.serialId = serialId;
-	}
-
-	public String getTitle() {
-		return title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
-	}
-
-	public Date getModifyTime() {
-		return modifyTime;
-	}
-
-	public void setModifyTime(Date modifyTime) {
-		this.modifyTime = modifyTime;
-	}
-
-	public Long getAmount() {
-		return amount;
-	}
-
-	public void setAmount(Long amount) {
-		this.amount = amount;
-	}
-
-	public Long getTotalCount() {
-		return totalCount;
-	}
-
-	public void setTotalCount(Long totalCount) {
-		this.totalCount = totalCount;
-	}
-
-	public Long getSuccessfulCount() {
-		return successfulCount;
-	}
-
-	public void setSuccessfulCount(Long successfulCount) {
-		this.successfulCount = successfulCount;
-	}
-
-	public Long getFailedCount() {
-		return failedCount;
-	}
-
-	public void setFailedCount(Long failedCount) {
-		this.failedCount = failedCount;
-	}
-
-	public String getModifyUser() {
-		return modifyUser;
-	}
-
-	public void setModifyUser(String modifyUser) {
-		this.modifyUser = modifyUser;
-	}
-
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
+	
+	
 	public Long getId() {
 		return id;
 	}
-
+	public String getSerialId() {
+		return serialId;
+	}
+	public void setSerialId(String serialId) {
+		this.serialId = serialId;
+	}
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	public Date getModifyTime() {
+		return modifyTime;
+	}
+	public void setModifyTime(Date modifyTime) {
+		this.modifyTime = modifyTime;
+	}
+	public Long getAmount() {
+		return amount;
+	}
+	public void setAmount(Long amount) {
+		this.amount = amount;
+	}
+	public Long getTotalCount() {
+		return totalCount;
+	}
+	public void setTotalCount(Long totalCount) {
+		this.totalCount = totalCount;
+	}
+	public Long getSuccessfulCount() {
+		return successfulCount;
+	}
+	public void setSuccessfulCount(Long successfulCount) {
+		this.successfulCount = successfulCount;
+	}
+	public Long getFailedCount() {
+		return failedCount;
+	}
+	public void setFailedCount(Long failedCount) {
+		this.failedCount = failedCount;
+	}
+	public String getModifyUser() {
+		return modifyUser;
+	}
+	public void setModifyUser(String modifyUser) {
+		this.modifyUser = modifyUser;
+	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
 	public String getSendType() {
 		return sendType;
 	}
-
 	public void setSendType(String sendType) {
 		this.sendType = sendType;
+	}
+	public String getPccCode() {
+		return pccCode;
+	}
+	public void setPccCode(String pccCode) {
+		this.pccCode = pccCode;
+	}
+	public String getSendTimingType() {
+		return sendTimingType;
+	}
+	public void setSendTimingType(String sendTimingType) {
+		this.sendTimingType = sendTimingType;
+	}
+	public Date getSendTimingTime() {
+		return sendTimingTime;
+	}
+	public void setSendTimingTime(Date sendTimingTime) {
+		this.sendTimingTime = sendTimingTime;
+	}
+	public String getSendAmountType() {
+		return sendAmountType;
+	}
+	public void setSendAmountType(String sendAmountType) {
+		this.sendAmountType = sendAmountType;
+	}
+	public Boolean getDoCheckFollowage() {
+		return doCheckFollowage;
+	}
+	public void setDoCheckFollowage(Boolean doCheckFollowage) {
+		this.doCheckFollowage = doCheckFollowage;
+	}
+	public Boolean getDoAppendMessage() {
+		return doAppendMessage;
+	}
+	public void setDoAppendMessage(Boolean doAppendMessage) {
+		this.doAppendMessage = doAppendMessage;
 	}
 }

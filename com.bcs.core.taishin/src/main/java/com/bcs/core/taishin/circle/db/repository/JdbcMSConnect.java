@@ -2,7 +2,7 @@ package com.bcs.core.taishin.circle.db.repository;
 
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Repository;
-import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
+//import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -11,7 +11,7 @@ import java.sql.SQLException;
 public class JdbcMSConnect {
 	/** Logger */
 	private static Logger logger = Logger.getLogger(JdbcMSConnect.class);
-	
+	/*
 	public void execute(String sql){
 		Connection conn = null;
 //		String sql = "INSERT INTO BCS_SYSTEM_CONFIG (CONFIG_ID, DESCRIPTION, MODIFY_TIME, VALUE) VALUES (?,?,GETDATE(),?)";
@@ -43,4 +43,5 @@ public class JdbcMSConnect {
 			}
 		}
 	}
+	*/
 }

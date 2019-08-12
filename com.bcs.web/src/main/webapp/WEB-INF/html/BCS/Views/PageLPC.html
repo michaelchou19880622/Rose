@@ -1,8 +1,10 @@
 <!DOCTYPE html>
+
 <html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:th="http://www.thymeleaf.org">
-<head
-	th:replace="/BCS/Views/Common/Head :: head ('Line Point Create Page','/BCS/JS/PageLPC.base.js')">
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.springframework.org/security/tags"
+      th:with="strList = ${ {'/BCS/JS/MsgFragment/MsgFragment.js', '/BCS/JS/MsgFragment/PreviewDialog.js', '/BCS/JS/MsgFragment/TextMsgPreviewContent.js', '/BCS/JS/MsgFragment/StickerMsgPreviewContent.js', '/BCS/JS/MsgFragment/ImageMsgPreviewContent.js', '/BCS/JS/MsgFragment/RichMsgPreviewContent.js', '/BCS/JS/MsgFragment/LinkMsgPreviewContent.js', '/BCS/JS/MsgFragment/CouponMsgPreviewContent.js', '/BCS/JS/MsgFragment/RewardCardMsgPreviewContent.js', '/BCS/JS/MsgFragment/TemplateMsgPreviewContent.js', '/BCS/JS/PageLPC.base.js'} }" >
+<head th:replace="/BCS/Views/Common/Head :: head ('Line Point Create Page',${strList})">
 </head>
 <body>
 	<header th:replace="/BCS/Views/Common/Header :: header"></header>
@@ -12,18 +14,24 @@
 
 		<!-- Right Content -->
 		<div class="LyMain" role="main">
-			<form id="formCampaignGroupAdd">
+			<form id="formSendGroup">
 				<section>
 					<header class="ContentHead">
 						<h3 class="CHTtl">建立發送專案</h3>						
 					</header>
-					<div class="mainFrame">
+					<div class="mainFrame CMsg">
 						<table border="1">
 							<colgroup>
 								<col width="190"> 
 								<col>
 							</colgroup>
 							<tbody>
+								<tr>
+									<th colspan='2'>
+										<label id="fileInformation">　</label>
+									</th>
+								</tr>
+								
 								<tr>
 									<th>專案名稱</th>
 									<td>
@@ -113,39 +121,43 @@
 									<th>是否發送推播</th>
 									<td>
 	                                    <label class="mdFRM05Input" style="text-align:left;float:left;">
-	                						<input type="radio" class="doAppendMessage" value="false" style="cursor: pointer;" checked=true>否
+	                						<input type="radio" class="doAppendMessage" name="doAppendMessage" value="false" style="cursor: pointer;" checked=true>否
 	            						</label>
 	                                    <label class="mdFRM05Input" style="text-align:left;float:left;">
-	                						<input type="radio" class="doAppendMessage" value="true" style="cursor: pointer;">是 選取發送內容
+	                						<input type="radio" class="doAppendMessage" name="doAppendMessage" value="true" style="cursor: pointer;">是 選取發送內容
 	            						</label>
 									</td>
 								</tr>
+								<tr>
+                                    <th colspan='2'>發送內容</th>
+                                </tr>
 							</tbody>
 						</table>
-					</div>
-<!--					
-                    <div class="mainFrame CMsg">
+						
 						<div th:replace="/BCS/Views/MsgFragment/MsgFragmentBase :: msgFrame"></div>
+					
 						<div th:replace="/BCS/Views/MsgFragment/MsgFragmentBtn :: msgFrameBtn (${ {'TEXT', 'STICKER', 'IMAGE', 'COUPON','REWARDCARD', 'RICH_MSG', 'AUDIO', 'LINK', 'VIDEO', 'TEMPLATE'} })"></div>
-                    </div>
-                    -->
+					</div>
                 </section>
 
-<!-- 				<div th:replace="/BCS/Views/MsgFragment/DialogStickerSelect :: dialogStickerSelect"></div>
+				<div class="BtnSet">
+					<div>
+						<input class="btn_query SendPreviewBtn" type="button" value="預覽" style="cursor: pointer;">
+						<input class="btn_save" style="cursor: pointer;" type="button"	value="建立">  
+					</div>
+				</div>
+				
+ 				<div th:replace="/BCS/Views/MsgFragment/DialogStickerSelect :: dialogStickerSelect"></div>
 				<div th:replace="/BCS/Views/MsgFragment/DialogRichMsgSelect :: dialogRichMsgSelect"></div>
 				<div th:replace="/BCS/Views/MsgFragment/DialogLinkListSelect :: dialogLinkListSelect"></div>
 				<div th:replace="/BCS/Views/MsgFragment/DialogEmoticonSelect :: dialogEmoticonSelect"></div>
 				<div th:replace="/BCS/Views/MsgFragment/DialogCouponSelect :: dialogCouponSelect"></div>
 				<div th:replace="/BCS/Views/MsgFragment/DialogRewardCardSelect :: dialogRewardCardSelect"></div>
-				<div th:replace="/BCS/Views/MsgFragment/DialogTemplateMsgSelect :: dialogTemplateMsgSelect"></div> -->
-
-            
-				<div class="BtnSet">
-					<div>
-						<input class="btn_save" style="cursor: pointer;" type="button"	value="建立">  
-					</div>
-				</div>
+				<div th:replace="/BCS/Views/MsgFragment/DialogTemplateMsgSelect :: dialogTemplateMsgSelect"></div>
 			</form>
+			
+			<div id="previewDialog" style="display: none;">
+			</div>
 		</div>
 	</div>
 

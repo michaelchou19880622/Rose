@@ -6,6 +6,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
@@ -25,6 +27,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.utils.ObjectUtil;
+import com.bcs.core.db.service.ContentRichMsgService;
+import com.bcs.core.db.service.ContentTemplateMsgService;
 import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.web.security.CurrentUser;
@@ -52,6 +56,11 @@ public class BCSLinePointController extends BCSBaseController {
 	private LinePointPushAkkaService linePointPushAkkaService;
 	@Autowired
 	private ExportToExcelForLinePointPushApiEffects exportToExcelForLinePointPushApiEffects;
+	@Autowired
+	private ContentRichMsgService contentRichMsgService;
+	@Autowired
+	private ContentTemplateMsgService contentTemplateMsgService;
+	
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSLinePointController.class);
 	
@@ -384,4 +393,39 @@ public class BCSLinePointController extends BCSBaseController {
 			e.printStackTrace();
 		}
     }
+	
+	// --- get Send Message
+	@ControllerLog(description="取得圖文訊息")
+	@RequestMapping(method = RequestMethod.GET, value = "/lpCreator/getRichMsg/{richId}")
+	@ResponseBody
+	public ResponseEntity<?> getRichMsg(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+			@PathVariable String richId) throws IOException {
+		logger.info("lpCreator getRichMsg");
+		try{
+			Map<String, List<String>> result = contentRichMsgService.getContentRichMsg(richId);
+			return new ResponseEntity<>(result, HttpStatus.OK);
+		}catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));
+			if(e instanceof BcsNoticeException){
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			}else{
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		}
+	}
+	
+	@ControllerLog(description="取得樣板訊息")
+	@RequestMapping(method = RequestMethod.GET, value = "/lpCreator/getTemplateMsg/{templateId}")
+	@ResponseBody
+	public ResponseEntity<?> getTemplateMsg(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+			@PathVariable String templateId) throws IOException {
+		logger.info("lpCreator getTemplateMsg");
+		try{
+			Map<String, List<String>> result = contentTemplateMsgService.getContentTemplateMsg(templateId);
+			return new ResponseEntity<>(result, HttpStatus.OK);
+		}catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));	
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 }

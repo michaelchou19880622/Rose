@@ -74,6 +74,9 @@
                         <li th:classappend="${currentPage == 'PageLPS'} ? 'ExSelected'">
                             <a th:href="@{/bcs/lpCreator/linePointSendPage}"><span>發送明細列表</span></a>
                         </li>
+                        <li th:classappend="${currentPage == 'PageLPSOld'} ? 'ExSelected'">
+                            <a th:href="@{/bcs/lpCreator/linePointSendOldPage}"><span>Old發送明細列表</span></a>
+                        </li>
                     </ul>
                 </li>
 

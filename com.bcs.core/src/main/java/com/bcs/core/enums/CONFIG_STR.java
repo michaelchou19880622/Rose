@@ -94,7 +94,8 @@ public enum CONFIG_STR {
 	LINE_POINT_API_ORIGINAL_TOKEN("line.point.api.original.token"),
 	AES_SECRET_KEY("aes.secret.key"),
 	AES_INITIALIZATION_VECTOR("aes.initialization.vector"),
-
+	LINE_POINT_CHANNEL_TOKEN("line.point.channel.token"),
+	
 	TAISHIN_PROXY_URL("taishin.proxy.url"),
 	TAISHIN_LOGIN_URL("taishin.login.url"),
 	RICHART_ANNOUNCEMENT_URL("richart.announcement.url"),

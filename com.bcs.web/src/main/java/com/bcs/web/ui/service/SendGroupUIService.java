@@ -1,5 +1,6 @@
 package com.bcs.web.ui.service;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -201,4 +202,81 @@ public class SendGroupUIService {
 			throw new BcsNoticeException("上傳沒有UID");
 		}
 	}
+	
+	//
+	@Transactional(rollbackFor=Exception.class)
+	public Map<String, Object> uploadMidSendGroup(InputStream inputStream, String modifyUser, Date modifyTime, String fileName) throws Exception{
+
+		Set<String> mids = null;
+		mids = importMidFromExcel.importData(inputStream);	
+		
+		if(mids != null && mids.size() > 0){
+			List<String> list = new ArrayList<String>(mids);
+
+			List<String> existMids = new ArrayList<String>();
+			
+			// Check MID Exist by Part
+			List<String> check = new ArrayList<String>();
+			for(int i = 1; i <= list.size(); i++){
+				
+				check.add(list.get(i-1));
+				
+				if(i % 1000 == 0){
+//					logger.info("check.size():" + check.size());
+					List<String> midResult = lineUserService.findMidByMidInAndActive(check);
+					if(midResult != null && midResult.size() > 0){
+						existMids.addAll(midResult);
+					}
+					check.clear();
+				}
+			}
+//			logger.info("check.size():" + check.size());
+			if(check.size() > 0){
+				List<String> midResult = lineUserService.findMidByMidInAndActive(check);
+				if(midResult != null && midResult.size() > 0){
+					existMids.addAll(midResult);
+				}
+			}
+
+			if(existMids != null && existMids.size() > 0){
+				logger.debug("existMids:" + existMids);
+				
+				String referenceId = UUID.randomUUID().toString().toLowerCase();
+				
+				for(String mid : existMids){
+					UserEventSet userEventSet = new UserEventSet();
+
+					userEventSet.setTarget(EVENT_TARGET_ACTION_TYPE.EVENT_SEND_GROUP.toString());
+					userEventSet.setAction(EVENT_TARGET_ACTION_TYPE.ACTION_UPLOAD_MID.toString());
+
+					userEventSet.setReferenceId(referenceId);
+					
+					userEventSet.setMid(mid);
+					userEventSet.setContent(fileName);
+					
+					userEventSet.setSetTime(modifyTime);
+					userEventSet.setModifyUser(modifyUser);
+					
+					userEventSetService.save(userEventSet);
+				}
+
+				Map<String, Object> result = new HashMap<String, Object>();
+		
+				result.put("referenceId", referenceId);
+				result.put("count", existMids.size());
+				
+				return result;
+			}
+			else{
+				throw new BcsNoticeException("上傳沒有UID");
+			}
+		}
+		else if(mids == null){
+			throw new BcsNoticeException("上傳格式錯誤");
+		}
+		else{
+			throw new BcsNoticeException("上傳沒有UID");
+		}
+	}
+	
 }

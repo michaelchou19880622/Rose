@@ -132,6 +132,7 @@ public enum BcsPageEnum {
 	LinePointListPage("/BCS/Views/PageLPL"),
 	LinePointCreatePage("/BCS/Views/PageLPC"),
 	LinePointSendPage("/BCS/Views/PageLPS"),
+	LinePointSendOldPage("/BCS/Views/PageLPSOld"),
 	LinePointReportPage("/BCS/Views/PageLPR"),
 	LinePointDetailPage("/BCS/Views/PageLPD"),
 	

@@ -12,6 +12,8 @@ import com.bcs.core.bot.record.service.CatchRecordReceive;
 import com.bcs.core.bot.scheduler.service.LiveChatTaskService;
 import com.bcs.core.bot.scheduler.service.SchedulerService;
 import com.bcs.core.interactive.service.InteractiveService;
+import com.bcs.core.linepoint.scheduler.service.LinePointSchedulerService;
+import com.bcs.core.linepoint.scheduler.service.LinePointSimpleSchedulerService;
 import com.bcs.core.record.service.CatchHandleMsgReceiveTimeout;
 import com.bcs.core.record.service.CatchRecordBinded;
 import com.bcs.core.record.service.CatchRecordOpAddReceive;
@@ -58,6 +60,8 @@ public class InitController {
 	private PnpPNPMsgService pnpPNPMsgService;
 	@Autowired
 	private PnpSMSMsgService pnpSMSMsgService;
+	@Autowired
+	private LinePointSchedulerService linePointschedulerService;
 	
 	/** Logger */
 	private static Logger logger = Logger.getLogger(InitController.class);
@@ -155,6 +159,13 @@ public class InitController {
 			logger.error(ErrorRecord.recordError(e));
 		}
 		
+		// LinePoint Task
+//		try {
+//			logger.info("init LinePointschedulerService loadScheduleFromDB");
+//			linePointschedulerService.loadScheduleFromDB();
+//		} catch (Throwable e) {
+//			logger.error(ErrorRecord.recordError(e));
+//		}
 		
 
 		try {

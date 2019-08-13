@@ -4,6 +4,7 @@ import java.security.MessageDigest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -35,8 +36,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.client.HttpClientErrorException;
 
 import com.bcs.core.linepoint.api.model.LinePointPushModel;
+import com.bcs.core.linepoint.api.model.LinePointTaskModel;
 import com.bcs.core.linepoint.db.entity.LinePointDetail;
 import com.bcs.core.linepoint.db.service.LinePointDetailService;
+import com.bcs.core.linepoint.scheduler.service.LinePointSimpleSchedulerService;
 import com.bcs.core.linepoint.akka.handler.LinePointPushApiActor;
 import com.bcs.core.linepoint.akka.service.LinePointPushAkkaService;
 import com.bcs.core.utils.CryptUtil;
@@ -66,7 +69,8 @@ public class LinePointPushApiController {
 	private LinePointPushAkkaService AkkaLinePointPushService;
 	@Autowired
 	private LinePointDetailService linePointDetailService;
-	
+	@Autowired
+	private LinePointSimpleSchedulerService linePointSimpleSchedulerService;
 //	public static void main(String[] args) {
 //		String secret = "taishinlinebuscs";
 //		String iv = "taishinlinebuscs";
@@ -79,6 +83,92 @@ public class LinePointPushApiController {
 //		}
 //	}
 	
+//	public static void main(String[] args) {
+//		try {
+//			Date dt = new Date();
+//			System.out.println(dt.toString());
+//			Calendar c = Calendar.getInstance(); 
+//			c.setTime(dt); 
+//			c.add(Calendar.MINUTE, 12);
+//			dt = c.getTime();
+//			System.out.println(dt.toString());
+//		}catch(Exception e) {
+//			System.out.println(e.toString());
+//		}
+//	}
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/linePoint/task", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity<?> linePointTask(HttpServletRequest request, HttpServletResponse response, @RequestBody LinePointTaskModel linePointTaskModel) {
+		try {
+			LinePointDetail linePointDetail = linePointTaskModel.getLinePointDetail();
+			logger.info("-------------------- api linePoint issue --------------------");
+			
+			if(request.getHeader(HttpHeaders.AUTHORIZATION) == null) {
+				return new ResponseEntity<>("{\"result\": 0, \"msg\": \"Missing 'Authorization' header.\"}", HttpStatus.BAD_REQUEST);
+			}else{
+				String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+				
+				if(authorization.split("key=").length != 2) {
+					return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"Invalid 'Authorization' format.\"}", HttpStatus.UNAUTHORIZED);
+				}
+				
+				String token = authorization.split("key=")[1];
+				String secret = CoreConfigReader.getString(CONFIG_STR.AES_SECRET_KEY, true);
+				String iv = CoreConfigReader.getString(CONFIG_STR.AES_INITIALIZATION_VECTOR, true);
+				String originalToken = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_API_ORIGINAL_TOKEN, true);
+				
+				if(!CryptUtil.Decrypt(CryptUtil.AES, token, secret, iv).equals(originalToken)) {
+					return new ResponseEntity<>("{\"result\": 0, \"msg\": \"invalid token.\"}", HttpStatus.UNAUTHORIZED);
+				}
+			}
+			
+			logger.info("[LinePoint API] Request Body:" + linePointDetail);
+			linePointDetail.setDetailType(LinePointDetail.SOURCE_ISSUE_API);
+			linePointDetail.setTriggerTime(new Date());
+			
+			// ----------- validation --------------
+			try {
+			    if(linePointDetail.getDepartment() == null) throw new IllegalArgumentException("Request Department is NULL");
+			    if(linePointDetail.getServiceName() == null) throw new IllegalArgumentException("Request ServiceName is NULL");
+			    if(linePointDetail.getPccCode() == null) throw new IllegalArgumentException("Request PccCode is NULL");
+			    if(linePointDetail.getCampName() == null) throw new IllegalArgumentException("Request CampName is NULL");
+			    if(linePointDetail.getUid() == null) throw new IllegalArgumentException("Request Uid is NULL");
+			    if(linePointDetail.getOrderKey() == null) throw new IllegalArgumentException("Request OrderKey is NULL");
+			    if(linePointDetail.getAmount() == null) throw new IllegalArgumentException("Request Amount is NULL");
+			    
+			    if(linePointDetail.getDepartment().length() > 50) { linePointDetail.setDepartment("NG"); throw new IllegalArgumentException("Request Department out of boundary");}
+			    if(linePointDetail.getServiceName().length() > 50) { linePointDetail.setServiceName("NG"); throw new IllegalArgumentException("Request ServiceName out of boundary");}
+			    if(linePointDetail.getPccCode().length() > 50) { linePointDetail.setPccCode("NG"); throw new IllegalArgumentException("Request PccCode out of boundary");}
+			    if(linePointDetail.getCampName().length() > 50) { linePointDetail.setCampName("NG"); throw new IllegalArgumentException("Request CampName out of boundary");}
+			    if(linePointDetail.getUid().length() > 33) { linePointDetail.setUid("NG"); throw new IllegalArgumentException("Request Uid out of boundary");}
+			    if(linePointDetail.getCustid().length() > 10) { linePointDetail.setUid("NG"); throw new IllegalArgumentException("Request Custid out of boundary");}
+			    if(linePointDetail.getOrderKey().length() > 50) { linePointDetail.setOrderKey("NG"); throw new IllegalArgumentException("Request OrderKey out of boundary");}
+			    if(linePointDetail.getAmount() <= 0L || linePointDetail.getAmount() > 2147483647L) { 
+			    	linePointDetail.setAmount(0L); throw new IllegalArgumentException("Request Amount out of boundary");
+			    }
+			}catch(Exception e) {
+				linePointDetail.setMessage(e.toString());
+				linePointDetail.setStatus(LinePointDetail.STATUS_FAIL);
+				linePointDetail.setSendTime(new Date());
+				linePointDetailService.save(linePointDetail);
+				throw e;
+			}
+			
+			String dateString = linePointTaskModel.getDate();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			Date date = sdf.parse(dateString);
+			linePointSimpleSchedulerService.createLinePointTask(linePointDetail, date); // linePointTaskModel.getDate()
+			return new ResponseEntity<>("{}", HttpStatus.OK);
+		} catch(Exception e) {
+			logger.info("e:"+e.toString());
+			if(e instanceof IllegalArgumentException)
+				return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"" + e.getMessage() + "\"}", HttpStatus.BAD_REQUEST);
+			else if(e instanceof BadPaddingException || e instanceof IllegalBlockSizeException || e instanceof IllegalArgumentException)
+				return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"invalid token\"}", HttpStatus.UNAUTHORIZED);
+			return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
 	@RequestMapping(method = RequestMethod.POST, value = "/linePoint/issue", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<?> pushLinePoint(HttpServletRequest request, HttpServletResponse response, @RequestBody LinePointDetail linePointDetail) {
 		try {
@@ -86,7 +176,7 @@ public class LinePointPushApiController {
 			
 			if(request.getHeader(HttpHeaders.AUTHORIZATION) == null) {
 				return new ResponseEntity<>("{\"result\": 0, \"msg\": \"Missing 'Authorization' header.\"}", HttpStatus.BAD_REQUEST);
-			} else {
+			}else{
 				String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
 				
 				if(authorization.split("key=").length != 2) {
@@ -138,7 +228,7 @@ public class LinePointPushApiController {
 			// ---------------------------------------
 			// initialize request header
 			HttpHeaders headers = new HttpHeaders();
-			String accessToken = CoreConfigReader.getString("LinePoint", CONFIG_STR.ChannelToken.toString(), true); // LinePoint.ChannelToken
+			String accessToken = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_CHANNEL_TOKEN.toString(), true); // line.point.channel.token
 			headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
 			headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 			
@@ -267,7 +357,7 @@ public class LinePointPushApiController {
 			// ---------------------------------------
 			// initialize request header
 			HttpHeaders headers = new HttpHeaders();
-			String accessToken = CoreConfigReader.getString("LinePoint", CONFIG_STR.ChannelToken.toString(), true); // LinePoint.ChannelToken
+			String accessToken = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_CHANNEL_TOKEN.toString(), true); // line.point.channel.token
 			headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
 			headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 			

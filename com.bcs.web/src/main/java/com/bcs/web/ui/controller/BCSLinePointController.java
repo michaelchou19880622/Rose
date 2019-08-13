@@ -2,6 +2,7 @@ package com.bcs.web.ui.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,7 +24,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.utils.ObjectUtil;
@@ -39,12 +42,14 @@ import com.bcs.web.aop.ControllerLog;
 
 import com.bcs.web.ui.service.LinePointUIService;
 import com.bcs.web.ui.service.LoadFileUIService;
+import com.bcs.web.ui.service.SendGroupUIService;
 import com.bcs.core.linepoint.api.model.LinePointPushModel;
 import com.bcs.core.linepoint.akka.service.LinePointPushAkkaService;
 import com.bcs.core.linepoint.db.entity.LinePointDetail;
 import com.bcs.core.linepoint.db.entity.LinePointMain;
 import com.bcs.core.linepoint.db.entity.LinePointScheduledDetail;
 import com.bcs.core.linepoint.db.service.ExportToExcelForLinePointPushApiEffects;
+import com.bcs.core.linepoint.utils.service.ExcelUtilService;
 
 @Controller
 @RequestMapping("/bcs")
@@ -60,7 +65,10 @@ public class BCSLinePointController extends BCSBaseController {
 	private ContentRichMsgService contentRichMsgService;
 	@Autowired
 	private ContentTemplateMsgService contentTemplateMsgService;
-	
+	@Autowired
+	private ExcelUtilService excelUtilService;
+	@Autowired
+	private SendGroupUIService sendGroupUIService;
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSLinePointController.class);
 	
@@ -85,6 +93,14 @@ public class BCSLinePointController extends BCSBaseController {
 		return BcsPageEnum.LinePointSendPage.toString();
 	}
 
+	@ControllerLog(description = "發送 Line Point Old 活動")
+	@RequestMapping(method = RequestMethod.GET, value = "/lpCreator/linePointSendOldPage")
+	public String linePointSendOldPage(HttpServletRequest request, HttpServletResponse response) {
+		logger.info("linePointSendOldPage");
+		return BcsPageEnum.LinePointSendOldPage.toString();
+	}	
+	
+	
 	@ControllerLog(description = "Line Point 活動報表")
 	@RequestMapping(method = RequestMethod.GET, value = "/lpQuerier/linePointReportPage")
 	public String linePointReportPage(HttpServletRequest request, HttpServletResponse response) {
@@ -324,6 +340,72 @@ public class BCSLinePointController extends BCSBaseController {
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
 			else 
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	// CSV to EXCEL
+	@ControllerLog(description="CSV to EXCEL")
+    @RequestMapping(method = RequestMethod.POST, value = "/edit/csvToExcel")
+    @ResponseBody
+    public ResponseEntity<?> csvToExcel(HttpServletRequest request, HttpServletResponse response, 
+    		@CurrentUser CustomUser customUser, @RequestPart MultipartFile filePart) throws IOException {
+      
+		// file path
+        String filePath = CoreConfigReader.getString("file.path");
+        
+        // file name
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
+		Date date = new Date();
+        String fileName = "LinePointSendGroupCsvToXlsx_" + sdf.format(date) + ".xlsx";
+        
+        try {
+        	// convert to excel file
+            File folder = new File(filePath);
+            if(!folder.exists()){
+                folder.mkdirs();
+            }
+            InputStream isXlsx = excelUtilService.csvToXlsx(filePart.getInputStream(), filePath, fileName);
+            
+            // uploadMidSendGroup
+			if(isXlsx != null){
+				String modifyUser = customUser.getAccount();
+				logger.info("modifyUser:" + modifyUser);
+				
+				Map<String, Object> result = sendGroupUIService.uploadMidSendGroup(isXlsx, modifyUser, new Date(), fileName);
+				
+				return new ResponseEntity<>(result, HttpStatus.OK);
+			}else{
+				throw new Exception("Upload isXlsx Null");
+			}            
+        } catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+			if(e instanceof BcsNoticeException){
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			}else{
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+        }
+
+    }
+	
+	private Map<String, Object> uploadMidSendGroup(CustomUser customUser, MultipartFile filePart) throws IOException {
+		logger.info("uploadMidSendGroup");
+
+		try{
+			if(filePart != null){
+				String modifyUser = customUser.getAccount();
+				logger.info("modifyUser:" + modifyUser);
+				
+				Map<String, Object> result = sendGroupUIService.uploadMidSendGroup(filePart, modifyUser, new Date());
+				
+				return result;
+			}else{
+				throw new Exception("Upload Mid SendGroup Null");
+			}
+		}
+		catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));
+			return null;
 		}
 	}
 	

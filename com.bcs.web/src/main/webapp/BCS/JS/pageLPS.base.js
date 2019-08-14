@@ -27,6 +27,7 @@ $(function(){
 				},
 				maxlength : 50
 			},
+			
 			// 群組說明
 			'groupDescription' : {
 				required : {
@@ -406,7 +407,10 @@ $(function(){
 	});
 	
 	$('#upload_mid_btn').on("change", function(ev){
-
+		// calculate & extract csv data
+		csvEventListener(ev);
+		
+		// import xlsx data
 		var input = ev.currentTarget;
     	if (input.files && input.files[0]) {
     		var fileName = input.files[0].name;
@@ -1440,8 +1444,27 @@ $(function(){
 	    	  
 	      } else {
 	          alert('FileReader are not supported in this browser.');
-	      }
+	      }		
 	}, false);
+	
+	function csvEventListener(e) {
+		// Check for the various File API support.
+	      if (window.FileReader) {
+	    	
+	          // FileReader are supported.
+	    	  var files = e.target.files;
+	    	  //proceed your files here
+	    	  var reader = new FileReader();
+	          // Read file into memory as UTF-8      
+	          reader.readAsText(files[0]);
+	          // Handle errors load
+	          reader.onload = loadHandler; //將內容打印出來
+	          reader.onerror = errorHandler;
+	    	  
+	      } else {
+	          alert('FileReader are not supported in this browser.');
+	      }		
+	};
 	
 	function loadHandler(event) {
       var csv = event.target.result;

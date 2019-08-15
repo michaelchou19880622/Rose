@@ -4,16 +4,16 @@
 $(function(){
 	// Global Variables
 	$.BCS.actionTypeParam = $.urlParam("actionType");
-	// 紀錄 最後按鈕
-	var btnTarget = ""; 
+	var btnTarget = ""; // 紀錄 最後按鈕
 	
-	// ---- Send Group Creation 
-	var sendGroupCondition = null;
-	var templateBody = {};
+	// ---- Send Group Creation ----
+	var sendGroupCondition = null; // 欄位查詢條件
+	var templateBody = {};		   // 查詢條件Tr
 	
 	// 表單驗證
 	var sendGroupCreationValidator = $('#formSendGroup').validate({
 		rules : {
+			/*
 			// 群組名稱
 			'groupTitle' : {
 				required : {
@@ -41,64 +41,11 @@ $(function(){
 				},
 				maxlength : 700
 			}
+			*/
 		}
 	});
 	
-	// 為新增的一列群組條件加上驗證規則
-	var setValidationOnNewRow = function() {
-		var tableBody = $('#tableBody');
-		var queryBody = tableBody.find('.dataTemplate:last');
-		
-		// 重新修改 element 的 name，避免多個 element 有重複的 name 而導致表單驗證錯誤的問題
-		var rowIndex = tableBody.prop('rowIndex') || 0;
-		rowIndex++;
-		queryBody.find('.queryField, .queryOp').each(function(index, element) {
-			var jqElement = $(this);
-			jqElement.attr("name", jqElement.attr("name") + rowIndex);
-		});
-		queryBody.find('.queryValue').each(function(index, element) {
-			var jqElement = $(this);
-			jqElement.attr("name", jqElement.attr("name") + rowIndex + '_' + (index + 1));
-		});
-		
-		tableBody.prop('rowIndex', rowIndex);
-		
-		// 對新增的欄位加上表單驗證
-		// 群組條件-欄位
-		queryBody.find('.queryField').rules("add", {
-			required : true
-		});
-		
-		// 群組條件-條件
-		queryBody.find('.queryOp').rules("add", {
-			required : true
-		});
-		
-		// 群組條件-數值
-		queryBody.find('.queryValue').each(function(index, element) {
-			var queryValue = $(this);
-			
-			// 日期元件
-			if (queryValue.is("input.datepicker")) {
-				queryValue.rules("add", {
-					required : true,
-					dateYYYYMMDD : true
-				});
-				
-			// 一般輸入框
-			} else if (queryValue.is("input")) {
-				queryValue.rules("add", {
-					required : true,
-					maxlength : 50
-				});
-			// 下拉選單
-			} else {
-				queryValue.rules("add", {
-					required : true
-				});
-			}
-		});
-	};
+
 		
 	$('.btn_save').click(function(){
 		var queryDataDoms = $('.dataTemplate');
@@ -304,14 +251,14 @@ $(function(){
 		});
 	});
 	
+	// do Cancel
 	$('.btn_cancel').click(function(){
 		var r = confirm("請確認是否取消");
-		if (r) {
-			// confirm true
-		} else {
-		    return;
+		if(r){
+		}else{
+		   return;
 		}
- 		window.location.replace(bcs.bcsContextPath + '/market/sendGroupListPage');
+ 		window.location.replace(bcs.bcsContextPath + '/lpCreator/linePointSendPage');
 	});
 
 	var btn_deteleFunc = function(){
@@ -382,17 +329,6 @@ $(function(){
 		}
 	};
 	
-	var optionSelectChange_func = function(){
-		var select = $(this);
-		var selectValue = select.find('option:selected').text();
-		select.closest('.option').find('.optionLabel').html(selectValue);
-		
-		// 若是[欄位]下拉選單
-		if (select.hasClass('queryField')) {
-			setGroupQueryComponent(select);
-		}
-	};
-	
 	$('.add_rule').click(function(){
 		var queryBody = templateBody.clone(true);
 		queryBody.find('.btn_delete').click(btn_deteleFunc);
@@ -456,17 +392,18 @@ $(function(){
         } 
 	});
 
+	// initialize
 	var sendGroupCreationLoadDataFunc = function(){
-		// clone & remove
+		// clone & remove 查詢條件TableRow
 		templateBody = $('.dataTemplate').clone(true);
 		$('.dataTemplate').remove();
 		
-		// 取得群組條件各個下拉選項值
+		// get Default Conditions
 		$.ajax({
 			type : "GET",
 			url : bcs.bcsContextPath + '/market/getSendGroupCondition'
 		}).success(function(response){
-			console.info(response);
+			console.info('market_getSendGroupCondition:', response);
 			sendGroupCondition = response;
 			
 			$.each(sendGroupCondition, function(queryFieldId, queryFieldObject){
@@ -474,10 +411,9 @@ $(function(){
 						'<option value="' + queryFieldId + '">' + queryFieldObject.queryFieldName + '</option>');
 			});
 			
+			// get SendGroup settings
 			var groupId = $.urlParam("groupId");
-			
 			if(groupId){
-				
 				$.ajax({
 					type : "GET",
 					url : bcs.bcsContextPath + '/market/getSendGroup?groupId=' + groupId
@@ -489,14 +425,13 @@ $(function(){
 					$('#groupDescription').val(response.groupDescription);
 					
 					if(groupId > 0){
+						// custom group 
 						$.each(response.sendGroupDetail, function(i, o){
-	
 							var queryBody = templateBody.clone(true);
 							queryBody.find(".datepicker").datepicker({ 'dateFormat' : 'yy-mm-dd'});
 							queryBody.find('.optionSelect').change(optionSelectChange_func);
 							
 							if('UploadMid' == o.queryField){
-
 								var split = o.queryValue.split(':');
 								
 				        		queryBody.find('.labelField').html("UID匯入");
@@ -510,8 +445,7 @@ $(function(){
 				        		queryBody.find('.labelValue').attr('fileName', o.queryOp);
 				        		queryBody.find('.labelValue').attr('referenceId', split[0]);
 				        		queryBody.find('.labelValue').attr('count', split[1]);
-							}
-							else{
+							}else{
 								queryBody.find('.queryField').val(o.queryField).change();
 								queryBody.find('.queryOp').val(o.queryOp).change();
 								queryBody.find('.queryValue').val(o.queryValue).change();
@@ -522,27 +456,25 @@ $(function(){
 							$('#tableBody').append(queryBody);
 							setValidationOnNewRow();
 						});
-					}
-					else{
+					}else{
+						// default group
 						$('#groupTitle').attr('disabled',true);
 						$('#groupDescription').attr('disabled',true);
 						
 						$('.btn_save').remove();
 						$('#queryContent').remove();
 					}
-					
 				}).fail(function(response){
 					console.info(response);
 					$.FailResponse(response);
 				}).done(function(){
 				});
 				
+				// get actionType
 				var actionType = $.urlParam("actionType");
-				
 				if(actionType == "Edit"){
 					$('.CHTtl').html('編輯發送群組');
-				}
-				else if(actionType == "Copy"){
+				}else if(actionType == "Copy"){
 					$('.CHTtl').html('複製發送群組');
 				}
 			}
@@ -553,7 +485,71 @@ $(function(){
 		});
 	};
 
-
+	// ---- Function ----
+	
+	// 為新增的一列群組條件加上驗證規則
+	var setValidationOnNewRow = function() {
+		var tableBody = $('#tableBody');
+		var queryBody = tableBody.find('.dataTemplate:last');
+		
+		// 重新修改 element 的 name，避免多個 element 有重複的 name 而導致表單驗證錯誤的問題
+		var rowIndex = tableBody.prop('rowIndex') || 0;
+		rowIndex++;
+		queryBody.find('.queryField, .queryOp').each(function(index, element) {
+			var jqElement = $(this);
+			jqElement.attr("name", jqElement.attr("name") + rowIndex);
+		});
+		queryBody.find('.queryValue').each(function(index, element) {
+			var jqElement = $(this);
+			jqElement.attr("name", jqElement.attr("name") + rowIndex + '_' + (index + 1));
+		});
+		tableBody.prop('rowIndex', rowIndex);
+		
+		// 對新增的欄位加上表單驗證
+		// 群組條件-欄位
+		queryBody.find('.queryField').rules("add", {
+			required : true
+		});
+		
+		// 群組條件-條件
+		queryBody.find('.queryOp').rules("add", {
+			required : true
+		});
+		
+		// 群組條件-數值
+		queryBody.find('.queryValue').each(function(index, element) {
+			var queryValue = $(this);
+			// 日期元件
+			if (queryValue.is("input.datepicker")) {
+				queryValue.rules("add", {
+					required : true,
+					dateYYYYMMDD : true
+				});
+			// 一般輸入框
+			} else if (queryValue.is("input")) {
+				queryValue.rules("add", {
+					required : true,
+					maxlength : 50
+				});
+			// 下拉選單
+			} else {
+				queryValue.rules("add", {
+					required : true
+				});
+			}
+		});
+	};
+	
+	var optionSelectChange_func = function(){
+		var select = $(this);
+		var selectValue = select.find('option:selected').text();
+		select.closest('.option').find('.optionLabel').html(selectValue);
+		
+		// 若是[欄位]下拉選單
+		if (select.hasClass('queryField')) {
+			setGroupQueryComponent(select);
+		}
+	};
 	
 	sendGroupCreationLoadDataFunc();
 	

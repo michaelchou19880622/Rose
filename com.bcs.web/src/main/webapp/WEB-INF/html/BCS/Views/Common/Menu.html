@@ -81,7 +81,7 @@
                 </li>
 
 				<li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_LP_QUERIER', 'ROLE_LP_CREATOR', 'ROLE_LP_JUDGER')">
-                    <a href="" style="cursor: pointer;"><span>LINE POINT報表</span></a>
+                    <a href="" style="cursor: pointer;"><span>LINE POINTS報表</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
                         <li th:classappend="${currentPage == 'PageLPR'} ? 'ExSelected'">
                             <a th:href="@{/bcs/lpQuerier/linePointReportPage}"><span>LINE POINT統計報表</span></a>

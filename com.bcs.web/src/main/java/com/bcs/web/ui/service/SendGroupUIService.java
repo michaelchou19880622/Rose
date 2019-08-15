@@ -181,6 +181,7 @@ public class SendGroupUIService {
 					userEventSet.setSetTime(modifyTime);
 					userEventSet.setModifyUser(modifyUser);
 					
+					logger.info("userEventSet1:"+userEventSet);
 					userEventSetService.save(userEventSet);
 				}
 

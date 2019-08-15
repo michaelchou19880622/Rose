@@ -35,6 +35,7 @@ public enum BcsPageEnum {
 	
 	AdminUserCreatePage("/BCS/Views/Page9"),
 	AdminUserListPage("/BCS/Views/Page10"),
+	AdminUserBoardPage("/BCS/Views/Page44"),
 	
 	ReportPage("/BCS/Views/Page11"),
 	ReportCreatePage("/BCS/Views/Page16"),
@@ -170,7 +171,7 @@ public enum BcsPageEnum {
     EsnListPage("/BCS/Views/PageESN2"),
     
     //貴賓之夜
-    QRcodeScannedRecordPage("/BCS/Views/Page-QRcodeScannedRecord");
+    QRcodeScannedRecordPage("/BCS/Views/Page-QRcodeScannedRecord"), ;
 
     private final String str;
     

@@ -37,6 +37,7 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import com.bcs.core.linepoint.api.model.LinePointPushModel;
 import com.bcs.core.linepoint.api.model.LinePointTaskModel;
+import com.bcs.core.linepoint.api.service.LinePointApiService;
 import com.bcs.core.linepoint.db.entity.LinePointDetail;
 import com.bcs.core.linepoint.db.service.LinePointDetailService;
 import com.bcs.core.linepoint.scheduler.service.LinePointSimpleSchedulerService;
@@ -71,6 +72,9 @@ public class LinePointPushApiController {
 	private LinePointDetailService linePointDetailService;
 	@Autowired
 	private LinePointSimpleSchedulerService linePointSimpleSchedulerService;
+	@Autowired
+	private LinePointApiService linePointApiService;
+	
 //	public static void main(String[] args) {
 //		String secret = "taishinlinebuscs";
 //		String iv = "taishinlinebuscs";
@@ -228,7 +232,9 @@ public class LinePointPushApiController {
 			// ---------------------------------------
 			// initialize request header
 			HttpHeaders headers = new HttpHeaders();
-			String accessToken = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_CHANNEL_TOKEN.toString(), true); // line.point.channel.token
+			//String accessToken = linePointApiService.getLinePointChannelAccessToken();
+			String accessToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelToken.toString(), true);
+			
 			headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
 			headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 			
@@ -357,7 +363,8 @@ public class LinePointPushApiController {
 			// ---------------------------------------
 			// initialize request header
 			HttpHeaders headers = new HttpHeaders();
-			String accessToken = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_CHANNEL_TOKEN.toString(), true); // line.point.channel.token
+			//String accessToken = linePointApiService.getLinePointChannelAccessToken();
+			String accessToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelToken.toString(), true);
 			headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
 			headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 			

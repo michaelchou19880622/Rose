@@ -27,6 +27,7 @@ import com.bcs.core.db.service.ShareCampaignClickTracingService;
 import com.bcs.core.db.service.ShareCampaignService;
 import com.bcs.core.db.service.ShareUserRecordService;
 import com.bcs.core.enums.CONFIG_STR;
+import com.bcs.core.linepoint.api.service.LinePointApiService;
 import com.bcs.core.linepoint.db.entity.LinePointDetail;
 import com.bcs.core.linepoint.db.service.LinePointDetailService;
 import com.bcs.core.resource.CoreConfigReader;
@@ -51,6 +52,7 @@ public class LinePointTask implements Job {
 //	LinePointScheduledDetailService linePointScheduledDetailService = ApplicationContextProvider.getApplicationContext().getBean(LinePointScheduledDetailService.class);
 	//LinePointPushAkkaService linePointPushAkkaService = ApplicationContextProvider.getApplicationContext().getBean(LinePointPushAkkaService.class);
 	LinePointDetailService linePointDetailService = ApplicationContextProvider.getApplicationContext().getBean(LinePointDetailService.class);
+	LinePointApiService linePointApiService = ApplicationContextProvider.getApplicationContext().getBean(LinePointApiService.class);
 	
 	private static Logger logger = Logger.getLogger(LinePointTask.class);
 	@Override
@@ -63,7 +65,7 @@ public class LinePointTask implements Job {
 			// ---------------------------------------
 			// initialize request header
 			HttpHeaders headers = new HttpHeaders();
-			String accessToken = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_CHANNEL_TOKEN.toString(), true); // line.point.channel.token
+			String accessToken = linePointApiService.getLinePointChannelAccessToken();
 			headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
 			headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 			

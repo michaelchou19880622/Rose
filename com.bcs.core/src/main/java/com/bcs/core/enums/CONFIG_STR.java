@@ -94,7 +94,6 @@ public enum CONFIG_STR {
 	LINE_POINT_API_ORIGINAL_TOKEN("line.point.api.original.token"),
 	AES_SECRET_KEY("aes.secret.key"),
 	AES_INITIALIZATION_VECTOR("aes.initialization.vector"),
-	LINE_POINT_CHANNEL_TOKEN("line.point.channel.token"),
 	
 	TAISHIN_PROXY_URL("taishin.proxy.url"),
 	TAISHIN_LOGIN_URL("taishin.login.url"),
@@ -313,9 +312,12 @@ public enum CONFIG_STR {
 	LINE_PNP_PUSH_VERIFIED("line.pnp.push.verified"),
 	
 	// Line Point
-	LINE_POINT_API_CLIENT_ID("line.point.api.client.id"),
 	LINE_POINT_MESSAGE_PUSH_URL("line.point.push.url"),
 	LINE_POINT_MESSAGE_CANCEL_URL("line.point.cancel.url"),
+	LINE_POINT_API_CLIENT_ID("line.point.api.client.id"),
+	LINE_POINT_API_CHANNEL_ID("line.point.api.channel.id"),
+	LINE_POINT_API_CHANNEL_SECRET("line.point.api.channel.secret"),
+	
 	
 //	// Oracle Database
 	ORACLE_DATASOURCE_URL("oracle.datasource.url"),

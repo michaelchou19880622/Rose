@@ -239,10 +239,14 @@ public class SendMsgUIService {
 	}
 	
 	public void saveDraftMessage(SendMsgModel sendMsgModel, String adminUserAccount) throws Exception{
-
 		this.saveMessage(sendMsgModel, adminUserAccount, MsgMain.MESSAGE_STATUS_DRAFT);
 	}
 
+	public Long saveDraftMessageWithId(SendMsgModel sendMsgModel, String adminUserAccount) throws Exception{
+		return this.saveMessage(sendMsgModel, adminUserAccount, MsgMain.MESSAGE_STATUS_DRAFT);
+	}
+
+	
 	/**
 	 * Delete MsgMain
 	 * @param msgId

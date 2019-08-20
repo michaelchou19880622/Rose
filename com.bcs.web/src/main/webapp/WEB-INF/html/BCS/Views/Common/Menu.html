@@ -65,22 +65,23 @@
 				<li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_LP_CREATOR', 'ROLE_LP_JUDGER')">
                     <a href="" style="cursor: pointer;"><span>LINE POINTS發送</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
-                        <li th:classappend="${currentPage == 'PageLPL'} ? 'ExSelected'">
-                            <a th:href="@{/bcs/lpCreator/linePointListPage}"><span>發送專案列表</span></a>
+                       <li th:classappend="${currentPage == 'PageLPC'} ? 'ExSelected'">
+                            <a th:href="@{/bcs/edit/linePointCreatePage}"><span>建立發送專案</span></a>
                         </li>
-                        <li th:classappend="${currentPage == 'PageLPC'} ? 'ExSelected'">
-                            <a th:href="@{/bcs/lpCreator/linePointCreatePage}"><span>建立發送專案</span></a>
+                        
+<!--                         <li th:classappend="${currentPage == 'PageLPL'} ? 'ExSelected'">
+                            <a th:href="@{/bcs/edit/linePointListPage}"><span>發送專案列表</span></a>
                         </li>
                         <li th:classappend="${currentPage == 'PageLPS'} ? 'ExSelected'">
-                            <a th:href="@{/bcs/lpCreator/linePointSendPage}"><span>發送明細列表</span></a>
+                            <a th:href="@{/bcs/edit/linePointSendPage}"><span>發送明細列表</span></a>
                         </li>
                         <li th:classappend="${currentPage == 'PageLPSOld'} ? 'ExSelected'">
-                            <a th:href="@{/bcs/lpCreator/linePointSendOldPage}"><span>Old發送明細列表</span></a>
-                        </li>
+                            <a th:href="@{/bcs/edit/linePointSendOldPage}"><span>Old發送明細列表</span></a>
+                        </li> -->
                     </ul>
                 </li>
 
-				<li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_LP_QUERIER', 'ROLE_LP_CREATOR', 'ROLE_LP_JUDGER')">
+<!-- 				<li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_LP_QUERIER', 'ROLE_LP_CREATOR', 'ROLE_LP_JUDGER')">
                     <a href="" style="cursor: pointer;"><span>LINE POINTS報表</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
                         <li th:classappend="${currentPage == 'PageLPR'} ? 'ExSelected'">
@@ -90,7 +91,7 @@
                             <a th:href="@{/bcs/lpQuerier/linePointDetailPage}"><span>LINE POINT統計明細報表</span></a>
                         </li>
                     </ul>
-                </li>
+                </li> -->
                                
                 <li sec:authorize="hasAnyRole('NotShowRole')">
                     <a href="" style="cursor: pointer;"><span>活動</span></a>

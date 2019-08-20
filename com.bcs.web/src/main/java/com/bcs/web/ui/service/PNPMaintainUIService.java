@@ -24,8 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.bcs.core.db.entity.Campaign;
 import com.bcs.core.db.repository.CampaignRepository;
 import com.bcs.core.db.service.CampaignService;
+import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.log.util.SystemLogUtil;
+import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
 import com.bcs.core.taishin.circle.PNP.db.repository.PNPMaintainAccountModelCustom;
 import com.bcs.core.taishin.circle.PNP.db.repository.PNPMaintainAccountModelRepository;
@@ -119,8 +121,13 @@ public class PNPMaintainUIService {
 		if(StringUtils.isNotBlank(account)) queryString += "AND ACCOUNT = '" + account + "' ";
 		if(StringUtils.isNotBlank(pccCode)) queryString += "AND PCC_CODE = '" + pccCode + "' ";
 		if(StringUtils.isNotBlank(sourceSystem)) queryString += "AND SOURCE_SYSTEM = '" + sourceSystem + "' ";
-		String empAva = oraclePnpService.getAvailableEmpIdsByEmpId(empId);
-		if(StringUtils.isNotBlank(empAva)) queryString += empAva;
+
+		boolean oracleUseDepartmentCheck = CoreConfigReader.getBoolean(CONFIG_STR.ORACLE_USE_DEPARTMENT_CHECK, true);
+		logger.info("oracleUseDepartmentCheck:"+oracleUseDepartmentCheck);
+		if(oracleUseDepartmentCheck) {
+			String empAva = oraclePnpService.getAvailableEmpIdsByEmpId(empId);
+			if(StringUtils.isNotBlank(empAva)) queryString += empAva;				
+		}
     	
     	queryString	+=
     		") AS R2 "
@@ -188,8 +195,13 @@ public class PNPMaintainUIService {
 		if(StringUtils.isNotBlank(account)) queryString += "AND ACCOUNT = '" + account + "' ";
 		if(StringUtils.isNotBlank(pccCode)) queryString += "AND PCC_CODE = '" + pccCode + "' ";
 		if(StringUtils.isNotBlank(sourceSystem)) queryString += "AND SOURCE_SYSTEM = '" + sourceSystem + "' ";
-		String empAva = oraclePnpService.getAvailableEmpIdsByEmpId(empId);
-		if(StringUtils.isNotBlank(empAva)) queryString += empAva;
+
+		boolean oracleUseDepartmentCheck = CoreConfigReader.getBoolean(CONFIG_STR.ORACLE_USE_DEPARTMENT_CHECK, true);
+		logger.info("oracleUseDepartmentCheck:"+oracleUseDepartmentCheck);
+		if(oracleUseDepartmentCheck) {
+			String empAva = oraclePnpService.getAvailableEmpIdsByEmpId(empId);
+			if(StringUtils.isNotBlank(empAva)) queryString += empAva;				
+		}
 		
     	queryString	+=
     		") AS R2 ";

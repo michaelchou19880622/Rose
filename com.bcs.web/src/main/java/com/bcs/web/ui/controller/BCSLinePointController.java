@@ -73,28 +73,28 @@ public class BCSLinePointController extends BCSBaseController {
 	private static Logger logger = Logger.getLogger(BCSLinePointController.class);
 	
 	@ControllerLog(description = "建立 Line Point 活動")
-	@RequestMapping(method = RequestMethod.GET, value = "/lpCreator/linePointCreatePage")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/linePointCreatePage")
 	public String linePointCreatePage(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser) {
 		logger.info("linePointCreatePage");
 		return BcsPageEnum.LinePointCreatePage.toString();
 	}
 
 	@ControllerLog(description = "Line Point 活動列表")
-	@RequestMapping(method = RequestMethod.GET, value = "/lpCreator/linePointListPage")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/linePointListPage")
 	public String linePointListPage(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser) {
 		logger.info("linePointListPage");
 		return BcsPageEnum.LinePointListPage.toString();
 	}
 
 	@ControllerLog(description = "發送 Line Point 活動")
-	@RequestMapping(method = RequestMethod.GET, value = "/lpCreator/linePointSendPage")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/linePointSendPage")
 	public String linePointSendPage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("linePointSendPage");
 		return BcsPageEnum.LinePointSendPage.toString();
 	}
 
 	@ControllerLog(description = "發送 Line Point Old 活動")
-	@RequestMapping(method = RequestMethod.GET, value = "/lpCreator/linePointSendOldPage")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/linePointSendOldPage")
 	public String linePointSendOldPage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("linePointSendOldPage");
 		return BcsPageEnum.LinePointSendOldPage.toString();
@@ -116,7 +116,7 @@ public class BCSLinePointController extends BCSBaseController {
 	}
 	
 	@ControllerLog(description = "Add/Edit Line Point Main")
-	@RequestMapping(method = RequestMethod.POST, value = "/lpCreator/createLinePointMain", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.POST, value = "/edit/createLinePointMain", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createLinePointMain(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser, @RequestBody LinePointMain linePointMain) throws IOException {
@@ -138,7 +138,7 @@ public class BCSLinePointController extends BCSBaseController {
 	}
 	
 	@ControllerLog(description = "Get All Line Point Main")
-	@RequestMapping(method = RequestMethod.GET, value = "/lpCreator/getAllLinePointMainList")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getAllLinePointMainList")
 	@ResponseBody
 	public ResponseEntity<?> getAllLinePointMainList(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser) throws IOException {
@@ -151,7 +151,7 @@ public class BCSLinePointController extends BCSBaseController {
 	}
 
 	@ControllerLog(description = "Get Manual Line Point Main")
-	@RequestMapping(method = RequestMethod.GET, value = "/lpCreator/getManualLinePointMainList")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getManualLinePointMainList")
 	@ResponseBody
 	public ResponseEntity<?> getManualLinePointMainList(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser) throws IOException {
@@ -164,7 +164,7 @@ public class BCSLinePointController extends BCSBaseController {
 	}
 	
 	@ControllerLog(description = "Get Auto Line Point Main")
-	@RequestMapping(method = RequestMethod.GET, value = "/lpCreator/getAutoLinePointMainList")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getAutoLinePointMainList")
 	@ResponseBody
 	public ResponseEntity<?> getAutoLinePointMainList(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser) throws IOException {
@@ -178,7 +178,7 @@ public class BCSLinePointController extends BCSBaseController {
 	
 	//----
 	@ControllerLog(description = "Get All Line Point Main")
-	@RequestMapping(method = RequestMethod.GET, value = "/lpCreator/getAllLinePointMainListSearch/{searchText}")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getAllLinePointMainListSearch/{searchText}")
 	@ResponseBody
 	public ResponseEntity<?> getAllLinePointMainListSearch(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser, @PathVariable String searchText) throws IOException {
@@ -197,7 +197,7 @@ public class BCSLinePointController extends BCSBaseController {
 	}
 
 	@ControllerLog(description = "Get Manual Line Point Main")
-	@RequestMapping(method = RequestMethod.GET, value = "/lpCreator/getManualLinePointMainListSearch/{searchText}")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getManualLinePointMainListSearch/{searchText}")
 	@ResponseBody
 	public ResponseEntity<?> getManualLinePointMainListSearch(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser, @PathVariable String searchText) throws IOException {
@@ -210,7 +210,7 @@ public class BCSLinePointController extends BCSBaseController {
 	}
 	
 	@ControllerLog(description = "Get Auto Line Point Main")
-	@RequestMapping(method = RequestMethod.GET, value = "/lpCreator/getAutoLinePointMainListSearch/{searchText}")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getAutoLinePointMainListSearch/{searchText}")
 	@ResponseBody
 	public ResponseEntity<?> getAutoLinePointMainListSearch(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser, @PathVariable String searchText) throws IOException {
@@ -223,7 +223,7 @@ public class BCSLinePointController extends BCSBaseController {
 	}
 	//----
 	@ControllerLog(description = "Get Undone Manual Line Point Main")
-	@RequestMapping(method = RequestMethod.GET, value = "/lpCreator/getUndoneManualLinePointMainList")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getUndoneManualLinePointMainList")
 	@ResponseBody
 	public ResponseEntity<?> getUndoneManualLinePointMainList(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser ) throws IOException {
@@ -236,7 +236,7 @@ public class BCSLinePointController extends BCSBaseController {
 	}
 	
 	@ControllerLog(description = "Get Undone Auto Line Point Main")
-	@RequestMapping(method = RequestMethod.GET, value = "/lpCreator/getUndoneAutoLinePointMainList")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getUndoneAutoLinePointMainList")
 	@ResponseBody
 	public ResponseEntity<?> getUndoneAutoLinePointMainList(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser ) throws IOException {
@@ -249,7 +249,7 @@ public class BCSLinePointController extends BCSBaseController {
 	}
 	
 	@ControllerLog(description = "Get Success Line Point Detail")
-	@RequestMapping(method = RequestMethod.GET, value = "/lpCreator/getSuccessLinePointDetailList/{linePointMainId}")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getSuccessLinePointDetailList/{linePointMainId}")
 	@ResponseBody
 	public ResponseEntity<?> getSuccessLinePointDetailList(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser, @PathVariable String linePointMainId) throws IOException {
@@ -264,7 +264,7 @@ public class BCSLinePointController extends BCSBaseController {
 	}
 
 	@ControllerLog(description = "Get Fail Line Point Detail")
-	@RequestMapping(method = RequestMethod.GET, value = "/lpCreator/getFailLinePointDetailList/{linePointMainId}")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getFailLinePointDetailList/{linePointMainId}")
 	@ResponseBody
 	public ResponseEntity<?> getFailLinePointDetailList(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser, @PathVariable String linePointMainId) throws IOException {
@@ -279,7 +279,7 @@ public class BCSLinePointController extends BCSBaseController {
 	}
 	
 	@ControllerLog(description = "Get Success Line Point Detail")
-	@RequestMapping(method = RequestMethod.GET, value = "/lpCreator/getLinePointScheduledDetailList/{mainId}")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getLinePointScheduledDetailList/{mainId}")
 	@ResponseBody
 	public ResponseEntity<?> getLinePointScheduledDetailList(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser, @PathVariable Long mainId) throws IOException {
@@ -293,7 +293,7 @@ public class BCSLinePointController extends BCSBaseController {
 	}
 	
 	@ControllerLog(description="Delete Line Point Main")
-	@RequestMapping(method = RequestMethod.DELETE, value = "/lpCreator/deleteLinePointMain")
+	@RequestMapping(method = RequestMethod.DELETE, value = "/edit/deleteLinePointMain")
 	@ResponseBody
 	public ResponseEntity<?> deleteLinePointMain( HttpServletRequest request,  HttpServletResponse response, @CurrentUser CustomUser customUser,
 			@RequestParam(required=false) String campaignId, @RequestParam(required=false) String listType) throws IOException {
@@ -315,7 +315,7 @@ public class BCSLinePointController extends BCSBaseController {
 	}
 	
 	@ControllerLog(description = "Push Line Point")
-	@RequestMapping(method = RequestMethod.POST, value = "/lpCreator/pushLinePoint", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.POST, value = "/edit/pushLinePoint", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> pushLinePoint(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
 			@RequestBody List<String> uids, @RequestParam Long eventId) throws IOException {
@@ -477,37 +477,37 @@ public class BCSLinePointController extends BCSBaseController {
     }
 	
 	// --- get Send Message
-	@ControllerLog(description="取得圖文訊息")
-	@RequestMapping(method = RequestMethod.GET, value = "/lpCreator/getRichMsg/{richId}")
-	@ResponseBody
-	public ResponseEntity<?> getRichMsg(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
-			@PathVariable String richId) throws IOException {
-		logger.info("lpCreator getRichMsg");
-		try{
-			Map<String, List<String>> result = contentRichMsgService.getContentRichMsg(richId);
-			return new ResponseEntity<>(result, HttpStatus.OK);
-		}catch(Exception e){
-			logger.error(ErrorRecord.recordError(e));
-			if(e instanceof BcsNoticeException){
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			}else{
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-		}
-	}
-	
-	@ControllerLog(description="取得樣板訊息")
-	@RequestMapping(method = RequestMethod.GET, value = "/lpCreator/getTemplateMsg/{templateId}")
-	@ResponseBody
-	public ResponseEntity<?> getTemplateMsg(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
-			@PathVariable String templateId) throws IOException {
-		logger.info("lpCreator getTemplateMsg");
-		try{
-			Map<String, List<String>> result = contentTemplateMsgService.getContentTemplateMsg(templateId);
-			return new ResponseEntity<>(result, HttpStatus.OK);
-		}catch(Exception e){
-			logger.error(ErrorRecord.recordError(e));	
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
+//	@ControllerLog(description="取得圖文訊息")
+//	@RequestMapping(method = RequestMethod.GET, value = "/edit/getRichMsg/{richId}")
+//	@ResponseBody
+//	public ResponseEntity<?> getRichMsg(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+//			@PathVariable String richId) throws IOException {
+//		logger.info("edit getRichMsg");
+//		try{
+//			Map<String, List<String>> result = contentRichMsgService.getContentRichMsg(richId);
+//			return new ResponseEntity<>(result, HttpStatus.OK);
+//		}catch(Exception e){
+//			logger.error(ErrorRecord.recordError(e));
+//			if(e instanceof BcsNoticeException){
+//				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+//			}else{
+//				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+//			}
+//		}
+//	}
+//	
+//	@ControllerLog(description="取得樣板訊息")
+//	@RequestMapping(method = RequestMethod.GET, value = "/edit/getTemplateMsg/{templateId}")
+//	@ResponseBody
+//	public ResponseEntity<?> getTemplateMsg(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+//			@PathVariable String templateId) throws IOException {
+//		logger.info("edit getTemplateMsg");
+//		try{
+//			Map<String, List<String>> result = contentTemplateMsgService.getContentTemplateMsg(templateId);
+//			return new ResponseEntity<>(result, HttpStatus.OK);
+//		}catch(Exception e){
+//			logger.error(ErrorRecord.recordError(e));	
+//			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+//		}
+//	}
 }

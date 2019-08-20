@@ -261,18 +261,15 @@ public class BCSSendGroupController extends BCSBaseController {
 				SendGroup result = sendGroupUIService.saveFromUI(sendGroup, adminUserAccount);
 				
 				return new ResponseEntity<>(result, HttpStatus.OK);
-			}
-			else{
+			}else{
 				throw new Exception("SendGroup Null");
 			}
-		}
-		catch(Exception e){
+		}catch(Exception e){
 			logger.error(ErrorRecord.recordError(e));
 
 			if(e instanceof BcsNoticeException){
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			}
-			else{
+			}else{
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		}

@@ -49,7 +49,7 @@ public class LinePointMain extends AbstractBcsEntity {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name = "ID")
 	private Long id;
-	@Column(name = "SEND_TYPE", columnDefinition="varchar(50)")
+	@Column(name = "SEND_TYPE", columnDefinition="varchar(50)") // MANUAL/AUTO
 	private String sendType;
 	@Column(name = "MODIFY_USER", columnDefinition="nvarchar(50)")
 	private String modifyUser;
@@ -63,11 +63,11 @@ public class LinePointMain extends AbstractBcsEntity {
 	private String pccCode;
 	@Column(name = "SERIAL_ID", columnDefinition="nvarchar(50)")
 	private String serialId;
-	@Column(name = "SEND_TIMING_TYPE", columnDefinition="varchar(50)")
+	@Column(name = "SEND_TIMING_TYPE", columnDefinition="varchar(50)") // IMMEDIATE/SCHEDULE
 	private String sendTimingType;
 	@Column(name = "SEND_TIMING_TIME")  // only for sendTimingType = SCHEDULE
 	private Date sendTimingTime;
-	@Column(name = "SEND_AMOUNT_TYPE", columnDefinition="varchar(50)")
+	@Column(name = "SEND_AMOUNT_TYPE", columnDefinition="varchar(50)") // INDIVIDUAL/UNIVERSAL
 	private String sendAmountType;	
 	@Column(name = "AMOUNT")     // only for sendAmountType = UNIVERSAL
 	private Long amount;
@@ -75,10 +75,15 @@ public class LinePointMain extends AbstractBcsEntity {
 	private Boolean doCheckFollowage;
 	@Column(name = "DO_APPEND_MESSAGE")
 	private Boolean doAppendMessage;
-	
+	@Column(name = "APPEND_MESSAGE_ID")
+	private Long appendMessageId;
+	@Column(name = "LINE_POINT_SEND_GROUP_ID")
+	private Long linePointSendGroupId;
 	
 	@Column(name = "TOTAL_COUNT")
 	private Long totalCount;
+	@Column(name = "TOTAL_AMOUNT")
+	private Long totalAmount;
 	@Column(name = "SUCCESSFUL_COUNT")
 	private Long successfulCount;
 	@Column(name = "FAILED_COUNT")
@@ -185,5 +190,23 @@ public class LinePointMain extends AbstractBcsEntity {
 	}
 	public void setDoAppendMessage(Boolean doAppendMessage) {
 		this.doAppendMessage = doAppendMessage;
+	}
+	public Long getAppendMessageId() {
+		return appendMessageId;
+	}
+	public void setAppendMessageId(Long appendMessageId) {
+		this.appendMessageId = appendMessageId;
+	}
+	public Long getLinePointSendGroupId() {
+		return linePointSendGroupId;
+	}
+	public void setLinePointSendGroupId(Long linePointSendGroupId) {
+		this.linePointSendGroupId = linePointSendGroupId;
+	}
+	public Long getTotalAmount() {
+		return totalAmount;
+	}
+	public void setTotalAmount(Long totalAmount) {
+		this.totalAmount = totalAmount;
 	}
 }

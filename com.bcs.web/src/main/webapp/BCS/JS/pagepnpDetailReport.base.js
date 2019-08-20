@@ -13,7 +13,7 @@ $(function(){
 	var account = "";
 	var employeeId = "";
 	
-	// result
+	// result data
 	var hasData = false;
 	var templateCount = 0;
 	var oringinalTr = {};
@@ -63,6 +63,7 @@ $(function(){
 			$('#pageAndTotalPages').text(page + '/' + totalPages);
 		}
 	});
+	
 	$('.btn.next').click(function(){
 		if(page < totalPages) {
 			page++;
@@ -83,8 +84,7 @@ $(function(){
 			loadData();
 		}
 	});
-	
-	
+		
 	// do Download
 	var setExportButtonSource = function() {
 		if(hasData) {

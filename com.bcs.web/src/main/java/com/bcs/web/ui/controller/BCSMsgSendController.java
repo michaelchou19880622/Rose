@@ -792,11 +792,10 @@ public class BCSMsgSendController extends BCSBaseController {
 	private ResponseEntity<?> saveToDraft(SendMsgModel sendMsgModel, CustomUser customUser) throws Exception{
 		String adminUserAccount = customUser.getAccount();
 		
-		sendMsgUIService.saveDraftMessage(sendMsgModel, adminUserAccount);
+		Long msgId = sendMsgUIService.saveDraftMessageWithId(sendMsgModel, adminUserAccount);
+		//String result = "Save Message Draft Success";
 		
-		String result = "Save Message Draft Success";
-		
-		return new ResponseEntity<>(result, HttpStatus.OK);
+		return new ResponseEntity<>(msgId, HttpStatus.OK);
 	}
 	
 	private SendMsgDetailModel generateTestMsgNotice(){

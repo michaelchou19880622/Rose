@@ -5,6 +5,7 @@ $(function(){
 	// Global Variables
 	$.BCS.actionTypeParam = $.urlParam("actionType");
 	var btnTarget = ""; // 紀錄 最後按鈕
+	var sendGroupId = null;
 	
 	// ---- Send Group Creation ----
 	var sendGroupCondition = null; // 欄位查詢條件
@@ -45,13 +46,60 @@ $(function(){
 		}
 	});
 	
-
+	var getDetailFunc = function(){
+		var queryDataDoms = $('.dataTemplate');
+		var groupId = sendGroupId;
 		
-	$('.btn_save').click(function(){
+		var groupTitle = $('#groupTitle').val();
+		console.info('groupTitle', groupTitle);
+		
+		var postData = {};
+		postData.groupTitle = groupTitle;
+		
+		if(groupId < 0){ // 預設群組不需要設定
+			postData.groupId = groupId;
+		}else{
+//			if(queryDataDoms.length == 0){
+//				alert('請設定群組條件');
+//				return;
+//			}
+			btnTarget = "btn_query";
+			if (!sendGroupCreationValidator.form()) {
+				return;
+			}
+		}
+		
+		// Get Query Data
+		var sendGroupDetail = [];
+		$.each(queryDataDoms, function(i, o){
+			var dom = $(o);
+			var queryData = {};
+			if(dom.find('.labelField').is(':visible')){
+				queryData.queryField = 'UploadMid';
+				queryData.queryOp = dom.find('.labelValue').attr('fileName');
+				queryData.queryValue = dom.find('.labelValue').attr('referenceId') + ":" + dom.find('.labelValue').attr('count');
+			}else{
+				queryData.queryField = dom.find('.queryField').val();
+				queryData.queryOp = dom.find('.queryOp').val();
+				queryData.queryValue = dom.find('.queryValue:visible').val();
+			}
+			sendGroupDetail.push(queryData);
+		});
+		postData.sendGroupDetail = sendGroupDetail;
+		return postData;
+	}
+
+	// [Delete] Button
+	var btn_deteleFunc = function(){
+		$(this).closest('tr').remove();
+	};
+	
+	// [儲存] Button
+	$('.send_group_create').click(function(){
 		var queryDataDoms = $('.dataTemplate');
 		
 		if(queryDataDoms.length == 0){
-			alert('請設定群組條件');
+			alert('請設定輸入CVS檔案');
 			return;
 		}
 		
@@ -60,21 +108,20 @@ $(function(){
 			return;
 		}
 		
-		var groupTitle = $('#groupTitle').val();
-		console.info('groupTitle', groupTitle);
-		var groupDescription = $('#groupDescription').val();
-		console.info('groupDescription', groupDescription);
+		var groupTitle = 'LPSG;' + $('#title').val();
+		var groupDescription = 'LINE_POINT_SEND_GROUP';
 		var groupId = $.urlParam("groupId");
-		console.info('groupId', groupId);
 		var actionType = $.urlParam("actionType");
+		
+		console.info('groupTitle', groupTitle);
+		console.info('groupDescription', groupDescription);
+		console.info('groupId', groupId);
 		console.info('actionType', actionType);
 		
 		var msgAction = "Create";
-				
 		if(groupId && actionType == 'Edit'){
 			msgAction = "Change"
-		}
-		else if(actionType == 'Copy'){
+		}else if(actionType == 'Copy'){
 			groupId = null;
 		}
 		
@@ -88,8 +135,7 @@ $(function(){
 				queryData.queryField = 'UploadMid';
 				queryData.queryOp = dom.find('.labelValue').attr('fileName');
 				queryData.queryValue = dom.find('.labelValue').attr('referenceId') + ":" + dom.find('.labelValue').attr('count');
-			}
-			else{
+			}else{
 				queryData.queryField = dom.find('.queryField').val();
 				queryData.queryOp = dom.find('.queryOp').val();
 				queryData.queryValue = dom.find('.queryValue:visible').val();
@@ -112,12 +158,10 @@ $(function(){
 			confirmStr = "請確認是否儲存";
 		}
 		var r = confirm(confirmStr);
-		if (r) {
-			// confirm true
-		} else {
-		    return;
+		if (!r) {
+			return;
 		}
-
+		
 		$.ajax({
 			type : "POST",
 			url : bcs.bcsContextPath + '/market/createSendGroup',
@@ -126,9 +170,12 @@ $(function(){
             processData: false,
 			data : JSON.stringify(postData)
 		}).success(function(response){
-			console.info(response);
+			console.info('createSendGroup response:', response);
+			sendGroupId = response.groupId;
+			console.info('sendGroupId:', sendGroupId);
+			
 			alert('儲存成功');
-	 		window.location.replace(bcs.bcsContextPath + '/lpCreator/linePointSendPage');
+	 		//window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
 		}).fail(function(response){
 			console.info(response);
 			$.FailResponse(response);
@@ -136,57 +183,8 @@ $(function(){
 		});
 	});
 	
-	var getDetailFunc = function(){
-		var queryDataDoms = $('.dataTemplate');
-		var groupId = $.urlParam("groupId");
-		var groupTitle = $('#groupTitle').val();
-		console.info('groupTitle', groupTitle);
-		
-		var postData = {};
-		postData.groupTitle = groupTitle;
-		
-		if(groupId < 0){ // 預設群組不需要設定
-			postData.groupId = groupId;
-		}
-		else{
-			if(queryDataDoms.length == 0){
-				alert('請設定群組條件');
-				return;
-			}
-
-			btnTarget = "btn_query";
-			if (!sendGroupCreationValidator.form()) {
-				return;
-			}
-		}
-		
-		// Get Query Data
-		var sendGroupDetail = [];
-		$.each(queryDataDoms, function(i, o){
-			var dom = $(o);
-			var queryData = {};
-			
-			if(dom.find('.labelField').is(':visible')){
-				queryData.queryField = 'UploadMid';
-				queryData.queryOp = dom.find('.labelValue').attr('fileName');
-				queryData.queryValue = dom.find('.labelValue').attr('referenceId') + ":" + dom.find('.labelValue').attr('count');
-			}
-			else{
-				queryData.queryField = dom.find('.queryField').val();
-				queryData.queryOp = dom.find('.queryOp').val();
-				queryData.queryValue = dom.find('.queryValue:visible').val();
-			}
-			
-			sendGroupDetail.push(queryData);
-		});
-		
-		postData.sendGroupDetail = sendGroupDetail;
-		
-		return postData;
-	}
-
-	// 匯出MID
-	$('.btn_draft').click(function(){
+	// [匯出MID] Button
+	$('.download_mid').click(function(){
 		var postData = getDetailFunc();
 		console.info('postData', postData);
 
@@ -219,129 +217,22 @@ $(function(){
 		}).done(function(){
 		});
 	});
-
 	$('#downloadReport').load(function () {
         //if the download link return a page
         //load event will be triggered
 		$('.LyMain').unblock();
     });
 	
-	// 條件結果按鍵
-	$('.btn_query').click(function(){
-		var postData = getDetailFunc();
-		console.info('postData', postData);
-		if(!postData){
-			return;
-		}
-		
-		$.ajax({
-			type : "POST",
-			url : bcs.bcsContextPath + '/market/getSendGroupConditionResult',
-            cache: false,
-            contentType: 'application/json',
-            processData: false,
-			data : JSON.stringify(postData)
-		}).success(function(response){
-			console.info(response);
-			alert('查詢結果共 ' + response + ' 筆');
-		}).fail(function(response){
-			console.info(response);
-			$.FailResponse(response);
-		}).done(function(){
-		});
-	});
-	
-	// do Cancel
-	$('.btn_cancel').click(function(){
-		var r = confirm("請確認是否取消");
-		if(r){
-		}else{
-		   return;
-		}
- 		window.location.replace(bcs.bcsContextPath + '/lpCreator/linePointSendPage');
-	});
-
-	var btn_deteleFunc = function(){
-		$(this).closest('tr').remove();
-	};
-	
-	/**
-	 * 選擇[欄位]要動態切換[條件]下拉選單的選項、[數值]元件
-	 * @param queryFieldSelect [欄位]下拉選單
-	 */
-	var setGroupQueryComponent = function(queryFieldSelect){		
-		if (!sendGroupCondition) {
-			return;
-		}
-		
-		// 包含[欄位]下拉選單的 <tr/>
-		var tr = queryFieldSelect.closest('tr');
-		
-		// [條件]下拉選單
-		var queryOpSelect = tr.find('.queryOp');
-		queryOpSelect.find('option[value!=""]').remove();
-		queryOpSelect.change();
-		
-		// [數值]元件
-		var queryValueComponent = tr.find('.queryValueComponent');
-		
-		// 移除表單驗證所加上的錯誤 css class
-		queryValueComponent.find('.queryValue').removeClass('error').next('label.error').remove();
-		
-		var queryValueComponentSelectList = queryValueComponent.find('.queryValueComponentSelectList');
-		queryValueComponentSelectList.hide().find('option[value!=""]').remove();
-		var queryValueComponentInput = queryValueComponent.find('.queryValueComponentInput');
-		queryValueComponentInput.hide().find(':text').val('');
-		var queryValueComponentDatepicker = queryValueComponent.find('.queryValueComponentDatepicker');
-		queryValueComponentDatepicker.hide().find(':text').val('');
-		
-		var queryFieldId = queryFieldSelect.val();
-		
-		if (!queryFieldId) {
-			return;
-		}
-		
-		// 設定[條件]下拉選單的選項
-		$.each(sendGroupCondition[queryFieldId].queryFieldOp, function(index, value) {
-			queryOpSelect.append('<option value="' + value + '">' + value + '</option>');
-		});
-		queryOpSelect.change();
-		
-		// 判斷要使用的[數值]元件
-		switch (sendGroupCondition[queryFieldId].queryFieldSet) {
-		case 'SelectList':
-			$.each(sendGroupCondition[queryFieldId].sendGroupQueryTag, function(index, sendGroupQueryTag) {
-				queryValueComponentSelectList
-					.find('select')
-					.append('<option value="' + sendGroupQueryTag.queryFieldTagValue + '">' 
-							+ sendGroupQueryTag.queryFieldTagDisplay + '</option>');
-			});
-			queryValueComponentSelectList.show().find('select').change();
-			break;
-		case 'Input':
-			queryValueComponentInput.show();
-			break;
-		case 'DatePicker':
-			queryValueComponentDatepicker.show();
-			break;
-		default:
-			break;
-		}
-	};
-	
-	$('.add_rule').click(function(){
-		var queryBody = templateBody.clone(true);
-		queryBody.find('.btn_delete').click(btn_deteleFunc);
-		queryBody.find('.optionSelect').change(optionSelectChange_func);
-		queryBody.find(".datepicker").datepicker({'dateFormat' : 'yy-mm-dd'});
-		$('#tableBody').append(queryBody);
-		setValidationOnNewRow();
-	});
-	
+	// [上傳UID] Button
 	$('.upload_mid').click(function(){
+		var queryDataDoms = $('.dataTemplate');
+		if(queryDataDoms.length >= 1){
+			alert('您已經上傳了一個CVS檔案了！');
+			return;
+		}
+		
 		$('#upload_mid_btn').click();
 	});
-	
 	$('#upload_mid_btn').on("change", function(ev){
 		// calculate & extract csv data
 		csvEventListener(ev);
@@ -351,6 +242,7 @@ $(function(){
     	if (input.files && input.files[0]) {
     		var fileName = input.files[0].name;
     		console.info("fileName : " + fileName);
+    		$('#fileNameShow').text(fileName);
     		
     		var form_data = new FormData();
     		
@@ -394,6 +286,9 @@ $(function(){
 
 	// initialize
 	var sendGroupCreationLoadDataFunc = function(){
+		// get urlParam
+		sendGroupId = $.urlParam("groupId");
+		
 		// clone & remove 查詢條件TableRow
 		templateBody = $('.dataTemplate').clone(true);
 		$('.dataTemplate').remove();
@@ -469,14 +364,6 @@ $(function(){
 					$.FailResponse(response);
 				}).done(function(){
 				});
-				
-				// get actionType
-				var actionType = $.urlParam("actionType");
-				if(actionType == "Edit"){
-					$('.CHTtl').html('編輯發送群組');
-				}else if(actionType == "Copy"){
-					$('.CHTtl').html('複製發送群組');
-				}
 			}
 		}).fail(function(response){
 			console.info(response);
@@ -540,18 +427,124 @@ $(function(){
 		});
 	};
 	
-	var optionSelectChange_func = function(){
-		var select = $(this);
-		var selectValue = select.find('option:selected').text();
-		select.closest('.option').find('.optionLabel').html(selectValue);
-		
-		// 若是[欄位]下拉選單
-		if (select.hasClass('queryField')) {
-			setGroupQueryComponent(select);
-		}
-	};
-	
 	sendGroupCreationLoadDataFunc();
+	
+	
+	// [條件結果] Button
+//	$('.btn_query').click(function(){
+//		var postData = getDetailFunc();
+//		console.info('postData', postData);
+//		if(!postData){
+//			return;
+//		}
+//		
+//		$.ajax({
+//			type : "POST",
+//			url : bcs.bcsContextPath + '/market/getSendGroupConditionResult',
+//            cache: false,
+//            contentType: 'application/json',
+//            processData: false,
+//			data : JSON.stringify(postData)
+//		}).success(function(response){
+//			console.info(response);
+//			alert('查詢結果共 ' + response + ' 筆');
+//		}).fail(function(response){
+//			console.info(response);
+//			$.FailResponse(response);
+//		}).done(function(){
+//		});
+//	});
+	// [取消] Button
+//	$('.btn_cancel').click(function(){
+//		var r = confirm("請確認是否取消");
+//		if(!r){
+//			return;
+//		}
+// 		window.location.replace(bcs.bcsContextPath + '/edit/linePointSendPage');
+//	});
+	// [加入條件] Button
+//	$('.add_rule').click(function(){
+//		var queryBody = templateBody.clone(true);
+//		queryBody.find('.btn_delete').click(btn_deteleFunc);
+//		queryBody.find('.optionSelect').change(optionSelectChange_func);
+//		queryBody.find(".datepicker").datepicker({'dateFormat' : 'yy-mm-dd'});
+//		$('#tableBody').append(queryBody);
+//		setValidationOnNewRow();
+//	});
+	// [拉下選單]
+//	var optionSelectChange_func = function(){
+//		var select = $(this);
+//		var selectValue = select.find('option:selected').text();
+//		select.closest('.option').find('.optionLabel').html(selectValue);
+//		
+//		// 若是[欄位]下拉選單
+//		if (select.hasClass('queryField')) {
+//			setGroupQueryComponent(select);
+//		}
+//	};
+//	/**
+//	 * 選擇[欄位]要動態切換[條件]下拉選單的選項、[數值]元件
+//	 * @param queryFieldSelect [欄位]下拉選單
+//	 */
+//	var setGroupQueryComponent = function(queryFieldSelect){		
+//		if (!sendGroupCondition) {
+//			return;
+//		}
+//		
+//		// 包含[欄位]下拉選單的 <tr/>
+//		var tr = queryFieldSelect.closest('tr');
+//		
+//		// [條件]下拉選單
+//		var queryOpSelect = tr.find('.queryOp');
+//		queryOpSelect.find('option[value!=""]').remove();
+//		queryOpSelect.change();
+//		
+//		// [數值]元件
+//		var queryValueComponent = tr.find('.queryValueComponent');
+//		
+//		// 移除表單驗證所加上的錯誤 css class
+//		queryValueComponent.find('.queryValue').removeClass('error').next('label.error').remove();
+//		
+//		var queryValueComponentSelectList = queryValueComponent.find('.queryValueComponentSelectList');
+//		queryValueComponentSelectList.hide().find('option[value!=""]').remove();
+//		var queryValueComponentInput = queryValueComponent.find('.queryValueComponentInput');
+//		queryValueComponentInput.hide().find(':text').val('');
+//		var queryValueComponentDatepicker = queryValueComponent.find('.queryValueComponentDatepicker');
+//		queryValueComponentDatepicker.hide().find(':text').val('');
+//		
+//		var queryFieldId = queryFieldSelect.val();
+//		
+//		if (!queryFieldId) {
+//			return;
+//		}
+//		
+//		// 設定[條件]下拉選單的選項
+//		$.each(sendGroupCondition[queryFieldId].queryFieldOp, function(index, value) {
+//			queryOpSelect.append('<option value="' + value + '">' + value + '</option>');
+//		});
+//		queryOpSelect.change();
+//		
+//		// 判斷要使用的[數值]元件
+//		switch (sendGroupCondition[queryFieldId].queryFieldSet) {
+//		case 'SelectList':
+//			$.each(sendGroupCondition[queryFieldId].sendGroupQueryTag, function(index, sendGroupQueryTag) {
+//				queryValueComponentSelectList
+//					.find('select')
+//					.append('<option value="' + sendGroupQueryTag.queryFieldTagValue + '">' 
+//							+ sendGroupQueryTag.queryFieldTagDisplay + '</option>');
+//			});
+//			queryValueComponentSelectList.show().find('select').change();
+//			break;
+//		case 'Input':
+//			queryValueComponentInput.show();
+//			break;
+//		case 'DatePicker':
+//			queryValueComponentDatepicker.show();
+//			break;
+//		default:
+//			break;
+//		}
+//	};
 	
 	// ---- Sending Message ----
 	// 表單驗證
@@ -607,33 +600,30 @@ $(function(){
 		}
 
 		// 發送群組
-		var sendGroupId = $('#sendGroupId').val();
-		console.info('sendGroupId', sendGroupId);
-
 		var serialId = $('.serialSetting').val();
+		console.info('sendGroupId', sendGroupId);
 		console.info('serialId', serialId);
 
 		// 發送時間
 		var sendingMsgType = $('[name="sendTimeType"]:checked').val();
 		console.info('sendingMsgType', sendingMsgType);
 
+		
 		// 訊息類別
-		var msgTagList = msgTagContentFlag.getContentFlagList();
+		var msgTagList = [];
+		//var msgTagList = msgTagContentFlag.getContentFlagList();
 		console.info('msgTagList', msgTagList);
 
 		$.BCS.isValidate  = true;
 		// 發送內容 設定
 		var MsgFrameContents = $.BCS.getMsgFrameContent();
 		console.info('MsgFrameContents', MsgFrameContents);
-		/**
-		 * Validate Error
-		 */
+		// Validate Error
 		if(!$.BCS.isValidate){
 			return;
 		}
 
 		var sendingMsgTime = "";
-
 		if (!sendingMsgValidator.form()) {
 			return;
 		}
@@ -712,20 +702,21 @@ $(function(){
             processData: false,
 			data : JSON.stringify(postData)
 		}).success(function(response){
-			console.info(response);
+			console.info('sendingMsg response:', response);
+			var draftMsgId = response;
+			console.info('draftMsgId:', draftMsgId);
+			
 			if(postData.actionType == "SaveDraft"){
 				alert('儲存成功');
 				window.location.replace(bcs.bcsContextPath +'/edit/msgListPage');
-			}
-			else if(postData.actionType == "SendMsg"){
+			}else if(postData.actionType == "SendMsg"){
 				if(sendingMsgType == "DELAY"){
 					alert('預約發送成功');
 				}else{
 					alert('立即傳送成功');
 				}
-				window.location.replace(bcs.bcsContextPath +'/lpCreator/linePointSendPage');
-			}
-			else{
+				window.location.replace(bcs.bcsContextPath +'/edit/linePointCreatePage');
+			}else{
 				alert('傳送成功');
 			}
 		}).fail(function(response){
@@ -966,11 +957,6 @@ $(function(){
 
 	// 傳送
 	$('.btn_save').click(function(){
-		sendingMsgFunc("SendMsg");
-	});
-
-	// 傳送
-	$('.btn_add').click(function(){
 		sendingMsgFunc("SendMsg");
 	});
 
@@ -1253,7 +1239,7 @@ $(function(){
 
 				$.ajax({
 					type: 'GET',
-					url: bcs.bcsContextPath + "/lpCreator/getRichMsg/" + richId,
+					url: bcs.bcsContextPath + "/edit/getRichMsg/" + richId,
 				}).success(function(response){
 					var valueObj = response[richId];
 					console.info('valueObj', valueObj);
@@ -1291,7 +1277,7 @@ $(function(){
 				var templateId = detailContent.templateId;
 				$.ajax({
 					type: 'GET',
-					url: bcs.bcsContextPath + "/lpCreator/getTemplateMsg/" + templateId,
+					url: bcs.bcsContextPath + "/edit/getTemplateMsg/" + templateId,
 				}).success(function(response){
 					console.info('response', response);
 					$.BCS.previewMsgTemplate(previewDialog, response);
@@ -1488,6 +1474,10 @@ $(function(){
         }
         console.info('trimmed rows:', rows);
         
+        // get fix amount
+        var fixAmount = parseInt($('#amount').val());
+        console.info('fixAmount:', fixAmount);
+        
         // split by column
         uids = []; custIds = []; pts = [];
         colMaxNum = 2;
@@ -1499,6 +1489,8 @@ $(function(){
         	if(cols.length == 3){
         		colMaxNum = 3;
         		pts.push(parseInt(cols[2]));
+        	}else{
+        		pts.push(fixAmount);
         	}
         }
         
@@ -1509,13 +1501,13 @@ $(function(){
     	
         if(needColMaxNum != colMaxNum) {
         	alert('資料行數：' + colMaxNum + '與需要行數：' + needColMaxNum + '不符');
-        	window.location.replace(bcs.bcsContextPath + '/lpCreator/linePointCreatePage');
+        	window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
         }
         if(colMaxNum == 2){
         	var amount = parseInt($('#amount').val());
         	if(isNaN(amount) || amount <= 0){
         		alert('發送數量必須大於零');
-        		window.location.replace(bcs.bcsContextPath + '/lpCreator/linePointCreatePage');
+        		window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
         	}
         	fileInformation.innerHTML = '本次共發送' + rows.length + '筆，合計發送點數為' + rows.length * amount +'點';
         }else{
@@ -1541,4 +1533,11 @@ $(function(){
 //		console.info("selectedSendType:", sendType);
 //		console.info("sendTimingType:", $('.sendTimingType')[0].checked);
 //	});
+    
+    // ---- the final save ---
+    
+    function finalSave(){
+    	
+    }
+    
 });

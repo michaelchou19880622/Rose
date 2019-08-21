@@ -120,7 +120,7 @@ public class BCSLinePointController extends BCSBaseController {
 	@ResponseBody
 	public ResponseEntity<?> createLinePointMain(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser, @RequestBody LinePointMain linePointMain) throws IOException {
-		logger.info("createLinePointMain");
+		logger.info("[createLinePointMain]");
 		try {
 			if (linePointMain != null) {
 				String adminUserAccount = customUser.getAccount();
@@ -128,6 +128,28 @@ public class BCSLinePointController extends BCSBaseController {
 				return new ResponseEntity<>(result, HttpStatus.OK);
 			} else 
 				throw new Exception("LinePointMain is Null");
+		} catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+			if (e instanceof BcsNoticeException) 
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			else 
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@ControllerLog(description = "Add/Edit Line Point Detail List")
+	@RequestMapping(method = RequestMethod.POST, value = "/edit/createLinePointDetailList", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> createLinePointDetailList(HttpServletRequest request, HttpServletResponse response,
+			@CurrentUser CustomUser customUser, @RequestBody List<LinePointDetail> linePointDetail) throws IOException {
+		logger.info("[createLinePointDetailList]");
+		try {
+			if (linePointDetail != null) {
+				String adminUserAccount = customUser.getAccount();
+				List<LinePointDetail> result = linePointUIService.saveLinePointDetailListFromUI(linePointDetail, adminUserAccount);
+				return new ResponseEntity<>(result, HttpStatus.OK);
+			} else 
+				throw new Exception("linePointDetail is Null");
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
 			if (e instanceof BcsNoticeException) 
@@ -150,31 +172,31 @@ public class BCSLinePointController extends BCSBaseController {
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 
-	@ControllerLog(description = "Get Manual Line Point Main")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getManualLinePointMainList")
-	@ResponseBody
-	public ResponseEntity<?> getManualLinePointMainList(HttpServletRequest request, HttpServletResponse response,
-			@CurrentUser CustomUser customUser) throws IOException {
-		logger.info("[getManualLinePointMainList]");
-		List<LinePointMain> result = new ArrayList();
-		List<LinePointMain> list = linePointUIService.linePointMainFindManual();
-		result.addAll(list);
-		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
-		return new ResponseEntity<>(result, HttpStatus.OK);
-	}
+//	@ControllerLog(description = "Get Manual Line Point Main")
+//	@RequestMapping(method = RequestMethod.GET, value = "/edit/getManualLinePointMainList")
+//	@ResponseBody
+//	public ResponseEntity<?> getManualLinePointMainList(HttpServletRequest request, HttpServletResponse response,
+//			@CurrentUser CustomUser customUser) throws IOException {
+//		logger.info("[getManualLinePointMainList]");
+//		List<LinePointMain> result = new ArrayList();
+//		List<LinePointMain> list = linePointUIService.linePointMainFindManual();
+//		result.addAll(list);
+//		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
+//		return new ResponseEntity<>(result, HttpStatus.OK);
+//	}
 	
-	@ControllerLog(description = "Get Auto Line Point Main")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getAutoLinePointMainList")
-	@ResponseBody
-	public ResponseEntity<?> getAutoLinePointMainList(HttpServletRequest request, HttpServletResponse response,
-			@CurrentUser CustomUser customUser) throws IOException {
-		logger.info("[getAutoLinePointMainList]");
-		List<LinePointMain> result = new ArrayList();
-		List<LinePointMain> list = linePointUIService.linePointMainFindAuto();
-		result.addAll(list);
-		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
-		return new ResponseEntity<>(result, HttpStatus.OK);
-	}
+//	@ControllerLog(description = "Get Auto Line Point Main")
+//	@RequestMapping(method = RequestMethod.GET, value = "/edit/getAutoLinePointMainList")
+//	@ResponseBody
+//	public ResponseEntity<?> getAutoLinePointMainList(HttpServletRequest request, HttpServletResponse response,
+//			@CurrentUser CustomUser customUser) throws IOException {
+//		logger.info("[getAutoLinePointMainList]");
+//		List<LinePointMain> result = new ArrayList();
+//		List<LinePointMain> list = linePointUIService.linePointMainFindAuto();
+//		result.addAll(list);
+//		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
+//		return new ResponseEntity<>(result, HttpStatus.OK);
+//	}
 	
 	//----
 	@ControllerLog(description = "Get All Line Point Main")
@@ -196,57 +218,57 @@ public class BCSLinePointController extends BCSBaseController {
 
 	}
 
-	@ControllerLog(description = "Get Manual Line Point Main")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getManualLinePointMainListSearch/{searchText}")
-	@ResponseBody
-	public ResponseEntity<?> getManualLinePointMainListSearch(HttpServletRequest request, HttpServletResponse response,
-			@CurrentUser CustomUser customUser, @PathVariable String searchText) throws IOException {
-		logger.info("[getManualLinePointMainListSearch]");
-		List<LinePointMain> result = new ArrayList();
-		List<LinePointMain> list = linePointUIService.linePointMainFindManual(searchText);
-		result.addAll(list);
-		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
-		return new ResponseEntity<>(result, HttpStatus.OK);
-	}
-	
-	@ControllerLog(description = "Get Auto Line Point Main")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getAutoLinePointMainListSearch/{searchText}")
-	@ResponseBody
-	public ResponseEntity<?> getAutoLinePointMainListSearch(HttpServletRequest request, HttpServletResponse response,
-			@CurrentUser CustomUser customUser, @PathVariable String searchText) throws IOException {
-		logger.info("[getAutoLinePointMainListSearch]");
-		List<LinePointMain> result = new ArrayList();
-		List<LinePointMain> list = linePointUIService.linePointMainFindAuto(searchText);
-		result.addAll(list);
-		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
-		return new ResponseEntity<>(result, HttpStatus.OK);
-	}
-	//----
-	@ControllerLog(description = "Get Undone Manual Line Point Main")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getUndoneManualLinePointMainList")
-	@ResponseBody
-	public ResponseEntity<?> getUndoneManualLinePointMainList(HttpServletRequest request, HttpServletResponse response,
-			@CurrentUser CustomUser customUser ) throws IOException {
-		logger.info("getUndoneManualLinePointMainList");
-		List<LinePointMain> result = new ArrayList();
-		List<LinePointMain> list = linePointUIService.linePointMainFindUndoneManual();
-		result.addAll(list);
-		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
-		return new ResponseEntity<>(result, HttpStatus.OK);
-	}
-	
-	@ControllerLog(description = "Get Undone Auto Line Point Main")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getUndoneAutoLinePointMainList")
-	@ResponseBody
-	public ResponseEntity<?> getUndoneAutoLinePointMainList(HttpServletRequest request, HttpServletResponse response,
-			@CurrentUser CustomUser customUser ) throws IOException {
-		logger.info("getUndoneAutoLinePointMainList");
-		List<LinePointMain> result = new ArrayList();
-		List<LinePointMain> list = linePointUIService.linePointMainFindUndoneAuto();
-		result.addAll(list);
-		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
-		return new ResponseEntity<>(result, HttpStatus.OK);
-	}
+//	@ControllerLog(description = "Get Manual Line Point Main")
+//	@RequestMapping(method = RequestMethod.GET, value = "/edit/getManualLinePointMainListSearch/{searchText}")
+//	@ResponseBody
+//	public ResponseEntity<?> getManualLinePointMainListSearch(HttpServletRequest request, HttpServletResponse response,
+//			@CurrentUser CustomUser customUser, @PathVariable String searchText) throws IOException {
+//		logger.info("[getManualLinePointMainListSearch]");
+//		List<LinePointMain> result = new ArrayList();
+//		List<LinePointMain> list = linePointUIService.linePointMainFindManual(searchText);
+//		result.addAll(list);
+//		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
+//		return new ResponseEntity<>(result, HttpStatus.OK);
+//	}
+//	
+//	@ControllerLog(description = "Get Auto Line Point Main")
+//	@RequestMapping(method = RequestMethod.GET, value = "/edit/getAutoLinePointMainListSearch/{searchText}")
+//	@ResponseBody
+//	public ResponseEntity<?> getAutoLinePointMainListSearch(HttpServletRequest request, HttpServletResponse response,
+//			@CurrentUser CustomUser customUser, @PathVariable String searchText) throws IOException {
+//		logger.info("[getAutoLinePointMainListSearch]");
+//		List<LinePointMain> result = new ArrayList();
+//		List<LinePointMain> list = linePointUIService.linePointMainFindAuto(searchText);
+//		result.addAll(list);
+//		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
+//		return new ResponseEntity<>(result, HttpStatus.OK);
+//	}
+//	//----
+//	@ControllerLog(description = "Get Undone Manual Line Point Main")
+//	@RequestMapping(method = RequestMethod.GET, value = "/edit/getUndoneManualLinePointMainList")
+//	@ResponseBody
+//	public ResponseEntity<?> getUndoneManualLinePointMainList(HttpServletRequest request, HttpServletResponse response,
+//			@CurrentUser CustomUser customUser ) throws IOException {
+//		logger.info("getUndoneManualLinePointMainList");
+//		List<LinePointMain> result = new ArrayList();
+//		List<LinePointMain> list = linePointUIService.linePointMainFindUndoneManual();
+//		result.addAll(list);
+//		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
+//		return new ResponseEntity<>(result, HttpStatus.OK);
+//	}
+//	
+//	@ControllerLog(description = "Get Undone Auto Line Point Main")
+//	@RequestMapping(method = RequestMethod.GET, value = "/edit/getUndoneAutoLinePointMainList")
+//	@ResponseBody
+//	public ResponseEntity<?> getUndoneAutoLinePointMainList(HttpServletRequest request, HttpServletResponse response,
+//			@CurrentUser CustomUser customUser ) throws IOException {
+//		logger.info("getUndoneAutoLinePointMainList");
+//		List<LinePointMain> result = new ArrayList();
+//		List<LinePointMain> list = linePointUIService.linePointMainFindUndoneAuto();
+//		result.addAll(list);
+//		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
+//		return new ResponseEntity<>(result, HttpStatus.OK);
+//	}
 	
 	@ControllerLog(description = "Get Success Line Point Detail")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getSuccessLinePointDetailList/{linePointMainId}")

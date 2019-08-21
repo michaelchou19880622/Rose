@@ -68,12 +68,12 @@
                                             <ul>
                                                 <li>
                                                     <label class="MdFRM02Check">
-                                                        <input type="radio" name="sendTimeType" value="IMMEDIATE">立即
+                                                        <input type="radio" class="sendTimeType" name="sendTimeType" value="IMMEDIATE" checked=true>立即
                                                     </label>
                                                 </li>
                                                 <li>
                                                     <label class="MdFRM02Check">
-                                                        <input type="radio" name="sendTimeType"  value="DELAY" >預約發送
+                                                        <input type="radio" class="sendTimeType" name="sendTimeType"  value="DELAY" >預約發送
                                                     </label>
                                                     <span id="delaySelect">
                                                         <div class="option date">
@@ -208,7 +208,7 @@
                         				
                         				<input class="upload_mid" type="button" value="匯入UID">
 				                        <input class="download_mid" type="button" value="匯出UID" style="cursor: pointer;">
-				                        <input class="send_group_create" style="cursor: pointer;" type="button" value="儲存">
+				                        <input class="send_group_create" id="send_group_create" style="cursor: pointer;visibility:hidden;display:inline;" type="button" value="儲存">
 				                    	<iframe id="downloadReport" style='display:none'></iframe>
 	                					
 	                					<span id="fileNameShow">　</span>
@@ -342,10 +342,11 @@
                 <div class="BtnSet">
                     <div>
                         <input class="btn_query SendPreviewBtn" type="button" value="預覽" style="cursor: pointer;">
-                        <input class="btn_draft" type="button" value="儲存草稿" style="cursor: pointer;">
+                        <!-- <input class="btn_draft" type="button" value="儲存草稿" style="cursor: pointer;"> -->
                         <!-- <input class="btn_add createProject" type="button" value="建立" style="cursor: pointer;" sec:authorize="hasAnyRole('ROLE_ADMIN')"> -->
-                        <input class="btn_query SaveProjectBtn" type="button" value="儲存" style="cursor: pointer;">
-                        <input class="btn_save" type="button" value="傳送" style="cursor: pointer;" sec:authorize="hasAnyRole('ROLE_ADMIN')">
+                        <input class="btn_query send_group_create" type="button" value="儲存" style="cursor: pointer;">
+
+                        <!-- <input class="btn_save" type="button" value="傳送" style="cursor: pointer;" sec:authorize="hasAnyRole('ROLE_ADMIN')"> -->
                         <!-- <input class="btn_cancel" type="button" value="取消" style="cursor: pointer;"> -->
                     </div>
                 </div>

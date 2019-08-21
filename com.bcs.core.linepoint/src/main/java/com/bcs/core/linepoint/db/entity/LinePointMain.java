@@ -29,8 +29,8 @@ import com.bcs.core.json.AbstractBcsEntity;
 public class LinePointMain extends AbstractBcsEntity {
 	private static final long serialVersionUID = 1L;
 
-	public static final String SEND_TYPE_MANUAL = "MANUAL"; // FOR BCS
-	public static final String SEND_TYPE_AUTO = "AUTO"; // FOR MGM
+	public static final String SEND_TYPE_BCS = "BCS"; // FOR BCS
+	public static final String SEND_TYPE_API = "API"; // FOR API
 	
 	public static final String SEND_TIMING_TYPE_IMMEDIATE = "IMMEDIATE";
 	public static final String SEND_TIMING_TYPE_SCHEDULE = "SCHEDULE";
@@ -49,7 +49,7 @@ public class LinePointMain extends AbstractBcsEntity {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name = "ID")
 	private Long id;
-	@Column(name = "SEND_TYPE", columnDefinition="varchar(50)") // MANUAL/AUTO
+	@Column(name = "SEND_TYPE", columnDefinition="varchar(50)") // BCS/API
 	private String sendType;
 	@Column(name = "MODIFY_USER", columnDefinition="nvarchar(50)")
 	private String modifyUser;

@@ -6,7 +6,15 @@ $(function(){
 	$.BCS.actionTypeParam = $.urlParam("actionType");
 	var btnTarget = ""; // 紀錄 最後按鈕
 	var sendGroupId = null;
+	var draftMsgId = null;
+	var totalCount = 0;
+	var totalAmount = 0;
+	var linePointMainId = null;
 	
+	// LinePointDetails
+    var uids = [], custIds = [], pts = [];
+    var colMaxNum = 2;
+    
 	// ---- Send Group Creation ----
 	var sendGroupCondition = null; // 欄位查詢條件
 	var templateBody = {};		   // 查詢條件Tr
@@ -96,13 +104,13 @@ $(function(){
 	
 	// [儲存] Button
 	$('.send_group_create').click(function(){
-		var queryDataDoms = $('.dataTemplate');
+		$('.LyMain').block($.BCS.blockMsgUpload);
 		
+		var queryDataDoms = $('.dataTemplate');
 		if(queryDataDoms.length == 0){
 			alert('請設定輸入CVS檔案');
 			return;
 		}
-		
 		btnTarget = "btn_save";
 		if (!sendGroupCreationValidator.form()) {
 			return;
@@ -112,7 +120,6 @@ $(function(){
 		var groupDescription = 'LINE_POINT_SEND_GROUP';
 		var groupId = $.urlParam("groupId");
 		var actionType = $.urlParam("actionType");
-		
 		console.info('groupTitle', groupTitle);
 		console.info('groupDescription', groupDescription);
 		console.info('groupId', groupId);
@@ -153,14 +160,14 @@ $(function(){
 		console.info('postData', postData);
 
 		// Do Confirm Check
-		var confirmStr = "請確認是否建立";
-		if(msgAction  == "Change"){
-			confirmStr = "請確認是否儲存";
-		}
-		var r = confirm(confirmStr);
-		if (!r) {
-			return;
-		}
+//		var confirmStr = "請確認是否建立";
+//		if(msgAction  == "Change"){
+//			confirmStr = "請確認是否儲存";
+//		}
+//		var r = confirm(confirmStr);
+//		if (!r) {
+//			return;
+//		}
 		
 		$.ajax({
 			type : "POST",
@@ -174,12 +181,16 @@ $(function(){
 			sendGroupId = response.groupId;
 			console.info('sendGroupId:', sendGroupId);
 			
-			alert('儲存成功');
+			//alert('儲存成功');
 	 		//window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
 		}).fail(function(response){
 			console.info(response);
 			$.FailResponse(response);
+			$('.LyMain').unblock();
+			window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
 		}).done(function(){
+			// goto save draft
+			sendingMsgFunc("SaveDraft");
 		});
 	});
 	
@@ -703,19 +714,19 @@ $(function(){
 			data : JSON.stringify(postData)
 		}).success(function(response){
 			console.info('sendingMsg response:', response);
-			var draftMsgId = response;
+			draftMsgId = response;
 			console.info('draftMsgId:', draftMsgId);
 			
 			if(postData.actionType == "SaveDraft"){
-				alert('儲存成功');
-				window.location.replace(bcs.bcsContextPath +'/edit/msgListPage');
+				//alert('儲存成功');
+				//window.location.replace(bcs.bcsContextPath +'/edit/msgListPage');
 			}else if(postData.actionType == "SendMsg"){
 				if(sendingMsgType == "DELAY"){
-					alert('預約發送成功');
+					//alert('預約發送成功');
 				}else{
-					alert('立即傳送成功');
+					//alert('立即傳送成功');
 				}
-				window.location.replace(bcs.bcsContextPath +'/edit/linePointCreatePage');
+				//window.location.replace(bcs.bcsContextPath +'/edit/linePointCreatePage');
 			}else{
 				alert('傳送成功');
 			}
@@ -723,8 +734,10 @@ $(function(){
 			console.info(response);
 			$.FailResponse(response);
 			$('.LyMain').unblock();
+			window.location.replace(bcs.bcsContextPath +'/edit/linePointCreatePage');
 		}).done(function(){
-			$('.LyMain').unblock();
+			//$('.LyMain').unblock();
+			linePointMainSave();
 		});
 	};
 
@@ -1198,9 +1211,7 @@ $(function(){
 	sendingMsgLoadDataFunc();
 	
 	// ----- Project Creation ----
-	// Global Variables
-    var uids = [], custIds = [], pts = [];
-    var colMaxNum = 2;
+
 	
 	// 預覽
 	$('.SendPreviewBtn').click(function(event) {
@@ -1312,102 +1323,6 @@ $(function(){
 		previewDialog.dialog('open');
 	});
 	
-	
-	
-    $('.btn_save').click(function() {
-		var MsgFrameContents = $.BCS.getMsgFrameContent();
-		console.info('MsgFrameContents', MsgFrameContents);
-		if(MsgFrameContents.length > 4){
-			alert('發送內容不能超過4個');
-			return;
-		}
-		
-        var title = $('#title').val();
-        var pccCode = $('#pccCode').val();
-        var serialId = $('#serialId').val();
-        var sendTimingType = ($('.sendTimingType')[0].checked)?"IMMEDIATE":"SCHEDULE";
-        var sendAmountType = ($('.sendAmountType')[0].checked)?"UNIVERSAL":"INDIVIDUAL";
-        var amount = ($('.sendAmountType')[0].checked)?($('#amount').val()):0;
-
-        console.info("va1:", sendAmountType);
-        
-        /*
-		// 傳送資料
-		$('.LyMain').block($.BCS.blockMsgSave);
-		$.ajax({
-			type : "POST",
-			url : bcs.bcsContextPath +'/edit/sendingMsg',
-            cache: false,
-            contentType: 'application/json',
-            processData: false,
-			data : JSON.stringify(postData)
-		}).success(function(response){
-			console.info(response);
-			if(postData.actionType == "SaveDraft"){
-				alert('儲存成功');
-				window.location.replace(bcs.bcsContextPath +'/edit/msgListPage');
-			}
-			else if(postData.actionType == "SendMsg"){
-				if(sendingMsgType == "DELAY"){
-					alert('預約發送成功');
-				}
-				else if(sendingMsgType == "SCHEDULE"){
-					alert('排程發送成功');
-				}
-				else{
-					alert('立即傳送成功');
-				}
-				window.location.replace(bcs.bcsContextPath +'/edit/msgListSendedPage');
-			}
-			else{
-				alert('傳送成功');
-			}
-		}).fail(function(response){
-			console.info(response);
-			$.FailResponse(response);
-			$('.LyMain').unblock();
-		}).done(function(){
-			$('.LyMain').unblock();
-		});
-		*/
-        
-//        if (!campaignName || !campaignCode || !sendPoint || !campaignPersonNum) {
-//            alert("欄位不可為空");
-//            return;
-//        }
-//
-//        var postData = {};
-//        postData.title = campaignName;
-//        postData.serialId = campaignCode;
-//        postData.amount = sendPoint;
-//        postData.totalCount = campaignPersonNum;
-//        postData.sendType = sendType;
-//        postData.status = "IDLE";
-//        postData.successfulCount = 0;
-//        postData.failedCount = 0;
-//        
-//        console.info('postData', postData);
-
-        /*
-        $.ajax({
-            type: "POST",
-            url: bcs.bcsContextPath + '/market/createLinePointMain',
-            cache: false,
-            contentType: 'application/json',
-            processData: false,
-            data: JSON.stringify(postData)
-
-        }).success(
-            function(response) {
-                console.info(response);
-                alert('儲存成功');
-                window.location.replace(bcs.bcsContextPath + '/market/linePointListPage');
-            }).fail(function(response) {
-            console.info(response);
-            $.FailResponse(response);
-        })
-        */
-    });
     
 	/* File Upload and Parse CSV Begin */
 	document.getElementById('fileupload').addEventListener('change', function (e) {
@@ -1503,20 +1418,26 @@ $(function(){
         	alert('資料行數：' + colMaxNum + '與需要行數：' + needColMaxNum + '不符');
         	window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
         }
+        
+        var sum = 0;
         if(colMaxNum == 2){
         	var amount = parseInt($('#amount').val());
         	if(isNaN(amount) || amount <= 0){
         		alert('發送數量必須大於零');
         		window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
         	}
-        	fileInformation.innerHTML = '本次共發送' + rows.length + '筆，合計發送點數為' + rows.length * amount +'點';
+        	sum = rows.length * amount;
+        	fileInformation.innerHTML = '本次共發送' + rows.length + '筆，合計發送點數為' + sum +'點';
         }else{
-        	var sum = 0;
+        	sum = 0;
             for (var i = 0; i < pts.length; i++) {
             	sum += pts[i];
             }
             fileInformation.innerHTML = '本次共發送' + rows.length + '筆，合計發送點數為' + sum +'點';
         }
+        
+        totalCount = rows.length;
+        totalAmount = sum;
     }
 
     function errorHandler(evt) {
@@ -1526,6 +1447,166 @@ $(function(){
     }
     /* File Upload and Parse CSV End */
     
+    
+    // ------------------------
+	//  $('.LinePointDetailCreate').click(function(event){
+	//	console.info('223');
+	//	//linePointDetailSave();
+	//});
+//	$('[name="LinePointDetailCreate"]').click(function(){
+//		console.info('224');
+//	});
+
+    // final save
+    function linePointMainSave(){
+//		var MsgFrameContents = $.BCS.getMsgFrameContent();
+//		console.info('MsgFrameContents', MsgFrameContents);
+//		if(MsgFrameContents.length > 4){
+//			alert('發送內容不能超過4個');
+//			return;
+//		}
+        /*
+		// 傳送資料
+		$('.LyMain').block($.BCS.blockMsgSave);
+		$.ajax({
+			type : "POST",
+			url : bcs.bcsContextPath +'/edit/sendingMsg',
+            cache: false,
+            contentType: 'application/json',
+            processData: false,
+			data : JSON.stringify(postData)
+		}).success(function(response){
+			console.info(response);
+			if(postData.actionType == "SaveDraft"){
+				alert('儲存成功');
+				window.location.replace(bcs.bcsContextPath +'/edit/msgListPage');
+			}
+			else if(postData.actionType == "SendMsg"){
+				if(sendingMsgType == "DELAY"){
+					alert('預約發送成功');
+				}
+				else if(sendingMsgType == "SCHEDULE"){
+					alert('排程發送成功');
+				}
+				else{
+					alert('立即傳送成功');
+				}
+				window.location.replace(bcs.bcsContextPath +'/edit/msgListSendedPage');
+			}
+			else{
+				alert('傳送成功');
+			}
+		}).fail(function(response){
+			console.info(response);
+			$.FailResponse(response);
+			$('.LyMain').unblock();
+		}).done(function(){
+			$('.LyMain').unblock();
+		});
+		*/
+        
+        var title = $('#title').val();
+        var pccCode = $('#pccCode').val();
+        var serialId = $('#serialId').val();
+        var sendTimingType = ($('.sendTimeType')[0].checked)?"IMMEDIATE":"SCHEDULE";
+        var sendAmountType = ($('.sendAmountType')[0].checked)?"UNIVERSAL":"INDIVIDUAL";
+        var amount = ($('.sendAmountType')[0].checked)?($('#amount').val()):0;
+        var doCheckFollowage = ($('.doCheckFollowage')[0].checked)?true:false;
+        var doAppendMessage = ($('.doAppendMessage')[0].checked)?false:true;
+        console.info('sendGroupId:', sendGroupId);
+    	console.info('draftMsgId:', draftMsgId);
+    	
+//        if (!campaignName || !campaignCode || !sendPoint || !campaignPersonNum) {
+//            alert("欄位不可為空");
+//            return;
+//        }
+
+        var postData = {};
+        postData.sendType = 'MANUAL';
+        postData.title = title;
+        postData.pccCode = pccCode;
+        postData.serialId = serialId;
+        postData.sendTimingType = sendTimingType;
+        postData.sendAmountType = sendAmountType;
+        postData.amount = amount;
+        postData.doCheckFollowage = doCheckFollowage;
+        postData.doAppendMessage = doAppendMessage;
+        postData.appendMessageId = draftMsgId;
+        postData.linePointSendGroupId = sendGroupId;
+        
+        postData.totalCount = totalCount;
+        postData.totalAmount = totalAmount;
+        postData.successfulCount = 0;
+        postData.failedCount = 0;
+        postData.status = 'IDLE';
+        
+        console.info('postData', postData);
+        
+        
+        $.ajax({
+            type: "POST",
+            url: bcs.bcsContextPath + '/edit/createLinePointMain',
+            cache: false,
+            contentType: 'application/json',
+            processData: false,
+            data: JSON.stringify(postData)
+        }).success(function(response) {
+            console.info(response);
+            linePointMain = response.id;
+            console.info('linePointMain:',linePointMain);
+        }).fail(function(response) {
+            console.info(response);
+            $.FailResponse(response);
+            window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
+            $('.LyMain').unblock();
+        }).done(function(){
+        	linePointDetailSave();
+		});
+        
+    }
+    
+    // linePointDetailSave
+    function linePointDetailSave(){
+    	console.info('linePointDetailSave');
+    	linePointMain  = 10;
+    	var detailList = [];
+    	var detail = {};
+    	
+    	for (var i = 0; i < totalCount; i++) {
+    		detail.linePointMainId = linePointMain;
+    		detail.custid = custIds[i];
+    		detail.amount = pts[i];
+    		detail.uid = uids[i];
+    		
+    		detailList.push(detail);
+        }
+
+    	console.info('detailList:', detailList);
+        $.ajax({
+            type: "POST",
+            url: bcs.bcsContextPath + '/edit/createLinePointDetailList',
+            cache: false,
+            contentType: 'application/json',
+            processData: false,
+            data: JSON.stringify(detailList)
+        }).success(function(response) {
+            console.info('linePointDetailSave response:', response);
+            alert('儲存成功');
+            $('.LyMain').unblock();
+            window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
+        }).fail(function(response) {
+            console.info(response);
+            $.FailResponse(response);
+            $('.LyMain').unblock();
+            window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
+        }).done(function(){
+		});
+    }
+    
+//	$('.SaveProjectBtn').click(function(){
+//		$('#send_group_create').click();
+//	});
+	
 //	var sendType = 'MANUAL';
 //	
 //	$(".sendType").click(function(e){
@@ -1533,11 +1614,4 @@ $(function(){
 //		console.info("selectedSendType:", sendType);
 //		console.info("sendTimingType:", $('.sendTimingType')[0].checked);
 //	});
-    
-    // ---- the final save ---
-    
-    function finalSave(){
-    	
-    }
-    
 });

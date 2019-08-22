@@ -525,6 +525,13 @@ public class SendMsgUIService {
 		}
 	}
 
+	public void createExecuteSendMsgRunnable(Long msgId) throws Exception{
+		ExecuteSendMsgRunnable run = new ExecuteSendMsgRunnable();
+		run.thisMsgId = msgId;
+		Thread thread = new Thread(run);
+		thread.start();
+	}
+	
 	private static class ExecuteSendMsgRunnable implements Runnable{
 
 		public Long thisMsgId = null;

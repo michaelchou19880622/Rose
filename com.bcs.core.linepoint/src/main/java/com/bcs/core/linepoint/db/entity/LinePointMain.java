@@ -39,8 +39,8 @@ public class LinePointMain extends AbstractBcsEntity {
 	public static final String SEND_AMOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
 	
 	public static final String STATUS_DELETE = "DELETE";
-	public static final String STATUS_IDLE = "IDLE";
-	public static final String STATUS_SCHEDULED = "SCHEDULED";
+	public static final String STATUS_IDLE = "IDLE"; 		   // weather immediate or schedule
+	public static final String STATUS_SCHEDULED = "SCHEDULED"; // begin to start
 	public static final String STATUS_COMPLETE = "COMPLETE";
 	public static final String STATUS_ROTTEN = "ROTTEN";
 	
@@ -86,8 +86,12 @@ public class LinePointMain extends AbstractBcsEntity {
 	private Long totalAmount;
 	@Column(name = "SUCCESSFUL_COUNT")
 	private Long successfulCount;
+	@Column(name = "SUCCESSFUL_AMOUNT")
+	private Long successfulAmount;
 	@Column(name = "FAILED_COUNT")
 	private Long failedCount;
+	@Column(name = "SEND_START_TIME")  // press [Start] at LinePointList
+	private Date sendStartTime;
 	@Column(name = "STATUS", columnDefinition="nvarchar(50)")
 	private String status;
 	
@@ -208,5 +212,17 @@ public class LinePointMain extends AbstractBcsEntity {
 	}
 	public void setTotalAmount(Long totalAmount) {
 		this.totalAmount = totalAmount;
+	}
+	public Long getSuccessfulAmount() {
+		return successfulAmount;
+	}
+	public void setSuccessfulAmount(Long successfulAmount) {
+		this.successfulAmount = successfulAmount;
+	}
+	public Date getSendStartTime() {
+		return sendStartTime;
+	}
+	public void setSendStartTime(Date sendStartTime) {
+		this.sendStartTime = sendStartTime;
 	}
 }

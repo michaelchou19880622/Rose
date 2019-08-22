@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,8 +32,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.utils.ObjectUtil;
+import com.bcs.core.db.entity.MsgDetail;
+import com.bcs.core.db.entity.MsgMain;
 import com.bcs.core.db.service.ContentRichMsgService;
 import com.bcs.core.db.service.ContentTemplateMsgService;
+import com.bcs.core.db.service.MsgMainService;
 import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.web.security.CurrentUser;
@@ -39,10 +44,12 @@ import com.bcs.core.web.security.CustomUser;
 import com.bcs.core.web.ui.controller.BCSBaseController;
 import com.bcs.core.web.ui.page.enums.BcsPageEnum;
 import com.bcs.web.aop.ControllerLog;
-
+import com.bcs.web.ui.model.SendMsgDetailModel;
+import com.bcs.web.ui.model.SendMsgModel;
 import com.bcs.web.ui.service.LinePointUIService;
 import com.bcs.web.ui.service.LoadFileUIService;
 import com.bcs.web.ui.service.SendGroupUIService;
+import com.bcs.web.ui.service.SendMsgUIService;
 import com.bcs.core.linepoint.api.model.LinePointPushModel;
 import com.bcs.core.linepoint.akka.service.LinePointPushAkkaService;
 import com.bcs.core.linepoint.db.entity.LinePointDetail;
@@ -69,6 +76,11 @@ public class BCSLinePointController extends BCSBaseController {
 	private ExcelUtilService excelUtilService;
 	@Autowired
 	private SendGroupUIService sendGroupUIService;
+	@Autowired
+	private MsgMainService msgMainService;
+	@Autowired
+	private SendMsgUIService sendMsgUIService;
+	
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSLinePointController.class);
 	
@@ -100,7 +112,6 @@ public class BCSLinePointController extends BCSBaseController {
 		return BcsPageEnum.LinePointSendOldPage.toString();
 	}	
 	
-	
 	@ControllerLog(description = "Line Point 活動報表")
 	@RequestMapping(method = RequestMethod.GET, value = "/lpQuerier/linePointReportPage")
 	public String linePointReportPage(HttpServletRequest request, HttpServletResponse response) {
@@ -123,10 +134,11 @@ public class BCSLinePointController extends BCSBaseController {
 		logger.info("[createLinePointMain]");
 		try {
 			if (linePointMain != null) {
-				String adminUserAccount = customUser.getAccount();
-				LinePointMain result = linePointUIService.saveLinePointMainFromUI(linePointMain, adminUserAccount);
+				linePointMain.setModifyUser(customUser.getAccount());
+				linePointMain.setModifyTime(new Date());
+				LinePointMain result = linePointUIService.saveLinePointMainFromUI(linePointMain);
 				return new ResponseEntity<>(result, HttpStatus.OK);
-			} else 
+			}else 
 				throw new Exception("LinePointMain is Null");
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
@@ -172,6 +184,85 @@ public class BCSLinePointController extends BCSBaseController {
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 
+	@ControllerLog(description = "Get BCS Line Point Main")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getBcsLinePointMainList")
+	@ResponseBody
+	public ResponseEntity<?> getManualLinePointMainList(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+			@RequestParam(value = "startDate", required = false) String startDateStr, 
+			@RequestParam(value = "endDate", required = false) String endDateStr) throws IOException {
+		logger.info("[getManualLinePointMainList]");
+		
+		// parse date
+		if(StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) startDateStr = "1911-01-01";
+		if(StringUtils.isBlank(endDateStr) || endDateStr.equals("null")) endDateStr = "3099-01-01";
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date startDate = null, endDate = null;
+		try {
+			startDate = sdf.parse(startDateStr);
+			endDate = sdf.parse(endDateStr);
+			endDate = DateUtils.addDays(endDate, 1);
+		}catch(Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+		}
+		logger.info("startDate:"+startDate);
+		logger.info("endDate:"+endDate);
+		
+		List<LinePointMain> result = new ArrayList();
+		List<LinePointMain> list = linePointUIService.linePointMainFindBcsAndDate(startDate, endDate);
+		result.addAll(list);
+		logger.info("result:" + ObjectUtil.objectToJsonStr(result));
+		return new ResponseEntity<>(result, HttpStatus.OK);
+	}
+	
+	@ControllerLog(description = "press Send Line Point Main")
+	@RequestMapping(method = RequestMethod.POST, value = "/edit/pressSendLinePointMain")
+	@ResponseBody
+	public ResponseEntity<?> pressSendLinePointMain(HttpServletRequest request, HttpServletResponse response, 
+			@CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
+		try{
+			// get linePointMain
+			logger.info("[pressSendLinePointMain] linePointMainId:"+linePointMainId);
+			LinePointMain linePointMain = linePointUIService.linePointMainFindOne(linePointMainId);
+			if(linePointMain.getSendStartTime() != null) {
+				throw new BcsNoticeException("此專案已發送");
+			}
+			
+			// immediate
+			if(LinePointMain.SEND_TIMING_TYPE_IMMEDIATE.equals(linePointMain.getSendTimingType())) {
+				try {
+					// send append message
+					Long msgId = linePointMain.getAppendMessageId();
+					logger.info("msgId:" + msgId);
+					sendMsgUIService.createExecuteSendMsgRunnable(msgId);
+					
+					// save send start time
+					linePointMain.setModifyUser(customUser.getAccount());
+					linePointMain.setSendStartTime(new Date());
+					linePointMain.setStatus(LinePointMain.STATUS_COMPLETE);
+					
+					linePointMain.setModifyTime(new Date());
+					linePointUIService.saveLinePointMainFromUI(linePointMain);
+					
+					// combine LinePointPushModel
+					
+				}catch(Exception e) {
+					throw new BcsNoticeException(e.getMessage());
+				}
+			}
+			
+		
+			return new ResponseEntity<>("", HttpStatus.OK);
+		}catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));
+			if(e instanceof BcsNoticeException){
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			}else{
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		}
+	}
+	
 //	@ControllerLog(description = "Get Manual Line Point Main")
 //	@RequestMapping(method = RequestMethod.GET, value = "/edit/getManualLinePointMainList")
 //	@ResponseBody
@@ -352,7 +443,7 @@ public class BCSLinePointController extends BCSBaseController {
 				linePointPushModel.setUid(uid);
 				linePointPushModel.setEventId(eventId);
 				linePointPushModel.setSource(LinePointPushModel.SOURCE_TYPE_BCS);
-				linePointPushModel.setSendTimeType(LinePointPushModel.SEND_TYPE_IMMEDIATE);
+				linePointPushModel.setSendTimeType(LinePointPushModel.SEND_TIMING_TYPE_IMMEDIATE);
 				linePointPushModel.setTriggerTime(new Date());
 				linePointPushAkkaService.tell(linePointPushModel);
 				return new ResponseEntity<>("",HttpStatus.OK);

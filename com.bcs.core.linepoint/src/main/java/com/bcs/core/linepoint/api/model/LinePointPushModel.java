@@ -9,25 +9,26 @@ import com.bcs.core.json.AbstractBcsEntity;
 public class LinePointPushModel extends AbstractBcsEntity {
 	private static final long serialVersionUID = 1L;
 	
-	public static final String SEND_TYPE_IMMEDIATE = "IMMEDIATE";
-	public static final String SEND_TYPE_DELAY = "DELAY";
+	public static final String SEND_TIMING_TYPE_IMMEDIATE = "IMMEDIATE";
+	public static final String SEND_TIMING_TYPE_SCHEDULE = "SCHEDULE";
 
 	public static final String SOURCE_TYPE_BCS = "BCS";
-	public static final String SOURCE_TYPE_MGM = "MGM";
-	private String clientId;
-	
-	private JSONArray uid;
-	
+	public static final String SEND_TYPE_API = "API";
+
+
+	// input data
 	private Long eventId;
-	
+	private String clientId;
+	private JSONArray uid;
 	private Long amount;
 	
-	private String source;
-	
+	// input information
 	private String sendTimeType;
-	
+	private String source;
+
+	// output information
 	private Date triggerTime;
-	
+		
 	public String getClientId() {
 		return clientId;
 	}

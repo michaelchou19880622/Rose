@@ -34,10 +34,8 @@ public class LinePointPushMasterActor extends UntypedActor {
 			Integer pointer = 0;
 			
 			while(pointer < arrayLength) {
-				Integer counter = 0;
 				partition = new JSONArray();
-				
-				for(; (counter < buffer) && (pointer < arrayLength); counter++, pointer++) {
+				for(Integer counter = 0; (counter < buffer) && (pointer < arrayLength); counter++, pointer++) {
 					partition.put(uids.get(pointer));
 				}
 				LinePointPushModel pushApiModel_clone = (LinePointPushModel) pushApiModel.clone();
@@ -47,10 +45,11 @@ public class LinePointPushMasterActor extends UntypedActor {
 				pushMessageRouterActor.tell(pushApiModel_clone, this.getSelf());
 			}
 			
-		}else if (object instanceof LinePointDetail) {
-			LinePointDetail linePointDetail = (LinePointDetail) object;
-			pushApiRouterActor.tell(linePointDetail, this.getSelf());
 		}
+//		else if (object instanceof LinePointDetail) {
+//			LinePointDetail linePointDetail = (LinePointDetail) object;
+//			pushApiRouterActor.tell(linePointDetail, this.getSelf());
+//		}
 //		else if(object instanceof FtpTaskModel) {
 //			FtpTaskModel ftpTaskModel = (FtpTaskModel) object;
 //			

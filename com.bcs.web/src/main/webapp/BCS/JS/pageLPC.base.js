@@ -1522,7 +1522,7 @@ $(function(){
 //        }
 
         var postData = {};
-        postData.sendType = 'MANUAL';
+        postData.sendType = 'BCS';
         postData.title = title;
         postData.pccCode = pccCode;
         postData.serialId = serialId;
@@ -1537,6 +1537,7 @@ $(function(){
         postData.totalCount = totalCount;
         postData.totalAmount = totalAmount;
         postData.successfulCount = 0;
+        postData.successfulAmount = 0;
         postData.failedCount = 0;
         postData.status = 'IDLE';
         

@@ -1,5 +1,6 @@
 package com.bcs.core.linepoint.db.repository;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
@@ -23,6 +24,11 @@ public interface LinePointMainRepository extends EntityRepository<LinePointMain,
     @Query(value = "select x from LinePointMain x where x.sendType = ?1 order by x.modifyTime desc")	
 	public List<LinePointMain> findBySendType(String sendType);
 
+    @Transactional(timeout = 30)
+    @Query(value = "select x from LinePointMain x where x.sendType = ?1 "
+    + "and x.modifyTime >= ?2 and x.modifyTime <= ?3 order by x.modifyTime desc")	
+	public List<LinePointMain> findBySendTypeAndDate(String sendType, Date startDate, Date endDate);
+    
     // with searchText
     @Transactional(timeout = 30)
     @Query(value = "select x from LinePointMain x where "

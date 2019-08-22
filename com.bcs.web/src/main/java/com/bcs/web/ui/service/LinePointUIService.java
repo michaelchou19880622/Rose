@@ -35,7 +35,14 @@ public class LinePointUIService {
 	}
 	public List<LinePointMain> linePointMainFindAll(String searchText){
 		return linePointMainService.findAll(searchText);
-	}	
+	}
+	public List<LinePointMain> linePointMainFindBcs(){
+		return linePointMainService.findBySendType(LinePointMain.SEND_TYPE_BCS);
+	}
+	public List<LinePointMain> linePointMainFindBcsAndDate(Date startDate, Date endDate){
+		return linePointMainService.findBySendTypeAndDate(LinePointMain.SEND_TYPE_BCS, startDate, endDate);
+	}
+	
 //	public List<LinePointMain> linePointMainFindManual(){
 //		return linePointMainService.findManual();
 //	}
@@ -65,10 +72,7 @@ public class LinePointUIService {
 	}
 	
 	@Transactional(rollbackFor=Exception.class, timeout = 30)
-	public LinePointMain saveLinePointMainFromUI(LinePointMain linePointMain, String adminUserAccount) throws BcsNoticeException{
-		logger.info("saveFromUI:" + linePointMain);
-		linePointMain.setModifyUser(adminUserAccount);
-		linePointMain.setModifyTime(new Date());
+	public LinePointMain saveLinePointMainFromUI(LinePointMain linePointMain) throws BcsNoticeException{
 		linePointMainService.save(linePointMain);
 		return linePointMain;
 	}

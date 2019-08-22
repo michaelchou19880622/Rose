@@ -105,7 +105,7 @@ public class LinePointPushApiController {
 	public ResponseEntity<?> linePointTask(HttpServletRequest request, HttpServletResponse response, @RequestBody LinePointTaskModel linePointTaskModel) {
 		try {
 			LinePointDetail linePointDetail = linePointTaskModel.getLinePointDetail();
-			logger.info("-------------------- api linePoint issue --------------------");
+			logger.info("-------------------- api linePoint task --------------------");
 			
 //			if(request.getHeader(HttpHeaders.AUTHORIZATION) == null) {
 //				return new ResponseEntity<>("{\"result\": 0, \"msg\": \"Missing 'Authorization' header.\"}", HttpStatus.BAD_REQUEST);

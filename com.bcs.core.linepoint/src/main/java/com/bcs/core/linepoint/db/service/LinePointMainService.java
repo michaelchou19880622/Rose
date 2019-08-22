@@ -51,7 +51,12 @@ public class LinePointMainService {
 	public List<LinePointMain> findAll(String searchText){
 		return linePointMainRepository.findAll(searchText);
 	}
-	
+	public List<LinePointMain> findBySendType(String sendType){
+		return linePointMainRepository.findBySendType(sendType);
+	}
+	public List<LinePointMain> findBySendTypeAndDate(String sendType, Date startDate, Date endDate){
+		return linePointMainRepository.findBySendTypeAndDate(sendType, startDate, endDate);
+	}	
 
 //	public List<LinePointMain> findManual(){
 //		return linePointMainRepository.findBySendType(LinePointMain.SEND_TYPE_MANUAL);

@@ -78,6 +78,12 @@ public class LinePointUIService {
 	}
 	
 	@Transactional(rollbackFor=Exception.class, timeout = 30)
+	public List<LinePointScheduledDetail> saveLinePointScheduledDetailListFromUI(List<LinePointScheduledDetail> linePointScheduledDetail) throws BcsNoticeException{
+		linePointScheduledDetailService.save(linePointScheduledDetail);
+		return linePointScheduledDetail;
+	}
+	
+	@Transactional(rollbackFor=Exception.class, timeout = 30)
 	public List<LinePointDetail> saveLinePointDetailListFromUI(List<LinePointDetail> linePointDetailList, String adminUserAccount) throws BcsNoticeException{
 		logger.info("saveFromUI:" + linePointDetailList);
 		for(LinePointDetail detail : linePointDetailList) {

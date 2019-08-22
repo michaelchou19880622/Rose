@@ -1,5 +1,6 @@
 package com.bcs.core.linepoint.api.controller;
 
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -33,19 +34,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
 
 import com.bcs.core.linepoint.api.model.LinePointPushModel;
 import com.bcs.core.linepoint.api.model.LinePointTaskModel;
 import com.bcs.core.linepoint.api.service.LinePointApiService;
 import com.bcs.core.linepoint.db.entity.LinePointDetail;
+import com.bcs.core.linepoint.db.entity.LinePointMain;
 import com.bcs.core.linepoint.db.service.LinePointDetailService;
+import com.bcs.core.linepoint.db.service.LinePointMainService;
 import com.bcs.core.linepoint.scheduler.service.LinePointSimpleSchedulerService;
 import com.bcs.core.linepoint.akka.handler.LinePointPushApiActor;
 import com.bcs.core.linepoint.akka.service.LinePointPushAkkaService;
 import com.bcs.core.utils.CryptUtil;
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.utils.RestfulUtil;
+import com.bcs.core.web.security.CurrentUser;
+import com.bcs.core.web.security.CustomUser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -59,6 +66,7 @@ import scala.concurrent.Await;
 
 import com.bcs.core.db.repository.ShareUserRecordRepository;
 import com.bcs.core.enums.CONFIG_STR;
+import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.resource.CoreConfigReader;
 
 @Controller
@@ -67,13 +75,15 @@ public class LinePointPushApiController {
 	private static Logger logger = Logger.getLogger(LinePointPushApiController.class);
 	
 	@Autowired
-	private LinePointPushAkkaService AkkaLinePointPushService;
+	private LinePointPushAkkaService linePointPushAkkaService;
 	@Autowired
 	private LinePointDetailService linePointDetailService;
 	@Autowired
-	private LinePointSimpleSchedulerService linePointSimpleSchedulerService;
+	private LinePointMainService linePointMainService;
 	@Autowired
-	private LinePointApiService linePointApiService;
+	private LinePointSimpleSchedulerService linePointSimpleSchedulerService;
+//	@Autowired
+//	private LinePointApiService linePointApiService;
 	
 //	public static void main(String[] args) {
 //		String secret = "taishinlinebuscs";
@@ -100,6 +110,40 @@ public class LinePointPushApiController {
 //			System.out.println(e.toString());
 //		}
 //	}
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/linePoint/pushLinePoint", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> pushLinePoint(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+			/*@RequestBody List<String> uids,*/ @RequestParam Long eventId) throws IOException {
+		try {
+				LinePointMain linePointMain = linePointMainService.findOne(eventId);	
+			
+				//List<String> uids = new JSONArray(){"U58ffae876d497a488111d38a70b5aea0", "U58ffae876d497a488111d38a70b5aea0"};
+				
+				JSONArray uids = new JSONArray();
+				JSONArray amounts = new JSONArray();
+				for(int i = 1; i <= 10; i++) {
+					uids.put("U58ffae876d497a488111d38a70b5aea0");
+					amounts.put(i);
+				}
+							
+				LinePointPushModel linePointPushModel = new LinePointPushModel();
+				linePointPushModel.setAmount(amounts);
+				linePointPushModel.setUid(uids);
+				linePointPushModel.setEventId(eventId);
+				linePointPushModel.setSource(LinePointPushModel.SOURCE_TYPE_BCS);
+				linePointPushModel.setSendTimeType(LinePointPushModel.SEND_TIMING_TYPE_IMMEDIATE);
+				linePointPushModel.setTriggerTime(new Date());
+				linePointPushAkkaService.tell(linePointPushModel);
+				return new ResponseEntity<>("",HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+			if (e instanceof BcsNoticeException) 
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			else 
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 	
 	@RequestMapping(method = RequestMethod.POST, value = "/linePoint/task", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<?> linePointTask(HttpServletRequest request, HttpServletResponse response, @RequestBody LinePointTaskModel linePointTaskModel) {

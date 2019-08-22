@@ -41,6 +41,7 @@ public class LinePointPushMessageActor extends UntypedActor {
 			// get push data
 			LinePointPushModel pushApiModel = (LinePointPushModel) object;
 			JSONArray uids = pushApiModel.getUid();
+			JSONArray amounts = pushApiModel.getAmount();
 			
 			// initialize request header
 			HttpHeaders headers = new HttpHeaders();
@@ -53,17 +54,21 @@ public class LinePointPushMessageActor extends UntypedActor {
 			String url = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_MESSAGE_PUSH_URL.toString(), true); // https://api.line.me/pointConnect/v1/issue
 		    String clientId = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_API_CLIENT_ID.toString(), true); // 10052
 		    requestBody.put("clientId", clientId);
-			requestBody.put("amount", pushApiModel.getAmount());
+			
 			
 			for(Integer i = 0; i < uids.length(); i++) {
 
 				// initialize detail
 				LinePointDetail detail = new LinePointDetail();
 				//detail.setLinePointMainId(eventId);
-				detail.setAmount(pushApiModel.getAmount());
+				
+				String amountStr = "" + amounts.get(i);
+				Long amount = Long.parseLong(amountStr);
+				
+				detail.setAmount(amount);
 				detail.setTriggerTime(pushApiModel.getTriggerTime());
 				//detail.setSource(pushApiModel.getSource());
-				
+				requestBody.put("amount", amount);
 				
 				// memberId
 				requestBody.put("memberId", uids.get(i));
@@ -104,8 +109,8 @@ public class LinePointPushMessageActor extends UntypedActor {
 					detail.setTranscationTime(Time);
 					detail.setTranscationType(Type);
 					detail.setTransactionAmount(Amount);
-					//detail.setTransactionBalance(Balance);
-					//detail.setDescription("");
+//					detail.setTransactionBalance(Balance);
+//					detail.setDescription("");
 					detail.setStatus(LinePointDetail.STATUS_SUCCESS);
 				} catch (HttpClientErrorException e) {
 					//detail.setDescription(e.getResponseBodyAsString());

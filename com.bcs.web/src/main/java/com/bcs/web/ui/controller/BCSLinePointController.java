@@ -148,6 +148,27 @@ public class BCSLinePointController extends BCSBaseController {
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+
+	@ControllerLog(description = "Find One Line Point Main")
+	@RequestMapping(method = RequestMethod.POST, value = "/edit/findOneLinePointMain")
+	@ResponseBody
+	public ResponseEntity<?> findOneLinePointMain(HttpServletRequest request, HttpServletResponse response,
+			@CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
+		logger.info("[findOneLinePointMain]");
+		try {
+			if (linePointMainId != null) {
+				LinePointMain result = linePointUIService.linePointMainFindOne(linePointMainId);
+				return new ResponseEntity<>(result, HttpStatus.OK);
+			}else 
+				throw new Exception("LinePointMain is Null");
+		} catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+			if (e instanceof BcsNoticeException) 
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			else 
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 	
 	@ControllerLog(description = "Add/Edit Line Point Detail List")
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/createLinePointDetailList", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -159,6 +180,27 @@ public class BCSLinePointController extends BCSBaseController {
 			if (linePointDetail != null) {
 				String adminUserAccount = customUser.getAccount();
 				List<LinePointDetail> result = linePointUIService.saveLinePointDetailListFromUI(linePointDetail, adminUserAccount);
+				return new ResponseEntity<>(result, HttpStatus.OK);
+			} else 
+				throw new Exception("linePointDetail is Null");
+		} catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+			if (e instanceof BcsNoticeException) 
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			else 
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@ControllerLog(description = "Add/Edit Line Point Scheduled Detail List")
+	@RequestMapping(method = RequestMethod.POST, value = "/edit/createLinePointScheduledDetailList", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> createLinePointScheduledDetailList(HttpServletRequest request, HttpServletResponse response,
+			@CurrentUser CustomUser customUser, @RequestBody List<LinePointScheduledDetail> linePointScheduledDetailList) throws IOException {
+		logger.info("[createLinePointScheduledDetailList]");
+		try {
+			if (linePointScheduledDetailList != null) {
+				List<LinePointScheduledDetail> result = linePointUIService.saveLinePointScheduledDetailListFromUI(linePointScheduledDetailList);
 				return new ResponseEntity<>(result, HttpStatus.OK);
 			} else 
 				throw new Exception("linePointDetail is Null");
@@ -423,35 +465,6 @@ public class BCSLinePointController extends BCSBaseController {
 			if(e instanceof BcsNoticeException)
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
 			else
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-	
-	@ControllerLog(description = "Push Line Point")
-	@RequestMapping(method = RequestMethod.POST, value = "/edit/pushLinePoint", consumes = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public ResponseEntity<?> pushLinePoint(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
-			@RequestBody List<String> uids, @RequestParam Long eventId) throws IOException {
-		try {
-				JSONArray uid = new JSONArray();
-				for(String u : uids) {
-					uid.put(u);
-				}
-				LinePointMain linePointMain = linePointUIService.linePointMainFindOne(eventId);				
-				LinePointPushModel linePointPushModel = new LinePointPushModel();
-				linePointPushModel.setAmount(linePointMain.getAmount());
-				linePointPushModel.setUid(uid);
-				linePointPushModel.setEventId(eventId);
-				linePointPushModel.setSource(LinePointPushModel.SOURCE_TYPE_BCS);
-				linePointPushModel.setSendTimeType(LinePointPushModel.SEND_TIMING_TYPE_IMMEDIATE);
-				linePointPushModel.setTriggerTime(new Date());
-				linePointPushAkkaService.tell(linePointPushModel);
-				return new ResponseEntity<>("",HttpStatus.OK);
-		} catch (Exception e) {
-			logger.error(ErrorRecord.recordError(e));
-			if (e instanceof BcsNoticeException) 
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			else 
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

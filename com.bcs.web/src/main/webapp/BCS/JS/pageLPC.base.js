@@ -1325,24 +1325,24 @@ $(function(){
 	
     
 	/* File Upload and Parse CSV Begin */
-	document.getElementById('fileupload').addEventListener('change', function (e) {
-		// Check for the various File API support.
-	      if (window.FileReader) {
-	    	
-	          // FileReader are supported.
-	    	  var files = e.target.files;
-	    	  //proceed your files here
-	    	  var reader = new FileReader();
-	          // Read file into memory as UTF-8      
-	          reader.readAsText(files[0]);
-	          // Handle errors load
-	          reader.onload = loadHandler; //將內容打印出來
-	          reader.onerror = errorHandler;
-	    	  
-	      } else {
-	          alert('FileReader are not supported in this browser.');
-	      }		
-	}, false);
+//	document.getElementById('fileupload').addEventListener('change', function (e) {
+//		// Check for the various File API support.
+//	      if (window.FileReader) {
+//	    	
+//	          // FileReader are supported.
+//	    	  var files = e.target.files;
+//	    	  //proceed your files here
+//	    	  var reader = new FileReader();
+//	          // Read file into memory as UTF-8      
+//	          reader.readAsText(files[0]);
+//	          // Handle errors load
+//	          reader.onload = loadHandler; //將內容打印出來
+//	          reader.onerror = errorHandler;
+//	    	  
+//	      } else {
+//	          alert('FileReader are not supported in this browser.');
+//	      }		
+//	}, false);
 	
 	function csvEventListener(e) {
 		// Check for the various File API support.
@@ -1539,6 +1539,7 @@ $(function(){
         postData.successfulCount = 0;
         postData.successfulAmount = 0;
         postData.failedCount = 0;
+        postData.allowToSend = false;
         postData.status = 'IDLE';
         
         console.info('postData', postData);
@@ -1604,6 +1605,96 @@ $(function(){
 		});
     }
     
+    
+    var init = function() {
+    	$('.LyMain').block($.BCS.blockMsgUpload);
+    	
+    	if($.urlParam('linePointMainId')){
+    		linePointMainId = $.urlParam('linePointMainId');
+    		console.info("linePointMainId:", $.urlParam('linePointMainId'));
+    		
+    		// get LinePointMain
+            $.ajax({
+                type: 'POST',
+                url: bcs.bcsContextPath + '/edit/findOneLinePointMain?linePointMainId=' + linePointMainId,
+            }).success(function(o) {
+                console.info('findOneLinePointMain response:', o);
+                
+                $('#title').val(o.title);
+                $('#pccCode').val(o.pccCode);
+                $('#serialId').val(o.serialId);
+                
+                var fileInformation = document.getElementById("fileInformation");
+                fileInformation.innerHTML = '本次共發送' + o.totalCount + '筆，合計發送點數為' + o.totalAmount +'點';
+                
+                var doAppendMessage = o.doAppendMessage;
+                if(doAppendMessage){
+                	$('.doAppendMessage')[1].click();
+                }else{
+                	$('.doAppendMessage')[0].click();
+                }
+                
+                var doCheckFollowage = o.doCheckFollowage;
+                if(doCheckFollowage){
+                	$('.doCheckFollowage')[0].click();
+                }else{
+                	$('.doCheckFollowage')[1].click();
+                }
+                
+                var sendTimingType = o.sendTimingType;
+                if(sendTimingType=="IMMEDIATE"){
+                	$('.sendTimeType')[0].click();
+                }else{
+                	$('.sendTimeType')[1].click();
+                	// set schedule Time
+                	var scheduleTime = o.sendTimingTime;
+    				console.info('scheduleTime', scheduleTime);
+    				if(scheduleTime){
+    					var splits = scheduleTime.split(' ');
+    					console.info('splits', splits);
+
+    					$('#delaySelect .datepicker').val(splits[0]);
+
+    					if(splits[1]){
+    						$('#delaySelect .selectHour').val(splits[1].split(':')[0]);
+    					}
+    					$('#delaySelect .selectHour').change();
+
+    					if(splits[1]){
+    						$('#delaySelect .selectMinuteOne').val(splits[1].split(':')[1].substr(0,1));
+    					}
+    					$('#delaySelect .selectMinuteOne').change();
+
+    					if(splits[1]){
+    						$('#delaySelect .selectMinuteTwo').val(splits[1].split(':')[1].substr(1,2));
+    					}
+    					$('#delaySelect .selectMinuteTwo').change();
+    				}
+                }
+ 
+				
+				
+                var sendAmountType = o.sendAmountType;
+                if(sendAmountType=="UNIVERSAL"){
+                	$('.sendAmountType')[0].click();
+                	console.info('o.amount:', o.amount);
+                	$('#amount').val(o.amount);
+                }else{
+                	$('.sendAmountType')[1].click();
+                }
+                
+            }).fail(function(response) {
+                console.info(response);
+                $.FailResponse(response);
+                $('.LyMain').unblock();
+                
+            }).done(function(){
+            	$('.LyMain').unblock();
+    		});
+    	}
+    	
+    }
+    init();
 //	$('.SaveProjectBtn').click(function(){
 //		$('#send_group_create').click();
 //	});

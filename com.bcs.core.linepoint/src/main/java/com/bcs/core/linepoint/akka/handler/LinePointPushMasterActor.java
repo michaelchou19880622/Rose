@@ -29,18 +29,22 @@ public class LinePointPushMasterActor extends UntypedActor {
 			LinePointPushModel pushApiModel = (LinePointPushModel) object;
 			Integer buffer = 100;
 			JSONArray uids = pushApiModel.getUid();
-			JSONArray partition = null;
+			JSONArray amounts = pushApiModel.getAmount();
 			Integer arrayLength = uids.length();
 			Integer pointer = 0;
 			
 			while(pointer < arrayLength) {
-				partition = new JSONArray();
+				JSONArray partitionUids = new JSONArray();
+				JSONArray partitionAmounts = new JSONArray();
+
 				for(Integer counter = 0; (counter < buffer) && (pointer < arrayLength); counter++, pointer++) {
-					partition.put(uids.get(pointer));
+					partitionUids.put(uids.get(pointer));
+					partitionAmounts.put(amounts.get(pointer));
 				}
-				LinePointPushModel pushApiModel_clone = (LinePointPushModel) pushApiModel.clone();
 				
-				pushApiModel_clone.setUid(partition);
+				LinePointPushModel pushApiModel_clone = (LinePointPushModel) pushApiModel.clone();
+				pushApiModel_clone.setUid(partitionUids);
+				pushApiModel_clone.setAmount(partitionAmounts);
 				
 				pushMessageRouterActor.tell(pushApiModel_clone, this.getSelf());
 			}

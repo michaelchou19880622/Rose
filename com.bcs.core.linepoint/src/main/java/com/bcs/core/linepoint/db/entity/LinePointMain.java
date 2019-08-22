@@ -38,11 +38,9 @@ public class LinePointMain extends AbstractBcsEntity {
 	public static final String SEND_AMOUNT_TYPE_UNIVERSAL = "UNIVERSAL";
 	public static final String SEND_AMOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
 	
-	public static final String STATUS_DELETE = "DELETE";
 	public static final String STATUS_IDLE = "IDLE"; 		   // weather immediate or schedule
 	public static final String STATUS_SCHEDULED = "SCHEDULED"; // begin to start
 	public static final String STATUS_COMPLETE = "COMPLETE";
-	public static final String STATUS_ROTTEN = "ROTTEN";
 	
 	
 	@Id
@@ -75,6 +73,8 @@ public class LinePointMain extends AbstractBcsEntity {
 	private Boolean doCheckFollowage;
 	@Column(name = "DO_APPEND_MESSAGE")
 	private Boolean doAppendMessage;
+	@Column(name = "ALLOW_TO_SEND")
+	private Boolean allowToSend;
 	@Column(name = "APPEND_MESSAGE_ID")
 	private Long appendMessageId;
 	@Column(name = "LINE_POINT_SEND_GROUP_ID")
@@ -224,5 +224,11 @@ public class LinePointMain extends AbstractBcsEntity {
 	}
 	public void setSendStartTime(Date sendStartTime) {
 		this.sendStartTime = sendStartTime;
+	}
+	public Boolean getAllowToSend() {
+		return allowToSend;
+	}
+	public void setAllowToSend(Boolean allowToSend) {
+		this.allowToSend = allowToSend;
 	}
 }

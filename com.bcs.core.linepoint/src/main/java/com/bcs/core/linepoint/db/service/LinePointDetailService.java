@@ -26,9 +26,8 @@ public class LinePointDetailService {
     EntityManager entityManager;
     
 	public void delete(Long msgId){
-		LinePointDetail main = linePointDetailRepository.findOne(msgId);
-		main.setStatus(LinePointMain.STATUS_DELETE);
-		this.save(main);
+		LinePointDetail detail = linePointDetailRepository.findOne(msgId);
+		linePointDetailRepository.delete(detail);
 	}
     
 	public void save(LinePointDetail linePoint){

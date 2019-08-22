@@ -44,4 +44,10 @@ public interface LinePointMainRepository extends EntityRepository<LinePointMain,
     @Transactional(timeout = 30)
     @Query(value = "select x from LinePointMain x where x.status <> 'COMPLETE' and x.sendType = ?1 order by x.modifyTime desc")
 	public List<LinePointMain> findUndoneBySendType(String sendType);
+    
+    @Transactional(timeout = 30)
+    @Query(value = "select x from LinePointMain x where x.status = 'IDLE' and x.allowToSend and " 
+    	+ "(x.sendTimingType = 'IMMEDIATE' or (DATEDIFF(SECOND, SEND_TIMING_TIME, GETDATE()) < 300) and"+
+    		"DATEDIFF(SECOND, SEND_TIMING_TIME, GETDATE()) > 0)")
+	public List<LinePointMain> findAllowableIdles();
 }

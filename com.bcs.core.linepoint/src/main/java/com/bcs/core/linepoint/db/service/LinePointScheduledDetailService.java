@@ -28,7 +28,10 @@ public class LinePointScheduledDetailService {
 	public void save(LinePointScheduledDetail linePointScheduledDetail){
 		linePointScheduledDetailRepository.save(linePointScheduledDetail);
 	}
-    
+	public void save(List<LinePointScheduledDetail> linePointScheduledDetail){
+		linePointScheduledDetailRepository.save(linePointScheduledDetail);
+	}
+	
 	public LinePointScheduledDetail findOne(Long msgId){
 		return linePointScheduledDetailRepository.findOne(msgId);
 	}

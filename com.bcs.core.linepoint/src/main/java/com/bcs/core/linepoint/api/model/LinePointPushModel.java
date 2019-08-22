@@ -20,7 +20,7 @@ public class LinePointPushModel extends AbstractBcsEntity {
 	private Long eventId;
 	private String clientId;
 	private JSONArray uid;
-	private Long amount;
+	private JSONArray amount;
 	
 	// input information
 	private String sendTimeType;
@@ -45,11 +45,11 @@ public class LinePointPushModel extends AbstractBcsEntity {
 		this.uid = uid;
 	}
 
-	public Long getAmount() {
+	public JSONArray getAmount() {
 		return amount;
 	}
 
-	public void setAmount(Long amount) {
+	public void setAmount(JSONArray amount) {
 		this.amount = amount;
 	}
 

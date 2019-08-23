@@ -75,7 +75,7 @@ $(function() {
                 console.info("templateTr:", templateTr);
                 
                 templateTr.find('#titleLink').html(o.title);
-                templateTr.find('#titleLink').attr('href', bcs.bcsContextPath + '/edit/linePointCreatePage?linePointMainId=' + o.id);
+                templateTr.find('#titleLink').attr('href', bcs.bcsContextPath + '/edit/linePointCreatePage?linePointMainId=' + o.id + '&sendGroupId=' + o.linePointSendGroupId);
 		        if (o.modifyTime) {
 		              templateTr.find('.modifyTime').html(moment(o.modifyTime).format('YYYY-MM-DD'));
 		        }else{
@@ -114,7 +114,7 @@ $(function() {
 		        	templateTr.find('.btn_copy').val('已過期');
 		        }else{
 		        	templateTr.find('.btn_copy').val('發送');
-		        	templateTr.find('.btn_copy').attr('id', o.id);
+		        	templateTr.find('.btn_copy').attr('linePointId', o.id);
                     templateTr.find('.btn_copy').click(btn_sendFunc);
 		        }
 //                if (bcs.user.admin) {
@@ -147,7 +147,7 @@ $(function() {
  
     // do Send
     var btn_sendFunc = function() {
-        var linePointMainId = $(this).attr('id');
+        var linePointMainId = $(this).attr('linePointId');
         console.info('btn_sendFunc linePointMainId:' + linePointMainId);
 
         var r = confirm("請確認是否發送");

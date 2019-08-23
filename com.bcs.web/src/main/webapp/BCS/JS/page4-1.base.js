@@ -137,6 +137,17 @@ $(function(){
 				msgData.find('.modifyTime').html($.formatTime(new Date(keyObj.modifyTime)));
 				
 				var groupTitle = response.SendGroup[ keyObj.groupId];
+				console.info('groupTitle:', groupTitle);
+				
+				var doAppend = true;
+				if(groupTitle){
+					var groupTitleSub = groupTitle.slice(0, 5);
+					console.info('groupTitleSub:', groupTitleSub);
+					if(groupTitleSub == 'LPSG;'){
+						doAppend = false;
+					}
+				}
+				
 				if(groupTitle){
 					msgData.find('.sendGroup').html(groupTitle);
 				}
@@ -155,7 +166,9 @@ $(function(){
 					msgData.find('.btn_detele').remove();
 				}
 
-				$('#tableBody').append(msgData);
+				if(doAppend){
+					$('#tableBody').append(msgData);
+				}
 			}
 			
 		}).fail(function(response){

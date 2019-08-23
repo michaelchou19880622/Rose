@@ -48,7 +48,12 @@ $(function(){
 	
 			$.each(response, function(i, o){
 				var groupData = templateBody.clone(true);
-
+				
+				if(o.groupDescription == 'LINE_POINT_SEND_GROUP'){
+					return; // == continue;
+					// return false; // == break
+				}
+				
 				groupData.find('.groupTitle a').attr('href', bcs.bcsContextPath + '/market/sendGroupCreatePage?groupId=' + o.groupId + '&actionType=Edit');
 				groupData.find('.groupTitle a').html(o.groupTitle);
 				groupData.find('.groupDescription').html(o.groupDescription);

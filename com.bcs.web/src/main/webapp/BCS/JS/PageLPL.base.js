@@ -19,7 +19,7 @@ $(function() {
 		}
 	});
 	
-	var dataValidate = function() {
+	var dataValidate = function(){
 		startDate = $('#startDate').val();
 		endDate = $('#endDate').val();
 		if(!startDate) {
@@ -48,12 +48,7 @@ $(function() {
 	    $('.templateTr').remove();
 	};
 	
-    var loadDataFunc = function() {
-    	//searchText = $.urlParam('searchText');
-//    	if($.urlParam('searchText')){
-//    		console.info("searchText", $.urlParam('searchText'));
-//    		searchText = $.urlParam('searchText');
-//    	}
+    var loadDataFunc = function(){
 		// block
 		$('.LyMain').block($.BCS.blockMsgRead);
 		
@@ -114,7 +109,12 @@ $(function() {
 		        } else if(currentTime.isAfter(sendStartTime)){
 		        	templateTr.find('.btn_copy').val('已過期');
 		        }else{
-		        	templateTr.find('.btn_copy').val('發送');
+		        	if(o.allowToSend == true){
+		        		templateTr.find('.btn_copy').val('收回');
+		        	}else{
+		        		templateTr.find('.btn_copy').val('發送');
+		        	}
+		        	
 		        	templateTr.find('.btn_copy').attr('linePointId', o.id);
                     templateTr.find('.btn_copy').click(btn_sendFunc);
 		        }
@@ -141,27 +141,22 @@ $(function() {
         window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
     });
 
-//    $('.btn_save').click(function() {
-//    	var searchText = $('#searchText').val();
-//        window.location.replace(bcs.bcsContextPath + '/edit/linePointListPage?searchText=' + searchText);
-//    });
- 
     // do Send
     var btn_sendFunc = function() {
         var linePointMainId = $(this).attr('linePointId');
         console.info('btn_sendFunc linePointMainId:' + linePointMainId);
 
-        var r = confirm("請確認是否發送");
-        if (!r) {
-        	return;
-        }
+//        var r = confirm("請確認是否發送/收回？");
+//        if (!r) {
+//        	return;
+//        }
 
         $.ajax({
             type: "POST",
             url: bcs.bcsContextPath + '/edit/pressSendLinePointMain?linePointMainId=' + linePointMainId 
         }).success(function(response) {
             console.info(response);
-            alert("發送成功");
+            alert("執行成功");
             window.location.replace(bcs.bcsContextPath + '/edit/linePointListPage');
         }).fail(function(response) {
             console.info(response);

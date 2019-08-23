@@ -178,7 +178,7 @@ public class LinePointPushApiController {
 //			}
 			
 			logger.info("[LinePoint API] Request Body:" + linePointDetail);
-			linePointDetail.setDetailType(LinePointDetail.SOURCE_ISSUE_API);
+			linePointDetail.setDetailType(LinePointDetail.DETAIL_TYPE_ISSUE_API);
 			linePointDetail.setTriggerTime(new Date());
 			
 			// ----------- validation --------------
@@ -256,7 +256,7 @@ public class LinePointPushApiController {
 //			}
 			
 			logger.info("[LinePoint API] Request Body:" + linePointDetail);
-			linePointDetail.setDetailType(LinePointDetail.SOURCE_ISSUE_API);
+			linePointDetail.setDetailType(LinePointDetail.DETAIL_TYPE_ISSUE_API);
 			linePointDetail.setTriggerTime(new Date());
 			
 			// ----------- validation --------------
@@ -386,7 +386,7 @@ public class LinePointPushApiController {
 //			}
 			
 			logger.info("[LinePoint API] Request Body:" + linePointDetail);
-			linePointDetail.setDetailType(LinePointDetail.SOURCE_CANCEL_API);
+			linePointDetail.setDetailType(LinePointDetail.DETAIL_TYPE_CANCEL_API);
 			linePointDetail.setTriggerTime(new Date());
 			
 			// ----------- validation --------------

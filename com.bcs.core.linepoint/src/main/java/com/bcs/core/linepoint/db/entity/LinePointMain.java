@@ -67,7 +67,6 @@ public class LinePointMain extends AbstractBcsEntity {
 	private String serialId;
 	@Column(name = "SEND_TIMING_TYPE", columnDefinition="varchar(50)") // IMMEDIATE/SCHEDULE
 	private String sendTimingType;
-	
 	@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss") 
 	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone = "GMT+8") 
 	@Column(name = "SEND_TIMING_TIME")  // only for sendTimingType = SCHEDULE
@@ -86,6 +85,7 @@ public class LinePointMain extends AbstractBcsEntity {
 	private Long appendMessageId;
 	@Column(name = "LINE_POINT_SEND_GROUP_ID")
 	private Long linePointSendGroupId;
+	
 	
 	@Column(name = "TOTAL_COUNT")
 	private Long totalCount;

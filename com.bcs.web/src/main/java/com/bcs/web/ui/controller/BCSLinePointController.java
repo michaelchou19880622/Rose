@@ -270,6 +270,10 @@ public class BCSLinePointController extends BCSBaseController {
 				throw new BcsNoticeException("此專案已發送");
 			}
 			
+			// switch allowToSend
+			linePointMain.setAllowToSend(!linePointMain.getAllowToSend());
+			linePointUIService.saveLinePointMainFromUI(linePointMain);
+			
 			// immediate
 			if(LinePointMain.SEND_TIMING_TYPE_IMMEDIATE.equals(linePointMain.getSendTimingType())) {
 				try {

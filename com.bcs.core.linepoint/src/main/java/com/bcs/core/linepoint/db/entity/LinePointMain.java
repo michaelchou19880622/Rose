@@ -12,7 +12,11 @@ import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedNativeQuery;
 import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
 import com.bcs.core.json.AbstractBcsEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 
 //@SqlResultSetMapping(name = "LinePointSendMainDetails", entities = {
@@ -63,6 +67,9 @@ public class LinePointMain extends AbstractBcsEntity {
 	private String serialId;
 	@Column(name = "SEND_TIMING_TYPE", columnDefinition="varchar(50)") // IMMEDIATE/SCHEDULE
 	private String sendTimingType;
+	
+	@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss") 
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone = "GMT+8") 
 	@Column(name = "SEND_TIMING_TIME")  // only for sendTimingType = SCHEDULE
 	private Date sendTimingTime;
 	@Column(name = "SEND_AMOUNT_TYPE", columnDefinition="varchar(50)") // INDIVIDUAL/UNIVERSAL

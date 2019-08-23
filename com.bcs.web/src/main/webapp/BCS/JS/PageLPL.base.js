@@ -75,7 +75,8 @@ $(function() {
                 console.info("templateTr:", templateTr);
                 
                 templateTr.find('#titleLink').html(o.title);
-                templateTr.find('#titleLink').attr('href', bcs.bcsContextPath + '/edit/linePointCreatePage?linePointMainId=' + o.id + '&sendGroupId=' + o.linePointSendGroupId);
+                templateTr.find('#titleLink').attr('href', bcs.bcsContextPath + '/edit/linePointCreatePage?linePointMainId=' + 
+                		o.id + '&sendGroupId=' + o.linePointSendGroupId + '&msgId=' + o.appendMessageId +'&actionType=Edit');
 		        if (o.modifyTime) {
 		              templateTr.find('.modifyTime').html(moment(o.modifyTime).format('YYYY-MM-DD'));
 		        }else{

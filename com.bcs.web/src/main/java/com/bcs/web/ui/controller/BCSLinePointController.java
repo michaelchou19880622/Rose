@@ -433,20 +433,20 @@ public class BCSLinePointController extends BCSBaseController {
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 	
-	@ControllerLog(description = "Get Success Line Point Detail")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getLinePointScheduledDetailList/{mainId}")
-	@ResponseBody
-	public ResponseEntity<?> getLinePointScheduledDetailList(HttpServletRequest request, HttpServletResponse response,
-			@CurrentUser CustomUser customUser, @PathVariable Long mainId) throws IOException {
-		logger.info("getLinePointScheduledDetailList");
+//	@ControllerLog(description = "Get Success Line Point Detail")
+//	@RequestMapping(method = RequestMethod.GET, value = "/edit/getLinePointScheduledDetailList/{mainId}")
+//	@ResponseBody
+//	public ResponseEntity<?> getLinePointScheduledDetailList(HttpServletRequest request, HttpServletResponse response,
+//			@CurrentUser CustomUser customUser, @PathVariable Long mainId) throws IOException {
+//		logger.info("getLinePointScheduledDetailList");
+//
+//		List<LinePointScheduledDetail> result = new ArrayList();
+//		List<LinePointScheduledDetail> list = linePointUIService.findScheduledDetailList(mainId);
+//		result.addAll(list);
+//		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
+//		return new ResponseEntity<>(result, HttpStatus.OK);
+//	}
 
-		List<LinePointScheduledDetail> result = new ArrayList();
-		List<LinePointScheduledDetail> list = linePointUIService.findScheduledDetailList(mainId);
-		result.addAll(list);
-		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
-		return new ResponseEntity<>(result, HttpStatus.OK);
-	}
-	
 	@ControllerLog(description="Delete Line Point Main")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/edit/deleteLinePointMain")
 	@ResponseBody

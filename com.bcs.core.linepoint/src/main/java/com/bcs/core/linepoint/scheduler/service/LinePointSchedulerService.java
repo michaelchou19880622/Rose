@@ -117,17 +117,17 @@ public class LinePointSchedulerService {
 			linePointMainService.save(main);
 			
 			// find linePointScheduledDetail.mainId = mainId
-			List<LinePointScheduledDetail> details = linePointScheduledDetailService.findByLinePointMainId(main.getId());
+			//List<LinePointScheduledDetail> details = linePointScheduledDetailService.findByLinePointMainId(main.getId());
 			
 			JSONArray uid = new JSONArray();
-			for(LinePointScheduledDetail detail : details) {
-				//uid.put(detail.getUid());
-				
-				detail.setStatus(LinePointScheduledDetail.STATUS_SENDED);
-				detail.setModifyTime(new Date());
-				linePointScheduledDetailService.save(detail);
-			}
-			logger.info("uid (begin to send):"+uid);
+//			for(LinePointScheduledDetail detail : details) {
+//				//uid.put(detail.getUid());
+//				
+//				detail.setStatus(LinePointScheduledDetail.STATUS_SENDED);
+//				detail.setModifyTime(new Date());
+//				linePointScheduledDetailService.save(detail);
+//			}
+//			logger.info("uid (begin to send):"+uid);
 			
 			// push to AkkaService
 			LinePointPushModel linePointPushModel = new LinePointPushModel();

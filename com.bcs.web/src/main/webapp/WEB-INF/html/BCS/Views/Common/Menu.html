@@ -230,6 +230,12 @@
                         <li th:classappend="${currentPage == 'Page9'} ? 'ExSelected'">
                         	<a th:href="@{/bcs/market/adminUserCreatePage}"><span>建立權限管理</span></a>
                         </li>
+                    </ul>
+                </li>
+				
+				<li sec:authorize="hasRole('ROLE_ADMIN')">
+                    <a href="" style="cursor: pointer;"><span>會員管理</span></a>
+                    <ul class="MdNonDisp subMenu" style="display:none">
                         <li th:classappend="${currentPage == 'Page44'} ? 'ExSelected'">
                         	<a th:href="@{/bcs/market/adminUserBoardPage}"><span>會員UID管理</span></a>
                         </li>

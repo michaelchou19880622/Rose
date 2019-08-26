@@ -43,7 +43,7 @@ public class LinePointMain extends AbstractBcsEntity {
 	public static final String SEND_AMOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
 	
 	public static final String STATUS_IDLE = "IDLE"; 		   // weather immediate or schedule
-	public static final String STATUS_SCHEDULED = "SCHEDULED"; // begin to start
+	//public static final String STATUS_SCHEDULED = "SCHEDULED"; // begin to start
 	public static final String STATUS_COMPLETE = "COMPLETE";
 	
 	

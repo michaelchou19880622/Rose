@@ -312,8 +312,7 @@ public class BCSLinePointController extends BCSBaseController {
 					// save send start time
 					linePointMain.setModifyUser(customUser.getAccount());
 					linePointMain.setSendStartTime(new Date());
-					linePointMain.setStatus(LinePointMain.STATUS_COMPLETE);
-					
+					linePointMain.setStatus(LinePointMain.STATUS_COMPLETE);					
 					linePointMain.setModifyTime(new Date());
 					linePointUIService.saveLinePointMainFromUI(linePointMain);
 					

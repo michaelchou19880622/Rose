@@ -39,7 +39,7 @@ $(function(){
             processData: false,
 			data : JSON.stringify(postData)
 		}).success(function(response){
-			console.info(response);
+			console.info('createSendGroupMidExcelTemp response:', response);
 			if(response.count > 0){
 				var url =  bcs.bcsContextPath + '/market/exportToExcelForSendGroup?tempId=' + response.tempId;
 				var downloadReport = $('#downloadReport');
@@ -61,8 +61,8 @@ $(function(){
 	
 	// SendGroup:[上傳UID] Button
 	$('.upload_mid').click(function(){
-		var queryDataDoms = $('.dataTemplate');		
 		// remove
+		var queryDataDoms = $('.dataTemplate');	
 		if(queryDataDoms.length >= 1){
 			$('.dataTemplate').remove();
 			queryDataDoms = $('.dataTemplate');
@@ -95,8 +95,8 @@ $(function(){
                 processData: false,
                 data: form_data
     		}).success(function(response){
-            	console.info(response);
-            	alert("匯入成功!");
+            	console.info('response csvToExcel:', response);
+            	//alert("匯入成功!");
         		var queryBody = templateBody.clone(true);
         		//queryBody.find('.btn_delete').click(btn_deteleFunc);
         		queryBody.find('.labelField').html("UID匯入");
@@ -126,7 +126,12 @@ $(function(){
 		var queryDataDoms = $('.dataTemplate');
 		var groupId = sendGroupId;
 		
-		var groupTitle = $('#groupTitle').val();
+//		if(!$('#title').val()){
+//			alert('請先輸入專案名稱');
+//			return;
+//		}
+		
+		var groupTitle = 'LPSG;' + $('#title').val();
 		console.info('groupTitle', groupTitle);
 		
 		var postData = {};

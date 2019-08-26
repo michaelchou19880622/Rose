@@ -8,16 +8,6 @@ $(function() {
 		 changeMonth: true
 	});
 	
-	$('.query').click(function(){
-		if(dataValidate()) {
-			$('.dataTemplate').remove();
-			$('.sumTemplate').remove();
-			startDate = $('#startDate').val();
-			endDate = $('#endDate').val();
-			
-			getListData();
-		}
-	});
 	
 	var dataValidate = function(){
 		startDate = $('#startDate').val();
@@ -46,6 +36,12 @@ $(function() {
 		// clone & remove
 	    originalTr = $('.templateTr').clone(true);
 	    $('.templateTr').remove();
+	    
+	    // initialize time picker
+		startDate = moment(new Date()).format('YYYY-MM-DD');
+		endDate = moment(new Date()).format('YYYY-MM-DD');
+		$('#startDate').val(startDate);
+		$('#endDate').val(endDate);
 	};
 	
     var loadDataFunc = function(){
@@ -146,10 +142,10 @@ $(function() {
         var linePointMainId = $(this).attr('linePointId');
         console.info('btn_sendFunc linePointMainId:' + linePointMainId);
 
-//        var r = confirm("請確認是否發送/收回？");
-//        if (!r) {
-//        	return;
-//        }
+        var r = confirm("請確認是否執行發送／收回？");
+        if (!r) {
+        	return;
+        }
 
         $.ajax({
             type: "POST",
@@ -165,6 +161,22 @@ $(function() {
         });
     };
     
+	// [查詢] Button
+	$('.query').click(function(){
+		if(dataValidate()) {
+			// block
+			$('.LyMain').block($.BCS.blockMsgRead);
+			
+			// get time data
+			$('.dataTemplate').remove();
+			$('.sumTemplate').remove();
+			startDate = $('#startDate').val();
+			endDate = $('#endDate').val();
+			
+			getListData();
+		}
+	});
+	
 	// main()
 	// initialize Page & load Data
     initPage();

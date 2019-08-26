@@ -89,7 +89,7 @@ public class BCSTsmbUserLineController extends BCSBaseController {
 				logger.info("[inquireUserLineUrl]  Response body: " + e.getResponseBodyAsString());
 				return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
 			}
-			
+
 			return new ResponseEntity<>(responseObject.toString(), HttpStatus.OK);
 		}catch(Exception e) {
 			logger.info("e:"+e.toString());

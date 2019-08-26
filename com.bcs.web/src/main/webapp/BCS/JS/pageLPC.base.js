@@ -846,7 +846,7 @@ $(function(){
             processData: false,
             data: JSON.stringify(postData)
         }).success(function(response) {
-            console.info(response);
+            console.info('createLinePointMain response:', response);
             linePointMain = response.id;
             console.info('linePointMain:',linePointMain);
         }).fail(function(response) {
@@ -862,7 +862,6 @@ $(function(){
     // Save:LinePointDetail
     function linePointDetailSave(){
     	console.info('linePointDetailSave');
-    	linePointMain  = 10;
     	var detailList = [];
     	var detail = {};
     	
@@ -942,6 +941,9 @@ $(function(){
 							
 							if('UploadMid' == o.queryField){
 								var split = o.queryValue.split(':');
+								
+								//fileNameShow
+								$('#fileNameShow').text(o.queryOp);
 								
 				        		queryBody.find('.labelField').html("UID匯入");
 				        		queryBody.find('.labelField').show();

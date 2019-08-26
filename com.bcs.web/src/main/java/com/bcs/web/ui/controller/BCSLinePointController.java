@@ -56,6 +56,7 @@ import com.bcs.core.linepoint.db.entity.LinePointDetail;
 import com.bcs.core.linepoint.db.entity.LinePointMain;
 import com.bcs.core.linepoint.db.entity.LinePointScheduledDetail;
 import com.bcs.core.linepoint.db.service.ExportToExcelForLinePointPushApiEffects;
+import com.bcs.core.linepoint.db.service.LinePointDetailService;
 import com.bcs.core.linepoint.utils.service.ExcelUtilService;
 
 @Controller
@@ -80,6 +81,8 @@ public class BCSLinePointController extends BCSBaseController {
 	private MsgMainService msgMainService;
 	@Autowired
 	private SendMsgUIService sendMsgUIService;
+	@Autowired
+	private LinePointDetailService linePointDetailService;
 	
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSLinePointController.class);
@@ -257,6 +260,30 @@ public class BCSLinePointController extends BCSBaseController {
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 	
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/findByMainId")
+	@ResponseBody
+	public ResponseEntity<?> findByMainId(HttpServletRequest request, HttpServletResponse response, 
+			@CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
+		try{
+			try {
+				logger.info("linePointMainId1:"+linePointMainId);
+				// get Details
+				List<LinePointDetail> linePointDetails = linePointUIService.findByLinePointMainId(linePointMainId);
+				logger.info("linePointDetails:"+linePointDetails);
+				return new ResponseEntity<>(linePointDetails, HttpStatus.OK);
+			}catch(Exception e) {
+				throw new BcsNoticeException(e.getMessage());
+			}
+		}catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));
+			if(e instanceof BcsNoticeException){
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			}else{
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		}
+	}
+	
 	@ControllerLog(description = "press Send Line Point Main")
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/pressSendLinePointMain")
 	@ResponseBody
@@ -290,14 +317,29 @@ public class BCSLinePointController extends BCSBaseController {
 					linePointMain.setModifyTime(new Date());
 					linePointUIService.saveLinePointMainFromUI(linePointMain);
 					
+					// get Details
+					List<LinePointDetail> linePointDetails = linePointUIService.findByLinePointMainId(linePointMainId);
+					logger.info("linePointDetails:"+linePointDetails);
+					
+					JSONArray detailIds = new JSONArray();
+					for(LinePointDetail linePointDetail: linePointDetails) {
+						detailIds.put(linePointDetail.getDetailId());
+					}
+					
 					// combine LinePointPushModel
+					LinePointPushModel linePointPushModel = new LinePointPushModel();
+					linePointPushModel.setEventId(linePointMainId);
+					linePointPushModel.setDetailIds(detailIds);
+					linePointPushModel.setSource(LinePointMain.SEND_TYPE_BCS);
+					linePointPushModel.setSendTimeType(LinePointMain.SEND_TIMING_TYPE_IMMEDIATE);
+					linePointPushModel.setTriggerTime(new Date());
+					
+					linePointPushAkkaService.tell(linePointPushModel);
 					
 				}catch(Exception e) {
 					throw new BcsNoticeException(e.getMessage());
 				}
 			}
-			
-		
 			return new ResponseEntity<>("", HttpStatus.OK);
 		}catch(Exception e){
 			logger.error(ErrorRecord.recordError(e));

@@ -67,6 +67,9 @@ public class LinePointUIService {
 	public List<LinePointDetail> findFail(Long linePointMainId){
 		return linePointDetailService.findFail(linePointMainId);
 	}
+	public List<LinePointDetail> findByLinePointMainId(Long linePointMainId){
+		return linePointDetailService.findByLinePointMainId(linePointMainId);
+	}
 	@Transactional(rollbackFor=Exception.class, timeout = 30)
 	public LinePointMain saveLinePointMainFromUI(LinePointMain linePointMain) throws BcsNoticeException{
 		linePointMainService.save(linePointMain);

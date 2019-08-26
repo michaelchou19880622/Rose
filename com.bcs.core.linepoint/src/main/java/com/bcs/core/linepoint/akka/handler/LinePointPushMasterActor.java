@@ -12,13 +12,13 @@ import akka.actor.UntypedActor;
 
 public class LinePointPushMasterActor extends UntypedActor {
 	private final ActorRef pushMessageRouterActor;
-	private final ActorRef pushApiRouterActor;
+	//private final ActorRef pushApiRouterActor;
 //	private final ActorRef pushMessageRecordRouterActor;
 //	private final ActorRef ftpTaskRouterActor;
 	
 	public LinePointPushMasterActor(){
 	    pushMessageRouterActor = new AkkaRouterFactory<LinePointPushMessageActor>(getContext(), LinePointPushMessageActor.class, true).routerActor;
-	    pushApiRouterActor = new AkkaRouterFactory<LinePointPushApiActor>(getContext(), LinePointPushApiActor.class, true).routerActor;
+	    //pushApiRouterActor = new AkkaRouterFactory<LinePointPushApiActor>(getContext(), LinePointPushApiActor.class, true).routerActor;
 	    //pushMessageRecordRouterActor = new AkkaRouterFactory<LinePointPushMessageRecordActor>(getContext(), LinePointPushMessageRecordActor.class, true).routerActor;
 	    //ftpTaskRouterActor = new AkkaRouterFactory<LinePointFtpTaskActor>(getContext(), LinePointFtpTaskActor.class, true).routerActor;
 	}
@@ -28,23 +28,19 @@ public class LinePointPushMasterActor extends UntypedActor {
 		if(object instanceof LinePointPushModel) {
 			LinePointPushModel pushApiModel = (LinePointPushModel) object;
 			Integer buffer = 100;
-			JSONArray uids = pushApiModel.getUid();
-			JSONArray amounts = pushApiModel.getAmount();
-			Integer arrayLength = uids.length();
+			JSONArray detailIds = pushApiModel.getDetailIds();
+			Integer arrayLength = detailIds.length();
 			Integer pointer = 0;
 			
 			while(pointer < arrayLength) {
-				JSONArray partitionUids = new JSONArray();
-				JSONArray partitionAmounts = new JSONArray();
+				JSONArray partitionDetailIds = new JSONArray();
 
 				for(Integer counter = 0; (counter < buffer) && (pointer < arrayLength); counter++, pointer++) {
-					partitionUids.put(uids.get(pointer));
-					partitionAmounts.put(amounts.get(pointer));
+					partitionDetailIds.put(detailIds.get(pointer));
 				}
 				
 				LinePointPushModel pushApiModel_clone = (LinePointPushModel) pushApiModel.clone();
-				pushApiModel_clone.setUid(partitionUids);
-				pushApiModel_clone.setAmount(partitionAmounts);
+				pushApiModel_clone.setDetailIds(partitionDetailIds);
 				
 				pushMessageRouterActor.tell(pushApiModel_clone, this.getSelf());
 			}

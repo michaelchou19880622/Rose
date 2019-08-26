@@ -132,7 +132,7 @@ public class LinePointSchedulerService {
 			// push to AkkaService
 			LinePointPushModel linePointPushModel = new LinePointPushModel();
 			//linePointPushModel.setAmount(main.getAmount());
-			linePointPushModel.setUid(uid);
+			//linePointPushModel.setUid(uid);
 			linePointPushModel.setEventId(main.getId());
 			linePointPushModel.setSource(LinePointPushModel.SOURCE_TYPE_BCS);
 			//linePointPushModel.setSendTimeType(LinePointPushModel.SEND_TYPE_IMMEDIATE);

@@ -49,7 +49,11 @@ public class LinePointDetailService {
 	public List<LinePointDetail> findFail(Long linePointMainId){
 		return linePointDetailRepository.findByStatusAndLinePointMainId(LinePointDetail.STATUS_FAIL, linePointMainId);
 	}
-		
+	
+	public List<LinePointDetail> findByLinePointMainId(Long linePointMainId){
+		return linePointDetailRepository.findByLinePointMainId(linePointMainId);
+	}
+	
 //	public LinePointDetail findBySerialId(String serialId){
 //		return linePointDetailRepository.findBySerialId(serialId);
 //	}

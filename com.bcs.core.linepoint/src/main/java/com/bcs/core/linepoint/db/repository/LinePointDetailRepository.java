@@ -20,6 +20,10 @@ public interface LinePointDetailRepository extends EntityRepository<LinePointDet
     @Transactional(timeout = 30)
     public LinePointDetail findByOrderKeyAndStatus(String orderKey, String status);
     
+    @Transactional(timeout = 30)
+    public List<LinePointDetail> findByLinePointMainId(Long linePointMainId);
+    
+    
 //	public LinePointDetail findBySerialId(String serialId);
 //	
 //	public List<LinePointDetail> findByStatus(String status);

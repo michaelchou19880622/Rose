@@ -70,34 +70,8 @@ $(function(){
 				console.info(response);
 				response = JSON.parse(response);      //string to Json
 				if(response.ReturnCode == 'S001'){
-					//查詢身分證之後顯示帳號狀態
-					var ReturnMessage = "" ;
-					var RegisterDate  = response.ReturnData.RegisterDate.substring(0,4)+"/"+
-										response.ReturnData.RegisterDate.substring(4,6)+"/"+
-										response.ReturnData.RegisterDate.substring(6,8);
-					var RegisterTime  = response.ReturnData.RegisterTime.substring(0,5);
-					var ModifyDate    = null ;
-					if(response.ReturnMessage == "客戶已綁定"){
-						ReturnMessage = "已綁定";
-					}else{
-						ReturnMessage = "已解除綁定";
-					}
-					
-					if(response.ReturnData.ModifyDate != null){
-						ModifyDate = response.ReturnData.ModifyDate.substring(0,4)+"/"+
-									 response.ReturnData.ModifyDate.substring(4,6)+"/"+
-									 response.ReturnData.ModifyDate.substring(6,8)+" "+
-									 response.ReturnData.ModifyTime.substring(0,5);
-					}else{
-						ModifyDate = "N/A"
-					}
-					
-					//$(".showResult").html("LINE UID : <br><br>" + response.ReturnData.Luid ).css("color","blue").css("fontSize", "35px");
-					$(".showResult").html(
-							"LINE UID :  " + response.ReturnData.Luid + 
-							"<br>目前狀態 : " + ReturnMessage + 
-							"<br>綁定時間 : " + RegisterDate + " " + RegisterTime+ 
-							"<br>解綁時間 : " + ModifyDate).css("color","blue").css("fontSize", "20px");
+					//顯示UID
+					$(".showResult").html("LINE UID : <br><br>" + response.ReturnData.Luid ).css("color","blue").css("fontSize", "35px");
 				}else if(response.ReturnCode == 'E001'){
 					//顯示錯誤訊息
 					$(".showResult").html(response.ReturnMessage ).css("color","red").css("fontSize", "35px");
@@ -143,27 +117,10 @@ $(function(){
 			response = JSON.parse(response);      //string to Json
 			if(response.ReturnCode == 'S001'){
 				//顯示UID
-				var ReturnMessage = '解綁成功' ;
-				var RegisterDate  = response.ReturnData.RegisterDate.substring(0,4)+"/"+
-									response.ReturnData.RegisterDate.substring(4,6)+"/"+
-									response.ReturnData.RegisterDate.substring(6,8);
-				var RegisterTime  = response.ReturnData.RegisterTime.substring(0,5);
-				var ModifyDate    = response.ReturnData.ModifyDate.substring(0,4)+"/"+
-									response.ReturnData.ModifyDate.substring(4,6)+"/"+
-									response.ReturnData.ModifyDate.substring(6,8)+" "+
-									response.ReturnData.ModifyTime.substring(0,5);
-
-				
-				//$(".showResult").html("LINE UID : <br><br>" + response.ReturnData.Luid ).css("color","blue").css("fontSize", "35px");
-				$(".showResult").html(
-						"&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp"+userId + " 已解除綁定 <br>"+
-						"<br>LINE UID :  " + response.ReturnData.Luid + 
-						"<br>目前狀態 : "     + ReturnMessage + 
-						"<br>綁定時間 : "     + RegisterDate + " " + RegisterTime+ 
-						"<br>解綁時間 : "     + ModifyDate).css("color","blue").css("fontSize", "20px");
-				}else if(response.ReturnCode == 'E001'){
+				$(".showResult").html("身分證字號 : "+ userId + "   " +response.ReturnMessage +"<br><br> LINE UID : <br><br>" + response.ReturnData.Luid ).css("color","blue").css("fontSize", "35px");
+			}else if(response.ReturnCode == 'E001'){
 				//顯示錯誤訊息
-				$(".showResult").html(response.ReturnMessage ).css("color","red").css("fontSize", "20px");
+				$(".showResult").html(response.ReturnMessage ).css("color","red").css("fontSize", "35px");
 			}
 
 		}).fail(function(response){

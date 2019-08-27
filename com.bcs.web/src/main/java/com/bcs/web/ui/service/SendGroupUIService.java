@@ -165,9 +165,14 @@ public class SendGroupUIService {
 					}
 				}
 
+				long endTime = System.currentTimeMillis(); //獲取當前時間
+				logger.info("PASS - 查詢上傳UID是否是LINE好友的時間  : " +  (endTime - startTime) + "毫秒");
+
 			}catch(Exception e) {
-				long endTime = System.currentTimeMillis(); //獲取開始時間
-				logger.info("查詢上傳UID是否是LINE好友的時間  : " +  (endTime - startTime) + "毫秒");
+				long endTime = System.currentTimeMillis(); //獲取當前時間
+				logger.info("FAIL - 查詢上傳UID是否是LINE好友的時間  : " +  (endTime - startTime) + "毫秒");
+				
+				// 增加retry機制，紀錄當前findMidByMidInAndActive的index， 如果 timeout，則重新從index繼續做findMidByMidInAndActive
 			}
 
 			if(existMids != null && existMids.size() > 0){
@@ -175,7 +180,7 @@ public class SendGroupUIService {
 				
 				String referenceId = UUID.randomUUID().toString().toLowerCase();
 				//start
-				startTime = System.currentTimeMillis(); //獲取開始時間
+				startTime = System.currentTimeMillis(); //獲取當前時間
 				try {
 					
 					for(String mid : existMids){
@@ -197,10 +202,15 @@ public class SendGroupUIService {
 						
 						userEventSetService.save(userEventSet);
 					}
+
+					long endTime = System.currentTimeMillis(); //獲取當前時間
+					logger.info("PASS - 存入 userEventSet 時間 : " +  (endTime - startTime) + "毫秒");
 					
 				}catch(Exception e) {
-					long endTime = System.currentTimeMillis(); //獲取開始時間
-					logger.info("存入 userEventSet 時間 : " +  (endTime - startTime) + "毫秒");
+					long endTime = System.currentTimeMillis(); //獲取當前時間
+					logger.info("FAIL - 存入 userEventSet 時間 : " +  (endTime - startTime) + "毫秒");
+
+					// 增加retry機制，紀錄當前寫入UserEventSet table 的index， 如果 timeout，則重新從index繼續寫入UserEventSet table
 				}
 				Map<String, Object> result = new HashMap<String, Object>();
 		

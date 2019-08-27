@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Line Point List Page', '/BCS/JS/PageLPStatisticsReport.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('PageLPStatisticsReport')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">統計報表</h3>
+                        <p class="CHDesc">LINE POINT統計報表。</p>
+                    </header>
+                    <div class="CHBtnSet">
+                        <div class="CHLeft">
+	                    	<div>
+		                    	<span>日期區間：</span>
+		                    	<div class="option date">
+		                        	<input type="text" 
+			                           	class="datepicker" 
+			                           	id="startDate" 
+			                           	placeholder="YYYY-MM-DD"/>
+		                       	</div>
+		                       	<span>~</span>
+		                       	<div class="option date">
+		                        	<input type="text" 
+			                        	class="datepicker" 
+			                           	id="endDate" 
+			                           	placeholder="YYYY-MM-DD"/>
+		                      	</div>
+	                      		<input class="btn_save query" type="button" value="查詢"  style="cursor: pointer;">
+	                    	</div>
+                        </div>
+                        <div class="CHRight">
+                        	<input class="btn_add" style="cursor: pointer;" type="button" value="建立專案">
+                       	</div>
+                    </div>
+					<div class="mainFrame alignLeft" id="mainFrameId">
+                        <table border="1" class="templateTable">
+                            <colgroup>
+                                <col width="200">
+                            	<col width="130">
+                            	<col width="100">
+                            	<col width="100">
+                            	<col width="100">
+                            	<col width="130">
+                            	<col width="130">
+                            	<col width="130">
+                            	<col width="130">
+                            	<col width="100">
+                            	<col width="100">
+							</colgroup>
+                            <tr class="templateTh">
+                                <th>專案名稱</th>
+                                <th>建立日期</th>
+                                <th>建立人員</th>
+                                <th>建立人員單位</th>
+                                <th>PCC</th>
+                                <th>Service name</th>
+                                <th>Campaign Code</th>
+                                <th>發送筆數</th>
+                                <th>成功筆數</th>
+                                <th>失敗筆數</th>
+                                <th>發送總點數</th>
+                                <th>發送明細</th>
+                            </tr>
+                            <tbody class="templateTbody">
+	                            <tr class="templateTr">
+	                                <td class="title"></td>
+	                                <td class="modifyTime"></td>
+	                                <td class="modifyUser"></td>
+	                                <td class="departmentFullName"></td>
+	                                <td class="pccCode"></td>
+	                                <td class="serviceName"></td>
+	                                <td class="campaignCode"></td>
+	                                <td class="sendedCount"></td>
+	                                <td class="successfulCount"></td>
+	                                <td class="failedCount"></td>
+	                                <td class="totalAmount"></td>
+	                                <td class="action">
+	                                	<input class="btn_copy" style="cursor: pointer;" type="button" value="查看明細">
+	                                </td>
+	                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </section>
+            </form>
+        </div>
+    </div>
+    
+</body>
+</html>

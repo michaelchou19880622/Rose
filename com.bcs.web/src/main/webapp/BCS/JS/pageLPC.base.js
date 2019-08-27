@@ -173,7 +173,6 @@ $(function(){
 	function csvEventListener(e) {
 		// Check for the various File API support.
 	      if (window.FileReader) {
-	    	
 	          // FileReader are supported.
 	    	  var files = e.target.files;
 	    	  //proceed your files here

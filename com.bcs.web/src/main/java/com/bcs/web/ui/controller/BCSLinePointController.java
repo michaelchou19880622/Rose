@@ -39,6 +39,8 @@ import com.bcs.core.db.service.ContentTemplateMsgService;
 import com.bcs.core.db.service.MsgMainService;
 import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.resource.CoreConfigReader;
+import com.bcs.core.taishin.circle.db.entity.TaishinEmployee;
+import com.bcs.core.taishin.circle.db.service.OracleService;
 import com.bcs.core.web.security.CurrentUser;
 import com.bcs.core.web.security.CustomUser;
 import com.bcs.core.web.ui.controller.BCSBaseController;
@@ -83,7 +85,8 @@ public class BCSLinePointController extends BCSBaseController {
 	private SendMsgUIService sendMsgUIService;
 	@Autowired
 	private LinePointDetailService linePointDetailService;
-	
+	@Autowired
+	private OracleService oracleService;
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSLinePointController.class);
 	
@@ -101,6 +104,13 @@ public class BCSLinePointController extends BCSBaseController {
 		return BcsPageEnum.LinePointListPage.toString();
 	}
 
+	@ControllerLog(description = "Line Point 統計明細")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/linePointStatisticsReportPage")
+	public String linePointStatisticsReportPage(HttpServletRequest request, HttpServletResponse response) {
+		logger.info("linePointStatisticsReportPage");
+		return BcsPageEnum.LinePointStatisticsReportPage.toString();
+	}
+	
 	@ControllerLog(description = "發送 Line Point 活動")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/linePointSendPage")
 	public String linePointSendPage(HttpServletRequest request, HttpServletResponse response) {
@@ -136,13 +146,38 @@ public class BCSLinePointController extends BCSBaseController {
 			@CurrentUser CustomUser customUser, @RequestBody LinePointMain linePointMain) throws IOException {
 		logger.info("[createLinePointMain]");
 		try {
-			if (linePointMain != null) {
-				linePointMain.setModifyUser(customUser.getAccount());
-				linePointMain.setModifyTime(new Date());
-				LinePointMain result = linePointUIService.saveLinePointMainFromUI(linePointMain);
-				return new ResponseEntity<>(result, HttpStatus.OK);
-			}else 
+			
+			if (linePointMain == null) {
 				throw new Exception("LinePointMain is Null");
+			}
+			
+			String empId = customUser.getAccount().toUpperCase();
+			logger.info("empId:" + empId);
+			if(StringUtils.isBlank(empId)) {
+				throw new Exception("empId is Null");
+			}
+			
+			TaishinEmployee taishinEmployee = null;
+			try {
+				taishinEmployee = oracleService.findByEmployeeId(empId);		
+			}catch(Exception e){
+				throw new BcsNoticeException("The Employee Id Is Not Correct!"); 
+			}
+			
+			if(taishinEmployee == null || StringUtils.isBlank(taishinEmployee.getDivisionName())){
+				throw new BcsNoticeException("The Employee Id Is Not Correct!");
+			}
+			
+			String departmentFullName = taishinEmployee.getDivisionName() + " " + 
+				taishinEmployee.getDepartmentName() + " " + taishinEmployee.getGroupName();
+			logger.info("departmentFullName:" + departmentFullName);
+			
+			linePointMain.setDepartmentFullName(departmentFullName);
+			linePointMain.setModifyUser(customUser.getAccount());
+			linePointMain.setModifyTime(new Date());
+			LinePointMain result = linePointUIService.saveLinePointMainFromUI(linePointMain);
+			return new ResponseEntity<>(result, HttpStatus.OK);
+				
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
 			if (e instanceof BcsNoticeException) 

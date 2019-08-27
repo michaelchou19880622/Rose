@@ -61,10 +61,13 @@ public class LinePointMain extends AbstractBcsEntity {
 	
 	@Column(name = "TITLE", columnDefinition="nvarchar(50)")
 	private String title;
-	@Column(name = "PCC_CODE", columnDefinition="nvarchar(50)")
-	private String pccCode;
 	@Column(name = "SERIAL_ID", columnDefinition="nvarchar(50)")
 	private String serialId;
+	@Column(name = "PCC_CODE", columnDefinition="nvarchar(50)")
+	private String pccCode;
+	@Column(name = "DEPARTMENT_FULL_NAME", columnDefinition="nvarchar(200)")
+	private String departmentFullName;
+	
 	@Column(name = "SEND_TIMING_TYPE", columnDefinition="varchar(50)") // IMMEDIATE/SCHEDULE
 	private String sendTimingType;
 	@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss") 
@@ -237,5 +240,11 @@ public class LinePointMain extends AbstractBcsEntity {
 	}
 	public void setAllowToSend(Boolean allowToSend) {
 		this.allowToSend = allowToSend;
+	}
+	public String getDepartmentFullName() {
+		return departmentFullName;
+	}
+	public void setDepartmentFullName(String departmentFullName) {
+		this.departmentFullName = departmentFullName;
 	}
 }

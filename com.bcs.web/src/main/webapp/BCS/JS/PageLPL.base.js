@@ -93,20 +93,45 @@ $(function() {
 		        }
 		        templateTr.find('.successfulCount').html(o.successfulCount);
 		        templateTr.find('.successfulAmount').html(o.successfulAmount);
-		        templateTr.find('.status').html(o.status);
 		        
-		        var currentTime = moment();
+		        // get date data
+		        var currentTime = moment(new Date()).add(-120, 'seconds');
 		        var sendStartTime = moment(o.sendStartTime).format('YYYY-MM-DD HH:mm:ss');
 		        console.info('currentTime:', currentTime);
 		        console.info('sendStartTime:', sendStartTime);
 		        console.info('isAfter:', currentTime.isAfter(sendStartTime));
+		        
+		        // set status
+		        var statusCh = '';
+		        if(o.sendTimingType == 'IMMEDIATE'){
+		        	if(o.status == 'COMPLETE'){
+		        		statusCh = '已發送';
+		        	}else{
+		        		statusCh = '已設定';
+		        	}
+		        }else{
+		        	if(o.status == 'COMPLETE'){
+		        		statusCh = '已發送';
+		        	}else{
+		        		if(currentTime.isAfter(sendStartTime)){
+		        			statusCh = '已逾期';
+		        		}else if(o.allowToSend == true){
+		        			statusCh = '待發送';
+		        		}else{
+		        			statusCh = '已設定';
+		        		}
+		        	}
+		        }
+		        templateTr.find('.status').html(statusCh);
+
+		        // set button
 		        if(o.sendStartTime){
 		        	templateTr.find('.btn_copy').val('已發送');
-		        } else if(currentTime.isAfter(sendStartTime)){
-		        	templateTr.find('.btn_copy').val('已過期');
+		        }else if(currentTime.isAfter(sendStartTime)){
+		        	templateTr.find('.btn_copy').val('過期');
 		        }else{
 		        	if(o.allowToSend == true){
-		        		templateTr.find('.btn_copy').val('收回');
+		        		templateTr.find('.btn_copy').val('取消');
 		        	}else{
 		        		templateTr.find('.btn_copy').val('發送');
 		        	}
@@ -114,6 +139,7 @@ $(function() {
 		        	templateTr.find('.btn_copy').attr('linePointId', o.id);
                     templateTr.find('.btn_copy').click(btn_sendFunc);
 		        }
+		        
 //                if (bcs.user.admin) {
 //                } else {
 //                    templateTr.find('.btn_copy').remove();
@@ -142,11 +168,17 @@ $(function() {
         var linePointMainId = $(this).attr('linePointId');
         console.info('btn_sendFunc linePointMainId:' + linePointMainId);
 
-        var r = confirm("請確認是否執行發送／收回？");
-        if (!r) {
-        	return;
+        // warning while actionText = Send
+        var actionText = $(this).attr('value');
+        console.info('actionText:', actionText);
+        if(actionText == '發送'){
+        	var r = confirm("請再次確認是否要發送？");
+            if (!r) {
+            	return;
+            }
         }
-
+        
+        // send
         $.ajax({
             type: "POST",
             url: bcs.bcsContextPath + '/edit/pressSendLinePointMain?linePointMainId=' + linePointMainId 

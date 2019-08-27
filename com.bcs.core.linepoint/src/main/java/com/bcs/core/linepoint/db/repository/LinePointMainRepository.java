@@ -48,6 +48,6 @@ public interface LinePointMainRepository extends EntityRepository<LinePointMain,
     @Transactional(timeout = 30)
     @Query(value = "select x from LinePointMain x where x.status = 'IDLE' "
         + " and x.allowToSend = 1 and x.sendTimingType = 'SCHEDULE' and "
-    	+ " DATEDIFF(SECOND, x.sendTimingTime, GETDATE()) < 120 and DATEDIFF(SECOND, x.sendTimingTime, GETDATE()) > 0 ) ) ")
+    	+ " DATEDIFF(SECOND, x.sendTimingTime, GETDATE()) < 120 and DATEDIFF(SECOND, x.sendTimingTime, GETDATE()) >= 0 ) ) ")
 	public List<LinePointMain> findAllowableIdles();
 }

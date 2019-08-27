@@ -37,8 +37,8 @@ $(function() {
 	    originalTr = $('.templateTr').clone(true);
 	    $('.templateTr').remove();
 	    
-	    // initialize time picker
-		startDate = moment(new Date()).format('YYYY-MM-DD');
+		// initialize date-picker
+		startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
 		endDate = moment(new Date()).format('YYYY-MM-DD');
 		$('#startDate').val(startDate);
 		$('#endDate').val(endDate);

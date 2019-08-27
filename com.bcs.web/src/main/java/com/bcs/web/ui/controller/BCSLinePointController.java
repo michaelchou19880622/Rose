@@ -36,6 +36,7 @@ import com.bcs.core.db.entity.MsgDetail;
 import com.bcs.core.db.entity.MsgMain;
 import com.bcs.core.db.service.ContentRichMsgService;
 import com.bcs.core.db.service.ContentTemplateMsgService;
+import com.bcs.core.db.service.LineUserService;
 import com.bcs.core.db.service.MsgMainService;
 import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.resource.CoreConfigReader;
@@ -87,6 +88,8 @@ public class BCSLinePointController extends BCSBaseController {
 	private LinePointDetailService linePointDetailService;
 	@Autowired
 	private OracleService oracleService;
+	@Autowired
+	private LineUserService lineUserService;
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSLinePointController.class);
 	
@@ -548,6 +551,36 @@ public class BCSLinePointController extends BCSBaseController {
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+
+	// Check Active UIds
+	@ControllerLog(description="Check Active UIds")
+    @RequestMapping(method = RequestMethod.POST, value = "/edit/checkActiveUids", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> checkActiveUids(HttpServletRequest request, HttpServletResponse response, 
+    		@CurrentUser CustomUser customUser, @RequestBody List<String> uids) throws IOException {
+        try { 
+    		logger.info("[checkActiveUids]");
+    		
+    		List<Integer> removeIndexs = new ArrayList();
+    		for(int i = 0; i < uids.size(); i++) {
+    			if(!lineUserService.checkMIDAllActive(uids.get(i))) {
+    				removeIndexs.add(i);
+    			}
+    		}
+    		
+    		List<Integer> result = new ArrayList();
+    		result.addAll(removeIndexs);
+    		logger.info("result:" + ObjectUtil.objectToJsonStr(removeIndexs));
+    		return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+			if(e instanceof BcsNoticeException){
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			}else{
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+        }
+    }
 	
 	// CSV to EXCEL
 	@ControllerLog(description="CSV to EXCEL")
@@ -591,7 +624,6 @@ public class BCSLinePointController extends BCSBaseController {
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 			}
         }
-
     }
 	
 	private Map<String, Object> uploadMidSendGroup(CustomUser customUser, MultipartFile filePart) throws IOException {

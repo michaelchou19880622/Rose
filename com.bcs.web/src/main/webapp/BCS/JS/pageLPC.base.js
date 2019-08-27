@@ -212,36 +212,106 @@ $(function(){
         }
         console.info('trimmed rows:', rows);
         
-        // get fix amount
+        // get fix amount & need column max number
         var fixAmount = parseInt($('#amount').val());
-        console.info('fixAmount:', fixAmount);
-        
+        var needColMaxNum = ($('.sendAmountType')[0].checked)?2:3;
+    	console.info('fixAmount:', fixAmount);
+    	console.info('needColMaxNum:', needColMaxNum);
+    	
         // split by column
         uids = []; custIds = []; pts = [];
-        colMaxNum = 2;
+        colMaxNum = 0;
+        var maxPts = 0;
         for (var i = 0; i < rows.length; i++) {
         	var cols = rows[i].split(/,/);
         	console.info('cols:', cols);
         	uids.push(cols[0]);
         	custIds.push(cols[1]);
-        	if(cols.length == 3){
-        		colMaxNum = 3;
-        		pts.push(parseInt(cols[2]));
-        	}else{
-        		pts.push(fixAmount);
+        	
+        	// set column max number
+        	if(cols.length > colMaxNum){
+        		colMaxNum = cols.length;
+        	}
+        	
+        	// save & check columns
+        	if(needColMaxNum == 2){ // universal
+        		if(cols.length == 3){ // check universal but with points
+        			alert('您選擇統一發送數量，但上傳的資料格式不符');
+        			window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
+        			//return;
+        		}else{
+        			pts.push(fixAmount);
+        		}
+        	}else{ // individual
+        		if(cols.length == 3){
+        			pts.push(cols[2]);
+        			// store max points
+        			if(cols[2] > maxPts){
+        				maxPts = cols[2];
+        			}
+        		}else{
+        			pts.push(0);
+        		}
         	}
         }
-        
-        // calculate sum
-        var needColMaxNum = ($('.sendAmountType')[0].checked)?2:3;
-    	console.info('colMaxNum:', colMaxNum);
-    	console.info('needColMaxNum:', needColMaxNum);
-    	
-        if(needColMaxNum != colMaxNum) {
-        	alert('資料行數：' + colMaxNum + '與需要行數：' + needColMaxNum + '不符');
-        	window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
+
+        // check max points
+        if(maxPts > 3000){
+    		var r = confirm('您的名單中有單筆超過3,000點的發送需求');
+    		if (r) {
+    		} else {
+    		}
         }
         
+        // check individual but column max number = 2
+        console.info('colMaxNum:', colMaxNum);
+        if(needColMaxNum == 3 && colMaxNum == 2){
+			alert('您上傳的資料中未包含發送數量資訊');
+			window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
+			//return;
+        }
+        
+        // no need to check follow-age
+        if($('.sendAmountType')[1].checked){
+        	calculateSum();
+        }
+        
+        // check follow-age
+        $.ajax({
+            type: 'POST',
+            url: bcs.bcsContextPath + '/edit/checkActiveUids',
+            cache: false,
+            contentType: 'application/json',
+            processData: false,
+            data : JSON.stringify(uids)
+		}).success(function(response){
+        	console.info('checkActiveUids response:', response);
+        	console.info('checkActiveUids response.length:', response.length);
+        	removeIndexs = response;
+        	if(removeIndexs.length != 0){
+        		// trim inactive UIds
+                if(removeIndexs.length > 0) {
+        	        removeIndexs.reverse().forEach(function(index){
+        	        	uids.splice(index, 1);
+        	        	custIds.splice(index, 1);
+        	        	pts.splice(index, 1);
+        	        });
+                }
+                console.info('trimmed uids:', uids);
+                console.info('trimmed custIds:', custIds);
+                console.info('trimmed pts:', pts);
+                
+        	}
+		}).fail(function(response){
+			console.info(response);
+			$.FailResponse(response);
+			return;
+		}).done(function(){
+			calculateSum();
+		});
+    }
+    function calculateSum(){
+        // calculate sum
         var sum = 0;
         if(colMaxNum == 2){
         	var amount = parseInt($('#amount').val());
@@ -249,18 +319,18 @@ $(function(){
         		alert('發送數量必須大於零');
         		window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
         	}
-        	sum = rows.length * amount;
-        	fileInformation.innerHTML = '本次共發送' + rows.length + '筆，合計發送點數為' + sum +'點';
+        	sum = uids.length * amount;
         }else{
         	sum = 0;
             for (var i = 0; i < pts.length; i++) {
             	sum += pts[i];
             }
-            fileInformation.innerHTML = '本次共發送' + rows.length + '筆，合計發送點數為' + sum +'點';
         }
         
-        totalCount = rows.length;
+        // export to global variables & front-end
+        totalCount = uids.length;
         totalAmount = sum;
+        fileInformation.innerHTML = '本次共發送' + totalCount + '筆，合計發送點數為' + sum +'點';
     }
     function errorHandler(evt) {
       if(evt.target.error.name == "NotReadableError") {

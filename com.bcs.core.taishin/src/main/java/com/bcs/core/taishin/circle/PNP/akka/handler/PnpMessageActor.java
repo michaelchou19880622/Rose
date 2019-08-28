@@ -15,18 +15,18 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- * BC發送訊息
+ * PNP發送訊息
  *
- * @author jessie
- * STAGE = BC
- * @see PnpMainActor#PnpMainActor()
+ * @author kenneth
+ * STAGE = PNP
+ * @see PnpMainActor#onReceive
  */
-public class PnpPushMessageActor extends UntypedActor {
-    private static Logger logger = Logger.getLogger(PnpPushMessageActor.class);
+public class PnpMessageActor extends UntypedActor {
+    private static Logger logger = Logger.getLogger(PnpMessageActor.class);
 
     @Override
     public void onReceive(Object object) throws Exception {
-        logger.info("PnpPushMessageActor Receive!!");
+        logger.info("PnpMessageActor Receive!!");
         PnpMain pnpMain = (PnpMain) object;
         checkSendTypeThenDoSomething(pnpMain);
     }
@@ -75,18 +75,18 @@ public class PnpPushMessageActor extends UntypedActor {
             return new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(pnpMain.getScheduleTime());
         } catch (ParseException e) {
             logger.error(e);
-            logger.error("ScheduleTime Format Error :" + pnpMain.getScheduleTime());
+            logger.error("ScheduleTime format Error :" + pnpMain.getScheduleTime());
             return null;
         }
     }
 
     /**
-     * 立即發送BC訊息
+     * 立即發送PNP訊息
      * @param pnpMain pnpMain
      */
     private void immediatePushMessage(PnpMain pnpMain) {
         PnpService pnpService = ApplicationContextProvider.getApplicationContext().getBean(PnpService.class);
-        pnpService.pushLineMessage(pnpMain, this.getSender(), this.getSelf());
+        pnpService.pushPnpMessage(pnpMain, this.getSender(), this.getSelf());
     }
 
     /**

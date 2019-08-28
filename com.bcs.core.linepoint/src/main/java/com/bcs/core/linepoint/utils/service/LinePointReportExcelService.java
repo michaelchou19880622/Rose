@@ -71,9 +71,9 @@ public class LinePointReportExcelService {
 				
 				Cell createTimeCell = row.createCell(1);
 				createTimeCell.setCellValue(main.getModifyTime());
+				createTimeCell.setCellStyle(cellStyle);
 				
 				// Combine Other Rows
-				createTimeCell.setCellStyle(cellStyle);
 				row.createCell(0).setCellValue(main.getTitle());
 				//row.createCell(1).setCellValue(main.getModifyTime());
 				row.createCell(2).setCellValue(main.getModifyUser());

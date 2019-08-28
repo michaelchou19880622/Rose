@@ -25,7 +25,7 @@ import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpRepositoryCustom;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpService;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpSetting;
-import com.bcs.core.taishin.circle.PNP.scheduler.LoadFtbPnpDataTask;
+import com.bcs.core.taishin.circle.PNP.scheduler.LoadFtpPnpDataTask;
 import com.bcs.core.taishin.circle.PNP.scheduler.PnpPushMsgService;
 import com.bcs.core.taishin.circle.PNP.scheduler.PnpSMSMsgService;
 import com.bcs.core.taishin.circle.PNP.service.PnpService;
@@ -54,7 +54,7 @@ public class PNPTester {
 	private PnpSMSMsgService pnpSMSMsgService;
 	
 	@Autowired
-	private LoadFtbPnpDataTask loadFtbPnpDataTask;
+	private LoadFtpPnpDataTask loadFtpPnpDataTask;
 	@Autowired
 	private PNPFtpService pnpFtpService;
 	
@@ -475,7 +475,7 @@ public class PNPTester {
 	
 	@Test
 	public void testPnpSMSMsg() throws Exception {
-		pnpSMSMsgService.sendingSMSMain();
+		pnpSMSMsgService.sendingSmsMain();
 		
 	}
 	

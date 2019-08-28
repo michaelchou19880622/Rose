@@ -106,41 +106,6 @@ public class BCSLinePointController extends BCSBaseController {
 		logger.info("linePointListPage");
 		return BcsPageEnum.LinePointListPage.toString();
 	}
-
-	@ControllerLog(description = "Line Point 統計明細")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/linePointStatisticsReportPage")
-	public String linePointStatisticsReportPage(HttpServletRequest request, HttpServletResponse response) {
-		logger.info("linePointStatisticsReportPage");
-		return BcsPageEnum.LinePointStatisticsReportPage.toString();
-	}
-	
-	@ControllerLog(description = "發送 Line Point 活動")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/linePointSendPage")
-	public String linePointSendPage(HttpServletRequest request, HttpServletResponse response) {
-		logger.info("linePointSendPage");
-		return BcsPageEnum.LinePointSendPage.toString();
-	}
-
-	@ControllerLog(description = "發送 Line Point Old 活動")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/linePointSendOldPage")
-	public String linePointSendOldPage(HttpServletRequest request, HttpServletResponse response) {
-		logger.info("linePointSendOldPage");
-		return BcsPageEnum.LinePointSendOldPage.toString();
-	}	
-	
-	@ControllerLog(description = "Line Point 活動報表")
-	@RequestMapping(method = RequestMethod.GET, value = "/lpQuerier/linePointReportPage")
-	public String linePointReportPage(HttpServletRequest request, HttpServletResponse response) {
-		logger.info("linePointReportPage");
-		return BcsPageEnum.LinePointReportPage.toString();
-	}
-
-	@ControllerLog(description = "Line Point 活動明細")
-	@RequestMapping(method = RequestMethod.GET, value = "/lpQuerier/linePointDetailPage")
-	public String linePointDetailPage(HttpServletRequest request, HttpServletResponse response) {
-		logger.info("linePointDetailPage");
-		return BcsPageEnum.LinePointDetailPage.toString();
-	}
 	
 	@ControllerLog(description = "Add/Edit Line Point Main")
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/createLinePointMain", consumes = MediaType.APPLICATION_JSON_VALUE)

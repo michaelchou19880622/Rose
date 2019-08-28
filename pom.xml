@@ -408,6 +408,12 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>2.4</version>
 					<configuration>
+					    <configuration>
+					        <compilerArgs>
+					            <arg>-verbose</arg>
+					            <arg>-parameters</arg>
+					        </compilerArgs>
+					    </configuration>
 						<source>${java.version}</source>
 						<target>${java.version}</target>
 						<showDeprecation>true</showDeprecation>

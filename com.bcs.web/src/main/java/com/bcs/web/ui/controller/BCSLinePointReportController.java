@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -45,6 +46,10 @@ import com.bcs.core.db.service.MsgSendMainService;
 import com.bcs.core.db.service.MsgSendRecordService;
 import com.bcs.core.db.service.SendGroupService;
 import com.bcs.core.exception.BcsNoticeException;
+import com.bcs.core.linepoint.db.entity.LinePointDetail;
+import com.bcs.core.linepoint.db.entity.LinePointMain;
+import com.bcs.core.linepoint.db.service.LinePointDetailService;
+import com.bcs.core.linepoint.utils.service.LinePointReportExcelService;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMing;
@@ -66,6 +71,7 @@ import com.bcs.web.ui.model.SendMsgModel;
 import com.bcs.web.ui.model.TemplateActionModel;
 import com.bcs.web.ui.model.TemplateMsgModel;
 import com.bcs.web.ui.service.ExportExcelUIService;
+import com.bcs.web.ui.service.LinePointUIService;
 import com.bcs.web.ui.service.LoadFileUIService;
 import com.bcs.web.ui.service.PNPMaintainUIService;
 import com.bcs.web.ui.service.SendMsgUIService;
@@ -76,41 +82,180 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 @Controller
 @RequestMapping("/bcs")
 public class BCSLinePointReportController extends BCSBaseController {	
-//	@Autowired
-//	private PNPMaintainUIService pnpMaintainUIService;
-//	@Autowired
-//	private PnpReportExcelService pnpReportExcelService;
-//	
-//	/** Logger */
-//	private static Logger logger = Logger.getLogger(BCSLinePointReportController.class);
-//	
-//	@RequestMapping(method = RequestMethod.GET, value ="/pnpEmployee/pnpDetailReportPage")
-//	public String pnpDetailReportPage(HttpServletRequest request, HttpServletResponse response) {
-//		logger.info("pnpDetailReportPage");
-//		return BcsPageEnum.PnpDetailReportPage.toString();
-//	}
-//	
-//	@RequestMapping(method = RequestMethod.GET, value = "/pnpEmployee/getPNPDetailReport")
-//	@ResponseBody
-//	public ResponseEntity<?> getPNPDetailReport(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
-//			@RequestParam(value = "startDate", required=false) String startDate, 
-//			@RequestParam(value = "endDate", required=false) String endDate,
-//			@RequestParam(value = "account", required=false) String account, 
-//			@RequestParam(value = "pccCode", required=false) String pccCode, 
-//			@RequestParam(value = "sourceSystem", required=false) String sourceSystem, 
-//			@RequestParam(value = "page", required=false) Integer page) throws IOException {
-//		if(startDate == null) startDate = "2019-03-01";
-//		if(endDate == null) endDate = "2019-07-30";
-//		try{
-//			String empId =  customUser.getAccount().toUpperCase();
-//			Map<String, List<String>> result = pnpMaintainUIService.getPNPDetailReport(startDate, endDate, account, pccCode, sourceSystem, page, empId);
-//			return new ResponseEntity<>(result, HttpStatus.OK);
-//		}catch(Exception e){
-//			logger.error(ErrorRecord.recordError(e));	
-//			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-//		}
-//	}
-//	
+	@Autowired
+	private LinePointUIService linePointUIService;
+	@Autowired
+	private LinePointDetailService linePointDetailService;
+	@Autowired
+	private LinePointReportExcelService linePointReportExcelService;
+	/** Logger */
+	private static Logger logger = Logger.getLogger(BCSLinePointReportController.class);
+	
+	@ControllerLog(description = "Line Point 統計明細")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/linePointStatisticsReportPage")
+	public String linePointStatisticsReportPage(HttpServletRequest request, HttpServletResponse response) {
+		logger.info("linePointStatisticsReportPage");
+		return BcsPageEnum.LinePointStatisticsReportPage.toString();
+	}
+	
+    @RequestMapping(method = RequestMethod.GET, value = "/edit/exportLPStatisticsReportExcel")
+    @ResponseBody
+    public void exportLPStatisticsReportExcel(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, 
+			@RequestParam(value = "startDate", required=false) String startDateStr, 
+			@RequestParam(value = "endDate", required=false) String endDateStr,
+			@RequestParam(value = "modifyUser", required=false) String modifyUser, 
+			@RequestParam(value = "title", required=false) String title) throws IOException {
+      
+		// null translation
+		if(StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) startDateStr = "1911-01-01";
+		if(StringUtils.isBlank(endDateStr) || endDateStr.equals("null")) endDateStr = "3099-01-01";
+		if(StringUtils.isBlank(title) || title.equals("null")) title = "";
+		if(StringUtils.isBlank(modifyUser) || modifyUser.equals("null")) modifyUser = "";
+		
+		// parse date
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date startDate = null, endDate = null;
+		try {
+			startDate = sdf.parse(startDateStr);
+			endDate = sdf.parse(endDateStr);
+			endDate = DateUtils.addDays(endDate, 1);
+		}catch(Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+		}
+		logger.info("startDate:"+startDate);
+		logger.info("endDate:"+endDate);
+		logger.info("title:"+title);
+		logger.info("modifyUser:"+modifyUser);
+		
+		// file path
+        String filePath = CoreConfigReader.getString("file.path");
+        
+        // file name
+		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
+		Date date = new Date();
+        String fileName = "LinePointStatisticReport_" + sdf2.format(date) + ".xlsx";
+        
+        try {
+            File folder = new File(filePath);
+            if(!folder.exists()){
+                folder.mkdirs();
+            }
+            String filePathAndName = filePath + System.getProperty("file.separator") + fileName;
+            linePointReportExcelService.exportExcel_LinePointStatisticsReport(filePathAndName, startDate, endDate, modifyUser, title);
+        } catch (Exception e) {
+            logger.error(ErrorRecord.recordError(e));
+        }
+
+        try {
+			LoadFileUIService.loadFileToResponse(filePath, fileName, response);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
+    
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getLPStatisticsReport")
+	@ResponseBody
+	public ResponseEntity<?> getLPStatisticsReport(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+			@RequestParam(value = "startDate", required=false) String startDateStr, 
+			@RequestParam(value = "endDate", required=false) String endDateStr,
+			@RequestParam(value = "modifyUser", required=false) String modifyUser, 
+			@RequestParam(value = "title", required=false) String title, 
+			@RequestParam(value = "page", required=true) Integer page) throws IOException {
+
+		// null translation
+		if(StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) startDateStr = "1911-01-01";
+		if(StringUtils.isBlank(endDateStr) || endDateStr.equals("null")) endDateStr = "3099-01-01";
+		if(StringUtils.isBlank(title) || title.equals("null")) title = "";
+		if(StringUtils.isBlank(modifyUser) || modifyUser.equals("null")) modifyUser = "";
+		
+		// parse date
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date startDate = null, endDate = null;
+		try {
+			startDate = sdf.parse(startDateStr);
+			endDate = sdf.parse(endDateStr);
+			endDate = DateUtils.addDays(endDate, 1);
+		}catch(Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+		}
+		logger.info("startDate:"+startDate);
+		logger.info("endDate:"+endDate);
+		logger.info("title:"+title);
+		logger.info("modifyUser:"+modifyUser);
+		
+		// get list
+		try{
+			List<LinePointMain> result = new ArrayList();
+			List<LinePointMain> list = linePointUIService.getLinePointStatisticsReport(startDate, endDate, modifyUser, title, page);
+			
+			for(LinePointMain main : list) {
+				String serviceName = "BCS";
+				if(main.getSendType().equals(LinePointMain.SEND_TYPE_API)) {
+					List<LinePointDetail> details = linePointDetailService.findByLinePointMainId(main.getId());
+					serviceName = details.get(0).getServiceName();
+				}
+				main.setSendType(serviceName);
+				result.add(main);
+			}
+
+			logger.info("result:" + ObjectUtil.objectToJsonStr(result));
+			return new ResponseEntity<>(result, HttpStatus.OK);
+		}catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));	
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getLPStatisticsReportTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> getLPStatisticsReportTotalPages(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+			@RequestParam(value = "startDate", required=false) String startDateStr, 
+			@RequestParam(value = "endDate", required=false) String endDateStr,
+			@RequestParam(value = "modifyUser", required=false) String modifyUser, 
+			@RequestParam(value = "title", required=false) String title) throws IOException {
+
+		// null translation
+		if(StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) startDateStr = "1911-01-01";
+		if(StringUtils.isBlank(endDateStr) || endDateStr.equals("null")) endDateStr = "3099-01-01";
+		if(StringUtils.isBlank(title) || title.equals("null")) title = "";
+		if(StringUtils.isBlank(modifyUser) || modifyUser.equals("null")) modifyUser = "";
+		
+		// parse date
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date startDate = null, endDate = null;
+		try {
+			startDate = sdf.parse(startDateStr);
+			endDate = sdf.parse(endDateStr);
+			endDate = DateUtils.addDays(endDate, 1);
+		}catch(Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+		}
+		logger.info("startDate:"+startDate);
+		logger.info("endDate:"+endDate);
+		logger.info("title:"+title);
+		logger.info("modifyUser:"+modifyUser);
+		
+		// get list
+		try{
+			Long count = linePointUIService.getLinePointStatisticsReportTotalPages(startDate, endDate, modifyUser, title);
+			
+			// divide by 10
+			if(count % 10L == 0L) {
+				count /= 10;
+			}else {
+				count = count / 10 + 1;
+			}
+			
+			return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count.toString() + "\"}", HttpStatus.OK);
+		}catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));
+			return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+
 //	@RequestMapping(method = RequestMethod.GET, value = "/pnpEmployee/getPNPDetailReportTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 //	@ResponseBody
 //	public ResponseEntity<?> getPNPDetailReportTotalPages(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,

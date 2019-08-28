@@ -43,6 +43,13 @@ public class LinePointUIService {
 		return linePointMainService.findBySendTypeAndDate(LinePointMain.SEND_TYPE_BCS, startDate, endDate);
 	}
 	
+	public List<LinePointMain> getLinePointStatisticsReport(Date startDate, Date endDate, String modifyUser, String title, Integer page){
+		return linePointMainService.getLinePointStatisticsReport(startDate, endDate, modifyUser, title, page);
+	}
+	public Long getLinePointStatisticsReportTotalPages(Date startDate, Date endDate, String modifyUser, String title) {
+		return linePointMainService.getLinePointStatisticsReportTotalPages(startDate, endDate, modifyUser, title);
+	}
+	
 //	public List<LinePointMain> linePointMainFindManual(){
 //		return linePointMainService.findManual();
 //	}

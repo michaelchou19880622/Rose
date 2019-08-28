@@ -4,7 +4,6 @@ $(function() {
 	var modifyUserInput = "";
 	var titleInput = "";
 	
-	
 	// result data
 	var hasData = false;
 	var oringinalTr = {};
@@ -13,7 +12,7 @@ $(function() {
 	var page = 1, totalPages = 0;
 	var firstFatch = true;
 	
-	// date data
+	// date module
 	$('.datepicker').datepicker({
 		 maxDate : 0,
 		 dateFormat : 'yy-mm-dd',
@@ -76,12 +75,13 @@ $(function() {
 	});
 	
 	// do Download
-	var setExportButtonSource = function() {
+	setExportButtonSource = function(){
+		console.info('hasData:', hasData);
 		if(hasData) {
 			var modifyUserInput = $('#modifyUserInput').val();
 			var titleInput = $('#titleInput').val();
-			var getUrl = bcs.bcsContextPath + '/pnpEmployee/exportPNPDetailReportExcel?startDate=' + startDate + '&endDate=' + endDate 
-				+ '&sourceSystem=' + sourceSystemInput + '&pccCodeInput=' + pccCode + '&account=' + accountInput;
+			var getUrl = bcs.bcsContextPath + '/edit/exportLPStatisticsReportExcel?startDate=' + startDate + '&endDate=' + endDate + 
+			'&modifyUser=' + modifyUserInput + '&title=' + titleInput;
 			console.info('getUrl', getUrl);
 			
 			$('.btn_add.exportToExcel').attr('href', getUrl);
@@ -103,8 +103,8 @@ $(function() {
 		
 		var modifyUserInput = $('#modifyUserInput').val();
 		var titleInput = $('#titleInput').val();
-		var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPDetailReport?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page + '&sourceSystem=' + sourceSystemInput 
-			+ '&pccCodeInput=' + pccCode + '&account=' + accountInput;
+		var getUrl = bcs.bcsContextPath + '/edit/getLPStatisticsReport?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page + 
+			'&modifyUser=' + modifyUserInput + '&title=' + titleInput;
 		console.info('getUrl', getUrl);
 		
         $.ajax({
@@ -141,6 +141,8 @@ $(function() {
 		        //resultTr.find('.status').html(o.status);
 		        resultTr.find('#toDetail').attr('href', bcs.bcsContextPath + '/edit/linePointCreatePage');
                     
+		        setExportButtonSource();
+		        
                 // Append to Table
                 $('.resultTable').append(resultTr);
             });
@@ -159,8 +161,8 @@ $(function() {
 		// get URL
 		var modifyUserInput = $('#modifyUserInput').val();
 		var titleInput = $('#titleInput').val();
-		var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPDetailReportTotalPages?startDate=' + startDate + '&endDate=' + endDate + '&sourceSystem=' + sourceSystemInput 
-			+ '&pccCode=' + pccCode + '&account=' + accountInput;
+		var getUrl = bcs.bcsContextPath + '/edit/getLPStatisticsReportTotalPages?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page + 
+		'&modifyUser=' + modifyUserInput + '&title=' + titleInput;
 		console.info('getUrl', getUrl);
 		
 		// get data

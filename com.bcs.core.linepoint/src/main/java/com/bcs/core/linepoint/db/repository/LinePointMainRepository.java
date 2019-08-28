@@ -13,6 +13,10 @@ public interface LinePointMainRepository extends EntityRepository<LinePointMain,
 	
 	@Transactional(timeout = 30)
 	public LinePointMain findBySerialId(String serialId);
+
+	@Transactional(timeout = 30)
+	public LinePointMain findByTitle(String title);
+	
 	@Transactional(timeout = 30)
 	public List<LinePointMain> findByStatus(String status);
     
@@ -50,4 +54,17 @@ public interface LinePointMainRepository extends EntityRepository<LinePointMain,
         + " and x.allowToSend = 1 and x.sendTimingType = 'SCHEDULE' and "
     	+ " DATEDIFF(SECOND, x.sendTimingTime, GETDATE()) < 120 and DATEDIFF(SECOND, x.sendTimingTime, GETDATE()) >= 0 ) ) ")
 	public List<LinePointMain> findAllowableIdles();
+    
+    @Transactional(timeout = 30)
+    @Query(value = "select x from LinePointMain x where "
+    	+ "x.title like ('%' + ?1 + '%') or x.modifyUser like ('%' + ?2 + '%') "
+    	+ "and x.modifyTime >= ?3 and x.modifyTime <= ?4 "
+    	+ "order by x.modifyTime desc ")	
+	public List<LinePointMain> findByTitleAndModifyUserAndDate(String title, String modifyUser, Date startDate, Date endDate);
+    
+    @Transactional(timeout = 30)
+    @Query(value = "select count(x.id) from LinePointMain x where "
+    	+ "x.title like ('%' + ?1 + '%') or x.modifyUser like ('%' + ?2 + '%') "
+    	+ "and x.modifyTime >= ?3 and x.modifyTime <= ?4 ")	
+	public Long findTotalCountByTitleAndModifyUserAndStartDateAndEndDate(String title, String modifyUser, Date startDate, Date endDate);
 }

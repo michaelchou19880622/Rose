@@ -15,18 +15,22 @@ import javax.persistence.Table;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.bcs.core.db.entity.MsgDetail;
+import com.bcs.core.db.entity.MsgSendMain;
 import com.bcs.core.json.AbstractBcsEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 
-//@SqlResultSetMapping(name = "LinePointSendMainDetails", entities = {
-//		@EntityResult(entityClass = LinePointSendMain.class),
-//		@EntityResult(entityClass = LinePointSend.class)
-//})
-//
-//@NamedNativeQueries({
-//		@NamedNativeQuery(name = "queryLinePointSendMainDetailAll",   query = "SELECT BCS_LINE_POINT_SEND_MAIN.MSG_ID, BCS_LINE_POINT_SEND_MAIN.MSG_LP_ID, SERIAL_ID , MODIFY_TIME, MODIFY_USER, SCHEDULE_TIME, SEND_TYPE, BCS_LINE_POINT_SEND_MAIN.STATUS, STATUS_NOTICE, BCS_LINE_POINT_SEND_MAIN.SEND_TIME, SEND_TOTAL,SEND_SUCCESS,SEND_BLOCKED, SEND_ID, BCS_LINE_POINT_SEND.MSG_LP_ID, UID, MAIN_ID, BCS_LINE_POINT_SEND.STATUS, SOURCE, DESCRIPTION, RESPONSE_CODE FROM BCS_LINE_POINT_SEND_MAIN LEFT OUTER JOIN BCS_LINE_POINT_SEND ON BCS_LINE_POINT_SEND_MAIN.MSG_ID = BCS_LINE_POINT_SEND.MAIN_ID WHERE BCS_LINE_POINT_SEND_MAIN.STATUS <>'DELETE' ORDER BY BCS_LINE_POINT_SEND_MAIN.MSG_ID desc ", resultSetMapping = "LinePointSendMainDetails"),
-//})
+@SqlResultSetMapping(name = "LinePointMain", entities = {
+		@EntityResult(entityClass = LinePointMain.class),
+})
+
+@NamedNativeQueries({
+		@NamedNativeQuery(name = "queryGetStatisticsReportPage", query = "select * from BCS_LINE_POINT_MAIN x where "
+    	    	+ "x.TITLE like ('%' + ?1 + '%') and x.MODIFY_USER like ('%' + ?2 + '%') "
+    	    	+ "and x.MODIFY_TIME >= ?3 and x.MODIFY_TIME <= ?4 "
+    	    	+ "order by x.MODIFY_TIME desc ", resultSetMapping = "LinePointMain"),
+})
 
 @Entity
 @Table(name = "BCS_LINE_POINT_MAIN")

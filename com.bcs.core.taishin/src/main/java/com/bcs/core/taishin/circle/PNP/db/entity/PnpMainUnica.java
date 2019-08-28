@@ -151,117 +151,145 @@ public class PnpMainUnica extends PnpMain {
 		modifyTime = Calendar.getInstance().getTime();
 	}
 	
-    public Long getPnpMainId() {
+    @Override
+	public Long getPnpMainId() {
         return pnpMainId;
     }
 
-    public void setPnpMainId(Long pnpMainId) {
+    @Override
+	public void setPnpMainId(Long pnpMainId) {
         this.pnpMainId = pnpMainId;
     }
 
-    public String getStatus() {
+    @Override
+	public String getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    @Override
+	public void setStatus(String status) {
         this.status = status;
     }
 
-    public String getStatusNotice() {
+    @Override
+	public String getStatusNotice() {
         return statusNotice;
     }
 
-    public void setStatusNotice(String statusNotice) {
+    @Override
+	public void setStatusNotice(String statusNotice) {
         this.statusNotice = statusNotice;
         if(this.statusNotice.length() > 200){
             this.statusNotice = this.statusNotice.substring(0, 199);
         }
     }
 
-    public Long getTotalCount() {
+    @Override
+	public Long getTotalCount() {
         return totalCount;
     }
 
-    public void setTotalCount(Long totalCount) {
+    @Override
+	public void setTotalCount(Long totalCount) {
         this.totalCount = totalCount;
     }
 
-    public Long getSendCount() {
+    @Override
+	public Long getSendCount() {
         return sendCount;
     }
 
-    public void setSendCount(Long sendCount) {
+    @Override
+	public void setSendCount(Long sendCount) {
         this.sendCount = sendCount;
     }
 
-    public String getSendType() {
+    @Override
+	public String getSendType() {
         return sendType;
     }
 
-    public void setSendType(String sendType) {
+    @Override
+	public void setSendType(String sendType) {
         this.sendType = sendType;
     }
 
-    public String getScheduleTime() {
+    @Override
+	public String getScheduleTime() {
         return scheduleTime;
     }
 
-    public void setScheduleTime(String scheduleTime) {
+    @Override
+	public void setScheduleTime(String scheduleTime) {
         this.scheduleTime = scheduleTime;
     }
 
+	@Override
 	public String getTempId() {
 		return tempId;
 	}
 
+	@Override
 	public void setTempId(String tempId) {
 		this.tempId = tempId;
 	}
 
+	@Override
 	public Long getGroupId() {
 		return groupId;
 	}
 
+	@Override
 	public void setGroupId(Long groupId) {
 		this.groupId = groupId;
 	}
 
+	@Override
 	public Date getCreateTime() {
 		return createTime;
 	}
 
+	@Override
 	public void setCreateTime(Date createTime) {
 		this.createTime = createTime;
 	}
 
+	@Override
 	public String getProcApName() {
 		return procApName;
 	}
 
+	@Override
 	public void setProcApName(String procApName) {
 		this.procApName = procApName;
 	}
 
+	@Override
 	public String getOrigFileName() {
 		return origFileName;
 	}
 
+	@Override
 	public void setOrigFileName(String origFileName) {
 		this.origFileName = origFileName;
 	}
 
+	@Override
 	public Date getModifyTime() {
 		return modifyTime;
 	}
 
+	@Override
 	public void setModifyTime(Date modifyTime) {
 		this.modifyTime = modifyTime;
 	}
 
+	@Override
 	public String getSource() {
 		return source;
 	}
 
+	@Override
 	public void setSource(String source) {
 		this.source = source;
 	}
@@ -322,42 +350,52 @@ public class PnpMainUnica extends PnpMain {
 		BatchID = batchID;
 	}
 
+	@Override
 	public String getProcFlow() {
 		return procFlow;
 	}
 
+	@Override
 	public void setProcFlow(String procFlow) {
 		this.procFlow = procFlow;
 	}
 
+	@Override
 	public String getProcStage() {
 		return procStage;
 	}
 
+	@Override
 	public void setProcStage(String procStage) {
 		this.procStage = procStage;
 	}
 
+	@Override
 	public Date getLinePushTime() {
 		return linePushTime;
 	}
 
+	@Override
 	public void setLinePushTime(Date linePushTime) {
 		this.linePushTime = linePushTime;
 	}
 
+	@Override
 	public Date getPnpTime() {
 		return pnpTime;
 	}
 
+	@Override
 	public void setPnpTime(Date pnpTime) {
 		this.pnpTime = pnpTime;
 	}
 
+	@Override
 	public Date getSmsTime() {
 		return smsTime;
 	}
 
+	@Override
 	public void setSmsTime(Date smsTime) {
 		this.smsTime = smsTime;
 	}

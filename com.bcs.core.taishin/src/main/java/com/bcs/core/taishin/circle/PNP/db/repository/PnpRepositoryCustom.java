@@ -10,26 +10,81 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMitake;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailUnica;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFTPType;
+import org.springframework.stereotype.Repository;
 
+/**
+ * The interface Pnp repository custom.
+ *
+ * @author ???
+ */
 public interface PnpRepositoryCustom {
 
-	public List<? super PnpDetail> updateStatusByStageBC(PNPFTPType type, String procApName, Set<Long> allMainIds);
+    /**
+     * Update status by stage bc list.
+     *
+     * @param type       the type
+     * @param procApName the proc ap name
+     * @param allMainIds the all main ids
+     * @return the list
+     */
+    List<? super PnpDetail> updateStatusByStageBC(PNPFTPType type, String procApName, Set<Long> allMainIds);
 
-	public List<? super PnpDetail> updateStatus(PNPFTPType type, String procApName, String stage);
-	
-	public List<? super PnpDetail> updateDelivertExpiredStatus(PNPFTPType type, String procApName, String stage);
+    /**
+     * Update status list.
+     *
+     * @param type       the type
+     * @param procApName the proc ap name
+     * @param stage      the stage
+     * @return the list
+     */
+    List<? super PnpDetail> updateStatus(PNPFTPType type, String procApName, String stage);
 
-//	public void updateStatus(String deliveryTags); 移至com.bcs.core.bot.db.repository.MsgBotReceiveRepositoryImpl
+    /**
+     * Update delivert expired status list.
+     *
+     * @param type       the type
+     * @param procApName the proc ap name
+     * @param stage      the stage
+     * @return the list
+     */
+    List<? super PnpDetail> updateDelivertExpiredStatus(PNPFTPType type, String procApName, String stage);
 
-	public PnpMain findMainByMainId(PNPFTPType type, Long mainId);
+    /**
+     * Find main by main id pnp main.
+     *
+     * @param type   the type
+     * @param mainId the main id
+     * @return the pnp main
+     */
+    PnpMain findMainByMainId(PNPFTPType type, Long mainId);
 
-	public void batchInsertPnpDetailEvery8d(final List<PnpDetailEvery8d> list);
+    /**
+     * Batch insert pnp detail every 8 d.
+     *
+     * @param list the list
+     */
+    void batchInsertPnpDetailEvery8d(final List<PnpDetailEvery8d> list);
 
-	public void batchInsertPnpDetailMitake(final List<PnpDetailMitake> list);
+    /**
+     * Batch insert pnp detail mitake.
+     *
+     * @param list the list
+     */
+    void batchInsertPnpDetailMitake(final List<PnpDetailMitake> list);
 
-	public void batchInsertPnpDetailMing(final List<PnpDetailMing> list);
+    /**
+     * Batch insert pnp detail ming.
+     *
+     * @param list the list
+     */
+    void batchInsertPnpDetailMing(final List<PnpDetailMing> list);
 
-	public void batchInsertPnpDetailUnica(final List<PnpDetailUnica> list);
-	
-	
+    /**
+     * Batch insert pnp detail unica.
+     *
+     * @param list the list
+     */
+    void batchInsertPnpDetailUnica(final List<PnpDetailUnica> list);
+
+
 }

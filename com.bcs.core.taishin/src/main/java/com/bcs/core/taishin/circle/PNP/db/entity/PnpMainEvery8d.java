@@ -1,8 +1,5 @@
 package com.bcs.core.taishin.circle.PNP.db.entity;
 
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -103,7 +100,6 @@ public class PnpMainEvery8d extends PnpMain {
     @Column(name = "SCHEDULE_TIME", columnDefinition = "nvarchar(50)")
     private String scheduleTime;
 
-    @CreationTimestamp
     @Column(name = "CREAT_TIME")
     private Date createTime;
 
@@ -115,7 +111,6 @@ public class PnpMainEvery8d extends PnpMain {
     @Column(name = "ORIG_FILE_NAME", columnDefinition = "nvarchar(200)")
     private String origFileName;
 
-    @UpdateTimestamp
     @Column(name = "MODIFY_TIME")
     private Date modifyTime;
 
@@ -137,6 +132,19 @@ public class PnpMainEvery8d extends PnpMain {
     private String MsgType;
     @Column(name = "BATCH_ID", columnDefinition = "nvarchar(36)")
     private String BatchID;
+
+    @Override
+    @PrePersist
+    public void prePersist() {
+        createTime = Calendar.getInstance().getTime();
+        modifyTime = createTime;
+    }
+
+    @Override
+    @PreUpdate
+    public void preUpdate() {
+        modifyTime = Calendar.getInstance().getTime();
+    }
 
     @Override
     public Long getPnpMainId() {

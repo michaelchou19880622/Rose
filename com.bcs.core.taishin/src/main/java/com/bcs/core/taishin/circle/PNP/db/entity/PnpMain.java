@@ -3,13 +3,18 @@ package com.bcs.core.taishin.circle.PNP.db.entity;
 import com.bcs.core.json.AbstractBcsEntity;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.Column;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Transient;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -122,7 +127,6 @@ public class PnpMain extends AbstractBcsEntity {
     /**
      * 建立時間
      */
-    @CreationTimestamp
     @Column(name = "CREAT_TIME")
     private Date createTime;
 
@@ -141,7 +145,6 @@ public class PnpMain extends AbstractBcsEntity {
     /**
      * 更新時間
      */
-    @UpdateTimestamp
     @Column(name = "MODIFY_TIME")
     private Date modifyTime;
 
@@ -169,6 +172,16 @@ public class PnpMain extends AbstractBcsEntity {
     @Transient
     private List<PnpContentTemplateMsgAction> templateActions;
 
+    @PrePersist
+    public void prePersist() {
+        createTime = Calendar.getInstance().getTime();
+        modifyTime = createTime;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        modifyTime = Calendar.getInstance().getTime();
+    }
 
     public List<? super PnpDetail> getPnpDetails() {
         return pnpDetails;

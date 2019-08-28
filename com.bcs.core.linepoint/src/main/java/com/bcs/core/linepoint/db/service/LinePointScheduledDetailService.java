@@ -28,21 +28,24 @@ public class LinePointScheduledDetailService {
 	public void save(LinePointScheduledDetail linePointScheduledDetail){
 		linePointScheduledDetailRepository.save(linePointScheduledDetail);
 	}
-    
+	public void save(List<LinePointScheduledDetail> linePointScheduledDetail){
+		linePointScheduledDetailRepository.save(linePointScheduledDetail);
+	}
+	
 	public LinePointScheduledDetail findOne(Long msgId){
 		return linePointScheduledDetailRepository.findOne(msgId);
 	}
 	
-	public List<LinePointScheduledDetail> findByLinePointMainId(Long linePointMainId){
-		return linePointScheduledDetailRepository.findByLinePointMainId(linePointMainId);
-	}
+//	public List<LinePointScheduledDetail> findByLinePointMainId(Long linePointMainId){
+//		return linePointScheduledDetailRepository.findByLinePointMainId(linePointMainId);
+//	}
 	
 	public void delete(LinePointScheduledDetail linePointScheduledDetail) {
 		linePointScheduledDetailRepository.delete(linePointScheduledDetail);
 	}
-	public List<LinePointScheduledDetail> findAll(Long mainId){
-		return linePointScheduledDetailRepository.findByLinePointMainId(mainId);
-	}	
+//	public List<LinePointScheduledDetail> findAll(Long mainId){
+//		return linePointScheduledDetailRepository.findByLinePointMainId(mainId);
+//	}	
 	
 //	public LinePointDetail findBySerialId(String serialId){
 //		return linePointDetailRepository.findBySerialId(serialId);

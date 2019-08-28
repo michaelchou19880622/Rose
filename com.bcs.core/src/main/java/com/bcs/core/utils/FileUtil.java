@@ -606,7 +606,7 @@ public class FileUtil {
 		String errorMsg = "";
 		
 		try {
-
+			logger.info("[getFile]");
 			in = new FileInputStream(file);
 			out = response.getOutputStream();
 			if(contentType != null){

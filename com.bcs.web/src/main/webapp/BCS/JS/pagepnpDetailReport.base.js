@@ -13,13 +13,12 @@ $(function(){
 	var account = "";
 	var employeeId = "";
 	
-	// result
+	// result data
 	var hasData = false;
 	var templateCount = 0;
 	var oringinalTr = {};
 	var originalTable = {};
 	var startDate = null, endDate = null;
-	var hasData = false;
 	var page = 1, totalPages = 0;
 	var firstFatch = true;
 	
@@ -63,6 +62,7 @@ $(function(){
 			$('#pageAndTotalPages').text(page + '/' + totalPages);
 		}
 	});
+	
 	$('.btn.next').click(function(){
 		if(page < totalPages) {
 			page++;
@@ -83,8 +83,7 @@ $(function(){
 			loadData();
 		}
 	});
-	
-	
+		
 	// do Download
 	var setExportButtonSource = function() {
 		if(hasData) {

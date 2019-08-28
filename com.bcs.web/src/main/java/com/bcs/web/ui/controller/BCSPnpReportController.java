@@ -82,7 +82,6 @@ public class BCSPnpReportController extends BCSBaseController {
 	private PnpReportExcelService pnpReportExcelService;
 	@Autowired	
 	private OracleService oraclePnpService;
-
 	
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSPnpReportController.class);

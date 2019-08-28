@@ -21,6 +21,7 @@ import com.bcs.core.linepoint.db.entity.LinePointDetail;
 import com.bcs.core.linepoint.db.entity.LinePointMain;
 import com.bcs.core.linepoint.db.repository.LinePointMainRepository;
 import com.bcs.core.linepoint.db.service.LinePointDetailService;
+import com.bcs.core.linepoint.db.service.LinePointMainService;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.enums.LINE_HEADER;
 import com.bcs.core.resource.CoreConfigReader;
@@ -37,14 +38,18 @@ public class LinePointPushMessageActor extends UntypedActor {
 		if(object instanceof LinePointPushModel) {
 			// get bean
 			LinePointDetailService linePointDetailService = ApplicationContextProvider.getApplicationContext().getBean(LinePointDetailService.class);
+			LinePointMainService linePointMainService = ApplicationContextProvider.getApplicationContext().getBean(LinePointMainService.class);
 			
 			// get push data
 			LinePointPushModel pushApiModel = (LinePointPushModel) object;
-			JSONArray uids = pushApiModel.getUid();
+			JSONArray detailIds = pushApiModel.getDetailIds();
+			
+			// get line point main
+			LinePointMain linePointMain = linePointMainService.findOne(pushApiModel.getEventId());
 			
 			// initialize request header
 			HttpHeaders headers = new HttpHeaders();
-			String accessToken = CoreConfigReader.getString("LinePoint", CONFIG_STR.ChannelToken.toString(), true); // LinePoint.ChannelToken
+			String accessToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelToken.toString(), true); // TaishinBank.ChannelToken
 			headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
 			headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 			
@@ -53,24 +58,24 @@ public class LinePointPushMessageActor extends UntypedActor {
 			String url = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_MESSAGE_PUSH_URL.toString(), true); // https://api.line.me/pointConnect/v1/issue
 		    String clientId = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_API_CLIENT_ID.toString(), true); // 10052
 		    requestBody.put("clientId", clientId);
-			requestBody.put("amount", pushApiModel.getAmount());
 			
-			for(Integer i = 0; i < uids.length(); i++) {
-
-				// initialize detail
-				LinePointDetail detail = new LinePointDetail();
-				//detail.setLinePointMainId(eventId);
-				detail.setAmount(pushApiModel.getAmount());
-				detail.setTriggerTime(pushApiModel.getTriggerTime());
-				//detail.setSource(pushApiModel.getSource());
+			
+			for(Integer i = 0; i < detailIds.length(); i++) {
+				// detailId
+				String detailIdStr = "" + detailIds.get(i);
+				Long detailId = Long.parseLong(detailIdStr);
 				
+				// initialize detail
+				LinePointDetail detail = linePointDetailService.findOne(detailId);
+				detail.setTriggerTime(pushApiModel.getTriggerTime());
+				requestBody.put("amount", detail.getAmount());
 				
 				// memberId
-				requestBody.put("memberId", uids.get(i));
+				requestBody.put("memberId", detail.getUid());
 				
 				// orderKey
 				MessageDigest salt = MessageDigest.getInstance("SHA-256");
-				String hashStr = "" + uids.get(i) + (new Date()).getTime() + pushApiModel.getEventId();
+				String hashStr = "" + detail.getUid() + (new Date()).getTime() + pushApiModel.getEventId();
 				String hash = DigestUtils.md5Hex(hashStr);
 			    salt.update(hash.toString().getBytes("UTF-8"));
 			    String orderKey = bytesToHex(salt.digest()).substring(0, 48);
@@ -104,21 +109,26 @@ public class LinePointPushMessageActor extends UntypedActor {
 					detail.setTranscationTime(Time);
 					detail.setTranscationType(Type);
 					detail.setTransactionAmount(Amount);
-					//detail.setTransactionBalance(Balance);
-					//detail.setDescription("");
+					detail.setBalance(Balance);
+					detail.setMessage("");
 					detail.setStatus(LinePointDetail.STATUS_SUCCESS);
+					
+					linePointMain.setSuccessfulAmount(linePointMain.getSuccessfulAmount() + Amount);
+					linePointMain.setSuccessfulCount(linePointMain.getSuccessfulCount() + 1);
 				} catch (HttpClientErrorException e) {
-					//detail.setDescription(e.getResponseBodyAsString());
+					detail.setMessage(e.getResponseBodyAsString());
 					detail.setStatus(LinePointDetail.STATUS_FAIL);
+					
+					linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
 				}
 				
-				detail.setUid(uids.get(i).toString());
 				detail.setOrderKey(orderKey);
 				detail.setApplicationTime(applicationTime);
 				detail.setSendTime(new Date());
 
 				Logger.info("detail1: " + detail.toString());
-				//linePointDetailService.save(detail);
+				linePointDetailService.save(detail);
+				linePointMainService.save(linePointMain);
 			}
 		}
 	}

@@ -1,5 +1,6 @@
 package com.bcs.core.linepoint.api.controller;
 
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -33,19 +34,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
 
 import com.bcs.core.linepoint.api.model.LinePointPushModel;
 import com.bcs.core.linepoint.api.model.LinePointTaskModel;
 import com.bcs.core.linepoint.api.service.LinePointApiService;
 import com.bcs.core.linepoint.db.entity.LinePointDetail;
+import com.bcs.core.linepoint.db.entity.LinePointMain;
 import com.bcs.core.linepoint.db.service.LinePointDetailService;
+import com.bcs.core.linepoint.db.service.LinePointMainService;
 import com.bcs.core.linepoint.scheduler.service.LinePointSimpleSchedulerService;
 import com.bcs.core.linepoint.akka.handler.LinePointPushApiActor;
 import com.bcs.core.linepoint.akka.service.LinePointPushAkkaService;
 import com.bcs.core.utils.CryptUtil;
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.utils.RestfulUtil;
+import com.bcs.core.web.security.CurrentUser;
+import com.bcs.core.web.security.CustomUser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -59,6 +66,7 @@ import scala.concurrent.Await;
 
 import com.bcs.core.db.repository.ShareUserRecordRepository;
 import com.bcs.core.enums.CONFIG_STR;
+import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.resource.CoreConfigReader;
 
 @Controller
@@ -67,13 +75,15 @@ public class LinePointPushApiController {
 	private static Logger logger = Logger.getLogger(LinePointPushApiController.class);
 	
 	@Autowired
-	private LinePointPushAkkaService AkkaLinePointPushService;
+	private LinePointPushAkkaService linePointPushAkkaService;
 	@Autowired
 	private LinePointDetailService linePointDetailService;
 	@Autowired
-	private LinePointSimpleSchedulerService linePointSimpleSchedulerService;
+	private LinePointMainService linePointMainService;
 	@Autowired
-	private LinePointApiService linePointApiService;
+	private LinePointSimpleSchedulerService linePointSimpleSchedulerService;
+//	@Autowired
+//	private LinePointApiService linePointApiService;
 	
 //	public static void main(String[] args) {
 //		String secret = "taishinlinebuscs";
@@ -101,33 +111,74 @@ public class LinePointPushApiController {
 //		}
 //	}
 	
+	@RequestMapping(method = RequestMethod.POST, value = "/linePoint/pushLinePoint", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> pushLinePoint(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+			/*@RequestBody List<String> uids,*/ @RequestParam Long eventId) throws IOException {
+		try {
+				LinePointMain linePointMain = linePointMainService.findOne(eventId);	
+			
+				//List<String> uids = new JSONArray(){"U58ffae876d497a488111d38a70b5aea0", "U58ffae876d497a488111d38a70b5aea0"};
+				
+				JSONArray uids = new JSONArray();
+				JSONArray amounts = new JSONArray();
+				for(int i = 1; i <= 10; i++) {
+					uids.put("U58ffae876d497a488111d38a70b5aea0");
+					amounts.put(i);
+				}
+							
+				LinePointPushModel linePointPushModel = new LinePointPushModel();
+//				linePointPushModel.setAmount(amounts);
+//				linePointPushModel.setUid(uids);
+				linePointPushModel.setEventId(eventId);
+				linePointPushModel.setSource(LinePointPushModel.SOURCE_TYPE_BCS);
+				linePointPushModel.setSendTimeType(LinePointPushModel.SEND_TIMING_TYPE_IMMEDIATE);
+				linePointPushModel.setTriggerTime(new Date());
+				linePointPushAkkaService.tell(linePointPushModel);
+				return new ResponseEntity<>("",HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+			if (e instanceof BcsNoticeException) 
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			else 
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
 	@RequestMapping(method = RequestMethod.POST, value = "/linePoint/task", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<?> linePointTask(HttpServletRequest request, HttpServletResponse response, @RequestBody LinePointTaskModel linePointTaskModel) {
 		try {
 			LinePointDetail linePointDetail = linePointTaskModel.getLinePointDetail();
-			logger.info("-------------------- api linePoint issue --------------------");
+			logger.info("-------------------- api linePoint task --------------------");
 			
-			if(request.getHeader(HttpHeaders.AUTHORIZATION) == null) {
-				return new ResponseEntity<>("{\"result\": 0, \"msg\": \"Missing 'Authorization' header.\"}", HttpStatus.BAD_REQUEST);
-			}else{
-				String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-				
-				if(authorization.split("key=").length != 2) {
-					return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"Invalid 'Authorization' format.\"}", HttpStatus.UNAUTHORIZED);
-				}
-				
-				String token = authorization.split("key=")[1];
-				String secret = CoreConfigReader.getString(CONFIG_STR.AES_SECRET_KEY, true);
-				String iv = CoreConfigReader.getString(CONFIG_STR.AES_INITIALIZATION_VECTOR, true);
-				String originalToken = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_API_ORIGINAL_TOKEN, true);
-				
-				if(!CryptUtil.Decrypt(CryptUtil.AES, token, secret, iv).equals(originalToken)) {
-					return new ResponseEntity<>("{\"result\": 0, \"msg\": \"invalid token.\"}", HttpStatus.UNAUTHORIZED);
-				}
-			}
+//			if(request.getHeader(HttpHeaders.AUTHORIZATION) == null) {
+//				return new ResponseEntity<>("{\"result\": 0, \"msg\": \"Missing 'Authorization' header.\"}", HttpStatus.BAD_REQUEST);
+//			}else{
+//				String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+//				
+//				if(authorization.split("key=").length != 2) {
+//					return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"Invalid 'Authorization' format.\"}", HttpStatus.UNAUTHORIZED);
+//				}
+//				
+//				String token = authorization.split("key=")[1];
+//				String secret = CoreConfigReader.getString(CONFIG_STR.AES_SECRET_KEY, true);
+//				String iv = CoreConfigReader.getString(CONFIG_STR.AES_INITIALIZATION_VECTOR, true);
+//				String originalToken = CoreConfigReader.getString(CONFIG_STR.API_ORIGINAL_TOKEN, true);
+//				logger.info("token:"+token);
+//				logger.info("secret:"+secret);
+//				logger.info("iv:"+iv);
+//				logger.info("originalToken:"+originalToken);
+//				
+//				String getToken = CryptUtil.Decrypt(CryptUtil.AES, token, secret, iv);
+//				logger.info("decryptOriginalToken:"+getToken);
+//				
+//				if(!getToken.equals(originalToken)) {
+//					return new ResponseEntity<>("{\"result\": 0, \"msg\": \"invalid token.\"}", HttpStatus.UNAUTHORIZED);
+//				}
+//			}
 			
 			logger.info("[LinePoint API] Request Body:" + linePointDetail);
-			linePointDetail.setDetailType(LinePointDetail.SOURCE_ISSUE_API);
+			linePointDetail.setDetailType(LinePointDetail.DETAIL_TYPE_ISSUE_API);
 			linePointDetail.setTriggerTime(new Date());
 			
 			// ----------- validation --------------
@@ -177,28 +228,69 @@ public class LinePointPushApiController {
 	public ResponseEntity<?> pushLinePoint(HttpServletRequest request, HttpServletResponse response, @RequestBody LinePointDetail linePointDetail) {
 		try {
 			logger.info("-------------------- api linePoint issue --------------------");
-			
+
+			// ----------- authorization --------------
 			if(request.getHeader(HttpHeaders.AUTHORIZATION) == null) {
 				return new ResponseEntity<>("{\"result\": 0, \"msg\": \"Missing 'Authorization' header.\"}", HttpStatus.BAD_REQUEST);
 			}else{
 				String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-				
 				if(authorization.split("key=").length != 2) {
 					return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"Invalid 'Authorization' format.\"}", HttpStatus.UNAUTHORIZED);
 				}
 				
 				String token = authorization.split("key=")[1];
-				String secret = CoreConfigReader.getString(CONFIG_STR.AES_SECRET_KEY, true);
-				String iv = CoreConfigReader.getString(CONFIG_STR.AES_INITIALIZATION_VECTOR, true);
 				String originalToken = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_API_ORIGINAL_TOKEN, true);
 				
-				if(!CryptUtil.Decrypt(CryptUtil.AES, token, secret, iv).equals(originalToken)) {
+				if(!token.equals(originalToken)) {
 					return new ResponseEntity<>("{\"result\": 0, \"msg\": \"invalid token.\"}", HttpStatus.UNAUTHORIZED);
 				}
 			}
 			
+//			if(request.getHeader(HttpHeaders.AUTHORIZATION) == null) {
+//				return new ResponseEntity<>("{\"result\": 0, \"msg\": \"Missing 'Authorization' header.\"}", HttpStatus.BAD_REQUEST);
+//			}else{
+//				String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+//				
+//				if(authorization.split("key=").length != 2) {
+//					return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"Invalid 'Authorization' format.\"}", HttpStatus.UNAUTHORIZED);
+//				}
+//				
+//				String token = authorization.split("key=")[1];
+//				String secret = CoreConfigReader.getString(CONFIG_STR.AES_SECRET_KEY, true);
+//				String iv = CoreConfigReader.getString(CONFIG_STR.AES_INITIALIZATION_VECTOR, true);
+//				String originalToken = CoreConfigReader.getString(CONFIG_STR.API_ORIGINAL_TOKEN, true);
+//				logger.info("token:"+token);
+//				logger.info("secret:"+secret);
+//				logger.info("iv:"+iv);
+//				logger.info("originalToken:"+originalToken);
+//				
+//				String getToken = CryptUtil.Decrypt(CryptUtil.AES, token, secret, iv);
+//				logger.info("decryptOriginalToken:"+getToken);
+//				
+//				if(!getToken.equals(originalToken)) {
+//					return new ResponseEntity<>("{\"result\": 0, \"msg\": \"invalid token.\"}", HttpStatus.UNAUTHORIZED);
+//				}
+//			}
+			
+			// ----- set main information -----
 			logger.info("[LinePoint API] Request Body:" + linePointDetail);
-			linePointDetail.setDetailType(LinePointDetail.SOURCE_ISSUE_API);
+			String title = linePointDetail.getCampName();
+			LinePointMain linePointMain = linePointMainService.findByTitle(title);
+			if(linePointMain == null) {
+				linePointMain = new LinePointMain();
+				linePointMain.setSendType(LinePointMain.SEND_TYPE_API);
+				linePointMain.setModifyTime(new Date());
+				linePointMain.setTitle(title);
+				linePointMain.setTotalCount(0L);
+				linePointMain.setTotalAmount(0L);
+				linePointMain.setSuccessfulAmount(0L);
+				linePointMain.setFailedCount(0L);
+				linePointMainService.save(linePointMain);
+			}
+			
+			// ----- set detail information -----
+			linePointDetail.setLinePointMainId(linePointMain.getId());
+			linePointDetail.setDetailType(LinePointDetail.DETAIL_TYPE_ISSUE_API);
 			linePointDetail.setTriggerTime(new Date());
 			
 			// ----------- validation --------------
@@ -229,7 +321,8 @@ public class LinePointPushApiController {
 				throw e;
 			}
 			
-			// ---------------------------------------
+			
+			// ----------- execute --------------
 			// initialize request header
 			HttpHeaders headers = new HttpHeaders();
 			//String accessToken = linePointApiService.getLinePointChannelAccessToken();
@@ -277,7 +370,7 @@ public class LinePointPushApiController {
 				linePointDetailService.save(linePointDetail);
 			} catch (HttpClientErrorException e) {
 				logger.info("[LinePointApi] Status code: " + e.getStatusCode());
-				logger.info("[LinePointApi]  Response body: " + e.getResponseBodyAsString());
+				logger.info("[LinePointApi] Response body: " + e.getResponseBodyAsString());
 				
 				linePointDetail.setMessage(e.getResponseBodyAsString());
 				linePointDetail.setStatus(LinePointDetail.STATUS_FAIL);
@@ -302,26 +395,49 @@ public class LinePointPushApiController {
 			logger.info("-------------------- api linePoint cancel --------------------");
 			
 			if(request.getHeader(HttpHeaders.AUTHORIZATION) == null) {
-				return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"Missing 'Authorization' header.\"}", HttpStatus.BAD_REQUEST);
-			} else {
+				return new ResponseEntity<>("{\"result\": 0, \"msg\": \"Missing 'Authorization' header.\"}", HttpStatus.BAD_REQUEST);
+			}else{
 				String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-				
 				if(authorization.split("key=").length != 2) {
 					return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"Invalid 'Authorization' format.\"}", HttpStatus.UNAUTHORIZED);
 				}
 				
 				String token = authorization.split("key=")[1];
-				String secret = CoreConfigReader.getString(CONFIG_STR.AES_SECRET_KEY, true);
-				String iv = CoreConfigReader.getString(CONFIG_STR.AES_INITIALIZATION_VECTOR, true);
 				String originalToken = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_API_ORIGINAL_TOKEN, true);
 				
-				if(!CryptUtil.Decrypt(CryptUtil.AES, token, secret, iv).equals(originalToken)) {
-					return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"invalid token.\"}", HttpStatus.UNAUTHORIZED);
+				if(!token.equals(originalToken)) {
+					return new ResponseEntity<>("{\"result\": 0, \"msg\": \"invalid token.\"}", HttpStatus.UNAUTHORIZED);
 				}
 			}
 			
+//			if(request.getHeader(HttpHeaders.AUTHORIZATION) == null) {
+//				return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"Missing 'Authorization' header.\"}", HttpStatus.BAD_REQUEST);
+//			} else {
+//				String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+//				
+//				if(authorization.split("key=").length != 2) {
+//					return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"Invalid 'Authorization' format.\"}", HttpStatus.UNAUTHORIZED);
+//				}
+//				
+//				String token = authorization.split("key=")[1];
+//				String secret = CoreConfigReader.getString(CONFIG_STR.AES_SECRET_KEY, true);
+//				String iv = CoreConfigReader.getString(CONFIG_STR.AES_INITIALIZATION_VECTOR, true);
+//				String originalToken = CoreConfigReader.getString(CONFIG_STR.API_ORIGINAL_TOKEN, true);
+//				logger.info("token:"+token);
+//				logger.info("secret:"+secret);
+//				logger.info("iv:"+iv);
+//				logger.info("originalToken:"+originalToken);
+//				
+//				String getToken = CryptUtil.Decrypt(CryptUtil.AES, token, secret, iv);
+//				logger.info("decryptOriginalToken:"+getToken);
+//				
+//				if(!getToken.equals(originalToken)) {
+//					return new ResponseEntity<>("{\"result\": 0, \"msg\": \"invalid token.\"}", HttpStatus.UNAUTHORIZED);
+//				}
+//			}
+			
 			logger.info("[LinePoint API] Request Body:" + linePointDetail);
-			linePointDetail.setDetailType(LinePointDetail.SOURCE_CANCEL_API);
+			linePointDetail.setDetailType(LinePointDetail.DETAIL_TYPE_CANCEL_API);
 			linePointDetail.setTriggerTime(new Date());
 			
 			// ----------- validation --------------

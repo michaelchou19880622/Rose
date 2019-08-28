@@ -22,7 +22,7 @@ public class AdminUser extends AbstractBcsEntity{
 		ROLE_PNP_INQUIRER("ROLE_PNP_INQUIRER", "PNP查詢者", "pnpInquirer"),
 		ROLE_PNP_EMPLOYEE("ROLE_PNP_EMPLOYEE", "PNP單位發送暨查詢者", "pnpEmployee"),
 		ROLE_LP_QUERIER("ROLE_LP_QUERIER", "LINE點報表查詢者", "lpQuerier"),
-		ROLE_LP_CREATOR("ROLE_LP_CREATOR", "LINE點發送建立者", "lpCreator"),
+		ROLE_LP_CREATOR("ROLE_LP_CREATOR", "LINE點發送建立者", "edit"),
 		ROLE_LP_JUDGER("ROLE_LP_JUDGER", "LINE點發送審核者", "lpJudger"),
 		;
 		

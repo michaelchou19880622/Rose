@@ -25,53 +25,34 @@ public class LinePointScheduledDetail extends AbstractBcsEntity {
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column(name = "DETAIL_ID")
-	private Long detailId;
-
-	@Column(name = "LINE_POINT_MAIN_ID")
-	private Long linePointMainId;
-
-	@Column(name = "UID", columnDefinition="varchar(50)")
-	private String uid;
-
+	@Column(name = "LINE_POINT_SCHEDULED_DETAIL_ID")
+	private Long linePointScheduledDetailId;
+	@Column(name = "LINE_POINT_DETAIL_ID")
+	private Long linePointDetailId;
+	
 	@Column(name = "STATUS", columnDefinition="nvarchar(50)")
 	private String status;
-	
 	@Column(name = "MODIFY_TIME")
 	private Date modifyTime;
 	
-	public Long getDetailId() {
-		return detailId;
+	public Long getLinePointScheduledDetailId() {
+		return linePointScheduledDetailId;
 	}
-
-	public Long getLinePointMainId() {
-		return linePointMainId;
+	public Long getLinePointDetailId() {
+		return linePointDetailId;
 	}
-
-	public void setLinePointMainId(Long linePointMainId) {
-		this.linePointMainId = linePointMainId;
+	public void setLinePointMainId(Long linePointDetailId) {
+		this.linePointDetailId = linePointDetailId;
 	}
-
-	public String getUid() {
-		return uid;
-	}
-
-	public void setUid(String uid) {
-		this.uid = uid;
-	}
-
 	public String getStatus() {
 		return status;
 	}
-
 	public void setStatus(String status) {
 		this.status = status;
 	}
-
 	public Date getModifyTime() {
 		return modifyTime;
 	}
-
 	public void setModifyTime(Date modifyTime) {
 		this.modifyTime = modifyTime;
 	}

@@ -40,7 +40,7 @@ $(function() {
 
 				$.ajax({
 					type: 'GET',
-					url: bcs.bcsContextPath + "/lpCreator/getRichMsg/" + richId,
+					url: bcs.bcsContextPath + "/edit/getRichMsg/" + richId,
 				}).success(function(response){
 					var valueObj = response[richId];
 					console.info('valueObj', valueObj);
@@ -78,7 +78,7 @@ $(function() {
 				var templateId = detailContent.templateId;
 				$.ajax({
 					type: 'GET',
-					url: bcs.bcsContextPath + "/lpCreator/getTemplateMsg/" + templateId,
+					url: bcs.bcsContextPath + "/edit/getTemplateMsg/" + templateId,
 				}).success(function(response){
 					console.info('response', response);
 					$.BCS.previewMsgTemplate(previewDialog, response);
@@ -277,13 +277,13 @@ $(function() {
     	
         if(needColMaxNum != colMaxNum) {
         	alert('資料行數：' + colMaxNum + '與需要行數：' + needColMaxNum + '不符');
-        	window.location.replace(bcs.bcsContextPath + '/lpCreator/linePointCreatePage');
+        	window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
         }
         if(colMaxNum == 2){
         	var amount = parseInt($('#amount').val());
         	if(isNaN(amount) || amount <= 0){
         		alert('發送數量必須大於零');
-        		window.location.replace(bcs.bcsContextPath + '/lpCreator/linePointCreatePage');
+        		window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
         	}
         	fileInformation.innerHTML = '本次共發送' + rows.length + '筆，合計發送點數為' + rows.length * amount +'點';
         }else{

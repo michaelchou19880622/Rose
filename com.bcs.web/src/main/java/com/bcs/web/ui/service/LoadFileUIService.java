@@ -27,6 +27,7 @@ public class LoadFileUIService {
 		response.setCharacterEncoding("UTF-8");
 		OutputStream outp = response.getOutputStream();
 		try {
+			logger.info("[loadFileToResponse]");
 			IOUtils.copy(inp, outp);
 			response.flushBuffer();
 		} catch (IOException e) {

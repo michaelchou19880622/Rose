@@ -326,6 +326,7 @@ public enum CONFIG_STR {
 	ORACLE_DATASOURCE_DRIVER_NAME("oracle.datasource.driver.name"),
 	ORACLE_SCHEMA_HR("oracle.schema.hr"),
 	ORACLE_SCHEMA_CMM("oracle.schema.cmm"),
+	ORACLE_USE_DEPARTMENT_CHECK("oracle.use.department.check"),
 	
 	//PNP監控
 //	PNP_PROC_FLOW("pnp.proc.flow"),

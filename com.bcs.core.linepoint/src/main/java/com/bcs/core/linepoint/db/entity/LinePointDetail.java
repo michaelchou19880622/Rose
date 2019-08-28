@@ -23,8 +23,11 @@ public class LinePointDetail extends AbstractBcsEntity {
 	public static final String STATUS_WAIT = "WAIT";
  	public static final String STATUS_SUCCESS = "SUCCESS";
  	public static final String STATUS_FAIL = "FAIL";
-	public static final String SOURCE_ISSUE_API = "ISSUE_API";
-	public static final String SOURCE_CANCEL_API = "CANCEL_API";
+ 	
+	public static final String DETAIL_TYPE_ISSUE_API = "ISSUE_API";
+	public static final String DETAIL_TYPE_CANCEL_API = "CANCEL_API";
+	public static final String DETAIL_TYPE_BCS = "BCS";
+	
  	public static final String DESCRIPTION_OVERFLOW = "OVERFLOW";
 	
 	@Id

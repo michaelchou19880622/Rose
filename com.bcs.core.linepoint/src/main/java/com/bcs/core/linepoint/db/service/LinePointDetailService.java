@@ -26,9 +26,8 @@ public class LinePointDetailService {
     EntityManager entityManager;
     
 	public void delete(Long msgId){
-		LinePointDetail main = linePointDetailRepository.findOne(msgId);
-		main.setStatus(LinePointMain.STATUS_DELETE);
-		this.save(main);
+		LinePointDetail detail = linePointDetailRepository.findOne(msgId);
+		linePointDetailRepository.delete(detail);
 	}
     
 	public void save(LinePointDetail linePoint){
@@ -50,7 +49,11 @@ public class LinePointDetailService {
 	public List<LinePointDetail> findFail(Long linePointMainId){
 		return linePointDetailRepository.findByStatusAndLinePointMainId(LinePointDetail.STATUS_FAIL, linePointMainId);
 	}
-		
+	
+	public List<LinePointDetail> findByLinePointMainId(Long linePointMainId){
+		return linePointDetailRepository.findByLinePointMainId(linePointMainId);
+	}
+	
 //	public LinePointDetail findBySerialId(String serialId){
 //		return linePointDetailRepository.findBySerialId(serialId);
 //	}

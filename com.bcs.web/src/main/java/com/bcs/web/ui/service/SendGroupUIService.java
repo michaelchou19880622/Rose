@@ -120,6 +120,7 @@ public class SendGroupUIService {
 	@Transactional(rollbackFor=Exception.class)
 	public Map<String, Object> uploadMidSendGroup(MultipartFile filePart, String modifyUser, Date modifyTime) throws Exception{
 
+		logger.info("uploadMidSendGroup 1-1");
 		String fileName = filePart.getOriginalFilename();
 		logger.info("getOriginalFilename:" + fileName);
 		String contentType = filePart.getContentType();
@@ -136,60 +137,76 @@ public class SendGroupUIService {
 		
 		if(mids != null && mids.size() > 0){
 			List<String> list = new ArrayList<String>(mids);
-
+			logger.info("list.size():" + list.size());
 			List<String> existMids = new ArrayList<String>();
 			
 			// Check MID Exist by Part
-			List<String> check = new ArrayList<String>();
-			for(int i = 1; i <= list.size(); i++){
-				
-				check.add(list.get(i-1));
-				
-				if(i % 1000 == 0){
-//					logger.info("check.size():" + check.size());
+			long startTime = System.currentTimeMillis(); //獲取開始時間
+			try {
+				List<String> check = new ArrayList<String>();
+				for(int i = 1; i <= list.size(); i++){
+					
+					check.add(list.get(i-1));
+					
+					if(i % 1000 == 0){
+	//					logger.info("check.size():" + check.size());
+						List<String> midResult = lineUserService.findMidByMidInAndActive(check);
+						if(midResult != null && midResult.size() > 0){
+							existMids.addAll(midResult);
+						}
+						check.clear();
+					}
+				}
+	//			logger.info("check.size():" + check.size());
+				if(check.size() > 0){
 					List<String> midResult = lineUserService.findMidByMidInAndActive(check);
 					if(midResult != null && midResult.size() > 0){
 						existMids.addAll(midResult);
 					}
-					check.clear();
 				}
-			}
-//			logger.info("check.size():" + check.size());
-			if(check.size() > 0){
-				List<String> midResult = lineUserService.findMidByMidInAndActive(check);
-				if(midResult != null && midResult.size() > 0){
-					existMids.addAll(midResult);
-				}
+
+			}catch(Exception e) {
+				long endTime = System.currentTimeMillis(); //獲取開始時間
+				logger.info("查詢上傳UID是否是LINE好友的時間  : " +  (endTime - startTime) + "毫秒");
 			}
 
 			if(existMids != null && existMids.size() > 0){
 				logger.debug("existMids:" + existMids);
 				
 				String referenceId = UUID.randomUUID().toString().toLowerCase();
-				
-				for(String mid : existMids){
-					UserEventSet userEventSet = new UserEventSet();
-
-					userEventSet.setTarget(EVENT_TARGET_ACTION_TYPE.EVENT_SEND_GROUP.toString());
-					userEventSet.setAction(EVENT_TARGET_ACTION_TYPE.ACTION_UPLOAD_MID.toString());
-
-					userEventSet.setReferenceId(referenceId);
+				//start
+				startTime = System.currentTimeMillis(); //獲取開始時間
+				try {
 					
-					userEventSet.setMid(mid);
-					userEventSet.setContent(fileName);
+					for(String mid : existMids){
+						UserEventSet userEventSet = new UserEventSet();
+	
+						userEventSet.setTarget(EVENT_TARGET_ACTION_TYPE.EVENT_SEND_GROUP.toString());
+						userEventSet.setAction(EVENT_TARGET_ACTION_TYPE.ACTION_UPLOAD_MID.toString());
+	
+						userEventSet.setReferenceId(referenceId);
+						
+						userEventSet.setMid(mid);
+						userEventSet.setContent(fileName);
+						
+						userEventSet.setSetTime(modifyTime);
+						userEventSet.setModifyUser(modifyUser);
+						
+						logger.info("userEventSet1:"+userEventSet);
+						//end
+						
+						userEventSetService.save(userEventSet);
+					}
 					
-					userEventSet.setSetTime(modifyTime);
-					userEventSet.setModifyUser(modifyUser);
-					
-					logger.info("userEventSet1:"+userEventSet);
-					userEventSetService.save(userEventSet);
+				}catch(Exception e) {
+					long endTime = System.currentTimeMillis(); //獲取開始時間
+					logger.info("存入 userEventSet 時間 : " +  (endTime - startTime) + "毫秒");
 				}
-
 				Map<String, Object> result = new HashMap<String, Object>();
 		
 				result.put("referenceId", referenceId);
 				result.put("count", existMids.size());
-				
+				logger.info("result:"+result);
 				return result;
 			}
 			else{

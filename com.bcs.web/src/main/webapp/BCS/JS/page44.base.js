@@ -57,21 +57,55 @@ $(function(){
 			showerror();
 		}else{
 			showblank();
+			var userId = $('#userID').val();
 			
 			$.ajax({
 				
-				type : "GET",
-				url : bcs.bcsContextPath + '/tsmb/inquireUserLineUrl',
+				type : "POST",
+				url : bcs.bcsContextPath + '/tsmb/inquireUserLineUrl?userId=' + userId ,
 	            cache: false,
 	            contentType: 'application/json',
 	            processData: false,
 			}).success(function(response){
 				console.info(response);
-				inquireLineUid(response);
+				response = JSON.parse(response);      //string to Json
+				if(response.ReturnCode == 'S001'){
+					//查詢身分證之後顯示帳號狀態
+					var Status = "" ;
+					var RegisterDate  = response.ReturnData.RegisterDate.substring(0,4)+"/"+
+										response.ReturnData.RegisterDate.substring(4,6)+"/"+
+										response.ReturnData.RegisterDate.substring(6,8);
+					var RegisterTime  = response.ReturnData.RegisterTime.substring(0,5);
+					var ModifyDate    = null ;
+					if(response.ReturnData.Status == "BINDED"){
+						Status = "已綁定";
+					}else{
+						Status = "解除綁定";
+					}
+					
+					if(response.ReturnData.ModifyDate != null){
+						ModifyDate = response.ReturnData.ModifyDate.substring(0,4)+"/"+
+									 response.ReturnData.ModifyDate.substring(4,6)+"/"+
+									 response.ReturnData.ModifyDate.substring(6,8)+" "+
+									 response.ReturnData.ModifyTime.substring(0,5);
+					}else{
+						ModifyDate = "N/A"
+					}
+					
+					//$(".showResult").html("LINE UID : <br><br>" + response.ReturnData.Luid ).css("color","blue").css("fontSize", "35px");
+					$(".showResult").html(
+							"LINE UID :  " + response.ReturnData.Luid + 
+							"<br>目前狀態 : " + Status + 
+							"<br>綁定時間 : " + RegisterDate + " " + RegisterTime+ 
+							"<br>解綁時間 : " + ModifyDate).css("color","blue").css("fontSize", "20px");
+				}else if(response.ReturnCode == 'E001'){
+					//顯示錯誤訊息
+					$(".showResult").html(response.ReturnMessage ).css("color","red").css("fontSize", "35px");
+				}
 
 			}).fail(function(response){
 				console.info(response);
-				//$.FailResponse(response);
+				$(".showResult").html('查無此ID').css("color","red").css("fontSize", "35px");
 			}).done(function(){
 			});
 		
@@ -84,9 +118,9 @@ $(function(){
 			showerror();
 		}else{
 			showblank();
-			var userID = $('#userID').val();
+			var userId = $('#userID').val();
 			$("#dialog").css('display','block').dialog().css('text-align','center');	//秀資訊
-			$("#showUserID").html("此步驟無法反悔<br>請確定要解除綁定<br><br>"+ userID);
+			$("#showUserID").html("此步驟無法反悔<br>請確定要解除綁定<br><br>"+ userId);
 		}
 	});
 	//彈跳視窗 取消解除
@@ -97,26 +131,52 @@ $(function(){
 	//彈跳視窗 確定解除
 	$('#determine').click(function(){
 		$("#dialog").dialog("close");
-		
+		var userId = $('#userID').val();
 		$.ajax({
-			
-			type : "GET",
-			url : bcs.bcsContextPath + '/tsmb/unbindUserLineUrl',
+			type : "POST",
+			url : bcs.bcsContextPath + '/tsmb/unbindUserLineUrl?userId=' + userId,
             cache: false,
             contentType: 'application/json',
             processData: false,
 		}).success(function(response){
 			console.info(response);
-			unbindUserLineUrl(response);
+			response = JSON.parse(response);      //string to Json
+			if(response.ReturnCode == 'S001'){
+				//顯示UID
+				var Status = "" ;
+				var RegisterDate  = response.ReturnData.RegisterDate.substring(0,4)+"/"+
+									response.ReturnData.RegisterDate.substring(4,6)+"/"+
+									response.ReturnData.RegisterDate.substring(6,8);
+				var RegisterTime  = response.ReturnData.RegisterTime.substring(0,5);
+				var ModifyDate    = response.ReturnData.ModifyDate.substring(0,4)+"/"+
+									response.ReturnData.ModifyDate.substring(4,6)+"/"+
+									response.ReturnData.ModifyDate.substring(6,8)+" "+
+									response.ReturnData.ModifyTime.substring(0,5);
+				if(response.ReturnData.Status == "BINDED"){
+					Status = "已綁定";
+				}else{
+					Status = "解除綁定";
+				}
+				
+				//$(".showResult").html("LINE UID : <br><br>" + response.ReturnData.Luid ).css("color","blue").css("fontSize", "35px");
+				$(".showResult").html(
+						"&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp"+userId + " 已解除綁定 <br>"+
+						"<br>LINE UID :  " + response.ReturnData.Luid + 
+						"<br>目前狀態 : "     + Status + 
+						"<br>綁定時間 : "     + RegisterDate + " " + RegisterTime+ 
+						"<br>解綁時間 : "     + ModifyDate).css("color","blue").css("fontSize", "20px");
+				}else if(response.ReturnCode == 'E001'){
+				//顯示錯誤訊息
+				$(".showResult").html(response.ReturnMessage ).css("color","red").css("fontSize", "20px");
+			}
 
 		}).fail(function(response){
 			console.info(response);
+			$(".showResult").html('查無此ID' ).css("color","red").css("fontSize", "35px");
 			//$.FailResponse(response);
 		}).done(function(){
 		});
 	});
-
-	
 	
 	function showerror(){
 		$(".CheckID").text("身分證格式錯誤").css({ "color":"red",
@@ -127,70 +187,4 @@ $(function(){
 		$(".CheckID").text("");
 	}
 	
-	function inquireLineUid(Url){
-		var userID = $('#userID').val();
-		var sJson = { 
-			SourceChannel: 'TSLINE_P',
-			CustId: userID
-		};
-		$.ajax({
-			type : "POST",
-			url : Url,
-            cache: false,
-            contentType: 'application/json',
-            processData: false,
-			data : sJson
-		}).success(function(response){
-			console.info("URL" ,response);
-			if(response.ReturnCode == 'S001'){
-				//顯示UID
-				$(".showResult").html("LINE UID : <br><br>" + response.ReturnData.Luid ).css("color","blue").css("fontSize", "35px");
-			}else if(response.ReturnCode == 'E001'){
-				//顯示錯誤訊息
-				$(".showResult").html(response.ReturnMessage ).css("color","red").css("fontSize", "35px");
-			}
-		}).fail(function(response){
-			console.info(response);
-			$(".showResult").html('查無此ID').css("color","red").css("fontSize", "35px");
-		}).done(function(){
-		});
-	}
-	
-	
-	function unbindUserLineUrl(Url){
-		var EMP_ID = $('#LoginID').text();
-		var userID = $('#userID').val();
-		console.info(Url);
-		var sJson = 
-		{ 
-			"SourceChannel": "TSLINE_P",
-			"CustId": userID,    //解綁身分證字號
-			"UpdateUser": EMP_ID //員工編號
-		};
-		
-		 $.ajax({
-				type : "POST",
-				url : Url,
-	            cache: false,
-	            contentType: 'application/json',
-	            processData: false,
-				data : sJson
-			}).success(function(response){
-				console.info(response);
-				if(response.ReturnCode == 'S001'){
-					//顯示UID
-					$(".showResult").html("身分證字號 : "+ userID + "   " +response.ReturnMessage +"<br><br> LINE UID : <br><br>" + response.ReturnData.Luid ).css("color","blue").css("fontSize", "35px");
-				}else if(response.ReturnCode == 'E001'){
-					//顯示錯誤訊息
-					$(".showResult").html(response.ReturnMessage ).css("color","red").css("fontSize", "35px");
-				}
-		 		window.location.reload();
-			}).fail(function(response){
-				console.info(response);
-				$(".showResult").html('查無此ID' ).css("color","red").css("fontSize", "35px");
-				//$.FailResponse(response);
-			}).done(function(){
-			});
-
-	}
 });

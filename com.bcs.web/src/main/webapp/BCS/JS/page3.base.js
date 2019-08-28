@@ -157,6 +157,7 @@ $(function(){
 			postData.msgId = msgId;
 		}
 		console.info('postData', postData);
+		//console.info('postData.sendMsgDetails[0]', postData.sendMsgDetails[0]);
 
 		// 傳送資料
 		$('.LyMain').block($.BCS.blockMsgSave);

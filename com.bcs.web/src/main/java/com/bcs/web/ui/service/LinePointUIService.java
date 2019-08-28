@@ -35,43 +35,72 @@ public class LinePointUIService {
 	}
 	public List<LinePointMain> linePointMainFindAll(String searchText){
 		return linePointMainService.findAll(searchText);
-	}	
-	public List<LinePointMain> linePointMainFindManual(){
-		return linePointMainService.findManual();
 	}
-	public List<LinePointMain> linePointMainFindManual(String searchText){
-		return linePointMainService.findManual(searchText);
-	}	
-	public List<LinePointMain> linePointMainFindAuto(){
-		return linePointMainService.findAuto();
+	public List<LinePointMain> linePointMainFindBcs(){
+		return linePointMainService.findBySendType(LinePointMain.SEND_TYPE_BCS);
 	}
-	public List<LinePointMain> linePointMainFindAuto(String searchText){
-		return linePointMainService.findAuto(searchText);
+	public List<LinePointMain> linePointMainFindBcsAndDate(Date startDate, Date endDate){
+		return linePointMainService.findBySendTypeAndDate(LinePointMain.SEND_TYPE_BCS, startDate, endDate);
 	}
-	public List<LinePointMain> linePointMainFindUndoneManual(){
-		return linePointMainService.findUndoneManual();
+	
+	public List<LinePointMain> getLinePointStatisticsReport(Date startDate, Date endDate, String modifyUser, String title, Integer page){
+		return linePointMainService.getLinePointStatisticsReport(startDate, endDate, modifyUser, title, page);
 	}
-	public List<LinePointMain> linePointMainFindUndoneAuto(){
-		return linePointMainService.findUndoneAuto();
+	public Long getLinePointStatisticsReportTotalPages(Date startDate, Date endDate, String modifyUser, String title) {
+		return linePointMainService.getLinePointStatisticsReportTotalPages(startDate, endDate, modifyUser, title);
 	}
+	
+//	public List<LinePointMain> linePointMainFindManual(){
+//		return linePointMainService.findManual();
+//	}
+//	public List<LinePointMain> linePointMainFindManual(String searchText){
+//		return linePointMainService.findManual(searchText);
+//	}	
+//	public List<LinePointMain> linePointMainFindAuto(){
+//		return linePointMainService.findAuto();
+//	}
+//	public List<LinePointMain> linePointMainFindAuto(String searchText){
+//		return linePointMainService.findAuto(searchText);
+//	}
+//	public List<LinePointMain> linePointMainFindUndoneManual(){
+//		return linePointMainService.findUndoneManual();
+//	}
+//	public List<LinePointMain> linePointMainFindUndoneAuto(){
+//		return linePointMainService.findUndoneAuto();
+//	}
 	public List<LinePointDetail> findSuccess(Long linePointMainId){
 		return linePointDetailService.findSuccess(linePointMainId);
 	}
 	public List<LinePointDetail> findFail(Long linePointMainId){
 		return linePointDetailService.findFail(linePointMainId);
 	}
-	public List<LinePointScheduledDetail> findScheduledDetailList(Long mainId){
-		return linePointScheduledDetailService.findAll(mainId);
-	}	
+	public List<LinePointDetail> findByLinePointMainId(Long linePointMainId){
+		return linePointDetailService.findByLinePointMainId(linePointMainId);
+	}
 	@Transactional(rollbackFor=Exception.class, timeout = 30)
-	public LinePointMain saveLinePointMainFromUI(LinePointMain linePointMain, String adminUserAccount) throws BcsNoticeException{
-		logger.info("saveFromUI:" + linePointMain);
-		linePointMain.setModifyUser(adminUserAccount);
-		linePointMain.setModifyTime(new Date());
+	public LinePointMain saveLinePointMainFromUI(LinePointMain linePointMain) throws BcsNoticeException{
 		linePointMainService.save(linePointMain);
 		return linePointMain;
 	}
+	
+	@Transactional(rollbackFor=Exception.class, timeout = 30)
+	public List<LinePointScheduledDetail> saveLinePointScheduledDetailListFromUI(List<LinePointScheduledDetail> linePointScheduledDetail) throws BcsNoticeException{
+		linePointScheduledDetailService.save(linePointScheduledDetail);
+		return linePointScheduledDetail;
+	}
+	
+	@Transactional(rollbackFor=Exception.class, timeout = 30)
+	public List<LinePointDetail> saveLinePointDetailListFromUI(List<LinePointDetail> linePointDetailList, String adminUserAccount) throws BcsNoticeException{
+		logger.info("saveFromUI:" + linePointDetailList);
+		for(LinePointDetail detail : linePointDetailList) {
+//			detail.setModifyUser(adminUserAccount);
+//			detail.setModifyTime(new Date());
+			linePointDetailService.save(detail);
+		}
 		
+		return linePointDetailList;
+	}
+	
 	@Transactional(rollbackFor=Exception.class, timeout = 30)
 	public void deleteFromUI(long id, String adminUserAccount, String listType) throws BcsNoticeException {
 		logger.info("deleteFromUI:" +id);		

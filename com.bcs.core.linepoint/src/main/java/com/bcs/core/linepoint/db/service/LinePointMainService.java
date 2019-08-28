@@ -51,34 +51,75 @@ public class LinePointMainService {
 	public List<LinePointMain> findAll(String searchText){
 		return linePointMainRepository.findAll(searchText);
 	}
-	
-
-	public List<LinePointMain> findManual(){
-		return linePointMainRepository.findBySendType(LinePointMain.SEND_TYPE_MANUAL);
+	public List<LinePointMain> findBySendType(String sendType){
+		return linePointMainRepository.findBySendType(sendType);
+	}
+	public List<LinePointMain> findBySendTypeAndDate(String sendType, Date startDate, Date endDate){
+		return linePointMainRepository.findBySendTypeAndDate(sendType, startDate, endDate);
+	}	
+	public List<LinePointMain> findAllowableIdles(){
+		return linePointMainRepository.findAllowableIdles();
 	}
 	
-	public List<LinePointMain> findManual(String searchText){
-		return linePointMainRepository.findBySendType(LinePointMain.SEND_TYPE_MANUAL, searchText);
+	public List<LinePointMain> findByTitleAndModifyUserAndDate(Date startDate, Date endDate, String modifyUser, String title){
+		return linePointMainRepository.findByTitleAndModifyUserAndDate(title, modifyUser, startDate, endDate);
+	}
+	@SuppressWarnings("unchecked")
+	public List<LinePointMain> getLinePointStatisticsReport(Date startDate, Date endDate, String modifyUser, String title, Integer page){
+    	// get Row Index
+		Integer rowStart, rowEnd;
+    	if(page == null) {
+    		rowStart = 1;
+    		rowEnd = Integer.MAX_VALUE; // get all data
+    	}else {
+    		page--; // 1~199 => 0~198
+    		rowStart = page * 10 + 1;
+    		rowEnd = rowStart + 10; // 10 as Size
+    	}
+    	logger.info("rowStart:"+rowStart);
+    	logger.info("rowEnd:"+rowEnd);
+    	
+    	Query query = entityManager.createNamedQuery("queryGetStatisticsReportPage").setParameter(1, title).setParameter(2, modifyUser)
+    			.setParameter(3, startDate).setParameter(4, endDate);
+    	query.setFirstResult(rowStart);
+    	query.setMaxResults(rowEnd);
+    	
+		return query.getResultList();
 	}
 	
-	public List<LinePointMain> findAuto(){
-		return linePointMainRepository.findBySendType(LinePointMain.SEND_TYPE_AUTO);
+	public Long getLinePointStatisticsReportTotalPages(Date startDate, Date endDate, String modifyUser, String title){
+		return linePointMainRepository.findTotalCountByTitleAndModifyUserAndStartDateAndEndDate(title, modifyUser, startDate, endDate);
 	}
+//	public List<LinePointMain> findManual(){
+//		return linePointMainRepository.findBySendType(LinePointMain.SEND_TYPE_MANUAL);
+//	}
+//	
+//	public List<LinePointMain> findManual(String searchText){
+//		return linePointMainRepository.findBySendType(LinePointMain.SEND_TYPE_MANUAL, searchText);
+//	}
 	
-	public List<LinePointMain> findAuto(String searchText){
-		return linePointMainRepository.findBySendType(LinePointMain.SEND_TYPE_AUTO, searchText);
-	}
-	
-	public List<LinePointMain> findUndoneManual(){
-		return linePointMainRepository.findUndoneBySendType(LinePointMain.SEND_TYPE_MANUAL);
-	}
-
-	public List<LinePointMain> findUndoneAuto(){
-		return linePointMainRepository.findUndoneBySendType(LinePointMain.SEND_TYPE_AUTO);
-	}
+//	public List<LinePointMain> findAuto(){
+//		return linePointMainRepository.findBySendType(LinePointMain.SEND_TYPE_AUTO);
+//	}
+//	
+//	public List<LinePointMain> findAuto(String searchText){
+//		return linePointMainRepository.findBySendType(LinePointMain.SEND_TYPE_AUTO, searchText);
+//	}
+//	
+//	public List<LinePointMain> findUndoneManual(){
+//		return linePointMainRepository.findUndoneBySendType(LinePointMain.SEND_TYPE_MANUAL);
+//	}
+//
+//	public List<LinePointMain> findUndoneAuto(){
+//		return linePointMainRepository.findUndoneBySendType(LinePointMain.SEND_TYPE_AUTO);
+//	}
 	
 	public LinePointMain findBySerialId(String serialId){
 		return linePointMainRepository.findBySerialId(serialId);
+	}
+	
+	public LinePointMain findByTitle(String title){
+		return linePointMainRepository.findByTitle(title);
 	}
 	
 	public List<LinePointMain> findByStatus(String status){

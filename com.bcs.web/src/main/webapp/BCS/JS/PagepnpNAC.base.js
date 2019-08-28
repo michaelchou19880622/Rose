@@ -147,7 +147,7 @@ $(function(){
         }).done(function() {
             $('.LyMain').unblock();
             $('#dialog-modal').dialog({
-                    width: 960,
+                width: 960,
                 height: 480,
                 modal: true
             });

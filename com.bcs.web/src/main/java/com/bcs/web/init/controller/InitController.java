@@ -4,6 +4,7 @@ import com.bcs.core.bot.record.service.CatchRecordReceive;
 import com.bcs.core.bot.scheduler.service.LiveChatTaskService;
 import com.bcs.core.bot.scheduler.service.SchedulerService;
 import com.bcs.core.interactive.service.InteractiveService;
+import com.bcs.core.linepoint.scheduler.service.LinePointSimpleSchedulerService;
 import com.bcs.core.linepoint.scheduler.service.LinePointSchedulerService;
 import com.bcs.core.record.service.CatchHandleMsgReceiveTimeout;
 import com.bcs.core.record.service.CatchRecordBinded;
@@ -18,6 +19,7 @@ import com.bcs.core.taishin.circle.service.BillingNoticeFtpService;
 import com.bcs.core.taishin.circle.service.BillingNoticeSendMsgService;
 import com.bcs.core.utils.DataSyncUtil;
 import com.bcs.core.utils.ErrorRecord;
+import com.bcs.web.ui.service.LinePointSchedulerService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -71,12 +73,7 @@ public class InitController {
      */
     private static Logger logger = Logger.getLogger(InitController.class);
 
-    /**
-     * Instantiates a new Init controller.
-     */
-    public InitController() {
-        logger.info("Constructor InitController");
-    }
+		
 
     /**
      * Init.
@@ -93,7 +90,7 @@ public class InitController {
         pnpMsgServiceStartCircle();
         pnpSMSMsgServiceStartCircle();
 //        linePointSchedulerServiceLoadScheduleFromDB();
-
+        linePointschedulerServiceStartCircle();
         threadStart();
         liveChatTaskServiceCheckUserStatus();
 
@@ -125,6 +122,18 @@ public class InitController {
                     });
             thread.start();
         } catch (Exception e) {
+            logger.error(ErrorRecord.recordError(e));
+        }
+    }
+    
+    /**
+     * LinePoint Scheduler
+     */
+    private void linePointschedulerServiceStartCircle() {
+        try {
+            logger.info("init LinePoint Scheduler ");
+            linePointschedulerService.startCircle();
+        } catch (Throwable e) {
             logger.error(ErrorRecord.recordError(e));
         }
     }

@@ -239,10 +239,14 @@ public class SendMsgUIService {
 	}
 	
 	public void saveDraftMessage(SendMsgModel sendMsgModel, String adminUserAccount) throws Exception{
-
 		this.saveMessage(sendMsgModel, adminUserAccount, MsgMain.MESSAGE_STATUS_DRAFT);
 	}
 
+	public Long saveDraftMessageWithId(SendMsgModel sendMsgModel, String adminUserAccount) throws Exception{
+		return this.saveMessage(sendMsgModel, adminUserAccount, MsgMain.MESSAGE_STATUS_DRAFT);
+	}
+
+	
 	/**
 	 * Delete MsgMain
 	 * @param msgId
@@ -521,6 +525,13 @@ public class SendMsgUIService {
 		}
 	}
 
+	public void createExecuteSendMsgRunnable(Long msgId) throws Exception{
+		ExecuteSendMsgRunnable run = new ExecuteSendMsgRunnable();
+		run.thisMsgId = msgId;
+		Thread thread = new Thread(run);
+		thread.start();
+	}
+	
 	private static class ExecuteSendMsgRunnable implements Runnable{
 
 		public Long thisMsgId = null;

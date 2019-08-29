@@ -93,15 +93,16 @@ public class PnpPNPMsgService {
                 List<? super PnpDetail> details = pnpRepositoryCustom.updateStatus(type, procApName, AbstractPnpMainEntity.STAGE_PNP);
                 logger.info("pnpMain details type :" + type + " details size:" + details.size());
                 if (CollectionUtils.isEmpty(details)) {
-                    logger.info("pnpMain type :" + type + " there is a main has no details!!!");
-                    return;
+                    logger.info("details not data type:" + type.toString());
+                    continue;
                 }
+                logger.info("details has data type:" + type.toString());
                 PnpDetail oneDetail = (PnpDetail) details.get(0);
                 //組裝資料
                 pnpMain = pnpRepositoryCustom.findMainByMainId(type, oneDetail.getPnpMainId());
                 if (null == pnpMain) {
                     logger.info("pnpMain type :" + type + "sendingMain not data");
-                    return;
+                    continue;
                 }
                 pnpMain.setProcStage(AbstractPnpMainEntity.STAGE_PNP);
                 pnpMain.setPnpDetails(details);

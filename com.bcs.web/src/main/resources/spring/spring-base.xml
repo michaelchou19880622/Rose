@@ -98,19 +98,18 @@
 		<property name="dataSourceProperties">
 			<props>
 
-<!--
+
   				<prop key="user">sa</prop>
 				<prop key="password">XtremeApp53811062</prop>
 				<prop key="serverName">172.104.113.123</prop>
 				<prop key="databaseName">Taishin_Customer_Connect</prop>
 				<prop key="portNumber">1433</prop> 
--->
 
- 				<prop key="user">Taishin</prop>
-				<prop key="password">Hpifive16890535</prop>
-				<prop key="serverName">13.78.19.109</prop>
-				<prop key="databaseName">Taishin Customer Connect</prop>
-				<prop key="portNumber">1433</prop>
+<!--  				<prop key="user">Taishin</prop> -->
+<!-- 				<prop key="password">Hpifive16890535</prop> -->
+<!-- 				<prop key="serverName">13.78.19.109</prop> -->
+<!-- 				<prop key="databaseName">Taishin Customer Connect</prop> -->
+<!-- 				<prop key="portNumber">1433</prop> -->
 			</props>
 		</property>
 	</bean>

@@ -58,7 +58,7 @@ $(function() {
 		
         $.ajax({
             type: "GET",
-            url: bcs.bcsContextPath + '/edit/getBcsLinePointMainList?startDate=' + startDate + '&endDate=' + endDate
+            url: bcs.bcsContextPath + '/edit/findAllBcsLinePointMain?startDate=' + startDate + '&endDate=' + endDate
         }).success(function(response) {
             console.info("response:", response);
             $.each(response, function(i, o) {

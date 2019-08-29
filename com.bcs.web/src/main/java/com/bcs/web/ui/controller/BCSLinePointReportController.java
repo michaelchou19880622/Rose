@@ -242,4 +242,66 @@ public class BCSLinePointReportController extends BCSBaseController {
             logger.error(ErrorRecord.recordError(e));
         }
     }
+    
+//	//  匯出 Push API 成效報表
+//	@ControllerLog(description="匯出Line Point Push API 成效報表")
+//    @RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForLPPushApiEffects")
+//    @ResponseBody
+//    public void exportToExcelForLPPushApiEffects(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser) {
+//      
+//		// file path
+//        String filePath = CoreConfigReader.getString("file.path");
+//        
+//        // file name
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
+//		Date date = new Date();
+//        String fileName = "LPPushApiEffects_" + sdf.format(date) + ".xlsx";
+//        
+//        try {
+//            File folder = new File(filePath);
+//            if(!folder.exists()){
+//                folder.mkdirs();
+//            }
+//            exportToExcelForLinePointPushApiEffects.exportExcel(filePath, fileName);
+//        } catch (Exception e) {
+//            logger.error(ErrorRecord.recordError(e));
+//        }
+//
+//        try {
+//			LoadFileUIService.loadFileToResponse(filePath, fileName, response);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//    }
+//	// 匯出 Push API 成效報表
+//	@ControllerLog(description="匯出Line Point Push API Detail 成效報表")
+//    @RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForLPPushApiEffectsDetail/{mainId}/{status}")
+//    @ResponseBody
+//    public void exportToExcelForLPPushApiEffectsDetail(HttpServletRequest request, HttpServletResponse response, 
+//    		@CurrentUser CustomUser customUser, @PathVariable Long mainId, @PathVariable String status) {
+//      
+//		// file path
+//        String filePath = CoreConfigReader.getString("file.path");
+//        
+//        // file name
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
+//		Date date = new Date();
+//        String fileName = "LPPushApiEffectsDetail_" + sdf.format(date) + ".xlsx";
+//        
+//        try {
+//            File folder = new File(filePath);
+//            if(!folder.exists()){
+//                folder.mkdirs();
+//            }
+//            exportToExcelForLinePointPushApiEffects.exportExcel(filePath, fileName, mainId, status);
+//        } catch (Exception e) {
+//            logger.error(ErrorRecord.recordError(e));
+//        }
+//
+//        try {
+//			LoadFileUIService.loadFileToResponse(filePath, fileName, response);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//    }
 }

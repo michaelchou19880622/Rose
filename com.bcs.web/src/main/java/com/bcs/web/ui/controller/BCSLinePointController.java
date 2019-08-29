@@ -65,6 +65,8 @@ import com.bcs.core.linepoint.utils.service.ExcelUtilService;
 @Controller
 @RequestMapping("/bcs")
 public class BCSLinePointController extends BCSBaseController {
+	/** Logger */
+	private static Logger logger = Logger.getLogger(BCSLinePointController.class);
 	@Autowired
 	private LinePointUIService linePointUIService;
 	@Autowired
@@ -83,8 +85,7 @@ public class BCSLinePointController extends BCSBaseController {
 	private OracleService oracleService;
 	@Autowired
 	private LineUserService lineUserService;
-	/** Logger */
-	private static Logger logger = Logger.getLogger(BCSLinePointController.class);
+
 	
 	@ControllerLog(description = "建立 Line Point 活動")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/linePointCreatePage")
@@ -102,7 +103,7 @@ public class BCSLinePointController extends BCSBaseController {
 	
 	// ---- Data Creation ----
 	
-	@ControllerLog(description = "Save Line Point Main")
+	@ControllerLog(description = "createLinePointMain")
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/createLinePointMain", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createLinePointMain(HttpServletRequest request, HttpServletResponse response,
@@ -150,19 +151,18 @@ public class BCSLinePointController extends BCSBaseController {
 		}
 	}
 
-	@ControllerLog(description = "Add/Edit Line Point Detail List")
+	@ControllerLog(description = "Save Line Point Detail List")
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/createLinePointDetailList", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createLinePointDetailList(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser, @RequestBody List<LinePointDetail> linePointDetail) throws IOException {
 		logger.info("[createLinePointDetailList]");
 		try {
-			if (linePointDetail != null) {
-				String adminUserAccount = customUser.getAccount();
-				List<LinePointDetail> result = linePointUIService.saveLinePointDetailListFromUI(linePointDetail, adminUserAccount);
-				return new ResponseEntity<>(result, HttpStatus.OK);
-			} else 
+			if (linePointDetail == null) {
 				throw new Exception("linePointDetail is Null");
+			}
+			List<LinePointDetail> result = linePointUIService.saveLinePointDetailListFromUI(linePointDetail, customUser.getAccount());
+			return new ResponseEntity<>(result, HttpStatus.OK);				
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
 			if (e instanceof BcsNoticeException) 
@@ -174,13 +174,13 @@ public class BCSLinePointController extends BCSBaseController {
 	
 	// ---- Data Search ----
 	
-	@ControllerLog(description = "Find One Line Point Main")
-	@RequestMapping(method = RequestMethod.POST, value = "/edit/findOneMainByMainId")
+	@ControllerLog(description = "findOneMainByMainId")
+	@RequestMapping(method = RequestMethod.POST, value = "/edit/findOneLinePointMainByMainId")
 	@ResponseBody
-	public ResponseEntity<?> findOneMainByMainId(HttpServletRequest request, HttpServletResponse response,
+	public ResponseEntity<?> findOneLinePointMainByMainId(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
 		try {
-			logger.info("[findOneMainByMainId]");
+			logger.info("[findOneLinePointMainByMainId]");
 			if (linePointMainId != null) {
 				LinePointMain result = linePointUIService.linePointMainFindOne(linePointMainId);
 				return new ResponseEntity<>(result, HttpStatus.OK);
@@ -195,13 +195,14 @@ public class BCSLinePointController extends BCSBaseController {
 		}
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/findAllDetailsByMainId")
+	@ControllerLog(description = "findAllLinePointDetailByMainId")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/findAllLinePointDetailByMainId")
 	@ResponseBody
-	public ResponseEntity<?> findAllDetailsByMainId(HttpServletRequest request, HttpServletResponse response, 
+	public ResponseEntity<?> findAllLinePointDetailByMainId(HttpServletRequest request, HttpServletResponse response, 
 			@CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
 		try{
 			try {
-				logger.info("[findAllDetailsByMainId] linePointMainId:"+linePointMainId);
+				logger.info("[findAllLinePointDetailByMainId] linePointMainId:"+linePointMainId);
 				// get Details
 				List<LinePointDetail> linePointDetails = linePointUIService.findByLinePointMainId(linePointMainId);
 				logger.info("linePointDetails:"+linePointDetails);
@@ -219,44 +220,45 @@ public class BCSLinePointController extends BCSBaseController {
 		}
 	}
 	
-	@ControllerLog(description = "Get BCS Line Point Main")
-	@RequestMapping(method = {RequestMethod.GET}, value = {"/edit/getBcsLinePointMainList"})
+	@ControllerLog(description = "findAllBcsLinePointMain")
+	@RequestMapping(method = {RequestMethod.GET}, value = {"/edit/findAllBcsLinePointMain"})
 	@ResponseBody
-	public ResponseEntity<?> getBcsLinePointMainList(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, 
+	public ResponseEntity<?> findAllBcsLinePointMain(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, 
 			@RequestParam(value = "startDate", required = false) String startDateStr, 
 			@RequestParam(value = "endDate", required = false) String endDateStr) throws IOException {
-	    logger.info("[getManualLinePointMainList]");
-	    
-	    if (StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) startDateStr = "1911-01-01"; 
-	    if (StringUtils.isBlank(endDateStr) || endDateStr.equals("null")) endDateStr = "3099-01-01"; 
-	    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-	    Date startDate = null, endDate = null;
 	    try {
+	    	logger.info("[findAllBcsLinePointMain]");
+
+	    	// null translation
+		    if (StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) startDateStr = "1911-01-01"; 
+		    if (StringUtils.isBlank(endDateStr) || endDateStr.equals("null")) endDateStr = "3099-01-01"; 
+		    
+	    	// parse date data
+	    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		    Date startDate = null, endDate = null;
 	    	startDate = sdf.parse(startDateStr);
 	    	endDate = sdf.parse(endDateStr);
 	    	endDate = DateUtils.addDays(endDate, 1);
+	    	logger.info("startDate:" + startDate);
+		    logger.info("endDate:" + endDate);
+		    
+		    List<LinePointMain> result = new ArrayList<LinePointMain>();
+		    List<LinePointMain> list = this.linePointUIService.linePointMainFindBcsAndDate(startDate, endDate);
+		    result.addAll(list);
+		    logger.info("result:" + ObjectUtil.objectToJsonStr(result));
+			return new ResponseEntity(result, HttpStatus.OK);
 	    } catch (Exception e) {
 	    	logger.error(ErrorRecord.recordError(e));
 	    	return new ResponseEntity(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-	    } 
-	    logger.info("startDate:" + startDate);
-	    logger.info("endDate:" + endDate);
-	    
-	    List<LinePointMain> result = new ArrayList<LinePointMain>();
-	    List<LinePointMain> list = this.linePointUIService.linePointMainFindBcsAndDate(startDate, endDate);
-	    result.addAll(list);
-	    logger.info("result:" + ObjectUtil.objectToJsonStr(result));
-		return new ResponseEntity(result, HttpStatus.OK);
+	    }
 	}
 	
-	
-	@ControllerLog(description = "Get All Line Point Main")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getAllLinePointMainList")
+	@ControllerLog(description = "findAllLinePointMain")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/findAllLinePointMain")
 	@ResponseBody
-	public ResponseEntity<?> getAllLinePointMainList(HttpServletRequest request, HttpServletResponse response,
-			@CurrentUser CustomUser customUser) throws IOException {
-		logger.info("[getAllLinePointMainList]");
-		List<LinePointMain> result = new ArrayList();
+	public ResponseEntity<?> getAllLinePointMainList(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser) throws IOException {
+		logger.info("[findAllLinePointMain]");
+		List<LinePointMain> result = new ArrayList<LinePointMain>();
 		List<LinePointMain> list = linePointUIService.linePointMainFindAll();		
 		result.addAll(list);
 		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
@@ -264,8 +266,78 @@ public class BCSLinePointController extends BCSBaseController {
 	}
 	
 
+	// ---- Front End Data Upload ----
 	
-	@ControllerLog(description = "press Send Line Point Main")
+	@ControllerLog(description="Check Active UIds")
+    @RequestMapping(method = RequestMethod.POST, value = "/edit/checkActiveUids", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> checkActiveUids(HttpServletRequest request, HttpServletResponse response, 
+    		@CurrentUser CustomUser customUser, @RequestBody List<String> uids) throws IOException {
+        try { 
+    		logger.info("[checkActiveUids]");
+    		List<Integer> removeIndexs = new ArrayList();
+    		for(int i = 0; i < uids.size(); i++) {
+    			Boolean isUnactive = lineUserService.checkMIDAllActive(uids.get(i));
+    			logger.info("i="+i+", uid="+uids.get(i)+", isUnactive="+isUnactive);
+    			if(isUnactive) {
+    				removeIndexs.add(i);
+    			}
+    		}
+    		logger.info("removeIndexs:" + ObjectUtil.objectToJsonStr(removeIndexs));
+    		return new ResponseEntity<>(removeIndexs, HttpStatus.OK);
+        } catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+			if(e instanceof BcsNoticeException){
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			}else{
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+        }
+    }
+	
+	@ControllerLog(description="CSV to EXCEL")
+    @RequestMapping(method = RequestMethod.POST, value = "/edit/csvToExcel")
+    @ResponseBody
+    public ResponseEntity<?> csvToExcel(HttpServletRequest request, HttpServletResponse response, 
+    		@CurrentUser CustomUser customUser, @RequestPart MultipartFile filePart) throws IOException {
+        try {
+    		// file path
+            String filePath = CoreConfigReader.getString("file.path");
+            
+            // file name
+    		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
+    		Date date = new Date();
+            String fileName = "LinePointSendGroupCsvToXlsx_" + sdf.format(date) + ".xlsx";
+            
+        	// convert to excel file
+            File folder = new File(filePath);
+            if(!folder.exists()){
+                folder.mkdirs();
+            }
+            InputStream isXlsx = excelUtilService.csvToXlsx(filePart.getInputStream(), filePath, fileName);
+            
+            // uploadMidSendGroup
+			if(isXlsx != null){
+				String modifyUser = customUser.getAccount();
+				logger.info("modifyUser:" + modifyUser);
+				
+				Map<String, Object> result = sendGroupUIService.uploadMidSendGroup(isXlsx, modifyUser, new Date(), fileName);
+				return new ResponseEntity<>(result, HttpStatus.OK);
+			}else{
+				throw new Exception("Upload isXlsx Null");
+			}            
+        } catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+			if(e instanceof BcsNoticeException){
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			}else{
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+        }
+    }
+	
+	// ---- Front End Action ----
+	@ControllerLog(description = "pressSendLinePointMain")
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/pressSendLinePointMain")
 	@ResponseBody
 	public ResponseEntity<?> pressSendLinePointMain(HttpServletRequest request, HttpServletResponse response, 
@@ -429,38 +501,35 @@ public class BCSLinePointController extends BCSBaseController {
 //		result.addAll(list);
 //		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
 //		return new ResponseEntity<>(result, HttpStatus.OK);
+//	}	
+//	@ControllerLog(description = "Get Success Line Point Detail")
+//	@RequestMapping(method = RequestMethod.GET, value = "/edit/getSuccessLinePointDetailList/{linePointMainId}")
+//	@ResponseBody
+//	public ResponseEntity<?> getSuccessLinePointDetailList(HttpServletRequest request, HttpServletResponse response,
+//			@CurrentUser CustomUser customUser, @PathVariable String linePointMainId) throws IOException {
+//		logger.info("getSuccessLinePointDetailList");
+//		Long mainId = Long.parseLong(linePointMainId);
+//		
+//		List<LinePointDetail> result = new ArrayList();
+//		List<LinePointDetail> list = linePointUIService.findSuccess(mainId);
+//		result.addAll(list);
+//		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
+//		return new ResponseEntity<>(result, HttpStatus.OK);
 //	}
-	
-	@ControllerLog(description = "Get Success Line Point Detail")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getSuccessLinePointDetailList/{linePointMainId}")
-	@ResponseBody
-	public ResponseEntity<?> getSuccessLinePointDetailList(HttpServletRequest request, HttpServletResponse response,
-			@CurrentUser CustomUser customUser, @PathVariable String linePointMainId) throws IOException {
-		logger.info("getSuccessLinePointDetailList");
-		Long mainId = Long.parseLong(linePointMainId);
-		
-		List<LinePointDetail> result = new ArrayList();
-		List<LinePointDetail> list = linePointUIService.findSuccess(mainId);
-		result.addAll(list);
-		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
-		return new ResponseEntity<>(result, HttpStatus.OK);
-	}
-
-	@ControllerLog(description = "Get Fail Line Point Detail")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getFailLinePointDetailList/{linePointMainId}")
-	@ResponseBody
-	public ResponseEntity<?> getFailLinePointDetailList(HttpServletRequest request, HttpServletResponse response,
-			@CurrentUser CustomUser customUser, @PathVariable String linePointMainId) throws IOException {
-		logger.info("getFailLinePointDetailList");
-		Long mainId = Long.parseLong(linePointMainId);
-		
-		List<LinePointDetail> result = new ArrayList();
-		List<LinePointDetail> list = linePointUIService.findFail(mainId);
-		result.addAll(list);
-		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
-		return new ResponseEntity<>(result, HttpStatus.OK);
-	}
-	
+//	@ControllerLog(description = "Get Fail Line Point Detail")
+//	@RequestMapping(method = RequestMethod.GET, value = "/edit/getFailLinePointDetailList/{linePointMainId}")
+//	@ResponseBody
+//	public ResponseEntity<?> getFailLinePointDetailList(HttpServletRequest request, HttpServletResponse response,
+//			@CurrentUser CustomUser customUser, @PathVariable String linePointMainId) throws IOException {
+//		logger.info("getFailLinePointDetailList");
+//		Long mainId = Long.parseLong(linePointMainId);
+//		
+//		List<LinePointDetail> result = new ArrayList();
+//		List<LinePointDetail> list = linePointUIService.findFail(mainId);
+//		result.addAll(list);
+//		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
+//		return new ResponseEntity<>(result, HttpStatus.OK);
+//	}	
 //	@ControllerLog(description = "Get Success Line Point Detail")
 //	@RequestMapping(method = RequestMethod.GET, value = "/edit/getLinePointScheduledDetailList/{mainId}")
 //	@ResponseBody
@@ -474,223 +543,26 @@ public class BCSLinePointController extends BCSBaseController {
 //		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
 //		return new ResponseEntity<>(result, HttpStatus.OK);
 //	}
-
-	@ControllerLog(description="Delete Line Point Main")
-	@RequestMapping(method = RequestMethod.DELETE, value = "/edit/deleteLinePointMain")
-	@ResponseBody
-	public ResponseEntity<?> deleteLinePointMain( HttpServletRequest request,  HttpServletResponse response, @CurrentUser CustomUser customUser,
-			@RequestParam(required=false) String campaignId, @RequestParam(required=false) String listType) throws IOException {
-		logger.info("deleteLinePointMain");
-		try{
-			if(StringUtils.isNotBlank(campaignId)){
-				logger.info("campaignId:" + campaignId);
-				linePointUIService.deleteFromUI(Long.parseLong(campaignId), customUser.getAccount(), listType);
-				return new ResponseEntity<>("Delete Success", HttpStatus.OK);
-			} else
-				throw new Exception("ID IS NULL");
-		} catch(Exception e) {
-			logger.error(ErrorRecord.recordError(e));
-			if(e instanceof BcsNoticeException)
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			else
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-
-	// Check Active UIds
-	@ControllerLog(description="Check Active UIds")
-    @RequestMapping(method = RequestMethod.POST, value = "/edit/checkActiveUids", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public ResponseEntity<?> checkActiveUids(HttpServletRequest request, HttpServletResponse response, 
-    		@CurrentUser CustomUser customUser, @RequestBody List<String> uids) throws IOException {
-        try { 
-    		logger.info("[checkActiveUids]");
-    		
-    		List<Integer> removeIndexs = new ArrayList();
-    		for(int i = 0; i < uids.size(); i++) {
-    			if(!lineUserService.checkMIDAllActive(uids.get(i))) {
-    				removeIndexs.add(i);
-    			}
-    		}
-    		
-    		List<Integer> result = new ArrayList();
-    		result.addAll(removeIndexs);
-    		logger.info("result:" + ObjectUtil.objectToJsonStr(removeIndexs));
-    		return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (Exception e) {
-			logger.error(ErrorRecord.recordError(e));
-			if(e instanceof BcsNoticeException){
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			}else{
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-        }
-    }
 	
-	// CSV to EXCEL
-	@ControllerLog(description="CSV to EXCEL")
-    @RequestMapping(method = RequestMethod.POST, value = "/edit/csvToExcel")
-    @ResponseBody
-    public ResponseEntity<?> csvToExcel(HttpServletRequest request, HttpServletResponse response, 
-    		@CurrentUser CustomUser customUser, @RequestPart MultipartFile filePart) throws IOException {
-      
-		// file path
-        String filePath = CoreConfigReader.getString("file.path");
-        
-        // file name
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
-		Date date = new Date();
-        String fileName = "LinePointSendGroupCsvToXlsx_" + sdf.format(date) + ".xlsx";
-        
-        try {
-        	// convert to excel file
-            File folder = new File(filePath);
-            if(!folder.exists()){
-                folder.mkdirs();
-            }
-            InputStream isXlsx = excelUtilService.csvToXlsx(filePart.getInputStream(), filePath, fileName);
-            
-            // uploadMidSendGroup
-			if(isXlsx != null){
-				String modifyUser = customUser.getAccount();
-				logger.info("modifyUser:" + modifyUser);
-				
-				Map<String, Object> result = sendGroupUIService.uploadMidSendGroup(isXlsx, modifyUser, new Date(), fileName);
-				
-				return new ResponseEntity<>(result, HttpStatus.OK);
-			}else{
-				throw new Exception("Upload isXlsx Null");
-			}            
-        } catch (Exception e) {
-			logger.error(ErrorRecord.recordError(e));
-			if(e instanceof BcsNoticeException){
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			}else{
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-        }
-    }
-	
-	private Map<String, Object> uploadMidSendGroup(CustomUser customUser, MultipartFile filePart) throws IOException {
-		logger.info("uploadMidSendGroup");
-
-		try{
-			if(filePart != null){
-				String modifyUser = customUser.getAccount();
-				logger.info("modifyUser:" + modifyUser);
-				
-				Map<String, Object> result = sendGroupUIService.uploadMidSendGroup(filePart, modifyUser, new Date());
-				
-				return result;
-			}else{
-				throw new Exception("Upload Mid SendGroup Null");
-			}
-		}
-		catch(Exception e){
-			logger.error(ErrorRecord.recordError(e));
-			return null;
-		}
-	}
-	
-	/**
-     * 匯出 Push API 成效報表
-     */
-	@ControllerLog(description="匯出Line Point Push API 成效報表")
-    @RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForLPPushApiEffects")
-    @ResponseBody
-    public void exportToExcelForLPPushApiEffects(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser) {
-      
-		// file path
-        String filePath = CoreConfigReader.getString("file.path");
-        
-        // file name
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
-		Date date = new Date();
-        String fileName = "LPPushApiEffects_" + sdf.format(date) + ".xlsx";
-        
-        try {
-            File folder = new File(filePath);
-            if(!folder.exists()){
-                folder.mkdirs();
-            }
-            exportToExcelForLinePointPushApiEffects.exportExcel(filePath, fileName);
-        } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
-        }
-
-        try {
-			LoadFileUIService.loadFileToResponse(filePath, fileName, response);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-    }
-	
-	/**
-     * 匯出 Push API 成效報表
-     */
-	@ControllerLog(description="匯出Line Point Push API Detail 成效報表")
-    @RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForLPPushApiEffectsDetail/{mainId}/{status}")
-    @ResponseBody
-    public void exportToExcelForLPPushApiEffectsDetail(HttpServletRequest request, HttpServletResponse response, 
-    		@CurrentUser CustomUser customUser, @PathVariable Long mainId, @PathVariable String status) {
-      
-		// file path
-        String filePath = CoreConfigReader.getString("file.path");
-        
-        // file name
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
-		Date date = new Date();
-        String fileName = "LPPushApiEffectsDetail_" + sdf.format(date) + ".xlsx";
-        
-        try {
-            File folder = new File(filePath);
-            if(!folder.exists()){
-                folder.mkdirs();
-            }
-            exportToExcelForLinePointPushApiEffects.exportExcel(filePath, fileName, mainId, status);
-        } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
-        }
-
-        try {
-			LoadFileUIService.loadFileToResponse(filePath, fileName, response);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-    }
-	
-	// --- get Send Message
-//	@ControllerLog(description="取得圖文訊息")
-//	@RequestMapping(method = RequestMethod.GET, value = "/edit/getRichMsg/{richId}")
+//	@ControllerLog(description="deleteLinePointMain")
+//	@RequestMapping(method = RequestMethod.DELETE, value = "/edit/deleteLinePointMain")
 //	@ResponseBody
-//	public ResponseEntity<?> getRichMsg(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
-//			@PathVariable String richId) throws IOException {
-//		logger.info("edit getRichMsg");
+//	public ResponseEntity<?> deleteLinePointMain( HttpServletRequest request,  HttpServletResponse response, @CurrentUser CustomUser customUser,
+//			@RequestParam(required=false) String campaignId, @RequestParam(required=false) String listType) throws IOException {
+//		logger.info("deleteLinePointMain");
 //		try{
-//			Map<String, List<String>> result = contentRichMsgService.getContentRichMsg(richId);
-//			return new ResponseEntity<>(result, HttpStatus.OK);
-//		}catch(Exception e){
+//			if(StringUtils.isNotBlank(campaignId)){
+//				logger.info("campaignId:" + campaignId);
+//				linePointUIService.deleteFromUI(Long.parseLong(campaignId), customUser.getAccount(), listType);
+//				return new ResponseEntity<>("Delete Success", HttpStatus.OK);
+//			} else
+//				throw new Exception("ID IS NULL");
+//		} catch(Exception e) {
 //			logger.error(ErrorRecord.recordError(e));
-//			if(e instanceof BcsNoticeException){
+//			if(e instanceof BcsNoticeException)
 //				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-//			}else{
+//			else
 //				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-//			}
-//		}
-//	}
-//	
-//	@ControllerLog(description="取得樣板訊息")
-//	@RequestMapping(method = RequestMethod.GET, value = "/edit/getTemplateMsg/{templateId}")
-//	@ResponseBody
-//	public ResponseEntity<?> getTemplateMsg(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
-//			@PathVariable String templateId) throws IOException {
-//		logger.info("edit getTemplateMsg");
-//		try{
-//			Map<String, List<String>> result = contentTemplateMsgService.getContentTemplateMsg(templateId);
-//			return new ResponseEntity<>(result, HttpStatus.OK);
-//		}catch(Exception e){
-//			logger.error(ErrorRecord.recordError(e));	
-//			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 //		}
 //	}
 }

@@ -19,7 +19,6 @@ $(function(){
 	var oringinalTr = {};
 	var originalTable = {};
 	var startDate = null, endDate = null;
-	var hasData = false;
 	var page = 1, totalPages = 0;
 	var firstFatch = true;
 	

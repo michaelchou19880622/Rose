@@ -2,6 +2,7 @@
  *
  */
 $(function(){
+	
 	// ---- Global Variables ----
 	// BCS Parameters
 	$.BCS.actionTypeParam = $.urlParam("actionType");
@@ -1131,6 +1132,21 @@ $(function(){
                 	$('#amount').val(o.amount);
                 }else{
                 	$('.sendAmountType')[1].click();
+                }
+                
+		        // get date data
+		        var currentTime = moment();
+		        var sendStartTime = moment(o.sendStartTime).format('YYYY-MM-DD HH:mm:ss');
+		        console.info('currentTime:', currentTime);
+		        console.info('sendStartTime:', sendStartTime);
+		        console.info('isAfter:', currentTime.isAfter(sendStartTime));
+		        
+                // hide Send Group Create Button
+                if(o.status == 'COMPLETE'){
+                	$('.send_group_create').hide();
+                }
+                if(o.sendTimingType == 'SCHEDULE' && currentTime.isAfter(sendStartTime)){
+                	$('.send_group_create').hide();
                 }
                 
             }).fail(function(response) {

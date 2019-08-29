@@ -229,6 +229,7 @@ public class LinePointPushApiController {
 		try {
 			logger.info("-------------------- api linePoint issue --------------------");
 
+			// ----------- authorization --------------
 			if(request.getHeader(HttpHeaders.AUTHORIZATION) == null) {
 				return new ResponseEntity<>("{\"result\": 0, \"msg\": \"Missing 'Authorization' header.\"}", HttpStatus.BAD_REQUEST);
 			}else{
@@ -271,7 +272,24 @@ public class LinePointPushApiController {
 //				}
 //			}
 			
+			// ----- set main information -----
 			logger.info("[LinePoint API] Request Body:" + linePointDetail);
+			String title = linePointDetail.getCampName();
+			LinePointMain linePointMain = linePointMainService.findByTitle(title);
+			if(linePointMain == null) {
+				linePointMain = new LinePointMain();
+				linePointMain.setSendType(LinePointMain.SEND_TYPE_API);
+				linePointMain.setModifyTime(new Date());
+				linePointMain.setTitle(title);
+				linePointMain.setTotalCount(0L);
+				linePointMain.setTotalAmount(0L);
+				linePointMain.setSuccessfulAmount(0L);
+				linePointMain.setFailedCount(0L);
+				linePointMainService.save(linePointMain);
+			}
+			
+			// ----- set detail information -----
+			linePointDetail.setLinePointMainId(linePointMain.getId());
 			linePointDetail.setDetailType(LinePointDetail.DETAIL_TYPE_ISSUE_API);
 			linePointDetail.setTriggerTime(new Date());
 			
@@ -303,7 +321,8 @@ public class LinePointPushApiController {
 				throw e;
 			}
 			
-			// ---------------------------------------
+			
+			// ----------- execute --------------
 			// initialize request header
 			HttpHeaders headers = new HttpHeaders();
 			//String accessToken = linePointApiService.getLinePointChannelAccessToken();
@@ -351,7 +370,7 @@ public class LinePointPushApiController {
 				linePointDetailService.save(linePointDetail);
 			} catch (HttpClientErrorException e) {
 				logger.info("[LinePointApi] Status code: " + e.getStatusCode());
-				logger.info("[LinePointApi]  Response body: " + e.getResponseBodyAsString());
+				logger.info("[LinePointApi] Response body: " + e.getResponseBodyAsString());
 				
 				linePointDetail.setMessage(e.getResponseBodyAsString());
 				linePointDetail.setStatus(LinePointDetail.STATUS_FAIL);

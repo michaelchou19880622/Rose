@@ -504,6 +504,19 @@ public class BCSSendGroupController extends BCSBaseController {
 			}
 		}
 		catch(Exception e){
+
+			logger.info("uploadMidSendGroup Exception : " +  e.getMessage().toString());
+			if (e.getMessage().contains("RetrySaveUserEventSet"))
+			{
+				Map<String, Object> result = sendGroupUIService.RetrySaveUserEventSet();
+				logger.info("uploadMidSendGroupResult1:" + result);
+				
+				return new ResponseEntity<>(result, HttpStatus.OK);
+			}
+			else if (e.getMessage().contains("TimeOut")) {
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.SERVICE_UNAVAILABLE);
+			}
+			
 			logger.error(ErrorRecord.recordError(e));
 
 			if(e instanceof BcsNoticeException){

@@ -123,20 +123,17 @@ public class GroupGenerateRepository{
 		}
 		
 		// Setting Upload Mid SQL
-		if(uploadMidSetting != null && uploadMidSetting.size() > 0){
-			if(sendGroupDetails != null && sendGroupDetails.size() > 0){
-				sqlString += ", " + generateUploadMidSettingFrom(uploadMidSetting, sendGroupDetails.size()*2 + 1);
-			}
-			else{
+		if (uploadMidSetting != null && uploadMidSetting.size() > 0) {
+			if (sendGroupDetails != null && sendGroupDetails.size() > 0) {
+				sqlString += ", " + generateUploadMidSettingFrom(uploadMidSetting, sendGroupDetails.size() * 2 + 1);
+			} 
+			else {
 
 				selectColumns = selectColumns.replace("MID", "SETMID");
-				
-				sqlString = 
-						"SELECT " 
-								+ selectColumns
-						+ " FROM " + generateUploadMidSettingFrom(uploadMidSetting, 1);
 
-				if(StringUtils.isNotBlank(mid)){
+				sqlString = "SELECT " + selectColumns + " FROM " + generateUploadMidSettingFrom(uploadMidSetting, 1);
+
+				if (StringUtils.isNotBlank(mid)) {
 					sqlString += " WHERE SETMID = ?" + (uploadMidSetting.size() + 1) + " ";
 				}
 			}

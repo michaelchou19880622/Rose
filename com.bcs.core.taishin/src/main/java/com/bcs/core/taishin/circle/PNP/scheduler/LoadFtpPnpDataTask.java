@@ -29,6 +29,7 @@ import com.bcs.core.utils.ErrorRecord;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.primitives.Chars;
+import com.google.gson.GsonBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -180,11 +181,9 @@ public class LoadFtpPnpDataTask {
     /**
      * Start Schedule
      *
-     * @throws SchedulerException   SchedulerException
-     * @throws InterruptedException InterruptedException
      * @see com.bcs.web.init.controller.InitController#init()
      */
-    public void startCircle() throws SchedulerException, InterruptedException {
+    public void startCircle() {
         /* 批次執行時間單位 */
         String unit = CoreConfigReader.getString(CONFIG_STR.PNP_SCHEDULE_UNIT, true, false);
         /* 批次開始執行時間 */
@@ -267,18 +266,7 @@ public class LoadFtpPnpDataTask {
 
         // 跟據來源不同取各自連線資訊
         PNPFtpSetting pnpFtpSetting = pnpFtpService.getFtpSettings(source);
-
-        logger.info(" source            :" + pnpFtpSetting.getChannelId());
-        logger.info(" ftpServerName     :" + pnpFtpSetting.getServerHostName());
-        logger.info(" ftpServerNamePort :" + pnpFtpSetting.getServerHostNamePort());
-        logger.info(" ftpHost           :" + pnpFtpSetting.getHost());
-        logger.info(" ftpPort           :" + pnpFtpSetting.getPort());
-        logger.info(" ftpUsr            :" + pnpFtpSetting.getAccount());
-        logger.info(" ftpPass           :" + pnpFtpSetting.getPassword());
-        logger.info(" downloadSavePath  :" + pnpFtpSetting.getDownloadSavePath());
-        logger.info(" downloadPath      :" + pnpFtpSetting.getPath());
-        logger.info(" uploadPath        :" + pnpFtpSetting.getUploadPath());
-
+        logger.info(new GsonBuilder().serializeNulls().setPrettyPrinting().create().toJson(pnpFtpSetting));
         try {
             /* 至FTP取得資料 */
             Map<String, byte[]> returnDataMap = pnpFtpService.downloadMultipleFileByType(source, pnpFtpSetting.getPath(), "TXT", pnpFtpSetting);
@@ -309,20 +297,21 @@ public class LoadFtpPnpDataTask {
                     if (!validateWhiteListAccountPccode(source, fileName)) {
                         // 1.2.1 白名單檢核錯誤
                         // 1.1 將檔案rename(加L)放到SMS只定路徑
-                        logger.error("=======白名單 Account PCode 檢核失敗，轉傳SMS===========");
+                        logger.error("======= Valid WhiteList Account PCode Fail!! To SMS =====");
                         uploadFileToSms(source, targetStream, fileName);
-                        break;
+                        continue;
                     }
-
+                    logger.info("Valid WhiteList Account PCode Success!! ");
                     // 檢核白名單檔名上的帳號是否與來源對應
                     List<String> fileContents = IOUtils.readLines(targetStream, encoding);
                     // 依來源解成各格式
                     List<Object> pnpMains = parseFtpFile(source, fileName, fileContents);
                     if (pnpMains == null || pnpMains.isEmpty()) {
-                        logger.error("=======白名單內容檢核失敗，轉傳SMS===========");
+                        logger.error("======= Valid WhiteList Content Fail!! To SMS =====");
                         uploadFileToSms(source, targetStream, fileName);
-                        break;
+                        continue;
                     }
+                    logger.info("Valid WhiteList Content Success!! ");
                     mains.addAll(pnpMains);
                 }
             }
@@ -997,6 +986,7 @@ public class LoadFtpPnpDataTask {
         }
         if (!details.isEmpty()) {
             pnpRepositoryCustom.batchInsertPnpDetailMitake(details);
+            logger.info("Update Status : " + AbstractPnpMainEntity.SOURCE_MING);
         }
     }
 
@@ -1026,6 +1016,7 @@ public class LoadFtpPnpDataTask {
         }
         if (!details.isEmpty()) {
             pnpRepositoryCustom.batchInsertPnpDetailUnica(details);
+            logger.info("Update Status : " + AbstractPnpMainEntity.SOURCE_MING);
         }
     }
 
@@ -1055,6 +1046,7 @@ public class LoadFtpPnpDataTask {
         }
         if (!details.isEmpty()) {
             pnpRepositoryCustom.batchInsertPnpDetailEvery8d(details);
+            logger.info("Update Status : " + AbstractPnpMainEntity.SOURCE_MING);
         }
     }
 
@@ -1085,6 +1077,7 @@ public class LoadFtpPnpDataTask {
         }
         if (!details.isEmpty()) {
             pnpRepositoryCustom.batchInsertPnpDetailMing(details);
+            logger.info("Update Status : " + AbstractPnpMainEntity.SOURCE_MING);
         }
     }
 
@@ -1105,6 +1098,7 @@ public class LoadFtpPnpDataTask {
         Date now = Calendar.getInstance().getTime();
         pnpMainMitakeRepository.updatePnpMainMitakeStatus(status, now, mainId);
         pnpDetailMitakeRepository.updateStatusByMainId(status, now, mainId);
+        logger.info("Update Status : " + status);
     }
 
     /**
@@ -1120,6 +1114,7 @@ public class LoadFtpPnpDataTask {
         Date now = Calendar.getInstance().getTime();
         pnpMainEvery8dRepository.updatePnpMainEvery8dStatus(status, now, mainId);
         pnpDetailEvery8dRepository.updateStatusByMainId(status, now, mainId);
+        logger.info("Update Status : " + status);
     }
 
     /**
@@ -1135,6 +1130,7 @@ public class LoadFtpPnpDataTask {
         Date now = Calendar.getInstance().getTime();
         pnpMainUnicaRepository.updatePnpMainUnicaStatus(status, now, mainId);
         pnpDetailUnicaRepository.updateStatusByMainId(status, now, mainId);
+        logger.info("Update Status : " + status);
     }
 
     /**
@@ -1150,6 +1146,7 @@ public class LoadFtpPnpDataTask {
         Date now = Calendar.getInstance().getTime();
         pnpMainMingRepository.updatePnpMainMingStatus(status, now, mainId);
         pnpDetailMingRepository.updateStatusByMainId(status, now, mainId);
+        logger.info("Update Status : " + status);
     }
 
     /*================================================================================*/

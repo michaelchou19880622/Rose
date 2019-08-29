@@ -59,6 +59,7 @@ public class PnpAkkaService {
             if (InetAddress.getLocalHost() != null) {
                 return InetAddress.getLocalHost().getHostName();
             }
+            logger.error(" getHostName error: LocalHost is Null!!");
         } catch (Exception e) {
             logger.error(" getHostName error:" + e.getMessage());
         }

@@ -41,16 +41,16 @@ public class PnpMainActor extends UntypedActor {
     @Override
     public void onReceive(Object object) throws Exception {
         if (object instanceof PnpMain) {
-            logger.info("PnpMainActor onReceive object instanceof PnpMain!!!");
-
             PnpMain pnpMain = (PnpMain) object;
             String stage = pnpMain.getProcStage();
+            logger.info("PnpMainActor onReceive object instanceof PnpMain!!! Stage: " + stage);
             if (AbstractPnpMainEntity.STAGE_BC.equals(stage)) {
                 tellActor(pushMessageRouterActor, pnpMain);
             } else if (AbstractPnpMainEntity.STAGE_PNP.equals(stage)) {
                 tellActor(pnpMessageRouterActor, pnpMain);
             }
         } else if (object instanceof PnpDetail) {
+            logger.info("PnpMainActor onReceive object instanceof PnpDetail!!!");
             updateStatusRouterActor.tell(object, this.getSelf());
         }
     }

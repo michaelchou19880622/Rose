@@ -4,8 +4,6 @@ import com.bcs.core.bot.record.service.CatchRecordReceive;
 import com.bcs.core.bot.scheduler.service.LiveChatTaskService;
 import com.bcs.core.bot.scheduler.service.SchedulerService;
 import com.bcs.core.interactive.service.InteractiveService;
-import com.bcs.core.linepoint.scheduler.service.LinePointSimpleSchedulerService;
-import com.bcs.core.linepoint.scheduler.service.LinePointSchedulerService;
 import com.bcs.core.record.service.CatchHandleMsgReceiveTimeout;
 import com.bcs.core.record.service.CatchRecordBinded;
 import com.bcs.core.record.service.CatchRecordOpAddReceive;
@@ -144,7 +142,7 @@ public class InitController {
     private void linePointSchedulerServiceLoadScheduleFromDB() {
         try {
             logger.info("init LinePointSchedulerService loadScheduleFromDB");
-            linePointschedulerService.loadScheduleFromDB();
+            linePointschedulerService.startCircle();
         } catch (Exception e) {
             logger.error(ErrorRecord.recordError(e));
         }

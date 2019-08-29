@@ -49,7 +49,7 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailEvery8d;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMing;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainEvery8d;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpRepositoryCustom;
-import com.bcs.core.taishin.circle.PNP.scheduler.LoadFtbPnpDataTask;
+import com.bcs.core.taishin.circle.PNP.scheduler.LoadFtpPnpDataTask;
 import com.bcs.core.taishin.circle.PNP.scheduler.PnpPushMsgService;
 import com.bcs.core.taishin.circle.PNP.scheduler.PnpSMSMsgService;
 import com.bcs.core.taishin.circle.PNP.service.PnpService;

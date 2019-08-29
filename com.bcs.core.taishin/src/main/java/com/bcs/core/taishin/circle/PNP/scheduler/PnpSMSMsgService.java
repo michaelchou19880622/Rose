@@ -78,7 +78,7 @@ public class PnpSMSMsgService {
         scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                logger.debug(" PnpSMSMsgService startCircle....");
+                logger.info(" PnpSMSMsgService startCircle....");
 
                 /* 0: 停止排程) 1: 停止排程，並轉發SMS*/
                 int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true, false);
@@ -106,7 +106,7 @@ public class PnpSMSMsgService {
                 logger.info("SMS pnpMain details type :" + type + " details size:" + details.size());
 
                 if (CollectionUtils.isEmpty(details)) {
-                    logger.debug("SMS pnpMain type :" + type + " there is a main has no details!!!");
+                    logger.info("SMS pnpMain type :" + type + " there is a main has no details!!!");
                     return;
                 }
 
@@ -144,7 +144,7 @@ public class PnpSMSMsgService {
                 List<? super PnpDetail> details = pnpRepositoryCustom.updateDelivertExpiredStatus(type, procApName, AbstractPnpMainEntity.STAGE_SMS);
                 logger.info("SMS PNP PUSH DeliveryExpired pnpMain details type :" + type + " details size:" + details.size());
                 if (CollectionUtils.isEmpty(details)) {
-                    logger.debug("SMS PNP PUSH DeliveryExpired pnpMain type :" + type + " there is a main has no details!!!");
+                    logger.info("SMS PNP PUSH DeliveryExpired pnpMain type :" + type + " there is a main has no details!!!");
                     return;
                 }
                 PnpDetail oneDetail = (PnpDetail) details.get(0);

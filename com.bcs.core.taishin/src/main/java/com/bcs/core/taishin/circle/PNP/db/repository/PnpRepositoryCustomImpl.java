@@ -386,7 +386,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     @Override
     @Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
     public List<? super PnpDetail> updateStatusByStageBC(PNPFTPType type, String procApName, Set<Long> allMainIds) {
-        logger.debug(" begin updateStatusByStageBC:" + procApName + " type:" + type);
+        logger.info(" begin updateStatusByStageBC:" + procApName + " type:" + type);
         try {
             // 找出第一筆 WAIT MAIN 並更新狀態
             Long waitMainId = findAndUpdateFirstWaitMainByStageBc(procApName, type.getMainTable());
@@ -395,7 +395,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
             } else {
                 logger.info("updateStatusByStageBC waitMainId is null" + " type:" + type);
             }
-            logger.debug("updateStatusByStageBC allMainIds:" + allMainIds + " type:" + type);
+            logger.info("updateStatusByStageBC allMainIds:" + allMainIds + " type:" + type);
             if (!allMainIds.isEmpty()) {
                 //  根據MAIN_ID 更新 Detail
                 List<BigInteger> detailIds = findAndUpdateDetailByMainAndStatus(allMainIds, type);
@@ -406,7 +406,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
             } else {
                 logger.info("updateStatusByStageBC:" + procApName + " type:" + type + " allMainIds isEmpty");
             }
-            logger.debug(" end updateStatusByStageBC:" + procApName + " type:" + type);
+            logger.info(" end updateStatusByStageBC:" + procApName + " type:" + type);
         } catch (Exception e) {
             logger.error(e);
             throw e;
@@ -460,6 +460,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
      */
     @Override
     public PnpMain findMainByMainId(PNPFTPType type, Long mainId) {
+        logger.info("Find Main By MainId : " + type);
         switch (type) {
             case MITAKE:
                 return findMainByMainIdMitake(mainId);

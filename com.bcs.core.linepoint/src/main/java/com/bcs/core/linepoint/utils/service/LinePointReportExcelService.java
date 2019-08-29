@@ -32,6 +32,8 @@ public class LinePointReportExcelService {
 	@Autowired
 	LinePointDetailService linePointDetailService;
 	
+	// ---- Statistics Report ---- 
+	
 	public void exportExcel_LinePointStatisticsReport(String filePathAndName, Date startDate, Date endDate, String modifyUser, String title){
 		try {
 			Workbook workbook = new XSSFWorkbook();
@@ -99,7 +101,7 @@ public class LinePointReportExcelService {
 	private Sheet createSheet_LinePointStatisticsReport(Workbook workbook, Integer sheetNumber) {
 		Sheet sheet = null;
 		try {
-			sheet = workbook.createSheet("LinePointw統計報表" + sheetNumber);
+			sheet = workbook.createSheet("LinePoint統計報表" + sheetNumber);
 		
 			// first row
 			Row row = sheet.createRow(0);
@@ -114,6 +116,103 @@ public class LinePointReportExcelService {
 			row.createCell(8).setCellValue("成功筆數");
 			row.createCell(9).setCellValue("失敗筆數");
 			row.createCell(10).setCellValue("發送總點數");
+			
+			// column width
+			for (int i=0; i<=10; i++) {
+				sheet.setColumnWidth(i, 35*256);
+			}
+		} catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+		}
+		return sheet;
+	}
+	
+	// ---- Statistics Report Detail ---- 
+	
+	public void exportExcel_LinePointStatisticsReportDetail(String filePathAndName, Long linePointMainId){
+		try {
+			Workbook workbook = new XSSFWorkbook();
+			FileOutputStream out = new FileOutputStream(filePathAndName);
+			
+			this.getExcel_LinePointStatisticsReportDetail(workbook, linePointMainId);
+			workbook.write(out);
+			out.close();
+			workbook.close();
+		} catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+		}
+	}
+	
+	private void getExcel_LinePointStatisticsReportDetail(Workbook workbook, Long linePointMainId){
+		List<LinePointDetail> details = linePointDetailService.findByLinePointMainId(linePointMainId);
+		logger.info("[getExcel_LinePointStatisticsReportDetail] details:"+details);
+		
+		try {
+			Integer sheetNumber = 1;
+			Sheet sheet = this.createSheet_LinePointStatisticsReportDetail(workbook, sheetNumber++);
+			Integer rowNumber = 1; 
+
+			for(LinePointDetail detail : details) {
+				String result = "";
+				if(detail.getStatus().equals(LinePointDetail.STATUS_SUCCESS)) {
+					result = "成功";
+				}else if(detail.getStatus().equals(LinePointDetail.STATUS_FAIL)) {
+					result = "失敗";
+				}else {
+					continue;
+				}
+				
+				Row row = sheet.createRow(rowNumber);
+
+				// Time Cell Rows
+				CellStyle cellStyle = workbook.createCellStyle();
+				CreationHelper createHelper = workbook.getCreationHelper();
+				cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("YYYY-MM-DD HH:mm:ss"));
+				
+				Cell createTimeCell = row.createCell(0);
+				createTimeCell.setCellValue(detail.getSendTime());
+				createTimeCell.setCellStyle(cellStyle);
+				
+				// Combine Other Rows
+				row.createCell(1).setCellValue(detail.getOrderKey());
+				row.createCell(2).setCellValue(detail.getUid());
+				row.createCell(3).setCellValue(detail.getCustid());
+				row.createCell(4).setCellValue(detail.getAmount());
+				
+
+				
+				if(detail.getDetailType().equals(LinePointDetail.DETAIL_TYPE_CANCEL_API) || 
+						detail.getDetailType().equals(LinePointDetail.DETAIL_TYPE_CANCEL_API)) {
+					result = "取消" + result;
+				}
+				
+				row.createCell(5).setCellValue(result);
+				row.createCell(6).setCellValue(detail.getStatus().equals(LinePointDetail.STATUS_FAIL)?detail.getMessage():"");
+
+				rowNumber++;
+				if(rowNumber > 1048500) { // RowLimit = 1048576 
+					sheet = this.createSheet_LinePointStatisticsReportDetail(workbook, sheetNumber++);
+					rowNumber = 1;
+				}
+			}
+		} catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+		}
+	}
+	private Sheet createSheet_LinePointStatisticsReportDetail(Workbook workbook, Integer sheetNumber) {
+		Sheet sheet = null;
+		try {
+			sheet = workbook.createSheet("LinePoint統計明細報表" + sheetNumber);
+		
+			// first row
+			Row row = sheet.createRow(0);
+			row.createCell(0).setCellValue("發送時間");
+			row.createCell(1).setCellValue("訂單編號");
+			row.createCell(2).setCellValue("客戶UID");
+			row.createCell(3).setCellValue("客戶ID");
+			row.createCell(4).setCellValue("發送數量");
+			row.createCell(5).setCellValue("發送結果");
+			row.createCell(6).setCellValue("失敗原因");
 			
 			// column width
 			for (int i=0; i<=10; i++) {

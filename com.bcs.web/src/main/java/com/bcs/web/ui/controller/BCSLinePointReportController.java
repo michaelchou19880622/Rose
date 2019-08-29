@@ -250,6 +250,37 @@ public class BCSLinePointReportController extends BCSBaseController {
         }
     }
     
+	// ---- Statistics Report Detail ----    
+    
+    @RequestMapping(method = RequestMethod.GET, value = "/edit/getLPStatisticsReportDetailExcel")
+    @ResponseBody
+    public void getLPStatisticsReportDetailExcel(HttpServletRequest request, HttpServletResponse response, 
+    		@CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
+    	try {
+    		logger.info("[getLPStatisticsReportDetailExcel]");
+    		
+	        // set file path
+			String filePath = CoreConfigReader.getString("file.path");
+			File folder = new File(filePath);
+	        if(!folder.exists()){
+	            folder.mkdirs();
+	        }
+	        
+	        // set file name
+			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
+			Date date = new Date();
+	        String fileName = "LinePointStatisticReportDetail_" + sdf2.format(date) + ".xlsx";
+	
+	        // combine & export excel file
+	        String filePathAndName = filePath + System.getProperty("file.separator") + fileName;
+	        linePointReportExcelService.exportExcel_LinePointStatisticsReportDetail(filePathAndName, linePointMainId);
+	        LoadFileUIService.loadFileToResponse(filePath, fileName, response);
+    	} catch (Exception e) {
+    		e.printStackTrace();
+            logger.error(ErrorRecord.recordError(e));
+        }
+    }  
+    
 //	//  匯出 Push API 成效報表
 //	@ControllerLog(description="匯出Line Point Push API 成效報表")
 //    @RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForLPPushApiEffects")

@@ -32,10 +32,7 @@ $(function() {
 	setExportButtonSource = function(){
 		console.info('hasData:', hasData);
 		if(hasData) {
-			var modifyUserInput = $('#modifyUserInput').val();
-			var titleInput = $('#titleInput').val();
-			var getUrl = bcs.bcsContextPath + '/edit/getLPStatisticsReportExcel?startDate=' + startDate + '&endDate=' + endDate + 
-			'&modifyUser=' + modifyUserInput + '&title=' + titleInput;
+			var getUrl = bcs.bcsContextPath + '/edit/getLPStatisticsReportDetailExcel?linePointMainId=' + linePointMainId;
 			console.info('getUrl', getUrl);
 			
 			$('.btn_add.exportToExcel').attr('href', getUrl);
@@ -82,8 +79,22 @@ $(function() {
             console.info("response:", response);
 			
             $.each(response, function(i, o) {
-                var resultTr = originalTr.clone(true); //增加一行
-               
+                var responseStatus = "";
+                if(o.status=='SUCCESS'){
+                	responseStatus = '成功';
+                }else if(o.status=='FAIL'){
+                	responseStatus = '失敗';
+                }else {
+                	responseStatus = '等待';
+                	return; // == continue
+                }
+                if(o.detailType == 'CANCEL_API' || o.detailType == 'CANCEL_BCS'){
+                	responseStatus = '取消' + responseStatus;
+                }
+		        
+		        
+            	var resultTr = originalTr.clone(true); //增加一行
+                
                 if (o.sendTime) {
 		              resultTr.find('.sendTime').html(moment(o.sendTime).format('YYYY-MM-DD HH:mm:ss'));
 		        }else{
@@ -94,16 +105,8 @@ $(function() {
                 resultTr.find('.uid').html(o.uid);
                 resultTr.find('.custId').html(o.custid);
                 resultTr.find('.amount').html(o.amount);
-                
-                var responseStatus = "";
-                if(o.status=='SUCCESS'){
-                	responseStatus = '成功';
-                }else if(o.status=='FAIL'){
-                	responseStatus = '失敗';
-                }else {
-                	responseStatus = '等待';
-                }
-		        resultTr.find('.responseStatus').html(responseStatus);
+                resultTr.find('.responseStatus').html(responseStatus);
+
 		        
                 if (o.status=='FAIL') {
 		              resultTr.find('.message').html(o.message);
@@ -128,8 +131,6 @@ $(function() {
 		$('.LyMain').block($.BCS.blockMsgRead);
 		
 		// get URL
-		var modifyUserInput = $('#modifyUserInput').val();
-		var titleInput = $('#titleInput').val();
 		var getUrl = bcs.bcsContextPath + '/edit/getLPStatisticsReportTotalPages?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page + 
 		'&modifyUser=' + modifyUserInput + '&title=' + titleInput;
 		console.info('getUrl', getUrl);
@@ -177,7 +178,7 @@ $(function() {
 			firstFatch = false;
 			//setTotal();
 			getMainList();
-			//setExportButtonSource();
+			setExportButtonSource();
 		}
 		getDataList();
 	};

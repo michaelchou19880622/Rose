@@ -285,6 +285,11 @@ public class LinePointPushApiController {
 				linePointMain.setTotalAmount(0L);
 				linePointMain.setSuccessfulAmount(0L);
 				linePointMain.setFailedCount(0L);
+				
+				linePointMain.setSerialId("API_" + title);
+				linePointMain.setModifyUser("API");
+				linePointMain.setSerialId("API無此參數");
+				linePointMain.setDepartmentFullName(linePointDetail.getDepartment());
 				linePointMainService.save(linePointMain);
 			}
 			
@@ -368,6 +373,10 @@ public class LinePointPushApiController {
 				linePointDetail.setStatus(LinePointDetail.STATUS_SUCCESS);
 				linePointDetail.setSendTime(new Date());
 				linePointDetailService.save(linePointDetail);
+				
+				linePointMain.setSuccessfulAmount(linePointMain.getSuccessfulAmount() + Amount);
+				linePointMain.setSuccessfulCount(linePointMain.getSuccessfulCount() + 1);
+				linePointMainService.save(linePointMain);
 			} catch (HttpClientErrorException e) {
 				logger.info("[LinePointApi] Status code: " + e.getStatusCode());
 				logger.info("[LinePointApi] Response body: " + e.getResponseBodyAsString());
@@ -376,6 +385,9 @@ public class LinePointPushApiController {
 				linePointDetail.setStatus(LinePointDetail.STATUS_FAIL);
 				linePointDetail.setSendTime(new Date());
 				linePointDetailService.save(linePointDetail);
+				
+				linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
+				linePointMainService.save(linePointMain);
 				return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
 			}
 			return new ResponseEntity<>(responseObject.toString(), HttpStatus.OK);
@@ -519,6 +531,7 @@ public class LinePointPushApiController {
 				linePointDetail.setTranscationType(Type);
 				linePointDetail.setCancelledAmount(cancelledAmount);
 				linePointDetail.setRemainingAmount(remainingAmount);
+				linePointDetail.setAmount(new Long(remainingAmount)); // amount = remainingAmount
 				linePointDetail.setBalance(Balance);
 				linePointDetail.setMessage("SUCCESS");
 				linePointDetail.setStatus(LinePointDetail.STATUS_SUCCESS);

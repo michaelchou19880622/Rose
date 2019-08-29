@@ -94,7 +94,7 @@ public class LinePointDetail extends AbstractBcsEntity {
 	private String error;
 	@Column(name = "MESSAGE", columnDefinition="nvarchar(200)")
 	private String message;
-	@Column(name = "DETAILS", columnDefinition="nvarchar(200)")
+	@Column(name = "DETAILS", columnDefinition="nvarchar(200)") // optional response
 	private String details;
 	
 	public Long getDetailId() {

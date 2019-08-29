@@ -1069,9 +1069,9 @@ $(function(){
     		// get LinePointMain
             $.ajax({
                 type: 'POST',
-                url: bcs.bcsContextPath + '/edit/findOneLinePointMain?linePointMainId=' + linePointMainId,
+                url: bcs.bcsContextPath + '/edit/findOneLinePointMainByMainId?linePointMainId=' + linePointMainId,
             }).success(function(o) {
-                console.info('findOneLinePointMain response:', o);
+                console.info('findOneLinePointMainByMainId response:', o);
                 
                 $('#title').val(o.title);
                 $('#pccCode').val(o.pccCode);

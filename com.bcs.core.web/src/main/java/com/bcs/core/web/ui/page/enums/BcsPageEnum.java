@@ -133,10 +133,11 @@ public enum BcsPageEnum {
 	LinePointListPage("/BCS/Views/PageLPL"),
 	LinePointCreatePage("/BCS/Views/PageLPC"),
 	LinePointStatisticsReportPage("/BCS/Views/PageLPStatisticsReport"),
-	LinePointSendPage("/BCS/Views/PageLPS"),
-	LinePointSendOldPage("/BCS/Views/PageLPSOld"),
-	LinePointReportPage("/BCS/Views/PageLPR"),
-	LinePointDetailPage("/BCS/Views/PageLPD"),
+	LinePointStatisticsReportDetailPage("/BCS/Views/PageLPStatisticsReportDetail"),
+//	LinePointSendPage("/BCS/Views/PageLPS"),
+//	LinePointSendOldPage("/BCS/Views/PageLPSOld"),
+//	LinePointReportPage("/BCS/Views/PageLPR"),
+//	LinePointDetailPage("/BCS/Views/PageLPD"),
 	
 	// PNP Template
    	PnpCreatePage("/BCS/Views/PagePNP1"),

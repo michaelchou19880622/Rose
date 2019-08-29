@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Line Point Statistics Report Page', '/BCS/JS/PageLPStatisticsReportDetail.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+	<div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('PageLPStatisticsReportDetail')"></div>
+
+		<!-- Right Content -->
+		<div class="LyMain" role="main">
+			<form>
+				<section>
+					<!-- Title -->
+					<header class="ContentHead">
+						<h3 class="CHTtl">統計報表明細</h3>
+						<p class="CHDesc">LINE POINT統計報表明細。</p>
+					</header>
+
+					<!-- Function Panel -->
+					<div class="CHBtnSet">
+						<div class="CHLeft">
+							<ul>
+								<li class="CHLeftBtn">
+									<input class="btn prev" type="button" value="<" style="cursor: pointer;">
+									<span id="pageAndTotalPages">1/0</span>
+									<input class="btn next" type="button" value=">" style="cursor: pointer;">
+								</li>
+							</ul>
+						</div>
+						<div class="CHRight">
+							<a class="btn_add exportToExcel" style="cursor: pointer; padding: 7px 12px; text-decoration: none">匯出EXCEL</a>
+						</div>
+					</div>
+
+
+					<!-- Main Frame -->
+					<div class="mainFrame alignLeft" id="mainFrameId">
+						<!-- Information Table -->
+						<table class="informationTable">
+							<colgroup>
+								<col width="100">
+								<col width="100">
+							</colgroup>
+							<tbody class="informationTbody">
+								<tr>
+									<th>
+										<label id="titleText" style="text-align: left; float: left;"> </label>
+									</th>
+									<th>
+										<label id="modifyUserText" style="text-align: left; float: left;"> </label>
+									</th>
+								</tr>
+								<tr>
+									<th>
+										<label id="serialIdText" style="text-align: left; float: left;"> </label>
+									</th>
+									<th>
+										<label id="departmentFullNameText" style="text-align: left; float: left;"> </label>
+									</th>
+								</tr>
+								<tr>
+									<th>
+										<label id="totalCountText" style="text-align: left; float: left;"> </label>
+									</th>
+									<th>
+										<label id="pccCodeText" style="text-align: left; float: left;"> </label>
+									</th>
+								</tr>
+							</tbody>
+						</table>
+
+						<!-- Result Table -->
+						<table border="1" class="resultTable">
+							<colgroup>
+								<col width="100">
+								<col width="100">
+								<col width="100">
+								<col width="100">
+								<col width="100">
+								<col width="100">
+								<col width="100">
+							</colgroup>
+							<tr class="resultTh">
+								<th>發送時間</th>
+								<th>訂單編號</th>
+								<th>客戶UID</th>
+								<th>客戶ID</th>
+								<th>發送數量</th>
+								<th>發送結果</th>
+								<th>失敗原因</th>
+							</tr>
+							<tbody class="resultTbody">
+								<tr class="resultTr">
+									<td class="sendTime"></td>
+									<td class="orderKey"></td>
+									<td class="uid"></td>
+									<td class="custId"></td>
+									<td class="amount"></td>
+									<td class="responseStatus"></td>
+									<td class="message"></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+				</section>
+			</form>
+		</div>
+	</div>
+
+</body>
+</html>

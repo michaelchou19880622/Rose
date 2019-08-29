@@ -1,45 +1,15 @@
 $(function() {
 	// ---- Global Variables ----
-	// input data
-	var modifyUserInput = "";
-	var titleInput = "";
+	// parameter data
+	var linePointMainId = null;
 	
 	// result data
-	var hasData = false;
+	var hasData = true; // always true
 	var oringinalTr = {};
 	var originalTable = {};
-	var startDate = null, endDate = null;
 	var page = 1, totalPages = 0;
 	var firstFatch = true;
 	
-	// date module
-	$('.datepicker').datepicker({
-		 maxDate : 0,
-		 dateFormat : 'yy-mm-dd',
-		 changeMonth: true
-	});
-	
-	var dataValidate = function(){
-		startDate = $('#startDate').val();
-		endDate = $('#endDate').val();
-		if(!startDate) {
-			alert('請填寫起始日期！');
-			return false;
-		}
-		if(!endDate) {
-			alert('請填寫結束日期！');
-			return false;
-		}
-		if(!moment(startDate).add(31, 'days').isAfter(moment(endDate))){
-			alert('起始日期與結束日期之間不可相隔超過一個月！');
-			return false;
-		}
-		if(moment(startDate).isAfter(moment(endDate))){
-			alert('起始日期不可大於結束日期！');
-			return false;
-		}
-		return true;
-	}
 	
 	// ---- Functions ----
     // do Split Page
@@ -55,22 +25,6 @@ $(function() {
 			page++;
 			getDataList();
 			$('#pageAndTotalPages').text(page + '/' + totalPages);
-		}
-	});
-	
-	// do Search
-	$('.btn_add.search').click(function(){
-		if(dataValidate()) {
-			// block
-			$('.LyMain').block($.BCS.blockMsgRead);
-			
-			// get time data
-			startDate = $('#startDate').val();
-			endDate = $('#endDate').val();
-			
-			// refresh to new list
-			$('.resultTr').remove();
-			getDataList();
 		}
 	});
 	
@@ -91,57 +45,72 @@ $(function() {
 	}
 	
 	// ---- Initialize Page ----
+	// get Main List
+	var getMainList = function(){
+        $.ajax({
+			type : 'POST',
+			url : bcs.bcsContextPath + '/edit/findOneLinePointMainByMainId?linePointMainId=' + linePointMainId,
+            contentType: 'application/json',
+        }).success(function(o) {
+            console.info('findOneLinePointMainByMainId response:', o);
+            $('#titleText').html('專案名稱：' + o.title);
+            $('#serialIdText').html('Campaign：' + o.serialId);
+            $('#totalCountText').html('發送總點數：' + o.totalCount);
+            $('#modifyUserText').html('建立人員：' + o.modifyUser);
+            $('#departmentFullNameText').html('建立人員單位：' + o.departmentFullName);
+            $('#pccCodeText').html('PCC：' + o.pccCode);
+        }).fail(function(response) {
+            console.info(response);
+            $.FailResponse(response);
+        }).done(function() {
+        	$('.LyMain').unblock();
+        });		
+	};
+	
     // get Data List
 	var getDataList = function(){
 		$('.LyMain').block($.BCS.blockMsgRead);
 		$('.resultTr').remove();
-		console.info("firstFatch:", firstFatch);
-		if(firstFatch){
-			firstFatch = false;
-			setTotal();
-		}
 		
-		var modifyUserInput = $('#modifyUserInput').val();
-		var titleInput = $('#titleInput').val();
-		var getUrl = bcs.bcsContextPath + '/edit/getLPStatisticsReport?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page + 
-			'&modifyUser=' + modifyUserInput + '&title=' + titleInput;
-		console.info('getUrl', getUrl);
+
 		
         $.ajax({
 			type : 'GET',
-			url : getUrl,
+			url : bcs.bcsContextPath + '/edit/findAllLinePointDetailByMainId?linePointMainId=' + linePointMainId,
             contentType: 'application/json',
         }).success(function(response) {
             console.info("response:", response);
-			if(response.length === 0) {
-				hasData = false;
-			} else {
-				hasData = true;
-			}
 			
             $.each(response, function(i, o) {
                 var resultTr = originalTr.clone(true); //增加一行
-                console.info("resultTr:", resultTr);
                
-                resultTr.find('.title').html(o.title);
-                if (o.modifyTime) {
-		              resultTr.find('.modifyTime').html(moment(o.modifyTime).format('YYYY-MM-DD HH:mm:ss'));
+                if (o.sendTime) {
+		              resultTr.find('.sendTime').html(moment(o.sendTime).format('YYYY-MM-DD HH:mm:ss'));
 		        }else{
-		              resultTr.find('.modifyTime').html('-');
+		              resultTr.find('.sendTime').html('-');
 		        }
-                resultTr.find('.modifyUser').html(o.modifyUser);
-                resultTr.find('.departmentFullName').html(o.departmentFullName);
-                resultTr.find('.pccCode').html(o.pccCode);
-		        resultTr.find('.serviceName').html(o.sendType);
-		        resultTr.find('.campaignCode').html(o.serialId);
-		        resultTr.find('.sendedCount').html(o.successfulCount + o.failedCount);
-		        resultTr.find('.successfulCount').html(o.successfulCount);
-		        resultTr.find('.failedCount').html(o.failedCount);
-		        resultTr.find('.totalAmount').html(o.totalAmount);
-		        resultTr.find('#toDetail').attr('href', bcs.bcsContextPath + '/edit/linePointStatisticsReportDetailPage?linePointMainId=' + o.id);
-                    
-		        setExportButtonSource();
+                
+                resultTr.find('.orderKey').html(o.orderKey);
+                resultTr.find('.uid').html(o.uid);
+                resultTr.find('.custId').html(o.custid);
+                resultTr.find('.amount').html(o.amount);
+                
+                var responseStatus = "";
+                if(o.status=='SUCCESS'){
+                	responseStatus = '成功';
+                }else if(o.status=='FAIL'){
+                	responseStatus = '失敗';
+                }else {
+                	responseStatus = '等待';
+                }
+		        resultTr.find('.responseStatus').html(responseStatus);
 		        
+                if (o.status=='FAIL') {
+		              resultTr.find('.message').html(o.message);
+		        }else{
+		              resultTr.find('.message').html('-');
+		        }
+                
                 // Append to Table
                 $('.resultTable').append(resultTr);
             });
@@ -188,6 +157,9 @@ $(function() {
 	
 	// initialize Page
 	var initPage = function(){
+		// get parameters
+		linePointMainId = $.urlParam("linePointMainId");
+		
 		// clone & remove
 	    originalTr = $('.resultTr').clone(true);
 	    $('.resultTr').remove();
@@ -198,6 +170,16 @@ $(function() {
 		endDate = moment(new Date()).format('YYYY-MM-DD');
 		$('#startDate').val(startDate);
 		$('#endDate').val(endDate);
+		
+		// start execute
+		console.info("firstFatch:", firstFatch);
+		if(firstFatch){
+			firstFatch = false;
+			//setTotal();
+			getMainList();
+			//setExportButtonSource();
+		}
+		getDataList();
 	};
 	
     initPage();

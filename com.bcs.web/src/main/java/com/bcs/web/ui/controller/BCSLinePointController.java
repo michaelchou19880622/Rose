@@ -337,6 +337,7 @@ public class BCSLinePointController extends BCSBaseController {
     }
 	
 	// ---- Front End Action ----
+	
 	@ControllerLog(description = "pressSendLinePointMain")
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/pressSendLinePointMain")
 	@ResponseBody

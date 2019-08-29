@@ -92,11 +92,18 @@ public class BCSLinePointReportController extends BCSBaseController {
 	private static Logger logger = Logger.getLogger(BCSLinePointReportController.class);
 	
 	
-	@ControllerLog(description = "Line Point 統計明細")
+	@ControllerLog(description = "Line Point 統計報表")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/linePointStatisticsReportPage")
 	public String linePointStatisticsReportPage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("linePointStatisticsReportPage");
 		return BcsPageEnum.LinePointStatisticsReportPage.toString();
+	}
+	
+	@ControllerLog(description = "Line Point 統計報表明細")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/linePointStatisticsReportDetailPage")
+	public String linePointStatisticsReportDetailPage(HttpServletRequest request, HttpServletResponse response) {
+		logger.info("linePointStatisticsReportPage");
+		return BcsPageEnum.LinePointStatisticsReportDetailPage.toString();
 	}
 	
 	// ---- Statistics Report ----    

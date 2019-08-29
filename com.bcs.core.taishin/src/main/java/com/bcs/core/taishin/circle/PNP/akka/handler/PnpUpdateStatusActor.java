@@ -5,6 +5,7 @@ import com.bcs.core.spring.ApplicationContextProvider;
 import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
 import com.bcs.core.taishin.circle.PNP.service.PnpService;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,10 +16,13 @@ import java.util.List;
  * @author jessie
  * @see PnpMainActor
  */
+@Slf4j
 public class PnpUpdateStatusActor extends UntypedActor {
     @Override
-    public void onReceive(Object object) throws Exception {
+    public void onReceive(Object object) {
+        log.info("PnpUpdateStatusActor Receive!!");
         if (object instanceof PnpDetail) {
+            log.info("Object instanceof PnpDetail!!");
             PnpService pnpService = ApplicationContextProvider.getApplicationContext().getBean(PnpService.class);
             PnpDetail pnpDetail = (PnpDetail) object;
             saveResultAndUpdateSendTime(pnpService, pnpDetail);
@@ -41,7 +45,8 @@ public class PnpUpdateStatusActor extends UntypedActor {
      */
     private void updateStatus(PnpService pnpService, PnpDetail pnpDetail) {
         if (checkCanUpdateStatusToComplete(pnpDetail)) {
-            pnpService.updatePnpMainStatusComplete(pnpDetail.getPnpMainId(), pnpDetail.getSource());
+            log.info(String.format("Update Status To Complete!! Main Id: %s, Detail Id: %s", pnpDetail.getPnpMainId(), pnpDetail.getPnpDetailId()));
+            pnpService.updatePnpMainStatusComplete(pnpDetail.getPnpMainId(), pnpDetail.getSource(), pnpDetail.getProcStage());
         }
     }
 
@@ -58,6 +63,7 @@ public class PnpUpdateStatusActor extends UntypedActor {
         status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
         status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_WAIT);
         status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_SCHEDULED);
+        log.info(String.format("Check Status: %s, Can Update: %s", pnpDetail.getStatus(), !status.contains(pnpDetail.getStatus())));
         return !status.contains(pnpDetail.getStatus());
     }
 }

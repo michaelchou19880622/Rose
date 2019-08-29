@@ -102,7 +102,6 @@ public class PnpPushMsgService {
                 }
                 logger.info("details has data type:" + type.toString());
                 List<? super PnpDetail> details2 = findDetailUid(details);
-                logger.info(new GsonBuilder().serializeNulls().setPrettyPrinting().create().toJson(details2));
                 Long[] mainIds = allMainIds.toArray(new Long[0]);
                 PnpMain pnpMain = pnpRepositoryCustom.findMainByMainId(type, mainIds[0]);
                 logger.info("sending handle Main:" + pnpMain.getOrigFileName() + " type:" + type);

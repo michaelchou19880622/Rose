@@ -267,19 +267,6 @@ public class LoadFtpPnpDataTask {
         // 跟據來源不同取各自連線資訊
         PNPFtpSetting pnpFtpSetting = pnpFtpService.getFtpSettings(source);
         logger.info(new GsonBuilder().serializeNulls().setPrettyPrinting().create().toJson(pnpFtpSetting));
-//        logger.info("------------------------------------------------------------");
-//        logger.info(" source            :" + pnpFtpSetting.getChannelId());
-//        logger.info(" ftpServerName     :" + pnpFtpSetting.getServerHostName());
-//        logger.info(" ftpServerNamePort :" + pnpFtpSetting.getServerHostNamePort());
-//        logger.info(" ftpHost           :" + pnpFtpSetting.getHost());
-//        logger.info(" ftpPort           :" + pnpFtpSetting.getPort());
-//        logger.info(" ftpUsr            :" + pnpFtpSetting.getAccount());
-//        logger.info(" ftpPass           :" + pnpFtpSetting.getPassword());
-//        logger.info(" downloadSavePath  :" + pnpFtpSetting.getDownloadSavePath());
-//        logger.info(" downloadPath      :" + pnpFtpSetting.getPath());
-//        logger.info(" uploadPath        :" + pnpFtpSetting.getUploadPath());
-//        logger.info("------------------------------------------------------------");
-
         try {
             /* 至FTP取得資料 */
             Map<String, byte[]> returnDataMap = pnpFtpService.downloadMultipleFileByType(source, pnpFtpSetting.getPath(), "TXT", pnpFtpSetting);

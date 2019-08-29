@@ -450,8 +450,13 @@ $(function(){
         		queryBody.find('.labelValue').attr('count', response.count);
         		$('#tableBody').append(queryBody);
     		}).fail(function(response){
-    			console.info(response);
-    			$.FailResponse(response);
+    			console.info("response = " + response);
+    			
+    			if (response.status == 503)
+        			$.TimeoutFailResponse(response);
+    			else
+        			$.FailResponse(response);
+    			
     			$('.LyMain').unblock();
     		}).done(function(){
     			$('.LyMain').unblock();
@@ -552,6 +557,16 @@ $(function(){
 		}).done(function(){
 		});
 	};
+	
+	$.TimeoutFailResponse = function(response){
+		var str = "";
+		if(response && response.status == 503){
+			str = "\n[" + "資料量過大導致超時，請再重新匯入。" + "]";
+		}
+		
+		alert(str);
+		$('.LyMain').unblock();
+	}
 
 	var templateBody = {};
 	templateBody = $('.dataTemplate').clone(true);

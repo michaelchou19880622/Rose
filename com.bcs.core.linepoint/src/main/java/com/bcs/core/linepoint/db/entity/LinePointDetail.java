@@ -26,7 +26,8 @@ public class LinePointDetail extends AbstractBcsEntity {
  	
 	public static final String DETAIL_TYPE_ISSUE_API = "ISSUE_API";
 	public static final String DETAIL_TYPE_CANCEL_API = "CANCEL_API";
-	public static final String DETAIL_TYPE_BCS = "BCS";
+	public static final String DETAIL_TYPE_ISSUE_BCS = "ISSUE_BCS";
+	public static final String DETAIL_TYPE_CANCEL_BCS = "CANCEL_BCS";
 	
  	public static final String DESCRIPTION_OVERFLOW = "OVERFLOW";
 	
@@ -94,7 +95,7 @@ public class LinePointDetail extends AbstractBcsEntity {
 	private String error;
 	@Column(name = "MESSAGE", columnDefinition="nvarchar(200)")
 	private String message;
-	@Column(name = "DETAILS", columnDefinition="nvarchar(200)")
+	@Column(name = "DETAILS", columnDefinition="nvarchar(200)") // optional response
 	private String details;
 	
 	public Long getDetailId() {

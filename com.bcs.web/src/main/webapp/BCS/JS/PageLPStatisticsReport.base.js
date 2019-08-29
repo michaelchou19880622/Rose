@@ -80,7 +80,7 @@ $(function() {
 		if(hasData) {
 			var modifyUserInput = $('#modifyUserInput').val();
 			var titleInput = $('#titleInput').val();
-			var getUrl = bcs.bcsContextPath + '/edit/exportLPStatisticsReportExcel?startDate=' + startDate + '&endDate=' + endDate + 
+			var getUrl = bcs.bcsContextPath + '/edit/getLPStatisticsReportExcel?startDate=' + startDate + '&endDate=' + endDate + 
 			'&modifyUser=' + modifyUserInput + '&title=' + titleInput;
 			console.info('getUrl', getUrl);
 			
@@ -138,8 +138,7 @@ $(function() {
 		        resultTr.find('.successfulCount').html(o.successfulCount);
 		        resultTr.find('.failedCount').html(o.failedCount);
 		        resultTr.find('.totalAmount').html(o.totalAmount);
-		        //resultTr.find('.status').html(o.status);
-		        resultTr.find('#toDetail').attr('href', bcs.bcsContextPath + '/edit/linePointCreatePage');
+		        resultTr.find('#toDetail').attr('href', bcs.bcsContextPath + '/edit/linePointStatisticsReportDetailPage?linePointMainId=' + o.id);
                     
 		        setExportButtonSource();
 		        
@@ -154,6 +153,7 @@ $(function() {
         });		
 	};
     
+	// get Total Count
 	var setTotal = function(){
 		// block
 		$('.LyMain').block($.BCS.blockMsgRead);

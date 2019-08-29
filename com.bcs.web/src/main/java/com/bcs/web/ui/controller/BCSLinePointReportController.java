@@ -91,68 +91,23 @@ public class BCSLinePointReportController extends BCSBaseController {
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSLinePointReportController.class);
 	
-	@ControllerLog(description = "Line Point 統計明細")
+	
+	@ControllerLog(description = "Line Point 統計報表")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/linePointStatisticsReportPage")
 	public String linePointStatisticsReportPage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("linePointStatisticsReportPage");
 		return BcsPageEnum.LinePointStatisticsReportPage.toString();
 	}
 	
-    @RequestMapping(method = RequestMethod.GET, value = "/edit/exportLPStatisticsReportExcel")
-    @ResponseBody
-    public void exportLPStatisticsReportExcel(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, 
-			@RequestParam(value = "startDate", required=false) String startDateStr, 
-			@RequestParam(value = "endDate", required=false) String endDateStr,
-			@RequestParam(value = "modifyUser", required=false) String modifyUser, 
-			@RequestParam(value = "title", required=false) String title) throws IOException {
-      
-		// null translation
-		if(StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) startDateStr = "1911-01-01";
-		if(StringUtils.isBlank(endDateStr) || endDateStr.equals("null")) endDateStr = "3099-01-01";
-		if(StringUtils.isBlank(title) || title.equals("null")) title = "";
-		if(StringUtils.isBlank(modifyUser) || modifyUser.equals("null")) modifyUser = "";
-		
-		// parse date
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		Date startDate = null, endDate = null;
-		try {
-			startDate = sdf.parse(startDateStr);
-			endDate = sdf.parse(endDateStr);
-			endDate = DateUtils.addDays(endDate, 1);
-		}catch(Exception e) {
-			logger.error(ErrorRecord.recordError(e));
-		}
-		logger.info("startDate:"+startDate);
-		logger.info("endDate:"+endDate);
-		logger.info("title:"+title);
-		logger.info("modifyUser:"+modifyUser);
-		
-		// file path
-        String filePath = CoreConfigReader.getString("file.path");
-        
-        // file name
-		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
-		Date date = new Date();
-        String fileName = "LinePointStatisticReport_" + sdf2.format(date) + ".xlsx";
-        
-        try {
-            File folder = new File(filePath);
-            if(!folder.exists()){
-                folder.mkdirs();
-            }
-            String filePathAndName = filePath + System.getProperty("file.separator") + fileName;
-            linePointReportExcelService.exportExcel_LinePointStatisticsReport(filePathAndName, startDate, endDate, modifyUser, title);
-        } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
-        }
-
-        try {
-			LoadFileUIService.loadFileToResponse(filePath, fileName, response);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-    }
-    
+	@ControllerLog(description = "Line Point 統計報表明細")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/linePointStatisticsReportDetailPage")
+	public String linePointStatisticsReportDetailPage(HttpServletRequest request, HttpServletResponse response) {
+		logger.info("linePointStatisticsReportPage");
+		return BcsPageEnum.LinePointStatisticsReportDetailPage.toString();
+	}
+	
+	// ---- Statistics Report ----    
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getLPStatisticsReport")
 	@ResponseBody
 	public ResponseEntity<?> getLPStatisticsReport(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
@@ -161,34 +116,31 @@ public class BCSLinePointReportController extends BCSBaseController {
 			@RequestParam(value = "modifyUser", required=false) String modifyUser, 
 			@RequestParam(value = "title", required=false) String title, 
 			@RequestParam(value = "page", required=true) Integer page) throws IOException {
-
-		// null translation
-		if(StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) startDateStr = "1911-01-01";
-		if(StringUtils.isBlank(endDateStr) || endDateStr.equals("null")) endDateStr = "3099-01-01";
-		if(StringUtils.isBlank(title) || title.equals("null")) title = "";
-		if(StringUtils.isBlank(modifyUser) || modifyUser.equals("null")) modifyUser = "";
-		
-		// parse date
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		Date startDate = null, endDate = null;
-		try {
+		try{
+			logger.info("[getLPStatisticsReport]");
+			
+			// null translation
+			if(StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) startDateStr = "1911-01-01";
+			if(StringUtils.isBlank(endDateStr) || endDateStr.equals("null")) endDateStr = "3099-01-01";
+			if(StringUtils.isBlank(title) || title.equals("null")) title = "";
+			if(StringUtils.isBlank(modifyUser) || modifyUser.equals("null")) modifyUser = "";
+			
+			// parse date data
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			Date startDate = null, endDate = null;
 			startDate = sdf.parse(startDateStr);
 			endDate = sdf.parse(endDateStr);
-			endDate = DateUtils.addDays(endDate, 1);
-		}catch(Exception e) {
-			logger.error(ErrorRecord.recordError(e));
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-		}
-		logger.info("startDate:"+startDate);
-		logger.info("endDate:"+endDate);
-		logger.info("title:"+title);
-		logger.info("modifyUser:"+modifyUser);
-		
-		// get list
-		try{
+			endDate = DateUtils.addDays(endDate, 1);	
+			logger.info("startDate:"+startDate);
+			logger.info("endDate:"+endDate);
+			logger.info("title:"+title);
+			logger.info("modifyUser:"+modifyUser);
+			
+			// get result list
 			List<LinePointMain> result = new ArrayList();
 			List<LinePointMain> list = linePointUIService.getLinePointStatisticsReport(startDate, endDate, modifyUser, title, page);
 			
+			// reset service name
 			for(LinePointMain main : list) {
 				String serviceName = "BCS";
 				if(main.getSendType().equals(LinePointMain.SEND_TYPE_API)) {
@@ -214,34 +166,28 @@ public class BCSLinePointReportController extends BCSBaseController {
 			@RequestParam(value = "endDate", required=false) String endDateStr,
 			@RequestParam(value = "modifyUser", required=false) String modifyUser, 
 			@RequestParam(value = "title", required=false) String title) throws IOException {
-
-		// null translation
-		if(StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) startDateStr = "1911-01-01";
-		if(StringUtils.isBlank(endDateStr) || endDateStr.equals("null")) endDateStr = "3099-01-01";
-		if(StringUtils.isBlank(title) || title.equals("null")) title = "";
-		if(StringUtils.isBlank(modifyUser) || modifyUser.equals("null")) modifyUser = "";
-		
-		// parse date
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		Date startDate = null, endDate = null;
-		try {
+		try{
+			logger.info("[getLPStatisticsReportTotalPages]");
+			
+			// null translation
+			if(StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) startDateStr = "1911-01-01";
+			if(StringUtils.isBlank(endDateStr) || endDateStr.equals("null")) endDateStr = "3099-01-01";
+			if(StringUtils.isBlank(title) || title.equals("null")) title = "";
+			if(StringUtils.isBlank(modifyUser) || modifyUser.equals("null")) modifyUser = "";
+			
+			// parse date data
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			Date startDate = null, endDate = null;
 			startDate = sdf.parse(startDateStr);
 			endDate = sdf.parse(endDateStr);
-			endDate = DateUtils.addDays(endDate, 1);
-		}catch(Exception e) {
-			logger.error(ErrorRecord.recordError(e));
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-		}
-		logger.info("startDate:"+startDate);
-		logger.info("endDate:"+endDate);
-		logger.info("title:"+title);
-		logger.info("modifyUser:"+modifyUser);
-		
-		// get list
-		try{
-			Long count = linePointUIService.getLinePointStatisticsReportTotalPages(startDate, endDate, modifyUser, title);
+			endDate = DateUtils.addDays(endDate, 1);	
+			logger.info("startDate:"+startDate);
+			logger.info("endDate:"+endDate);
+			logger.info("title:"+title);
+			logger.info("modifyUser:"+modifyUser);
 			
-			// divide by 10
+			// calculate count
+			Long count = linePointUIService.getLinePointStatisticsReportTotalPages(startDate, endDate, modifyUser, title);
 			if(count % 10L == 0L) {
 				count /= 10;
 			}else {
@@ -255,38 +201,91 @@ public class BCSLinePointReportController extends BCSBaseController {
 		}
 	}
 	
-
-//	@RequestMapping(method = RequestMethod.GET, value = "/pnpEmployee/getPNPDetailReportTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-//	@ResponseBody
-//	public ResponseEntity<?> getPNPDetailReportTotalPages(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
-//			@RequestParam(value = "startDate", required=false) String startDate, 
-//			@RequestParam(value = "endDate", required=false) String endDate,
-//			@RequestParam(value = "account", required=false) String account, 
-//			@RequestParam(value = "pccCode", required=false) String pccCode, 
-//			@RequestParam(value = "sourceSystem", required=false) String sourceSystem) throws IOException {
-//	
-//		logger.info("getPNPDetailReportTotalPages");
-//		if(startDate == null) startDate = "1911-01-01";
-//		if(endDate == null) endDate = "3099-01-01";
-//		
-//		try{
-//			String empId =  customUser.getAccount().toUpperCase();
-//			String count = pnpMaintainUIService.getPNPDetailReportTotalPages(startDate, endDate, account, pccCode, sourceSystem, empId);
-//			return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count + "\"}", HttpStatus.OK);
-//		}catch(Exception e){
-//			logger.error(ErrorRecord.recordError(e));
-//			return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
-//		}
-//	}
-//	
-//    @RequestMapping(method = RequestMethod.GET, value = "/pnpEmployee/exportPNPDetailReportExcel")
+    @RequestMapping(method = RequestMethod.GET, value = "/edit/getLPStatisticsReportExcel")
+    @ResponseBody
+    public void getLPStatisticsReportExcel(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, 
+			@RequestParam(value = "startDate", required=false) String startDateStr, 
+			@RequestParam(value = "endDate", required=false) String endDateStr,
+			@RequestParam(value = "modifyUser", required=false) String modifyUser, 
+			@RequestParam(value = "title", required=false) String title) throws IOException {
+    	try {
+    		logger.info("[exportLPStatisticsReportExcel]");
+    		
+			// null translation
+			if(StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) startDateStr = "1911-01-01";
+			if(StringUtils.isBlank(endDateStr) || endDateStr.equals("null")) endDateStr = "3099-01-01";
+			if(StringUtils.isBlank(title) || title.equals("null")) title = "";
+			if(StringUtils.isBlank(modifyUser) || modifyUser.equals("null")) modifyUser = "";
+			
+			// parse date data
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			Date startDate = null, endDate = null;
+			startDate = sdf.parse(startDateStr);
+			endDate = sdf.parse(endDateStr);
+			endDate = DateUtils.addDays(endDate, 1);	
+			logger.info("startDate:"+startDate);
+			logger.info("endDate:"+endDate);
+			logger.info("title:"+title);
+			logger.info("modifyUser:"+modifyUser);
+			
+	        // set file path
+			String filePath = CoreConfigReader.getString("file.path");
+			File folder = new File(filePath);
+	        if(!folder.exists()){
+	            folder.mkdirs();
+	        }
+	        
+	        // set file name
+			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
+			Date date = new Date();
+	        String fileName = "LinePointStatisticReport_" + sdf2.format(date) + ".xlsx";
+	
+	        // combine & export excel file
+	        String filePathAndName = filePath + System.getProperty("file.separator") + fileName;
+	        linePointReportExcelService.exportExcel_LinePointStatisticsReport(filePathAndName, startDate, endDate, modifyUser, title);
+	        LoadFileUIService.loadFileToResponse(filePath, fileName, response);
+    	} catch (Exception e) {
+    		e.printStackTrace();
+            logger.error(ErrorRecord.recordError(e));
+        }
+    }
+    
+	// ---- Statistics Report Detail ----    
+    
+    @RequestMapping(method = RequestMethod.GET, value = "/edit/getLPStatisticsReportDetailExcel")
+    @ResponseBody
+    public void getLPStatisticsReportDetailExcel(HttpServletRequest request, HttpServletResponse response, 
+    		@CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
+    	try {
+    		logger.info("[getLPStatisticsReportDetailExcel]");
+    		
+	        // set file path
+			String filePath = CoreConfigReader.getString("file.path");
+			File folder = new File(filePath);
+	        if(!folder.exists()){
+	            folder.mkdirs();
+	        }
+	        
+	        // set file name
+			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
+			Date date = new Date();
+	        String fileName = "LinePointStatisticReportDetail_" + sdf2.format(date) + ".xlsx";
+	
+	        // combine & export excel file
+	        String filePathAndName = filePath + System.getProperty("file.separator") + fileName;
+	        linePointReportExcelService.exportExcel_LinePointStatisticsReportDetail(filePathAndName, linePointMainId);
+	        LoadFileUIService.loadFileToResponse(filePath, fileName, response);
+    	} catch (Exception e) {
+    		e.printStackTrace();
+            logger.error(ErrorRecord.recordError(e));
+        }
+    }  
+    
+//	//  匯出 Push API 成效報表
+//	@ControllerLog(description="匯出Line Point Push API 成效報表")
+//    @RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForLPPushApiEffects")
 //    @ResponseBody
-//    public void exportPNPDetailReportExcel(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, 
-//			@RequestParam(value = "startDate", required=false) String startDate, 
-//			@RequestParam(value = "endDate", required=false) String endDate,
-//			@RequestParam(value = "account", required=false) String account, 
-//			@RequestParam(value = "pccCode", required=false) String pccCode, 
-//			@RequestParam(value = "sourceSystem", required=false) String sourceSystem) throws IOException {
+//    public void exportToExcelForLPPushApiEffects(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser) {
 //      
 //		// file path
 //        String filePath = CoreConfigReader.getString("file.path");
@@ -294,15 +293,45 @@ public class BCSLinePointReportController extends BCSBaseController {
 //        // file name
 //		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
 //		Date date = new Date();
-//        String fileName = "PNPDetailReport_" + sdf.format(date) + ".xlsx";
+//        String fileName = "LPPushApiEffects_" + sdf.format(date) + ".xlsx";
 //        
 //        try {
 //            File folder = new File(filePath);
 //            if(!folder.exists()){
 //                folder.mkdirs();
 //            }
-//            String empId =  customUser.getAccount().toUpperCase();
-//            pnpReportExcelService.exportPNPDetailReportExcel(filePath, fileName, startDate, endDate, account, pccCode, sourceSystem, empId);
+//            exportToExcelForLinePointPushApiEffects.exportExcel(filePath, fileName);
+//        } catch (Exception e) {
+//            logger.error(ErrorRecord.recordError(e));
+//        }
+//
+//        try {
+//			LoadFileUIService.loadFileToResponse(filePath, fileName, response);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//    }
+//	// 匯出 Push API 成效報表
+//	@ControllerLog(description="匯出Line Point Push API Detail 成效報表")
+//    @RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForLPPushApiEffectsDetail/{mainId}/{status}")
+//    @ResponseBody
+//    public void exportToExcelForLPPushApiEffectsDetail(HttpServletRequest request, HttpServletResponse response, 
+//    		@CurrentUser CustomUser customUser, @PathVariable Long mainId, @PathVariable String status) {
+//      
+//		// file path
+//        String filePath = CoreConfigReader.getString("file.path");
+//        
+//        // file name
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
+//		Date date = new Date();
+//        String fileName = "LPPushApiEffectsDetail_" + sdf.format(date) + ".xlsx";
+//        
+//        try {
+//            File folder = new File(filePath);
+//            if(!folder.exists()){
+//                folder.mkdirs();
+//            }
+//            exportToExcelForLinePointPushApiEffects.exportExcel(filePath, fileName, mainId, status);
 //        } catch (Exception e) {
 //            logger.error(ErrorRecord.recordError(e));
 //        }

@@ -167,7 +167,7 @@ public class GroupGenerateRepository{
 		}
 		
 		Query query = entityManager.createNativeQuery(sqlString);
-		query.setHint("javax.persistence.query.timeout", 30000);
+		query.setHint("javax.persistence.query.timeout", 300000);
 		
 		for (int i = 0; i < sendGroupDetails.size(); i++) {
 			query.setParameter(2*i + 1, sendGroupDetails.get(i).getQueryField());
@@ -256,9 +256,10 @@ public class GroupGenerateRepository{
 			
 			sqlString += " AND (k.STATUS = 'BINDED' OR k.STATUS = 'UNBIND') ";
 
+			
 			if(sendGroupDetails.size() > 1){
 				for(int i = 1; i < sendGroupDetails.size(); i++){
-					sqlString += " AND s" + i + ".REFERENCE_ID = ?" + (i+params) + " ";
+					sqlString += " OR s" + i + ".REFERENCE_ID = ?" + (i+params) + " ";
 				}
 			}
 			

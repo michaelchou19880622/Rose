@@ -174,4 +174,24 @@ public class PnpReportExcelService {
         }
     }
 
+    /**
+     * Transfer Source Code To Chinese Name
+     * @param sourceCode Source Code 1. 2. 3. 4.
+     * @return Source Chinese Name
+     */
+    public String englishSourceToChinese(String sourceCode) {
+        switch (sourceCode) {
+            case "1":
+                return "三竹";
+            case "2":
+                return "互動";
+            case "3":
+                return "明宣";
+            case "4":
+                return "UNICA";
+            default:
+                return "";
+        }
+    }
+
 }

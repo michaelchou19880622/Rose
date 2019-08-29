@@ -52,7 +52,6 @@ public class SendGroupUIService {
 	
 	private static int TRANSACTION_TIMEOUT_RETRY_MAX_TIMES = 3;
 	
-	// Test - Michael
 	private List<String> existMids = new ArrayList<String>();
 	private String referenceId;
 	private String fileName;
@@ -134,7 +133,7 @@ public class SendGroupUIService {
 		SystemLogUtil.saveLogDebug("SendGroup", action, modifyUser, content, referenceId);
 	}
  
-	@Transactional(rollbackFor=Exception.class, timeout = 10) //改timeout = 300000
+	@Transactional(rollbackFor=Exception.class, timeout = 300000)
 	public Map<String, Object> uploadMidSendGroup(MultipartFile filePart, String modifyUser, Date modifyTime) throws Exception{
 
 		logger.info("uploadMidSendGroup 1-1");

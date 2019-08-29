@@ -65,7 +65,6 @@ import com.bcs.core.linepoint.utils.service.ExcelUtilService;
 @Controller
 @RequestMapping("/bcs")
 public class BCSLinePointController extends BCSBaseController {
-
 	@Autowired
 	private LinePointUIService linePointUIService;
 	@Autowired
@@ -73,15 +72,9 @@ public class BCSLinePointController extends BCSBaseController {
 	@Autowired
 	private ExportToExcelForLinePointPushApiEffects exportToExcelForLinePointPushApiEffects;
 	@Autowired
-	private ContentRichMsgService contentRichMsgService;
-	@Autowired
-	private ContentTemplateMsgService contentTemplateMsgService;
-	@Autowired
 	private ExcelUtilService excelUtilService;
 	@Autowired
 	private SendGroupUIService sendGroupUIService;
-	@Autowired
-	private MsgMainService msgMainService;
 	@Autowired
 	private SendMsgUIService sendMsgUIService;
 	@Autowired
@@ -107,35 +100,37 @@ public class BCSLinePointController extends BCSBaseController {
 		return BcsPageEnum.LinePointListPage.toString();
 	}
 	
-	@ControllerLog(description = "Add/Edit Line Point Main")
+	// ---- Data Creation ----
+	
+	@ControllerLog(description = "Save Line Point Main")
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/createLinePointMain", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createLinePointMain(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser, @RequestBody LinePointMain linePointMain) throws IOException {
-		logger.info("[createLinePointMain]");
 		try {
-			
+			// Null Exception
+			logger.info("[createLinePointMain]");
 			if (linePointMain == null) {
-				throw new Exception("LinePointMain is Null");
+				throw new BcsNoticeException("LinePointMain is Null");
 			}
 			
+			// get Oracle Account Information
 			String empId = customUser.getAccount().toUpperCase();
 			logger.info("empId:" + empId);
 			if(StringUtils.isBlank(empId)) {
-				throw new Exception("empId is Null");
+				throw new BcsNoticeException("empId is Null");
 			}
-			
 			TaishinEmployee taishinEmployee = null;
 			try {
 				taishinEmployee = oracleService.findByEmployeeId(empId);		
 			}catch(Exception e){
 				throw new BcsNoticeException("The Employee Id Is Not Correct!"); 
 			}
-			
 			if(taishinEmployee == null || StringUtils.isBlank(taishinEmployee.getDivisionName())){
 				throw new BcsNoticeException("The Employee Id Is Not Correct!");
 			}
 			
+			// get Department Full Name
 			String departmentFullName = taishinEmployee.getDivisionName() + " " + 
 				taishinEmployee.getDepartmentName() + " " + taishinEmployee.getGroupName();
 			logger.info("departmentFullName:" + departmentFullName);
@@ -143,7 +138,7 @@ public class BCSLinePointController extends BCSBaseController {
 			linePointMain.setDepartmentFullName(departmentFullName);
 			linePointMain.setModifyUser(customUser.getAccount());
 			linePointMain.setModifyTime(new Date());
-			LinePointMain result = linePointUIService.saveLinePointMainFromUI(linePointMain);
+			LinePointMain result = linePointUIService.saveLinePointMain(linePointMain);
 			return new ResponseEntity<>(result, HttpStatus.OK);
 				
 		} catch (Exception e) {
@@ -155,27 +150,6 @@ public class BCSLinePointController extends BCSBaseController {
 		}
 	}
 
-	@ControllerLog(description = "Find One Line Point Main")
-	@RequestMapping(method = RequestMethod.POST, value = "/edit/findOneLinePointMain")
-	@ResponseBody
-	public ResponseEntity<?> findOneLinePointMain(HttpServletRequest request, HttpServletResponse response,
-			@CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
-		logger.info("[findOneLinePointMain]");
-		try {
-			if (linePointMainId != null) {
-				LinePointMain result = linePointUIService.linePointMainFindOne(linePointMainId);
-				return new ResponseEntity<>(result, HttpStatus.OK);
-			}else 
-				throw new Exception("LinePointMain is Null");
-		} catch (Exception e) {
-			logger.error(ErrorRecord.recordError(e));
-			if (e instanceof BcsNoticeException) 
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			else 
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-	
 	@ControllerLog(description = "Add/Edit Line Point Detail List")
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/createLinePointDetailList", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -197,19 +171,21 @@ public class BCSLinePointController extends BCSBaseController {
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-
-	@ControllerLog(description = "Add/Edit Line Point Scheduled Detail List")
-	@RequestMapping(method = RequestMethod.POST, value = "/edit/createLinePointScheduledDetailList", consumes = MediaType.APPLICATION_JSON_VALUE)
+	
+	// ---- Data Search ----
+	
+	@ControllerLog(description = "Find One Line Point Main")
+	@RequestMapping(method = RequestMethod.POST, value = "/edit/findOneMainByMainId")
 	@ResponseBody
-	public ResponseEntity<?> createLinePointScheduledDetailList(HttpServletRequest request, HttpServletResponse response,
-			@CurrentUser CustomUser customUser, @RequestBody List<LinePointScheduledDetail> linePointScheduledDetailList) throws IOException {
-		logger.info("[createLinePointScheduledDetailList]");
+	public ResponseEntity<?> findOneMainByMainId(HttpServletRequest request, HttpServletResponse response,
+			@CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
 		try {
-			if (linePointScheduledDetailList != null) {
-				List<LinePointScheduledDetail> result = linePointUIService.saveLinePointScheduledDetailListFromUI(linePointScheduledDetailList);
+			logger.info("[findOneMainByMainId]");
+			if (linePointMainId != null) {
+				LinePointMain result = linePointUIService.linePointMainFindOne(linePointMainId);
 				return new ResponseEntity<>(result, HttpStatus.OK);
-			} else 
-				throw new Exception("linePointDetail is Null");
+			}else 
+				throw new Exception("LinePointMain is Null");
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
 			if (e instanceof BcsNoticeException) 
@@ -219,57 +195,13 @@ public class BCSLinePointController extends BCSBaseController {
 		}
 	}
 	
-	@ControllerLog(description = "Get All Line Point Main")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getAllLinePointMainList")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/findAllDetailsByMainId")
 	@ResponseBody
-	public ResponseEntity<?> getAllLinePointMainList(HttpServletRequest request, HttpServletResponse response,
-			@CurrentUser CustomUser customUser) throws IOException {
-		logger.info("[getAllLinePointMainList]");
-		List<LinePointMain> result = new ArrayList();
-		List<LinePointMain> list = linePointUIService.linePointMainFindAll();		
-		result.addAll(list);
-		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
-		return new ResponseEntity<>(result, HttpStatus.OK);
-	}
-
-	@ControllerLog(description = "Get BCS Line Point Main")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getBcsLinePointMainList")
-	@ResponseBody
-	public ResponseEntity<?> getManualLinePointMainList(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
-			@RequestParam(value = "startDate", required = false) String startDateStr, 
-			@RequestParam(value = "endDate", required = false) String endDateStr) throws IOException {
-		logger.info("[getManualLinePointMainList]");
-		
-		// parse date
-		if(StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) startDateStr = "1911-01-01";
-		if(StringUtils.isBlank(endDateStr) || endDateStr.equals("null")) endDateStr = "3099-01-01";
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		Date startDate = null, endDate = null;
-		try {
-			startDate = sdf.parse(startDateStr);
-			endDate = sdf.parse(endDateStr);
-			endDate = DateUtils.addDays(endDate, 1);
-		}catch(Exception e) {
-			logger.error(ErrorRecord.recordError(e));
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-		}
-		logger.info("startDate:"+startDate);
-		logger.info("endDate:"+endDate);
-		
-		List<LinePointMain> result = new ArrayList();
-		List<LinePointMain> list = linePointUIService.linePointMainFindBcsAndDate(startDate, endDate);
-		result.addAll(list);
-		logger.info("result:" + ObjectUtil.objectToJsonStr(result));
-		return new ResponseEntity<>(result, HttpStatus.OK);
-	}
-	
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/findByMainId")
-	@ResponseBody
-	public ResponseEntity<?> findByMainId(HttpServletRequest request, HttpServletResponse response, 
+	public ResponseEntity<?> findAllDetailsByMainId(HttpServletRequest request, HttpServletResponse response, 
 			@CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
 		try{
 			try {
-				logger.info("linePointMainId1:"+linePointMainId);
+				logger.info("[findAllDetailsByMainId] linePointMainId:"+linePointMainId);
 				// get Details
 				List<LinePointDetail> linePointDetails = linePointUIService.findByLinePointMainId(linePointMainId);
 				logger.info("linePointDetails:"+linePointDetails);
@@ -287,6 +219,52 @@ public class BCSLinePointController extends BCSBaseController {
 		}
 	}
 	
+	@ControllerLog(description = "Get BCS Line Point Main")
+	@RequestMapping(method = {RequestMethod.GET}, value = {"/edit/getBcsLinePointMainList"})
+	@ResponseBody
+	public ResponseEntity<?> getBcsLinePointMainList(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, 
+			@RequestParam(value = "startDate", required = false) String startDateStr, 
+			@RequestParam(value = "endDate", required = false) String endDateStr) throws IOException {
+	    logger.info("[getManualLinePointMainList]");
+	    
+	    if (StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) startDateStr = "1911-01-01"; 
+	    if (StringUtils.isBlank(endDateStr) || endDateStr.equals("null")) endDateStr = "3099-01-01"; 
+	    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	    Date startDate = null, endDate = null;
+	    try {
+	    	startDate = sdf.parse(startDateStr);
+	    	endDate = sdf.parse(endDateStr);
+	    	endDate = DateUtils.addDays(endDate, 1);
+	    } catch (Exception e) {
+	    	logger.error(ErrorRecord.recordError(e));
+	    	return new ResponseEntity(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+	    } 
+	    logger.info("startDate:" + startDate);
+	    logger.info("endDate:" + endDate);
+	    
+	    List<LinePointMain> result = new ArrayList<LinePointMain>();
+	    List<LinePointMain> list = this.linePointUIService.linePointMainFindBcsAndDate(startDate, endDate);
+	    result.addAll(list);
+	    logger.info("result:" + ObjectUtil.objectToJsonStr(result));
+		return new ResponseEntity(result, HttpStatus.OK);
+	}
+	
+	
+	@ControllerLog(description = "Get All Line Point Main")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getAllLinePointMainList")
+	@ResponseBody
+	public ResponseEntity<?> getAllLinePointMainList(HttpServletRequest request, HttpServletResponse response,
+			@CurrentUser CustomUser customUser) throws IOException {
+		logger.info("[getAllLinePointMainList]");
+		List<LinePointMain> result = new ArrayList();
+		List<LinePointMain> list = linePointUIService.linePointMainFindAll();		
+		result.addAll(list);
+		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
+		return new ResponseEntity<>(result, HttpStatus.OK);
+	}
+	
+
+	
 	@ControllerLog(description = "press Send Line Point Main")
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/pressSendLinePointMain")
 	@ResponseBody
@@ -302,7 +280,7 @@ public class BCSLinePointController extends BCSBaseController {
 			
 			// switch allowToSend
 			linePointMain.setAllowToSend(!linePointMain.getAllowToSend());
-			linePointUIService.saveLinePointMainFromUI(linePointMain);
+			linePointUIService.saveLinePointMain(linePointMain);
 			
 			// immediate
 			if(LinePointMain.SEND_TIMING_TYPE_IMMEDIATE.equals(linePointMain.getSendTimingType())) {
@@ -317,7 +295,7 @@ public class BCSLinePointController extends BCSBaseController {
 					linePointMain.setSendStartTime(new Date());
 					linePointMain.setStatus(LinePointMain.STATUS_COMPLETE);					
 					linePointMain.setModifyTime(new Date());
-					linePointUIService.saveLinePointMainFromUI(linePointMain);
+					linePointUIService.saveLinePointMain(linePointMain);
 					
 					// get Details
 					List<LinePointDetail> linePointDetails = linePointUIService.findByLinePointMainId(linePointMainId);
@@ -353,6 +331,8 @@ public class BCSLinePointController extends BCSBaseController {
 		}
 	}
 	
+
+	
 //	@ControllerLog(description = "Get Manual Line Point Main")
 //	@RequestMapping(method = RequestMethod.GET, value = "/edit/getManualLinePointMainList")
 //	@ResponseBody
@@ -380,24 +360,24 @@ public class BCSLinePointController extends BCSBaseController {
 //	}
 	
 	//----
-	@ControllerLog(description = "Get All Line Point Main")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getAllLinePointMainListSearch/{searchText}")
-	@ResponseBody
-	public ResponseEntity<?> getAllLinePointMainListSearch(HttpServletRequest request, HttpServletResponse response,
-			@CurrentUser CustomUser customUser, @PathVariable String searchText) throws IOException {
-		logger.info("[findAllLinePointMainList]");
-		try {
-			List<LinePointMain> result = new ArrayList();
-			List<LinePointMain> list = linePointUIService.linePointMainFindAll(searchText);
-			result.addAll(list);
-			logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
-			return new ResponseEntity<>(result, HttpStatus.OK);
-		}catch(Exception e) {
-			logger.info("Error1: " + e.getMessage());
-			return new ResponseEntity<>("Error1: " + e.getMessage(), HttpStatus.OK);
-		}
-
-	}
+//	@ControllerLog(description = "Get All Line Point Main")
+////	@RequestMapping(method = RequestMethod.GET, value = "/edit/getAllLinePointMainListSearch/{searchText}")
+//	@ResponseBody
+//	public ResponseEntity<?> getAllLinePointMainListSearch(HttpServletRequest request, HttpServletResponse response,
+//			@CurrentUser CustomUser customUser, @PathVariable String searchText) throws IOException {
+//		logger.info("[findAllLinePointMainList]");
+//		try {
+//			List<LinePointMain> result = new ArrayList();
+//			List<LinePointMain> list = linePointUIService.linePointMainFindAll(searchText);
+//			result.addAll(list);
+//			logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
+//			return new ResponseEntity<>(result, HttpStatus.OK);
+//		}catch(Exception e) {
+//			logger.info("Error1: " + e.getMessage());
+//			return new ResponseEntity<>("Error1: " + e.getMessage(), HttpStatus.OK);
+//		}
+//
+//	}
 
 //	@ControllerLog(description = "Get Manual Line Point Main")
 //	@RequestMapping(method = RequestMethod.GET, value = "/edit/getManualLinePointMainListSearch/{searchText}")

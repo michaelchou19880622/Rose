@@ -115,7 +115,7 @@ public class LinePointSchedulerService {
 				linePointMain.setSendStartTime(new Date());
 				linePointMain.setStatus(LinePointMain.STATUS_COMPLETE);
 				linePointMain.setModifyTime(new Date());
-				linePointUIService.saveLinePointMainFromUI(linePointMain);
+				linePointUIService.saveLinePointMain(linePointMain);
 				
 				// get details
 				List<LinePointDetail> linePointDetails = linePointUIService.findByLinePointMainId(linePointMain.getId());

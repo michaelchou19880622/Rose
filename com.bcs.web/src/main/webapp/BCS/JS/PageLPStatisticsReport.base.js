@@ -80,7 +80,7 @@ $(function() {
 		if(hasData) {
 			var modifyUserInput = $('#modifyUserInput').val();
 			var titleInput = $('#titleInput').val();
-			var getUrl = bcs.bcsContextPath + '/edit/exportLPStatisticsReportExcel?startDate=' + startDate + '&endDate=' + endDate + 
+			var getUrl = bcs.bcsContextPath + '/edit/getLPStatisticsReportExcel?startDate=' + startDate + '&endDate=' + endDate + 
 			'&modifyUser=' + modifyUserInput + '&title=' + titleInput;
 			console.info('getUrl', getUrl);
 			
@@ -154,6 +154,7 @@ $(function() {
         });		
 	};
     
+	// get Total Count
 	var setTotal = function(){
 		// block
 		$('.LyMain').block($.BCS.blockMsgRead);

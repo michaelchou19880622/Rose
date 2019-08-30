@@ -9,13 +9,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.annotation.Resource;
-
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionTimedOutException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -57,7 +53,6 @@ public class SendGroupUIService {
 	private String fileName;
 	private Date modifyTime;
 	private String modifyUser;
-	private int curIndex = 0;
 	private int curSaveIndex = 0;
 	private int TransactionTimeoutRetry = 0;
 	private List<String> list;
@@ -135,16 +130,20 @@ public class SendGroupUIService {
  
 	@Transactional(rollbackFor=Exception.class, timeout = 300000)
 	public Map<String, Object> uploadMidSendGroup(MultipartFile filePart, String modifyUser, Date modifyTime) throws Exception{
-
-		logger.info("uploadMidSendGroup 1-1");
+		long startTime = System.currentTimeMillis();
+		long endTime = 0;
+		
+		logger.info("filePart.getSize():" + filePart.getSize());
+		
 		fileName = filePart.getOriginalFilename();
 		logger.info("getOriginalFilename:" + fileName);
+		
 		String contentType = filePart.getContentType();
 		logger.info("getContentType:" + contentType);
-		logger.info("getSize:" + filePart.getSize());
 		
 		this.modifyTime = modifyTime;
 		this.modifyUser = modifyUser;
+		
 
 		Set<String> mids = null;
 		if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType)){
@@ -157,69 +156,59 @@ public class SendGroupUIService {
 		if(mids != null && mids.size() > 0){
 			list = new ArrayList<String>(mids);
 			logger.info("list.size():" + list.size());
-//			List<String> existMids = new ArrayList<String>();
 			
-			// Check MID Exist by Part
-//			long startTime = System.currentTimeMillis(); //獲取開始時間
-//			try {
+			try {
+				
 				List<String> check = new ArrayList<String>();
-				for(int i = 1; i <= list.size(); i++){
-					
-					curIndex = i;
-					
-					check.add(list.get(i-1));
-					
-					if(i % 1000 == 0){
-	//					logger.info("check.size():" + check.size());
+				for (int i = 1; i <= list.size(); i++) {
+
+					check.add(list.get(i - 1));
+
+					if (i % 1000 == 0) {
 						List<String> midResult = lineUserService.findMidByMidInAndActive(check);
-						if(midResult != null && midResult.size() > 0){
+						if (midResult != null && midResult.size() > 0) {
 							existMids.addAll(midResult);
 						}
 						check.clear();
 					}
 				}
-	//			logger.info("check.size():" + check.size());
-				if(check.size() > 0){
+				if (check.size() > 0) {
 					List<String> midResult = lineUserService.findMidByMidInAndActive(check);
-					if(midResult != null && midResult.size() > 0){
+					if (midResult != null && midResult.size() > 0) {
 						existMids.addAll(midResult);
 					}
 				}
+
+				endTime = System.currentTimeMillis();
+
+				logger.info("Fill existMids - START TIME : " + startTime);
+				logger.info("Fill existMids - END TIME : " + endTime);
+				logger.info("Fill existMids - ELAPSED : " + (endTime - startTime));
+
+			} catch (Exception e) {
+
+				endTime = System.currentTimeMillis();
+				logger.info("findMidByMidInAndActive exception :" + e.getMessage());
+
+				logger.info("Fill existMids - START TIME : " + startTime);
+				logger.info("Fill existMids - END TIME : " + endTime);
+				logger.info("Fill existMids - ELAPSED : " + (endTime - startTime));
+			}
 				
-//				logger.info("existMids.size() = " + existMids.size());
+			if (existMids != null && existMids.size() > 0) {
 
-//				long endTime = System.currentTimeMillis(); //獲取當前時間
-//				logger.info("PASS - 查詢上傳UID是否是LINE好友的時間  : " +  (endTime - startTime) + "毫秒");
-
-//			}catch(Exception e) {
-////				long endTime = System.currentTimeMillis(); //獲取當前時間
-////				logger.info("FAIL - 查詢上傳UID是否是LINE好友的時間  : " +  (endTime - startTime) + "毫秒");
-//				
-//				logger.info("1-1 Exception : " +  e.getMessage().toString());
-//				if (e.getMessage().contains("transaction timeout expired"))
-//				{
-//					logger.info("RetryFindByMidInAndActive : curIndex = " + curIndex);
-//					
-//					existMids = RetryFindByMidInAndActive(list, existMids, curIndex);
-//				}
-//			}
-
-			if(existMids != null && existMids.size() > 0){
-				logger.info("existMids.size() = " + existMids.size());
-				logger.debug("existMids:" + existMids);
-				
 				referenceId = UUID.randomUUID().toString().toLowerCase();
-				//start
-//				startTime = System.currentTimeMillis(); //獲取當前時間
+				
+				/* 
+				 * 增加Try-Catch，判斷Exception是否為Transaction Timeout Exception?
+				 * 如是，則判斷是否已達Retry上限次數? 是的話拋出Execption{TimeOut}，否則拋Execption{RetrySaveUserEventSet}。
+				*/
 				try {
-					
 					curSaveIndex = 0;
-					
+
 					for (int i = 0; i < existMids.size(); i++) {
-						
-//					for(String mid : existMids){
 						String mid = existMids.get(i);
-						
+
 						UserEventSet userEventSet = new UserEventSet();
 						userEventSet.setTarget(EVENT_TARGET_ACTION_TYPE.EVENT_SEND_GROUP.toString());
 						userEventSet.setAction(EVENT_TARGET_ACTION_TYPE.ACTION_UPLOAD_MID.toString());
@@ -228,28 +217,29 @@ public class SendGroupUIService {
 						userEventSet.setContent(fileName);
 						userEventSet.setSetTime(modifyTime);
 						userEventSet.setModifyUser(modifyUser);
-						
-						logger.info("userEventSet1:"+userEventSet);
-						
+
+						logger.info("userEventSet1:" + userEventSet);
+
 						userEventSetService.save(userEventSet);
 					}
 
-//					long endTime = System.currentTimeMillis(); //獲取當前時間
-//					logger.info("PASS - 存入 userEventSet 時間 : " +  (endTime - startTime) + "毫秒");
-					
-				}catch(Exception e) {
-//					long endTime = System.currentTimeMillis(); //獲取當前時間
-//					logger.info("FAIL - 存入 userEventSet 時間 : " +  (endTime - startTime) + "毫秒");
+					endTime = System.currentTimeMillis();
 
-					// 增加retry機制，紀錄當前寫入UserEventSet table 的index， 如果 timeout，則重新從index繼續寫入UserEventSet table
-					logger.info("1-2 Exception : " +  e.getMessage().toString());
-					if (e.getMessage().contains("transaction timeout expired"))
-					{
+					logger.info("Save [UserEventSet] - START TIME : " + startTime);
+					logger.info("Save [UserEventSet] - END TIME : " + endTime);
+					logger.info("Save [UserEventSet] - ELAPSED : " + (endTime - startTime));
+
+				}catch(Exception e) {
+					endTime = System.currentTimeMillis();
+
+					logger.info("Save [UserEventSet] - START TIME : " + startTime);
+					logger.info("Save [UserEventSet] - END TIME : " + endTime);
+					logger.info("Save [UserEventSet] - ELAPSED : " + (endTime - startTime));
+					
+					if (e.getMessage().contains("transaction timeout expired")) {
 						TransactionTimeoutRetry += 1;
-						
-						logger.info("RetryFindByMidInAndActive : TransactionTimeoutRetry = " + TransactionTimeoutRetry);
-						logger.info("1-2 RetrySaveUserEventSt : curSaveIndex = " + curSaveIndex);
-						
+						logger.info("Save [UserEventSet] retry : " + TransactionTimeoutRetry);
+
 						if (TransactionTimeoutRetry > TRANSACTION_TIMEOUT_RETRY_MAX_TIMES) {
 							throw new Exception("TimeOut");
 						} else {
@@ -279,65 +269,9 @@ public class SendGroupUIService {
 		}
 	}
 	
-	public Map<String, Object> RetryFindByMidInAndActive()
-	{
-		try {
-			existMids = RetryFindByMidInAndActive(list, existMids, curIndex);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return null;
-	}
-	@Transactional(rollbackFor=Exception.class)
-	public List<String> RetryFindByMidInAndActive(List<String> listMid, List<String> existMids, int curIndex) {
-		int curCheckIndex = curIndex;
-		logger.info("RetryFindByMidInAndActive 1-0 : curCheckIndex = " + curCheckIndex);
-
-		try {
-			List<String> check = new ArrayList<String>();
-
-			for (int i = 1; i <= listMid.size(); i++) {
-
-				curCheckIndex = i;
-				
-				check.add(listMid.get(i - 1));
-
-				if (i % 1000 == 0) { // check每填滿1000筆MID就檢查一次並加到existMids中，然後清空check。
-					List<String> midResult = lineUserService.findMidByMidInAndActive(check);
-					if (midResult != null && midResult.size() > 0) {
-						existMids.addAll(midResult);
-					}
-					check.clear();
-				}
-			}
-
-			if (check.size() > 0) { // 如果check填不滿1000筆MID，則直接檢查check，並把Active的Mid加到existMids中。
-				List<String> midResult = lineUserService.findMidByMidInAndActive(check);
-				if (midResult != null && midResult.size() > 0) {
-					existMids.addAll(midResult);
-				}
-			}
-
-		} catch (Exception e) {
-
-			logger.info("1-3 Exception : " +  e.getMessage().toString());
-			if (e.getMessage().contains("transaction timeout expired"))
-			{
-				logger.info("RetryFindByMidInAndActive 1-1 : existMids.size() = " + existMids.size());
-				return RetryFindByMidInAndActive(listMid, existMids, curCheckIndex);
-			}
-		}
-		
-		logger.info("RetryFindByMidInAndActive 1-2 : existMids.size() = " + existMids.size());
-		return existMids;
-	}
-	
 	public Map<String, Object> RetrySaveUserEventSet()
 	{
 		try {
-			logger.info("RetrySaveUserEventSet 10-1 : curSaveIndex = " + curSaveIndex);
-			
 			return RetrySaveUserEventSet(existMids, referenceId, fileName, modifyTime, modifyUser, curSaveIndex);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -346,29 +280,23 @@ public class SendGroupUIService {
 		return null;
 	}
 
-	@Transactional(rollbackFor = Exception.class)
+	/* Retry to save UserEventSet */
+	@Transactional(rollbackFor = Exception.class, timeout = -1)
 	public Map<String, Object> RetrySaveUserEventSet(List<String> existMids, String referenceId, String fileName, Date modifyTime, String modifyUser, int curSaveIndex) throws Exception {
+		long retryStartTime = System.currentTimeMillis();
+		long retryEndTime = 0;
 		
 		this.existMids = existMids;
-		logger.info("RetrySaveUserEventSt 9-9 : this.existMids = " + this.existMids);
 		this.referenceId = referenceId;
-		logger.info("RetrySaveUserEventSt 9-9 : this.referenceId = " + this.referenceId);
 		this.fileName = fileName;
-		logger.info("RetrySaveUserEventSt 9-9 : this.fileName = " + this.fileName);
 		this.modifyTime = modifyTime;
-		logger.info("RetrySaveUserEventSt 9-9 : this.modifyTime = " + this.modifyTime);
 		this.modifyUser = modifyUser;
-		logger.info("RetrySaveUserEventSt 9-9 : this.modifyUser = " + this.modifyUser);
 		this.curSaveIndex = curSaveIndex;
-		logger.info("RetrySaveUserEventSt 9-9 : this.curSaveIndex = " + this.curSaveIndex);
 		
-		logger.info("------------------------------------------------------------------------------");
-		logger.info("RetrySaveUserEventSt 10-1 : this.curSaveIndex = " + this.curSaveIndex);
-		logger.info("RetrySaveUserEventSt 10-2 : existMids.size() = " + existMids.size());
 
 		try {
+			
 			for (int i = this.curSaveIndex; i < existMids.size(); i++) {
-
 				String mid = existMids.get(i);
 
 				UserEventSet userEventSet = new UserEventSet();
@@ -388,6 +316,12 @@ public class SendGroupUIService {
 
 				userEventSetService.save(userEventSet);
 			}
+
+			retryEndTime = System.currentTimeMillis();
+
+			logger.info("Save [UserEventSet] - START TIME : " + retryStartTime);
+			logger.info("Save [UserEventSet] - END TIME : " + retryEndTime);
+			logger.info("Save [UserEventSet] - ELAPSED : " + (retryEndTime - retryStartTime));
 			
 			Map<String, Object> result = new HashMap<String, Object>();
 			
@@ -397,17 +331,27 @@ public class SendGroupUIService {
 			return result;
 
 		} catch (Exception e) {
-			logger.info("1-4 Exception : " + e.getMessage().toString());
+			retryEndTime = System.currentTimeMillis();
 
-			logger.info("------------------------------------------------------------------------------");
-			logger.info("RetrySaveUserEventSt 10-3 : this.curSaveIndex = " + this.curSaveIndex);
-			logger.info("RetrySaveUserEventSt 10-4 : existMids.size() = " + existMids.size());
+			logger.info("Save [UserEventSet] - START TIME : " + retryStartTime);
+			logger.info("Save [UserEventSet] - END TIME : " + retryEndTime);
+			logger.info("Save [UserEventSet] - ELAPSED : " + (retryEndTime - retryStartTime));
 			
-			throw new Exception("RetrySaveUserEventSet:");
+			// 增加retry機制，紀錄當前寫入UserEventSet table 的index， 如果 timeout，則重新從index繼續寫入UserEventSet table
+			if (e.getMessage().contains("transaction timeout expired")) {
+				TransactionTimeoutRetry += 1;
+				logger.info("Save [UserEventSet] retry : " + TransactionTimeoutRetry);
+
+				if (TransactionTimeoutRetry > TRANSACTION_TIMEOUT_RETRY_MAX_TIMES) {
+					throw new Exception("TimeOut");
+				} else {
+					throw new Exception("RetrySaveUserEventSet");
+				}
+			}
+			throw new BcsNoticeException("資料量過大導致超時，重試異常");
 		}
 	}
 	
-	//
 	@Transactional(rollbackFor=Exception.class)
 	public Map<String, Object> uploadMidSendGroup(InputStream inputStream, String modifyUser, Date modifyTime, String fileName) throws Exception{
 

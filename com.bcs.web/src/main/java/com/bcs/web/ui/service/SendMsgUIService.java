@@ -569,10 +569,10 @@ public class SendMsgUIService {
 			throw new BcsNoticeException("群組設定錯誤");
 		}
 		
-		// Validate SendGroupId
+		// Validate sendGroup
 		SendGroup sendGroup = sendGroupService.findOne(groupId);
 		if(sendGroup == null){
-			logger.error("SendGroupId Null");
+			logger.error("sendGroup Null");
 			throw new BcsNoticeException("群組設定錯誤");
 		}
 		

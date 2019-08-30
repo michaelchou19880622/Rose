@@ -60,9 +60,13 @@ public class BCSPnpReportController extends BCSBaseController {
                                                 @RequestParam(value = "account", required = false) String account,
                                                 @RequestParam(value = "pccCode", required = false) String pccCode,
                                                 @RequestParam(value = "sourceSystem", required = false) String sourceSystem,
-                                                @RequestParam(value = "page", required = false) Integer page) throws IOException {
-        if (startDate == null) startDate = "2019-03-01";
-        if (endDate == null) endDate = "2019-07-30";
+                                                @RequestParam(value = "page", required = false) Integer page) {
+        if (startDate == null) {
+            startDate = "2019-03-01";
+        }
+        if (endDate == null) {
+            endDate = "2019-07-30";
+        }
         try {
             String empId = customUser.getAccount().toUpperCase();
             Map<String, List<String>> result = pnpMaintainUIService.getPNPDetailReport(startDate, endDate, account, pccCode, sourceSystem, page, empId);

@@ -1,176 +1,269 @@
 package com.bcs.core.taishin.circle.PNP.db.service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PreDestroy;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.bcs.core.db.entity.Campaign;
-import com.bcs.core.db.repository.CampaignRepository;
-import com.bcs.core.db.service.CampaignService;
 import com.bcs.core.enums.CONFIG_STR;
-import com.bcs.core.exception.BcsNoticeException;
-import com.bcs.core.log.util.SystemLogUtil;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
 import com.bcs.core.taishin.circle.PNP.db.repository.PNPMaintainAccountModelCustom;
 import com.bcs.core.taishin.circle.PNP.db.repository.PNPMaintainAccountModelRepository;
 import com.bcs.core.taishin.circle.db.service.OracleService;
-import com.bcs.core.utils.DataSyncUtil;
-import com.bcs.core.utils.ErrorRecord;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class PNPMaintainAccountModelService {
 
-	/** Logger */
-	private static Logger logger = Logger.getLogger(PNPMaintainAccountModelService.class);
-	@Autowired
-	private PNPMaintainAccountModelRepository pnpMaintainAccountModelRepository;    
-	@Autowired
+    /**
+     * Logger
+     */
+    private static Logger logger = Logger.getLogger(PNPMaintainAccountModelService.class);
+    @Autowired
+    private PNPMaintainAccountModelRepository pnpMaintainAccountModelRepository;
+    @Autowired
     private PNPMaintainAccountModelCustom PNPMaintainAccountModelCustom;
-	@Autowired
-	private OracleService oraclePnpService;
-	@PersistenceContext
+    @Autowired
+    private OracleService oraclePnpService;
+    @PersistenceContext
     EntityManager entityManager;
-	
-	public void save(PNPMaintainAccountModel pnpMaintainAccountModel) {
-		pnpMaintainAccountModelRepository.save(pnpMaintainAccountModel);
-	}
 
-	public void delete(PNPMaintainAccountModel pnpMaintainAccountModel) {
-		pnpMaintainAccountModelRepository.delete(pnpMaintainAccountModel);
-	}
-	
-	public PNPMaintainAccountModel findOne(Long id) {
-		return pnpMaintainAccountModelRepository.findOne(id);
-	}
-	
-	public List<PNPMaintainAccountModel> findByDivisionNameAndDepartmentNameAndGroupNameAndPccCodeAndAccountAndEmployeeIdAndAccountType(
-			String divisionName, String departmentName, String groupName, String pccCode, String account, String employeeId, String accountType){
-		return pnpMaintainAccountModelRepository.findByDivisionNameAndDepartmentNameAndGroupNameAndPccCodeAndAccountAndEmployeeIdAndAccountType(
-				divisionName, departmentName, groupName, pccCode, account, employeeId, accountType);
-	}
-	public List<PNPMaintainAccountModel> queryUsePageCoditions(
-			String divisionName, String departmentName, String groupName, String pccCode, String account, String employeeId, String accountType, Boolean status){
-		return PNPMaintainAccountModelCustom.queryUseConditions(divisionName, departmentName, groupName, pccCode, account, employeeId, accountType, status);
-	}
-	
-	public List<PNPMaintainAccountModel> findByAccountAndSourceSystemAndPnpContent(String account, String sourceSystem, String pnpContent){
-		return pnpMaintainAccountModelRepository.findByAccountAndSourceSystemAndPnpContent(account, sourceSystem, pnpContent);
-	}
-   
-	public List<PNPMaintainAccountModel> findByAccountType(String accountType){
-		return pnpMaintainAccountModelRepository.findByAccountType(accountType);
-	}
-	
-    @SuppressWarnings("unchecked")
-    public Map<String, List<String>> getPNPDetailReportExcelList(String startDate, String endDate, String account, String pccCode, String sourceSystem, String empId){
-    	
-    	String queryString = 
-			"SELECT * "
-			+"FROM (  "
-			+"SELECT CONCAT(D.PNP_MAIN_ID, '.', D.PNP_DETAIL_ID) AS 'ID', A.SOURCE_SYSTEM, A.PATHWAY, D.PROC_STAGE, A.ACCOUNT,  "
-			+"A.PCC_CODE, M.PNP_MAIN_ID, D.SN, A.TEMPLATE, D.MSG,  "
-			+"1 AS MESSAGE_POINT, NULL AS CAMPAIGN_ID, NULL AS SEGMENT_ID, NULL AS PROGRAM_ID, NULL AS PID,  "
-			+"D.PHONE, D.UID, D.DETAIL_SCHEDULE_TIME AS DETAIL_SCHEDULE_TIME1, D.DETAIL_SCHEDULE_TIME AS DETAIL_SCHEDULE_TIME2, D.PNP_DELIVERY_EXPIRE_TIME AS PNP_DELIVERY_EXPIRE_TIME1, "
-			+"D.PNP_DELIVERY_EXPIRE_TIME AS PNP_DELIVERY_EXPIRE_TIME2, D.STATUS AS STATUS1, D.STATUS AS STATUS2, D.STATUS AS STATUS3, NULL AS IS_INTERNATIONAL, "
-			+"D.CREAT_TIME AS CREAT_TIME1, D.CREAT_TIME AS CREAT_TIME2, A.EMPLOYEE_ID "
-			+"FROM BCS_PNP_DETAIL_MING AS D LEFT JOIN BCS_PNP_MAIN_MING AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID  "
-			+"LEFT JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID "
-			+"UNION  "
-			+"SELECT CONCAT(D.PNP_MAIN_ID, '.', D.PNP_DETAIL_ID) AS 'ID', A.SOURCE_SYSTEM, A.PATHWAY, D.PROC_STAGE, A.ACCOUNT,  "
-			+"A.PCC_CODE, M.PNP_MAIN_ID, D.DEST_NAME, A.TEMPLATE, D.MSG,  "
-			+"1 AS MESSAGE_POINT, NULL AS CAMPAIGN_ID, NULL AS SEGMENT_ID, NULL AS PROGRAM_ID, NULL AS PID,  "
-			+"D.PHONE, D.UID, NULL AS DETAIL_SCHEDULE_TIME1, NULL AS DETAIL_SCHEDULE_TIME2, D.PNP_DELIVERY_EXPIRE_TIME AS PNP_DELIVERY_EXPIRE_TIME1, "
-			+"D.PNP_DELIVERY_EXPIRE_TIME AS PNP_DELIVERY_EXPIRE_TIME2, D.STATUS AS STATUS1, D.STATUS AS STATUS2, D.STATUS AS STATUS3, NULL AS IS_INTERNATIONAL, "
-			+"D.CREAT_TIME AS CREAT_TIME1, D.CREAT_TIME AS CREAT_TIME2, A.EMPLOYEE_ID "
-			+"FROM BCS_PNP_DETAIL_MITAKE AS D LEFT JOIN BCS_PNP_MAIN_MITAKE AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID  "
-			+"LEFT JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID "
-			+"UNION  "
-			+"SELECT CONCAT(D.PNP_MAIN_ID, '.', D.PNP_DETAIL_ID) AS 'ID', A.SOURCE_SYSTEM, A.PATHWAY, D.PROC_STAGE, A.ACCOUNT,  "
-			+"A.PCC_CODE, M.PNP_MAIN_ID, D.SN, A.TEMPLATE, D.MSG,  "
-			+"1 AS MESSAGE_POINT, D.CAMPAIGN_ID, D.SEGMENT_ID, D.PROGRAM_ID, D.PID,  "
-			+"D.PHONE, D.UID, NULL AS DETAIL_SCHEDULE_TIME1, NULL AS DETAIL_SCHEDULE_TIME2, D.PNP_DELIVERY_EXPIRE_TIME AS PNP_DELIVERY_EXPIRE_TIME1, "
-			+"D.PNP_DELIVERY_EXPIRE_TIME AS PNP_DELIVERY_EXPIRE_TIME2, D.STATUS AS STATUS1, D.STATUS AS STATUS2, D.STATUS AS STATUS3, NULL AS IS_INTERNATIONAL, "
-			+"D.CREAT_TIME AS CREAT_TIME1, D.CREAT_TIME AS CREAT_TIME2, A.EMPLOYEE_ID "
-			+"FROM BCS_PNP_DETAIL_UNICA AS D LEFT JOIN BCS_PNP_MAIN_UNICA AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID  "
-			+"LEFT JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID "
-			+"UNION  "
-			+"SELECT CONCAT(D.PNP_MAIN_ID, '.', D.PNP_DETAIL_ID) AS 'ID', A.SOURCE_SYSTEM, A.PATHWAY, D.PROC_STAGE, A.ACCOUNT,  "
-			+"A.PCC_CODE, M.PNP_MAIN_ID, D.SN, A.TEMPLATE, D.MSG,  "
-			+"1 AS MESSAGE_POINT, D.CAMPAIGN_ID, D.SEGMENT_ID, D.PROGRAM_ID, D.PID,  "
-			+"D.PHONE, D.UID, NULL AS DETAIL_SCHEDULE_TIME1, NULL AS DETAIL_SCHEDULE_TIME2, D.PNP_DELIVERY_EXPIRE_TIME AS PNP_DELIVERY_EXPIRE_TIME1, "
-			+"D.PNP_DELIVERY_EXPIRE_TIME AS PNP_DELIVERY_EXPIRE_TIME2, D.STATUS AS STATUS1, D.STATUS AS STATUS2, D.STATUS AS STATUS3, NULL AS IS_INTERNATIONAL, "
-			+"D.CREAT_TIME AS CREAT_TIME1, D.CREAT_TIME AS CREAT_TIME2, A.EMPLOYEE_ID "
-			+"FROM BCS_PNP_DETAIL_EVERY8D AS D LEFT JOIN BCS_PNP_MAIN_EVERY8D AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID  "
-			+"LEFT JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID "
-			+") AS R1 "
-			+"WHERE CREAT_TIME1 >= ?1  "
-			+"AND CREAT_TIME1 <  DATEADD(DAY, 1, ?2) ";
-
-    	
-		if(StringUtils.isNotBlank(account)) queryString += "AND ACCOUNT = '" + account + "' ";
-		if(StringUtils.isNotBlank(pccCode)) queryString += "AND PCC_CODE = '" + pccCode + "' ";
-		if(StringUtils.isNotBlank(sourceSystem)) queryString += "AND SOURCE_SYSTEM = '" + sourceSystem + "' ";
-		
-		boolean oracleUseDepartmentCheck = CoreConfigReader.getBoolean(CONFIG_STR.ORACLE_USE_DEPARTMENT_CHECK, true);
-		logger.info("oracleUseDepartmentCheck:"+oracleUseDepartmentCheck);
-		if(oracleUseDepartmentCheck) {
-			String empAva = oraclePnpService.getAvailableEmpIdsByEmpId(empId);
-			if(StringUtils.isNotBlank(empAva)) queryString += empAva;				
-		}
-		
-		queryString += "ORDER BY CREAT_TIME1 DESC";
-		
-    	logger.info("str1: " + queryString);
-    	Query query = entityManager.createNativeQuery(queryString).setParameter(1, startDate).setParameter(2, endDate);
-    	logger.info("query:"+query.toString());
-    	
-		List<Object[]> list = query.getResultList();
-    	//logger.info("List1: " + list.toString());
-    		
-    	Map<String, List<String>> map = new LinkedHashMap<>();
-    	
-    	Integer count = 0;
-		for (Object[] o : list) {
-			count++;
-			logger.info("c:" + count);
-			List<String> dataList = new ArrayList<String>();
-			map.put(count.toString(), dataList);
-			for (int i=0, max=27; i<max; i++) {
-				if (o[i] == null) {
-					dataList.add("");
-					//logger.info("i=" + i  + ", null");
-				} else {
-					dataList.add(o[i].toString());
-					//logger.info("i=" + i  + ", " + o[i].toString());
-				}
-			}
-		}
-    	logger.info("map1: " + map.toString());
-    	
-		return map;
+    public void save(PNPMaintainAccountModel pnpMaintainAccountModel) {
+        pnpMaintainAccountModelRepository.save(pnpMaintainAccountModel);
     }
-    
+
+    public void delete(PNPMaintainAccountModel pnpMaintainAccountModel) {
+        pnpMaintainAccountModelRepository.delete(pnpMaintainAccountModel);
+    }
+
+    public PNPMaintainAccountModel findOne(Long id) {
+        return pnpMaintainAccountModelRepository.findOne(id);
+    }
+
+    public List<PNPMaintainAccountModel> findByDivisionNameAndDepartmentNameAndGroupNameAndPccCodeAndAccountAndEmployeeIdAndAccountType(
+            String divisionName, String departmentName, String groupName, String pccCode, String account, String employeeId, String accountType) {
+        return pnpMaintainAccountModelRepository.findByDivisionNameAndDepartmentNameAndGroupNameAndPccCodeAndAccountAndEmployeeIdAndAccountType(
+                divisionName, departmentName, groupName, pccCode, account, employeeId, accountType);
+    }
+
+    public List<PNPMaintainAccountModel> queryUsePageCoditions(
+            String divisionName, String departmentName, String groupName, String pccCode, String account, String employeeId, String accountType, Boolean status) {
+        return PNPMaintainAccountModelCustom.queryUseConditions(divisionName, departmentName, groupName, pccCode, account, employeeId, accountType, status);
+    }
+
+    public List<PNPMaintainAccountModel> findByAccountAndSourceSystemAndPnpContent(String account, String sourceSystem, String pnpContent) {
+        return pnpMaintainAccountModelRepository.findByAccountAndSourceSystemAndPnpContent(account, sourceSystem, pnpContent);
+    }
+
+    public List<PNPMaintainAccountModel> findByAccountType(String accountType) {
+        return pnpMaintainAccountModelRepository.findByAccountType(accountType);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, List<String>> getPNPDetailReportExcelList(String startDate, String endDate, String account, String pccCode, String sourceSystem, String empId) {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("select * from " +
+                " ( " +
+                "        ( " +
+                "                select " +
+                "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
+                "                        a.source_system, " +
+                "                        a.pathway, " +
+                "                        d.proc_stage, " +
+                "                        a.account, " +
+                "                        a.pcc_code, " +
+                "                        m.pnp_main_id, " +
+                "                        d.sn, " +
+                "                        a.template, " +
+                "                        d.msg, " +
+                "                        1 as message_point, " +
+                "                        null as campaign_id, " +
+                "                        null as segment_id, " +
+                "                        null as program_id, " +
+                "                        null as pid, " +
+                "                        d.phone, " +
+                "                        d.uid, " +
+                "                        d.detail_schedule_time as detail_schedule_time1, " +
+                "                        d.detail_schedule_time as detail_schedule_time2, " +
+                "                        d.pnp_delivery_expire_time as pnp_delivery_expire_time1, " +
+                "                        d.pnp_delivery_expire_time as pnp_delivery_expire_time2, " +
+                "                        d.status as status1, " +
+                "                        d.status as status2, " +
+                "                        d.status as status3, " +
+                "                        null as is_international, " +
+                "                        d.creat_time as creat_time1, " +
+                "                        d.creat_time as creat_time2, " +
+                "                        a.employee_id " +
+                "                from bcs_pnp_detail_ming as d " +
+                "                left join bcs_pnp_main_ming as m on d.pnp_main_id = m.pnp_main_id " +
+                "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
+                "        ) " +
+                "        union all " +
+                "        ( " +
+                "                select " +
+                "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
+                "                        a.source_system, " +
+                "                        a.pathway, " +
+                "                        d.proc_stage, " +
+                "                        a.account, " +
+                "                        a.pcc_code, " +
+                "                        m.pnp_main_id, " +
+                "                        d.dest_name, " +
+                "                        a.template, " +
+                "                        d.msg, " +
+                "                        1 as message_point, " +
+                "                        null as campaign_id, " +
+                "                        null as segment_id, " +
+                "                        null as program_id, " +
+                "                        null as pid, " +
+                "                        d.phone, " +
+                "                        d.uid, " +
+                "                        null as detail_schedule_time1, " +
+                "                        null as detail_schedule_time2, " +
+                "                        d.pnp_delivery_expire_time as pnp_delivery_expire_time1, " +
+                "                        d.pnp_delivery_expire_time as pnp_delivery_expire_time2, " +
+                "                        d.status as status1, " +
+                "                        d.status as status2, " +
+                "                        d.status as status3, " +
+                "                        null as is_international, " +
+                "                        d.creat_time as creat_time1, " +
+                "                        d.creat_time as creat_time2, " +
+                "                        a.employee_id " +
+                "                from bcs_pnp_detail_mitake as d " +
+                "                left join bcs_pnp_main_mitake as m on d.pnp_main_id = m.pnp_main_id " +
+                "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
+                "        ) " +
+                "        union all " +
+                "        ( " +
+                "                select " +
+                "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
+                "                        a.source_system, " +
+                "                        a.pathway, " +
+                "                        d.proc_stage, " +
+                "                        a.account, " +
+                "                        a.pcc_code, " +
+                "                        m.pnp_main_id, " +
+                "                        d.sn, " +
+                "                        a.template, " +
+                "                        d.msg, " +
+                "                        1 as message_point, " +
+                "                        d.campaign_id, " +
+                "                        d.segment_id, " +
+                "                        d.program_id, " +
+                "                        d.pid, " +
+                "                        d.phone, " +
+                "                        d.uid, " +
+                "                        null as detail_schedule_time1, " +
+                "                        null as detail_schedule_time2, " +
+                "                        d.pnp_delivery_expire_time as pnp_delivery_expire_time1, " +
+                "                        d.pnp_delivery_expire_time as pnp_delivery_expire_time2, " +
+                "                        d.status as status1, " +
+                "                        d.status as status2, " +
+                "                        d.status as status3, " +
+                "                        null as is_international, " +
+                "                        d.creat_time as creat_time1, " +
+                "                        d.creat_time as creat_time2, " +
+                "                        a.employee_id " +
+                "                from bcs_pnp_detail_unica as d " +
+                "                left join bcs_pnp_main_unica as m on d.pnp_main_id = m.pnp_main_id " +
+                "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
+                "        ) " +
+                "        union all " +
+                "        ( " +
+                "                select " +
+                "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
+                "                        a.source_system, " +
+                "                        a.pathway, " +
+                "                        d.proc_stage, " +
+                "                        a.account, " +
+                "                        a.pcc_code, " +
+                "                        m.pnp_main_id, " +
+                "                        d.sn, " +
+                "                        a.template, " +
+                "                        d.msg, " +
+                "                        1 as message_point, " +
+                "                        d.campaign_id, " +
+                "                        d.segment_id, " +
+                "                        d.program_id, " +
+                "                        d.pid, " +
+                "                        d.phone, " +
+                "                        d.uid, " +
+                "                        null as detail_schedule_time1, " +
+                "                        null as detail_schedule_time2, " +
+                "                        d.pnp_delivery_expire_time as pnp_delivery_expire_time1, " +
+                "                        d.pnp_delivery_expire_time as pnp_delivery_expire_time2, " +
+                "                        d.status as status1, " +
+                "                        d.status as status2, " +
+                "                        d.status as status3, " +
+                "                        null as is_international, " +
+                "                        d.creat_time as creat_time1, " +
+                "                        d.creat_time as creat_time2, " +
+                "                        a.employee_id " +
+                "                from bcs_pnp_detail_every8d as d " +
+                "                left join bcs_pnp_main_every8d as m on d.pnp_main_id = m.pnp_main_id " +
+                "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
+                "        ) " +
+                " ) as r1 " +
+                " where creat_time1 >= ?1 " +
+                " and creat_time1 <  dateadd(day, 1, ?2) ");
+
+
+        if (StringUtils.isNotBlank(account)) {
+            sb.append(String.format(" and account = '%s'", account));
+        }
+        if (StringUtils.isNotBlank(pccCode)) {
+            sb.append(String.format(" and pcc_code = '%s' ", pccCode));
+        }
+        if (StringUtils.isNotBlank(sourceSystem)) {
+            sb.append(String.format(" and source_system = '%s' ", sourceSystem));
+        }
+
+        boolean oracleUseDepartmentCheck = CoreConfigReader.getBoolean(CONFIG_STR.ORACLE_USE_DEPARTMENT_CHECK, true);
+        logger.info("oracleUseDepartmentCheck:" + oracleUseDepartmentCheck);
+        if (oracleUseDepartmentCheck) {
+            String empAva = oraclePnpService.getAvailableEmpIdsByEmpId(empId);
+            if (StringUtils.isNotBlank(empAva)) {
+                sb.append(empAva);
+            }
+        }
+
+        sb.append(" order by creat_time1 desc ");
+
+        logger.info("str1: " + sb.toString());
+        Query query = entityManager.createNativeQuery(sb.toString()).setParameter(1, startDate).setParameter(2, endDate);
+        logger.info("query:" + query.toString());
+
+        List<Object[]> list = query.getResultList();
+
+        Map<String, List<String>> map = new LinkedHashMap<>();
+
+        int count = 0;
+        for (Object[] o : list) {
+            count++;
+            logger.info("c:" + count);
+            List<String> dataList = new ArrayList<>();
+            map.put(Integer.toString(count), dataList);
+            for (int i = 0, max = 27; i < max; i++) {
+                if (o[i] == null) {
+                    dataList.add("");
+                } else {
+                    dataList.add(o[i].toString());
+                }
+            }
+        }
+        logger.info("map1: " + map.toString());
+
+        return map;
+    }
+
 //    protected LoadingCache<String, Campaign> dataCache;
 //    
 //	private Timer flushTimer = new Timer();

@@ -1,20 +1,16 @@
 package com.bcs.web.ui.controller;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.bcs.core.db.entity.AdminUser;
+import com.bcs.core.exception.BcsNoticeException;
+import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
+import com.bcs.core.taishin.circle.db.entity.TaishinEmployee;
+import com.bcs.core.taishin.circle.db.service.OracleService;
+import com.bcs.core.utils.ErrorRecord;
+import com.bcs.core.web.security.CurrentUser;
+import com.bcs.core.web.security.CustomUser;
+import com.bcs.core.web.ui.controller.BCSBaseController;
+import com.bcs.core.web.ui.page.enums.BcsPageEnum;
+import com.bcs.web.ui.service.PNPMaintainUIService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,245 +18,210 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.bcs.core.api.msg.MsgGenerator;
-import com.bcs.core.db.entity.AdminUser;
-import com.bcs.core.db.entity.ContentLink;
-import com.bcs.core.db.entity.ContentTemplateMsg;
-import com.bcs.core.db.entity.ContentTemplateMsgAction;
-import com.bcs.core.db.entity.MsgDetail;
-import com.bcs.core.db.entity.MsgMain;
-import com.bcs.core.db.entity.MsgSendMain;
-import com.bcs.core.db.entity.MsgSendRecord;
-import com.bcs.core.db.service.AdminUserService;
-import com.bcs.core.db.service.MsgDetailService;
-import com.bcs.core.db.service.MsgMainService;
-import com.bcs.core.db.service.MsgSendMainService;
-import com.bcs.core.db.service.MsgSendRecordService;
-import com.bcs.core.db.service.SendGroupService;
-import com.bcs.core.exception.BcsNoticeException;
-import com.bcs.core.resource.CoreConfigReader;
-import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
-import com.bcs.core.taishin.circle.db.entity.TaishinEmployee;
-import com.bcs.core.taishin.circle.db.service.OracleService;
-import com.bcs.core.taishin.service.PNPMaintainExcelService;
-import com.bcs.core.utils.ErrorRecord;
-import com.bcs.core.utils.ObjectUtil;
-import com.bcs.core.web.security.CurrentUser;
-import com.bcs.core.web.security.CustomUser;
-import com.bcs.core.web.ui.controller.BCSBaseController;
-import com.bcs.core.web.ui.page.enums.BcsPageEnum;
-import com.bcs.web.aop.ControllerLog;
-import com.bcs.web.ui.model.SendMsgDetailModel;
-import com.bcs.web.ui.model.SendMsgModel;
-import com.bcs.web.ui.model.TemplateActionModel;
-import com.bcs.web.ui.model.TemplateMsgModel;
-import com.bcs.web.ui.service.ExportExcelUIService;
-import com.bcs.web.ui.service.LoadFileUIService;
-import com.bcs.web.ui.service.PNPMaintainUIService;
-import com.bcs.web.ui.service.SendMsgUIService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
+import java.util.List;
 
 
 @Controller
 @RequestMapping("/bcs")
-public class BCSPNPMaintainController extends BCSBaseController {	
-	@Autowired
-	private PNPMaintainUIService pnpMaintainUIService;
-	@Autowired	
-	private OracleService oraclePnpService;
-	
-	/** Logger */
-	private static Logger logger = Logger.getLogger(BCSPNPMaintainController.class);
-	
-	@RequestMapping(method = RequestMethod.GET, value ="/pnpAdmin/pnpNormalAccountListPage")
-	public String pnpNormalAccountListPage(HttpServletRequest request, HttpServletResponse response) {
-		logger.info("pnpNormalAccountListPage");
-		return BcsPageEnum.PNPNormalAccountListPage.toString();
-	}
-	
-	@RequestMapping(method = RequestMethod.GET, value ="/pnpAdmin/pnpNormalAccountCreatePage")
-	public String pnpNormalAccountCreatePage(HttpServletRequest request, HttpServletResponse response) {
-		logger.info("pnpNormalAccountCreatePage");
-		return BcsPageEnum.PNPNormalAccountCreatePage.toString();
-	}
+public class BCSPNPMaintainController extends BCSBaseController {
+    @Autowired
+    private PNPMaintainUIService pnpMaintainUIService;
+    @Autowired
+    private OracleService oraclePnpService;
 
-	@RequestMapping(method = RequestMethod.GET, value ="/pnpAdmin/pnpUnicaAccountListPage")
-	public String pnpUnicaAccountListPage(HttpServletRequest request, HttpServletResponse response) {
-		logger.info("pnpUnicaAccountListPage");
-		return BcsPageEnum.PNPUnicaAccountListPage.toString();
-	}
-	
-	@RequestMapping(method = RequestMethod.GET, value ="/pnpAdmin/pnpUnicaAccountCreatePage")
-	public String pnpUnicaAccountCreatePage(HttpServletRequest request, HttpServletResponse response) {
-		logger.info("pnpUnicaAccountCreatePage");
-		return BcsPageEnum.PNPUnicaAccountCreatePage.toString();
-	}
-	
-	@RequestMapping(method = RequestMethod.GET, value = "/pnpAdmin/getEmpAccount", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public ResponseEntity<?> getEmpAccount(HttpServletRequest request,  HttpServletResponse response, @CurrentUser CustomUser customUser,
-			@RequestParam(required=false) String empId) throws IOException {		
-		try {
-			
-			if(StringUtils.isBlank(empId)) {
-				logger.info("empId is blank");
-				return new ResponseEntity<>("{}", HttpStatus.OK);
-			}
-			
-			logger.info("getEmpAccount empId=" + empId);
-			TaishinEmployee result = null;
-			try {
-				result = oraclePnpService.findByEmployeeId(empId);		
-			}catch(Exception e){
-				throw new BcsNoticeException("The Employee Id Is Not Correct!"); 
-			}
-			
-			if(result == null || StringUtils.isBlank(result.getDivisionName())){
-				throw new BcsNoticeException("The Employee Id Is Not Correct!");
-			}
-			
-			result.setModifyTime(new Date());
-			result.setModifyUser(empId);
-			oraclePnpService.save(result);
-			return new ResponseEntity<>(result, HttpStatus.OK);
-		}catch(Exception e){
-			logger.error(ErrorRecord.recordError(e));
-			if(e instanceof BcsNoticeException){
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			}else{
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-		}
-	}
-	@RequestMapping(method = RequestMethod.POST, value = "/pnpAdmin/createPNPMaintainAccount", consumes = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public ResponseEntity<?> createPNPMaintainAccount(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, 
-			@RequestBody PNPMaintainAccountModel pnpMaintainAccountModel) throws IOException {
-		try{
-			logger.info("pnpMaintainAccountModel:"+pnpMaintainAccountModel);
-			// Check Duplication
-			String account = pnpMaintainAccountModel.getAccount();
-			String sourceSystem = pnpMaintainAccountModel.getSourceSystem();
-			String pnpContent = pnpMaintainAccountModel.getPnpContent();
-			List<PNPMaintainAccountModel> sameCheck = pnpMaintainUIService.findByAccountAndSourceSystemAndPnpContent(account, sourceSystem, pnpContent);
-			logger.info("sameCheck:"+sameCheck);
-			if(sameCheck.size() >= 2) {
-				throw new BcsNoticeException("帳號、前方來源系統、簡訊內容不可與之前資料重複！"); 
-			}else if(sameCheck.size() == 1) {
-				Long addId = pnpMaintainAccountModel.getId();
-				logger.info("addId:"+addId);
-				if(addId==null) { // Create Mode
-					throw new BcsNoticeException("帳號、前方來源系統、簡訊內容不可與之前資料重複！"); 
-				}
-				
-				Long sameId = sameCheck.get(0).getId();
-				logger.info("sameId:"+sameId);
-				
-				if(sameId!=addId) { //  Edit Mode & Not same Id
-					throw new BcsNoticeException("帳號、前方來源系統、簡訊內容不可與之前資料重複！"); 
-				}
-			}
-			
-			// save
-			pnpMaintainAccountModel.setModifyTime(new Date());
-			pnpMaintainAccountModel.setModifyUser(customUser.getAccount());
-			pnpMaintainUIService.save(pnpMaintainAccountModel);
+    /**
+     * Logger
+     */
+    private static Logger logger = Logger.getLogger(BCSPNPMaintainController.class);
 
-			return new ResponseEntity<>("save success", HttpStatus.OK);
-		}catch(Exception e){
-			logger.error(ErrorRecord.recordError(e));
-			if(e instanceof BcsNoticeException){
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			}else{
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}	
-		}
-	}
-	
-	@RequestMapping(method = RequestMethod.DELETE, value = "/pnpAdmin/deletePNPMaintainAccount")
-	@ResponseBody
-	public ResponseEntity<?> deletePNPMaintainAccount(HttpServletRequest request, HttpServletResponse response,
-			@CurrentUser CustomUser customUser, @RequestParam Long id) throws IOException {
-		try{
-			
-			if(!customUser.isAdmin() && !AdminUser.RoleCode.ROLE_PNP_ADMIN.toString().equals(customUser.getRole())) {
-				throw new BcsNoticeException("您無權限刪除");
-			}
+    @GetMapping(value = "/pnpAdmin/pnpNormalAccountListPage")
+    public String pnpNormalAccountListPage() {
+        logger.info("pnpNormalAccountListPage");
+        return BcsPageEnum.PNPNormalAccountListPage.toString();
+    }
 
-			PNPMaintainAccountModel pnpMaintainAccountModel = pnpMaintainUIService.findOne(id);			
-			if(pnpMaintainAccountModel == null){
-				throw new BcsNoticeException("刪除搜查錯誤");
-			}
-			
-			pnpMaintainUIService.delete(pnpMaintainAccountModel);					
-			return new ResponseEntity<>("刪除成功", HttpStatus.OK);
-		}catch(Exception e){
-			logger.error(ErrorRecord.recordError(e));
-			if(e instanceof BcsNoticeException)
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			else
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-	
-	@RequestMapping(method = RequestMethod.POST, value = "/pnpAdmin/getPNPMaintainAccount", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public ResponseEntity<?> getPNPMaintainAccount(
-			HttpServletRequest request,  HttpServletResponse response, 
-			@CurrentUser CustomUser customUser, @RequestParam Long id) throws IOException {		
-		try {
-			PNPMaintainAccountModel pnpMaintainAccountModel = pnpMaintainUIService.findOne(id);			
-			if(pnpMaintainAccountModel == null){
-				throw new BcsNoticeException("刪除搜查錯誤");
-			}
-			return new ResponseEntity<>(pnpMaintainAccountModel, HttpStatus.OK);
-		}catch(Exception e){
-			logger.error(ErrorRecord.recordError(e));
-			if(e instanceof BcsNoticeException){
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			}else{
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-		}
-	}
-	
-	@RequestMapping(method = RequestMethod.POST, value = "/pnpAdmin/getPNPMaintainAccountList", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public ResponseEntity<?> getPNPMaintainAccountList(
-			HttpServletRequest request,  HttpServletResponse response,  @CurrentUser CustomUser customUser, 
-			@RequestBody PNPMaintainAccountModel pnpMaintainAccountModel, @RequestParam Boolean status) throws IOException {		
-		try {
-			logger.info("pnpMaintainAccountModel1:"+pnpMaintainAccountModel);
-			String divisionName = pnpMaintainAccountModel.getDivisionName();
-			String departmentName = pnpMaintainAccountModel.getDepartmentName();
-			String groupName = pnpMaintainAccountModel.getGroupName();
-			String pccCode = pnpMaintainAccountModel.getPccCode();
-			String account = pnpMaintainAccountModel.getAccount();
-			String employeeId = pnpMaintainAccountModel.getEmployeeId();
-			String accountType = pnpMaintainAccountModel.getAccountType();
-			
-			List<PNPMaintainAccountModel> list = pnpMaintainUIService.queryUsePageCoditions(
-					divisionName, departmentName, groupName, pccCode, account, employeeId, accountType, status);
-			return new ResponseEntity<>(list, HttpStatus.OK);
-		} catch (Exception e) {
-			logger.error(ErrorRecord.recordError(e));
-			if(e instanceof BcsNoticeException){
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			}else{
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}	
-		}
-	}
-	
-	// 匯出 EXCEL
+    @GetMapping(value = "/pnpAdmin/pnpNormalAccountCreatePage")
+    public String pnpNormalAccountCreatePage() {
+        logger.info("pnpNormalAccountCreatePage");
+        return BcsPageEnum.PNPNormalAccountCreatePage.toString();
+    }
+
+    @GetMapping(value = "/pnpAdmin/pnpUnicaAccountListPage")
+    public String pnpUnicaAccountListPage() {
+        logger.info("pnpUnicaAccountListPage");
+        return BcsPageEnum.PNPUnicaAccountListPage.toString();
+    }
+
+    @GetMapping(value = "/pnpAdmin/pnpUnicaAccountCreatePage")
+    public String pnpUnicaAccountCreatePage() {
+        logger.info("pnpUnicaAccountCreatePage");
+        return BcsPageEnum.PNPUnicaAccountCreatePage.toString();
+    }
+
+    @GetMapping(value = "/pnpAdmin/getEmpAccount", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> getEmpAccount(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+                                           @RequestParam(required = false) String empId) {
+        try {
+
+            if (StringUtils.isBlank(empId)) {
+                logger.info("empId is blank");
+                return new ResponseEntity<>("{}", HttpStatus.OK);
+            }
+
+            logger.info("getEmpAccount empId=" + empId);
+            TaishinEmployee result;
+            try {
+                result = oraclePnpService.findByEmployeeId(empId);
+            } catch (Exception e) {
+                throw new BcsNoticeException("The Employee Id Is Not Correct!");
+            }
+
+            if (result == null || StringUtils.isBlank(result.getDivisionName())) {
+                throw new BcsNoticeException("The Employee Id Is Not Correct!");
+            }
+
+            result.setModifyTime(new Date());
+            result.setModifyUser(empId);
+            oraclePnpService.save(result);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (BcsNoticeException be) {
+            logger.error(ErrorRecord.recordError(be));
+            return new ResponseEntity<>(be.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+        } catch (Exception e) {
+            logger.error(ErrorRecord.recordError(e));
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping(value = "/pnpAdmin/createPNPMaintainAccount", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> createPNPMaintainAccount(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+                                                      @RequestBody PNPMaintainAccountModel pnpMaintainAccountModel) {
+        try {
+            logger.info("pnpMaintainAccountModel:" + pnpMaintainAccountModel);
+            // Check Duplication
+            String account = pnpMaintainAccountModel.getAccount();
+            String sourceSystem = pnpMaintainAccountModel.getSourceSystem();
+            String pnpContent = pnpMaintainAccountModel.getPnpContent();
+            List<PNPMaintainAccountModel> sameCheck = pnpMaintainUIService.findByAccountAndSourceSystemAndPnpContent(account, sourceSystem, pnpContent);
+            logger.info("sameCheck:" + sameCheck);
+            if (sameCheck.size() >= 2) {
+                throw new BcsNoticeException("帳號、前方來源系統、簡訊內容不可與之前資料重複！");
+            } else if (sameCheck.size() == 1) {
+                Long addId = pnpMaintainAccountModel.getId();
+                logger.info("addId:" + addId);
+                // Create Mode
+                if (addId == null) {
+                    throw new BcsNoticeException("帳號、前方來源系統、簡訊內容不可與之前資料重複！");
+                }
+
+                Long sameId = sameCheck.get(0).getId();
+                logger.info("sameId:" + sameId);
+
+                //  Edit Mode & Not same Id
+                if (sameId.longValue() != addId.longValue()) {
+                    throw new BcsNoticeException("帳號、前方來源系統、簡訊內容不可與之前資料重複！");
+                }
+            }
+
+            // save
+            pnpMaintainAccountModel.setModifyTime(new Date());
+            pnpMaintainAccountModel.setModifyUser(customUser.getAccount());
+            pnpMaintainUIService.save(pnpMaintainAccountModel);
+
+            return new ResponseEntity<>("save success", HttpStatus.OK);
+        } catch (BcsNoticeException be) {
+            logger.error(ErrorRecord.recordError(be));
+            return new ResponseEntity<>(be.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+        } catch (Exception e) {
+            logger.error(ErrorRecord.recordError(e));
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping(value = "/pnpAdmin/deletePNPMaintainAccount")
+    @ResponseBody
+    public ResponseEntity<?> deletePNPMaintainAccount(HttpServletRequest request, HttpServletResponse response,
+                                                      @CurrentUser CustomUser customUser, @RequestParam Long id) {
+        try {
+
+            if (!customUser.isAdmin() && !AdminUser.RoleCode.ROLE_PNP_ADMIN.toString().equals(customUser.getRole())) {
+                throw new BcsNoticeException("您無權限刪除");
+            }
+
+            PNPMaintainAccountModel pnpMaintainAccountModel = pnpMaintainUIService.findOne(id);
+            if (pnpMaintainAccountModel == null) {
+                throw new BcsNoticeException("刪除搜查錯誤");
+            }
+
+            pnpMaintainUIService.delete(pnpMaintainAccountModel);
+            return new ResponseEntity<>("刪除成功", HttpStatus.OK);
+        } catch (BcsNoticeException be) {
+            logger.error(ErrorRecord.recordError(be));
+            return new ResponseEntity<>(be.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+        } catch (Exception e) {
+            logger.error(ErrorRecord.recordError(e));
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping(value = "/pnpAdmin/getPNPMaintainAccount", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> getPNPMaintainAccount(
+            HttpServletRequest request, HttpServletResponse response,
+            @CurrentUser CustomUser customUser, @RequestParam Long id) {
+        try {
+            PNPMaintainAccountModel pnpMaintainAccountModel = pnpMaintainUIService.findOne(id);
+            if (pnpMaintainAccountModel == null) {
+                throw new BcsNoticeException("刪除搜查錯誤");
+            }
+            return new ResponseEntity<>(pnpMaintainAccountModel, HttpStatus.OK);
+        } catch (BcsNoticeException be) {
+            logger.error(ErrorRecord.recordError(be));
+            return new ResponseEntity<>(be.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+        } catch (Exception e) {
+            logger.error(ErrorRecord.recordError(e));
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping(value = "/pnpAdmin/getPNPMaintainAccountList", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> getPNPMaintainAccountList(
+            HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+            @RequestBody PNPMaintainAccountModel pnpMaintainAccountModel, @RequestParam Boolean status) {
+        try {
+            logger.info("pnpMaintainAccountModel1:" + pnpMaintainAccountModel);
+            String divisionName = pnpMaintainAccountModel.getDivisionName();
+            String departmentName = pnpMaintainAccountModel.getDepartmentName();
+            String groupName = pnpMaintainAccountModel.getGroupName();
+            String pccCode = pnpMaintainAccountModel.getPccCode();
+            String account = pnpMaintainAccountModel.getAccount();
+            String employeeId = pnpMaintainAccountModel.getEmployeeId();
+            String accountType = pnpMaintainAccountModel.getAccountType();
+
+            List<PNPMaintainAccountModel> list = pnpMaintainUIService.queryUsePageCoditions(
+                    divisionName, departmentName, groupName, pccCode, account, employeeId, accountType, status);
+            return new ResponseEntity<>(list, HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error(ErrorRecord.recordError(e));
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // 匯出 EXCEL
 //	@ControllerLog(description="匯出 EXCEL")
 //    @RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForPNPMaintainAccount")
 //    @ResponseBody
@@ -292,7 +253,7 @@ public class BCSPNPMaintainController extends BCSBaseController {
 //			e.printStackTrace();
 //		}
 //    }
-	
+
 //	@RequestMapping(method = RequestMethod.GET, value = "/edit/findAll/{maxRange}", produces = MediaType.APPLICATION_JSON_VALUE)
 //	@ResponseBody
 //	public ResponseEntity<?> findAll(HttpServletRequest request,  HttpServletResponse response, 

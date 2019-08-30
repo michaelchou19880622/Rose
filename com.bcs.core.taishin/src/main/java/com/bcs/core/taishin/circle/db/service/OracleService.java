@@ -3,6 +3,7 @@ package com.bcs.core.taishin.circle.db.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.sql.*;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,256 +19,268 @@ import org.apache.commons.lang3.StringUtils;
 
 @Service
 public class OracleService {
-	/** Logger */
-	private static Logger logger = Logger.getLogger(OracleService.class);	
-	@Autowired
-	private TaishinEmployeeRepository taishinEmployeeRepository;
+    /**
+     * Logger
+     */
+    private static Logger logger = Logger.getLogger(OracleService.class);
+    @Autowired
+    private TaishinEmployeeRepository taishinEmployeeRepository;
 
-	public void save(TaishinEmployee employeeRecord) {
-		taishinEmployeeRepository.save(employeeRecord);
-	}
+    public void save(TaishinEmployee employeeRecord) {
+        taishinEmployeeRepository.save(employeeRecord);
+    }
 
-	public TaishinEmployee findByEmployeeId(String empId) {
-		logger.info("[findByEmployeeId] EMP_ID="+empId);
-		try{
-			// use LDAP or Local Database
-			String useLDAP = CoreConfigReader.getString("oracleUseLdap");
-			String SERVER = "";
-			String USER = "";
-			String PASSWORD = "";
-			String DATABASENAME = "";
-			
-			if(useLDAP.equals("false")) {
-				USER = "SYSTEM";
-				PASSWORD = "123";
-				DATABASENAME = "XEPDB1";
-				SERVER = "LOCALHOST";
-			}else {
-				// connect to database
-				String ldapHost = CoreConfigReader.getString("oracleLdapHost");
-				String apName = CoreConfigReader.getString("oracleApName");
-				Integer apGroup = CoreConfigReader.getInteger("oracleApGroup");
-				String searchBase = CoreConfigReader.getString("oracleSearchBase");
-				String connection = getDBConnectionInfo(ldapHost, apName, apGroup, searchBase);
-				logger.info("connection:" + connection);
-				
-				String[] split = connection.split(";");
+    public TaishinEmployee findByEmployeeId(String empId) {
+        logger.info("[findByEmployeeId] EMP_ID=" + empId);
+        try {
+            // use LDAP or Local Database
+            String useLDAP = CoreConfigReader.getString("oracleUseLdap");
+            String server = "";
+            String user = "";
+            String password = "";
+            String databasesName = "";
 
-				for(String str : split){
-					if(StringUtils.isNotBlank(str)){
-						String[] keyvalue = str.split("=");
-					
-						if(keyvalue != null && keyvalue.length == 2){
-							if("server".equals(keyvalue[0])){
-								SERVER = keyvalue[1];
-							}
-							if("uid".equals(keyvalue[0])){
-								USER = keyvalue[1];
-							}
-							if("pwd".equals(keyvalue[0])){
-								PASSWORD = keyvalue[1];
-							}
-							if("database".equals(keyvalue[0])){
-								DATABASENAME = keyvalue[1];
-							}
-						}
-					}
-				}
-				USER = USER.toUpperCase();
-				PASSWORD = PASSWORD.toUpperCase();
-				DATABASENAME = DATABASENAME.toUpperCase();
-				SERVER = SERVER.toUpperCase();				
-			}
-			logger.info("SERVER:"+SERVER);
-			logger.info("USER:"+USER);
-			logger.info("PASSWORD:"+PASSWORD);
-			logger.info("DATABASENAME:"+DATABASENAME);
+            if ("false".equals(useLDAP)) {
+                user = "SYSTEM";
+                password = "123";
+                databasesName = "XEPDB1";
+                server = "LOCALHOST";
+            } else {
+                // connect to database
+                String ldapHost = CoreConfigReader.getString("oracleLdapHost");
+                String apName = CoreConfigReader.getString("oracleApName");
+                Integer apGroup = CoreConfigReader.getInteger("oracleApGroup");
+                String searchBase = CoreConfigReader.getString("oracleSearchBase");
+                String connection = getDBConnectionInfo(ldapHost, apName, apGroup, searchBase);
+                logger.info("connection:" + connection);
 
-			String ORACLE_DATASOURCE_URL = "jdbc:oracle:thin:@"+ SERVER +":1521/" + DATABASENAME;
-			logger.info("ORACLE_DATASOURCE_URL:"+ORACLE_DATASOURCE_URL);
-			
-			Class.forName("oracle.jdbc.driver.OracleDriver");
-			Connection con=DriverManager.getConnection(ORACLE_DATASOURCE_URL,USER,PASSWORD);
-			
-			// get data from table
-			String HR = CoreConfigReader.getString(CONFIG_STR.ORACLE_SCHEMA_HR, true);
-			logger.info("HR:"+HR);
-			
-			Statement stmt=con.createStatement();  			  
-			String sqlString = "select EMP_ID, DEPT_SER_NO_ACT, ACCT_DEPT_CD, ACCT_GRP_CD, CARD_DIV, CARD_DEPT, DEPT_EASY_NM from " +
-					HR + ".HR_EMP_SW LEFT OUTER JOIN " + HR + ".HR_DEPT_SW " + 
-					"on (HR_EMP_SW.DEPT_SER_NO_ACT = HR_DEPT_SW.DEPT_SERIAL_NO) " + 
-					"where TRIM(EMP_ID) = '" + empId + "'";
-			logger.info("sqlString:"+sqlString);
-			
-			TaishinEmployee emp = new TaishinEmployee();
-			ResultSet rs=stmt.executeQuery(sqlString);
-			while(rs.next()) {
-				for(int i = 1; i <= 7; i++) {
-					logger.info("[findByEmployeeId] i="+ i + ", s=" + rs.getString(i)); 
-				}
-				emp.setEmployeeId(empId);
-				emp.setDepartmentId(trim(rs.getString(2)));
-				emp.setPccCode(trim(rs.getString(3)) + trim(rs.getString(4)));
-				emp.setDivisionName(trim(rs.getString(5)));
-				emp.setDepartmentName(trim(rs.getString(6)));
-				emp.setEasyName(trim(rs.getString(7)));
-				emp.setGroupName(extractGroupName(emp));
-			}
-			logger.info("[findByEmployeeId] emp:"+emp);
-			
-			con.close(); 
-			return emp;
-		}catch(Exception e){
-			logger.info("[findByEmployeeId] error:" + e);
-			return null;
-		}
-	}
-	
-	public String getAvailableEmpIdsByEmpId(String empId) {
-		logger.info("[getAvailableEmpIdsByEmpId] EMP_ID="+empId);
-		if(StringUtils.isBlank(empId)) return "";
-		
-		try{
-			// connect to database
-			String ldapHost = CoreConfigReader.getString("oracleLdapHost");
-			String apName = CoreConfigReader.getString("oracleApName");
-			Integer apGroup = CoreConfigReader.getInteger("oracleApGroup");
-			String searchBase = CoreConfigReader.getString("oracleSearchBase");
-			String connection = getDBConnectionInfo(ldapHost, apName, apGroup, searchBase);
-			logger.info("connection:" + connection);
-			
-			String[] split = connection.split(";");
-			String SERVER = "";
-			String USER = "";
-			String PASSWORD = "";
-			String DATABASENAME = "";
-			for(String str : split){
-				if(StringUtils.isNotBlank(str)){
-					String[] keyvalue = str.split("=");
-				
-					if(keyvalue != null && keyvalue.length == 2){
-						if("server".equals(keyvalue[0])){
-							SERVER = keyvalue[1];
-						}
-						if("uid".equals(keyvalue[0])){
-							USER = keyvalue[1];
-						}
-						if("pwd".equals(keyvalue[0])){
-							PASSWORD = keyvalue[1];
-						}
-						if("database".equals(keyvalue[0])){
-							DATABASENAME = keyvalue[1];
-						}
-					}
-				}
-			}
-			USER = USER.toUpperCase();
-			PASSWORD = PASSWORD.toUpperCase();
-			DATABASENAME = DATABASENAME.toUpperCase();
-			SERVER = SERVER.toUpperCase();
-			
-			logger.info("SERVER:"+SERVER);
-			logger.info("USER:"+USER);
-			logger.info("PASSWORD:"+PASSWORD);
-			logger.info("DATABASENAME:"+DATABASENAME);
+                String[] split = connection.split(";");
 
-			String ORACLE_DATASOURCE_URL = "jdbc:oracle:thin:@"+ SERVER +":1521/" + DATABASENAME;
-			logger.info("ORACLE_DATASOURCE_URL:"+ORACLE_DATASOURCE_URL);
-			
-			Class.forName("oracle.jdbc.driver.OracleDriver");
-			Connection con=DriverManager.getConnection(ORACLE_DATASOURCE_URL,USER,PASSWORD);
-			
-			
-			// get Employee Data by Id
-			String HR = CoreConfigReader.getString(CONFIG_STR.ORACLE_SCHEMA_HR, true);
-			logger.info("HR:"+HR);
-			
-			String sqlString = "SELECT EMP_ID, DEPT_SER_NO_ACT, ACCT_DEPT_CD, ACCT_GRP_CD, CARD_DIV, CARD_DEPT, DEPT_EASY_NM FROM " +
-					HR + ".HR_EMP_SW LEFT OUTER JOIN " + HR + ".HR_DEPT_SW " + 
-					"ON (HR_EMP_SW.DEPT_SER_NO_ACT = HR_DEPT_SW.DEPT_SERIAL_NO) " + 
-					"WHERE TRIM(EMP_ID) = '" + empId + "'";
-			logger.info("sqlString:"+sqlString);
-			
-			Statement stmt=con.createStatement();  
-			ResultSet rs=stmt.executeQuery(sqlString);
-			TaishinEmployee emp = new TaishinEmployee();
-			while(rs.next()) {
-				for(int i = 1; i <= 7; i++) {
-					logger.info("[findByEmployeeId] i="+ i + ", s=" + rs.getString(i)); 
-				}
-				emp.setEmployeeId(empId);
-				emp.setDepartmentId(trim(rs.getString(2)));
-				emp.setPccCode(trim(rs.getString(3)) + trim(rs.getString(4)));
-				emp.setDivisionName(trim(rs.getString(5)));
-				emp.setDepartmentName(trim(rs.getString(6)));
-				emp.setEasyName(trim(rs.getString(7)));
-				emp.setGroupName(extractGroupName(emp));
-			}
-			logger.info("[getAvailableEmpIdsByEmpId] emp:"+emp);
-			
-			// get List of EmpIds
-			List<String> EmpIds = new ArrayList();
-			sqlString = "SELECT EMP_ID FROM " +
-					HR + ".HR_EMP_SW LEFT OUTER JOIN " + HR + ".HR_DEPT_SW " + 
-					"ON (HR_EMP_SW.DEPT_SER_NO_ACT = HR_DEPT_SW.DEPT_SERIAL_NO) ";
-			if(StringUtils.isNotBlank(emp.getGroupName())) { // 組權限
-				sqlString += "WHERE TRIM(CARD_DIV) = '" + emp.getDivisionName() + "' "
-					+ "AND TRIM(CARD_DEPT) = '" + emp.getDepartmentName() + "' "
-					+ "AND DEPT_EASY_NM LIKE '%" + emp.getGroupName() + "%' ";
-			}else if(StringUtils.isNotBlank(emp.getDepartmentName()))  { // 部權限
-				sqlString += "WHERE TRIM(CARD_DIV) = '" + emp.getDivisionName() + "' "
-					+ "AND TRIM(CARD_DEPT) = '" + emp.getDepartmentName() + "' ";
-			}else { // 處權限
-				sqlString += "WHERE TRIM(CARD_DIV) = '" + emp.getDivisionName() + "' ";
-			}
-			logger.info("sqlString2:"+sqlString);
-			
-			Statement stmt2=con.createStatement(); 
-			ResultSet rs2=stmt2.executeQuery(sqlString);
-			while(rs2.next()) {
-				EmpIds.add(trim(rs2.getString(1)));
-			}
-			logger.info("EmpIds:"+EmpIds);
-			
-			// Merge to IN('', '') String
-			String mergeStr = "AND EMPLOYEE_ID IN ('" + StringUtils.join(EmpIds, "', '") + "') ";
-			logger.info("mergeStr:"+mergeStr);
-			con.close();
-			return mergeStr;
-		}catch(Exception e){
-			logger.info("[getAvailableEmpIdsByEmpId] error:" + e);
-			return null;
-		}
-	}
-	
-	
-	// ---- Tools ----
-	public static String extractGroupName(TaishinEmployee emp) {
-		String s = emp.getEasyName();
-		s = s.replaceAll(emp.getDivisionName(), "");	// cut 處
-		s = s.replaceAll(emp.getDepartmentName(), "");	// cut 部
-		logger.info("extractGroupName:" + s);
-		return s;
-	}
-	
-	public static String trim(String s) {
-		if(StringUtils.isBlank(s)) return "";
-		return s.trim();
-	}
-	
-	private String getDBConnectionInfo(String ldapHost, String apName, int apGroup, String searchBase) {
-		try {
-			RunBat ap1 = new RunBat();
-			ap1.SSL = false;
-			ap1.ldapHost = ldapHost;
-			ap1.searchBase = searchBase;
-			return ap1.GetRunBat(apName, apGroup);
-		} catch (Exception e) {
-			logger.error(ErrorRecord.recordError(e));
-		}
-		return "";
-	}
+                for (String str : split) {
+                    if (StringUtils.isNotBlank(str)) {
+                        String[] keyValue = str.split("=");
+
+                        if (keyValue.length == 2) {
+                            if ("server".equals(keyValue[0])) {
+                                server = keyValue[1];
+                            }
+                            if ("uid".equals(keyValue[0])) {
+                                user = keyValue[1];
+                            }
+                            if ("pwd".equals(keyValue[0])) {
+                                password = keyValue[1];
+                            }
+                            if ("database".equals(keyValue[0])) {
+                                databasesName = keyValue[1];
+                            }
+                        }
+                    }
+                }
+                user = user.toUpperCase();
+                password = password.toUpperCase();
+                databasesName = databasesName.toUpperCase();
+                server = server.toUpperCase();
+            }
+            logger.info("server:" + server);
+            logger.info("user:" + user);
+            logger.info("password:" + password);
+            logger.info("databasesName:" + databasesName);
+
+            String oracleDatasourceUrl = "jdbc:oracle:thin:@" + server + ":1521/" + databasesName;
+            logger.info("Oracle Data Source Url:" + oracleDatasourceUrl);
+
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+            Connection con = DriverManager.getConnection(oracleDatasourceUrl, user, password);
+
+            // get data from table
+            String HR = CoreConfigReader.getString(CONFIG_STR.ORACLE_SCHEMA_HR, true);
+            logger.info("HR:" + HR);
+
+            Statement stmt = con.createStatement();
+            StringBuilder sb = new StringBuilder();
+            sb.append(String.format("select " +
+                    "     emp_id, " +
+                    "     dept_ser_no_act, " +
+                    "     acct_dept_cd, " +
+                    "     acct_grp_cd, " +
+                    "     card_div, " +
+                    "     card_dept, " +
+                    "     dept_easy_nm " +
+                    " from " +
+                    "     hr.hr_emp_sw" +
+                    " left outer join hr.hr_dept_sw on (hr_emp_sw.dept_ser_no_act = hr_dept_sw.dept_serial_no) " +
+                    "     where " +
+                    " trim(emp_id) = '%s'", empId));
+            logger.info("sqlString:" + sb.toString());
+
+            TaishinEmployee emp = new TaishinEmployee();
+            ResultSet rs = stmt.executeQuery(sb.toString());
+            while (rs.next()) {
+                for (int i = 1; i <= 7; i++) {
+                    logger.info("[findByEmployeeId] i=" + i + ", s=" + rs.getString(i));
+                }
+                emp.setEmployeeId(empId);
+                emp.setDepartmentId(trim(rs.getString(2)));
+                emp.setPccCode(trim(rs.getString(3)) + trim(rs.getString(4)));
+                emp.setDivisionName(trim(rs.getString(5)));
+                emp.setDepartmentName(trim(rs.getString(6)));
+                emp.setEasyName(trim(rs.getString(7)));
+                emp.setGroupName(extractGroupName(emp));
+            }
+            logger.info("[findByEmployeeId] emp:" + emp);
+
+            con.close();
+            return emp;
+        } catch (Exception e) {
+            logger.info("[findByEmployeeId] error:" + e);
+            return null;
+        }
+    }
+
+    public String getAvailableEmpIdsByEmpId(String empId) {
+        logger.info("[getAvailableEmpIdsByEmpId] EMP_ID=" + empId);
+        if (StringUtils.isBlank(empId)) return "";
+
+        try {
+            // connect to database
+            String ldapHost = CoreConfigReader.getString("oracleLdapHost");
+            String apName = CoreConfigReader.getString("oracleApName");
+            Integer apGroup = CoreConfigReader.getInteger("oracleApGroup");
+            String searchBase = CoreConfigReader.getString("oracleSearchBase");
+            String connection = getDBConnectionInfo(ldapHost, apName, apGroup, searchBase);
+            logger.info("connection:" + connection);
+
+            String[] split = connection.split(";");
+            String SERVER = "";
+            String USER = "";
+            String PASSWORD = "";
+            String DATABASENAME = "";
+            for (String str : split) {
+                if (StringUtils.isNotBlank(str)) {
+                    String[] keyvalue = str.split("=");
+
+                    if (keyvalue != null && keyvalue.length == 2) {
+                        if ("server".equals(keyvalue[0])) {
+                            SERVER = keyvalue[1];
+                        }
+                        if ("uid".equals(keyvalue[0])) {
+                            USER = keyvalue[1];
+                        }
+                        if ("pwd".equals(keyvalue[0])) {
+                            PASSWORD = keyvalue[1];
+                        }
+                        if ("database".equals(keyvalue[0])) {
+                            DATABASENAME = keyvalue[1];
+                        }
+                    }
+                }
+            }
+            USER = USER.toUpperCase();
+            PASSWORD = PASSWORD.toUpperCase();
+            DATABASENAME = DATABASENAME.toUpperCase();
+            SERVER = SERVER.toUpperCase();
+
+            logger.info("SERVER:" + SERVER);
+            logger.info("USER:" + USER);
+            logger.info("PASSWORD:" + PASSWORD);
+            logger.info("DATABASENAME:" + DATABASENAME);
+
+            String ORACLE_DATASOURCE_URL = "jdbc:oracle:thin:@" + SERVER + ":1521/" + DATABASENAME;
+            logger.info("ORACLE_DATASOURCE_URL:" + ORACLE_DATASOURCE_URL);
+
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+            Connection con = DriverManager.getConnection(ORACLE_DATASOURCE_URL, USER, PASSWORD);
+
+
+            // get Employee Data by Id
+            String HR = CoreConfigReader.getString(CONFIG_STR.ORACLE_SCHEMA_HR, true);
+            logger.info("HR:" + HR);
+
+            String sqlString = "SELECT EMP_ID, DEPT_SER_NO_ACT, ACCT_DEPT_CD, ACCT_GRP_CD, CARD_DIV, CARD_DEPT, DEPT_EASY_NM FROM " +
+                    HR + ".HR_EMP_SW LEFT OUTER JOIN " + HR + ".HR_DEPT_SW " +
+                    "ON (HR_EMP_SW.DEPT_SER_NO_ACT = HR_DEPT_SW.DEPT_SERIAL_NO) " +
+                    "WHERE TRIM(EMP_ID) = '" + empId + "'";
+            logger.info("sqlString:" + sqlString);
+
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(sqlString);
+            TaishinEmployee emp = new TaishinEmployee();
+            while (rs.next()) {
+                for (int i = 1; i <= 7; i++) {
+                    logger.info("[findByEmployeeId] i=" + i + ", s=" + rs.getString(i));
+                }
+                emp.setEmployeeId(empId);
+                emp.setDepartmentId(trim(rs.getString(2)));
+                emp.setPccCode(trim(rs.getString(3)) + trim(rs.getString(4)));
+                emp.setDivisionName(trim(rs.getString(5)));
+                emp.setDepartmentName(trim(rs.getString(6)));
+                emp.setEasyName(trim(rs.getString(7)));
+                emp.setGroupName(extractGroupName(emp));
+            }
+            logger.info("[getAvailableEmpIdsByEmpId] emp:" + emp);
+
+            // get List of EmpIds
+            List<String> EmpIds = new ArrayList();
+            sqlString = "SELECT EMP_ID FROM " +
+                    HR + ".HR_EMP_SW LEFT OUTER JOIN " + HR + ".HR_DEPT_SW " +
+                    "ON (HR_EMP_SW.DEPT_SER_NO_ACT = HR_DEPT_SW.DEPT_SERIAL_NO) ";
+            if (StringUtils.isNotBlank(emp.getGroupName())) { // 組權限
+                sqlString += "WHERE TRIM(CARD_DIV) = '" + emp.getDivisionName() + "' "
+                        + "AND TRIM(CARD_DEPT) = '" + emp.getDepartmentName() + "' "
+                        + "AND DEPT_EASY_NM LIKE '%" + emp.getGroupName() + "%' ";
+            } else if (StringUtils.isNotBlank(emp.getDepartmentName())) { // 部權限
+                sqlString += "WHERE TRIM(CARD_DIV) = '" + emp.getDivisionName() + "' "
+                        + "AND TRIM(CARD_DEPT) = '" + emp.getDepartmentName() + "' ";
+            } else { // 處權限
+                sqlString += "WHERE TRIM(CARD_DIV) = '" + emp.getDivisionName() + "' ";
+            }
+            logger.info("sqlString2:" + sqlString);
+
+            Statement stmt2 = con.createStatement();
+            ResultSet rs2 = stmt2.executeQuery(sqlString);
+            while (rs2.next()) {
+                EmpIds.add(trim(rs2.getString(1)));
+            }
+            logger.info("EmpIds:" + EmpIds);
+
+            // Merge to IN('', '') String
+            String mergeStr = "AND EMPLOYEE_ID IN ('" + StringUtils.join(EmpIds, "', '") + "') ";
+            logger.info("mergeStr:" + mergeStr);
+            con.close();
+            return mergeStr;
+        } catch (Exception e) {
+            logger.info("[getAvailableEmpIdsByEmpId] error:" + e);
+            return null;
+        }
+    }
+
+
+    // ---- Tools ----
+    public static String extractGroupName(TaishinEmployee emp) {
+        String s = emp.getEasyName();
+        s = s.replaceAll(emp.getDivisionName(), "");    // cut 處
+        s = s.replaceAll(emp.getDepartmentName(), "");    // cut 部
+        logger.info("extractGroupName:" + s);
+        return s;
+    }
+
+    public static String trim(String s) {
+        if (StringUtils.isBlank(s)) return "";
+        return s.trim();
+    }
+
+    private String getDBConnectionInfo(String ldapHost, String apName, int apGroup, String searchBase) {
+        try {
+            RunBat ap1 = new RunBat();
+            ap1.SSL = false;
+            ap1.ldapHost = ldapHost;
+            ap1.searchBase = searchBase;
+            return ap1.GetRunBat(apName, apGroup);
+        } catch (Exception e) {
+            logger.error(ErrorRecord.recordError(e));
+        }
+        return "";
+    }
 //	public void findAll(Integer maxRange) {
 //		logger.info("[findAll]");
 //		try{

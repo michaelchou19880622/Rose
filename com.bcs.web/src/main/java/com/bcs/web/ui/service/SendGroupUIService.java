@@ -128,9 +128,11 @@ public class SendGroupUIService {
 		SystemLogUtil.saveLogDebug("SendGroup", action, modifyUser, content, referenceId);
 	}
  
-	@Transactional(rollbackFor=Exception.class, timeout = 30)
+	@Transactional(rollbackFor=Exception.class, timeout = 300000)
 	public Map<String, Object> uploadMidSendGroup(MultipartFile filePart, String modifyUser, Date modifyTime) throws Exception{
-
+		long startTime = System.currentTimeMillis();
+		long endTime = 0;
+		
 		logger.info("filePart.getSize():" + filePart.getSize());
 		
 		fileName = filePart.getOriginalFilename();
@@ -142,8 +144,6 @@ public class SendGroupUIService {
 		this.modifyTime = modifyTime;
 		this.modifyUser = modifyUser;
 		
-		long startTime = 0;
-		long endTime = 0;
 
 		Set<String> mids = null;
 		if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType)){
@@ -158,7 +158,6 @@ public class SendGroupUIService {
 			logger.info("list.size():" + list.size());
 			
 			try {
-				startTime = System.currentTimeMillis();
 				
 				List<String> check = new ArrayList<String>();
 				for (int i = 1; i <= list.size(); i++) {
@@ -200,9 +199,11 @@ public class SendGroupUIService {
 
 				referenceId = UUID.randomUUID().toString().toLowerCase();
 				
+				/* 
+				 * 增加Try-Catch，判斷Exception是否為Transaction Timeout Exception?
+				 * 如是，則判斷是否已達Retry上限次數? 是的話拋出Execption{TimeOut}，否則拋Execption{RetrySaveUserEventSet}。
+				*/
 				try {
-					startTime = System.currentTimeMillis();
-					
 					curSaveIndex = 0;
 
 					for (int i = 0; i < existMids.size(); i++) {
@@ -235,7 +236,6 @@ public class SendGroupUIService {
 					logger.info("Save [UserEventSet] - END TIME : " + endTime);
 					logger.info("Save [UserEventSet] - ELAPSED : " + (endTime - startTime));
 					
-					// 增加retry機制，紀錄當前寫入UserEventSet table 的index， 如果 timeout，則重新從index繼續寫入UserEventSet table
 					if (e.getMessage().contains("transaction timeout expired")) {
 						TransactionTimeoutRetry += 1;
 						logger.info("Save [UserEventSet] retry : " + TransactionTimeoutRetry);
@@ -280,8 +280,11 @@ public class SendGroupUIService {
 		return null;
 	}
 
-	@Transactional(rollbackFor = Exception.class, timeout = 10)
+	/* Retry to save UserEventSet */
+	@Transactional(rollbackFor = Exception.class, timeout = -1)
 	public Map<String, Object> RetrySaveUserEventSet(List<String> existMids, String referenceId, String fileName, Date modifyTime, String modifyUser, int curSaveIndex) throws Exception {
+		long retryStartTime = System.currentTimeMillis();
+		long retryEndTime = 0;
 		
 		this.existMids = existMids;
 		this.referenceId = referenceId;
@@ -290,11 +293,8 @@ public class SendGroupUIService {
 		this.modifyUser = modifyUser;
 		this.curSaveIndex = curSaveIndex;
 		
-		long retryStartTime = 0;
-		long retryEndTime = 0;
 
 		try {
-			retryStartTime = System.currentTimeMillis();
 			
 			for (int i = this.curSaveIndex; i < existMids.size(); i++) {
 				String mid = existMids.get(i);

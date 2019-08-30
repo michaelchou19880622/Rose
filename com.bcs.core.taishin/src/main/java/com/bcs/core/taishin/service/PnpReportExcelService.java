@@ -96,9 +96,13 @@ public class PnpReportExcelService {
                             /* 發送狀態(簡訊) */
                             row.createCell(i).setCellValue("");
                             break;
-                        case 2:
+                        case 3:
                             /* 發送通路(1.2.3.4.) */
                             row.createCell(i).setCellValue(englishSourceToChinese(value));
+                            break;
+                        case 2:
+                            /* 通路流(1.2.3.4.) */
+                            row.createCell(i).setCellValue(englishProcFlowToChinese(value));
                             break;
                         default:
                             row.createCell(i).setCellValue(value);
@@ -132,8 +136,8 @@ public class PnpReportExcelService {
             Row row = sheet.createRow(0);
             row.createCell(0).setCellValue("序號");
             row.createCell(1).setCellValue("前方來源系統");
-            row.createCell(2).setCellValue("發送通路");
-            row.createCell(3).setCellValue("通路流");
+            row.createCell(2).setCellValue("通路流");
+            row.createCell(3).setCellValue("發送通路");
             row.createCell(4).setCellValue("發送帳號");
             row.createCell(5).setCellValue("掛帳PccCode");
             row.createCell(6).setCellValue("發送廠商訊息批次代碼");
@@ -256,6 +260,29 @@ public class PnpReportExcelService {
                 return "UNICA";
             default:
                 return sourceCode;
+        }
+    }
+
+
+
+    /**
+     * Transfer procFlow Code To Chinese Name
+     * @param procFlowCode procFlow Code 1. 2. 3. 4.
+     * @return Source Chinese Name
+     */
+    private String englishProcFlowToChinese(String procFlowCode) {
+        logger.info("procFlowCode: " + procFlowCode);
+        switch (procFlowCode) {
+            case "0":
+                return "SMS";
+            case "1":
+                return "BC";
+            case "2":
+                return "BC->PNP";
+            case "3":
+                return "BC->PNP->SMS";
+            default:
+                return procFlowCode;
         }
     }
 

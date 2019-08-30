@@ -98,7 +98,6 @@
 		<property name="dataSourceProperties">
 			<props>
 
-
   				<prop key="user">sa</prop>
 				<prop key="password">XtremeApp53811062</prop>
 				<prop key="serverName">172.104.113.123</prop>

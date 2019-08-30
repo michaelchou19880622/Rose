@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,53 +24,91 @@ public class PnpReportExcelService {
      */
     private static Logger logger = Logger.getLogger(PnpReportExcelService.class);
 
+    private int columnSize = 0;
+
     @Autowired
     private PNPMaintainAccountModelService pnpMaintainAccountModelService;
 
     public void exportPNPDetailReportExcel(String exportPath, String fileName,
                                            String startDate, String endDate, String account, String pccCode, String sourceSystem, String empId) {
         try {
-            Workbook workbook = new XSSFWorkbook();
-            FileOutputStream out = new FileOutputStream(exportPath + System.getProperty("file.separator") + fileName);
-
-            this.getDetailReportExcel(workbook, startDate, endDate, account, pccCode, sourceSystem, empId);
-            workbook.write(out);
-            out.close();
-            workbook.close();
+            logger.info("Export PNP Detail Report Start!!");
+            try(
+                Workbook workbook = new XSSFWorkbook();
+                FileOutputStream out = new FileOutputStream(exportPath + System.getProperty("file.separator") + fileName);
+            ){
+                this.getDetailReportExcel(workbook, startDate, endDate, account, pccCode, sourceSystem, empId);
+                workbook.write(out);
+            }
         } catch (Exception e) {
             logger.error(ErrorRecord.recordError(e));
         }
+        logger.info("Export PNP Detail Report Write Finish!!");
     }
 
+    /**
+     * Create Sheet and Assign Value to Column
+     *
+     * @param workbook workbook
+     * @param startDate start Date
+     * @param endDate end Date
+     * @param account account
+     * @param pccCode pccCode
+     * @param sourceSystem source System
+     * @param empId empId 員工ID
+     */
     private void getDetailReportExcel(Workbook workbook, String startDate, String endDate, String account, String pccCode, String sourceSystem, String empId) {
         Map<String, List<String>> lists = pnpMaintainAccountModelService.getPNPDetailReportExcelList(startDate, endDate, account, pccCode, sourceSystem, empId);
         try {
-            Integer sheetNumber = 1;
+            int sheetNumber = 1;
             Sheet sheet = this.createDetailReportSheet(workbook, sheetNumber++);
-            Integer rowNumber = 1;
+            int rowNumber = 1;
 
-            for (Object key : lists.keySet()) {
-                List<String> list = lists.get(key);
+            for (Map.Entry<String, List<String>> entry : lists.entrySet()) {
+                List<String> list = entry.getValue();
                 Row row = sheet.createRow(rowNumber);
+                for (int i = 0; i < columnSize; i++) {
+                    String value = list.get(i);
 
-                for (int i = 0; i < 27; i++) {
-                    if (i == 17 || i == 19 || i == 25 || i == 26) {    // Date
-                        row.createCell(i).setCellValue(dateTimeToDateOrTime(list.get(i), "Date"));
-                    } else if (i == 18 || i == 20) {                    // Time
-                        row.createCell(i).setCellValue(dateTimeToDateOrTime(list.get(i), "Time"));
-                    } else if (i == 21) {                                // 發送狀態(PNP代碼)
-                        row.createCell(i).setCellValue((list.get(i) == "COMPLETE" || list.get(i) == "FINISH") ? "200" : "501");
-                    } else if (i == 22) {                                // 發送狀態(PNP說明)
-                        row.createCell(i).setCellValue(englishStatusToChinese(list.get(i)));
-                    } else if (i == 23) {                                // 發送狀態(簡訊)
-                        row.createCell(i).setCellValue("");
-                    } else {
-                        row.createCell(i).setCellValue(list.get(i));
+                    /* 欄位特殊處理 */
+                    switch (i) {
+                        case 17:
+                        case 19:
+                        case 25:
+                        case 26:
+                            /* Date */
+                            row.createCell(i).setCellValue(dateTimeToDateOrTime(value, "Date"));
+                            break;
+                        case 18:
+                        case 20:
+                            /* Time */
+                            row.createCell(i).setCellValue(dateTimeToDateOrTime(value, "Time"));
+                            break;
+                        case 21:
+                            /* 發送狀態(PNP代碼) */
+                            row.createCell(i).setCellValue(("COMPLETE".equals(value) || "FINISH".equals(value) ? "200" : "501"));
+                            break;
+                        case 22:
+                            /* 發送狀態(PNP說明) */
+                            row.createCell(i).setCellValue(englishStatusToChinese(value));
+                            break;
+                        case 23:
+                            /* 發送狀態(簡訊) */
+                            row.createCell(i).setCellValue("");
+                            break;
+                        case 2:
+                            /* 發送通路(1.2.3.4.) */
+                            row.createCell(i).setCellValue(englishSourceToChinese(value));
+                            break;
+                        default:
+                            row.createCell(i).setCellValue(value);
+                            break;
                     }
                 }
-
+                /* Real RowLimit = 1048576 */
+                int rowLimit = 1048500;
                 rowNumber++;
-                if (rowNumber > 1048500) { // RowLimit = 1048576
+                if (rowNumber > rowLimit) {
                     sheet = this.createDetailReportSheet(workbook, sheetNumber++);
                     rowNumber = 1;
                 }
@@ -79,17 +118,22 @@ public class PnpReportExcelService {
         }
     }
 
+    /**
+     * Create Excel Sheet
+     * @param workbook workBook
+     * @param sheetNumber sheet Number
+     * @return Sheet
+     */
     private Sheet createDetailReportSheet(Workbook workbook, Integer sheetNumber) {
-        Sheet sheet = null;
         try {
-            sheet = workbook.createSheet("PNP明細報表" + sheetNumber);
+            Sheet sheet = workbook.createSheet("PNP明細報表" + sheetNumber);
 
-            // first row
+            /* first row */
             Row row = sheet.createRow(0);
             row.createCell(0).setCellValue("序號");
             row.createCell(1).setCellValue("前方來源系統");
-            row.createCell(2).setCellValue("通路流");
-            row.createCell(3).setCellValue("發送通路");
+            row.createCell(2).setCellValue("發送通路");
+            row.createCell(3).setCellValue("通路流");
             row.createCell(4).setCellValue("發送帳號");
             row.createCell(5).setCellValue("掛帳PccCode");
             row.createCell(6).setCellValue("發送廠商訊息批次代碼");
@@ -114,16 +158,25 @@ public class PnpReportExcelService {
             row.createCell(25).setCellValue("資料建立日期");
             row.createCell(26).setCellValue("資料更新日期");
 
+            this.columnSize = row.getLastCellNum();
+
+            logger.info("Column Size: " + this.columnSize);
+
             // column width
-            for (int i = 0; i < 27; i++) {
-                if (i == 9) continue;
+            for (int i = 0; i < this.columnSize; i++) {
+                /* Ignore Column No.9 Width 27 */
+                if (i == 9) {
+                    continue;
+                }
                 sheet.setColumnWidth(i, 22 * 256);
             }
+            /* Set Column No.9 Width 60 */
             sheet.setColumnWidth(9, 60 * 256);
+            return sheet;
         } catch (Exception e) {
             logger.error(ErrorRecord.recordError(e));
+            throw e;
         }
-        return sheet;
     }
 
     private String dateTimeToDateOrTime(String dateTimeStr, String dateOrTime) {
@@ -131,13 +184,19 @@ public class PnpReportExcelService {
         SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
         SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm:ss");
 
+        if(dateTimeStr == null || dateTimeStr.trim().isEmpty()){
+            logger.info("Date Time String is Null So Return Null!!");
+            return null;
+        }
+
         try {
-            dateTimeStr = dateTimeStr.replaceFirst("\\.\\d*(Z)?$", "$1"); // skip milliseconds
+            /* skip milliseconds */
+            dateTimeStr = dateTimeStr.replaceFirst("\\.\\d*(Z)?$", "$1");
             Date dateTime = sdfDateTime.parse(dateTimeStr);
 
-            if (dateOrTime == "Date") {
+            if ("Date".equals(dateOrTime)) {
                 return sdfDate.format(dateTime);
-            } else if (dateOrTime == "Time") {
+            } else if ("Time".equals(dateOrTime)) {
                 return sdfTime.format(dateTime);
             }
         } catch (Exception e) {
@@ -146,7 +205,6 @@ public class PnpReportExcelService {
         return null;
     }
 
-    // FIXME Alan 更新文案新增文案並且更新DB舊文案
     private String englishStatusToChinese(String status) {
         switch (status) {
             case "PROCESS":
@@ -156,7 +214,7 @@ public class PnpReportExcelService {
             case "FAIL":
                 return "發送處理失敗";
             case "CHECK_DELIVERY":
-                return "發送成功，等待響應";
+                return "發送成功，等待回應";
             case "SENDING":
                 return "發送中";
             case "DELETE":
@@ -165,6 +223,12 @@ public class PnpReportExcelService {
                 return "正在存進資料庫";
             case "WAIT":
                 return "等待進入處理程序";
+            case "BC_COMPLETE":
+                return "BC處理程序完成";
+            case "PNP_COMPLETE":
+                return "PNP處理程序完成";
+            case "SMS_COMPLETE":
+                return "SMS處理程序完成";
             case "COMPLETE":
                 return "處理程序完成";
             case "SCHEDULED":
@@ -179,7 +243,8 @@ public class PnpReportExcelService {
      * @param sourceCode Source Code 1. 2. 3. 4.
      * @return Source Chinese Name
      */
-    public String englishSourceToChinese(String sourceCode) {
+    private String englishSourceToChinese(String sourceCode) {
+        logger.info("sourceCode: " + sourceCode);
         switch (sourceCode) {
             case "1":
                 return "三竹";
@@ -190,7 +255,7 @@ public class PnpReportExcelService {
             case "4":
                 return "UNICA";
             default:
-                return "";
+                return sourceCode;
         }
     }
 

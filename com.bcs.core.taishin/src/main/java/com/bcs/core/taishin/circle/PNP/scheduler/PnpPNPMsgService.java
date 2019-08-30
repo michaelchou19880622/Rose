@@ -52,6 +52,10 @@ public class PnpPNPMsgService {
      */
     public void startCircle() {
 
+        for (PNPFTPType type : PNPFTPType.values()) {
+            logger.info("PNPFTPType : " + type);
+        }
+
         String unit = CoreConfigReader.getString(CONFIG_STR.PNP_SCHEDULE_UNIT, true, false);
         int time = CoreConfigReader.getInteger(CONFIG_STR.PNP_SCHEDULE_TIME, true, false);
         if (time == -1) {
@@ -62,7 +66,7 @@ public class PnpPNPMsgService {
             @Override
             public void run() {
                 // 排程工作
-                logger.debug(" PnpSendMsgService startCircle....");
+                logger.info(" PnpSendMsgService startCircle....");
 
                 /* pnp.big switch = 0(停止排程) 1(停止排程，並轉發SMS) 其他(正常運行) */
                 int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true, false);
@@ -82,21 +86,23 @@ public class PnpPNPMsgService {
     public void sendingPnpMain() {
         String procApName = pnpAkkaService.getProcessApName();
         for (PNPFTPType type : PNPFTPType.values()) {
+            logger.info(String.format("PNP Push ProcApName %s, Type: %s", procApName, type));
             PnpMain pnpMain;
             try {
                 /* Update 待發送資料 Status(Sending) & Executor name(hostname)*/
                 List<? super PnpDetail> details = pnpRepositoryCustom.updateStatus(type, procApName, AbstractPnpMainEntity.STAGE_PNP);
                 logger.info("pnpMain details type :" + type + " details size:" + details.size());
                 if (CollectionUtils.isEmpty(details)) {
-                    logger.debug("pnpMain type :" + type + " there is a main has no details!!!");
-                    return;
+                    logger.info("details not data type:" + type.toString());
+                    continue;
                 }
+                logger.info("details has data type:" + type.toString());
                 PnpDetail oneDetail = (PnpDetail) details.get(0);
                 //組裝資料
                 pnpMain = pnpRepositoryCustom.findMainByMainId(type, oneDetail.getPnpMainId());
                 if (null == pnpMain) {
                     logger.info("pnpMain type :" + type + "sendingMain not data");
-                    return;
+                    continue;
                 }
                 pnpMain.setProcStage(AbstractPnpMainEntity.STAGE_PNP);
                 pnpMain.setPnpDetails(details);

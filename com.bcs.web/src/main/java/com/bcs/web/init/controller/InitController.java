@@ -87,7 +87,6 @@ public class InitController {
         loadFtpPnpDataTaskStartCircle();
         pnpMsgServiceStartCircle();
         pnpSMSMsgServiceStartCircle();
-//        linePointSchedulerServiceLoadScheduleFromDB();
         linePointschedulerServiceStartCircle();
         threadStart();
         liveChatTaskServiceCheckUserStatus();
@@ -95,66 +94,86 @@ public class InitController {
     }
 
     /**
-     * 定期檢查 User Status，避免卡在真人客服頻道
+     * 1
      */
-    private void liveChatTaskServiceCheckUserStatus() {
+    private void registerServer() {
         try {
-            liveChatTaskService.checkUserStatus();
+            logger.info("init registerServer");
+            logger.info("init file.encoding:" + System.getProperty("file.encoding"));
+            DataSyncUtil.registerServer();
         } catch (Exception e) {
-            logger.error(e);
-        }
-    }
-
-    private void threadStart() {
-        try {
-            Thread thread = new Thread(
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            catchRecordBinded.loadInitData();
-                            catchRecordOpAddReceive.loadInitData();
-                            catchRecordOpBlockedReceive.loadInitData();
-                            catchRecordReceive.loadInitData();
-                            catchHandleMsgReceiveTimeout.loadInitData();
-                        }
-                    });
-            thread.start();
-        } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
-        }
-    }
-    
-    /**
-     * LinePoint Scheduler
-     */
-    private void linePointschedulerServiceStartCircle() {
-        try {
-            logger.info("init LinePoint Scheduler ");
-            linePointschedulerService.startCircle();
-        } catch (Throwable e) {
             logger.error(ErrorRecord.recordError(e));
         }
     }
 
     /**
-     * LinePoint Task
+     * 2
      */
-    private void linePointSchedulerServiceLoadScheduleFromDB() {
+    private void loadScheduleFromDb() {
         try {
-            logger.info("init LinePointSchedulerService loadScheduleFromDB");
-            linePointschedulerService.startCircle();
+            logger.info("init loadScheduleFromDB");
+            schedulerService.loadScheduleFromDB();
         } catch (Exception e) {
             logger.error(ErrorRecord.recordError(e));
         }
     }
 
-    private void pnpSMSMsgServiceStartCircle() {
-        //PNP transfer file to SMS flow
+    /**
+     * 3
+     */
+    private void loadInteractiveMap() {
+        try {
+            logger.info("init loadInteractiveMap");
+            interactiveService.loadInteractiveMap();
+        } catch (Exception e) {
+            logger.error(ErrorRecord.recordError(e));
+        }
+    }
+
+    /**
+     * 4
+     */
+    private void billingNoticeFtpServiceStartCircle() {
+        try {
+            /* AP */
+            if (CoreConfigReader.isBillingNoticeFtpDownload()) {
+                logger.info("init Billing Notice Data Parse ");
+                billingNoticeFtpService.startCircle();
+            } else {
+                logger.info("isBillingNoticeFtpDownload: false");
+            }
+        } catch (Exception e) {
+            logger.error(ErrorRecord.recordError(e));
+        }
+    }
+
+    /**
+     * 5
+     */
+    private void billingNoticeSendMsgServiceStartCircle() {
+        try {
+            /* WEB */
+            if (CoreConfigReader.isBillingNoticeSendMsg()) {
+                logger.info("init Billing Notice send ");
+                billingNoticeSendMsgService.startCircle();
+            } else {
+                logger.info("isBillingNoticeSendMsg: false");
+            }
+        } catch (Exception e) {
+            logger.error(ErrorRecord.recordError(e));
+        }
+    }
+
+    /**
+     * 6
+     */
+    private void loadFtpPnpDataTaskStartCircle() {
+        /* PNP FTP flow */
         try {
             /* WEB */
             if (CoreConfigReader.isPNPFtpDownload()) {
-                logger.info("init PNP transfer file to SMS flow ");
-                pnpSmsMsgService.startCircle();
+                logger.info("init PNP FTP flow ");
+                loadFtpPnpDataTask.startCircle();
             } else {
                 logger.info("isPNPFtpDownload: false");
             }
@@ -163,6 +182,9 @@ public class InitController {
         }
     }
 
+    /**
+     * 7
+     */
     private void pnpMsgServiceStartCircle() {
         try {
             /* WEB */
@@ -181,13 +203,16 @@ public class InitController {
         }
     }
 
-    private void loadFtpPnpDataTaskStartCircle() {
-        /* PNP FTP flow */
+    /**
+     * 8
+     */
+    private void pnpSMSMsgServiceStartCircle() {
+        //PNP transfer file to SMS flow
         try {
             /* WEB */
             if (CoreConfigReader.isPNPFtpDownload()) {
-                logger.info("init PNP FTP flow ");
-                loadFtpPnpDataTask.startCircle();
+                logger.info("init PNP transfer file to SMS flow ");
+                pnpSmsMsgService.startCircle();
             } else {
                 logger.info("isPNPFtpDownload: false");
             }
@@ -196,59 +221,48 @@ public class InitController {
         }
     }
 
-    private void billingNoticeSendMsgServiceStartCircle() {
+    /**
+     * 9. LinePoint Scheduler
+     */
+    private void linePointschedulerServiceStartCircle() {
         try {
-            /* WEB */
-            if (CoreConfigReader.isBillingNoticeSendMsg()) {
-                logger.info("init Billing Notice send ");
-                billingNoticeSendMsgService.startCircle();
-            } else {
-                logger.info("isBillingNoticeSendMsg: false");
-            }
+            logger.info("init LinePoint Scheduler ");
+            linePointschedulerService.startCircle();
+        } catch (Throwable e) {
+            logger.error(ErrorRecord.recordError(e));
+        }
+    }
+
+    /**
+     * 10
+     */
+    private void threadStart() {
+        try {
+            Thread thread = new Thread(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            catchRecordBinded.loadInitData();
+                            catchRecordOpAddReceive.loadInitData();
+                            catchRecordOpBlockedReceive.loadInitData();
+                            catchRecordReceive.loadInitData();
+                            catchHandleMsgReceiveTimeout.loadInitData();
+                        }
+                    });
+            thread.start();
         } catch (Exception e) {
             logger.error(ErrorRecord.recordError(e));
         }
     }
 
-    private void billingNoticeFtpServiceStartCircle() {
+    /**
+     * 11. 定期檢查 User Status，避免卡在真人客服頻道
+     */
+    private void liveChatTaskServiceCheckUserStatus() {
         try {
-            /* AP */
-            if (CoreConfigReader.isBillingNoticeFtpDownload()) {
-                logger.info("init Billing Notice Data Parse ");
-                billingNoticeFtpService.startCircle();
-            } else {
-                logger.info("isBillingNoticeFtpDownload: false");
-            }
+            liveChatTaskService.checkUserStatus();
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
-        }
-    }
-
-    private void loadInteractiveMap() {
-        try {
-            logger.info("init loadInteractiveMap");
-            interactiveService.loadInteractiveMap();
-        } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
-        }
-    }
-
-    private void registerServer() {
-        try {
-            logger.info("init registerServer");
-            logger.info("init file.encoding:" + System.getProperty("file.encoding"));
-            DataSyncUtil.registerServer();
-        } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
-        }
-    }
-
-    private void loadScheduleFromDb() {
-        try {
-            logger.info("init loadScheduleFromDB");
-            schedulerService.loadScheduleFromDB();
-        } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            logger.error(e);
         }
     }
 

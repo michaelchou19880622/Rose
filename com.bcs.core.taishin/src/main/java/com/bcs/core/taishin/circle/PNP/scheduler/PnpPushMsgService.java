@@ -8,6 +8,7 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpRepositoryCustom;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFTPType;
+import com.google.gson.GsonBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.quartz.SchedulerException;
@@ -71,7 +72,7 @@ public class PnpPushMsgService {
             @Override
             public void run() {
                 // 排程工作
-                logger.debug("PnpSendMsgService startCircle....");
+                logger.info("PnpSendMsgService startCircle....");
 
                 //#.pnp.big switch = 0(停止排程) 1(停止排程，並轉發SMS) 其他(正常運行)
                 int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true, false);
@@ -91,13 +92,15 @@ public class PnpPushMsgService {
     public void sendingMain() {
         String procApName = pnpAkkaService.getProcessApName();
         for (PNPFTPType type : PNPFTPType.values()) {
+            logger.info(String.format("BC Push ProcApName %s, Type: %s", procApName, type));
             try {
                 Set<Long> allMainIds = new HashSet<>();
                 List<? super PnpDetail> details = pnpRepositoryCustom.updateStatusByStageBC(type, procApName, allMainIds);
                 if (details.isEmpty()) {
                     logger.info("details not data type:" + type.toString());
-                    return;
+                    continue;
                 }
+                logger.info("details has data type:" + type.toString());
                 List<? super PnpDetail> details2 = findDetailUid(details);
                 Long[] mainIds = allMainIds.toArray(new Long[0]);
                 PnpMain pnpMain = pnpRepositoryCustom.findMainByMainId(type, mainIds[0]);

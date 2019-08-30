@@ -26,7 +26,8 @@ public class LinePointDetail extends AbstractBcsEntity {
  	
 	public static final String DETAIL_TYPE_ISSUE_API = "ISSUE_API";
 	public static final String DETAIL_TYPE_CANCEL_API = "CANCEL_API";
-	public static final String DETAIL_TYPE_BCS = "BCS";
+	public static final String DETAIL_TYPE_ISSUE_BCS = "ISSUE_BCS";
+	public static final String DETAIL_TYPE_CANCEL_BCS = "CANCEL_BCS";
 	
  	public static final String DESCRIPTION_OVERFLOW = "OVERFLOW";
 	

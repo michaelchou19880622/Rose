@@ -68,6 +68,7 @@ public class LinePointPushMessageActor extends UntypedActor {
 				// initialize detail
 				LinePointDetail detail = linePointDetailService.findOne(detailId);
 				detail.setTriggerTime(pushApiModel.getTriggerTime());
+				detail.setDetailType(LinePointDetail.DETAIL_TYPE_ISSUE_BCS);
 				requestBody.put("amount", detail.getAmount());
 				
 				// memberId

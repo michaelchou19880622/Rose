@@ -76,8 +76,8 @@ public class PNPMaintainAccountModelService {
                 "                select " +
                 "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
                 "                        a.source_system, " +
+                "                        d.proc_flow, " +
                 "                        a.pathway, " +
-                "                        d.proc_stage, " +
                 "                        a.account, " +
                 "                        a.pcc_code, " +
                 "                        m.pnp_main_id, " +
@@ -111,8 +111,8 @@ public class PNPMaintainAccountModelService {
                 "                select " +
                 "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
                 "                        a.source_system, " +
+                "                        d.proc_flow, " +
                 "                        a.pathway, " +
-                "                        d.proc_stage, " +
                 "                        a.account, " +
                 "                        a.pcc_code, " +
                 "                        m.pnp_main_id, " +
@@ -146,8 +146,8 @@ public class PNPMaintainAccountModelService {
                 "                select " +
                 "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
                 "                        a.source_system, " +
+                "                        d.proc_flow, " +
                 "                        a.pathway, " +
-                "                        d.proc_stage, " +
                 "                        a.account, " +
                 "                        a.pcc_code, " +
                 "                        m.pnp_main_id, " +
@@ -181,8 +181,8 @@ public class PNPMaintainAccountModelService {
                 "                select " +
                 "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
                 "                        a.source_system, " +
+                "                        d.proc_flow, " +
                 "                        a.pathway, " +
-                "                        d.proc_stage, " +
                 "                        a.account, " +
                 "                        a.pcc_code, " +
                 "                        m.pnp_main_id, " +

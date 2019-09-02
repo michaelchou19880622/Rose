@@ -56,7 +56,7 @@
             	<!-- <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop> -->
             	<prop key="hibernate.show_sql">false</prop>
             	<prop key="hibernate.format_sql">false</prop>
-            	<prop key="hibernate.hbm2ddl.auto">none</prop> <!-- none / update  -->
+            	<prop key="hibernate.hbm2ddl.auto">update</prop> <!-- none / update  -->
             	<prop key="hibernate.jdbc.batch_size">50</prop>
             	<prop key="hibernate.order_inserts">true</prop>
 				<prop key="hibernate.order_updates">true</prop>

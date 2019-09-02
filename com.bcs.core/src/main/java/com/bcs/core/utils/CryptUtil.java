@@ -18,10 +18,10 @@ public class CryptUtil {
     CryptUtil() {}
     
     public static void main(String[] args) throws Exception {
-    	String token = CryptUtil.Encrypt(CryptUtil.AES, "cp390819", "taishinlinebuscs", "taishinlinebuscs");
+    	String token = CryptUtil.Encrypt(CryptUtil.AES, "ThisIsAPushMessageApi", "taishinlinebuscs", "taishinlinebuscs");
     	System.out.println(token);
     	
-    	System.out.println(CryptUtil.Decrypt(CryptUtil.AES, token, "taishinlinebuscs", "taishinlinebuscs").equals("cp390819"));
+    	System.out.println(CryptUtil.Decrypt(CryptUtil.AES, token, "taishinlinebuscs", "taishinlinebuscs").equals("ThisIsAPushMessageApi"));
     }
     
     public static String Encrypt(String algorithm, String message, String secretKey, String initializationVector) throws Exception {

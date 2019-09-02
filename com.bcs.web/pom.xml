@@ -29,6 +29,11 @@
 			<artifactId>com.bcs.core.taishin</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.bcs</groupId>
+			<artifactId>com.bcs.core.linepoint</artifactId>
+			<version>${project.version}</version>
+		</dependency>		
 	</dependencies>
 
 	<packaging>war</packaging>
@@ -36,6 +41,9 @@
 	<profiles>
 		<profile>
 			<id>taishinapi</id> <!-- 台新測試機api -->
+			<build>
+		            <directory>target</directory>
+		        </build>
 			<properties>
 				<package.environment>taishinapi</package.environment>
 				<rp.build.warname>taishinapi</rp.build.warname>
@@ -44,6 +52,9 @@
 		</profile>
 		<profile>
 			<id>taishinuat</id> <!-- 台新測試機後台 -->
+			<build>
+		            <directory>target</directory>
+		        </build>
 			<properties>
 				<package.environment>taishinuat</package.environment>
 				<rp.build.warname>taishinuat</rp.build.warname>
@@ -52,6 +63,9 @@
 		</profile>
 		<profile>
 			<id>taishinoaapi</id> <!-- 台新正式機api -->
+			<build>
+		            <directory>target/AP</directory>
+		        </build>
 			<properties>
 				<package.environment>taishinoaapi</package.environment>
 				<rp.build.warname>taishinoaapi</rp.build.warname>
@@ -59,7 +73,32 @@
 			</properties>
 		</profile>
 		<profile>
+			<id>api_taishinoa</id> <!-- 台新正式機api的後台 -->
+			<build>
+		            <directory>target/AP</directory>
+		        </build>
+			<properties>
+				<package.environment>api_taishinoa</package.environment>
+				<rp.build.warname>taishinoa</rp.build.warname>
+				<maven.war.webxml>src/main/resources/api_taishinoa/web/web.xml</maven.war.webxml> <!-- set up webxml location -->
+			</properties>
+		</profile>
+		<profile>
+			<id>backend_taishinoaapi</id> <!--  台新正式機後台 的 api -->
+			<build>
+		            <directory>target/backend</directory>
+		        </build>
+			<properties>
+				<package.environment>backend_taishinoaapi</package.environment>
+				<rp.build.warname>taishinoaapi</rp.build.warname>
+				<maven.war.webxml>src/main/resources/backend_taishinoaapi/web/web.xml</maven.war.webxml> <!-- set up webxml location -->
+			</properties>
+		</profile>
+		<profile>
 			<id>taishinoa</id> <!-- 台新正式機後台 -->
+			<build>
+		            <directory>target/backend</directory>
+		        </build>
 			<properties>
 				<package.environment>taishinoa</package.environment>
 				<rp.build.warname>taishinoa</rp.build.warname>
@@ -68,6 +107,9 @@
 		</profile>
 		<profile>
 			<id>test</id>
+			<build>
+	            <directory>target</directory>
+	        </build>
 			<properties>
 				<package.environment>test</package.environment>
 				<rp.build.warname>Taishin</rp.build.warname>
@@ -76,6 +118,9 @@
 		</profile>
 		<profile>
 			<id>local</id>
+			<build>
+	            <directory>target</directory>
+	        </build>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
@@ -96,6 +141,8 @@
 					<exclude>taishinuat/</exclude>
 					<exclude>taishinoaapi/</exclude>
 					<exclude>taishinoa/</exclude>
+					<exclude>api_taishinoa/</exclude>
+					<exclude>backend_taishinoaapi/</exclude>
 				</excludes>
 			</resource>
 		</resources>

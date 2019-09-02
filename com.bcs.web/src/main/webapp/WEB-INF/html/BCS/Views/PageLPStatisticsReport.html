@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Line Point Statistics Report Page', '/BCS/JS/PageLPStatisticsReport.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('PageLPStatisticsReport')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                	<!-- Title -->
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">統計報表</h3>
+                        <p class="CHDesc">LINE POINT統計報表。</p>
+                    </header>
+                    
+                    <!-- Input Boxes -->
+                    <div>
+                        <span>發送日期：</span>
+                    	<div class="option date">
+                        	<input type="text" class="datepicker" id="startDate" placeholder="YYYY-MM-DD"/>
+                       	</div>
+                       	<span>~</span>
+                       	<div class="option date">
+                        	<input type="text" class="datepicker" id="endDate" placeholder="YYYY-MM-DD"/>
+                      	</div>
+                      	<br></br>
+                      	
+               		    <span>搜尋建立人員：</span>
+                        <input type="text" id="modifyUserInput" name="modifyUserInput" value="" maxlength="50" required="required">
+                        <span>&nbsp;&nbsp;&nbsp;&nbsp;搜尋專案名稱：</span>
+                        <input type="text" id="titleInput" name="titleInput" value="" maxlength="50" required="required">
+                        <br></br>
+                    </div>
+                    
+                    <div class="CHBtnSet">
+                    	<div class="CHLeft">
+                           <ul>
+                               <li class="CHLeftBtn">
+                                <input class="btn prev" type="button" value="<" style="cursor: pointer;">
+                                <span id="pageAndTotalPages">1/0</span>
+                                <input class="btn next" type="button" value=">" style="cursor: pointer;">
+                               </li>
+                           </ul>
+                       </div>
+                        <div class="CHRight">
+                        	<input class="btn_add search" type="button" value="搜尋" style="cursor: pointer;">
+                        	<a class="btn_add exportToExcel" style="cursor: pointer; padding: 7px 12px; text-decoration: none">匯出 EXCEL</a>
+                        </div>
+                    </div>
+                    
+					<div class="mainFrame alignLeft" id="mainFrameId">
+                        <table border="1" class="resultTable">
+                            <colgroup>
+                                <col width="100">
+                            	<col width="100">
+                            	<col width="100">
+                            	<col width="100">
+                            	<col width="100">
+                            	<col width="100">
+                            	<col width="100">
+                            	<col width="100">
+                            	<col width="100">
+                            	<col width="100">
+                            	<col width="100">
+							</colgroup>
+                            <tr class="templateTh">
+                                <th>專案名稱</th>
+                                <th>建立日期</th>
+                                <th>建立人員</th>
+                                <th>建立人員單位</th>
+                                <th>PCC</th>
+                                <th>Service name</th>
+                                <th>Campaign Code</th>
+                                <th>發送筆數</th>
+                                <th>成功筆數</th>
+                                <th>失敗筆數</th>
+                                <th>發送總點數</th>
+                                <th>發送明細</th>
+                            </tr>
+                            <tbody class="resultTbody">
+	                            <tr class="resultTr">
+	                                <td class="title"></td>
+	                                <td class="modifyTime"></td>
+	                                <td class="modifyUser"></td>
+	                                <td class="departmentFullName"></td>
+	                                <td class="pccCode"></td>
+	                                <td class="serviceName"></td>
+	                                <td class="campaignCode"></td>
+	                                <td class="sendedCount"></td>
+	                                <td class="successfulCount"></td>
+	                                <td class="failedCount"></td>
+	                                <td class="totalAmount"></td>
+	                                <td class="action">
+	                                	<a id="toDetail" href="">查看明細</a>
+	                                </td>
+	                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </section>
+            </form>
+        </div>
+    </div>
+    
+</body>
+</html>

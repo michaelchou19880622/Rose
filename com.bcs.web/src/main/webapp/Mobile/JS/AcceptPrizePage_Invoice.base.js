@@ -40,7 +40,7 @@ $(function(){
             type: 'GET',
             url: '../m/Game/getPrizeDetail/'+gameId,
 		}).success(function(response){
-			$('.prizeImageShow').find('img').attr('src', "../bcs/getResource/IMAGE/" + response['prizeImageId']);
+			$('.prizeImageShow').find('img').attr('src', "../bcs/getCdnResource/IMAGE/" + response['prizeImageId']);
 		}).fail(function(response){
 			console.info(response);
 		}).done(function(){
@@ -50,13 +50,13 @@ $(function(){
             type: 'GET',
             url: '../m/Game/turntable/'+gameId,
 		}).success(function(response){
-			$('.headerImage').find('img').attr('src', '../bcs/getResource/IMAGE/' + response.headerImageId);
-			$('.footerImage').find('img').attr('src', '../bcs/getResource/IMAGE/' + response.footerImageId);
+			$('.headerImage').find('img').attr('src', '../bcs/getCdnResource/IMAGE/' + response.headerImageId);
+			$('.footerImage').find('img').attr('src', '../bcs/getCdnResource/IMAGE/' + response.footerImageId);
 			if(response.shareImageId && response.shareImageId != ""){
-				$('.shareImage').find('img').attr('src', '../bcs/getResource/IMAGE/' + response.shareImageId);
+				$('.shareImage').find('img').attr('src', '../bcs/getCdnResource/IMAGE/' + response.shareImageId);
 			}
 			if(response.shareSmallImageId && response.shareSmallImageId != ""){
-				$('.shareSmallImage').find('img').attr('src', '../bcs/getResource/IMAGE/' + response.shareSmallImageId);
+				$('.shareSmallImage').find('img').attr('src', '../bcs/getCdnResource/IMAGE/' + response.shareSmallImageId);
 			}
 			shareMsg = response.shareMsg;
 		}).fail(function(response){

@@ -67,10 +67,27 @@ public class BillingNoticeContentTemplateMsg extends AbstractBcsEntity{
 	//宵禁起始時間：24小時制 HHMMSS
 	@Column(name = "CURFEW_START_TIME", columnDefinition="nvarchar(10)")
 	private String curfewStartTime;
+	
 	//宵禁結束時間：24小時制 HHMMSS
 	@Column(name = "CURFEW_END_TIME", columnDefinition="nvarchar(10)")
 	private String curfewEndTime;
 	
+	public String getCurfewStartTime() {
+		return curfewStartTime;
+	}
+
+	public void setCurfewStartTime(String curfewStartTime) {
+		this.curfewStartTime = curfewStartTime;
+	}
+
+	public String getCurfewEndTime() {
+		return curfewEndTime;
+	}
+
+	public void setCurfewEndTime(String curfewEndTime) {
+		this.curfewEndTime = curfewEndTime;
+	}
+
 	@Column(name = "MODIFY_USER", columnDefinition="nvarchar(50)")
 	private String modifyUser;
 
@@ -198,21 +215,4 @@ public class BillingNoticeContentTemplateMsg extends AbstractBcsEntity{
 		this.productSwitch = productSwitch;
 	}
 
-	public String getCurfewStartTime() {
-		return curfewStartTime;
-	}
-
-	public void setCurfewStartTime(String curfewStartTime) {
-		this.curfewStartTime = curfewStartTime;
-	}
-
-	public String getCurfewEndTime() {
-		return curfewEndTime;
-	}
-
-	public void setCurfewEndTime(String curfewEndTime) {
-		this.curfewEndTime = curfewEndTime;
-	}
-	
-	
 }

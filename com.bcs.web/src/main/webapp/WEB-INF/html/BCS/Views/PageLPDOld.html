@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Line Point Detail Page', '/BCS/JS/PageLPD.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('LinePointReportPage')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">LINE POINT 活動明細</h3>
+                    </header>
+                    <div class="CHBtnSet">
+                        <div class="CHRight">
+                        	<a class="btn_add" id="btnExcel" style="cursor: pointer; padding: 7px 12px; text-decoration: none">匯出 EXCEL</a>
+                        	<input class="btn_add" style="cursor: pointer;" type="button" value="返回">
+                       	</div>
+                    </div>
+                    <div class="mainFrame">
+                        <table border="1" id="tableBody">
+                            <colgroup>
+                            	<col width="150">
+                            	<col width="150">
+                            	<col width="150">
+                            </colgroup>
+                             <tr class="tableHeader">
+                                <th>UID</th>
+                                <th>狀態 (失敗原因/成功後的點數)</th>
+                                <th>發送時間</th>
+                             <tr class="dataTemplate">
+                                <td class="uid"></td>
+								<td class="status"></td>
+								<td class="time"></td>
+							</tr>
+                        </table>
+                    </div>
+
+                </section>
+            </form>
+        </div>
+    </div>
+ 
+    
+    
+    
+</body>
+
+</html>

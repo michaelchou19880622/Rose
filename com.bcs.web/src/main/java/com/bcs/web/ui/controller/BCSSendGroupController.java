@@ -165,6 +165,7 @@ public class BCSSendGroupController extends BCSBaseController {
 				SendGroup sendGroup = sendGroupService.findOne(Long.parseLong(groupId));
 				
 				if(sendGroup != null){
+					logger.info("sendGroup1:" + sendGroup);
 					return new ResponseEntity<>(sendGroup, HttpStatus.OK);
 				}
 			}
@@ -260,18 +261,15 @@ public class BCSSendGroupController extends BCSBaseController {
 				SendGroup result = sendGroupUIService.saveFromUI(sendGroup, adminUserAccount);
 				
 				return new ResponseEntity<>(result, HttpStatus.OK);
-			}
-			else{
+			}else{
 				throw new Exception("SendGroup Null");
 			}
-		}
-		catch(Exception e){
+		}catch(Exception e){
 			logger.error(ErrorRecord.recordError(e));
 
 			if(e instanceof BcsNoticeException){
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			}
-			else{
+			}else{
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		}
@@ -323,22 +321,20 @@ public class BCSSendGroupController extends BCSBaseController {
 				sendGroupQueryProperty.put("queryFieldFormat", queryFieldFormat);
 				if("Date".equals(queryFieldFormat)){
 					sendGroupQueryProperty.put("queryFieldSet", "DatePicker");
-				}
-				else{
+				}else{
 					sendGroupQueryProperty.put("queryFieldSet", "Input");
 				}
 				sendGroupCondition.putPOJO(queryFieldId, sendGroupQueryProperty);
 			}
 			
+			logger.info("sendGroupCondition1:"+sendGroupCondition);
 			return new ResponseEntity<>(sendGroupCondition, HttpStatus.OK);
 		}
 		catch(Exception e){
 			logger.error(ErrorRecord.recordError(e));
-
 			if(e instanceof BcsNoticeException){
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			}
-			else{
+			}else{
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		}
@@ -499,6 +495,7 @@ public class BCSSendGroupController extends BCSBaseController {
 				logger.info("modifyUser:" + modifyUser);
 				
 				Map<String, Object> result = sendGroupUIService.uploadMidSendGroup(filePart, modifyUser, new Date());
+				logger.info("uploadMidSendGroupResult1:" + result);
 				
 				return new ResponseEntity<>(result, HttpStatus.OK);
 			}
@@ -507,6 +504,19 @@ public class BCSSendGroupController extends BCSBaseController {
 			}
 		}
 		catch(Exception e){
+
+			logger.info("uploadMidSendGroup Exception : " +  e.getMessage().toString());
+			if (e.getMessage().contains("RetrySaveUserEventSet"))
+			{
+				Map<String, Object> result = sendGroupUIService.RetrySaveUserEventSet();
+				logger.info("uploadMidSendGroupResult1:" + result);
+				
+				return new ResponseEntity<>(result, HttpStatus.OK);
+			}
+			else if (e.getMessage().contains("TimeOut")) {
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.SERVICE_UNAVAILABLE);
+			}
+			
 			logger.error(ErrorRecord.recordError(e));
 
 			if(e instanceof BcsNoticeException){

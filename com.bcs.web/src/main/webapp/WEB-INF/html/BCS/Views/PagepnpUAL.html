@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" th:with="strList = ${ {'/BCS/JS/PagepnpUAL.base.js'} }">
+
+<head th:replace="/BCS/Views/Common/Head :: head ('PNP Normal Account Maintain Page', ${strList})">
+</head>
+
+<body>
+    <header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+        <div th:replace="/BCS/Views/Common/Menu :: menu ('PagepnpUAL')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">Unica帳號維護</h3>
+                    </header>
+                    <div>                      
+               		            帳號<!-- <font size="3" color="red">*</font> -->
+                        <input type="text" id="account" name="account" value="" maxlength="50" required="required"> 
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 員工編號<!-- <font size="3" color="red">*</font> -->
+                        <input type="text" id="employeeId" name="employeeId" value="" maxlength="50" required="required">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  PccCode<!-- <font size="3" color="red">*</font> -->
+                        <input type="text" id="pccCode" name="PccCode" value="" maxlength="50" required="required"> 
+                    </div>
+                    <div>   
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    </div>
+                    <div>
+                	            處 &nbsp;&nbsp;<!-- <font size="3" color="red">*</font> -->
+                        <input type="text" id="divisionName" name="divisionName" value="" maxlength="50" required="required"> 
+                        
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 部 &nbsp;&nbsp;<!-- <font size="3" color="red">*</font> -->
+                        <input type="text" id="departmentName" name="departmentName" value="" maxlength="50" required="required"> 
+
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 組&nbsp;&nbsp;<!-- <font size="3" color="red">*</font> -->
+                        <input type="text" id="groupName" name="groupName" value="" maxlength="50" required="required"> 
+                    </div>
+                    <div class="CHBtnSet">
+                        <div class="CHRight"><input class="btn_add search" type="button" value="Search" style="cursor: pointer;"></div>
+                    </div>
+                    <div class="CHBtnSet">
+                        <div class="CHRight"><input class="btn_add create" type="button" value="Create" style="cursor: pointer;"></div>
+                    </div>
+                    <div class="mainFrame">
+                        <div id="tabs">
+                            <ul style="height:35px; background:#e9e9e9; border:0px;">
+                            </ul>
+                        </div>
+                        
+                        <table border="1" class="searchTable">
+                            <colgroup>
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="70">
+                                <col width="70">
+                                <col width="70">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="200">
+                                <col width="200">
+                            </colgroup>
+                            <tr>
+                                <th>帳號</th>
+                                <th>帳號屬性</th>
+                                <th>帳號型態</th>
+                                <th>前方來源系統</th>
+                                <th>員工編號</th>
+                                <th>單位代號</th>
+                                <th>處</th>
+                                <th>部</th>
+                                <th>組</th>
+                                <th>PccCode</th>
+                                <th>狀態</th>
+                                <th>通路</th>
+                                <th>樣板</th>
+                                <th>簡訊內容</th>
+                                <th>編輯/刪除</th>
+                            </tr>
+                            <tbody class="searchTbody">
+                                <tr class="searchTr">
+                                    <td class="account"></td>
+                                    <td class="accountAttribute"></td>
+                                    <td class="accountClass"></td>
+                                    <td class="sourceSystem"></td>
+                                    <td class="employeeId"></td>
+                                    <td class="departmentId"></td>
+                                    <td class="divisionName"></td>
+                                    <td class="departmentName"></td>
+                                    <td class="groupName"></td>
+                                    <td class="pccCode"></td>
+                                    <td class="status"></td>
+                                    <td class="pathway"></td>
+                                    <td class="template"></td>
+                                    <td class="pnpContent"></td>
+                                    <td class="editAndDelete">
+                                    	<input type="hidden" class="pnpMaintainAccountId">
+                                    	<input class="btn_edit search" type="button" value="編輯" style="cursor: pointer;">
+                                    	<input class="btn_delete search" type="button" value="刪除" style="cursor: pointer;">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- <div class="CHBtnSet">
+                        <div class="CHRight">
+                        	<a class="btn_add download" style="cursor: pointer; padding: 7px 12px; text-decoration: none">Download</a>
+                        </div>
+                    </div>-->
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

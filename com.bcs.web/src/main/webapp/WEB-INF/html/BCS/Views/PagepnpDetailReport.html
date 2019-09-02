@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" th:with="strList = ${ {'/BCS/JS/pagepnpDetailReport.base.js'} }">
+
+<head th:replace="/BCS/Views/Common/Head :: head ('PNP Detail Report Page', ${strList})">
+</head>
+
+<body>
+    <header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+        <div th:replace="/BCS/Views/Common/Menu :: menu ('PagepnpDetailReport')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+	                <!-- Title -->
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">PNP明細報表</h3>
+                    </header>
+                    
+                    <!-- Input Boxes -->
+                    <div>                      
+               		    <span>前方來源系統</span>
+                        <input type="text" id="sourceSystemInput" name="sourceSystemInput" value="" maxlength="50" required="required">
+                        <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  PccCode</span>
+                        <input type="text" id="pccCodeInput" name="pccCodeInput" value="" maxlength="50" required="required">
+                        <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  發送帳號</span>
+                        <input type="text" id="accountInput" name="accountInput" value="" maxlength="50" required="required"> 
+                        <br></br>
+                        
+                        <span>發送日期：</span>
+                    	<div class="option date">
+                        	<input type="text" class="datepicker" id="startDate" placeholder="YYYY-MM-DD"/>
+                       	</div>
+                       	<span>~</span>
+                       	<div class="option date">
+                        	<input type="text" class="datepicker" id="endDate" placeholder="YYYY-MM-DD"/>
+                      	</div>
+                      	<br></br>
+                    </div>
+
+                    <div class="CHBtnSet">
+                    	<div class="CHLeft">
+                           <ul>
+                               <li class="CHLeftBtn">
+                                <input class="btn prev" type="button" value="<" style="cursor: pointer;">
+                                <span id="pageAndTotalPages">1/0</span>
+                                <input class="btn next" type="button" value=">" style="cursor: pointer;">
+                               </li>
+                           </ul>
+                       </div>
+                        <div class="CHRight">
+                        	<input class="btn_add search" type="button" value="Search" style="cursor: pointer;">
+                        	<a class="btn_add exportToExcel" style="cursor: pointer; padding: 7px 12px; text-decoration: none">匯出 EXCEL</a>
+                        </div>
+                    </div>
+                    <div class="mainFrame">
+                        <table border="1" class="resultTable">
+                            <colgroup>
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                            </colgroup>
+                            <tr>
+                            	<th>前方來源系統</th>
+                            	<th>通路流</th>
+                            	<th>發送通路</th>
+                                <th>發送帳號</th>
+								<th>掛帳PccCode</th>
+                                <th>訊息內文</th>
+                                <th>客戶手機號碼</th>
+                                <th>預約日期</th>
+                                <th>預約時間</th>
+                                <th>發送日期</th>
+                                <th>發送時間</th>
+                                <th>發送狀態</th>
+                            </tr>
+                            <tbody class="resultTbody">
+                                <tr class="resultTr">
+                                	<td class="sourceSystem"></td>
+                                	<td class="pathway"></td>
+                                    <td class="deliveryPathway"></td>
+                                    <td class="account"></td>
+                                    <td class="accountPccCode"></td>
+                                    <td class="pnpContent"></td>
+                                    <td class="customerCellPhoneNumber"></td>
+                                    <td class="scheduleDate"></td>
+                                    <td class="scheduleTime"></td>
+                                    <td class="deliveryDate"></td>
+                                    <td class="deliveryTime"></td>
+                                    <td class="statusCode"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -16,6 +16,7 @@ public enum BcsPageEnum {
 	SendGroupListPage("/BCS/Views/Page2"),
 
 	MsgCreatePage("/BCS/Views/Page3"),
+    CdnMsgCreatePage("/BCS/Views/PageCdnMsg"),
 	MsgListDraftPage("/BCS/Views/Page4-1"),
 	MsgListDelayPage("/BCS/Views/Page4-2"),
 	MsgListSendedPage("/BCS/Views/Page4-3"),
@@ -34,6 +35,7 @@ public enum BcsPageEnum {
 	
 	AdminUserCreatePage("/BCS/Views/Page9"),
 	AdminUserListPage("/BCS/Views/Page10"),
+	AdminUserBoardPage("/BCS/Views/Page44"),
 	
 	ReportPage("/BCS/Views/Page11"),
 	ReportCreatePage("/BCS/Views/Page16"),
@@ -42,7 +44,9 @@ public enum BcsPageEnum {
 	ReportPageVisitPage("/BCS/Views/Page22"),
 	ReportPageVisitDetailPage("/BCS/Views/Page23"),
 	ReportPushApiEffectsPage("/BCS/Views/Page-PushApiEffects"),
-
+	ReportBNEffectsPage("/BCS/Views/PageBNEffects"),
+	ReportBNEffectsDetailPage("/BCS/Views/PageBNEffectsDetail"),
+	
 	InteractiveResponsePage("/BCS/Views/Page12"),
 	InteractiveResponseDisablePage("/BCS/Views/Page12-1"),
 	InteractiveResponseCreatePage("/BCS/Views/Page13"),
@@ -121,6 +125,33 @@ public enum BcsPageEnum {
 	TemplateMsgCreatePage("/BCS/Views/PageT1"),
 	TemplateMsgListPage("/BCS/Views/PageT2"),
 
+	// Billing Notice Page
+	BillingNoticeCreatePage("/BCS/Views/PageBN1"),
+	BillingNoticeListPage("/BCS/Views/PageBN2"),
+	
+	// Line Point Page
+	LinePointListPage("/BCS/Views/PageLPL"),
+	LinePointCreatePage("/BCS/Views/PageLPC"),
+	LinePointStatisticsReportPage("/BCS/Views/PageLPStatisticsReport"),
+	LinePointStatisticsReportDetailPage("/BCS/Views/PageLPStatisticsReportDetail"),
+//	LinePointSendPage("/BCS/Views/PageLPS"),
+//	LinePointSendOldPage("/BCS/Views/PageLPSOld"),
+//	LinePointReportPage("/BCS/Views/PageLPR"),
+//	LinePointDetailPage("/BCS/Views/PageLPD"),
+	
+	// PNP Template
+   	PnpCreatePage("/BCS/Views/PagePNP1"),
+	PnpListPage("/BCS/Views/PagePNP2"), 
+	
+    // PNP Maintain
+    PNPNormalAccountListPage("/BCS/Views/PagepnpNAL"),
+    PNPNormalAccountCreatePage("/BCS/Views/PagepnpNAC"),
+    PNPUnicaAccountListPage("/BCS/Views/PagepnpUAL"),
+    PNPUnicaAccountCreatePage("/BCS/Views/PagepnpUAC"),
+	
+    // PNP Report
+    PnpDetailReportPage("/BCS/Views/PagepnpDetailReport"),
+    
 	//Game
 	GameCreatePage("/BCS/Views/PageG1"),
 	GameListPage("/BCS/Views/PageG2"),
@@ -142,7 +173,7 @@ public enum BcsPageEnum {
     EsnListPage("/BCS/Views/PageESN2"),
     
     //貴賓之夜
-    QRcodeScannedRecordPage("/BCS/Views/Page-QRcodeScannedRecord");
+    QRcodeScannedRecordPage("/BCS/Views/Page-QRcodeScannedRecord"), ;
 
     private final String str;
     

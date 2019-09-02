@@ -46,6 +46,7 @@ public class MsgBotReceive extends AbstractBcsEntity {
 	public static String EVENT_TYPE_LEAVE = "leave";
 	public static String EVENT_TYPE_POSTBACK = "postback";
 	public static String EVENT_TYPE_BEACON = "beacon";
+	public static String EVENT_TYPE_DELIVERY = "delivery";
 
 	public static String EVENT_TYPE_BCSEVENT = "bcsevent";
 
@@ -140,6 +141,9 @@ public class MsgBotReceive extends AbstractBcsEntity {
 
 	@Column(name = "USER_STATUS", columnDefinition="nvarchar(50)")
 	private String userStatus;
+	
+	@Column(name = "DELIVERY_DATA", columnDefinition="nvarchar(500)")
+	private String deliveryData;
 
 	public Long getId() {
 		return id;
@@ -331,6 +335,14 @@ public class MsgBotReceive extends AbstractBcsEntity {
 
 	public void setReceiveDay(String receiveDay) {
 		this.receiveDay = receiveDay;
+	}
+
+	public String getDeliveryData() {
+		return deliveryData;
+	}
+
+	public void setDeliveryData(String deliveryData) {
+		this.deliveryData = deliveryData;
 	}
 	
 }

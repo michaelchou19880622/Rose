@@ -98,7 +98,7 @@
 
             // set up this listener before calling setImages():
             scratchers[i].addEventListener('imagesloaded', onScratcherLoaded);
-            scratchers[i].setImages('../bcs/getResource/IMAGE/' + prizeImageId, '../bcs/getResource/IMAGE/' + scratchCardFrontImageId);
+            scratchers[i].setImages('../bcs/getCdnResource/IMAGE/' + prizeImageId, '../bcs/getCdnResource/IMAGE/' + scratchCardFrontImageId);
         }
 
         // get notifications of this scratcher changing
@@ -127,11 +127,11 @@
                 type: 'GET',
                 url: '../m/Game/scratchCard/'+gameId,
     		}).success(function(response){
-    			$('.headerImage').find('img').attr('src', '../bcs/getResource/IMAGE/' + response.headerImageId);
-    			$('.footerImage').find('img').attr('src', '../bcs/getResource/IMAGE/' + response.footerImageId);
-    			$('.prizedetail').css('background', 'url(../bcs/getResource/IMAGE/' + response.scratchcardBackgroundImageId + ')');
-    			$('.sratchCard-bg').css('background', 'url(../bcs/getResource/IMAGE/' + response.scratchcardBackgroundImageId + ')');
-    			$('#startGameButtonImage').attr('src', '../bcs/getResource/IMAGE/' + response.scratchcardStartButtonImageId)
+    			$('.headerImage').find('img').attr('src', '../bcs/getCdnResource/IMAGE/' + response.headerImageId);
+    			$('.footerImage').find('img').attr('src', '../bcs/getCdnResource/IMAGE/' + response.footerImageId);
+    			$('.prizedetail').css('background', 'url(../bcs/getCdnResource/IMAGE/' + response.scratchcardBackgroundImageId + ')');
+    			$('.sratchCard-bg').css('background', 'url(../bcs/getCdnResource/IMAGE/' + response.scratchcardBackgroundImageId + ')');
+    			$('#startGameButtonImage').attr('src', '../bcs/getCdnResource/IMAGE/' + response.scratchcardStartButtonImageId)
     			$('#startGameButtonImage').click(startGameEvent);
     			scratchCardFrontImageId = response.scratchcardFrontImageId;    			
     		}).fail(function(response){
@@ -176,7 +176,7 @@
 	    			prizeImageId = response.couponImageId;
 	    			prizeName = response.couponTitle;
 	    			
-					$('.prizedetail').find('img').attr('src', '../bcs/getResource/IMAGE/' + prizeImageId);
+					$('.prizedetail').find('img').attr('src', '../bcs/getCdnResource/IMAGE/' + prizeImageId);
 					
 					initPage();
 					

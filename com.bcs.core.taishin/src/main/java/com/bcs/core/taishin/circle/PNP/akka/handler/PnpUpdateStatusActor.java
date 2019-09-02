@@ -1,0 +1,69 @@
+package com.bcs.core.taishin.circle.PNP.akka.handler;
+
+import akka.actor.UntypedActor;
+import com.bcs.core.spring.ApplicationContextProvider;
+import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
+import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
+import com.bcs.core.taishin.circle.PNP.service.PnpService;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 更新狀態Actor
+ *
+ * @author jessie
+ * @see PnpMainActor
+ */
+@Slf4j
+public class PnpUpdateStatusActor extends UntypedActor {
+    @Override
+    public void onReceive(Object object) {
+        log.info("PnpUpdateStatusActor Receive!!");
+        if (object instanceof PnpDetail) {
+            log.info("Object instanceof PnpDetail!!");
+            PnpService pnpService = ApplicationContextProvider.getApplicationContext().getBean(PnpService.class);
+            PnpDetail pnpDetail = (PnpDetail) object;
+            saveResultAndUpdateSendTime(pnpService, pnpDetail);
+            updateStatus(pnpService, pnpDetail);
+        }
+    }
+
+    /**
+     * 儲存物件如果狀態為完成更新SendTime
+     */
+    private void saveResultAndUpdateSendTime(PnpService pnpService, PnpDetail pnpDetail) {
+        pnpService.save(pnpDetail);
+    }
+
+    /**
+     * 更新狀態
+     *
+     * @param pnpService pnpService
+     * @param pnpDetail  pnpDetail
+     */
+    private void updateStatus(PnpService pnpService, PnpDetail pnpDetail) {
+        if (checkCanUpdateStatusToComplete(pnpDetail)) {
+            log.info(String.format("Update Status To Complete!! Main Id: %s, Detail Id: %s", pnpDetail.getPnpMainId(), pnpDetail.getPnpDetailId()));
+            pnpService.updatePnpMainStatusComplete(pnpDetail.getPnpMainId(), pnpDetail.getSource(), pnpDetail.getProcStage());
+        }
+    }
+
+    /**
+     * 檢查是否能更新成Complete
+     *
+     * @param pnpDetail pnpDetail
+     * @return 是否可更新
+     */
+    private boolean checkCanUpdateStatusToComplete(PnpDetail pnpDetail) {
+        List<String> status = new ArrayList<>();
+        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS);
+        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_SENDING);
+        status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
+        status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_WAIT);
+        status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_SCHEDULED);
+        log.info(String.format("Check Status: %s, Can Update: %s", pnpDetail.getStatus(), !status.contains(pnpDetail.getStatus())));
+        return !status.contains(pnpDetail.getStatus());
+    }
+}

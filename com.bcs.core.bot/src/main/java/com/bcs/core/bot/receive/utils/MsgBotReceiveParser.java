@@ -168,6 +168,17 @@ public class MsgBotReceiveParser {
 						} //Skip
 					}
 
+					if(msg.get("delivery") != null && !msg.get("delivery").isNull()){
+						try{
+							if(msg.get("delivery") != null && !msg.get("delivery").isNull()){
+								String deliveryData = msg.get("delivery").get("data").asText();
+								receive.setDeliveryData(deliveryData);
+							}
+						}
+						catch(Exception e){
+							others += msg.get("delivery");
+						} //Skip
+					}
 					receive.setOthers(others);
 					
 					msgReceives.add(receive);

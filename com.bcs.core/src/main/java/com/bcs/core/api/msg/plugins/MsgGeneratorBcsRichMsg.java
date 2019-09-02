@@ -73,7 +73,8 @@ public class MsgGeneratorBcsRichMsg extends MsgGeneratorAbstract {
 		
 		String DOWNLOAD_URL = UriHelper.getStaticResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, FileUtil.RESIZE_PRE + richMsgData.get(2));
 		if(StringUtils.isBlank(DOWNLOAD_URL)){
-			DOWNLOAD_URL = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, richMsgData.get(2));
+			DOWNLOAD_URL = UriHelper.getCdnResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, richMsgData.get(2));
+			//DOWNLOAD_URL = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, richMsgData.get(2));
 		}
 		
 		String ALT_TEXT = richMsgData.get(1);

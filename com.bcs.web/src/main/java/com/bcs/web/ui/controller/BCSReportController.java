@@ -24,9 +24,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.bcs.core.db.service.PushMessageRecordService;
 import com.bcs.core.db.entity.PushReport;
 import com.bcs.core.db.service.ContentReportService;
+import com.bcs.core.db.service.PushMessageRecordService;
 import com.bcs.core.db.service.PushReportService;
 import com.bcs.core.db.service.UserTraceLogService;
 import com.bcs.core.exception.BcsNoticeException;
@@ -104,7 +104,18 @@ public class BCSReportController extends BCSBaseController {
 		return BcsPageEnum.KeywordAndInteractiveReportPage.toString();
 	}
 	
+	@RequestMapping(method = RequestMethod.GET, value = "/admin/reportBNEffectsPage")
+	public String reportBNEffectsPage(HttpServletRequest request, HttpServletResponse response) {
+		logger.info("reportBNEffectsPage");
+		return BcsPageEnum.ReportBNEffectsPage.toString();
+	}
 	
+	@RequestMapping(method = RequestMethod.GET, value = "/admin/reportBNEffectsDetailPage")
+	public String reportBNEffectsDetailPage(HttpServletRequest request, HttpServletResponse response) {
+		logger.info("ReportBNEffectsDetailPage");
+		return BcsPageEnum.ReportBNEffectsDetailPage.toString();
+	}
+
 	
 	/**
 	 * 取得發送報告清單

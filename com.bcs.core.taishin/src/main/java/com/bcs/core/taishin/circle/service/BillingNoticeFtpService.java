@@ -32,10 +32,10 @@ import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsg;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeDetail;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeMain;
-import com.bcs.core.taishin.circle.db.entity.CircleEntityManagerControl;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeContentTemplateMsgRepository;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeDetailRepository;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeMainRepository;
+import com.bcs.core.taishin.circle.db.repository.BillingNoticeRepositoryCustom;
 import com.bcs.core.taishin.circle.ftp.FtpService;
 import com.bcs.core.taishin.circle.ftp.FtpSetting;
 
@@ -46,7 +46,7 @@ public class BillingNoticeFtpService {
 	private static Logger logger = Logger.getLogger(BillingNoticeFtpService.class);
 	private DateFormat dataFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 	@Autowired
-	private CircleEntityManagerControl entityManagerControl;
+	private BillingNoticeRepositoryCustom billingNoticeRepositoryCustom;
 	@Autowired
 	private BillingNoticeMainRepository billingNoticeMainRepository;
 	@Autowired
@@ -69,8 +69,8 @@ public class BillingNoticeFtpService {
 	 * @throws InterruptedException
 	 */
 	public void startCircle() throws SchedulerException, InterruptedException {
-		String unit = CoreConfigReader.getString(CONFIG_STR.BN_SCHEDULE_UNIT, true);
-		int time = CoreConfigReader.getInteger(CONFIG_STR.BN_SCHEDULE_TIME, true);
+		String unit = CoreConfigReader.getString(CONFIG_STR.BN_SCHEDULE_UNIT, true, false);
+		int time = CoreConfigReader.getInteger(CONFIG_STR.BN_SCHEDULE_TIME, true, false);
 		if (time == -1 || TimeUnit.valueOf(unit) == null) {
 			logger.error(" BillingNoticeFtpService TimeUnit error :" + time  + unit);
 			return;
@@ -90,9 +90,9 @@ public class BillingNoticeFtpService {
 	 * 執行流程
 	 */
 	private void ftpProcessHandler() {
-		boolean bigSwitch = CoreConfigReader.getBoolean(CONFIG_STR.BN_BIGSWITCH, true);
-		String downloadSavePath = CoreConfigReader.getString(CONFIG_STR.BN_FTP_DOWNLOAD_SAVEFILEPATH, true);
-		String fileExtension = CoreConfigReader.getString(CONFIG_STR.BN_FTP_FILE_EXTENSION, true);
+		boolean bigSwitch = CoreConfigReader.getBoolean(CONFIG_STR.BN_BIGSWITCH, true, false);
+		String downloadSavePath = CoreConfigReader.getString(CONFIG_STR.BN_FTP_DOWNLOAD_SAVEFILEPATH, true, false);
+		String fileExtension = CoreConfigReader.getString(CONFIG_STR.BN_FTP_FILE_EXTENSION, true, false);
 		if (!bigSwitch) { //大流程關閉時不做
 			return;
 		}
@@ -118,9 +118,10 @@ public class BillingNoticeFtpService {
 				for(FtpSetting ftp : ftpSettings) {
 					if (ftp.containsFileName(fileName)) {
 						encoding = ftp.getFileEncoding();
-						logger.info(fileName + " encoding:" +  encoding );
+						logger.debug(fileName + " containsFileName encoding:" +  encoding );
 					}
 				}
+				logger.info(fileName + " encoding:" +  encoding );
 				byte[] fileData = lReturnDatas.get(fileName);
 				logger.info(" BillingNoticeFtpService handle file:" + downloadSavePath + File.separator + fileName );
 				File targetFile = new File(downloadSavePath + File.separator + fileName);
@@ -212,37 +213,46 @@ public class BillingNoticeFtpService {
 				String originalFileType = splitHeaderData[0];
 				String sendType = splitHeaderData[1].toUpperCase();
 				String scheduleTime = splitHeaderData[2];
+				
+				// TemplateTitle => Details
 				Map<String, List<BillingNoticeFtpDetail>> resultMap = parseDetail(fileContents);
+				
 				for (String key : resultMap.keySet()) {
-					List<BillingNoticeContentTemplateMsg> templates =  billingNoticeContentTemplateMsgRepository.findByTemplateTitle(key);
+					// get the Main Template
 					BillingNoticeContentTemplateMsg template = null;
+					List<BillingNoticeContentTemplateMsg> templates =  billingNoticeContentTemplateMsgRepository.findMainOnTemplateByTitle(key);
 					if (templates == null || templates.isEmpty()) {
 						logger.info("Template :" + key + " not exist!  Use Default");
 						// 拿不到範本取default
-						List<BillingNoticeContentTemplateMsg> defaultTemplates =  billingNoticeContentTemplateMsgRepository.findByTemplateTitle(DEFAULT_TEMPLATE);
+						List<BillingNoticeContentTemplateMsg> defaultTemplates =  billingNoticeContentTemplateMsgRepository.findByTemplateTitleAndProductSwitchOn(DEFAULT_TEMPLATE);
 						if (defaultTemplates == null || defaultTemplates.isEmpty()) {
 							logger.error("Default Template is not exist!");
 						}else {
 							template = defaultTemplates.get(0);
 						}
 					}else {
+						// carousel button
 						template = templates.get(0);
 					}
 					
 					if (template == null) {
 						logger.error("Template is not exist!:" + key);
 					}else {
+						// set Basics
 						BillingNoticeMain billingNoticeMain = new BillingNoticeMain();
 						billingNoticeMain.setGroupId(new Long(mains.size() + 1));
+						billingNoticeMain.setSendType(sendType);
 						billingNoticeMain.setOrigFileName(origFileName);
 						billingNoticeMain.setOrigFileType(originalFileType);
 						billingNoticeMain.setStatus(BillingNoticeMain.NOTICE_STATUS_DRAFT);
-						billingNoticeMain.setSendType(sendType);
 						billingNoticeMain.setExpiryTime(expiryTime.getTime());
 						billingNoticeMain.setTempId(template.getTemplateId()); 
 						if (sendType.equals(BillingNoticeMain.SENDING_MSG_TYPE_DELAY)) {
 							billingNoticeMain.setScheduleTime(scheduleTime);
 						}
+						billingNoticeMain.setTemplate(template);
+						
+						// set Details
 						List<BillingNoticeFtpDetail> ftpDetails = resultMap.get(key);
 						List<BillingNoticeDetail> details = new ArrayList<BillingNoticeDetail>();
 						for (BillingNoticeFtpDetail ftpDetail : ftpDetails) {
@@ -274,15 +284,16 @@ public class BillingNoticeFtpService {
 		List<BillingNoticeDetail> originalDetails = billingNoticeMain.getDetails();
 		logger.info(" BillingNoticeFtpService BillingNoticeDetail size:" + originalDetails.size() );
 		billingNoticeMain = billingNoticeMainRepository.save(billingNoticeMain);
-		List<Object> details = new ArrayList<>();
+		List<BillingNoticeDetail> details = new ArrayList<>();
 		for( BillingNoticeDetail detail : originalDetails) {
 			detail.setNoticeMainId(billingNoticeMain.getNoticeMainId());
 			details.add(detail);
 		}
 		if (!details.isEmpty()) {
-			entityManagerControl.persistInsert(details);
+			billingNoticeRepositoryCustom.batchInsertBillingNoticeDetail(details);
 		}
 	}
+	
 	
 	/**
 	 * 資料解析完狀態改為retry or wait

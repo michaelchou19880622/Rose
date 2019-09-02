@@ -27,6 +27,5 @@ public interface BillingNoticeDetailRepository extends EntityRepository<BillingN
     @Modifying
    	@Query("update BillingNoticeDetail x set x.status = ?1 , x.modifyTime = ?2 where x.noticeMainId = ?3  ")
    	@Transactional(rollbackFor = Exception.class, timeout = 30)
-   	void updateStatusByMainId(String status, Date modifyTime,  Long noticeMainId);
-        
+   	void updateStatusByMainId(String status, Date modifyTime,  Long noticeMainId);        
 }

@@ -54,6 +54,19 @@ $(function(){
 					role='行銷人員';
 				else if(o.role == 'ROLE_MARKET')
 					role='編輯人員';
+				else if(o.role == 'ROLE_PNP_ADMIN')
+					role='PNP系統管理者';
+				else if(o.role == 'ROLE_PNP_INQUIRER')
+					role='PNP查詢者';
+				else if(o.role == 'ROLE_PNP_EMPLOYEE')
+					role='PNP單位發送暨查詢者';
+				else if(o.role == 'ROLE_LP_QUERIER')
+					role='LINE點數報表查詢者';
+				else if(o.role == 'ROLE_LP_CREATOR')
+					role='LINE點發送建立者';
+				else if(o.role == 'ROLE_LP_JUDGER')
+					role='LINE點發送審核者';
+				
 				accountData.find('.role').html(role);
 				
 				accountData.find('.mid').html(o.mid ? '已綁訂' : '未綁訂');

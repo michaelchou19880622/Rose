@@ -1,9 +1,13 @@
 package com.bcs.core.taishin.circle.service;
 
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.bcs.core.resource.UriHelper;
+import com.bcs.core.spring.ApplicationContextProvider;
+import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentLink;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsgAction;
+import com.bcs.core.taishin.circle.db.repository.BillingNoticeContentLinkRepository;
 
 /**
  * 根據 BillingNoticeContentTemplateMsgActionType 組出JSONObject
@@ -13,18 +17,23 @@ import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsgActi
 public enum BillingNoticeContentTemplateMsgActionType {
 	MESSAGE{
 	    @Override
-	    public JSONObject getJSONObject(BillingNoticeContentTemplateMsgAction action) {
+	    public JSONObject getJSONObject(BillingNoticeContentTemplateMsgAction action, String MID) {
 	    	JSONObject actionObject = new JSONObject();
 			actionObject.put("type", action.getActionType());
             actionObject.put("label", action.getActionLabel());
             actionObject.put("text", action.getActionText());
             return actionObject;
-            
 	    }
 	},  URI{
 		@Override
-	    public JSONObject getJSONObject(BillingNoticeContentTemplateMsgAction action) {
-			String uri = UriHelper.getLinkUri( action.getLinkId());
+	    public JSONObject getJSONObject(BillingNoticeContentTemplateMsgAction action, String MID) {
+			BillingNoticeContentLinkRepository billingNoticeContentLinkRepository = ApplicationContextProvider.getApplicationContext().getBean(BillingNoticeContentLinkRepository.class);
+			BillingNoticeContentLink billingNoticeContentLink = billingNoticeContentLinkRepository.findOne(action.getLinkId());
+			String uri = billingNoticeContentLink.getLinkUrl();
+			
+			// Original
+			//String uri = UriHelper.getLinkUri( action.getLinkId(), MID);
+			
 	    	JSONObject actionObject = new JSONObject();
 			actionObject.put("type", action.getActionType());
             actionObject.put("label", action.getActionLabel());
@@ -33,7 +42,7 @@ public enum BillingNoticeContentTemplateMsgActionType {
 	    }
 	}, POSTBACK{
 		@Override
-	    public JSONObject getJSONObject(BillingNoticeContentTemplateMsgAction action) {
+	    public JSONObject getJSONObject(BillingNoticeContentTemplateMsgAction action, String MID) {
 	    	JSONObject actionObject = new JSONObject();
 			actionObject.put("type", action.getActionType());
             actionObject.put("label", action.getActionLabel());
@@ -43,7 +52,7 @@ public enum BillingNoticeContentTemplateMsgActionType {
 	    }
 	};
 	
-	public abstract JSONObject getJSONObject(BillingNoticeContentTemplateMsgAction action);
+	public abstract JSONObject getJSONObject(BillingNoticeContentTemplateMsgAction action, String MID);
 	
 	/**
 	 * find Action Type

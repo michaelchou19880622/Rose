@@ -239,10 +239,14 @@ public class SendMsgUIService {
 	}
 	
 	public void saveDraftMessage(SendMsgModel sendMsgModel, String adminUserAccount) throws Exception{
-
 		this.saveMessage(sendMsgModel, adminUserAccount, MsgMain.MESSAGE_STATUS_DRAFT);
 	}
 
+	public Long saveDraftMessageWithId(SendMsgModel sendMsgModel, String adminUserAccount) throws Exception{
+		return this.saveMessage(sendMsgModel, adminUserAccount, MsgMain.MESSAGE_STATUS_DRAFT);
+	}
+
+	
 	/**
 	 * Delete MsgMain
 	 * @param msgId
@@ -521,6 +525,13 @@ public class SendMsgUIService {
 		}
 	}
 
+	public void createExecuteSendMsgRunnable(Long msgId) throws Exception{
+		ExecuteSendMsgRunnable run = new ExecuteSendMsgRunnable();
+		run.thisMsgId = msgId;
+		Thread thread = new Thread(run);
+		thread.start();
+	}
+	
 	private static class ExecuteSendMsgRunnable implements Runnable{
 
 		public Long thisMsgId = null;
@@ -558,10 +569,10 @@ public class SendMsgUIService {
 			throw new BcsNoticeException("群組設定錯誤");
 		}
 		
-		// Validate SendGroupId
+		// Validate sendGroup
 		SendGroup sendGroup = sendGroupService.findOne(groupId);
 		if(sendGroup == null){
-			logger.error("SendGroupId Null");
+			logger.error("sendGroup Null");
 			throw new BcsNoticeException("群組設定錯誤");
 		}
 		
@@ -743,15 +754,20 @@ public class SendMsgUIService {
 			String resourceType = node.get("resourceType").textValue();
 			String resourceId = node.get("resourceId").textValue();
 			if(ContentResource.RESOURCE_TYPE_IMAGE.equals(resourceType)){
-				node.put("originalContentUrl",UriHelper.getResourceUri(resourceType, resourceId));
-				node.put("previewImageUrl", UriHelper.getResourcePreviewUri(resourceType, "IMAGE", resourceId));
+				node.put("originalContentUrl",UriHelper.getCdnResourceUri(resourceType, resourceId));
+				//node.put("originalContentUrl",UriHelper.getResourceUri(resourceType, resourceId));
+				node.put("previewImageUrl", UriHelper.getCdnResourcePreviewUri(resourceType, "IMAGE", resourceId));
+				//node.put("previewImageUrl", UriHelper.getResourcePreviewUri(resourceType, "IMAGE", resourceId));
 			}
 			else if(ContentResource.RESOURCE_TYPE_VIDEO.equals(resourceType)){
-				node.put("originalContentUrl",UriHelper.getResourceUri(resourceType, resourceId));
-				node.put("previewImageUrl", UriHelper.getResourcePreviewUri(resourceType, "IMAGE", resourceId));
+				node.put("originalContentUrl",UriHelper.getCdnResourceUri(resourceType, resourceId));
+				//node.put("originalContentUrl",UriHelper.getResourceUri(resourceType, resourceId));
+				node.put("previewImageUrl", UriHelper.getCdnResourcePreviewUri(resourceType, "IMAGE", resourceId));
+				//node.put("previewImageUrl", UriHelper.getResourcePreviewUri(resourceType, "IMAGE", resourceId));
 			}
 			else if(ContentResource.RESOURCE_TYPE_AUDIO.equals(resourceType)){
-				node.put("originalContentUrl",UriHelper.getResourceUri(resourceType, resourceId));
+				node.put("originalContentUrl",UriHelper.getCdnResourceUri(resourceType, resourceId));
+				//node.put("originalContentUrl",UriHelper.getResourceUri(resourceType, resourceId));
 				node.put("AUDLEN", node.get("resourceLength").textValue());
 			}
 		}

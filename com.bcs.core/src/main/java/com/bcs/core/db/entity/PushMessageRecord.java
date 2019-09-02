@@ -31,13 +31,28 @@ import com.bcs.core.json.AbstractBcsEntity;
 		"CASE " + 
 			"WHEN B.FAIL_COUNT IS NULL THEN 0 " + 
 			"ELSE B.FAIL_COUNT " + 
-		"END 'FAIL_COUNT' " + 
+		"END 'FAIL_COUNT', " + 
+		"CASE " + 
+			"WHEN A.SERVICE_NAME IS NULL THEN B.SERVICE_NAME " + 
+			"ELSE A.SERVICE_NAME " + 
+		"END 'SERVICENAME', " + 
+		"CASE " + 
+			"WHEN A.PUSH_THEME IS NULL THEN B.PUSH_THEME " + 
+			"ELSE A.PUSH_THEME " + 
+		"END 'PUSHTHEME',  " + 
+		"CASE " + 
+			"WHEN A.SEND_TYPE IS NULL THEN B.SEND_TYPE " + 
+			"ELSE A.SEND_TYPE " + 
+		"END 'SEND_TYPE' " + 
 	"FROM " + 
 		"(" + 
 			"(" + 
 				"SELECT " + 
 					"CREATE_TIME, " + 
-					"DEPARTMENT, " + 
+					"SEND_TYPE, " + 
+					"DEPARTMENT,  " + 
+					"SERVICE_NAME, " + 
+					"PUSH_THEME, " + 
 					"COUNT (*) AS SUCCESS_COUNT " + 
 				"FROM " + 
 					"BCS_PUSH_MESSAGE_RECORD " + 
@@ -45,13 +60,19 @@ import com.bcs.core.json.AbstractBcsEntity;
 					"MAIN_MESSAGE = 'SUCCESS' " + 
 				"GROUP BY " + 
 					"CREATE_TIME, " + 
-					"DEPARTMENT " + 
+					"SEND_TYPE, " + 
+					"DEPARTMENT, " + 
+					"SERVICE_NAME, " + 
+					"PUSH_THEME " + 
 			") AS A " + 
 			"FULL JOIN " + 
 			"(" + 
 				"SELECT " + 
 					"CREATE_TIME, " + 
+					"SEND_TYPE, " + 
 					"DEPARTMENT, " + 
+					"SERVICE_NAME, " + 
+					"PUSH_THEME, " + 
 					"COUNT (*) AS FAIL_COUNT " + 
 				"FROM " + 
 					"BCS_PUSH_MESSAGE_RECORD " + 
@@ -59,7 +80,10 @@ import com.bcs.core.json.AbstractBcsEntity;
 					"MAIN_MESSAGE != 'SUCCESS' " + 
 				"GROUP BY " + 
 					"CREATE_TIME, " + 
-					"DEPARTMENT " + 
+					"SEND_TYPE, " + 
+					"DEPARTMENT, " + 
+					"SERVICE_NAME, " + 
+					"PUSH_THEME " + 
 			") AS B ON A.CREATE_TIME = B.CREATE_TIME " + 
 		")" + 
 	"WHERE " + 
@@ -111,7 +135,26 @@ public class PushMessageRecord extends AbstractBcsEntity {
 	
 	@Column(name = "CREATE_TIME")
 	private Date createTime;
+	
+	@Column(name = "SERVICE_NAME", columnDefinition="nvarchar(50)")
+	private String serviceName;
+	
+	//推播主題
+	@Column(name = "PUSH_THEME", columnDefinition="nvarchar(200)")
+	private String pushTheme;
 
+	public String getServiceName() {
+		return serviceName;
+	}
+	public void setServiceName(String serviceName) {
+		this.serviceName = serviceName;
+	}
+	public String getPushTheme() {
+		return pushTheme;
+	}
+	public void setPushTheme(String pushTheme) {
+		this.pushTheme = pushTheme;
+	}
 	public Long getId() {
 		return id;
 	}

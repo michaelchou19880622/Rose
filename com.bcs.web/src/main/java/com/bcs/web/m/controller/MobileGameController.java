@@ -349,6 +349,7 @@ public class MobileGameController {
 			ResponseEntity<String> accessTokenResponse = restTemplate.postForEntity(CoreConfigReader.getString(CONFIG_STR.LINE_OAUTH_URL_ACCESSTOKEN_V2_1), accessTokenEntity, String.class);
 			
 			String responseBody = accessTokenResponse.getBody(); // Response 的結果
+			logger.info("responseBody:"+responseBody);
 			
 			JSONObject responseObj = new JSONObject(responseBody);
 			String ID_Token = responseObj.get("id_token").toString(); // 將 id_token 從 response body 中拿出來

@@ -18,45 +18,45 @@ import com.bcs.core.utils.ErrorRecord;
 @Repository
 public class CircleEntityManagerControl {
 	private static final String INIT_FLAG = "INIT_FLAG";
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(CircleEntityManagerControl.class);
-	
+
 	@PersistenceContext
 	private EntityManager entityManager;
-	
+
 	// 注意！此數值必須和 spring-base.xml 的 hibernate.jdbc.batch_size 值相同
-	private int batchSize = 50;
-	
-	private static AtomicBoolean isRun = new AtomicBoolean(false);  
-	
+	public static int batchSize = 50;
+
+	private static AtomicBoolean isRun = new AtomicBoolean(false);
+
 	private ConcurrentLinkedQueue<Object> queueAdd = new ConcurrentLinkedQueue<Object>();
-	
-	public CircleEntityManagerControl(){
-		
+
+	public CircleEntityManagerControl() {
+
 	}
 
-	public void fluchAll(){
-		if(isRun.compareAndSet(false, true)){
-			try{
-				ApplicationContextProvider.getApplicationContext().getBean(CircleEntityManagerControl.class).persistFlush();
-			}
-			catch(Throwable e){
+	public void fluchAll() {
+		if (isRun.compareAndSet(false, true)) {
+			try {
+				ApplicationContextProvider.getApplicationContext().getBean(CircleEntityManagerControl.class)
+						.persistFlush();
+			} catch (Throwable e) {
 				logger.error(ErrorRecord.recordError(e));
 			}
 			isRun.set(false);
 		}
 	}
 
-	public void persist(Object obj){
+	public void persist(Object obj) {
 		queueAdd.add(obj);
 		logger.debug("persistAdd:" + obj);
-		if(queueAdd.size() >= batchSize){
-			if(isRun.compareAndSet(false, true)){
-				try{
-						ApplicationContextProvider.getApplicationContext().getBean(CircleEntityManagerControl.class).persistFlush();
-				}
-				catch(Throwable e){
+		if (queueAdd.size() >= batchSize) {
+			if (isRun.compareAndSet(false, true)) {
+				try {
+					ApplicationContextProvider.getApplicationContext().getBean(CircleEntityManagerControl.class)
+							.persistFlush();
+				} catch (Throwable e) {
 					logger.error(ErrorRecord.recordError(e));
 				}
 				isRun.set(false);
@@ -64,90 +64,73 @@ public class CircleEntityManagerControl {
 		}
 	}
 
-	@Transactional(rollbackFor=Exception.class, timeout = 3000)
-	public void persistFlush(){
+	@Transactional(rollbackFor = Exception.class, timeout = 3000)
+	public void persistFlush() {
 //		logger.info("EntityManagerControl persistFlush execute");
 
-		try{
+		try {
 			synchronized (INIT_FLAG) {
 				boolean isPersistAdd = false;
 				logger.debug("CircleEntityManagerControl persistFlush execute:" + queueAdd.size());
 
 				int i = 0;
-				while(!queueAdd.isEmpty()){
-		
-					try{
+				while (!queueAdd.isEmpty()) {
+
+					try {
 						Object obj = queueAdd.poll();
-						if(obj != null){
+						if (obj != null) {
 							entityManager.persist(obj);
 							isPersistAdd = true;
 						}
-					}
-					catch(Exception e){
+					} catch (Exception e) {
 						logger.error(ErrorRecord.recordError(e, false));
 						break;
 					}
-					
+
 					i++;
 
-					if(i % batchSize == 0){
-						if(isPersistAdd){
+					if (i % batchSize == 0) {
+						if (isPersistAdd) {
 							entityManager.flush();
 							entityManager.clear();
 						}
 					}
 				}
-		
-				if(isPersistAdd){
+
+				if (isPersistAdd) {
 					entityManager.flush();
 					entityManager.clear();
 				}
 			}
-		}
-		catch(Throwable e){
+		} catch (Throwable e) {
 			logger.error(ErrorRecord.recordError(e));
 		}
-		
+
 		isRun.set(false);
 		logger.debug("CircleEntityManagerControl persistFlush end");
 	}
 
-	@Transactional(rollbackFor=Exception.class, timeout = 30)
-	public void persistInsert(List<Object> list){
+	
+	@Transactional(rollbackFor = Exception.class, timeout = 3000)
+	public void merge(List<Object> list) {
 
 		if (CollectionUtils.isEmpty(list)) {
 			return;
 		}
-		
-		int i = 0; 
-		for(Object obj : list){
-			entityManager.persist(obj);
-			i++;
-			if(i % batchSize == 0){
 
-				entityManager.flush();
-				entityManager.clear();
-			}
-		}
-	}
-	
-	
-	@Transactional(rollbackFor=Exception.class, timeout = 30)
-	public void merge(List<Object> list){
-
-		if (CollectionUtils.isEmpty(list)) {
-			return;
-		}
-		
-		int i = 0; 
-		for(Object obj : list){
+		int i = 0;
+		for (Object obj : list) {
 			entityManager.merge(obj);
 			i++;
-			if(i % batchSize == 0){
+			if (i % batchSize == 0) {
 
 				entityManager.flush();
 				entityManager.clear();
 			}
 		}
+
+		entityManager.flush();
+		entityManager.clear();
+
 	}
 }

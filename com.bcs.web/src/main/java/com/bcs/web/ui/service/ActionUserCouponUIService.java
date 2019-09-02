@@ -246,7 +246,8 @@ public class ActionUserCouponUIService {
 				
 			}
 			else{
-				imageId = UriHelper.getResourceUri("IMAGE", imageId, true);
+				imageId = UriHelper.getCdnResourceUri("IMAGE", imageId, true);
+				//imageId = UriHelper.getResourceUri("IMAGE", imageId, true);
 			}
 		}
 		

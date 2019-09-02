@@ -53,7 +53,8 @@ public class MsgGeneratorBcsPage extends MsgGeneratorAbstract {
 
 	private void createMsgLink() throws Exception{
 		
-		String bcsLogoUri = UriHelper.getResourceBcsLogoUri();
+		String bcsLogoUri = UriHelper.getCdnResourceBcsLogoUri();
+		//String bcsLogoUri = UriHelper.getResourceBcsLogoUri();
 		
 		String templateId = MsgGeneratorLink.templateId_Sub;
 		String textParams = "卡友頁面";

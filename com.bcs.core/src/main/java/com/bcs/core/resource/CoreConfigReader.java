@@ -57,6 +57,42 @@ public class CoreConfigReader {
 		return false;
 	}
 	
+	/**
+	 * PNP akka 送訊息服務是否啟動
+	 * @return
+	 */
+	public static boolean isPNPSendMsg(){
+		String isPNPSendMsg = getString(CONFIG_STR.IS_PNP_SENDMSG);
+		if(StringUtils.isNotBlank(isPNPSendMsg) && "true".equals(isPNPSendMsg)){
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * PNP ftp download是否啟動
+	 * @return
+	 */
+	public static boolean isPNPFtpDownload(){
+		String isPNPFtpDownload = getString(CONFIG_STR.IS_PNP_FTPDOWNLOAD);
+		if(StringUtils.isNotBlank(isPNPFtpDownload) && "true".equals(isPNPFtpDownload)){
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 *  PNP ftp 是否為開發者模式
+	 * @return
+	 */
+	public static boolean isPNPFtpTypeDevelop(){
+		String systemType = getString(CONFIG_STR.PNP_FTP_TYPE);
+		if("DEVELOP".equals(systemType)){
+			return true;
+		}
+		return false;
+	}
+	
 	public static boolean isMainSystem(){
 		String isMain = getString(CONFIG_STR.IS_MAIN_SYSTEM);
 		if(StringUtils.isNotBlank(isMain) && "true".equals(isMain)){
@@ -109,6 +145,12 @@ public class CoreConfigReader {
 		return getString(key.toString(), fromDB);
 	}
 	
+	public static String getString(CONFIG_STR key, boolean fromDB, boolean fromCatch) {
+
+		return getString(key.toString(), fromDB, fromCatch);
+	}
+	
+	
 	public static int getInteger(String key){
 		try{
 			return Integer.parseInt(getString(key, false));
@@ -154,9 +196,28 @@ public class CoreConfigReader {
 		}
 	}
 	
+	public static int getInteger(String key, boolean fromDB, boolean fromCatch){
+		try{
+			return Integer.parseInt(getString(key, fromDB, fromCatch));
+		}
+		catch(Exception e){
+			return -1;
+		}
+	}
+	
 	public static int getInteger(CONFIG_STR key, boolean fromDB){
 		try{
 			return Integer.parseInt(getString(key, fromDB));
+		}
+		catch(Exception e){
+			return -1;
+		}
+	}
+	
+	
+	public static int getInteger(CONFIG_STR key, boolean fromDB, boolean fromCatch){
+		try{
+			return Integer.parseInt(getString(key, fromDB, fromCatch));
 		}
 		catch(Exception e){
 			return -1;
@@ -181,6 +242,15 @@ public class CoreConfigReader {
 		}
 	}
 	
+	public static boolean getBoolean(CONFIG_STR key, boolean fromDB, boolean fromCatch){
+		try{
+			return Boolean.parseBoolean(getString(key, fromDB, fromCatch));
+		}
+		catch(Exception e){
+			return false;
+		}
+	}
+	
 	/**
 	 * Get the value of the key from properties
 	 * 
@@ -199,6 +269,15 @@ public class CoreConfigReader {
 	public static int getInteger(String ChannelId, String key, boolean fromDB){
 		try{
 			return Integer.parseInt(getString(ChannelId, key, fromDB));
+		}
+		catch(Exception e){
+			return -1;
+		}
+	}
+	
+	public static int getInteger(String ChannelId, String key, boolean fromDB, boolean fromCatch){
+		try{
+			return Integer.parseInt(getString(ChannelId, key, fromDB, fromCatch));
 		}
 		catch(Exception e){
 			return -1;

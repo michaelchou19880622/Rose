@@ -44,6 +44,8 @@
 				<value>com.bcs.core.bot.db.entity</value>
 				<value>com.bcs.core.pag.db.entity</value>
 				<value>com.bcs.core.taishin.circle.db.entity</value>
+				<value>com.bcs.core.taishin.circle.PNP.db.entity</value>
+				<value>com.bcs.core.linepoint.db.entity</value>
 			</array>
      	</property>
 		<property name="jpaVendorAdapter">
@@ -70,6 +72,9 @@
     </bean>
     
     <!-- ======= JDBC connection pool start ======= -->
+     <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">  
+		<property name="dataSource" ref="dataSource"></property>  
+	</bean> 
 	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
 	    <constructor-arg ref="hikariConfig" />
 	</bean>

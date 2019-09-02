@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" th:with="strList = ${ {'/BCS/JS/pagePNP2.base.js'} }">
+
+<head th:replace="/BCS/Views/Common/Head :: head ('Pnp List Page', ${strList})">
+</head>
+
+<body>
+    <header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+        <div th:replace="/BCS/Views/Common/Menu :: menu ('PagePNP2')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">PNP樣板訊息列表</h3>
+                    </header>
+
+                    <div class="CHBtnSet">
+                        <div class="CHRight"><input class="btn_add" id="toCreatePage" type="button" value="建立樣板訊息" style="cursor: pointer;"></div>
+                    </div>
+
+                   <header class="ContentHead">
+                   		<div class="CHTtl" style="display: inline">PNP訊息大開關</div>
+                   		<input type="radio" name="noticeSwitch" class="noticeSwitch" value="true" style="cursor: pointer;" checked="true" >開
+	                    <input type="radio" name="noticeSwitch" class="noticeSwitch" value="false" style="cursor: pointer;" >關
+	                    <input class="btn_save" id="btnNoticeSwitch" type="button" value="確認" style="cursor: pointer;">
+                    </header>
+						
+					<div class="mainFrame alignLeft" id="mainFrameId">
+                        <div id="tabs">
+                            <ul style="height:35px; background:#e9e9e9; border:0px;">
+                            </ul>
+                        </div>
+                        
+                        <table border="1" class="templateTable" id="templateMsgListTable" >
+                            <colgroup>
+                            	<col width="80">
+                                <col width="80">
+                                <col width="80">
+                                <col width="80">
+                                <col width="80">
+                                <col width="80">
+                                <col width="80">
+                                <col width="80">
+                            </colgroup>
+                            <tr class="templateTh">
+                            	<th>ID</th>
+                                <th>標題</th>
+                                <th>類型</th>
+                                <th>樣板開關</th>
+                                <th>宵禁時間</th>
+                                <th>建立時間</th>
+                                <th>建立人員</th>
+                                <th>複製/刪除</th>
+                            </tr>
+                            <tbody class="templateMsgTrTemplate">
+                                <tr class="templateTr" >
+                                	<td class="templateMsgId" style="text-align: center;"></td>
+                                    <td class="templateMsgImgTitle" style="text-align: center;">
+                                        <div>
+                                            <a href="templateMsgCreatePage" class="templateMsgTitle"></a>
+                                        </div>
+                                    </td>
+                                    <td class="templateMsgType" style="text-align: center;"></td>
+                                    <td class="templateMsgStatus" style="text-align: center;"></td>
+                                    <td class="templateMsgCurfewTime" style="text-align: center;"></td>
+                                    <td class="templateMsgCreateTime" style="text-align: center;"></td>
+                                    <td class="templateMsgCreateUser" style="text-align: center;"></td>
+                                    <td>
+                                        <input class="btn_copy" type="button" value="複製" style="cursor: pointer;">
+                                        <input class="btn_detele" type="button" value="刪除" style="cursor: pointer;" sec:authorize="hasAnyRole('ROLE_ADMIN')">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                     </div>
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

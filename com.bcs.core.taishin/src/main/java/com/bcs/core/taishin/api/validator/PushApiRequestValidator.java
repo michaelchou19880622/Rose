@@ -17,7 +17,9 @@ public class PushApiRequestValidator {
 		Date sendTimeSet = null;
 		JSONArray messageList = null;
 		JSONObject requestBody = new JSONObject(requestBodyString);
-		
+		 String serviceName = null;
+		//推播主題
+		 String pushTheme = null;
 		if(!requestBody.has("department"))
 			throw new IllegalArgumentException("Parameter 'department' is required.");
 		else if(requestBody.getString("department").equals(""))
@@ -25,6 +27,20 @@ public class PushApiRequestValidator {
 		else
 			department = requestBody.getString("department");
 		
+		 if(!requestBody.has("serviceName"))
+				throw new IllegalArgumentException("Parameter 'serviceName' is required.");
+			else if(requestBody.getString("serviceName").equals(""))
+				throw new IllegalArgumentException("Parameter 'serviceName' cannot be empty.");
+			else
+				serviceName = requestBody.getString("serviceName");
+		 if(!requestBody.has("pushTheme"))
+				throw new IllegalArgumentException("Parameter 'pushTheme' is required.");
+			else if(requestBody.getString("pushTheme").equals(""))
+				throw new IllegalArgumentException("Parameter 'pushTheme' cannot be empty.");
+			else
+				pushTheme = requestBody.getString("pushTheme");
+		
+		 
 		if(!requestBody.has("uid"))
 			throw new IllegalArgumentException("Parameter 'uid' is required.");
 		else {
@@ -83,7 +99,8 @@ public class PushApiRequestValidator {
 		pushApiModel.setSendTimeSet(sendTimeSet);
 		pushApiModel.setMessages(messageList);
 		pushApiModel.setTriggerTime(new Date());
-		
+		pushApiModel.setServiceName(serviceName);
+		pushApiModel.setPushTheme(pushTheme);
 		return;
 	}
 }

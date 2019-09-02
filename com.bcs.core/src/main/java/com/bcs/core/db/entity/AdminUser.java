@@ -18,6 +18,12 @@ public class AdminUser extends AbstractBcsEntity{
 		ROLE_ADMIN("ROLE_ADMIN","管理者", "manager"),
 		ROLE_EDIT("ROLE_EDIT", "編輯人員", "editor"),
 		ROLE_MARKET("ROLE_MARKET", "行銷人員", "marketing"),
+		ROLE_PNP_ADMIN("ROLE_PNP_ADMIN", "PNP系統管理者", "pnpAdmin"),
+		ROLE_PNP_INQUIRER("ROLE_PNP_INQUIRER", "PNP查詢者", "pnpInquirer"),
+		ROLE_PNP_EMPLOYEE("ROLE_PNP_EMPLOYEE", "PNP單位發送暨查詢者", "pnpEmployee"),
+		ROLE_LP_QUERIER("ROLE_LP_QUERIER", "LINE點報表查詢者", "lpQuerier"),
+		ROLE_LP_CREATOR("ROLE_LP_CREATOR", "LINE點發送建立者", "edit"),
+		ROLE_LP_JUDGER("ROLE_LP_JUDGER", "LINE點發送審核者", "lpJudger"),
 		;
 		
 		private String roleId;

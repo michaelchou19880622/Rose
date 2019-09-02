@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('Admin User Board Page', '/BCS/JS/page44.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page44')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form id="formAdminUser">
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl" id="fromTitle">會員UID管理</h3>
+                    </header>
+					
+                    <p>請輸入會員身分證字號</p>
+                    <div><input type="text" id="userID" />
+                    	<input  type ="button" id = "InquireUID" value="查詢UID"> 
+                    	<input  type ="button" id = "Unbind" value="解除綁定"> 
+                    </div>
+                    <a th:text="${#authentication.principal.username}" href="" id ='LoginID' style="display:none" >登入者 先生／小姐</a>
+                    <font size="4" class=CheckID></font>
+                    <br>
+                    <font size="10" class=showResult></font>
+                    
+                    <div id="dialog" title = "確認綁定解除"style="display:none">
+                    	<p id = showUserID><p>
+                    	<br>
+                    	<input  type ="button" id = "cancel" value="取消"> 
+                    	<input  type ="button" id = "determine" value="確定"> 
+                    	
+                    </div>
+                    
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

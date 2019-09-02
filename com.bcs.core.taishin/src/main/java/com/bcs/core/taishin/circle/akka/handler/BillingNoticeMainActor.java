@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.bcs.core.spring.ApplicationContextProvider;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsg;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeDetail;
@@ -20,6 +22,9 @@ public class BillingNoticeMainActor extends UntypedActor {
 	private final ActorRef expireRouterActor;
 	private final ActorRef curfewActor;
 	
+	/** Logger */
+	private static Logger logger = Logger.getLogger(BillingNoticeService.class);
+	
 	public BillingNoticeMainActor(){
 	    pushMessageRouterActor = new AkkaRouterFactory<BillingNoticePushMessageActor>(getContext(), BillingNoticePushMessageActor.class, true).routerActor;
 	    updateStatusRouterActor = new AkkaRouterFactory<BillingNoticeUpdateStatusActor>(getContext(), BillingNoticeUpdateStatusActor.class, true).routerActor;
@@ -35,6 +40,8 @@ public class BillingNoticeMainActor extends UntypedActor {
 			BillingNoticeService billingNoticeService = ApplicationContextProvider.getApplicationContext().getBean(BillingNoticeService.class);
 			BillingNoticeContentTemplateMsg template = billingNoticeMain.getTemplate();
 			boolean iscurfew = billingNoticeService.isCurfew(template, Calendar.getInstance());
+			logger.info("iscurfew1: " + iscurfew);
+			
 			if (iscurfew) {  //宵禁中
 				curfewActor.tell(billingNoticeMain, this.getSelf());
 			}else if (Calendar.getInstance().getTime().after(billingNoticeMain.getExpiryTime())) { // Expire
@@ -47,6 +54,8 @@ public class BillingNoticeMainActor extends UntypedActor {
 				List<BillingNoticeDetail> partition = null;
 				Integer arrayLength = details.size();
 				Integer pointer = 0;
+				
+				logger.info("detail1" + details.toString());
 				
 				while(pointer < arrayLength) {
 					Integer counter = 0;

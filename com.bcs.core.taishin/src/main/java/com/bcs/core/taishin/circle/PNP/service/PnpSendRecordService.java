@@ -1,0 +1,32 @@
+package com.bcs.core.taishin.circle.PNP.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.bcs.core.taishin.circle.PNP.db.entity.PnpSendRecord;
+import com.bcs.core.taishin.circle.PNP.db.repository.PnpSendRecordRepository;
+
+
+@Service
+public class PnpSendRecordService {
+	@Autowired
+	private PnpSendRecordRepository pnpSendRecordRepository;
+
+	public void save(PnpSendRecord pnpSend){
+		pnpSendRecordRepository.save(pnpSend);
+	}
+	
+	public List<PnpSendRecord> findByPnpMainId(Long pnpMainId){
+		return pnpSendRecordRepository.findByPnpMainId(pnpMainId);
+	}
+	
+	public void bulkPersist(PnpSendRecord pnpSend){
+		pnpSendRecordRepository.bulkPersist(pnpSend);
+	}
+	
+	public List<Object[]> findReportByPnpMainId(Long pnpMainId){
+	    return pnpSendRecordRepository.findReportByPnpMainId(pnpMainId);
+	}
+}

@@ -24,6 +24,24 @@ public class PushApiModel extends AbstractBcsEntity {
 	
 	private Date triggerTime;
 	
+	private String serviceName;
+	
+	//推播主題
+	private String pushTheme;
+	
+	
+	public String getServiceName() {
+		return serviceName;
+	}
+	public void setServiceName(String serviceName) {
+		this.serviceName = serviceName;
+	}
+	public String getPushTheme() {
+		return pushTheme;
+	}
+	public void setPushTheme(String pushTheme) {
+		this.pushTheme = pushTheme;
+	}
 	public String getDepartment() {
 		return department;
 	}

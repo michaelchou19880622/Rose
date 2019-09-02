@@ -127,7 +127,9 @@ public class SystemConfigService {
 				return systemConfig;
 			}
 		}
-		catch(Throwable e){}// Skip
+		catch(Throwable e){
+			logger.info("findSystemConfig Error:" + e.getMessage());
+		}// Skip
 		
 		return null;
 	}

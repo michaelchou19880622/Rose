@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/BCS/Views/Common/Head :: head ('帳務通知推送成效列表', '/BCS/JS/PageBNEffects.base.js')">
+</head>
+
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+
+    <div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('PageBNEffects')"></div>
+
+        <!-- Right Content -->
+        <div class="LyMain" role="main">
+            <form>
+                <section>
+                    <header class="ContentHead">
+                        <h3 class="CHTtl">帳務通知推送成效列表</h3>
+                    </header>
+
+                    <div class="CHBtnSet">
+                    	<div>
+	                    	<span>日期區間：</span>
+	                    	<div class="option date">
+	                        	<input type="text" 
+		                           	class="datepicker" 
+		                           	id="startDate" 
+		                           	placeholder="YYYY-MM-DD"/>
+	                       	</div>
+	                       	<span>~</span>
+	                       	<div class="option date">
+	                        	<input type="text" 
+		                        	class="datepicker" 
+		                           	id="endDate" 
+		                           	placeholder="YYYY-MM-DD"/>
+	                      	</div>
+	                      	<input class="btn_save query" type="button" value="查詢"  style="cursor: pointer;">
+	                    </div>
+	                    
+	                    <p style="color: #A1A7B5">※ 點擊「發送時間」以匯出詳細發送報表</p>
+	                    
+	                    <br></br>
+
+	                    <div class="CHLeft">
+                            <ul>
+                                <li class="CHLeftBtn">
+	                                <input class="btn prev" type="button" value="<" style="cursor: pointer;">
+	                                <span id="pageAndTotalPages">1/0</span>
+	                                <input class="btn next" type="button" value=">" style="cursor: pointer;">
+                                </li>
+                            </ul>
+                        </div>
+                        
+	                    <div class="CHRight">
+	                   		<a class="btn_add exportToExcel" style="cursor: pointer; padding: 7px 12px; text-decoration: none">匯出 EXCEL</a>
+	                   	</div>
+                    </div>
+                    
+                    <p class="MdTxtNotice01 MdAC pad10"></p>
+                    <div class="mainFrame" style="border: 0">
+                        <table border="1" id="tableBody">
+                            <colgroup>
+                            	<col width="180">
+                            	<col width="350">
+                            	<col width="150">
+                            	<col width="100">
+                            	<col width="100">
+                            	<col width="100">
+                           	</colgroup>
+                            <tr class="tableHeader">
+                                <th>發送時間</th>
+                                <th>產品名稱</th>
+                                <th>發送類型</th>
+                                <th>發送成功數</th>
+                                <th>發送失敗數</th>
+                                <th>發送數量</th>
+                            </tr>
+                            <tr class="sumTemplate" style="color:#3b4865;font-weight:bold;">
+                           		<td >總計</td>
+                           		<td ></td>
+                           		<td></td>
+                                <td class="completeSum"></td>
+                                <td class="failSum"></td>
+                                <td class="totalSum"></td>
+                           </tr>
+                            <tr class="dataTemplate">
+                                <td class="sendDate"></td>
+                                <td class="title" style="text-align:left;"></td>
+                                <td class="sendType"></td>
+                                <td class="completeCount"></td>
+                                <td class="failCount"></td>
+                                <td class="total"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </section>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

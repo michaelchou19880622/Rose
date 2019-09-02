@@ -1,14 +1,13 @@
 package com.bcs.core.taishin.circle.db.repository;
 
 import java.util.List;
+import java.util.Set;
 
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeDetail;
-import com.bcs.core.taishin.circle.db.entity.BillingNoticeMain;
 
 public interface BillingNoticeRepositoryCustom {
 
-	public List<BillingNoticeDetail> findDetailByStatusForUpdate(List<String> status, Long mainId);
-	public BillingNoticeDetail findFirstDetailByStatusForUpdate(String status, List<String> tempIds);
+	public void updateStatus(String procApName, List<String> tempIds, Set<Long>  allMainIds, List<BillingNoticeDetail> allDetails);
 	
-	public BillingNoticeMain findFirstMainByStatusForUpdate(String status, List<String> tempIds);
+	public void batchInsertBillingNoticeDetail(final List<BillingNoticeDetail> list);
 }

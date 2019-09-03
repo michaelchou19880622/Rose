@@ -53,7 +53,7 @@ public class PNPFtpService {
             PNPFtpSetting pnpFtpSetting = PNPFtpSetting.build(type);
 
             /* 如果不是開發環境則進行資源密碼系統取得帳號密碼 */
-            if (CoreConfigReader.isPNPFtpTypeDevelop()) {
+            if (!CoreConfigReader.isPNPFtpTypeDevelop()) {
                 pnpFtpSetting = useTrendPwMgmt(pnpFtpSetting);
             }
             ftpSettings.put(type.getSource(), pnpFtpSetting);

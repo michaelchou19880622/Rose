@@ -98,7 +98,11 @@ public class PnpReportExcelService {
                             break;
                         case 3:
                             /* 發送通路(1.2.3.4.) */
-                            row.createCell(i).setCellValue(englishSourceToChinese(value));
+                            String[] valueArray = value.split(";");
+                            String stage = valueArray[0];
+                            String source = valueArray[1];
+                            String sourceChinese = englishSourceToChinese(source);
+                            row.createCell(i).setCellValue(String.format("%s_%s", stage, sourceChinese));
                             break;
                         case 2:
                             /* 通路流(1.2.3.4.) */
@@ -161,6 +165,7 @@ public class PnpReportExcelService {
             row.createCell(24).setCellValue("是否國際簡訊");
             row.createCell(25).setCellValue("資料建立日期");
             row.createCell(26).setCellValue("資料更新日期");
+            row.createCell(27).setCellValue("");
 
             this.columnSize = row.getLastCellNum();
 

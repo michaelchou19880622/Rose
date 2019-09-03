@@ -76,7 +76,7 @@ public class PNPMaintainAccountModelService {
                 "                select " +
                 "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
                 "                        a.source_system, " +
-                "                        d.proc_flow, " +
+                "                        nvl(d.proc_stage, '') + ';' + nvl(d.proc_flow, '') as proc, " +
                 "                        a.pathway, " +
                 "                        a.account, " +
                 "                        a.pcc_code, " +
@@ -111,7 +111,7 @@ public class PNPMaintainAccountModelService {
                 "                select " +
                 "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
                 "                        a.source_system, " +
-                "                        d.proc_flow, " +
+                "                        nvl(d.proc_stage, '') + ';' + nvl(d.proc_flow, '') as proc, " +
                 "                        a.pathway, " +
                 "                        a.account, " +
                 "                        a.pcc_code, " +
@@ -146,7 +146,7 @@ public class PNPMaintainAccountModelService {
                 "                select " +
                 "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
                 "                        a.source_system, " +
-                "                        d.proc_flow, " +
+                "                        nvl(d.proc_stage, '') + ';' + nvl(d.proc_flow, '') as proc, " +
                 "                        a.pathway, " +
                 "                        a.account, " +
                 "                        a.pcc_code, " +
@@ -181,7 +181,7 @@ public class PNPMaintainAccountModelService {
                 "                select " +
                 "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
                 "                        a.source_system, " +
-                "                        d.proc_flow, " +
+                "                        nvl(d.proc_stage, '') + ';' + nvl(d.proc_flow, '') as proc, " +
                 "                        a.pathway, " +
                 "                        a.account, " +
                 "                        a.pcc_code, " +
@@ -240,7 +240,6 @@ public class PNPMaintainAccountModelService {
         logger.info("str1: " + sb.toString());
         Query query = entityManager.createNativeQuery(sb.toString()).setParameter(1, startDate).setParameter(2, endDate);
         logger.info("query:" + query.toString());
-
         List<Object[]> list = query.getResultList();
 
         Map<String, List<String>> map = new LinkedHashMap<>();

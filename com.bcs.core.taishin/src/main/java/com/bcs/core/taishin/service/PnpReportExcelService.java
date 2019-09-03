@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -98,7 +99,9 @@ public class PnpReportExcelService {
                             break;
                         case 3:
                             /* 發送通路(1.2.3.4.) */
+                            logger.info("Proc: " + value);
                             String[] valueArray = value.split(";");
+                            logger.info("Proc Array: " + Arrays.toString(valueArray));
                             String stage = valueArray[0];
                             String source = valueArray[1];
                             String sourceChinese = englishSourceToChinese(source);
@@ -165,7 +168,6 @@ public class PnpReportExcelService {
             row.createCell(24).setCellValue("是否國際簡訊");
             row.createCell(25).setCellValue("資料建立日期");
             row.createCell(26).setCellValue("資料更新日期");
-            row.createCell(27).setCellValue("");
 
             this.columnSize = row.getLastCellNum();
 

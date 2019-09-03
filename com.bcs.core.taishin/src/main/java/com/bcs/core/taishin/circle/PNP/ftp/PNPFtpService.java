@@ -52,6 +52,7 @@ public class PNPFtpService {
         for (PNPFTPType type : PNPFTPType.values()) {
             PNPFtpSetting pnpFtpSetting = PNPFtpSetting.build(type);
 
+            /* 如果不是開發環境則進行資源密碼系統取得帳號密碼 */
             if (!CoreConfigReader.isPNPFtpTypeDevelop()) {
                 pnpFtpSetting = useTrendPwMgmt(pnpFtpSetting);
             }
@@ -60,6 +61,11 @@ public class PNPFtpService {
         logger.info("initFtpSettings...OK");
     }
 
+    /**
+     * 至資源密碼系統下載帳號密碼
+     * @param pnpFtpSetting pnpFtpSetting
+     * @return new PNPFtpSetting
+     */
     private PNPFtpSetting useTrendPwMgmt(PNPFtpSetting pnpFtpSetting) {
 
         String host = pnpFtpSetting.getHost();
@@ -72,6 +78,7 @@ public class PNPFtpService {
         logger.info(String.format("loginFTP: %s PWD: %s", trendPwMgmt.get("uid"), trendPwMgmt.get("pwd")));
         pnpFtpSetting.setAccount(trendPwMgmt.get("uid"));
         pnpFtpSetting.setPassword(trendPwMgmt.get("pwd"));
+        logger.info("Download Side FTP Resource ID Password Login Done!!");
         logger.info("下載段資源密碼系統的帳號密碼登入完成");
 
         String smsHost = pnpFtpSetting.getSmsHost();
@@ -83,6 +90,7 @@ public class PNPFtpService {
         logger.info(String.format("login FTP: %s PWD: %s", trendPwMgmtSMS.get("uid"), trendPwMgmtSMS.get("pwd")));
         pnpFtpSetting.setSmsAccount(trendPwMgmtSMS.get("uid"));
         pnpFtpSetting.setSmsPassword(trendPwMgmtSMS.get("pwd"));
+        logger.info("Upload Side FTP Resource ID Password Login Done!!");
         logger.info("上傳段資源密碼系統的帳號密碼登入完成");
 
         return pnpFtpSetting;
@@ -125,25 +133,25 @@ public class PNPFtpService {
 
     /**
      * 重新載入參數設定資料
+     * 透過App Code Res Code 取得帳號密碼
      */
     private Map<String, String> loadFtp(String host, String serverHostName, int serverHostNamePort, String APPCode, String RESCode) {
-        Map<String, String> data = new HashMap<>();
-        logger.info("host : " + host);
-        logger.info("serverHostName : " + serverHostName);
-        logger.info("serverHostNamePort : " + serverHostNamePort);
-        logger.info("APPCode : " + APPCode);
-        logger.info("RESCode : " + RESCode);
-        logger.info("is64Bit : " + is64Bit);
+        logger.info("Host               : " + host);
+        logger.info("ServerHostName     : " + serverHostName);
+        logger.info("ServerHostNamePort : " + serverHostNamePort);
+        logger.info("APPCode            : " + APPCode);
+        logger.info("RESCode            : " + RESCode);
+        logger.info("Is64Bit            : " + is64Bit);
         try {
-            TrendPwMgmt lPwMgmt = new TrendPwMgmt(serverHostName, serverHostNamePort,
-                    APPCode, RESCode, is64Bit);
-            data.put("uid", StringUtils.trimToEmpty(lPwMgmt.getUserId()));
-            data.put("pwd", StringUtils.trimToEmpty(lPwMgmt.getPassword()));
-            logger.info("Host:" + host + " / GetUID:" + data.get("uid") + " / GetPWD:"
-                    + data.get("pwd"));
+            /* 透過TrendPwMgmt 取得帳號密碼 */
+            TrendPwMgmt trendPwMgmt = new TrendPwMgmt(serverHostName, serverHostNamePort, APPCode, RESCode, is64Bit);
+            Map<String, String> data = new HashMap<>();
+            data.put("uid", StringUtils.trimToEmpty(trendPwMgmt.getUserId()));
+            data.put("pwd", StringUtils.trimToEmpty(trendPwMgmt.getPassword()));
+            logger.info(String.format("Host: %s, Uid: %s, Pwd: %s", host, data.get("uid"), data.get("pwd")));
             return data;
         } catch (Exception e) {
-            logger.error("TrendPwMgmt exception:" + e.getMessage());
+            logger.error("trendPwMgmt exception:", e);
             throw new RuntimeException(e);
         }
     }
@@ -179,46 +187,52 @@ public class PNPFtpService {
             String account = setting.getAccount();
             String password = setting.getPassword();
             // 第一次登入
+            logger.info("FTP Client Connecting 1...");
             if (account != null && !account.trim().isEmpty() && password != null && !password.trim().isEmpty()) {
                 lStatus = pFTPClient.login(account, password);
             }
 
             if (lStatus) {
-                logger.info(String.format("login FTP: %s 資源密碼系統的帳號密碼登入完成", setting.getHost()));
+                logger.info(String.format("FTP Host Name: %s Login Success!!", setting.getHost()));
                 return true;
             } else {
-                logger.error(String.format("login FTP: %s 資源密碼系統的帳號密碼登入失敗 APP[%s] RES[%s]，重新載入FTP連線參數!",
+                logger.error(String.format("FTP Host Name: %s Login Fail!! APP[%s] RES[%s]，重新載入FTP連線參數!",
                         setting.getHost(), setting.getAPPCode(), setting.getRESCode()));
             }
 
             // T 登入失敗重新載入一次設定
             pFTPClient.disconnect();
+            logger.info("FTP Client Disconnect!!");
             // T 重新取得FTP 參數設定值
-            Map<String, String> trendPwMgmt = loadFtp(setting);
-            logger.info("loginFTP:" + trendPwMgmt.get("uid") + " PWD:" + trendPwMgmt.get("pwd"));
+            Map<String, String> ftpSetting = loadFtp(setting);
+            logger.info(String.format("ID: %s, PWD: %s", ftpSetting.get("uid"), ftpSetting.get("pwd")));
+            logger.info("FTP Client Connecting 2...");
             pFTPClient.connect(setting.getHost(), setting.getPort());
-            lStatus = pFTPClient.login(trendPwMgmt.get("uid"), trendPwMgmt.get("pwd"));
+            lStatus = pFTPClient.login(ftpSetting.get("uid"), ftpSetting.get("pwd"));
 
             if (lStatus) {
-                logger.info(String.format("login FTP: %s 資源密碼系統的帳號密碼登入完成", setting.getHost()));
+                logger.info(String.format("FTP Host Name: %s Login Success!!", setting.getHost()));
             } else {
-                logger.error(String.format("login FTP: %s 資源密碼系統的帳號密碼登入失敗 APP[%s] RES[%s]，重新載入FTP連線參數!",
+                logger.error(String.format("FTP Host Name: %s Login Fail!! APP[%s] RES[%s]，重新載入FTP連線參數!",
                         setting.getHost(), setting.getAPPCode(), setting.getRESCode()));
             }
 
             // T 以系統預設密碼登入
             if (!lStatus) {
-                lStatus = pFTPClient.login("ACCOUNT", "PASSWORD");
+                final String DEF_ID = "ACCOUNT";
+                final String DEF_PW = "PASSWORD";
+                lStatus = pFTPClient.login(DEF_ID, DEF_PW);
                 if (lStatus) {
-                    logger.info("loginFTP:" + setting.getHost() + "原系統記錄帳號密碼登入完成");
+                    logger.info(String.format("FTP Host Name: %s Login Success with Default ID and Password!!", setting.getHost()));
                 } else {
-                    logger.error("loginFTP:" + setting.getHost() + "原系統記錄帳號密碼登入失敗，停止執行");
+                    logger.error(String.format("FTP Host Name: %s Login Fail with Default ID and Password!! Stop Login!!", setting.getHost()));
                 }
             }
             return lStatus;
 
         } catch (Exception e) {
             logger.error("loginFTP:" + e.getMessage());
+            logger.error("Exception", e);
             return false;
         }
     }

@@ -6,6 +6,7 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
 import com.bcs.core.taishin.circle.PNP.db.repository.PNPMaintainAccountModelCustom;
 import com.bcs.core.taishin.circle.PNP.db.repository.PNPMaintainAccountModelRepository;
 import com.bcs.core.taishin.circle.db.service.OracleService;
+import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -214,7 +215,6 @@ public class PNPMaintainUIService {
         logger.info("rowEnd:" + rowEnd);
         Query query = entityManager.createNativeQuery(sb.toString()).setParameter(1, startDate).setParameter(2, endDate)
                 .setParameter(3, rowStart).setParameter(4, rowEnd);
-        logger.info("query:" + query.toString());
 
         List<Object[]> list = query.getResultList();
 
@@ -234,7 +234,7 @@ public class PNPMaintainUIService {
                 }
             }
         }
-        logger.info("map1: " + map.toString());
+        logger.info(new GsonBuilder().serializeNulls().setPrettyPrinting().create().toJson(map));
 
         return map;
     }

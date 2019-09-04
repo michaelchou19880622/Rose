@@ -273,7 +273,6 @@ public class LinePointPushApiController {
 //			}
 			
 			// ----- set main information -----
-			logger.info("[LinePoint API] Request Body:" + linePointDetail);
 			String title = linePointDetail.getCampName();
 			LinePointMain linePointMain = linePointMainService.findByTitle(title);
 			if(linePointMain == null) {
@@ -284,6 +283,7 @@ public class LinePointPushApiController {
 				linePointMain.setTotalCount(0L);
 				linePointMain.setTotalAmount(0L);
 				linePointMain.setSuccessfulAmount(0L);
+				linePointMain.setSuccessfulCount(0L);
 				linePointMain.setFailedCount(0L);
 				
 				linePointMain.setSerialId("API_" + title);
@@ -292,11 +292,13 @@ public class LinePointPushApiController {
 				linePointMain.setDepartmentFullName(linePointDetail.getDepartment());
 				linePointMainService.save(linePointMain);
 			}
+			logger.info("linePointMain:" + linePointMain);
 			
 			// ----- set detail information -----
 			linePointDetail.setLinePointMainId(linePointMain.getId());
 			linePointDetail.setDetailType(LinePointDetail.DETAIL_TYPE_ISSUE_API);
 			linePointDetail.setTriggerTime(new Date());
+			logger.info("linePointDetail:" + linePointDetail);
 			
 			// ----------- validation --------------
 			try {
@@ -356,14 +358,13 @@ public class LinePointPushApiController {
 			JSONObject responseObject = null;
 			try {
 				responseObject = restfulUtil.execute();
-				logger.info("responseObject:"+responseObject.toString());
 				
 				String Id = responseObject.getString("transactionId");
 				Long Time = responseObject.getLong("transactionTime");
 				String Type = responseObject.getString("transactionType");
-				Integer Amount = responseObject.getInt("transactionAmount");					
+				Integer Amount = responseObject.getInt("transactionAmount");
 				Integer Balance = responseObject.getInt("balance");
-
+				
 				linePointDetail.setTranscationId(Id);
 				linePointDetail.setTranscationTime(Time);
 				linePointDetail.setTranscationType(Type);
@@ -375,7 +376,7 @@ public class LinePointPushApiController {
 				linePointDetailService.save(linePointDetail);
 				
 				linePointMain.setSuccessfulAmount(linePointMain.getSuccessfulAmount() + Amount);
-				linePointMain.setSuccessfulCount(linePointMain.getSuccessfulCount() + 1);
+				linePointMain.setSuccessfulCount(linePointMain.getSuccessfulCount() + 1L);
 				linePointMainService.save(linePointMain);
 			} catch (HttpClientErrorException e) {
 				logger.info("[LinePointApi] Status code: " + e.getStatusCode());
@@ -386,9 +387,13 @@ public class LinePointPushApiController {
 				linePointDetail.setSendTime(new Date());
 				linePointDetailService.save(linePointDetail);
 				
-				linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
+				linePointMain.setFailedCount(linePointMain.getFailedCount() + 1L);
 				linePointMainService.save(linePointMain);
+<<<<<<< HEAD
 				return new ResponseEntity<>(e.getResponseBodyAsString(), HttpStatus.OK); // e.getStatusCode()
+=======
+				return new ResponseEntity<>(e.getResponseBodyAsString(), HttpStatus.OK); //e.getStatusCode()
+>>>>>>> 03d0acfd3dcc3b66d9d25b4d032efe7035ce2353
 			}
 			return new ResponseEntity<>(responseObject.toString(), HttpStatus.OK);
 		} catch(Exception e) {
@@ -517,7 +522,6 @@ public class LinePointPushApiController {
 			JSONObject responseObject = null;
 			try {
 				responseObject = restfulUtil.execute();
-				logger.info("responseObject:"+responseObject.toString());
 				
 				String Id = responseObject.getString("transactionId");
 				Long Time = responseObject.getLong("transactionTime");
@@ -537,6 +541,10 @@ public class LinePointPushApiController {
 				linePointDetail.setStatus(LinePointDetail.STATUS_SUCCESS);
 				linePointDetail.setSendTime(new Date());
 				linePointDetailService.save(linePointDetail);
+				
+//				linePointMain.setSuccessfulAmount(linePointMain.getSuccessfulAmount() + Amount);
+//				linePointMain.setSuccessfulCount(linePointMain.getSuccessfulCount() - 1L);
+//				linePointMainService.save(linePointMain);
 			} catch (HttpClientErrorException e) {
 				logger.info("[LinePointApi] Status code: " + e.getStatusCode());
 				logger.info("[LinePointApi]  Response body: " + e.getResponseBodyAsString());

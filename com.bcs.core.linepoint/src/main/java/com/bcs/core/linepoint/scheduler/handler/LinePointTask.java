@@ -89,7 +89,6 @@ public class LinePointTask implements Job {
 			JSONObject responseObject = null;
 			try {
 				responseObject = restfulUtil.execute();
-				logger.info("responseObject:"+responseObject.toString());
 				
 				String Id = responseObject.getString("transactionId");
 				Long Time = responseObject.getLong("transactionTime");

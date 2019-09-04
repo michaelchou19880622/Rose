@@ -174,7 +174,6 @@ public class LinePointApiService {
 			JSONObject responseObject = null;
 			try {
 				responseObject = restfulUtil.execute();
-				logger.info("responseObject:"+responseObject.toString());
 				
 				String accessToken = responseObject.getString("access_token");
 				logger.info("access_token:"+accessToken);

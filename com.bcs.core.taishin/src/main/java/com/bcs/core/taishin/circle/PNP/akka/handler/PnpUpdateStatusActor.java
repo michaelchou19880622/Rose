@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 /**
  * 更新狀態Actor
  *
@@ -18,11 +20,12 @@ import java.util.List;
  */
 @Slf4j
 public class PnpUpdateStatusActor extends UntypedActor {
+	private static Logger logger = Logger.getLogger(PnpUpdateStatusActor.class);
     @Override
     public void onReceive(Object object) {
-        log.info("PnpUpdateStatusActor Receive!!");
+    	logger.info("PnpUpdateStatusActor Receive!!");
         if (object instanceof PnpDetail) {
-            log.info("Object instanceof PnpDetail!!");
+        	logger.info("Object instanceof PnpDetail!!");
             PnpService pnpService = ApplicationContextProvider.getApplicationContext().getBean(PnpService.class);
             PnpDetail pnpDetail = (PnpDetail) object;
             saveResultAndUpdateSendTime(pnpService, pnpDetail);
@@ -45,7 +48,7 @@ public class PnpUpdateStatusActor extends UntypedActor {
      */
     private void updateStatus(PnpService pnpService, PnpDetail pnpDetail) {
         if (checkCanUpdateStatusToComplete(pnpDetail)) {
-            log.info(String.format("Update Status To Complete!! Main Id: %s, Detail Id: %s", pnpDetail.getPnpMainId(), pnpDetail.getPnpDetailId()));
+        	logger.info(String.format("Update Status To Complete!! Main Id: %s, Detail Id: %s", pnpDetail.getPnpMainId(), pnpDetail.getPnpDetailId()));
             pnpService.updatePnpMainStatusComplete(pnpDetail.getPnpMainId(), pnpDetail.getSource(), pnpDetail.getProcStage());
         }
     }
@@ -63,7 +66,7 @@ public class PnpUpdateStatusActor extends UntypedActor {
         status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
         status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_WAIT);
         status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_SCHEDULED);
-        log.info(String.format("Check Status: %s, Can Update: %s", pnpDetail.getStatus(), !status.contains(pnpDetail.getStatus())));
+        logger.info(String.format("Check Status: %s, Can Update: %s", pnpDetail.getStatus(), !status.contains(pnpDetail.getStatus())));
         return !status.contains(pnpDetail.getStatus());
     }
 }

@@ -166,6 +166,9 @@ $(function() {
     // do Send
     var btn_sendFunc = function() {
         var linePointMainId = $(this).attr('linePointId');
+        if(!linePointMainId){
+        	return;
+        }
         console.info('btn_sendFunc linePointMainId:' + linePointMainId);
 
         // warning while actionText = Send
@@ -201,7 +204,6 @@ $(function() {
 			
 			// get time data
 			$('.dataTemplate').remove();
-			$('.sumTemplate').remove();
 			startDate = $('#startDate').val();
 			endDate = $('#endDate').val();
 			

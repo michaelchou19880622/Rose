@@ -388,7 +388,7 @@ public class LinePointPushApiController {
 				
 				linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
 				linePointMainService.save(linePointMain);
-				return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+				return new ResponseEntity<>(e.getResponseBodyAsString(), HttpStatus.OK); // e.getStatusCode()
 			}
 			return new ResponseEntity<>(responseObject.toString(), HttpStatus.OK);
 		} catch(Exception e) {
@@ -545,7 +545,7 @@ public class LinePointPushApiController {
 				linePointDetail.setStatus(LinePointDetail.STATUS_FAIL);
 				linePointDetail.setSendTime(new Date());
 				linePointDetailService.save(linePointDetail);
-				return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+				return new ResponseEntity<>(e.getResponseBodyAsString(), HttpStatus.OK); //e.getStatusCode()
 			}
 			return new ResponseEntity<>(responseObject.toString(), HttpStatus.OK);
 		} catch(Exception e) {

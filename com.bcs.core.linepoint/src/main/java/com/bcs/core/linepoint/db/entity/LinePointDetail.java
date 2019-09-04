@@ -55,6 +55,14 @@ public class LinePointDetail extends AbstractBcsEntity {
 	private String note;
 	@Column(name = "CANCEL_TRANSCATION_ID", columnDefinition="varchar(20)")
 	private String cancelTranscationId;	
+
+	// Push Information
+	@Column(name = "STATUS", columnDefinition="nvarchar(50)")
+	private String status;
+	@Column(name = "TRIGGER_TIME")
+	private Date triggerTime;
+	@Column(name = "SEND_TIME")
+	private Date sendTime;
 	
 	// Post Model
 	@Column(name = "UID", columnDefinition="varchar(50)")
@@ -65,14 +73,6 @@ public class LinePointDetail extends AbstractBcsEntity {
 	private Long applicationTime;
 	@Column(name = "AMOUNT")
 	private Long amount;
-	
-	// Push Information
-	@Column(name = "STATUS", columnDefinition="nvarchar(50)")
-	private String status;
-	@Column(name = "TRIGGER_TIME")
-	private Date triggerTime;
-	@Column(name = "SEND_TIME")
-	private Date sendTime;
 	
 	// Success Response Model
 	@Column(name = "TRANSCATION_ID", columnDefinition="varchar(20)")

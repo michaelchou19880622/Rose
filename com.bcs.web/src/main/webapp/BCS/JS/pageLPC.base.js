@@ -340,8 +340,6 @@ $(function(){
     }
 	
 	
-	
-
 	// ---- Send Message ----
 	// SendMessage:Validator
 	var sendingMsgValidator = $('#formSendGroup').validate({
@@ -885,26 +883,36 @@ $(function(){
 //        }
 
         var postData = {};
+
+        // Type Information
         postData.sendType = 'BCS';
+        // modifyUser
+        // modifyTime
         postData.title = title;
-        postData.pccCode = pccCode;
         postData.serialId = serialId;
+        postData.pccCode = pccCode;
+        // deparmentFullName
+        postData.status = 'IDLE';
         postData.sendTimingType = sendTimingType;
         postData.sendAmountType = sendAmountType;
+        postData.sendTimingTime = sendTimingTime;
         postData.amount = amount;
         postData.doCheckFollowage = doCheckFollowage;
         postData.doAppendMessage = doAppendMessage;
+        postData.allowToSend = false;
         postData.appendMessageId = draftMsgId;
         postData.linePointSendGroupId = sendGroupId;
+        // sendStartTime
         
+        // Count/Amount Information
         postData.totalCount = totalCount;
         postData.totalAmount = totalAmount;
         postData.successfulCount = 0;
         postData.successfulAmount = 0;
         postData.failedCount = 0;
-        postData.allowToSend = false;
-        postData.status = 'IDLE';
-        postData.sendTimingTime = sendTimingTime;
+        
+        
+        
         
         console.info('postData', postData);
         

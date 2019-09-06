@@ -69,6 +69,43 @@ public class BCSPNPMaintainController extends BCSBaseController {
         return BcsPageEnum.PNPUnicaAccountCreatePage.toString();
     }
 
+    /**
+     * 透過員工代碼查詢員工資訊
+     *
+     * @param id Id
+     * @return 員工資訊
+     */
+    @ResponseBody
+    @GetMapping("/pnpAdmin/getEmpAccountInfo")
+    public ResponseEntity<?> getEmpAccountInfo(@RequestParam("id") String id) {
+        try {
+            if (StringUtils.isBlank(id)) {
+                logger.info("Employee ID is Blank!!");
+                return new ResponseEntity<>("{}", HttpStatus.OK);
+            }
+            logger.info("Employee ID is " + id);
+
+            TaishinEmployee taishinEmployee = oraclePnpService.findByEmployeeId(id);
+
+            return new ResponseEntity<>(taishinEmployee, HttpStatus.OK);
+        } catch (BcsNoticeException be) {
+            logger.error(ErrorRecord.recordError(be));
+            return new ResponseEntity<>(be.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+        } catch (Exception e) {
+            logger.error(ErrorRecord.recordError(e));
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 透過員工代碼查詢員工資訊
+     *
+     * @param request    request
+     * @param response   response
+     * @param customUser
+     * @param empId      員工ID
+     * @return 員工資訊
+     */
     @GetMapping(value = "/pnpAdmin/getEmpAccount", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<?> getEmpAccount(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
@@ -82,16 +119,8 @@ public class BCSPNPMaintainController extends BCSBaseController {
 
             logger.info("getEmpAccount empId=" + empId);
             TaishinEmployee result;
-            try {
-                result = oraclePnpService.findByEmployeeId(empId);
-            } catch (Exception e) {
-                throw new BcsNoticeException("The Employee Id Is Not Correct!");
-            }
-
-            if (result == null || StringUtils.isBlank(result.getDivisionName())) {
-                throw new BcsNoticeException("The Employee Id Is Not Correct!");
-            }
-
+            result = oraclePnpService.findByEmployeeId(empId);
+            /* 更新時間及更新人員 */
             result.setModifyTime(new Date());
             result.setModifyUser(empId);
             oraclePnpService.save(result);

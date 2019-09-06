@@ -28,14 +28,12 @@ import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpSetting;
 import com.bcs.core.utils.ErrorRecord;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.primitives.Chars;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -304,6 +302,7 @@ public class LoadFtpPnpDataTask {
                     logger.info("Valid WhiteList Account PCode Success!! ");
                     // 檢核白名單檔名上的帳號是否與來源對應
                     List<String> fileContents = IOUtils.readLines(targetStream, encoding);
+                    logger.info("File Content List : " + fileContents.toString());
                     // 依來源解成各格式
                     List<Object> pnpMains = parseFtpFile(source, fileName, fileContents);
                     if (pnpMains == null || pnpMains.isEmpty()) {
@@ -313,14 +312,17 @@ public class LoadFtpPnpDataTask {
                     }
                     logger.info("Valid WhiteList Content Success!! ");
                     mains.addAll(pnpMains);
+
+                } catch (Exception e) {
+                    logger.warn("Exception", e);
                 }
             }
             saveDraftToDatabaseBySource(source, mains);
             removeFtpFile(pnpFtpSetting, lReturnDataMap);
 
         } catch (Exception ex) {
-            logger.error("Error: " + ex.getMessage());
             logger.error(ex);
+            logger.error("Exception", ex);
         }
     }
 
@@ -328,7 +330,7 @@ public class LoadFtpPnpDataTask {
      * 3. Save Draft To Database By Source
      *
      * @param source source
-     * @param mains mains
+     * @param mains  mains
      */
     private void saveDraftToDatabaseBySource(String source, List<Object> mains) {
         switch (source) {
@@ -655,6 +657,7 @@ public class LoadFtpPnpDataTask {
      * @see this#parseDataFlow
      */
     private List<Object> parseFtpFile(String source, String origFileName, List<String> fileContents) throws Exception {
+        logger.info("Source: " + source);
         switch (source) {
             case AbstractPnpMainEntity.SOURCE_MITAKE:
                 return parseMitakeFiles(origFileName, fileContents);
@@ -685,8 +688,9 @@ public class LoadFtpPnpDataTask {
             logger.error("parseMingFiles fileContents.isEmpty");
             return Collections.emptyList();
         }
-
+        logger.info("fileContent List Size: " + fileContents.size());
         String[] contentSp = fileContents.get(0).split(MING_TAG, 9);
+        logger.info("Content Array: " + Arrays.toString(contentSp));
         String content1 = contentSp[2];
         PNPMaintainAccountModel accountModel = validateWhiteListContent(AbstractPnpMainEntity.SOURCE_MING, origFileName, content1);
         logger.info("accountModel1:" + accountModel);
@@ -742,7 +746,9 @@ public class LoadFtpPnpDataTask {
             logger.error("parseMitakeFiles fileContents.isEmpty");
             return Collections.emptyList();
         }
+        logger.info("fileContent List Size: " + fileContents.size());
         String[] contentSp = fileContents.get(1).split(TAG, 4);
+        logger.info("Content Array: " + Arrays.toString(contentSp));
         String content = contentSp[3];
         PNPMaintainAccountModel accountModel = validateWhiteListContent(AbstractPnpMainEntity.SOURCE_MITAKE, origFileName, content);
         if (null == accountModel) {
@@ -750,7 +756,9 @@ public class LoadFtpPnpDataTask {
             return Collections.emptyList();
         }
         String header = fileContents.get(0);
+        logger.info("Header Content      : " + header);
         String[] splitHeaderData = header.split(TAG, 6);
+        logger.info("Header Content Array: " + Arrays.toString(splitHeaderData));
         String groupID = splitHeaderData[0];
         String username = splitHeaderData[1];
         String userPassword = splitHeaderData[2];
@@ -798,7 +806,9 @@ public class LoadFtpPnpDataTask {
             logger.error("parseEvery8DFiles fileContents.isEmpty");
             return Collections.emptyList();
         }
+        logger.info("fileContent List Size: " + fileContents.size());
         String[] contentSp = fileContents.get(1).split(TAG, 10);
+        logger.info("Content Array: " + Arrays.toString(contentSp));
         String content = contentSp[3];
         PNPMaintainAccountModel accountModel = validateWhiteListContent(AbstractPnpMainEntity.SOURCE_EVERY8D, origFileName, content);
         if (null == accountModel) {
@@ -807,7 +817,9 @@ public class LoadFtpPnpDataTask {
         }
 
         String header = fileContents.get(0);
+        logger.info("Header Content      : " + header);
         String[] splitHeaderData = header.split(TAG, 7);
+        logger.info("Header Content Array: " + Arrays.toString(splitHeaderData));
         String subject = splitHeaderData[0];
         String userId = splitHeaderData[1];
         String password = splitHeaderData[2];
@@ -861,8 +873,9 @@ public class LoadFtpPnpDataTask {
             logger.error("parseUnicaFiles fileContents.isEmpty");
             return Collections.emptyList();
         }
-
+        logger.info("fileContent List Size: " + fileContents.size());
         String[] contentSp = fileContents.get(1).split(TAG, 10);
+        logger.info("Content Array: " + Arrays.toString(contentSp));
         String content1 = contentSp[3];
         PNPMaintainAccountModel accountModel = validateWhiteListContent(AbstractPnpMainEntity.SOURCE_UNICA, origFileName, content1);
         if (null == accountModel) {
@@ -871,7 +884,9 @@ public class LoadFtpPnpDataTask {
         }
 
         String header = fileContents.get(0);
+        logger.info("Header Content      : " + header);
         String[] splitHeaderData = header.split(TAG, 7);
+        logger.info("Header Content Array: " + Arrays.toString(splitHeaderData));
         String subject = splitHeaderData[0];
         String userId = splitHeaderData[1];
         String password = splitHeaderData[2];
@@ -1162,7 +1177,7 @@ public class LoadFtpPnpDataTask {
     private boolean validateWhiteListAccountPccode(String source, String fileName) {
         logger.info(String.format("Source: %s, FileName: %s", source, fileName));
         if (!whiteListValidate) {
-            logger.info("======跳過白名單AccountPccode檢核======");
+            logger.info("====== Ignore Valid Account Pccode ======");
             return true;
         }
 
@@ -1173,10 +1188,14 @@ public class LoadFtpPnpDataTask {
          * 3: String comeTime
          *  */
         String[] fileNameSp = fileName.split("_");
+        logger.info("fileName Array: " + Arrays.toString(fileNameSp));
         String sourceSystem = fileNameSp[1];
         String account = fileNameSp[2];
 
         List<PNPMaintainAccountModel> accountList = pnpMaintainAccountModelRepository.findByAccountAndSourceSystem(account, sourceSystem);
+        if (accountList != null) {
+            logger.info("Find Account List Size: " + accountList.size());
+        }
         return CollectionUtils.isNotEmpty(accountList);
     }
 
@@ -1272,7 +1291,7 @@ public class LoadFtpPnpDataTask {
     private static void printCharArrayCode(String str) {
         char[] contentArray = str.toCharArray();
         StringBuilder sb = new StringBuilder();
-        for(char c : contentArray){
+        for (char c : contentArray) {
             sb.append((int) c);
             sb.append(',');
         }

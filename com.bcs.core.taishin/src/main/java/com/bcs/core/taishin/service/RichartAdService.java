@@ -54,15 +54,20 @@ public class RichartAdService {
 			throw new Exception("NameNull");
 		}
 		adminUser.setUserName(name);
-
+		
 		String roseline = model.getRoseline();
+		logger.info("roseline = " + roseline);
+		
 		String role = "";
 		boolean roleCheck = false;
 		if(StringUtils.isBlank(roseline)){
 			throw new Exception("LinebcNull");
 		}
+		
 		RoleCode[] roles = RoleCode.values();
 		for(RoleCode code : roles){
+			logger.info("code.getRoleName() = " + code.getRoleName());
+			
 			if(code.getRoleName().equals(roseline)){
 				role = code.getRoleId();
 				roleCheck = true;

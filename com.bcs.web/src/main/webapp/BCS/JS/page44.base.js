@@ -84,8 +84,8 @@ $(function(){
 						isBIND = 2 ; // 1 尚未查詢 2 查詢後未綁定 3查詢後已綁定
 					}
 					
-					if(response.ReturnData.ModifyDate != null || response.ReturnData.ModifyDate != ''){
-						ModifyDate = stringToDate(response.ReturnData.ModifyDate)+
+					if(response.ReturnData.ModifyDate != null && response.ReturnData.ModifyDate != ''){
+						ModifyDate = stringToDate(response.ReturnData.ModifyDate)+ " " +
 									 response.ReturnData.ModifyTime.substring(0,5);
 					}else{
 						ModifyDate = "N/A"
@@ -151,7 +151,7 @@ $(function(){
 				var Status = "" ;
 				var RegisterDate  = stringToDate(response.ReturnData.RegisterDate);
 				var RegisterTime  = response.ReturnData.RegisterTime.substring(0,5);
-				var ModifyDate    = stringToDate(response.ReturnData.ModifyDate)+
+				var ModifyDate    = stringToDate(response.ReturnData.ModifyDate)+ " " +
 									response.ReturnData.ModifyTime.substring(0,5);
 				if(response.ReturnData.Status == "BINDED"){
 					Status = "已綁定";
@@ -192,7 +192,6 @@ $(function(){
 	function stringToDate(day){
 		var startDate = moment(day, "YYYY/MM/DD");
 		var dt_to = $.datepicker.formatDate('yy/mm/dd', new Date(startDate));
-		alert(dt_to);
 		return dt_to;
 	}
 	

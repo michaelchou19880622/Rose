@@ -48,6 +48,25 @@ $(function(){
 					.html(o.account);
 				accountData.find('.userName').html(o.userName);
 				
+//				if(o.role == 'ROLE_ADMIN')
+//					role='管理者';
+//				else if(o.role == 'ROLE_EDIT')
+//					role='行銷人員';
+//				else if(o.role == 'ROLE_MARKET')
+//					role='編輯人員';
+//				else if(o.role == 'ROLE_PNP_ADMIN')
+//					role='PNP系統管理者';
+//				else if(o.role == 'ROLE_PNP_INQUIRER')
+//					role='PNP查詢者';
+//				else if(o.role == 'ROLE_PNP_EMPLOYEE')
+//					role='PNP單位發送暨查詢者';
+//				else if(o.role == 'ROLE_LP_QUERIER')
+//					role='LINE點數報表查詢者';
+//				else if(o.role == 'ROLE_LP_CREATOR')
+//					role='LINE點發送建立者';
+//				else if(o.role == 'ROLE_LP_JUDGER')
+//					role='LINE點發送審核者';
+				
 				if(o.role == 'ROLE_ADMIN')
 					role='管理者';
 				else if(o.role == 'ROLE_EDIT')
@@ -55,17 +74,17 @@ $(function(){
 				else if(o.role == 'ROLE_MARKET')
 					role='編輯人員';
 				else if(o.role == 'ROLE_PNP_ADMIN')
-					role='PNP系統管理者';
-				else if(o.role == 'ROLE_PNP_INQUIRER')
-					role='PNP查詢者';
-				else if(o.role == 'ROLE_PNP_EMPLOYEE')
-					role='PNP單位發送暨查詢者';
-				else if(o.role == 'ROLE_LP_QUERIER')
-					role='LINE點數報表查詢者';
-				else if(o.role == 'ROLE_LP_CREATOR')
-					role='LINE點發送建立者';
-				else if(o.role == 'ROLE_LP_JUDGER')
-					role='LINE點發送審核者';
+					role='PNP管理者';
+				else if(o.role == 'ROLE_PNP_SEND_LINE_SEND')
+					role='PNP發送暨LINE點發送者';
+				else if(o.role == 'ROLE_PNP_SEND_LINE_VERIFY')
+					role='PNP發送暨LINE點審核者';
+				else if(o.role == 'ROLE_REPORT')
+					role='報表查詢人員';
+				else if(o.role == 'ROLE_LINE_SEND')
+					role='LINE點發送者';
+				else if(o.role == 'ROLE_LINE_VERIFY')
+					role='LINE點審核者';
 				
 				accountData.find('.role').html(role);
 				

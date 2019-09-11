@@ -52,17 +52,17 @@
                         <li th:classappend="${currentPage == 'Page25'} ? 'ExSelected'">
                         	<a th:href="@{/bcs/edit/tracingGeneratePage}"><span>建立追蹤網址</span></a>
                         </li>
-                        <li th:classappend="${currentPage == 'PagePNP2'} ? 'ExSelected'">
-                            <a th:href="@{/bcs/edit/pnpListPage}"><span>PNP訊息樣板列表</span></a>
-                        </li>
-                        <li th:classappend="${currentPage == 'PagePNP1'} ? 'ExSelected'">
-                        	<a th:href="@{/bcs/edit/pnpCreatePage}"><span>建立PNP訊息樣板</span></a>
-                        </li>
+<!--                         <li th:classappend="${currentPage == 'PagePNP2'} ? 'ExSelected'"> -->
+<!--                             <a th:href="@{/bcs/edit/pnpListPage}"><span>PNP訊息樣板列表</span></a> -->
+<!--                         </li> -->
+<!--                         <li th:classappend="${currentPage == 'PagePNP1'} ? 'ExSelected'"> -->
+<!--                         	<a th:href="@{/bcs/edit/pnpCreatePage}"><span>建立PNP訊息樣板</span></a> -->
+<!--                         </li> -->
                     </ul>
                 </li>
                 
                 
-				<li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_LP_CREATOR', 'ROLE_LP_JUDGER')">
+				<li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_LP_CREATOR', 'ROLE_LP_JUDGER', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_SEND')">
                     <a href="" style="cursor: pointer;"><span>LINE POINTS發送</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
                        <li th:classappend="${currentPage == 'PageLPC'} ? 'ExSelected'">
@@ -76,7 +76,7 @@
                 </li>
 
 
- 				<li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_LP_QUERIER', 'ROLE_LP_CREATOR', 'ROLE_LP_JUDGER')">
+ 				<li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_LP_QUERIER', 'ROLE_LP_CREATOR', 'ROLE_LP_JUDGER', 'ROLE_PNP_SEND_LINE_SEND')">
                     <a href="" style="cursor: pointer;"><span>LINE POINTS報表</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
                         <li th:classappend="${currentPage == 'PageLPStatisticsReport'} ? 'ExSelected'">

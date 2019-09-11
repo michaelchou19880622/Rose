@@ -64,8 +64,10 @@ public class BCSSsoAdminController {
 		else{
 	        try {
 				String id = request.getParameter("id");
+				logger.info("DEBUG 1-1 id = " + id);
 				String linebc = request.getParameter("roles");
-	//			String action = request.getParameter("action");
+				logger.info("DEBUG 1-2 linebc = " + linebc);
+//				String action = request.getParameter("action");
 	
 				byte[] decoded = Base64.getDecoder().decode(id);
 				String account = new String(decoded);
@@ -76,27 +78,48 @@ public class BCSSsoAdminController {
 				if(adminUser == null){
 					throw new Exception("登入失敗");
 				}
-	
+				
+//				String role = "";
+//				
+//				RoleCode[] roles = RoleCode.values();
+//				for(RoleCode code : roles){
+//					logger.info("code.getRoleName() = " + code.getRoleName());
+//					
+//					if(code.getRoleName().equals(linebc)){
+//						role = code.getRoleId();
+//						adminUser.setRole(role);
+//						break;
+//					}
+//				}
+				
 				String role = "";
 				boolean roleCheck = false;
 				if(StringUtils.isBlank(linebc)){
-	//				throw new Exception("LinebcNull");
-					role = adminUser.getRole();
+					throw new Exception("LinebcNull");
+//					role = adminUser.getRole();
 				}
 				else{
 					RoleCode[] roles = RoleCode.values();
+					
 					for(RoleCode code : roles){
+						logger.info("DEBUG 1-3 code.getRoleName() = " + code.getRoleName());
+						
 						if(code.getRoleName().equals(linebc)){
 							role = code.getRoleId();
 							roleCheck = true;
 						}
 					}
+					
 					for(RoleCode code : roles){
 						if(code.getRoleNameEn().equals(linebc)){
 							role = code.getRoleId();
 							roleCheck = true;
 						}
 					}
+					
+					logger.info("DEBUG 1-4 role = " + role);
+					logger.info("DEBUG 1-5 roleCheck = " + roleCheck);
+					
 					if(roleCheck){
 						String oldRole = adminUser.getRole();
 						if(oldRole.equals(role)){

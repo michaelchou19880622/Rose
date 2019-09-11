@@ -49,9 +49,6 @@ public class AdUserSyncController {
 			AdUserSyncModel model = ObjectUtil.jsonStrToObject(syncModel, AdUserSyncModel.class);
 			logger.info("-------adUserSync model-------:" + model);
 			
-			// Michael Test
-			model.setRoseline("manager");
-			
 			richartAdService.syncAdUser(model);
 
 			logger.info("-------adUserSync Success-------");

@@ -1,31 +1,41 @@
 package com.bcs.core.utils;
 
+import lombok.experimental.UtilityClass;
+
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.log4j.Logger;
-
+/**
+ * Ip Utils
+ *
+ * @author ???
+ */
+@UtilityClass
 public class IpUtil {
-	/** Logger */
-	private static Logger logger = Logger.getLogger(IpUtil.class);
-	
-	public static String getIP(HttpServletRequest request) {
+
+    private static final String UNKNOW = "unknown";
+
+    /**
+     * Get IP Address from HttpServletRequest
+     *
+     * @param request HttpServletRequest
+     * @return IP Address
+     */
+    public static String getIpAddress(HttpServletRequest request) {
+
+        if (request == null) {
+            return null;
+        }
+
         String ip = request.getHeader("x-forwarded-for");
-        if (!checkIP(ip)) {
+        if (ip == null || ip.length() == 0 || UNKNOW.equalsIgnoreCase(ip)) {
             ip = request.getHeader("Proxy-Client-IP");
         }
-        if (!checkIP(ip)) {
+        if (ip == null || ip.length() == 0 || UNKNOW.equalsIgnoreCase(ip)) {
             ip = request.getHeader("WL-Proxy-Client-IP");
         }
-        if (!checkIP(ip)) {
+        if (ip == null || ip.length() == 0 || UNKNOW.equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         }
         return ip;
-    }
-	
-    private static boolean checkIP(String ip) {
-        if (ip == null) {
-            return false;
-        }
-        return true;
     }
 }

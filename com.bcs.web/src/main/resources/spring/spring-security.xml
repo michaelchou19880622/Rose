@@ -1,78 +1,110 @@
 <beans:beans xmlns="http://www.springframework.org/schema/security"
-	xmlns:beans="http://www.springframework.org/schema/beans" 
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
 	http://www.springframework.org/schema/beans/spring-beans.xsd
-    http://www.springframework.org/schema/security 
+    http://www.springframework.org/schema/security
     http://www.springframework.org/schema/security/spring-security-4.1.xsd">
-    
+
+    <!-- ==================== Ignore Security =====================-->
     <http pattern="/webjars/**" security="none"/>
     <http pattern="/BCS/**" security="none"/>
     <http pattern="/Mobile/**" security="none"/>
-    
-   	<!-- LINE API 呼叫的 API -->
-	<http pattern="/line/**" security="none"/>
-	
-	<http pattern="/api/**" security="none"/>
-	
-	<http pattern="/campaign/**" security="none"/>
-
-	<!-- 使用 Controller 取得 Resource -->
-	<http pattern="/bcs/getResource/**" security="none"/>
-	<http pattern="/bcs/getLink/**" security="none"/>
-    
-	<http auto-config="true">
-		<intercept-url pattern="/init/**" access="permitAll"/>
-		<!-- Mobile Controller -->
-		<intercept-url pattern="/m/**" access="permitAll"/>
-
-		<!-- 使用 Controller Tracing Click -->
-		<intercept-url pattern="/l/**" access="permitAll"/>
-		<intercept-url pattern="/c/**" access="permitAll"/>
-		<intercept-url pattern="/campaign/**" access="permitAll"/>
-		
-		<intercept-url pattern="/bcs/doLogin*" access="permitAll"/>
-		
-		<intercept-url pattern="/bcs/admin/**" access="hasRole('ROLE_ADMIN')" />
-		<intercept-url pattern="/bcs/edit/**" access="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN', 'ROLE_LP_CREATOR', 'ROLE_LP_JUDGER')" />
-		<intercept-url pattern="/bcs/market/**" access="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN', 'ROLE_MARKET')" />
-		<intercept-url pattern="/bcs/pnpAdmin/**" access="hasAnyRole('ROLE_ADMIN', 'ROLE_PNP_ADMIN')" />
-		<intercept-url pattern="/bcs/pnpInquirer/**" access="hasAnyRole('ROLE_PNP_INQUIRER', 'ROLE_PNP_ADMIN', 'ROLE_ADMIN')" />
-		<intercept-url pattern="/bcs/pnpEmployee/**" access="hasAnyRole('ROLE_PNP_EMPLOYEE', 'ROLE_PNP_ADMIN', 'ROLE_ADMIN', 'ROLE_MARKET')" />
-		<intercept-url pattern="/bcs/lpQuerier/**" access="hasAnyRole('ROLE_ADMIN', 'ROLE_LP_CREATOR', 'ROLE_LP_JUDGER', 'ROLE_LP_QUERIER')" />
+    <http pattern="/line/**" security="none"/>
+    <http pattern="/api/**" security="none"/>
+    <http pattern="/campaign/**" security="none"/>
+    <http pattern="/bcs/getResource/**" security="none"/>
+    <http pattern="/bcs/getLink/**" security="none"/>
+    <!-- ==================== Ignore Security =====================-->
 
 
-		<!-- 此 pattern 要擺在最後面 -->
-		<intercept-url pattern="/**" access="authenticated"/>
-		
-		<form-login login-page="/bcs/doLogin" username-parameter="tid"
-			password-parameter="tpasswd" 
-			default-target-url="/bcs/login" 
-			always-use-default-target="true" />
-		<logout logout-url="/bcs/doLogout" />
-		<access-denied-handler ref="customAccessDeniedHandler" />
-		
-		<!-- CSRF 啟用與否 -->
-		<csrf disabled="true"/>
-		<!-- <csrf />-->
-		<headers>
-			<frame-options policy="SAMEORIGIN" />
-		</headers>
-	</http>
+    <!--權限管理-->
+    <authentication-manager>
+        <!--使用者權限服務指向-->
+        <authentication-provider user-service-ref="customUserDetailsService">
+            <!--密碼加密服務指向-->
+            <password-encoder ref="bcryptEncoder"/>
+        </authentication-provider>
+    </authentication-manager>
 
-	<authentication-manager>
-		<authentication-provider user-service-ref="customUserDetailsService">
-			<password-encoder ref="bcryptEncoder" />
-		</authentication-provider>
-	</authentication-manager>
+    <!--使用者權限服務Bean-->
+    <beans:bean id="customUserDetailsService"
+                class="com.bcs.web.security.service.CustomUserDetailsService"/>
 
-	<beans:bean id="customUserDetailsService"
-		class="com.bcs.web.security.service.CustomUserDetailsService" />
-		
-	<beans:bean name="bcryptEncoder"
-		class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
-	
-	<beans:bean id="customAccessDeniedHandler"
-		class="com.bcs.web.security.CustomAccessDeniedHandler" />
+    <!--密碼加密服務Bean-->
+    <beans:bean name="bcryptEncoder"
+                class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+
+    <!--無存取權限Bean-->
+    <beans:bean id="customAccessDeniedHandler"
+                class="com.bcs.web.security.CustomAccessDeniedHandler"/>
+
+
+    <http auto-config="true">
+        <!-- ====================== Permit All =========================-->
+        <!-- InitController -->
+        <intercept-url pattern="/init/**" access="permitAll"/>
+        <!-- MobileCouponViewController -->
+        <intercept-url pattern="/m/**" access="permitAll"/>
+        <!-- BCSTracingController -->
+        <intercept-url pattern="/l/**" access="permitAll"/>
+        <!-- MobileMgmClickTracingController -->
+        <intercept-url pattern="/c/**" access="permitAll"/>
+        <!--VIPNightController, MobileVIPNightTracingController-->
+        <intercept-url pattern="/campaign/**" access="permitAll"/>
+        <!--BCSIndexController.doLoginGet()-->
+        <intercept-url pattern="/bcs/doLogin*" access="permitAll"/>
+        <!-- ====================== Permit All =========================-->
+
+
+        <!--管理者-->
+        <intercept-url pattern="/bcs/admin/**"
+                       access="hasRole('ROLE_ADMIN')"/>
+        <!--編輯者-->
+        <intercept-url pattern="/bcs/edit/**"
+                       access="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN', 'ROLE_LP_CREATOR', 'ROLE_LP_JUDGER')"/>
+        <!--行銷人員-->
+        <intercept-url pattern="/bcs/market/**"
+                       access="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN', 'ROLE_MARKET')"/>
+
+
+        <!--PNP Inquirer-->
+        <intercept-url pattern="/bcs/pnpInquirer/**"
+                       access="hasAnyRole('ROLE_PNP_INQUIRER', 'ROLE_PNP_ADMIN', 'ROLE_ADMIN')"/>
+        <!--PNP員工-->
+        <intercept-url pattern="/bcs/pnpEmployee/**"
+                       access="hasAnyRole('ROLE_PNP_EMPLOYEE', 'ROLE_PNP_ADMIN', 'ROLE_ADMIN', 'ROLE_MARKET')"/>
+
+        <!--lp Creator-->
+        <intercept-url pattern="/bcs/lpCreator/**"
+                       access="hasAnyRole('ROLE_ADMIN', 'ROLE_LP_CREATOR', 'ROLE_LP_JUDGER')"/>
+        <!--lp Querier-->
+        <intercept-url pattern="/bcs/lpQuerier/**"
+                       access="hasAnyRole('ROLE_ADMIN', 'ROLE_LP_CREATOR', 'ROLE_LP_JUDGER', 'ROLE_LP_QUERIER')"/>
+
+        <!-- 要擺在最後面 -->
+        <intercept-url pattern="/**" access="authenticated"/>
+
+
+        <!-- FormPost Login -->
+        <form-login login-page="/bcs/doLogin"
+                    username-parameter="tid"
+                    password-parameter="tpasswd"
+                    default-target-url="/bcs/login"
+                    always-use-default-target="true"/>
+
+        <!-- 登出頁面URL -->
+        <logout logout-url="/bcs/doLogout"/>
+
+        <!--無存取權限Handler參照-->
+        <access-denied-handler ref="customAccessDeniedHandler"/>
+
+        <!-- CSRF 停用狀態 -->
+        <csrf disabled="true"/>
+        <!-- CORS 同源政策設定 -->
+        <headers>
+            <frame-options policy="SAMEORIGIN"/>
+        </headers>
+    </http>
 
 </beans:beans>

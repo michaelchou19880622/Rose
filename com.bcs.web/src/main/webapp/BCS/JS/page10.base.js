@@ -70,9 +70,9 @@ $(function(){
 				if(o.role == 'ROLE_ADMIN')
 					role='管理者';
 				else if(o.role == 'ROLE_EDIT')
-					role='行銷人員';
-				else if(o.role == 'ROLE_MARKET')
 					role='編輯人員';
+				else if(o.role == 'ROLE_MARKET')
+					role='行銷人員';
 				else if(o.role == 'ROLE_PNP_ADMIN')
 					role='PNP管理者';
 				else if(o.role == 'ROLE_PNP_SEND_LINE_SEND')

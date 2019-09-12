@@ -57,7 +57,7 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
 			LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
 			
 			String MID = receive.getSourceId();
-			logger.debug("MID:" + MID);
+			logger.info("MID:" + MID);
 			
 			LineUser lineUser = lineUserService.findByMidAndCreateUnbind(MID);
 			
@@ -108,9 +108,9 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
 		String text = content.getText();
 		String replyToken = content.getReplyToken();
 		
-		logger.debug("ChannelId:" + ChannelId);
-		logger.debug("ApiType:" + ApiType);
-		logger.debug("MID:" + MID);
+		logger.info("ChannelId:" + ChannelId);
+		logger.info("ApiType:" + ApiType);
+		logger.info("MID:" + MID);
 		
 		Map<Long, List<MsgDetail>> result = new HashMap<>();
 		

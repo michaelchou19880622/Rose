@@ -133,7 +133,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                     ps.setString(13, detail.getSource());
                     ps.setString(14, detail.getStatus());
                     ps.setString(15, detail.getUid());
-                    ps.setString(16, detail.getSN());
+                    ps.setString(16, detail.getSn());
                     ps.setString(17, detail.getVariable1());
                     ps.setString(18, detail.getVariable2());
                     ps.setString(19, detail.getAccount1());
@@ -185,12 +185,12 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                     ps.setString(13, detail.getStatus());
                     ps.setString(14, detail.getUid());
                     ps.setTimestamp(15, detail.getLinePushTime() != null ? new Timestamp(detail.getLinePushTime().getTime()) : null);
-                    ps.setString(16, detail.getCampaignID());
+                    ps.setString(16, detail.getCampaignId());
                     ps.setString(17, detail.getDestName());
-                    ps.setString(18, detail.getPID());
-                    ps.setString(19, detail.getProgramID());
-                    ps.setString(20, detail.getSN());
-                    ps.setString(21, detail.getSegmentID());
+                    ps.setString(18, detail.getPid());
+                    ps.setString(19, detail.getProgramId());
+                    ps.setString(20, detail.getSn());
+                    ps.setString(21, detail.getSegmentId());
                     ps.setString(22, detail.getVariable1());
                     ps.setString(23, detail.getVariable2());
                 }
@@ -238,12 +238,12 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                     ps.setString(13, detail.getStatus());
                     ps.setString(14, detail.getUid());
                     ps.setTimestamp(15, detail.getLinePushTime() != null ? new Timestamp(detail.getLinePushTime().getTime()) : null);
-                    ps.setString(16, detail.getCampaignID());
+                    ps.setString(16, detail.getCampaignId());
                     ps.setString(17, detail.getDestName());
-                    ps.setString(18, detail.getPID());
-                    ps.setString(19, detail.getProgramID());
-                    ps.setString(20, detail.getSN());
-                    ps.setString(21, detail.getSegmentID());
+                    ps.setString(18, detail.getPid());
+                    ps.setString(19, detail.getProgramId());
+                    ps.setString(20, detail.getSn());
+                    ps.setString(21, detail.getSegmentId());
                     ps.setString(22, detail.getVariable1());
                     ps.setString(23, detail.getVariable2());
                 }
@@ -271,6 +271,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
             /* Stage = PNP */
             List<BigInteger> detailIds = findAndUpdateProcessForUpdate(type.getDetailTable(), stage);
             if (!detailIds.isEmpty()) {
+                logger.info("Update Detail Status: [PROCESS] to [PNP][SENDING]");
                 List<List<BigInteger>> batchDetailIds = Lists.partition(detailIds, CircleEntityManagerControl.batchSize);
                 for (List<BigInteger> ids : batchDetailIds) {
 
@@ -298,7 +299,6 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
      */
     @SuppressWarnings("unchecked")
     private List<BigInteger> findAndUpdateProcessForUpdate(String detailTable, String stage) {
-        Date now = Calendar.getInstance().getTime();
         String sqlString = "select d.PNP_DETAIL_ID from " + detailTable + " d " +
                 " where d.STATUS = :status " +
                 "  and d.PROC_STAGE = :stage " +
@@ -309,7 +309,6 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 "   and a.PROC_STAGE = :stage " +
                 "   order by a.CREAT_TIME" +
                 " ) " +
-                //FIXME
                 " update " + detailTable + "" +
                 " set STATUS = :newStatus, MODIFY_TIME = :modifyTime " +
                 " where STATUS = :status " +
@@ -321,12 +320,11 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 "   and a.PROC_STAGE = :stage" +
                 "   order by a.CREAT_TIME" +
                 " ) ";
-        logger.info("Update Status: [PROCESS] to [PNP][SENDING]");
         return (List<BigInteger>) entityManager.createNativeQuery(sqlString)
                 .setParameter("stage", stage)
                 .setParameter("status", AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS)
                 .setParameter("newStatus", AbstractPnpMainEntity.MSG_SENDER_STATUS_SENDING)
-                .setParameter("modifyTime", now)
+                .setParameter("modifyTime", new Date())
                 .getResultList();
     }
 
@@ -341,6 +339,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
         try {
             List<BigInteger> detailIds = findAndUpdateDeliveryExpiredForUpdate(type.getDetailTable(), stage);
             if (!detailIds.isEmpty()) {
+                logger.info("Update Status: [PNP][CHECK_DELIVERY] to [SMS][SENDING]");
                 List<List<BigInteger>> batchDetailIds = Lists.partition(detailIds, CircleEntityManagerControl.batchSize);
                 for (List<BigInteger> ids : batchDetailIds) {
                     List<? super PnpDetail> details = findPnpDetailById(type, ids);
@@ -388,7 +387,6 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 "               and a.PNP_DELIVERY_EXPIRE_TIME < getdate()  " +
                 "           order by a.CREAT_TIME" +
                 "       )";
-        logger.info("Update Status: [PNP][CHECK_DELIVERY] to [SMS][SENDING]");
         return (List<BigInteger>) entityManager.createNativeQuery(sqlString)
                 .setParameter("newStatus", AbstractPnpMainEntity.MSG_SENDER_STATUS_SENDING)
                 .setParameter("modifyTime", new Date())
@@ -410,6 +408,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 allMainIds.add(waitMainId);
             } else {
                 logger.info(String.format("Type %s Main Id Not Found with Status is Wait.", type));
+                return Collections.emptyList();
             }
 
             if (!allMainIds.isEmpty()) {
@@ -417,6 +416,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 //  根據MAIN_ID 更新 Detail
                 List<BigInteger> detailIds = findAndUpdateDetailByMainAndStatus(allMainIds, type);
                 if (!detailIds.isEmpty()) {
+                    logger.info("Update Detail Status: [WAIT] to [BC][SENDING]");
                     List<List<BigInteger>> batchDetailIds = Lists.partition(detailIds, CircleEntityManagerControl.batchSize);
                     return findPnpDetailById(type, batchDetailIds.get(0));
                 }
@@ -477,8 +477,11 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 .setParameter("procApName", procApName)
                 .setParameter("modifyTime", new Date())
                 .setParameter("newStatus", AbstractPnpMainEntity.MSG_SENDER_STATUS_SENDING).getResultList();
-        logger.info("Update Status: [WAIT] to [BC][SENDING]");
-        return mains == null || mains.isEmpty() ? null : mains.get(0).longValue();
+        if (mains == null || mains.isEmpty()) {
+            return null;
+        }
+        logger.info("Update Main Status: [WAIT] to [BC][SENDING]");
+        return mains.get(0).longValue();
     }
 
     /**

@@ -20,6 +20,7 @@ import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpService;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpSetting;
 import com.bcs.core.taishin.circle.db.entity.CircleEntityManagerControl;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,9 +35,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -53,7 +54,11 @@ public class PnpSMSMsgService {
     private PnpRepositoryCustom pnpRepositoryCustom;
     private PNPFtpService pnpFtpService;
 
-    private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1,
+            new BasicThreadFactory.Builder()
+                    .namingPattern("PNP-SMS-Scheduled-%d")
+                    .daemon(true).build()
+    );
     private ScheduledFuture<?> scheduledFuture;
 
     @Autowired
@@ -312,14 +317,14 @@ public class PnpSMSMsgService {
         PnpDetailEvery8d pnpDetailEvery8d = null;
         for (Object detail : details) {
             pnpDetailEvery8d = (PnpDetailEvery8d) detail;
-            body.append(pnpDetailEvery8d.getSN() + "&");
+            body.append(pnpDetailEvery8d.getSn() + "&");
             body.append(pnpDetailEvery8d.getDestName() + "&");
             body.append(pnpDetailEvery8d.getPhone() + "&");
             body.append(pnpDetailEvery8d.getMsg() + "&");
-            body.append(pnpDetailEvery8d.getPID() + "&");
-            body.append(pnpDetailEvery8d.getCampaignID() + "&");
-            body.append(pnpDetailEvery8d.getSegmentID() + "&");
-            body.append(pnpDetailEvery8d.getProgramID() + "&");
+            body.append(pnpDetailEvery8d.getPid() + "&");
+            body.append(pnpDetailEvery8d.getCampaignId() + "&");
+            body.append(pnpDetailEvery8d.getSegmentId() + "&");
+            body.append(pnpDetailEvery8d.getProgramId() + "&");
             body.append(pnpDetailEvery8d.getVariable1() + "&");
             body.append(pnpDetailEvery8d.getVariable2() + "\r\n");
         }
@@ -372,14 +377,14 @@ public class PnpSMSMsgService {
         PnpDetailUnica pnpDetailUnica;
         for (Object detail : details) {
             pnpDetailUnica = (PnpDetailUnica) detail;
-            body.append(pnpDetailUnica.getSN() + "&");
+            body.append(pnpDetailUnica.getSn() + "&");
             body.append(pnpDetailUnica.getDestName() + "&");
             body.append(pnpDetailUnica.getPhone() + "&");
             body.append(pnpDetailUnica.getMsg() + "&");
-            body.append(pnpDetailUnica.getPID() + "&");
-            body.append(pnpDetailUnica.getCampaignID() + "&");
-            body.append(pnpDetailUnica.getSegmentID() + "&");
-            body.append(pnpDetailUnica.getProgramID() + "&");
+            body.append(pnpDetailUnica.getPid() + "&");
+            body.append(pnpDetailUnica.getCampaignId() + "&");
+            body.append(pnpDetailUnica.getSegmentId() + "&");
+            body.append(pnpDetailUnica.getProgramId() + "&");
             body.append(pnpDetailUnica.getVariable1() + "&");
             body.append(pnpDetailUnica.getVariable2() + "\r\n");
         }
@@ -402,7 +407,7 @@ public class PnpSMSMsgService {
         PnpDetailMing pnpDetailMing;
         for (Object detail : details) {
             pnpDetailMing = (PnpDetailMing) detail;
-            body.append(pnpDetailMing.getSN() + ";;");
+            body.append(pnpDetailMing.getSn() + ";;");
             body.append(pnpDetailMing.getPhone() + ";;");
             body.append(pnpDetailMing.getMsg() + ";;");
             body.append(pnpDetailMing.getDetailScheduleTime() + ";;");

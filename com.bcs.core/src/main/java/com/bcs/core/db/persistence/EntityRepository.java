@@ -10,6 +10,7 @@ import org.springframework.data.repository.NoRepositoryBean;
  *
  * @param <T>
  * @param <ID>
+ * @author ???
  */
 @NoRepositoryBean
 public interface EntityRepository<T, ID extends Serializable> extends JpaRepository<T, ID> {

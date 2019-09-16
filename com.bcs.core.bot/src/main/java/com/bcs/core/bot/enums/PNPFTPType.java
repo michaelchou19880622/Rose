@@ -1,6 +1,5 @@
-package com.bcs.core.taishin.circle.PNP.ftp;
+package com.bcs.core.bot.enums;
 
-import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
 import lombok.Getter;
 
 /**
@@ -14,10 +13,10 @@ public enum PNPFTPType {
     /**
      * 前方來源系統
      */
-    MITAKE("mitake", AbstractPnpMainEntity.SOURCE_MITAKE, "BCS_PNP_MAIN_MITAKE", "BCS_PNP_DETAIL_MITAKE"),
-    EVERY8D("every8d", AbstractPnpMainEntity.SOURCE_EVERY8D, "BCS_PNP_MAIN_EVERY8D", "BCS_PNP_DETAIL_EVERY8D"),
-    MING("ming", AbstractPnpMainEntity.SOURCE_MING, "BCS_PNP_MAIN_MING", "BCS_PNP_DETAIL_MING"),
-    UNICA("unica", AbstractPnpMainEntity.SOURCE_UNICA, "BCS_PNP_MAIN_UNICA", "BCS_PNP_DETAIL_UNICA");
+    MITAKE("mitake", "1", "BCS_PNP_MAIN_MITAKE", "BCS_PNP_DETAIL_MITAKE"),
+    EVERY8D("every8d", "2", "BCS_PNP_MAIN_EVERY8D", "BCS_PNP_DETAIL_EVERY8D"),
+    MING("ming", "3", "BCS_PNP_MAIN_MING", "BCS_PNP_DETAIL_MING"),
+    UNICA("unica", "4", "BCS_PNP_MAIN_UNICA", "BCS_PNP_DETAIL_UNICA");
 
     private String source;
     private String value;
@@ -38,12 +37,13 @@ public enum PNPFTPType {
 
     /**
      * 依照FTP Type Code 尋找對應名稱
+     *
      * @param code FTP Type Code
      * @return FTP Type Name
      */
-    public static String getNameByCode(String code){
-        for (PNPFTPType type: PNPFTPType.values()) {
-            if(type.source.equals(code)){
+    public static String getNameByCode(String code) {
+        for (PNPFTPType type : PNPFTPType.values()) {
+            if (type.source.equals(code)) {
                 return type.value;
             }
         }
@@ -52,12 +52,13 @@ public enum PNPFTPType {
 
     /**
      * 依照FTP Type Code 尋找對應 Main Table名稱
+     *
      * @param code FTP Type Code
      * @return FTP Table Name
      */
-    public static String getMainTableNameByCode(String code){
-        for (PNPFTPType type: PNPFTPType.values()) {
-            if(type.source.equals(code)){
+    public static String getMainTableNameByCode(String code) {
+        for (PNPFTPType type : PNPFTPType.values()) {
+            if (type.source.equals(code)) {
                 return type.mainTable;
             }
         }
@@ -66,12 +67,13 @@ public enum PNPFTPType {
 
     /**
      * 依照FTP Type Code 尋找對應 Detail Table名稱
+     *
      * @param code FTP Type Code
      * @return FTP Table Name
      */
-    public static String getDetailTableNameByCode(String code){
-        for (PNPFTPType type: PNPFTPType.values()) {
-            if(type.source.equals(code)){
+    public static String getDetailTableNameByCode(String code) {
+        for (PNPFTPType type : PNPFTPType.values()) {
+            if (type.source.equals(code)) {
                 return type.detailTable;
             }
         }

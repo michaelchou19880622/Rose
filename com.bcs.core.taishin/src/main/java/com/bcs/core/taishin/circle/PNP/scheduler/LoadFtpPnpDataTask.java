@@ -23,16 +23,18 @@ import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainMingRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainMitakeRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainUnicaRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpRepositoryCustom;
+import com.bcs.core.taishin.circle.PNP.ftp.PNPFTPType;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpService;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpSetting;
+import com.bcs.core.utils.DataUtils;
 import com.bcs.core.utils.ErrorRecord;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.GsonBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,9 +56,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -76,7 +78,11 @@ public class LoadFtpPnpDataTask {
     private static final String TAG = "\\&";
     private static final String MING_TAG = "\\;;";
 
-    private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1,
+            new BasicThreadFactory.Builder()
+                    .namingPattern("FTP-Scheduled--%d")
+                    .daemon(true).build()
+    );
     private ScheduledFuture<?> scheduledFuture = null;
 
     /**
@@ -197,6 +203,7 @@ public class LoadFtpPnpDataTask {
         scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
+
                 logger.info("ftpProcessHandler SOURCE_MITAKE....");
                 try {
                     ftpProcessHandler(AbstractPnpMainEntity.SOURCE_MITAKE);
@@ -235,23 +242,26 @@ public class LoadFtpPnpDataTask {
      * @see this#startCircle()
      */
     private void ftpProcessHandler(String source) {
-        logger.info("StartCircle...." + source);
+        logger.info(PNPFTPType.getNameByCode(source).toUpperCase() + " => StartCircle!!");
         int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true, false);
 
-        logger.info("PNP_BIG_SWITCH : " + bigSwitch);
-        if (0 == bigSwitch) {
-            /* 停止排程 */
-            logger.info("STOP PROCESS!!");
-        } else if (1 == bigSwitch) {
-            /* 停止排程並轉發SMS */
-            logger.info("Start put file to SMS FTP path process !!");
-            // 1.1 將檔案rename(加L)放到SMS指定路徑
-            // 因為路徑可用UI換，所以每次都要重拿連線資訊
-            transFileToSMSFlow(source);
-            logger.info("TransFileToSMSFlow Complete!");
-        } else {
-            /* 解析資料存到DB */
-            parseDataFlow(source);
+        switch(bigSwitch){
+            case 0:
+                logger.info(bigSwitch + ": Stop Process!!");
+                break;
+            case 1:
+                /* 停止排程並轉發SMS */
+                logger.info(bigSwitch + ": Start put file to SMS FTP path process !!");
+                // 1.1 將檔案rename(加L)放到SMS指定路徑
+                // 因為路徑可用UI換，所以每次都要重拿連線資訊
+                transFileToSMSFlow(source);
+                logger.info(bigSwitch + ": Transfer File To SMS Flow Complete!");
+                break;
+            default:
+                /* 解析資料存到DB */
+                logger.info(bigSwitch + ": Parse Data Flow To Database!!");
+                parseDataFlow(source);
+                break;
         }
     }
 
@@ -264,7 +274,7 @@ public class LoadFtpPnpDataTask {
 
         // 跟據來源不同取各自連線資訊
         PNPFtpSetting pnpFtpSetting = pnpFtpService.getFtpSettings(source);
-        logger.info(new GsonBuilder().serializeNulls().setPrettyPrinting().create().toJson(pnpFtpSetting));
+        logger.info("FTP Setting:\n" + DataUtils.toPrettyJson(pnpFtpSetting));
         try {
             /* 至FTP取得資料 */
             Map<String, byte[]> returnDataMap = pnpFtpService.downloadMultipleFileByType(source, pnpFtpSetting.getPath(), "TXT", pnpFtpSetting);
@@ -491,7 +501,7 @@ public class LoadFtpPnpDataTask {
                  * 8.有效秒數
                  */
                 PnpDetailMing detail = new PnpDetailMing();
-                detail.setSN(detailData[0]);
+                detail.setSn(detailData[0]);
                 detail.setPhone(detailData[1]);
                 detail.setPhoneHash(toSha256(detailData[1]));
                 detail.setMsg(detailData[2]);
@@ -577,15 +587,15 @@ public class LoadFtpPnpDataTask {
                      */
 
                     PnpDetailEvery8d detail = new PnpDetailEvery8d();
-                    detail.setSN(detailData[0]);
+                    detail.setSn(detailData[0]);
                     detail.setDestName(detailData[1]);
                     detail.setPhone(detailData[2]);
                     detail.setPhoneHash(toSha256(detailData[2]));
                     detail.setMsg(detailData[3]);
-                    detail.setPID(detailData[4]);
-                    detail.setCampaignID(detailData[5]);
-                    detail.setSegmentID(detailData[6]);
-                    detail.setProgramID(detailData[7]);
+                    detail.setPid(detailData[4]);
+                    detail.setCampaignId(detailData[5]);
+                    detail.setSegmentId(detailData[6]);
+                    detail.setProgramId(detailData[7]);
                     detail.setVariable1(detailData[8]);
                     detail.setVariable2(detailData[9]);
                     details.add(detail);
@@ -626,15 +636,15 @@ public class LoadFtpPnpDataTask {
                      * 9.Variable2 擴充欄位2(可為空值)
                      */
                     PnpDetailUnica detail = new PnpDetailUnica();
-                    detail.setSN(detailData[0]);
+                    detail.setSn(detailData[0]);
                     detail.setDestName(detailData[1]);
                     detail.setPhone(detailData[2]);
                     detail.setPhoneHash(toSha256(detailData[2]));
                     detail.setMsg(detailData[3]);
-                    detail.setPID(detailData[4]);
-                    detail.setCampaignID(detailData[5]);
-                    detail.setSegmentID(detailData[6]);
-                    detail.setProgramID(detailData[7]);
+                    detail.setPid(detailData[4]);
+                    detail.setCampaignId(detailData[5]);
+                    detail.setSegmentId(detailData[6]);
+                    detail.setProgramId(detailData[7]);
                     detail.setVariable1(detailData[8]);
                     detail.setVariable2(detailData[9]);
                     details.add(detail);
@@ -1159,7 +1169,8 @@ public class LoadFtpPnpDataTask {
         Long mainId = pnpMainMing.getPnpMainId();
         String status = AbstractPnpMainEntity.DATA_CONVERTER_STATUS_WAIT;
         Date now = Calendar.getInstance().getTime();
-        pnpMainMingRepository.updatePnpMainMingStatus(status, now, mainId);
+        int i = pnpMainMingRepository.updatePnpMainMingStatus(status, now, mainId);
+        logger.info("Return Int :" + i);
         pnpDetailMingRepository.updateStatusByMainId(status, now, mainId);
         logger.info("Update Status : " + status);
     }

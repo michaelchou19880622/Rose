@@ -8,8 +8,8 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpRepositoryCustom;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFTPType;
-import com.google.gson.GsonBuilder;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.log4j.Logger;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +22,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -43,8 +43,11 @@ public class PnpPushMsgService {
     private PnpAkkaService pnpAkkaService;
     private PnpRepositoryCustom pnpRepositoryCustom;
     private LineUserService lineUserService;
-
-    private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1,
+            new BasicThreadFactory.Builder()
+                    .namingPattern("PNP-BC-Scheduled-%d")
+                    .daemon(true).build()
+    );
     private ScheduledFuture<?> scheduledFuture = null;
 
     @Autowired
@@ -71,6 +74,7 @@ public class PnpPushMsgService {
         scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
+                Thread.currentThread().setName("PNP-BC-Scheduled-" + Thread.currentThread().getId());
                 // 排程工作
                 logger.info("PnpSendMsgService startCircle....");
 
@@ -104,8 +108,9 @@ public class PnpPushMsgService {
                 List<? super PnpDetail> details2 = findDetailUid(details);
                 Long[] mainIds = allMainIds.toArray(new Long[0]);
                 PnpMain pnpMain = pnpRepositoryCustom.findMainByMainId(type, mainIds[0]);
-                logger.info("sending handle Main:" + pnpMain.getOrigFileName() + " type:" + type);
+                logger.info("Sending handle Main:" + pnpMain.getOrigFileName() + " type:" + type);
                 pnpMain.setPnpDetails(details2);
+                logger.info("Tell Akka Send BC!!");
                 pnpAkkaService.tell(pnpMain);
 
             } catch (Exception e) {

@@ -6,6 +6,8 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
 import com.bcs.core.taishin.circle.PNP.db.repository.PNPMaintainAccountModelCustom;
 import com.bcs.core.taishin.circle.PNP.db.repository.PNPMaintainAccountModelRepository;
 import com.bcs.core.taishin.circle.db.service.OracleService;
+import com.bcs.core.utils.DataUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,18 +16,19 @@ import org.springframework.stereotype.Service;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.xml.crypto.Data;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
+@Slf4j
 @Service
 public class PNPMaintainAccountModelService {
 
-    /**
-     * Logger
-     */
-    private static Logger logger = Logger.getLogger(PNPMaintainAccountModelService.class);
     @Autowired
     private PNPMaintainAccountModelRepository pnpMaintainAccountModelRepository;
     @Autowired
@@ -69,6 +72,109 @@ public class PNPMaintainAccountModelService {
     @SuppressWarnings("unchecked")
     public Map<String, List<String>> getPNPDetailReportExcelList(String startDate, String endDate, String account, String pccCode, String sourceSystem, String empId) {
 
+        StringBuilder sb = getSQL(account, pccCode, sourceSystem, empId);
+        Query query = entityManager.createNativeQuery(sb.toString()).setParameter(1, startDate).setParameter(2, endDate);
+        log.info("query:" + query.toString());
+        List<Object[]> list = query.getResultList();
+        DataUtils.toPrettyJsonUseJackson(list);
+        int j = 0;
+        for (Object[] objArray : list) {
+            log.info(j + ") " + Arrays.toString(objArray));
+            j++;
+        }
+
+        Map<String, List<String>> map = new LinkedHashMap<>();
+
+        int count = 0;
+        for (Object[] o : list) {
+            count++;
+            log.info("c:" + count);
+            List<String> dataList = new ArrayList<>();
+            map.put(Integer.toString(count), dataList);
+            for (int i = 0, max = 27; i < max; i++) {
+                if (o[i] == null) {
+                    dataList.add("");
+                } else {
+                    dataList.add(o[i].toString());
+                }
+            }
+        }
+        log.info("map1: " + map.toString());
+
+        return map;
+    }
+
+
+    @SuppressWarnings("unchecked")
+    public List<Map<Integer, String>> getPNPDetailReportExcelMapList(String startDate, String endDate, String account, String pccCode, String sourceSystem, String empId) {
+        try {
+            StringBuilder sb = getSQL(account, pccCode, sourceSystem, empId);
+            Query query = entityManager.createNativeQuery(DataUtils.replaceUnnecessarySpace(sb.toString()))
+                    .setParameter(1, startDate)
+                    .setParameter(2, endDate);
+
+            final int maxColumn = 27;
+            List<Object[]> rowArrayList = query.getResultList();
+
+            int index = 0;
+            List<Map<Integer, String>> rowDataList = new LinkedList<>();
+            /* Header */
+            Map<Integer, String> columnDataMap = getHeaderMap(maxColumn);
+            rowDataList.add(columnDataMap);
+
+            /* Data */
+            /* 取出每一行資料*/
+            for (Object[] rowData : rowArrayList) {
+                columnDataMap = new LinkedHashMap<>(maxColumn);
+                for (int columnIndex = 0; columnIndex < maxColumn; columnIndex++) {
+                    /* 取出每一欄資料 */
+                    String value = rowData[columnIndex] == null ? "" : rowData[columnIndex].toString();
+                    value = columnSpecialProcess(columnIndex, value);
+                    columnDataMap.put(columnIndex, value);
+                }
+                rowDataList.add(columnDataMap);
+            }
+
+            return rowDataList;
+        } catch (Exception e) {
+            log.error("Exception", e);
+            throw e;
+        }
+    }
+
+    private String columnSpecialProcess(int columnIndex, String value) {
+        /* 資料特殊處理 */
+        log.info("{},{}", columnIndex, value);
+        switch (columnIndex) {
+            case 21:
+            case 22:
+            case 23:
+                /* 21 BC發送狀態 */
+                /* 22 PNP發送狀態*/
+                /* 23 SMS發送狀態*/
+                value = englishStatusToChinese(value);
+                break;
+            case 3:
+                /* 發送通路(ex: PNP_明宣) */
+                log.info("Proc: " + value);
+                String[] valueArray = value.split(";");
+                log.info("Proc Array: " + Arrays.toString(valueArray));
+                String stage = valueArray[0];
+                String source = valueArray[1];
+                String sourceChinese = englishSourceToChinese(source);
+                value = String.format("%s_%s", stage, sourceChinese);
+                break;
+            case 2:
+                /* 通路流(1.2.3.4.) */
+                value = englishProcFlowToChinese(value);
+                break;
+            default:
+                break;
+        }
+        return value == null ? "" : value;
+    }
+
+    private StringBuilder getSQL(String account, String pccCode, String sourceSystem, String empId) {
         StringBuilder sb = new StringBuilder();
         sb.append("select * from " +
                 " ( " +
@@ -93,14 +199,14 @@ public class PNPMaintainAccountModelService {
                 "                        d.uid, " +
                 "                        d.detail_schedule_time as detail_schedule_time1, " +
                 "                        d.detail_schedule_time as detail_schedule_time2, " +
-                "                        d.pnp_delivery_expire_time as pnp_delivery_expire_time1, " +
-                "                        d.pnp_delivery_expire_time as pnp_delivery_expire_time2, " +
-                "                        d.status as status1, " +
-                "                        d.status as status2, " +
-                "                        d.status as status3, " +
+                "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
+                "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
+                "                        d.bc_status as status1, " +
+                "                        d.pnp_status as status2, " +
+                "                        d.sms_status as status3, " +
                 "                        null as is_international, " +
-                "                        d.creat_time as creat_time1, " +
-                "                        d.creat_time as creat_time2, " +
+                "                        convert(varchar, d.creat_time, 120) AS create_time, " +
+                "                        convert(varchar, d.modify_time, 120) AS modify_time, " +
                 "                        a.employee_id " +
                 "                from bcs_pnp_detail_ming as d " +
                 "                left join bcs_pnp_main_ming as m on d.pnp_main_id = m.pnp_main_id " +
@@ -124,19 +230,19 @@ public class PNPMaintainAccountModelService {
                 "                        null as segment_id, " +
                 "                        null as program_id, " +
                 "                        null as pid, " +
-                "                        d.phone, " +
+                "                        d.phone, " +//15
                 "                        d.uid, " +
                 "                        null as detail_schedule_time1, " +
                 "                        null as detail_schedule_time2, " +
-                "                        d.pnp_delivery_expire_time as pnp_delivery_expire_time1, " +
-                "                        d.pnp_delivery_expire_time as pnp_delivery_expire_time2, " +
-                "                        d.status as status1, " +
-                "                        d.status as status2, " +
-                "                        d.status as status3, " +
+                "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
+                "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
+                "                        d.bc_status as status1, " +//21
+                "                        d.pnp_status as status2, " +
+                "                        d.sms_status as status3, " +
                 "                        null as is_international, " +
-                "                        d.creat_time as creat_time1, " +
-                "                        d.creat_time as creat_time2, " +
-                "                        a.employee_id " +
+                "                        convert(varchar, d.creat_time, 120) AS create_time, " +//25
+                "                        convert(varchar, d.modify_time, 120) AS modify_time, " +//26
+                "                        a.employee_id" +
                 "                from bcs_pnp_detail_mitake as d " +
                 "                left join bcs_pnp_main_mitake as m on d.pnp_main_id = m.pnp_main_id " +
                 "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
@@ -163,14 +269,14 @@ public class PNPMaintainAccountModelService {
                 "                        d.uid, " +
                 "                        null as detail_schedule_time1, " +
                 "                        null as detail_schedule_time2, " +
-                "                        d.pnp_delivery_expire_time as pnp_delivery_expire_time1, " +
-                "                        d.pnp_delivery_expire_time as pnp_delivery_expire_time2, " +
-                "                        d.status as status1, " +
-                "                        d.status as status2, " +
-                "                        d.status as status3, " +
+                "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
+                "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
+                "                        d.bc_status as status1, " +
+                "                        d.pnp_status as status2, " +
+                "                        d.sms_status as status3, " +
                 "                        null as is_international, " +
-                "                        d.creat_time as creat_time1, " +
-                "                        d.creat_time as creat_time2, " +
+                "                        convert(varchar, d.creat_time, 120) AS create_time, " +
+                "                        convert(varchar, d.modify_time, 120) AS modify_time, " +
                 "                        a.employee_id " +
                 "                from bcs_pnp_detail_unica as d " +
                 "                left join bcs_pnp_main_unica as m on d.pnp_main_id = m.pnp_main_id " +
@@ -198,22 +304,22 @@ public class PNPMaintainAccountModelService {
                 "                        d.uid, " +
                 "                        null as detail_schedule_time1, " +
                 "                        null as detail_schedule_time2, " +
-                "                        d.pnp_delivery_expire_time as pnp_delivery_expire_time1, " +
-                "                        d.pnp_delivery_expire_time as pnp_delivery_expire_time2, " +
-                "                        d.status as status1, " +
-                "                        d.status as status2, " +
-                "                        d.status as status3, " +
+                "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
+                "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
+                "                        d.bc_status as status1, " +
+                "                        d.pnp_status as status2, " +
+                "                        d.sms_status as status3, " +
                 "                        null as is_international, " +
-                "                        d.creat_time as creat_time1, " +
-                "                        d.creat_time as creat_time2, " +
+                "                        convert(varchar, d.creat_time, 120) AS create_time, " +
+                "                        convert(varchar, d.modify_time, 120) AS modify_time, " +
                 "                        a.employee_id " +
                 "                from bcs_pnp_detail_every8d as d " +
                 "                left join bcs_pnp_main_every8d as m on d.pnp_main_id = m.pnp_main_id " +
                 "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
                 "        ) " +
                 " ) as r1 " +
-                " where creat_time1 >= ?1 " +
-                " and creat_time1 <  dateadd(day, 1, ?2) ");
+                " where create_time >= ?1 " +
+                " and create_time <  dateadd(day, 1, ?2) ");
 
 
         if (StringUtils.isNotBlank(account)) {
@@ -227,7 +333,7 @@ public class PNPMaintainAccountModelService {
         }
 
         boolean oracleUseDepartmentCheck = CoreConfigReader.getBoolean(CONFIG_STR.ORACLE_USE_DEPARTMENT_CHECK, true);
-        logger.info("oracleUseDepartmentCheck:" + oracleUseDepartmentCheck);
+        log.info("oracleUseDepartmentCheck:" + oracleUseDepartmentCheck);
         if (oracleUseDepartmentCheck) {
             String empAva = oraclePnpService.getAvailableEmpIdsByEmpId(empId);
             if (StringUtils.isNotBlank(empAva)) {
@@ -235,225 +341,139 @@ public class PNPMaintainAccountModelService {
             }
         }
 
-        sb.append(" order by creat_time1 desc ");
+        sb.append(" order by create_time desc ");
 
-        logger.info("str1: " + sb.toString());
-        Query query = entityManager.createNativeQuery(sb.toString()).setParameter(1, startDate).setParameter(2, endDate);
-        logger.info("query:" + query.toString());
-        List<Object[]> list = query.getResultList();
-
-        Map<String, List<String>> map = new LinkedHashMap<>();
-
-        int count = 0;
-        for (Object[] o : list) {
-            count++;
-            logger.info("c:" + count);
-            List<String> dataList = new ArrayList<>();
-            map.put(Integer.toString(count), dataList);
-            for (int i = 0, max = 27; i < max; i++) {
-                if (o[i] == null) {
-                    dataList.add("");
-                } else {
-                    dataList.add(o[i].toString());
-                }
-            }
-        }
-        logger.info("map1: " + map.toString());
-
-        return map;
+        log.info("str1: " + DataUtils.replaceUnnecessarySpace(sb.toString()));
+        return sb;
     }
 
-//    protected LoadingCache<String, Campaign> dataCache;
-//    
-//	private Timer flushTimer = new Timer();
-//	
-//	private class CustomTask extends TimerTask{
-//		
-//		@Override
-//		public void run() {
-//
-//			try{
-//				// Check Data Sync
-//				Boolean isReSyncData = DataSyncUtil.isReSyncData(CAMPAIGN_SYNC);
-//				if(isReSyncData){
-//					dataCache.invalidateAll();
-//					DataSyncUtil.syncDataFinish(CAMPAIGN_SYNC);
-//				}
-//			}
-//			catch(Throwable e){
-//				logger.error(ErrorRecord.recordError(e));
-//			}
-//		}
-//	}
-//    
-//    public CampaignService(){
-//
-//		flushTimer.schedule(new CustomTask(), 120000, 30000);
-//
-//        dataCache = CacheBuilder.newBuilder()
-//                .concurrencyLevel(1)
-//                .expireAfterAccess(30, TimeUnit.MINUTES)
-//                .build(new CacheLoader<String, Campaign>() {
-//                    @Override
-//                    public Campaign load(String key) throws Exception {
-//                        return new Campaign();
-//                    }
-//                });
-//    }
-//    
-//    @PreDestroy
-//    public void cleanUp() {
-//        logger.info("[DESTROY] CampaignService cleaning up...");
-//        try{
-//            if(dataCache != null){
-//                dataCache.invalidateAll();
-//                dataCache = null;
-//            }
-//        }
-//        catch(Throwable e){}
-//        
-//        System.gc();
-//        logger.info("[DESTROY] CampaignService destroyed.");
-//    }
-//    
-//    private boolean notNull(Campaign result){
-//        if(result != null && StringUtils.isNotBlank(result.getCampaignId())){
-//            return true;
-//        }
-//        return false;
-//    }
-//    
-//    public Campaign findByName(String name) {
-//        Campaign result = campaignRepository.findByCampaignName(name);
-//        if(result != null){
-//            dataCache.put(result.getCampaignId(), result);
-//        }
-//        return result;
-//    }
-//    
-//
-//    public List<Campaign> findAll() {
-//        return campaignRepository.findAll();
-//    }
-//
-//    public List<Campaign> findByIsActive(Boolean isActive) {
-//        return campaignRepository.findByIsActive(isActive);
-//    }
-//
-//    public Long countAll() {
-//        return campaignRepository.count();
-//    }
-//
-//    public void save(Campaign campaign) {
-//        campaignRepository.save(campaign);
-//
-//        if(campaign != null){
-//            dataCache.put(campaign.getCampaignId(), campaign);
-//			DataSyncUtil.settingReSync(CAMPAIGN_SYNC);
-//        }
-//    }
-//    
-//    @Transactional(rollbackFor=Exception.class, timeout = 30)
-//    public void delete(String campaignId) throws BcsNoticeException{
-//        logger.debug("delete:" + campaignId);
-//        
-//        Campaign campaign = campaignRepository.findOne(campaignId);
-//        
-//        campaignRepository.delete(campaign);
-//        dataCache.invalidate(campaignId);
-//		DataSyncUtil.settingReSync(CAMPAIGN_SYNC);
-//    }
-//    
-//    public String findCampaignNameByCampaignId(String campaignId) throws BcsNoticeException{
-//        try {
-//            Campaign result = dataCache.get(campaignId);
-//            if(notNull(result)){
-//                return result.getCampaignName();
-//            }
-//        } catch (Exception e) {}
-//        
-//        return campaignRepository.findCampaignNameByCampaignId(campaignId);
-//    }
-//    
-//    public Campaign findOne(String campaignId){
-//        try {
-//            Campaign result = dataCache.get(campaignId);
-//            if(notNull(result)){
-//                return result;
-//            }
-//        } catch (Exception e) {}
-//        
-//        Campaign result = campaignRepository.findOne(campaignId);
-//        if(result != null){
-//            dataCache.put(result.getCampaignId(), result);
-//        }
-//        return result;
-//    }
-//    
-//    public String generateCampaignId() {
-//        String campaignId = UUID.randomUUID().toString().toLowerCase();
-//        
-//        while (campaignRepository.findOne(campaignId) != null) {
-//            campaignId = UUID.randomUUID().toString().toLowerCase();
-//        }
-//        return campaignId;
-//    }
-//    
-//	@Transactional(rollbackFor=Exception.class, timeout = 30)
-//    public void deleteFromUI(String campaignId, String account) throws BcsNoticeException {
-//        logger.info("deleteFromUI:" + campaignId);
-//        
-//        String campaignName = campaignService.findCampaignNameByCampaignId(campaignId);
-//        campaignService.delete(campaignId);
-//        createSystemLog("Delete", campaignName, account, new Date(), campaignId.toString());
-//    }
-//	
-//	private void createSystemLog(String action, Object content, String modifyUser, Date modifyTime, String referenceId) {
-//        SystemLogUtil.saveLogDebug("Campaign", action, modifyUser, content, referenceId);
-//    }
-//	
-//	@Transactional(rollbackFor=Exception.class, timeout = 30)
-//    public Campaign saveFromUI(Campaign campaign, String account) throws BcsNoticeException{
-//        logger.info("saveFromUI:" + campaign);
-//
-//        String campaignId = campaign.getCampaignId();
-//        
-//        String action = "Edit";
-//        if (campaignId == null) {
-//            action = "Create";
-//            
-//            campaignId = campaignService.generateCampaignId();
-//            campaign.setCampaignId(campaignId);
-//        }
-//            
-//        // Set Modify Admin User
-//        campaign.setModifyUser(account);
-//        campaign.setModifyTime(new Date());
-//        
-//        // Save Campaign
-//        campaignService.save(campaign);
-//        
-//        campaign = campaignService.findOne(campaign.getCampaignId());
-//        createSystemLog(action, campaign, campaign.getModifyUser(), campaign.getModifyTime(), campaign.getCampaignId());
-//        return campaign;
-//    }
-//
-//    @Transactional(rollbackFor=Exception.class, timeout = 30)
-//	public Campaign switchIsActive(String campaignId, String account) throws BcsNoticeException{
-//        logger.info("switchIsActive:" + campaignId);
-//        
-//        Campaign campaign = campaignService.findOne(campaignId);
-//        if (campaign != null) {
-//            boolean switchValue = (campaign.getIsActive() == Boolean.TRUE) ? false : true;
-//            campaign.setIsActive(switchValue);
-//            
-//            // Set Modify Admin User
-//            campaign.setModifyUser(account);
-//            campaign.setModifyTime(new Date());
-//            // Save Campaign
-//            campaignService.save(campaign);
-//        }
-//        
-//        return campaign;
-//	}
+    private Map<Integer, String> getHeaderMap(int maxColumn) {
+        Map<Integer, String> columnDataMap = new LinkedHashMap<>(maxColumn);
+        columnDataMap.put(0, "序號");
+        columnDataMap.put(1, "前方來源系統");
+        columnDataMap.put(2, "通路流");
+        columnDataMap.put(3, "發送通路");
+        columnDataMap.put(4, "發送帳號");
+        columnDataMap.put(5, "掛帳PccCode");
+        columnDataMap.put(6, "發送廠商訊息批次代碼");
+        columnDataMap.put(7, "發送廠商訊息流水號");
+        columnDataMap.put(8, "訊息樣板");
+        columnDataMap.put(9, "訊息內文");
+        columnDataMap.put(10, "訊息內文點數");
+        columnDataMap.put(11, "行銷活動代碼");
+        columnDataMap.put(12, "行銷活動階段");
+        columnDataMap.put(13, "行銷活動客群代碼");
+        columnDataMap.put(14, "客戶ID");
+        columnDataMap.put(15, "客戶手機號碼");
+        columnDataMap.put(16, "UID");
+        columnDataMap.put(17, "預約日期");
+        columnDataMap.put(18, "預約時間");
+        columnDataMap.put(19, "BC發送日期");
+        columnDataMap.put(20, "PNP發送時間");
+        columnDataMap.put(21, "BC發送狀態");
+        columnDataMap.put(22, "PNP發送狀態");
+        columnDataMap.put(23, "SMS發送狀態");
+        columnDataMap.put(24, "是否國際簡訊");
+        columnDataMap.put(25, "資料建立日期");
+        columnDataMap.put(26, "資料更新日期");
+        return columnDataMap;
+    }
+
+    private String englishStatusToChinese(String status) {
+        switch (status) {
+
+            case "DRAFT":
+                return "正在存進資料庫";
+            case "WAIT":
+                return "等待進入處理程序";
+            case "SCHEDULED":
+                return "等待預約發送";
+            case "BC_PROCESS":
+                return "進行BC發送處理中";
+            case "BC_SENDING":
+                return "BC發送中";
+            case "BC_COMPLETE":
+                return "BC處理程序完成";
+            case "BC_FAIL":
+                return "BC發送失敗";
+            case "BC_FAIL_PNP_PROCESS":
+                return "轉發PNP";
+            case "BC_FAIL_SMS_PROCESS":
+                return "轉發SMS";
+            case "PNP_SENDING":
+                return "PNP發送中";
+            case "CHECK_DELIVERY":
+                return "已發送，等待回應";
+            case "PNP_COMPLETE":
+                return "PNP處理程序完成";
+            case "PNP_FAIL_SMS_PROCESS":
+                return "轉發SMS";
+            case "SMS_COMPLETE":
+                return "SMS處理程序完成";
+            case "SMS_FAIL":
+                return "SMS發送失敗";
+
+
+            case "PROCESS":
+                return "發送處理進行中";
+            case "FINISH":
+                return "發送處理完成";
+            case "SENDING":
+                return "發送中";
+            case "DELETE":
+                return "已刪除";
+            case "COMPLETE":
+                return "處理程序完成";
+
+
+            default:
+                return status;
+        }
+    }
+
+    /**
+     * Transfer Source Code To Chinese Name
+     *
+     * @param sourceCode Source Code 1. 2. 3. 4.
+     * @return Source Chinese Name
+     */
+    private String englishSourceToChinese(String sourceCode) {
+        log.info("sourceCode: " + sourceCode);
+        switch (sourceCode) {
+            case "1":
+                return "三竹";
+            case "2":
+                return "互動";
+            case "3":
+                return "明宣";
+            case "4":
+                return "UNICA";
+            default:
+                return sourceCode;
+        }
+    }
+
+
+    /**
+     * Transfer procFlow Code To Chinese Name
+     *
+     * @param procFlowCode procFlow Code 1. 2. 3. 4.
+     * @return Source Chinese Name
+     */
+    private String englishProcFlowToChinese(String procFlowCode) {
+        log.info("procFlowCode: " + procFlowCode);
+        switch (procFlowCode) {
+            case "0":
+                return "SMS";
+            case "1":
+                return "BC";
+            case "2":
+                return "BC->PNP";
+            case "3":
+                return "BC->PNP->SMS";
+            default:
+                return procFlowCode;
+        }
+    }
+
 }

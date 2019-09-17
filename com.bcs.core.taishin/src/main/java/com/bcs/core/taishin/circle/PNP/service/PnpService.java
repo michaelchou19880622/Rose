@@ -178,6 +178,9 @@ public class PnpService {
         if (status.equals(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_COMPLETE)
                 || status.equals(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_BC_COMPLETE)
                 || status.equals(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_PNP_COMPLETE)) {
+            // FIXME PNP CHECK_DELIVERY 接收Line回傳訊息不是呼叫這隻Method處理，於是PNP_COMPLETE根本不會進行
+            // TODO 須將com.bcs.core.bot/src/main/java/com/bcs/core/bot/db/service/MsgBotReceiveService.java
+            //  透過APi打到這邊讓Akka處理
             pnpDetail.setSendTime(Calendar.getInstance().getTime());
             logger.info(String.format("Update SendTime: %s, Status: %s", pnpDetail.getSendTime(), status));
         }
@@ -203,7 +206,12 @@ public class PnpService {
         /* 需檢查的狀態清單 */
         List<String> status = new ArrayList<>();
         status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS);
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_SENDING);
+        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_PROCESS);
+        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_PNP_PROCESS);
+        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
+        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_FAIL_SMS_PROCESS);
+        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_SENDING);
+        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_SENDING);
         status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
         status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_WAIT);
         status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_SCHEDULED);
@@ -388,30 +396,30 @@ public class PnpService {
 
             if (sendSuccessFlag) {
                 /* 發送成功 */
-                /* FIXME PNP 發送時間為送給LINE的時間，不等Line回傳
-                 *  Line回傳時間另外紀錄
-                 * */
                 logger.info("BC Send Message Success!!");
                 detail.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_BC_COMPLETE);
+                detail.setBcStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_BC_COMPLETE);
             } else {
                 /* 發送失敗 */
                 logger.warn("BC Send Message Fail!!");
-                /* FIXME 20190822 Record ReturnCode and Create DB column and Report column */
+                /* FIXME 20190822 Record ReturnCode*/
                 String processFlow = pnpMain.getProcFlow();
                 detail.setLinePushTime(Calendar.getInstance().getTime());
                 switch (processFlow) {
                     case AbstractPnpMainEntity.PROC_FLOW_BC:
                         detail.setProcStage(AbstractPnpMainEntity.STAGE_BC);
                         detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_FINISH);
+                        detail.setBcStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL);
                         break;
                     case AbstractPnpMainEntity.PROC_FLOW_BC_SMS:
-                        /* FIXME 20190822 PNP Send Fail or devlevery out of date => Send to SMS Process */
                         detail.setProcStage(AbstractPnpMainEntity.STAGE_SMS);
                         detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS);
+                        detail.setBcStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
                         break;
                     case AbstractPnpMainEntity.PROC_FLOW_BC_PNP_SMS:
                         detail.setProcStage(AbstractPnpMainEntity.STAGE_PNP);
                         detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS);
+                        detail.setBcStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_PNP_PROCESS);
                         break;
                     default:
                         break;
@@ -480,11 +488,13 @@ public class PnpService {
                     logger.info("Pnp Delivery Expire Time : " + DataUtils.formatDateToString(calendar.getTime(), "yyyy-MM-dd HH:mm:ss"));
                     //待web hook在24小時內收到DELIVERY則將該則訊息update成COMPLETE，若24小時內沒收到DELIVERY則將該訊息轉發SMS
                     detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_CHECK_DELIVERY);
+                    detail.setPnpStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_CHECK_DELIVERY);
                 } else {
                     /* 發送失敗 */
                     logger.info("PNP Send Message Fail!! ==> SMS!!");
                     detail.setProcStage(AbstractPnpMainEntity.STAGE_SMS);
                     detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS);
+                    detail.setPnpStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_FAIL_SMS_PROCESS);
                 }
                 logger.info(String.format("Process Flow: %s, After Proc Stage: %s, After Status: %s"
                         , detail.getProcFlow(), detail.getProcStage(), detail.getStatus()));

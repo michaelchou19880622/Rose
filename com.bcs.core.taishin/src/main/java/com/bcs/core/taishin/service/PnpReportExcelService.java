@@ -75,6 +75,7 @@ public class PnpReportExcelService {
                     switch (i) {
                         case 17:
                         case 19:
+                            //發送日期
                         case 25:
                         case 26:
                             /* Date */
@@ -82,6 +83,7 @@ public class PnpReportExcelService {
                             break;
                         case 18:
                         case 20:
+                            // 發送時間
                             /* Time */
                             row.createCell(i).setCellValue(dateTimeToDateOrTime(value, "Time"));
                             break;
@@ -98,7 +100,7 @@ public class PnpReportExcelService {
                             row.createCell(i).setCellValue("");
                             break;
                         case 3:
-                            /* 發送通路(1.2.3.4.) */
+                            /* 發送通路(ex: PNP_明宣) */
                             logger.info("Proc: " + value);
                             String[] valueArray = value.split(";");
                             logger.info("Proc Array: " + Arrays.toString(valueArray));

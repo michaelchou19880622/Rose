@@ -1,21 +1,28 @@
 package com.bcs.core.json;
 
-import java.io.Serializable;
-
 import com.bcs.core.utils.ObjectUtil;
 
-public abstract class AbstractBcsEntity implements Serializable, Cloneable  {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+import java.io.Serializable;
 
-	@Override
-	public String toString() {
-	   return ObjectUtil.objectToJsonStr(this);
-	}
+/**
+ * @author ???
+ */
+public abstract class AbstractBcsEntity implements Serializable, Cloneable {
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
-	public Object clone() throws CloneNotSupportedException {
-		return super.clone();
-	}
+    @Override
+    public String toString() {
+        return ObjectUtil.objectToJsonStr(this);
+    }
+
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+
+    public String toJson(){
+        return ObjectUtil.objectToJsonStr(this);
+    }
 }

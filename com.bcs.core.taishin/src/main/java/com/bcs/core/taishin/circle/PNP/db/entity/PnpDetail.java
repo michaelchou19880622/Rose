@@ -1,6 +1,10 @@
 package com.bcs.core.taishin.circle.PNP.db.entity;
 
 import com.bcs.core.json.AbstractBcsEntity;
+import com.bcs.core.utils.DataUtils;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
@@ -9,54 +13,97 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
-import java.util.Calendar;
 import java.util.Date;
 
+/**
+ * 通用Detail物件
+ *
+ * @author ???
+ */
+@Slf4j
+@Getter
+@Setter
 @MappedSuperclass
 public class PnpDetail extends AbstractBcsEntity {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Detail ID - Content table Id
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PNP_DETAIL_ID")
     private Long pnpDetailId;
 
+    /**
+     * Main ID - Header table Id
+     */
     @Column(name = "PNP_MAIN_ID")
     private Long pnpMainId;
 
-    //Line uid ; push line 訊息時才會用phone回查lineUser取得
+    /**
+     * Line UID
+     */
     @Column(name = "UID", columnDefinition = "nvarchar(50)")
     private String uid;
 
-    //資料來源//三竹=1;互動來源=2;明宣=3;unica=4
+    /**
+     * 資料來源
+     * 1. 三竹 Mitake
+     * 2. 互動來源 Every8D
+     * 3. 明宣 Ming
+     * 4. Unica
+     */
     @Column(name = "SOURCE", columnDefinition = "nvarchar(3)")
     private String source;
 
-    //對應原生欄位Mobile
+    /**
+     * 電話號碼
+     * 對應原生欄位DestNo
+     */
     @Column(name = "PHONE", columnDefinition = "nvarchar(15)")
     private String phone;
-    //sha256 e.164 hash for line pnp push
+    /**
+     * 加密後電話號碼
+     * SHA256 e.164 hash for line pnp push
+     */
     @Column(name = "PHONE_HASH", columnDefinition = "nvarchar(100)")
     private String phoneHash;
 
-    //對應原生欄位 Content
+    /**
+     * 簡訊內文
+     * 對應原生欄位 MsgData
+     */
     @Column(name = "MSG", columnDefinition = "nvarchar(1000)")
     private String msg;
 
+    /**
+     * 建立時間
+     */
     @Column(name = "CREAT_TIME")
     private Date createTime;
 
+    /**
+     * 發送時間
+     */
     @Column(name = "SEND_TIME")
     private Date sendTime;
 
-    //明細檔狀態；select for update wait時更新此欄位，防止重複發送
+    /**
+     * 明細檔狀態；select for update wait時更新此欄位，防止重複發送
+     */
     @Column(name = "STATUS", columnDefinition = "nvarchar(50)")
     private String status;
 
+    /**
+     * 更新時間
+     */
     @Column(name = "MODIFY_TIME")
     private Date modifyTime;
 
-    //通路參數
+    /**
+     * 通路參數
+     */
     @Column(name = "PROC_FLOW", columnDefinition = "nvarchar(3)")
     private String procFlow;
 
@@ -67,187 +114,55 @@ public class PnpDetail extends AbstractBcsEntity {
     @Column(name = "PROC_STAGE", columnDefinition = "nvarchar(50)")
     private String procStage;
 
+    /**
+     * BC推播時間
+     */
     @Column(name = "LINE_PUSH_TIME")
     private Date linePushTime;
 
+    /**
+     * PNP推播時間
+     */
     @Column(name = "PNP_TIME")
     private Date pnpTime;
 
+    /**
+     * PNP 接收Line回傳時間
+     */
     @Column(name = "PNP_DELIVERY_TIME")
     private Date pnpDeliveryTime;
 
-    //web hook 送來 PNP DELIVERY的到期時間，20190620設定為24小時後過期(LINE提供的API文件規定為24小時)
+    /**
+     * web hook 送來 PNP DELIVERY的到期時間
+     */
     @Column(name = "PNP_DELIVERY_EXPIRE_TIME")
     private Date pnpDeliveryExpireTime;
 
+    /**
+     * SMS 發送時間
+     */
     @Column(name = "SMS_TIME")
     private Date smsTime;
 
-    //轉SMS使用的檔名 ；因為轉SMS時，是抓當下資料庫發送失敗的資料，組成一個檔案來轉送SMS，有可能一個原檔轉到SMS時變成多個檔案(發送時間問題)，所以在detail紀錄對應的SMS檔案
+    /**
+     * 轉SMS使用的檔名 ；因為轉SMS時，是抓當下資料庫發送失敗的資料，
+     * 組成一個檔案來轉送SMS，有可能一個原檔轉到SMS時變成多個檔案(發送時間問題)，
+     * 所以在detail紀錄對應的SMS檔案
+     */
     @Column(name = "SMS_FILE_NAME", columnDefinition = "nvarchar(200)")
     private String smsFileName;
 
     @PrePersist
     public void prePersist() {
-        createTime = Calendar.getInstance().getTime();
+        createTime = new Date();
         modifyTime = createTime;
+        log.info("Create Time is Update to : {}", DataUtils.formatDateToString(createTime, "yyyy-MM-dd HH:mm:ss"));
+        log.info("Modify Time is Update to : {}", DataUtils.formatDateToString(modifyTime, "yyyy-MM-dd HH:mm:ss"));
     }
 
     @PreUpdate
     public void preUpdate() {
-        modifyTime = Calendar.getInstance().getTime();
+        modifyTime = new Date();
+        log.info("Modify Time is Update to : {}", DataUtils.formatDateToString(modifyTime, "yyyy-MM-dd HH:mm:ss"));
     }
-
-    public Long getPnpDetailId() {
-        return pnpDetailId;
-    }
-
-    public void setPnpDetailId(Long pnpDetailId) {
-        this.pnpDetailId = pnpDetailId;
-    }
-
-    public Long getPnpMainId() {
-        return pnpMainId;
-    }
-
-    public void setPnpMainId(Long pnpMainId) {
-        this.pnpMainId = pnpMainId;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getPhoneHash() {
-        return phoneHash;
-    }
-
-    public void setPhoneHash(String phoneHash) {
-        this.phoneHash = phoneHash;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    public Date getSendTime() {
-        return sendTime;
-    }
-
-    public void setSendTime(Date sendTime) {
-        this.sendTime = sendTime;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public Date getModifyTime() {
-        return modifyTime;
-    }
-
-    public void setModifyTime(Date modifyTime) {
-        this.modifyTime = modifyTime;
-    }
-
-    public String getUid() {
-        return uid;
-    }
-
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
-
-    public String getProcFlow() {
-        return procFlow;
-    }
-
-    public void setProcFlow(String procFlow) {
-        this.procFlow = procFlow;
-    }
-
-    public String getProcStage() {
-        return procStage;
-    }
-
-    public void setProcStage(String procStage) {
-        this.procStage = procStage;
-    }
-
-    public Date getLinePushTime() {
-        return linePushTime;
-    }
-
-    public void setLinePushTime(Date linePushTime) {
-        this.linePushTime = linePushTime;
-    }
-
-    public Date getPnpTime() {
-        return pnpTime;
-    }
-
-    public void setPnpTime(Date pnpTime) {
-        this.pnpTime = pnpTime;
-    }
-
-    public Date getSmsTime() {
-        return smsTime;
-    }
-
-    public void setSmsTime(Date smsTime) {
-        this.smsTime = smsTime;
-    }
-
-    public String getSource() {
-        return source;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
-    }
-
-    public Date getPnpDeliveryTime() {
-        return pnpDeliveryTime;
-    }
-
-    public void setPnpDeliveryTime(Date pnpDeliveryTime) {
-        this.pnpDeliveryTime = pnpDeliveryTime;
-    }
-
-    public Date getPnpDeliveryExpireTime() {
-        return pnpDeliveryExpireTime;
-    }
-
-    public void setPnpDeliveryExpireTime(Date pnpDeliveryExpireTime) {
-        this.pnpDeliveryExpireTime = pnpDeliveryExpireTime;
-    }
-
-    public String getSmsFileName() {
-        return smsFileName;
-    }
-
-    public void setSmsFileName(String smsFileName) {
-        this.smsFileName = smsFileName;
-    }
-
 }

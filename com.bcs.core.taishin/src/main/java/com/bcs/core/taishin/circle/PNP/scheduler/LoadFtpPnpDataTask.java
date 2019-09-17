@@ -23,19 +23,19 @@ import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainMingRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainMitakeRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainUnicaRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpRepositoryCustom;
+import com.bcs.core.taishin.circle.PNP.ftp.PNPFTPType;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpService;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpSetting;
+import com.bcs.core.utils.DataUtils;
 import com.bcs.core.utils.ErrorRecord;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.primitives.Chars;
-import com.google.gson.GsonBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.log4j.Logger;
-import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -56,9 +56,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -78,7 +78,11 @@ public class LoadFtpPnpDataTask {
     private static final String TAG = "\\&";
     private static final String MING_TAG = "\\;;";
 
-    private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1,
+            new BasicThreadFactory.Builder()
+                    .namingPattern("FTP-Scheduled--%d")
+                    .daemon(true).build()
+    );
     private ScheduledFuture<?> scheduledFuture = null;
 
     /**
@@ -199,6 +203,7 @@ public class LoadFtpPnpDataTask {
         scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
+
                 logger.info("ftpProcessHandler SOURCE_MITAKE....");
                 try {
                     ftpProcessHandler(AbstractPnpMainEntity.SOURCE_MITAKE);
@@ -237,23 +242,26 @@ public class LoadFtpPnpDataTask {
      * @see this#startCircle()
      */
     private void ftpProcessHandler(String source) {
-        logger.info("StartCircle...." + source);
+        logger.info(PNPFTPType.getNameByCode(source).toUpperCase() + " => StartCircle!!");
         int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true, false);
 
-        logger.info("PNP_BIG_SWITCH : " + bigSwitch);
-        if (0 == bigSwitch) {
-            /* 停止排程 */
-            logger.info("STOP PROCESS!!");
-        } else if (1 == bigSwitch) {
-            /* 停止排程並轉發SMS */
-            logger.info("Start put file to SMS FTP path process !!");
-            // 1.1 將檔案rename(加L)放到SMS指定路徑
-            // 因為路徑可用UI換，所以每次都要重拿連線資訊
-            transFileToSMSFlow(source);
-            logger.info("TransFileToSMSFlow Complete!");
-        } else {
-            /* 解析資料存到DB */
-            parseDataFlow(source);
+        switch(bigSwitch){
+            case 0:
+                logger.info(bigSwitch + ": Stop Process!!");
+                break;
+            case 1:
+                /* 停止排程並轉發SMS */
+                logger.info(bigSwitch + ": Start put file to SMS FTP path process !!");
+                // 1.1 將檔案rename(加L)放到SMS指定路徑
+                // 因為路徑可用UI換，所以每次都要重拿連線資訊
+                transFileToSMSFlow(source);
+                logger.info(bigSwitch + ": Transfer File To SMS Flow Complete!");
+                break;
+            default:
+                /* 解析資料存到DB */
+                logger.info(bigSwitch + ": Parse Data Flow To Database!!");
+                parseDataFlow(source);
+                break;
         }
     }
 
@@ -266,7 +274,7 @@ public class LoadFtpPnpDataTask {
 
         // 跟據來源不同取各自連線資訊
         PNPFtpSetting pnpFtpSetting = pnpFtpService.getFtpSettings(source);
-        logger.info(new GsonBuilder().serializeNulls().setPrettyPrinting().create().toJson(pnpFtpSetting));
+        logger.info("FTP Setting:\n" + DataUtils.toPrettyJson(pnpFtpSetting));
         try {
             /* 至FTP取得資料 */
             Map<String, byte[]> returnDataMap = pnpFtpService.downloadMultipleFileByType(source, pnpFtpSetting.getPath(), "TXT", pnpFtpSetting);
@@ -304,6 +312,7 @@ public class LoadFtpPnpDataTask {
                     logger.info("Valid WhiteList Account PCode Success!! ");
                     // 檢核白名單檔名上的帳號是否與來源對應
                     List<String> fileContents = IOUtils.readLines(targetStream, encoding);
+                    logger.info("File Content List : " + fileContents.toString());
                     // 依來源解成各格式
                     List<Object> pnpMains = parseFtpFile(source, fileName, fileContents);
                     if (pnpMains == null || pnpMains.isEmpty()) {
@@ -313,14 +322,17 @@ public class LoadFtpPnpDataTask {
                     }
                     logger.info("Valid WhiteList Content Success!! ");
                     mains.addAll(pnpMains);
+
+                } catch (Exception e) {
+                    logger.warn("Exception", e);
                 }
             }
             saveDraftToDatabaseBySource(source, mains);
             removeFtpFile(pnpFtpSetting, lReturnDataMap);
 
         } catch (Exception ex) {
-            logger.error("Error: " + ex.getMessage());
             logger.error(ex);
+            logger.error("Exception", ex);
         }
     }
 
@@ -328,7 +340,7 @@ public class LoadFtpPnpDataTask {
      * 3. Save Draft To Database By Source
      *
      * @param source source
-     * @param mains mains
+     * @param mains  mains
      */
     private void saveDraftToDatabaseBySource(String source, List<Object> mains) {
         switch (source) {
@@ -489,7 +501,7 @@ public class LoadFtpPnpDataTask {
                  * 8.有效秒數
                  */
                 PnpDetailMing detail = new PnpDetailMing();
-                detail.setSN(detailData[0]);
+                detail.setSn(detailData[0]);
                 detail.setPhone(detailData[1]);
                 detail.setPhoneHash(toSha256(detailData[1]));
                 detail.setMsg(detailData[2]);
@@ -575,15 +587,15 @@ public class LoadFtpPnpDataTask {
                      */
 
                     PnpDetailEvery8d detail = new PnpDetailEvery8d();
-                    detail.setSN(detailData[0]);
+                    detail.setSn(detailData[0]);
                     detail.setDestName(detailData[1]);
                     detail.setPhone(detailData[2]);
                     detail.setPhoneHash(toSha256(detailData[2]));
                     detail.setMsg(detailData[3]);
-                    detail.setPID(detailData[4]);
-                    detail.setCampaignID(detailData[5]);
-                    detail.setSegmentID(detailData[6]);
-                    detail.setProgramID(detailData[7]);
+                    detail.setPid(detailData[4]);
+                    detail.setCampaignId(detailData[5]);
+                    detail.setSegmentId(detailData[6]);
+                    detail.setProgramId(detailData[7]);
                     detail.setVariable1(detailData[8]);
                     detail.setVariable2(detailData[9]);
                     details.add(detail);
@@ -624,15 +636,15 @@ public class LoadFtpPnpDataTask {
                      * 9.Variable2 擴充欄位2(可為空值)
                      */
                     PnpDetailUnica detail = new PnpDetailUnica();
-                    detail.setSN(detailData[0]);
+                    detail.setSn(detailData[0]);
                     detail.setDestName(detailData[1]);
                     detail.setPhone(detailData[2]);
                     detail.setPhoneHash(toSha256(detailData[2]));
                     detail.setMsg(detailData[3]);
-                    detail.setPID(detailData[4]);
-                    detail.setCampaignID(detailData[5]);
-                    detail.setSegmentID(detailData[6]);
-                    detail.setProgramID(detailData[7]);
+                    detail.setPid(detailData[4]);
+                    detail.setCampaignId(detailData[5]);
+                    detail.setSegmentId(detailData[6]);
+                    detail.setProgramId(detailData[7]);
                     detail.setVariable1(detailData[8]);
                     detail.setVariable2(detailData[9]);
                     details.add(detail);
@@ -655,6 +667,7 @@ public class LoadFtpPnpDataTask {
      * @see this#parseDataFlow
      */
     private List<Object> parseFtpFile(String source, String origFileName, List<String> fileContents) throws Exception {
+        logger.info("Source: " + source);
         switch (source) {
             case AbstractPnpMainEntity.SOURCE_MITAKE:
                 return parseMitakeFiles(origFileName, fileContents);
@@ -685,8 +698,9 @@ public class LoadFtpPnpDataTask {
             logger.error("parseMingFiles fileContents.isEmpty");
             return Collections.emptyList();
         }
-
+        logger.info("fileContent List Size: " + fileContents.size());
         String[] contentSp = fileContents.get(0).split(MING_TAG, 9);
+        logger.info("Content Array: " + Arrays.toString(contentSp));
         String content1 = contentSp[2];
         PNPMaintainAccountModel accountModel = validateWhiteListContent(AbstractPnpMainEntity.SOURCE_MING, origFileName, content1);
         logger.info("accountModel1:" + accountModel);
@@ -742,7 +756,9 @@ public class LoadFtpPnpDataTask {
             logger.error("parseMitakeFiles fileContents.isEmpty");
             return Collections.emptyList();
         }
+        logger.info("fileContent List Size: " + fileContents.size());
         String[] contentSp = fileContents.get(1).split(TAG, 4);
+        logger.info("Content Array: " + Arrays.toString(contentSp));
         String content = contentSp[3];
         PNPMaintainAccountModel accountModel = validateWhiteListContent(AbstractPnpMainEntity.SOURCE_MITAKE, origFileName, content);
         if (null == accountModel) {
@@ -750,7 +766,9 @@ public class LoadFtpPnpDataTask {
             return Collections.emptyList();
         }
         String header = fileContents.get(0);
+        logger.info("Header Content      : " + header);
         String[] splitHeaderData = header.split(TAG, 6);
+        logger.info("Header Content Array: " + Arrays.toString(splitHeaderData));
         String groupID = splitHeaderData[0];
         String username = splitHeaderData[1];
         String userPassword = splitHeaderData[2];
@@ -798,7 +816,9 @@ public class LoadFtpPnpDataTask {
             logger.error("parseEvery8DFiles fileContents.isEmpty");
             return Collections.emptyList();
         }
+        logger.info("fileContent List Size: " + fileContents.size());
         String[] contentSp = fileContents.get(1).split(TAG, 10);
+        logger.info("Content Array: " + Arrays.toString(contentSp));
         String content = contentSp[3];
         PNPMaintainAccountModel accountModel = validateWhiteListContent(AbstractPnpMainEntity.SOURCE_EVERY8D, origFileName, content);
         if (null == accountModel) {
@@ -807,7 +827,9 @@ public class LoadFtpPnpDataTask {
         }
 
         String header = fileContents.get(0);
+        logger.info("Header Content      : " + header);
         String[] splitHeaderData = header.split(TAG, 7);
+        logger.info("Header Content Array: " + Arrays.toString(splitHeaderData));
         String subject = splitHeaderData[0];
         String userId = splitHeaderData[1];
         String password = splitHeaderData[2];
@@ -861,8 +883,9 @@ public class LoadFtpPnpDataTask {
             logger.error("parseUnicaFiles fileContents.isEmpty");
             return Collections.emptyList();
         }
-
+        logger.info("fileContent List Size: " + fileContents.size());
         String[] contentSp = fileContents.get(1).split(TAG, 10);
+        logger.info("Content Array: " + Arrays.toString(contentSp));
         String content1 = contentSp[3];
         PNPMaintainAccountModel accountModel = validateWhiteListContent(AbstractPnpMainEntity.SOURCE_UNICA, origFileName, content1);
         if (null == accountModel) {
@@ -871,7 +894,9 @@ public class LoadFtpPnpDataTask {
         }
 
         String header = fileContents.get(0);
+        logger.info("Header Content      : " + header);
         String[] splitHeaderData = header.split(TAG, 7);
+        logger.info("Header Content Array: " + Arrays.toString(splitHeaderData));
         String subject = splitHeaderData[0];
         String userId = splitHeaderData[1];
         String password = splitHeaderData[2];
@@ -1144,7 +1169,8 @@ public class LoadFtpPnpDataTask {
         Long mainId = pnpMainMing.getPnpMainId();
         String status = AbstractPnpMainEntity.DATA_CONVERTER_STATUS_WAIT;
         Date now = Calendar.getInstance().getTime();
-        pnpMainMingRepository.updatePnpMainMingStatus(status, now, mainId);
+        int i = pnpMainMingRepository.updatePnpMainMingStatus(status, now, mainId);
+        logger.info("Return Int :" + i);
         pnpDetailMingRepository.updateStatusByMainId(status, now, mainId);
         logger.info("Update Status : " + status);
     }
@@ -1162,7 +1188,7 @@ public class LoadFtpPnpDataTask {
     private boolean validateWhiteListAccountPccode(String source, String fileName) {
         logger.info(String.format("Source: %s, FileName: %s", source, fileName));
         if (!whiteListValidate) {
-            logger.info("======跳過白名單AccountPccode檢核======");
+            logger.info("====== Ignore Valid Account Pccode ======");
             return true;
         }
 
@@ -1173,10 +1199,14 @@ public class LoadFtpPnpDataTask {
          * 3: String comeTime
          *  */
         String[] fileNameSp = fileName.split("_");
+        logger.info("fileName Array: " + Arrays.toString(fileNameSp));
         String sourceSystem = fileNameSp[1];
         String account = fileNameSp[2];
 
         List<PNPMaintainAccountModel> accountList = pnpMaintainAccountModelRepository.findByAccountAndSourceSystem(account, sourceSystem);
+        if (accountList != null) {
+            logger.info("Find Account List Size: " + accountList.size());
+        }
         return CollectionUtils.isNotEmpty(accountList);
     }
 
@@ -1272,7 +1302,7 @@ public class LoadFtpPnpDataTask {
     private static void printCharArrayCode(String str) {
         char[] contentArray = str.toCharArray();
         StringBuilder sb = new StringBuilder();
-        for(char c : contentArray){
+        for (char c : contentArray) {
             sb.append((int) c);
             sb.append(',');
         }

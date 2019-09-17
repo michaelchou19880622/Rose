@@ -14,6 +14,9 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMing;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMitake;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailUnica;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
+import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainEvery8d;
+import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainMitake;
+import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainUnica;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailEvery8dRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMingRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMitakeRepository;
@@ -22,6 +25,7 @@ import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainEvery8dRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainMingRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainMitakeRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainUnicaRepository;
+import com.bcs.core.utils.DataUtils;
 import com.bcs.core.utils.RestfulUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -36,6 +40,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 
+import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -78,7 +83,7 @@ public class PnpService {
      * @return 儲存完成後物件
      * @see com.bcs.core.taishin.circle.PNP.akka.handler.PnpUpdateStatusActor#onReceive
      */
-    public PnpDetail save(Object pnpDetail) {
+    public PnpDetail saveBySourceType(Object pnpDetail) {
         String source = ((PnpDetail) pnpDetail).getSource();
         if (StringUtils.isBlank(source)) {
             logger.error("PnpService save getting source is blank!!! MainID :" + ((PnpDetail) pnpDetail).getPnpMainId());
@@ -103,7 +108,7 @@ public class PnpService {
      *
      * @param pnpDetail pnpDetail
      * @return Saved Object
-     * @see this#save
+     * @see this#saveBySourceType
      */
     private PnpDetail saveMitakeDetailStatus(PnpDetailMitake pnpDetail) {
         String status = pnpDetail.getStatus();
@@ -113,7 +118,8 @@ public class PnpService {
             pnpDetail.setSendTime(Calendar.getInstance().getTime());
             logger.info(String.format("Update SendTime: %s, Status: %s", pnpDetail.getSendTime(), status));
         }
-        logger.info("Save Detail!!");
+        pnpDetail.setModifyTime(new Date());
+        logger.info(String.format("Before Save Detail:%n%s", pnpDetail.toString()));
         return pnpDetailMitakeRepository.save(pnpDetail);
 
     }
@@ -123,7 +129,7 @@ public class PnpService {
      *
      * @param pnpDetail pnpDetail
      * @return Saved Object
-     * @see this#save
+     * @see this#saveBySourceType
      */
     private PnpDetail saveEvery8dDetailStatus(PnpDetailEvery8d pnpDetail) {
         String status = pnpDetail.getStatus();
@@ -133,7 +139,8 @@ public class PnpService {
             pnpDetail.setSendTime(Calendar.getInstance().getTime());
             logger.info(String.format("Update SendTime: %s, Status: %s", pnpDetail.getSendTime(), status));
         }
-        logger.info("Save Detail!!");
+        pnpDetail.setModifyTime(new Date());
+        logger.info(String.format("Before Save Detail:%n%s", pnpDetail.toString()));
         return pnpDetailEvery8dRepository.save(pnpDetail);
 
     }
@@ -143,7 +150,7 @@ public class PnpService {
      *
      * @param pnpDetail pnpDetail
      * @return Saved Object
-     * @see this#save
+     * @see this#saveBySourceType
      */
     private PnpDetail saveUnicaDetailStatus(PnpDetailUnica pnpDetail) {
         String status = pnpDetail.getStatus();
@@ -153,7 +160,8 @@ public class PnpService {
             pnpDetail.setSendTime(Calendar.getInstance().getTime());
             logger.info(String.format("Update SendTime: %s, Status: %s", pnpDetail.getSendTime(), status));
         }
-        logger.info("Save Detail!!");
+        pnpDetail.setModifyTime(new Date());
+        logger.info(String.format("Before Save Detail:%n%s", pnpDetail.toString()));
         return pnpDetailUnicaRepository.save(pnpDetail);
 
     }
@@ -163,7 +171,7 @@ public class PnpService {
      *
      * @param pnpDetail pnpDetail
      * @return Saved Object
-     * @see this#save
+     * @see this#saveBySourceType
      */
     private PnpDetail saveMingDetailStatus(PnpDetailMing pnpDetail) {
         String status = pnpDetail.getStatus();
@@ -173,15 +181,17 @@ public class PnpService {
             pnpDetail.setSendTime(Calendar.getInstance().getTime());
             logger.info(String.format("Update SendTime: %s, Status: %s", pnpDetail.getSendTime(), status));
         }
-        logger.info("Save Detail!!");
+        pnpDetail.setModifyTime(new Date());
+        logger.info(String.format("Before Save Detail:%n%s", pnpDetail.toString()));
         return pnpDetailMingRepository.save(pnpDetail);
 
     }
 
     /**
      * 檢查訊息狀態並更新狀態為Complete
-     * @param mainId Detail ID
-     * @param source Source
+     *
+     * @param mainId    Detail ID
+     * @param source    Source
      * @param procStage BC PNP SMS
      * @see com.bcs.core.taishin.circle.PNP.akka.handler.PnpUpdateStatusActor#onReceive
      */
@@ -226,9 +236,10 @@ public class PnpService {
      */
     private void updatePnpMainMitakeStatusComplete(Long mainId, List<String> status, String procStage) {
         if (pnpDetailMitakeRepository.countByPnpMainIdAndStatus(mainId, status) == 0) {
-            Date now = Calendar.getInstance().getTime();
-
-            pnpMainMitakeRepository.updatePnpMainMitakeStatus(getCompleteStatusByStage(procStage), now, mainId);
+            int returnInt = pnpMainMitakeRepository.updatePnpMainMitakeStatus(
+                    getCompleteStatusByStage(procStage), new Date(), mainId
+            );
+            logger.info("After Main Save Return int is : " + returnInt);
         }
     }
 
@@ -242,8 +253,10 @@ public class PnpService {
      */
     private void updatePnpMainEvery8dStatusComplete(Long mainId, List<String> status, String procStage) {
         if (pnpDetailEvery8dRepository.countByPnpMainIdAndStatus(mainId, status) == 0) {
-            Date now = Calendar.getInstance().getTime();
-            pnpMainEvery8dRepository.updatePnpMainEvery8dStatus(getCompleteStatusByStage(procStage), now, mainId);
+            int returnInt = pnpMainEvery8dRepository.updatePnpMainEvery8dStatus(
+                    getCompleteStatusByStage(procStage), new Date(), mainId
+            );
+            logger.info("After Main Save Return int is : " + returnInt);
         }
     }
 
@@ -257,8 +270,10 @@ public class PnpService {
      */
     private void updatePnpMainUnicaStatusComplete(Long mainId, List<String> status, String procStage) {
         if (pnpDetailUnicaRepository.countByPnpMainIdAndStatus(mainId, status) == 0) {
-            Date now = Calendar.getInstance().getTime();
-            pnpMainUnicaRepository.updatePnpMainUnicaStatus(getCompleteStatusByStage(procStage), now, mainId);
+            int returnInt = pnpMainUnicaRepository.updatePnpMainUnicaStatus(
+                    getCompleteStatusByStage(procStage), new Date(), mainId
+            );
+            logger.info("After Main Save Return int is : " + returnInt);
         }
     }
 
@@ -272,23 +287,26 @@ public class PnpService {
      */
     private void updatePnpMainMingStatusComplete(Long mainId, List<String> status, String procStage) {
         if (pnpDetailMingRepository.countByPnpMainIdAndStatus(mainId, status) == 0) {
-            Date now = Calendar.getInstance().getTime();
-            pnpMainMingRepository.updatePnpMainMingStatus(getCompleteStatusByStage(procStage), now, mainId);
+            int returnInt = pnpMainMingRepository.updatePnpMainMingStatus(
+                getCompleteStatusByStage(procStage), new Date(), mainId
+            );
+            logger.info("After Main Save Return int is : " + returnInt);
         }
     }
 
     /**
      * 依照BC、PNP取得各自的Complete Status
+     *
      * @param procStage BC PNP SMS
      * @return 各自的Complete Status
      */
-    private String getCompleteStatusByStage(String procStage){
+    private String getCompleteStatusByStage(String procStage) {
         logger.info("ProcStage: " + procStage);
-        switch (procStage){
+        switch (procStage) {
             case "BC":
                 return AbstractPnpMainEntity.DATA_CONVERTER_STATUS_BC_COMPLETE;
             case "PNP":
-                return AbstractPnpMainEntity.DATA_CONVERTER_STATUS_PNP_COMPLETE;
+                return AbstractPnpMainEntity.MSG_SENDER_STATUS_CHECK_DELIVERY;
             case "SMS":
             default:
                 return null;
@@ -308,7 +326,7 @@ public class PnpService {
         List<PnpDetail> details = (List<PnpDetail>) pnpMain.getPnpDetails();
         for (PnpDetail detail : details) {
             detail.setStatus(status);
-            save(detail);
+            saveBySourceType(detail);
         }
         Date now = Calendar.getInstance().getTime();
 
@@ -362,7 +380,7 @@ public class PnpService {
             if (StringUtils.isBlank(detail.getUid())) {
                 /* UID is Empty 轉發 PNP */
                 sendSuccessFlag = false;
-                logger.info("Detail UID Not Found!! to PNP!!  " + " Main Id: " + detail.getPnpMainId() + " Detail Id: " + detail.getPnpDetailId());
+                logger.info("Line UID Not Found in Detail!! =>  PNP!!  " + " Main Id: " + detail.getPnpMainId() + " Detail Id: " + detail.getPnpDetailId());
             } else {
                 /* 發送訊息 */
                 sendSuccessFlag = pushMessage(url, headers, detail);
@@ -377,7 +395,7 @@ public class PnpService {
                 detail.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_BC_COMPLETE);
             } else {
                 /* 發送失敗 */
-                logger.info("BC Send Message Fail!!");
+                logger.warn("BC Send Message Fail!!");
                 /* FIXME 20190822 Record ReturnCode and Create DB column and Report column */
                 String processFlow = pnpMain.getProcFlow();
                 detail.setLinePushTime(Calendar.getInstance().getTime());
@@ -398,7 +416,8 @@ public class PnpService {
                     default:
                         break;
                 }
-                logger.info(String.format("After Process Flow: %s, After Status: %s", detail.getProcFlow(), detail.getStatus()));
+                logger.info(String.format("Process Flow: %s, After Stage: %s, After Status: %s",
+                        detail.getProcFlow(), detail.getProcStage(), detail.getStatus()));
             }
             if (sendRef != null) {
                 sendRef.tell(detail, selfActorRef);
@@ -431,7 +450,6 @@ public class PnpService {
             List<PnpDetail> details = (List<PnpDetail>) pnpMain.getPnpDetails();
 
             String source = pnpMain.getSource();
-            logger.info("pushLineMessage pnpMain.getProcFlow():" + pnpMain.getProcFlow());
 
             boolean sendSuccessFlag;
             for (PnpDetail detail : details) {
@@ -458,17 +476,18 @@ public class PnpService {
                     calendar.setTime(pnpSendTime);
                     calendar.add(expiredUnit, expired);
                     detail.setPnpDeliveryExpireTime(calendar.getTime());
-                    logger.info("Pnp Send Time            : " + pnpSendTime);
-                    logger.info("Pnp Delivery Expire Time : " + calendar.getTime());
+                    logger.info("Pnp Send Time            : " + DataUtils.formatDateToString(pnpSendTime, "yyyy-MM-dd HH:mm:ss"));
+                    logger.info("Pnp Delivery Expire Time : " + DataUtils.formatDateToString(calendar.getTime(), "yyyy-MM-dd HH:mm:ss"));
                     //待web hook在24小時內收到DELIVERY則將該則訊息update成COMPLETE，若24小時內沒收到DELIVERY則將該訊息轉發SMS
                     detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_CHECK_DELIVERY);
                 } else {
                     /* 發送失敗 */
-                    logger.info("PNP Send Message Fail!!");
+                    logger.info("PNP Send Message Fail!! ==> SMS!!");
                     detail.setProcStage(AbstractPnpMainEntity.STAGE_SMS);
                     detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS);
                 }
-                logger.info(String.format("After Process Flow: %s, After Status: %s", detail.getProcFlow(), detail.getStatus()));
+                logger.info(String.format("Process Flow: %s, After Proc Stage: %s, After Status: %s"
+                        , detail.getProcFlow(), detail.getProcStage(), detail.getStatus()));
                 if (sendRef != null) {
                     logger.info("Tell SendRef: " + sendRef);
                     sendRef.tell(detail, selfActorRef);

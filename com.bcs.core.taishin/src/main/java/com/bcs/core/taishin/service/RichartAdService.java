@@ -40,7 +40,7 @@ public class RichartAdService {
 		if(adminUser == null){
 			adminUser = new AdminUser();
 			adminUser.setAccount(account);
-			adminUser.setModifyTime(new Date());
+//			adminUser.setModifyTime(new Date());
 		}
 		String prefix = CoreConfigReader.getString(CONFIG_STR.PASSWORD_PREFIX, true);
 		String suffix = CoreConfigReader.getString(CONFIG_STR.PASSWORD_SUFFIX, true);
@@ -54,15 +54,20 @@ public class RichartAdService {
 			throw new Exception("NameNull");
 		}
 		adminUser.setUserName(name);
-
+		
 		String roseline = model.getRoseline();
+		logger.info("roseline = " + roseline);
+		
 		String role = "";
 		boolean roleCheck = false;
 		if(StringUtils.isBlank(roseline)){
 			throw new Exception("LinebcNull");
 		}
+		
 		RoleCode[] roles = RoleCode.values();
 		for(RoleCode code : roles){
+			logger.info("code.getRoleName() = " + code.getRoleName());
+			
 			if(code.getRoleName().equals(roseline)){
 				role = code.getRoleId();
 				roleCheck = true;
@@ -89,6 +94,7 @@ public class RichartAdService {
 		adminUser.setDesk(model.getDesk());
 		adminUser.setLinebc(model.getLinebc());
 		adminUser.setRoseline(model.getRoseline());
+		adminUser.setModifyTime(new Date());
 		
 		adminUser.setViewLimit(model.getViewLimit());
 		adminUser.setCanCopy(model.getCanCopy());

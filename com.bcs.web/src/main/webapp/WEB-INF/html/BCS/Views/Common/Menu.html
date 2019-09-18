@@ -7,7 +7,7 @@
     <div th:fragment="menu (currentPage)" class="LySub">    
         <nav class="Nav">
             <ul>
-                <li sec:authorize="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN', 'ROLE_MARKET')">
+                <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_MARKET')">
                     <a href="" style="cursor: pointer;"><span>發送群組</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
                         <li th:classappend="${currentPage == 'Page2'} ? 'ExSelected'">
@@ -19,13 +19,13 @@
                     </ul>
                 </li>
                 
-                <li sec:authorize="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN')">
+                <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT')">
                     <a href="" style="cursor: pointer;"><span>訊息</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
-                         <li th:classappend="${currentPage == 'Page4-1'} ? 'ExSelected'">
+                         <li th:classappend="${currentPage == 'Page4-1'} ? 'ExSelected'" sec:authorize="!hasAnyRole('ROLE_EDIT')">
                         	<a th:href="@{/bcs/edit/msgListPage}"><span>訊息列表</span></a>
                         </li>
-                        <li th:classappend="${currentPage == 'Page3'} ? 'ExSelected'">
+                        <li th:classappend="${currentPage == 'Page3'} ? 'ExSelected'" sec:authorize="!hasAnyRole('ROLE_EDIT')">
                         	<a th:href="@{/bcs/edit/msgCreatePage}"><span>建立訊息</span></a>
                         </li>
                         <li th:classappend="${currentPage == 'Page5'} ? 'ExSelected'">
@@ -52,17 +52,17 @@
                         <li th:classappend="${currentPage == 'Page25'} ? 'ExSelected'">
                         	<a th:href="@{/bcs/edit/tracingGeneratePage}"><span>建立追蹤網址</span></a>
                         </li>
-                        <li th:classappend="${currentPage == 'PagePNP2'} ? 'ExSelected'">
-                            <a th:href="@{/bcs/edit/pnpListPage}"><span>PNP訊息樣板列表</span></a>
-                        </li>
-                        <li th:classappend="${currentPage == 'PagePNP1'} ? 'ExSelected'">
-                        	<a th:href="@{/bcs/edit/pnpCreatePage}"><span>建立PNP訊息樣板</span></a>
-                        </li>
+<!--                         <li th:classappend="${currentPage == 'PagePNP2'} ? 'ExSelected'"> -->
+<!--                             <a th:href="@{/bcs/edit/pnpListPage}"><span>PNP訊息樣板列表</span></a> -->
+<!--                         </li> -->
+<!--                         <li th:classappend="${currentPage == 'PagePNP1'} ? 'ExSelected'"> -->
+<!--                         	<a th:href="@{/bcs/edit/pnpCreatePage}"><span>建立PNP訊息樣板</span></a> -->
+<!--                         </li> -->
                     </ul>
                 </li>
                 
                 
-				<li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_LP_CREATOR', 'ROLE_LP_JUDGER')">
+				<li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY')">
                     <a href="" style="cursor: pointer;"><span>LINE POINTS發送</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
                        <li th:classappend="${currentPage == 'PageLPC'} ? 'ExSelected'">
@@ -76,7 +76,7 @@
                 </li>
 
 
- 				<li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_LP_QUERIER', 'ROLE_LP_CREATOR', 'ROLE_LP_JUDGER')">
+ 				<li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_MARKET', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_REPORT', 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY')">
                     <a href="" style="cursor: pointer;"><span>LINE POINTS報表</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
                         <li th:classappend="${currentPage == 'PageLPStatisticsReport'} ? 'ExSelected'">
@@ -125,7 +125,7 @@
                         </li>
                     </ul>
                 </li>
-                <li class="responseSection" sec:authorize="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN')">
+                <li class="responseSection" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT')">
                     <a href="" style="cursor: pointer;"><span>自動回覆</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
                         <li th:classappend="${currentPage == 'Page17'} ? 'ExSelected'">
@@ -190,7 +190,7 @@
                     </ul>
                 </li>
                 
-                <li sec:authorize="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN')">
+                <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT')">
                     <a href="" style="cursor: pointer;"><span>MGM活動</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
                         <li th:classappend="${currentPage == 'PageMGM2'} ? 'ExSelected'">
@@ -202,7 +202,7 @@
                     </ul>
                 </li>
                 
-                <li sec:authorize="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN')">
+                <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT')">
                     <a href="" style="cursor: pointer;"><span>電子序號</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
                         <li th:classappend="${currentPage == 'PageESN2'} ? 'ExSelected'">
@@ -292,7 +292,7 @@
                     </ul>
                 </li>
 
-                <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_PNP_ADMIN', 'ROLE_PNP_INQUIRER', 'ROLE_PNP_EMPLOYEE', 'ROLE_MARKET')">
+                <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_MARKET', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_REPORT')">
                     <a href="" style="cursor: pointer;"><span>PNP成效報表</span></a>
                     <ul class="MdNonDisp subMenu" style="display:none">
                         <li th:classappend="${currentPage == 'PagepnpDetailReport'} ? 'ExSelected'">

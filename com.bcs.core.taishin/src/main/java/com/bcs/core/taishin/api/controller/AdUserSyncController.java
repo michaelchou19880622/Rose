@@ -38,9 +38,9 @@ public class AdUserSyncController {
 	@RequestMapping(method = RequestMethod.POST, value = "/adUserSync/{ChannelId}", 
 			consumes = MediaType.APPLICATION_JSON_VALUE + "; charset=UTF-8")
 	public ResponseEntity<?> adUserSync(@RequestBody String syncModel, @PathVariable String ChannelId, HttpServletRequest request, HttpServletResponse response) {
-		logger.debug("-------adUserSync-------");
+		logger.info("-------adUserSync-------");
 		Date start = new Date();
-		logger.debug("syncModel:" + syncModel);
+		logger.info("syncModel:" + syncModel);
 		
 		String error = "";
 		
@@ -51,16 +51,16 @@ public class AdUserSyncController {
 			
 			richartAdService.syncAdUser(model);
 
-			logger.debug("-------adUserSync Success-------");
+			logger.info("-------adUserSync Success-------");
 			response.setStatus(200);
 			SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_RichartApi, LOG_TARGET_ACTION_TYPE.ACTION_RichartApi_AdUserSync, start, 200, syncModel, "200");
 			return new ResponseEntity<>(createResult(200, "Success"), HttpStatus.OK);
 		}
 		catch(Throwable e){
 			error = e.getMessage();
-			logger.error(ErrorRecord.recordError(e));
+			logger.info(ErrorRecord.recordError(e));
 		}
-		logger.debug("-------adUserSync Fail-------");
+		logger.info("-------adUserSync Fail-------");
 		response.setStatus(500);
 		SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_RichartApi, LOG_TARGET_ACTION_TYPE.ACTION_RichartApi_AdUserSync, start, 500, syncModel, "500");
 		return new ResponseEntity<>(createResult(500, error), HttpStatus.INTERNAL_SERVER_ERROR);

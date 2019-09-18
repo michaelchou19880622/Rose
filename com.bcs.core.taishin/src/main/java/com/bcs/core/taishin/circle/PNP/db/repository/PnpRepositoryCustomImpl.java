@@ -108,9 +108,9 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
         }
         final Timestamp now = new Timestamp(Calendar.getInstance().getTime().getTime());
         String INSERT = "INSERT INTO BCS_PNP_DETAIL_MING" +
-                "(CREAT_TIME, LINE_PUSH_TIME, MODIFY_TIME, MSG, PHONE, PHONE_HASH, PNP_MAIN_ID, PNP_TIME, PROC_FLOW, PROC_STAGE, SEND_TIME, SMS_TIME, [SOURCE],"
-                + " STATUS, UID, SN, VARIABLE1, VARIABLE2, ACCOUNT1, ACCOUNT2, DETAIL_SCHEDULE_TIME, KEEP_SECOND)" +
-                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                " (CREAT_TIME, LINE_PUSH_TIME, MODIFY_TIME, MSG, PHONE, PHONE_HASH, PNP_MAIN_ID, PNP_TIME, PROC_FLOW, PROC_STAGE, SEND_TIME, SMS_TIME, [SOURCE]," + 
+                " STATUS, UID, SN, VARIABLE1, VARIABLE2, ACCOUNT1, ACCOUNT2, DETAIL_SCHEDULE_TIME, KEEP_SECOND)" +
+                " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         logger.info("batchInsertPnpDetailMing start");
         List<List<PnpDetailMing>> batchLists = Lists.partition(list, CircleEntityManagerControl.batchSize);
         for (final List<PnpDetailMing> batch : batchLists) {

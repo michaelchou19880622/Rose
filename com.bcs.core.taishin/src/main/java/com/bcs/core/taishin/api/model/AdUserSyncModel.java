@@ -19,6 +19,7 @@ public class AdUserSyncModel extends AbstractBcsEntity{
 	private String desk;
 	
 	private String gateway;
+	
 	private boolean viewLimit;
 	private boolean canCopy;
 	private boolean canSave;

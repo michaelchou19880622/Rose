@@ -2,7 +2,7 @@
              xmlns:beans="http://www.springframework.org/schema/beans"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://www.springframework.org/schema/beans
-	http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/beans/spring-beans.xsd
     http://www.springframework.org/schema/security
     http://www.springframework.org/schema/security/spring-security-4.1.xsd">
 
@@ -61,26 +61,30 @@
         <intercept-url pattern="/bcs/admin/**"
                        access="hasRole('ROLE_ADMIN')"/>
         <!--編輯者-->
-        <intercept-url pattern="/bcs/edit/**"
-                       access="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN', 'ROLE_LP_CREATOR', 'ROLE_LP_JUDGER')"/>
+        <intercept-url pattern="/bcs/edit/**" 
+                       access="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_MARKET', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_REPORT', 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY', 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY')" />
+
         <!--行銷人員-->
         <intercept-url pattern="/bcs/market/**"
                        access="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN', 'ROLE_MARKET')"/>
 
+        <!--PNP 管理者-->
+        <intercept-url pattern="/bcs/pnpAdmin/**" 
+                       access="hasAnyRole('ROLE_ADMIN', 'ROLE_PNP_ADMIN')" />
 
         <!--PNP Inquirer-->
-        <intercept-url pattern="/bcs/pnpInquirer/**"
-                       access="hasAnyRole('ROLE_PNP_INQUIRER', 'ROLE_PNP_ADMIN', 'ROLE_ADMIN')"/>
+        <!-- <intercept-url pattern="/bcs/pnpInquirer/**" -->
+                       <!-- access="hasAnyRole('ROLE_PNP_INQUIRER', 'ROLE_PNP_ADMIN', 'ROLE_ADMIN')"/> -->
         <!--PNP員工-->
         <intercept-url pattern="/bcs/pnpEmployee/**"
-                       access="hasAnyRole('ROLE_PNP_EMPLOYEE', 'ROLE_PNP_ADMIN', 'ROLE_ADMIN', 'ROLE_MARKET')"/>
+                       access="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_MARKET', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_REPORT')" />
 
         <!--lp Creator-->
-        <intercept-url pattern="/bcs/lpCreator/**"
-                       access="hasAnyRole('ROLE_ADMIN', 'ROLE_LP_CREATOR', 'ROLE_LP_JUDGER')"/>
+        <!-- <intercept-url pattern="/bcs/lpCreator/**" -->
+                       <!-- access="hasAnyRole('ROLE_ADMIN', 'ROLE_LP_CREATOR', 'ROLE_LP_JUDGER')"/> -->
         <!--lp Querier-->
-        <intercept-url pattern="/bcs/lpQuerier/**"
-                       access="hasAnyRole('ROLE_ADMIN', 'ROLE_LP_CREATOR', 'ROLE_LP_JUDGER', 'ROLE_LP_QUERIER')"/>
+        <!-- <intercept-url pattern="/bcs/lpQuerier/**" -->
+                       <!-- access="hasAnyRole('ROLE_ADMIN', 'ROLE_LP_CREATOR', 'ROLE_LP_JUDGER', 'ROLE_LP_QUERIER')"/> -->
 
         <!-- 要擺在最後面 -->
         <intercept-url pattern="/**" access="authenticated"/>

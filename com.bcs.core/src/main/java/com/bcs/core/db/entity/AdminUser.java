@@ -18,12 +18,22 @@ public class AdminUser extends AbstractBcsEntity{
 		ROLE_ADMIN("ROLE_ADMIN","管理者", "manager"),
 		ROLE_EDIT("ROLE_EDIT", "編輯人員", "editor"),
 		ROLE_MARKET("ROLE_MARKET", "行銷人員", "marketing"),
-		ROLE_PNP_ADMIN("ROLE_PNP_ADMIN", "PNP系統管理者", "pnpAdmin"),
-		ROLE_PNP_INQUIRER("ROLE_PNP_INQUIRER", "PNP查詢者", "pnpInquirer"),
-		ROLE_PNP_EMPLOYEE("ROLE_PNP_EMPLOYEE", "PNP單位發送暨查詢者", "pnpEmployee"),
-		ROLE_LP_QUERIER("ROLE_LP_QUERIER", "LINE點報表查詢者", "lpQuerier"),
-		ROLE_LP_CREATOR("ROLE_LP_CREATOR", "LINE點發送建立者", "edit"),
-		ROLE_LP_JUDGER("ROLE_LP_JUDGER", "LINE點發送審核者", "lpJudger"),
+		
+//		ROLE_PNP_ADMIN("ROLE_PNP_ADMIN", "PNP系統管理者", "pnp_manager"),
+//		ROLE_PNP_INQUIRER("ROLE_PNP_INQUIRER", "PNP查詢者", "pnpInquirer"),
+//		ROLE_PNP_EMPLOYEE("ROLE_PNP_EMPLOYEE", "PNP單位發送暨查詢者", "pnpEmployee"),
+//		ROLE_LP_QUERIER("ROLE_LP_QUERIER", "LINE點報表查詢者", "lpQuerier"),
+//		ROLE_LP_CREATOR("ROLE_LP_CREATOR", "LINE點發送建立者", "edit"),
+//		ROLE_LP_JUDGER("ROLE_LP_JUDGER", "LINE點發送審核者", "lpJudger"),
+
+		// Michael 20190911 update
+		ROLE_PNP_ADMIN("ROLE_PNP_ADMIN", "PNP管理者", "pnp_manager"),
+		ROLE_PNP_SEND_LINE_SEND("ROLE_PNP_SEND_LINE_SEND", "PNP發送暨LINE點發送者", "pnp_send_line_send"),
+		ROLE_PNP_SEND_LINE_VERIFY("ROLE_PNP_SEND_LINE_VERIFY", "PNP發送暨LINE點審核者", "pnp_send_line_verify"),
+		ROLE_REPORT("ROLE_REPORT", "報表查詢人員", "report"),
+		ROLE_LINE_SEND("ROLE_LINE_SEND", "LINE點發送者", "line_send"),
+		ROLE_LINE_VERIFY("ROLE_LINE_VERIFY", "LINE點審核者", "line_verify"),
+		
 		;
 		
 		private String roleId;

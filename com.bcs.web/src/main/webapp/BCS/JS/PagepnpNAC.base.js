@@ -140,7 +140,7 @@ $(function(){
             }).fail(function (response) {
                 console.info(response);
                 $.FailResponse(response);
-                window.location.replace('pnpNormalAccountCreatePage');
+//                window.location.replace('pnpNormalAccountCreatePage');
             }).done(function () {
                 // $('.LyMain').unblock();
                 // $('#dialog-modal').dialog({

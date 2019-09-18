@@ -1,64 +1,87 @@
 package com.bcs.core.bot.db.repository;
 
-import java.math.BigInteger;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import com.bcs.core.bot.db.entity.MsgBotReceive;
+import com.bcs.core.db.repository.EntityManagerControl;
+import com.bcs.core.utils.DataUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.Date;
+import java.util.List;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Modifying;
+/**
+ *
+ * @author ???
+ */
+@Slf4j
+public class MsgBotReceiveRepositoryImpl {
 
-import javax.persistence.Query;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+    @Autowired
+    private EntityManagerControl entityManagerControl;
 
-import com.bcs.core.bot.db.entity.MsgBotReceive;
-import com.bcs.core.db.repository.EntityManagerControl;
-@Repository
-public class MsgBotReceiveRepositoryImpl  implements MsgBotReceiveRepositoryCustom {
+    @PersistenceContext
+    private EntityManager entityManager;
 
-	/** Logger */
-	private static Logger logger = Logger.getLogger(MsgBotReceiveRepositoryImpl.class);
-	
-	@Autowired
-	private EntityManagerControl entityManagerControl;
-	
-	@PersistenceContext
-	private EntityManager entityManager;
+    public void bulkPersist(List<MsgBotReceive> msgReceives) {
+        if (CollectionUtils.isEmpty(msgReceives)) {
+            return;
+        }
+        for (MsgBotReceive msgReceive : msgReceives) {
+            entityManagerControl.persist(msgReceive);
+        }
+    }
 
-	@Override
-	public void bulkPersist(List<MsgBotReceive> msgReceives) {
+    public void bulkPersist(MsgBotReceive msgReceive) {
+        entityManagerControl.persist(msgReceive);
+    }
 
-		if (CollectionUtils.isEmpty(msgReceives)) {
-			return;
-		}
-		
-		for (MsgBotReceive msgReceive : msgReceives) {
-			entityManagerControl.persist(msgReceive);
-		}
-	}
+    /**
+     * 更新PNP Detail Table 狀態
+     * 狀態更新為 PNP_COMPLETE並更新接收時間
+     *
+     * @param detailTable Detail Table
+     * @param detailId    Detail Id
+     */
+    @Modifying
+    @Transactional(rollbackFor = Exception.class)
+    public void updatePnpDetailStatus(String detailTable, String detailId) {
+        String now = DataUtils.formatDateToString(new Date(),"yyyy-MM-dd HH:mm:ss.SSS");
+        String queryString = String.format(" update %s set " +
+                        " pnp_status = '%s'," +
+                        " modify_time = convert(datetime, '%s', 121)," +
+                        " pnp_delivery_time = convert(datetime, '%s', 121) " +
+                        " where pnp_detail_id = '%s';",
+                detailTable, "PNP_COMPLETE", now, now, detailId);
+        log.info("queryString:" + queryString);
+        int updateNum = entityManager.createNativeQuery(queryString).executeUpdate();
+        log.info("Update Status Return Int : " + updateNum);
+    }
 
-	@Override
-	public void bulkPersist(MsgBotReceive msgReceive) {
-		entityManagerControl.persist(msgReceive);
-	}
+    /**
+     * 更新PNP Main Table 狀態
+     * 狀態更新為 PNP_COMPLETE
+     *
+     * @param mainTable Detail Table
+     * @param mainId    Detail Id
+     */
+    @Modifying
+    @Transactional(rollbackFor = Exception.class)
+    public void updatePnpMainStatus(String mainTable, String mainId) {
+        String now = DataUtils.formatDateToString(new Date(),"yyyy-MM-dd HH:mm:ss.SSS");
+        String queryString = String.format(" update %s set " +
+                        " status = '%s'," +
+                        " modify_time = convert(datetime, '%s', 121)," +
+                        " where pnp_main_id = '%s';",
+                mainTable, "PNP_COMPLETE", now, mainId);
+        log.info("queryString:" + queryString);
+        int updateNum = entityManager.createNativeQuery(queryString).executeUpdate();
+        log.info("Update Status Return Int : " + updateNum);
+    }
 
-	@Transactional
-	@Modifying
-	public void updateStatus(String detailTable, String detailId) {
-		String queryString = 
-			"update " + detailTable + " set STATUS = 'COMPLETE', MODIFY_TIME = GETDATE(), PNP_DELIVERY_TIME = GETDATE()"
-				+ " where PNP_DETAIL_ID = '" + detailId + "';";
-		logger.info("queryString:"+queryString);
-		int updateNum = entityManager.createNativeQuery(queryString).executeUpdate();
-		logger.info("updateNum:"+updateNum);
-	}
-	
-	
+
 }

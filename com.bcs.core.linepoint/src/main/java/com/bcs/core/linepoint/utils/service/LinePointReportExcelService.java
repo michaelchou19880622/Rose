@@ -83,9 +83,9 @@ public class LinePointReportExcelService {
 				row.createCell(4).setCellValue(main.getPccCode());
 				row.createCell(5).setCellValue(serviceName);
 				row.createCell(6).setCellValue(main.getSerialId());
-				row.createCell(7).setCellValue(main.getSuccessfulCount() + main.getFailedCount());
-				row.createCell(8).setCellValue(main.getSuccessfulCount());
-				row.createCell(9).setCellValue(main.getFailedCount());
+//				row.createCell(7).setCellValue(main.getSuccessfulCount() + main.getFailedCount());
+//				row.createCell(8).setCellValue(main.getSuccessfulCount());
+//				row.createCell(9).setCellValue(main.getFailedCount());
 				row.createCell(10).setCellValue(main.getTotalAmount());
 
 				rowNumber++;

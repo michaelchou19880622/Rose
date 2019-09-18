@@ -2,6 +2,7 @@ package com.bcs.core.bot.db.repository;
 
 import com.bcs.core.bot.db.entity.MsgBotReceive;
 import com.bcs.core.db.repository.EntityManagerControl;
+import com.bcs.core.utils.DataUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -48,12 +50,13 @@ public class MsgBotReceiveRepositoryImpl {
     @Modifying
     @Transactional(rollbackFor = Exception.class)
     public void updatePnpDetailStatus(String detailTable, String detailId) {
+        String now = DataUtils.formatDateToString(new Date(),"yyyy-MM-dd HH:mm:ss.SSS");
         String queryString = String.format(" update %s set " +
-                        " status = '%s'," +
-                        " modify_time = getdate()," +
-                        " pnp_delivery_time = getdate() " +
+                        " pnp_status = '%s'," +
+                        " modify_time = convert(datetime, '%s', 121)," +
+                        " pnp_delivery_time = convert(datetime, '%s', 121) " +
                         " where pnp_detail_id = '%s';",
-                "PNP_COMPLETE", detailTable, detailId);
+                detailTable, "PNP_COMPLETE", now, now, detailId);
         log.info("queryString:" + queryString);
         int updateNum = entityManager.createNativeQuery(queryString).executeUpdate();
         log.info("Update Status Return Int : " + updateNum);
@@ -69,11 +72,12 @@ public class MsgBotReceiveRepositoryImpl {
     @Modifying
     @Transactional(rollbackFor = Exception.class)
     public void updatePnpMainStatus(String mainTable, String mainId) {
+        String now = DataUtils.formatDateToString(new Date(),"yyyy-MM-dd HH:mm:ss.SSS");
         String queryString = String.format(" update %s set " +
                         " status = '%s'," +
-                        " modify_time = getdate()," +
+                        " modify_time = convert(datetime, '%s', 121)," +
                         " where pnp_main_id = '%s';",
-                "PNP_COMPLETE", mainTable, mainId);
+                mainTable, "PNP_COMPLETE", now, mainId);
         log.info("queryString:" + queryString);
         int updateNum = entityManager.createNativeQuery(queryString).executeUpdate();
         log.info("Update Status Return Int : " + updateNum);

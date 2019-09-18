@@ -306,24 +306,28 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 " (" +
                 "   select top 1 a.PNP_MAIN_ID from " + detailTable + " a " +
                 "   where a.STATUS = :status " +
+                "   and a.BC_STATUS = :bc_status " +
                 "   and a.PROC_STAGE = :stage " +
                 "   order by a.CREAT_TIME" +
                 " ) " +
                 " update " + detailTable + "" +
-                " set STATUS = :newStatus, MODIFY_TIME = :modifyTime " +
+                " set STATUS = :newStatus, PNP_STATUS = :pnp_Status, MODIFY_TIME = :modifyTime " +
                 " where STATUS = :status " +
                 "   and PROC_STAGE = :stage " +
                 "   and PNP_MAIN_ID in " +
                 " ( " +
                 "   select top 1 a.PNP_MAIN_ID from " + detailTable + " a with(ROWLOCK) " +
                 "   where a.STATUS = :status " +
+                "   and a.BC_STATUS = :bc_status " +
                 "   and a.PROC_STAGE = :stage" +
                 "   order by a.CREAT_TIME" +
                 " ) ";
         return (List<BigInteger>) entityManager.createNativeQuery(sqlString)
                 .setParameter("stage", stage)
                 .setParameter("status", AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS)
+                .setParameter("bc_status", AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_PNP_PROCESS)
                 .setParameter("newStatus", AbstractPnpMainEntity.MSG_SENDER_STATUS_SENDING)
+                .setParameter("pnp_Status", AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_SENDING)
                 .setParameter("modifyTime", new Date())
                 .getResultList();
     }
@@ -377,7 +381,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 "       )" +
 
                 " update " + detailTable + " " +
-                "   set PROC_STAGE = 'SMS', STATUS = :newStatus, MODIFY_TIME = :modifyTime " +
+                "   set PROC_STAGE = 'SMS', STATUS = :newStatus, PNP_STATUS = :pnp_status, MODIFY_TIME = :modifyTime " +
                 " where STATUS = 'CHECK_DELIVERY' " +
                 "    and PNP_DELIVERY_EXPIRE_TIME < getdate() " +
                 "    and PNP_MAIN_ID" +
@@ -389,6 +393,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 "       )";
         return (List<BigInteger>) entityManager.createNativeQuery(sqlString)
                 .setParameter("newStatus", AbstractPnpMainEntity.MSG_SENDER_STATUS_SENDING)
+                .setParameter("pnp_status", AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_FAIL_SMS_PROCESS)
                 .setParameter("modifyTime", new Date())
                 .getResultList();
     }
@@ -440,13 +445,31 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
         Date modifyTime = Calendar.getInstance().getTime();
         String detailTable = type.getDetailTable();
 
-        String sqlString = "select  b.PNP_DETAIL_ID from " + detailTable + " b where  b.PNP_MAIN_ID in (:mainIds) and b.STATUS in (:status)  "
-                + "update " + detailTable + "  set STATUS = :newStatus , MODIFY_TIME = :modifyTime  where PNP_DETAIL_ID  IN "
-                + "	(select d.PNP_DETAIL_ID from " + detailTable + " d WITH(ROWLOCK) where  d.PNP_MAIN_ID in (:mainIds) and d.STATUS in (:status) )  ";
-        return (List<BigInteger>) entityManager.createNativeQuery(sqlString)
+//        String sqlString = "select  b.PNP_DETAIL_ID from " + detailTable + " b where  b.PNP_MAIN_ID in (:mainIds) and b.STATUS in (:status)  "
+//                + "update " + detailTable + "  set STATUS = :newStatus , MODIFY_TIME = :modifyTime  where PNP_DETAIL_ID  IN "
+//                + "	(select d.PNP_DETAIL_ID from " + detailTable + " d WITH(ROWLOCK) where  d.PNP_MAIN_ID in (:mainIds) and d.STATUS in (:status) )  ";
+
+        String sql = String.format(" SELECT b.PNP_DETAIL_ID FROM %s b " +
+                " WHERE b.PNP_MAIN_ID in(:mainIds)" +
+                " AND b.STATUS in(:status)" +
+
+                " UPDATE %s SET " +
+                "     STATUS = :newStatus, " +
+                "     BC_STATUS = :bc_status, " +
+                "     MODIFY_TIME = :modifyTime " +
+                " WHERE " +
+                "     PNP_DETAIL_ID IN( " +
+                "         SELECT d.PNP_DETAIL_ID FROM %s d WITH (ROWLOCK) " +
+                "         WHERE d.PNP_MAIN_ID in(:mainIds) " +
+                "         AND d.STATUS in(:status) " +
+                " ); ", detailTable, detailTable, detailTable) ;
+
+        return (List<BigInteger>) entityManager.createNativeQuery(sql)
                 .setParameter("status", statusList).setParameter("mainIds", mainIds)
                 .setParameter("modifyTime", modifyTime)
-                .setParameter("newStatus", AbstractPnpMainEntity.MSG_SENDER_STATUS_SENDING).getResultList();
+                .setParameter("newStatus", AbstractPnpMainEntity.MSG_SENDER_STATUS_SENDING)
+                .setParameter("bc_status", AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_SENDING)
+                .getResultList();
     }
 
 
@@ -476,7 +499,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 .setParameter("stage", AbstractPnpMainEntity.STAGE_BC)
                 .setParameter("procApName", procApName)
                 .setParameter("modifyTime", new Date())
-                .setParameter("newStatus", AbstractPnpMainEntity.MSG_SENDER_STATUS_SENDING).getResultList();
+                .setParameter("newStatus", AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_SENDING).getResultList();
         if (mains == null || mains.isEmpty()) {
             return null;
         }

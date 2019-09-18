@@ -8,12 +8,6 @@ public abstract class AbstractPnpMainEntity implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1L;
 
-
-    /* =============================== Common ==================================== */
-    public static final String MSG_SENDER_STATUS_PROCESS = "PROCESS";
-    public static final String MSG_SENDER_STATUS_SENDING = "SENDING";
-
-
     /* ================================ FTP ==================================== */
     /**
      * 草稿 - 儲存至Detail Table後
@@ -37,38 +31,46 @@ public abstract class AbstractPnpMainEntity implements Serializable, Cloneable {
      * 排程未過期 - 預約時間 > 現在時間過期(進入排程)
      */
     public static final String SEND_TYPE_DELAY = "DELAY";
-
-    /* ================================ BC ==================================== */
-    /**
-     * BC 發送失敗
-     */
-    public static final String MSG_SENDER_STATUS_FINISH = "FINISH";
-
-    /**
-     * BC 發送成功
-     */
-    public static final String DATA_CONVERTER_STATUS_BC_COMPLETE = "BC_COMPLETE";
-    /* ================================ PNP ==================================== */
-
-    /**
-     * PNP已發送等待Line回覆HttpStatusCode
-     */
-    public static final String MSG_SENDER_STATUS_CHECK_DELIVERY = "CHECK_DELIVERY";
-
-    /**
-     * PNP 發送成功
-     */
-    public static final String DATA_CONVERTER_STATUS_PNP_COMPLETE = "PNP_COMPLETE";
-
-
-    public static final String MSG_SENDER_STATUS_FAIL = "FAIL";
-
-    public static final String MSG_SENDER_STATUS_DELETE = "DELETE";
-
-    @Deprecated
-    public static final String DATA_CONVERTER_STATUS_COMPLETE = "COMPLETE";
     //預約
     public static final String DATA_CONVERTER_STATUS_SCHEDULED = "SCHEDULED";
+
+    public static final String MSG_SENDER_STATUS_BC_PROCESS = "BC_PROCESS";
+
+    /* ========================================BC================================================*/
+
+    public static final String MSG_SENDER_STATUS_BC_SENDING = "BC_SENDING";
+    public static final String DATA_CONVERTER_STATUS_BC_COMPLETE = "BC_COMPLETE";
+    public static final String MSG_SENDER_STATUS_BC_FAIL = "BC_FAIL";
+    public static final String MSG_SENDER_STATUS_BC_FAIL_PNP_PROCESS = "BC_FAIL_PNP_PROCESS";
+    public static final String MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS = "BC_FAIL_SMS_PROCESS";
+
+    /* ========================================BC================================================*/
+    /* ========================================PNP================================================*/
+    public static final String MSG_SENDER_STATUS_PNP_SENDING = "PNP_SENDING";
+    public static final String MSG_SENDER_STATUS_CHECK_DELIVERY = "CHECK_DELIVERY";
+    public static final String DATA_CONVERTER_STATUS_PNP_COMPLETE = "PNP_COMPLETE";
+    public static final String MSG_SENDER_STATUS_PNP_FAIL_SMS_PROCESS = "PNP_FAIL_SMS_PROCESS";
+
+
+    /* ========================================PNP================================================*/
+    /* ========================================SMS================================================*/
+    public static final String DATA_CONVERTER_STATUS_SMS_COMPLETE = "SMS_COMPLETE";
+    public static final String MSG_SENDER_STATUS_SMS_FAIL = "SMS_FAIL";
+    /* ========================================SMS================================================*/
+
+    @Deprecated
+    public static final String MSG_SENDER_STATUS_PROCESS = "PROCESS";
+    @Deprecated
+    public static final String MSG_SENDER_STATUS_SENDING = "SENDING";
+    @Deprecated
+    public static final String MSG_SENDER_STATUS_FINISH = "FINISH";
+    @Deprecated
+    public static final String MSG_SENDER_STATUS_FAIL = "FAIL";
+    @Deprecated
+    public static final String MSG_SENDER_STATUS_DELETE = "DELETE";
+    @Deprecated
+    public static final String DATA_CONVERTER_STATUS_COMPLETE = "COMPLETE";
+
 
     /**
      * 三竹來源

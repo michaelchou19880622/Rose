@@ -96,6 +96,24 @@ public class PnpDetail extends AbstractBcsEntity {
     private String status;
 
     /**
+     * 明細檔狀態；select for update wait時更新此欄位，防止重複發送
+     */
+    @Column(name = "BC_STATUS", columnDefinition = "nvarchar(20)")
+    private String bcStatus;
+
+    /**
+     * 明細檔狀態；select for update wait時更新此欄位，防止重複發送
+     */
+    @Column(name = "PNP_STATUS", columnDefinition = "nvarchar(20)")
+    private String pnpStatus;
+
+    /**
+     * 明細檔狀態；select for update wait時更新此欄位，防止重複發送
+     */
+    @Column(name = "SMS_STATUS", columnDefinition = "nvarchar(20)")
+    private String smsStatus;
+
+    /**
      * 更新時間
      */
     @Column(name = "MODIFY_TIME")

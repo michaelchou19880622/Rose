@@ -70,7 +70,6 @@ public class PnpPNPMsgService {
         scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-//                Thread.currentThread().setName("PNP-PNP-Scheduled-" + Thread.currentThread().getId());
                 // 排程工作
                 logger.info(" PnpSendMsgService startCircle....");
 

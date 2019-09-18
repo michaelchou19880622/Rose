@@ -69,174 +69,199 @@ public class PNPMaintainUIService {
 
     @SuppressWarnings("unchecked")
     public Map<String, List<String>> getPNPDetailReport(String startDate, String endDate, String account, String pccCode, String sourceSystem, Integer page, String empId) {
-        int rowStart;
-        int rowEnd;
-        if (page == null) {
-            rowStart = 1;
-            /* Equal Get all data */
-            rowEnd = Integer.MAX_VALUE;
-        } else {
-            // 1~199 => 0~198
-            page--;
-            rowStart = page * 10 + 1;
-            // 10 as Size
-            rowEnd = rowStart + 10;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("select * from ( " +
-                "        select " +
-                "                orig_file_name, " +
-                "                proc_flow, " +
-                "                source, " +
-                "                msg, " +
-                "                phone, " +
-                "                pnp_delivery_expire_time, " +
-                "                detail_schedule_time, " +
-                "                creat_time, " +
-                "                status, " +
-                "                pcc_code, " +
-                "                account, " +
-                "                source_system, " +
-                "                employee_id, " +
-                "                row_number() over ( " +
-                "        order by " +
-                "                creat_time desc) as rownum " +
-                "        from ( " +
-                "        ( " +
-                "                select " +
-                "                        m.orig_file_name, " +
-                "                        d.proc_flow, " +
-                "                        d.source, " +
-                "                        msg, " +
-                "                        phone, " +
-                "                        d.pnp_delivery_expire_time, " +
-                "                        d.detail_schedule_time, " +
-                "                        d.creat_time, " +
-                "                        d.status, " +
-                "                        a.pcc_code, " +
-                "                        a.account, " +
-                "                        a.source_system, " +
-                "                        a.employee_id " +
-                "                from " +
-                "                        bcs_pnp_detail_ming as d " +
-                "                left join bcs_pnp_main_ming as m on d.pnp_main_id = m.pnp_main_id " +
-                "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
-                "        ) " +
-                "        union all " +
-                "        ( " +
-                "               select " +
-                "                        m.orig_file_name, " +
-                "                        d.proc_flow, " +
-                "                        d.source, " +
-                "                        msg, " +
-                "                        phone, " +
-                "                        d.pnp_delivery_expire_time, " +
-                "                        null, " +
-                "                        d.creat_time, " +
-                "                        d.status, " +
-                "                        a.pcc_code, " +
-                "                        a.account, " +
-                "                        a.source_system, " +
-                "                        a.employee_id " +
-                "                from " +
-                "                        bcs_pnp_detail_mitake as d " +
-                "                left join bcs_pnp_main_mitake as m on d.pnp_main_id = m.pnp_main_id " +
-                "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
-                "        ) " +
-                "        union all " +
-                "        ( " +
-                "                select " +
-                "                        m.orig_file_name, " +
-                "                        d.proc_flow, " +
-                "                        d.source, " +
-                "                        msg, " +
-                "                        phone, " +
-                "                        d.pnp_delivery_expire_time, " +
-                "                        null, " +
-                "                        d.creat_time, " +
-                "                        d.status, " +
-                "                        a.pcc_code, " +
-                "                        a.account, " +
-                "                        a.source_system, " +
-                "                        a.employee_id " +
-                "                from " +
-                "                        bcs_pnp_detail_unica as d " +
-                "                left join bcs_pnp_main_unica as m on d.pnp_main_id = m.pnp_main_id " +
-                "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
-                "        ) " +
-                "        union all " +
-                "        ( " +
-                "                select " +
-                "                        m.orig_file_name, " +
-                "                        d.proc_flow, " +
-                "                        d.source, " +
-                "                        msg, " +
-                "                        phone, " +
-                "                        d.pnp_delivery_expire_time, " +
-                "                        null, " +
-                "                        d.creat_time, " +
-                "                        d.status, " +
-                "                        a.pcc_code, " +
-                "                        a.account, " +
-                "                        a.source_system, " +
-                "                        a.employee_id " +
-                "                from " +
-                "                        bcs_pnp_detail_every8d as d " +
-                "                left join bcs_pnp_main_every8d as m on d.pnp_main_id = m.pnp_main_id " +
-                "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
-                "        ) " +
-                " ) as r1 " +
-                " where creat_time >= ?1 " +
-                " and creat_time <  dateadd(day, 1, ?2) ");
-
-        if (StringUtils.isNotBlank(account)) {
-            sb.append(String.format(" and account = '%s'", account));
-        }
-        if (StringUtils.isNotBlank(pccCode)) {
-            sb.append(String.format(" and pcc_code = '%s' ", pccCode));
-        }
-        if (StringUtils.isNotBlank(sourceSystem)) {
-            sb.append(String.format(" and source_system = '%s' ", sourceSystem));
-        }
-        boolean oracleUseDepartmentCheck = CoreConfigReader.getBoolean(CONFIG_STR.ORACLE_USE_DEPARTMENT_CHECK, true);
-        logger.info("oracleUseDepartmentCheck:" + oracleUseDepartmentCheck);
-        if (oracleUseDepartmentCheck) {
-            String empAva = oraclePnpService.getAvailableEmpIdsByEmpId(empId);
-            if (StringUtils.isNotBlank(empAva)) {
-                sb.append(empAva);
+        try {
+            int rowStart;
+            int rowEnd;
+            if (page == null) {
+                rowStart = 1;
+                /* Equal Get all data */
+                rowEnd = Integer.MAX_VALUE;
+            } else {
+                // 1~199 => 0~198
+                page--;
+                rowStart = page * 10 + 1;
+                // 10 as Size
+                rowEnd = rowStart + 10;
             }
-        }
 
-        sb.append(" ) as r2 where rownum >= ?3 and rownum < ?4 ");
+            StringBuilder sb = new StringBuilder();
+            sb.append("select * from ( " +
+                    "        select " +
+                    "                orig_file_name, " +
+                    "                proc_flow, " +
+                    "                source, " +
+                    "                msg, " +
+                    "                phone, " +
+                    "                detail_schedule_time1, " +
+                    "                detail_schedule_time2, " +
+                    "                bc_time, " +
+                    "                pnp_time, " +
+                    "                status1, " +
+                    "                status2, " +
+                    "                status3, " +
+                    "                pcc_code, " +
+                    "                account, " +
+                    "                source_system, " +
+                    "                employee_id, " +
+                    "                creat_time, " +
+                    "                row_number() over ( " +
+                    "        order by " +
+                    "                creat_time desc) as rownum " +
+                    "        from ( " +
+                    "        ( " +
+                    "                select " +
+                    "                        m.orig_file_name, " +
+                    "                        d.proc_flow, " +
+                    "                        d.source, " +
+                    "                        msg, " +
+                    "                        phone, " +
+                    "                        d.detail_schedule_time as detail_schedule_time1, " +
+                    "                        d.detail_schedule_time as detail_schedule_time2, " +
+                    "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
+                    "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
+                    "                        d.bc_status as status1, " +
+                    "                        d.pnp_status as status2, " +
+                    "                        d.sms_status as status3, " +
+                    "                        a.pcc_code, " +
+                    "                        a.account, " +
+                    "                        a.source_system, " +
+                    "                        a.employee_id, " +
+                    "                        d.creat_time " +
+                    "                from " +
+                    "                        bcs_pnp_detail_ming as d " +
+                    "                left join bcs_pnp_main_ming as m on d.pnp_main_id = m.pnp_main_id " +
+                    "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
+                    "        ) " +
+                    "        union all " +
+                    "        ( " +
+                    "               select " +
+                    "                        m.orig_file_name, " +
+                    "                        d.proc_flow, " +
+                    "                        d.source, " +
+                    "                        msg, " +
+                    "                        phone, " +
+                    "                        null as detail_schedule_time1, " +
+                    "                        null as detail_schedule_time2, " +
+                    "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
+                    "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
+                    "                        d.bc_status as status1, " +
+                    "                        d.pnp_status as status2, " +
+                    "                        d.sms_status as status3, " +
+                    "                        a.pcc_code, " +
+                    "                        a.account, " +
+                    "                        a.source_system, " +
+                    "                        a.employee_id, " +
+                    "                        d.creat_time " +
+                    "                from " +
+                    "                        bcs_pnp_detail_mitake as d " +
+                    "                left join bcs_pnp_main_mitake as m on d.pnp_main_id = m.pnp_main_id " +
+                    "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
+                    "        ) " +
+                    "        union all " +
+                    "        ( " +
+                    "                select " +
+                    "                        m.orig_file_name, " +
+                    "                        d.proc_flow, " +
+                    "                        d.source, " +
+                    "                        msg, " +
+                    "                        phone, " +
+                    "                        null as detail_schedule_time1, " +
+                    "                        null as detail_schedule_time2, " +
+                    "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
+                    "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
+                    "                        d.bc_status as status1, " +
+                    "                        d.pnp_status as status2, " +
+                    "                        d.sms_status as status3, " +
+                    "                        a.pcc_code, " +
+                    "                        a.account, " +
+                    "                        a.source_system, " +
+                    "                        a.employee_id, " +
+                    "                        d.creat_time " +
+                    "                from " +
+                    "                        bcs_pnp_detail_unica as d " +
+                    "                left join bcs_pnp_main_unica as m on d.pnp_main_id = m.pnp_main_id " +
+                    "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
+                    "        ) " +
+                    "        union all " +
+                    "        ( " +
+                    "                select " +
+                    "                        m.orig_file_name, " +
+                    "                        d.proc_flow, " +
+                    "                        d.source, " +
+                    "                        msg, " +
+                    "                        phone, " +
+                    "                        null as detail_schedule_time1, " +
+                    "                        null as detail_schedule_time2, " +
+                    "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
+                    "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
+                    "                        d.bc_status as status1, " +
+                    "                        d.pnp_status as status2, " +
+                    "                        d.sms_status as status3, " +
+                    "                        a.pcc_code, " +
+                    "                        a.account, " +
+                    "                        a.source_system, " +
+                    "                        a.employee_id, " +
+                    "                        d.creat_time " +
+                    "                from " +
+                    "                        bcs_pnp_detail_every8d as d " +
+                    "                left join bcs_pnp_main_every8d as m on d.pnp_main_id = m.pnp_main_id " +
+                    "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
+                    "        ) " +
+                    " ) as r1 " +
+                    " where creat_time >= ?1 " +
+                    " and creat_time <  dateadd(day, 1, ?2) ");
 
-        logger.info("str1: " + sb.toString());
-        logger.info("rowStart:" + rowStart);
-        logger.info("rowEnd:" + rowEnd);
-        Query query = entityManager.createNativeQuery(sb.toString()).setParameter(1, startDate).setParameter(2, endDate)
-                .setParameter(3, rowStart).setParameter(4, rowEnd);
-
-        List<Object[]> list = query.getResultList();
-
-        Map<String, List<String>> map = new LinkedHashMap<>();
-
-        int count = 0;
-        for (Object[] o : list) {
-            count++;
-            logger.info("c:" + count);
-            List<String> dataList = new ArrayList<>();
-            map.put(Integer.toString(count), dataList);
-            for (int i = 0, max = 10; i < max; i++) {
-                if (o[i] == null) {
-                    dataList.add("");
-                } else {
-                    dataList.add(o[i].toString());
+            if (StringUtils.isNotBlank(account)) {
+                sb.append(String.format(" and account = '%s'", account));
+            }
+            if (StringUtils.isNotBlank(pccCode)) {
+                sb.append(String.format(" and pcc_code = '%s' ", pccCode));
+            }
+            if (StringUtils.isNotBlank(sourceSystem)) {
+                sb.append(String.format(" and source_system = '%s' ", sourceSystem));
+            }
+            boolean oracleUseDepartmentCheck = CoreConfigReader.getBoolean(CONFIG_STR.ORACLE_USE_DEPARTMENT_CHECK, true);
+            logger.info("oracleUseDepartmentCheck:" + oracleUseDepartmentCheck);
+            if (oracleUseDepartmentCheck) {
+                String empAva = oraclePnpService.getAvailableEmpIdsByEmpId(empId);
+                if (StringUtils.isNotBlank(empAva)) {
+                    sb.append(empAva);
                 }
             }
-        }
-        logger.info(new GsonBuilder().serializeNulls().setPrettyPrinting().create().toJson(map));
 
-        return map;
+            sb.append(" ) as r2 where rownum >= ?3 and rownum < ?4 ");
+
+            logger.info("str1: " + sb.toString());
+            logger.info("rowStart:" + rowStart);
+            logger.info("rowEnd:" + rowEnd);
+            Query query = entityManager.createNativeQuery(sb.toString()).setParameter(1, startDate).setParameter(2, endDate)
+                    .setParameter(3, rowStart).setParameter(4, rowEnd);
+
+            List<Object[]> list = query.getResultList();
+
+            Map<String, List<String>> map = new LinkedHashMap<>();
+
+            int count = 0;
+            for (Object[] objectArray : list) {
+                count++;
+                logger.info("c:" + count);
+                List<String> dataList = new ArrayList<>();
+                map.put(Integer.toString(count), dataList);
+                for (int i = 0, max = 14; i < max; i++) {
+                    if (objectArray[i] == null) {
+                        dataList.add("");
+                    } else {
+                        dataList.add(objectArray[i].toString());
+                    }
+                }
+            }
+            logger.info(new GsonBuilder().serializeNulls().setPrettyPrinting().create().toJson(map));
+
+            return map;
+        } catch (Exception e) {
+            logger.error("Exception", e);
+            throw e;
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -298,198 +323,4 @@ public class PNPMaintainUIService {
         char c10 = listStr.charAt(listStr.length() - 3); // 十位數
         return listStr.substring(1, listStr.length() - 3) + (++c10); // [431] => 44
     }
-
-//    protected LoadingCache<String, Campaign> dataCache;
-//    
-//	private Timer flushTimer = new Timer();
-//	
-//	private class CustomTask extends TimerTask{
-//		
-//		@Override
-//		public void run() {
-//
-//			try{
-//				// Check Data Sync
-//				Boolean isReSyncData = DataSyncUtil.isReSyncData(CAMPAIGN_SYNC);
-//				if(isReSyncData){
-//					dataCache.invalidateAll();
-//					DataSyncUtil.syncDataFinish(CAMPAIGN_SYNC);
-//				}
-//			}
-//			catch(Throwable e){
-//				logger.error(ErrorRecord.recordError(e));
-//			}
-//		}
-//	}
-//    
-//    public CampaignService(){
-//
-//		flushTimer.schedule(new CustomTask(), 120000, 30000);
-//
-//        dataCache = CacheBuilder.newBuilder()
-//                .concurrencyLevel(1)
-//                .expireAfterAccess(30, TimeUnit.MINUTES)
-//                .build(new CacheLoader<String, Campaign>() {
-//                    @Override
-//                    public Campaign load(String key) throws Exception {
-//                        return new Campaign();
-//                    }
-//                });
-//    }
-//    
-//    @PreDestroy
-//    public void cleanUp() {
-//        logger.info("[DESTROY] CampaignService cleaning up...");
-//        try{
-//            if(dataCache != null){
-//                dataCache.invalidateAll();
-//                dataCache = null;
-//            }
-//        }
-//        catch(Throwable e){}
-//        
-//        System.gc();
-//        logger.info("[DESTROY] CampaignService destroyed.");
-//    }
-//    
-//    private boolean notNull(Campaign result){
-//        if(result != null && StringUtils.isNotBlank(result.getCampaignId())){
-//            return true;
-//        }
-//        return false;
-//    }
-//    
-//    public Campaign findByName(String name) {
-//        Campaign result = campaignRepository.findByCampaignName(name);
-//        if(result != null){
-//            dataCache.put(result.getCampaignId(), result);
-//        }
-//        return result;
-//    }
-//    
-//
-//    public List<Campaign> findAll() {
-//        return campaignRepository.findAll();
-//    }
-//
-//    public List<Campaign> findByIsActive(Boolean isActive) {
-//        return campaignRepository.findByIsActive(isActive);
-//    }
-//
-//    public Long countAll() {
-//        return campaignRepository.count();
-//    }
-//
-//    public void save(Campaign campaign) {
-//        campaignRepository.save(campaign);
-//
-//        if(campaign != null){
-//            dataCache.put(campaign.getCampaignId(), campaign);
-//			DataSyncUtil.settingReSync(CAMPAIGN_SYNC);
-//        }
-//    }
-//    
-//    @Transactional(rollbackFor=Exception.class, timeout = 30)
-//    public void delete(String campaignId) throws BcsNoticeException{
-//        logger.debug("delete:" + campaignId);
-//        
-//        Campaign campaign = campaignRepository.findOne(campaignId);
-//        
-//        campaignRepository.delete(campaign);
-//        dataCache.invalidate(campaignId);
-//		DataSyncUtil.settingReSync(CAMPAIGN_SYNC);
-//    }
-//    
-//    public String findCampaignNameByCampaignId(String campaignId) throws BcsNoticeException{
-//        try {
-//            Campaign result = dataCache.get(campaignId);
-//            if(notNull(result)){
-//                return result.getCampaignName();
-//            }
-//        } catch (Exception e) {}
-//        
-//        return campaignRepository.findCampaignNameByCampaignId(campaignId);
-//    }
-//    
-//    public Campaign findOne(String campaignId){
-//        try {
-//            Campaign result = dataCache.get(campaignId);
-//            if(notNull(result)){
-//                return result;
-//            }
-//        } catch (Exception e) {}
-//        
-//        Campaign result = campaignRepository.findOne(campaignId);
-//        if(result != null){
-//            dataCache.put(result.getCampaignId(), result);
-//        }
-//        return result;
-//    }
-//    
-//    public String generateCampaignId() {
-//        String campaignId = UUID.randomUUID().toString().toLowerCase();
-//        
-//        while (campaignRepository.findOne(campaignId) != null) {
-//            campaignId = UUID.randomUUID().toString().toLowerCase();
-//        }
-//        return campaignId;
-//    }
-//    
-//	@Transactional(rollbackFor=Exception.class, timeout = 30)
-//    public void deleteFromUI(String campaignId, String account) throws BcsNoticeException {
-//        logger.info("deleteFromUI:" + campaignId);
-//        
-//        String campaignName = campaignService.findCampaignNameByCampaignId(campaignId);
-//        campaignService.delete(campaignId);
-//        createSystemLog("Delete", campaignName, account, new Date(), campaignId.toString());
-//    }
-//	
-//	private void createSystemLog(String action, Object content, String modifyUser, Date modifyTime, String referenceId) {
-//        SystemLogUtil.saveLogDebug("Campaign", action, modifyUser, content, referenceId);
-//    }
-//	
-//	@Transactional(rollbackFor=Exception.class, timeout = 30)
-//    public Campaign saveFromUI(Campaign campaign, String account) throws BcsNoticeException{
-//        logger.info("saveFromUI:" + campaign);
-//
-//        String campaignId = campaign.getCampaignId();
-//        
-//        String action = "Edit";
-//        if (campaignId == null) {
-//            action = "Create";
-//            
-//            campaignId = campaignService.generateCampaignId();
-//            campaign.setCampaignId(campaignId);
-//        }
-//            
-//        // Set Modify Admin User
-//        campaign.setModifyUser(account);
-//        campaign.setModifyTime(new Date());
-//        
-//        // Save Campaign
-//        campaignService.save(campaign);
-//        
-//        campaign = campaignService.findOne(campaign.getCampaignId());
-//        createSystemLog(action, campaign, campaign.getModifyUser(), campaign.getModifyTime(), campaign.getCampaignId());
-//        return campaign;
-//    }
-//
-//    @Transactional(rollbackFor=Exception.class, timeout = 30)
-//	public Campaign switchIsActive(String campaignId, String account) throws BcsNoticeException{
-//        logger.info("switchIsActive:" + campaignId);
-//        
-//        Campaign campaign = campaignService.findOne(campaignId);
-//        if (campaign != null) {
-//            boolean switchValue = (campaign.getIsActive() == Boolean.TRUE) ? false : true;
-//            campaign.setIsActive(switchValue);
-//            
-//            // Set Modify Admin User
-//            campaign.setModifyUser(account);
-//            campaign.setModifyTime(new Date());
-//            // Save Campaign
-//            campaignService.save(campaign);
-//        }
-//        
-//        return campaign;
-//	}
 }

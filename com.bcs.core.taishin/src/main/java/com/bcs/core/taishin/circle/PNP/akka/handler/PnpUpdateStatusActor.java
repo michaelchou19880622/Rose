@@ -23,15 +23,6 @@ public class PnpUpdateStatusActor extends UntypedActor {
 	private static Logger logger = Logger.getLogger(PnpUpdateStatusActor.class);
     @Override
     public void onReceive(Object object) {
-
-    	logger.info("PnpUpdateStatusActor Receive!!");
-        if (object instanceof PnpDetail) {
-        	logger.info("Object instanceof PnpDetail!!");
-            PnpService pnpService = ApplicationContextProvider.getApplicationContext().getBean(PnpService.class);
-            PnpDetail pnpDetail = (PnpDetail) object;
-            saveResultAndUpdateSendTime(pnpService, pnpDetail);
-            updateStatus(pnpService, pnpDetail);
-
         try {
             Thread.currentThread().setName("Actor-PNP-Update-" + Thread.currentThread().getId());
 

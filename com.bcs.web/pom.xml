@@ -112,7 +112,7 @@
 	        </build>
 			<properties>
 				<package.environment>test</package.environment>
-				<rp.build.warname>test</rp.build.warname>
+				<rp.build.warname>Taishin</rp.build.warname>
 				<maven.war.webxml>src/main/webapp/WEB-INF/web.xml</maven.war.webxml> <!-- set up webxml location -->
 			</properties>
 		</profile>

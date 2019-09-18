@@ -242,16 +242,16 @@ public class PNPMaintainUIService {
             Map<String, List<String>> map = new LinkedHashMap<>();
 
             int count = 0;
-            for (Object[] o : list) {
+            for (Object[] objectArray : list) {
                 count++;
                 logger.info("c:" + count);
                 List<String> dataList = new ArrayList<>();
                 map.put(Integer.toString(count), dataList);
                 for (int i = 0, max = 14; i < max; i++) {
-                    if (o[i] == null) {
+                    if (objectArray[i] == null) {
                         dataList.add("");
                     } else {
-                        dataList.add(o[i].toString());
+                        dataList.add(objectArray[i].toString());
                     }
                 }
             }

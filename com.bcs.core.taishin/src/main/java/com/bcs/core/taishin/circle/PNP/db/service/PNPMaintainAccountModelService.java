@@ -113,7 +113,7 @@ public class PNPMaintainAccountModelService {
                     .setParameter(1, startDate)
                     .setParameter(2, endDate);
 
-            final int maxColumn = 27;
+            final int maxColumn = 26;
             List<Object[]> rowArrayList = query.getResultList();
 
             int index = 0;
@@ -146,27 +146,25 @@ public class PNPMaintainAccountModelService {
         /* 資料特殊處理 */
         log.info("{},{}", columnIndex, value);
         switch (columnIndex) {
-            case 21:
-            case 22:
-            case 23:
-                /* 21 BC發送狀態 */
-                /* 22 PNP發送狀態*/
-                /* 23 SMS發送狀態*/
-                value = englishStatusToChinese(value);
+            case 2:
+                /* 通路流(1.2.3.4.) */
+                value = englishProcFlowToChinese(value);
                 break;
             case 3:
                 /* 發送通路(ex: PNP_明宣) */
-                log.info("Proc: " + value);
                 String[] valueArray = value.split(";");
-                log.info("Proc Array: " + Arrays.toString(valueArray));
                 String stage = valueArray[0];
                 String source = valueArray[1];
                 String sourceChinese = englishSourceToChinese(source);
                 value = String.format("%s_%s", stage, sourceChinese);
                 break;
-            case 2:
-                /* 通路流(1.2.3.4.) */
-                value = englishProcFlowToChinese(value);
+            case 20:
+            case 21:
+            case 22:
+                /* 20 BC發送狀態 */
+                /* 21 PNP發送狀態*/
+                /* 22 SMS發送狀態*/
+                value = englishStatusToChinese(value);
                 break;
             default:
                 break;
@@ -197,7 +195,7 @@ public class PNPMaintainAccountModelService {
                 "                        null as pid, " +
                 "                        d.phone, " +
                 "                        d.uid, " +
-                "                        d.detail_schedule_time as detail_schedule_time1, " +
+//                "                        d.detail_schedule_time as detail_schedule_time1, " +
                 "                        d.detail_schedule_time as detail_schedule_time2, " +
                 "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
                 "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
@@ -206,8 +204,8 @@ public class PNPMaintainAccountModelService {
                 "                        d.sms_status as status3, " +
                 "                        null as is_international, " +
                 "                        convert(varchar, d.creat_time, 120) AS create_time, " +
-                "                        convert(varchar, d.modify_time, 120) AS modify_time, " +
-                "                        a.employee_id " +
+                "                        convert(varchar, d.modify_time, 120) AS modify_time " +
+//                "                        a.employee_id " +
                 "                from bcs_pnp_detail_ming as d " +
                 "                left join bcs_pnp_main_ming as m on d.pnp_main_id = m.pnp_main_id " +
                 "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
@@ -232,7 +230,7 @@ public class PNPMaintainAccountModelService {
                 "                        null as pid, " +
                 "                        d.phone, " +//15
                 "                        d.uid, " +
-                "                        null as detail_schedule_time1, " +
+//                "                        null as detail_schedule_time1, " +
                 "                        null as detail_schedule_time2, " +
                 "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
                 "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
@@ -241,8 +239,8 @@ public class PNPMaintainAccountModelService {
                 "                        d.sms_status as status3, " +
                 "                        null as is_international, " +
                 "                        convert(varchar, d.creat_time, 120) AS create_time, " +//25
-                "                        convert(varchar, d.modify_time, 120) AS modify_time, " +//26
-                "                        a.employee_id" +
+                "                        convert(varchar, d.modify_time, 120) AS modify_time " +//26
+//                "                        a.employee_id" +
                 "                from bcs_pnp_detail_mitake as d " +
                 "                left join bcs_pnp_main_mitake as m on d.pnp_main_id = m.pnp_main_id " +
                 "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
@@ -267,7 +265,7 @@ public class PNPMaintainAccountModelService {
                 "                        d.pid, " +
                 "                        d.phone, " +
                 "                        d.uid, " +
-                "                        null as detail_schedule_time1, " +
+//                "                        null as detail_schedule_time1, " +
                 "                        null as detail_schedule_time2, " +
                 "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
                 "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
@@ -276,8 +274,8 @@ public class PNPMaintainAccountModelService {
                 "                        d.sms_status as status3, " +
                 "                        null as is_international, " +
                 "                        convert(varchar, d.creat_time, 120) AS create_time, " +
-                "                        convert(varchar, d.modify_time, 120) AS modify_time, " +
-                "                        a.employee_id " +
+                "                        convert(varchar, d.modify_time, 120) AS modify_time " +
+//                "                        a.employee_id " +
                 "                from bcs_pnp_detail_unica as d " +
                 "                left join bcs_pnp_main_unica as m on d.pnp_main_id = m.pnp_main_id " +
                 "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
@@ -302,7 +300,7 @@ public class PNPMaintainAccountModelService {
                 "                        d.pid, " +
                 "                        d.phone, " +
                 "                        d.uid, " +
-                "                        null as detail_schedule_time1, " +
+//                "                        null as detail_schedule_time1, " +
                 "                        null as detail_schedule_time2, " +
                 "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
                 "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
@@ -311,8 +309,8 @@ public class PNPMaintainAccountModelService {
                 "                        d.sms_status as status3, " +
                 "                        null as is_international, " +
                 "                        convert(varchar, d.creat_time, 120) AS create_time, " +
-                "                        convert(varchar, d.modify_time, 120) AS modify_time, " +
-                "                        a.employee_id " +
+                "                        convert(varchar, d.modify_time, 120) AS modify_time " +
+//                "                        a.employee_id " +
                 "                from bcs_pnp_detail_every8d as d " +
                 "                left join bcs_pnp_main_every8d as m on d.pnp_main_id = m.pnp_main_id " +
                 "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
@@ -366,16 +364,16 @@ public class PNPMaintainAccountModelService {
         columnDataMap.put(14, "客戶ID");
         columnDataMap.put(15, "客戶手機號碼");
         columnDataMap.put(16, "UID");
-        columnDataMap.put(17, "預約日期");
-        columnDataMap.put(18, "預約時間");
-        columnDataMap.put(19, "BC發送日期");
-        columnDataMap.put(20, "PNP發送時間");
-        columnDataMap.put(21, "BC發送狀態");
-        columnDataMap.put(22, "PNP發送狀態");
-        columnDataMap.put(23, "SMS發送狀態");
-        columnDataMap.put(24, "是否國際簡訊");
-        columnDataMap.put(25, "資料建立日期");
-        columnDataMap.put(26, "資料更新日期");
+//        columnDataMap.put(17, "預約日期");
+        columnDataMap.put(17, "預約時間");
+        columnDataMap.put(18, "BC發送日期");
+        columnDataMap.put(19, "PNP發送時間");
+        columnDataMap.put(20, "BC發送狀態");
+        columnDataMap.put(21, "PNP發送狀態");
+        columnDataMap.put(22, "SMS發送狀態");
+        columnDataMap.put(23, "是否國際簡訊");
+        columnDataMap.put(24, "資料建立日期");
+        columnDataMap.put(25, "資料更新日期");
         return columnDataMap;
     }
 

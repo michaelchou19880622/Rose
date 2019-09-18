@@ -181,12 +181,12 @@ $(function () {
                 // 8 pnp time
                 resultTr.find('.pnpTime').html(valueObj[8]);
 
-                // 9 bc status
-                resultTr.find('.bcStatusCode').html(valueObj[9]);
+
+                resultTr.find('.bcStatusCode').html(parseCodeToChinese(valueObj[9]));
                 // 10 pnp_status
-                resultTr.find('.pnpStatusCode').html(valueObj[10]);
+                resultTr.find('.pnpStatusCode').html(parseCodeToChinese(valueObj[10]));
                 // 11 sms_status
-                resultTr.find('.smsStatusCode').html(valueObj[11]);
+                resultTr.find('.smsStatusCode').html(parseCodeToChinese(valueObj[11]));
 
                 // 12 PCC_CODE
                 resultTr.find('.accountPccCode').html(valueObj[12]);
@@ -195,7 +195,6 @@ $(function () {
             }
 
             setExportButtonSource();
-            //------------------------------------------------------
 
         }).fail(function (response) {
             console.info(response);
@@ -204,9 +203,56 @@ $(function () {
         }).done(function () {
             $('.LyMain').unblock();
         });
-
-
     };
+
+    var parseCodeToChinese = function(status){
+        switch (status) {
+            case "DRAFT":
+                return "正在存進資料庫";
+            case "WAIT":
+                return "等待進入處理程序";
+            case "SCHEDULED":
+                return "等待預約發送";
+            case "BC_PROCESS":
+                return "進行BC發送處理中";
+            case "BC_SENDING":
+                return "BC發送中";
+            case "BC_COMPLETE":
+                return "BC處理程序完成";
+            case "BC_FAIL":
+                return "BC發送失敗";
+            case "BC_FAIL_PNP_PROCESS":
+                return "轉發PNP";
+            case "BC_FAIL_SMS_PROCESS":
+                return "轉發SMS";
+            case "PNP_SENDING":
+                return "PNP發送中";
+            case "CHECK_DELIVERY":
+                return "已發送，等待回應";
+            case "PNP_COMPLETE":
+                return "PNP處理程序完成";
+            case "PNP_FAIL_SMS_PROCESS":
+                return "轉發SMS";
+            case "SMS_COMPLETE":
+                return "SMS處理程序完成";
+            case "SMS_FAIL":
+                return "SMS發送失敗";
+
+
+            case "PROCESS":
+                return "發送處理進行中";
+            case "FINISH":
+                return "發送處理完成";
+            case "SENDING":
+                return "發送中";
+            case "DELETE":
+                return "已刪除";
+            case "COMPLETE":
+                return "處理程序完成";
+            default:
+                return status;
+        }
+    }
 
     var setTotal = function () {
         // get Total

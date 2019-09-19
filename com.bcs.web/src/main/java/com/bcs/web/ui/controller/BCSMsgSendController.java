@@ -12,6 +12,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,6 +99,7 @@ public class BCSMsgSendController extends BCSBaseController {
 	 * @param response
 	 * @return MsgListDraftPage
 	 */
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value ="/edit/msgListPage")
 	public String msgListPage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("msgListPage");
@@ -106,6 +108,7 @@ public class BCSMsgSendController extends BCSBaseController {
 	}
 
     // CDN
+	@WebServiceLog
     @RequestMapping(method = RequestMethod.GET, value ="/edit/cdnMsgCreatePage")
     public String cdnMsgCreatePage(HttpServletRequest request, HttpServletResponse response) {
         logger.info("cdnMsgCreatePage");
@@ -119,6 +122,7 @@ public class BCSMsgSendController extends BCSBaseController {
 	 * @param response
 	 * @return MsgListDraftPage
 	 */
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value ="/edit/msgListDraftPage")
 	public String msgListDraftPage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("msgListDraftPage");
@@ -133,6 +137,7 @@ public class BCSMsgSendController extends BCSBaseController {
 	 * @param response
 	 * @return MsgListDelayPage
 	 */
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value ="/edit/msgListDelayPage")
 	public String msgListDelayPage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("msgListDelayPage");
@@ -146,6 +151,7 @@ public class BCSMsgSendController extends BCSBaseController {
 	 * @param response
 	 * @return MsgListSendedPage
 	 */
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value ="/edit/msgListSendedPage")
 	public String msgListSendedPage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("msgListSendedPage");
@@ -159,6 +165,7 @@ public class BCSMsgSendController extends BCSBaseController {
 	 * @param response
 	 * @return MsgListSchedulePage
 	 */
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value ="/edit/msgListSchedulePage")
 	public String msgListSchedulePage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("msgListSchedulePage");
@@ -173,7 +180,8 @@ public class BCSMsgSendController extends BCSBaseController {
 	 * @return Map<String, Object>
 	 * @throws IOException
 	 */
-	@ControllerLog(description="取得 訊息資料 by msgId or msgSendId")
+	@WebServiceLog
+//	@ControllerLog(description="取得 訊息資料 by msgId or msgSendId")
 	@RequestMapping(method = RequestMethod.GET, value ="/edit/getSendMsg")
 	@ResponseBody
 	public ResponseEntity<?> getSendMsg(
@@ -258,7 +266,8 @@ public class BCSMsgSendController extends BCSBaseController {
 	 * @return Map<String, Object>
 	 * @throws IOException
 	 */
-	@ControllerLog(description="取得訊息資料列表")
+	@WebServiceLog
+//	@ControllerLog(description="取得訊息資料列表")
 	@RequestMapping(method = RequestMethod.GET, value ="/edit/getSendMsgList")
 	@ResponseBody
 	public ResponseEntity<?> getSendMsgList(
@@ -344,7 +353,8 @@ public class BCSMsgSendController extends BCSBaseController {
 	 * @return Map<String, Object>
 	 * @throws IOException
 	 */
-	@ControllerLog(description="取得訊息資料列表(已傳送)")
+	@WebServiceLog
+//	@ControllerLog(description="取得訊息資料列表(已傳送)")
 	@RequestMapping(method = RequestMethod.GET, value ="/edit/getSendedMsgList")
 	@ResponseBody
 	public ResponseEntity<?> getSendedMsgList(
@@ -427,7 +437,8 @@ public class BCSMsgSendController extends BCSBaseController {
     //}
     
     // CDN
-    @ControllerLog(description="CDN 傳送,儲存訊息")
+	@WebServiceLog
+//	@ControllerLog(description="CDN 傳送,儲存訊息")
     @RequestMapping(method = RequestMethod.POST, value ="/edit/sendingCdnMsg", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<?> sendingCdnMsg(HttpServletRequest request, HttpServletResponse response,
@@ -529,7 +540,8 @@ public class BCSMsgSendController extends BCSBaseController {
 	 * @return String Result
 	 * @throws IOException
 	 */
-	@ControllerLog(description="傳送,儲存訊息")
+	@WebServiceLog
+//	@ControllerLog(description="傳送,儲存訊息")
 	@RequestMapping(method = RequestMethod.POST, value ="/edit/sendingMsg", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> sendingMsg(
@@ -609,6 +621,7 @@ public class BCSMsgSendController extends BCSBaseController {
 	 * @return String Result
 	 * @throws IOException
 	 */
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value ="/edit/redeisgnSendMsg", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> redeisgnSendMsg(
@@ -663,7 +676,8 @@ public class BCSMsgSendController extends BCSBaseController {
 	 * @return String
 	 * @throws IOException
 	 */
-	@ControllerLog(description="刪除訊息")
+	@WebServiceLog
+//	@ControllerLog(description="刪除訊息")
 	@RequestMapping(method = RequestMethod.DELETE, value ="/admin/deleteSendMsg")
 	@ResponseBody
 	public ResponseEntity<?> deleteSendMsg(
@@ -846,8 +860,9 @@ public class BCSMsgSendController extends BCSBaseController {
 		
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
-	
-	@ControllerLog(description="exportToExcelForSendedMsg")
+
+	@WebServiceLog
+//	@ControllerLog(description="exportToExcelForSendedMsg")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForSendedMsg")
 	@ResponseBody
 	public void exportToExcelForSendedMsg(

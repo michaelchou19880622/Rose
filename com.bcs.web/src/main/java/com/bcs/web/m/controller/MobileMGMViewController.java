@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,6 +93,7 @@ public class MobileMGMViewController extends BCSBaseController {
      * @param response
      * @return
      */
+    @WebServiceLog
     @RequestMapping(method = RequestMethod.GET, value = "/mgmPage")
     public String mgmPage(Model model, HttpServletRequest request, HttpServletResponse response) {
         logger.info("mgmPage");
@@ -216,7 +218,8 @@ public class MobileMGMViewController extends BCSBaseController {
             return "error";
         }
     }
-    
+
+    @WebServiceLog
     @RequestMapping(method = RequestMethod.GET, value = "/mgmRedirectPage")
     public String mgmRedirectPage(Model model, HttpServletRequest request, HttpServletResponse response) {
         logger.info("mgmRedirectPage");

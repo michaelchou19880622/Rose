@@ -14,6 +14,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -61,13 +62,15 @@ public class BCSBillingNoticeTemplateMsgController {
 	
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSBillingNoticeTemplateMsgController.class);
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/billingNoticeCreatePage")
 	public String templateMsgCreatePage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("billingNoticeCreatePage");
 		return BcsPageEnum.BillingNoticeCreatePage.toString();
 	}
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/billingNoticeListPage")
 	public String templateMsgListPage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("billingNoticeListPage");
@@ -77,7 +80,8 @@ public class BCSBillingNoticeTemplateMsgController {
 	/**
 	 * 新增與更新樣板訊息
 	 */
-	@ControllerLog(description="新增與更新樣帳務通知板訊息")
+	@WebServiceLog
+//	@ControllerLog(description="新增與更新樣帳務通知板訊息")
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/createBillingNotice", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createTemplateMsg(
@@ -285,7 +289,8 @@ public class BCSBillingNoticeTemplateMsgController {
 	/**
 	 * 取得樣板訊息
 	 */
-	@ControllerLog(description="取得帳務通知樣板訊息")
+	@WebServiceLog
+//	@ControllerLog(description="取得帳務通知樣板訊息")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getBillingNotice/{templateId}")
 	@ResponseBody
 	public ResponseEntity<?> getTemplateMsg(
@@ -310,7 +315,8 @@ public class BCSBillingNoticeTemplateMsgController {
 	/**
 	 * 取得樣板訊息列表
 	 */
-	@ControllerLog(description="取得帳務通知樣板訊息列表")
+	@WebServiceLog
+//	@ControllerLog(description="取得帳務通知樣板訊息列表")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getBillingNoticeAllList")
 	@ResponseBody
 	public ResponseEntity<?> getAllMsgList(
@@ -334,7 +340,8 @@ public class BCSBillingNoticeTemplateMsgController {
 	/**
 	 * 取得ProductionOn樣板訊息列表
 	 */
-	@ControllerLog(description="取得帳務通知ProductionOn樣板訊息列表")
+	@WebServiceLog
+//	@ControllerLog(description="取得帳務通知ProductionOn樣板訊息列表")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getBillingNoticeOnList")
 	@ResponseBody
 	public ResponseEntity<?> getOnMsgList(
@@ -358,7 +365,8 @@ public class BCSBillingNoticeTemplateMsgController {
 	/**
 	 * 取得ProductionOff樣板訊息列表
 	 */
-	@ControllerLog(description="取得帳務通知ProductionOn樣板訊息列表")
+	@WebServiceLog
+//	@ControllerLog(description="取得帳務通知ProductionOn樣板訊息列表")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getBillingNoticeOffList")
 	@ResponseBody
 	public ResponseEntity<?> getOffMsgList(
@@ -383,7 +391,8 @@ public class BCSBillingNoticeTemplateMsgController {
 	/**
 	 * 取得帳務通知成效Total
 	 */
-	@ControllerLog(description="取得帳務通知成效清單")
+	@WebServiceLog
+//	@ControllerLog(description="取得帳務通知成效清單")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getBNEffectsTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> getBNEffectsTotalPages(
@@ -410,7 +419,8 @@ public class BCSBillingNoticeTemplateMsgController {
 	/**
 	 * 取得帳務通知成效清單
 	 */
-	@ControllerLog(description="取得帳務通知成效清單")
+	@WebServiceLog
+//	@ControllerLog(description="取得帳務通知成效清單")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getBNEffectsList")
 	@ResponseBody
 	public ResponseEntity<?> getBNEffectsList(
@@ -438,7 +448,8 @@ public class BCSBillingNoticeTemplateMsgController {
 	/**
 	 * 取得帳務通知明細成效清單
 	 */
-	@ControllerLog(description="取得帳務通知成效清單")
+	@WebServiceLog
+//	@ControllerLog(description="取得帳務通知成效清單")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getBNEffectsDetailTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> getBNEffectsDetailTotalPages(
@@ -462,7 +473,8 @@ public class BCSBillingNoticeTemplateMsgController {
 	/**
 	 * 取得帳務通知明細成效清單
 	 */
-	@ControllerLog(description="取得帳務通知成效清單")
+	@WebServiceLog
+//	@ControllerLog(description="取得帳務通知成效清單")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getBNEffectsDetailList")
 	@ResponseBody
 	public ResponseEntity<?> getBNEffectsDetailList(
@@ -559,7 +571,8 @@ public class BCSBillingNoticeTemplateMsgController {
 	/** 
 	 * 刪除樣板訊息
 	 */
-	@ControllerLog(description="刪除帳務通知樣板訊息")
+	@WebServiceLog
+//	@ControllerLog(description="刪除帳務通知樣板訊息")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/admin/deleteBillingNotice/{templateId}")
 	@ResponseBody
 	public ResponseEntity<?> deleteTemplateMsg(
@@ -593,7 +606,8 @@ public class BCSBillingNoticeTemplateMsgController {
 	/** 
 	 * 取得BigSwitch
 	 */
-	@ControllerLog(description="取得大開關")
+	@WebServiceLog
+//	@ControllerLog(description="取得大開關")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getBillingNoticeBigSwitch", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> getBillingNoticeBigSwitch(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -616,7 +630,8 @@ public class BCSBillingNoticeTemplateMsgController {
 	/** 
 	 * 設置BigSwitch
 	 */
-	@ControllerLog(description="設置大開關")
+	@WebServiceLog
+//	@ControllerLog(description="設置大開關")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/setBillingNoticeBigSwitch/{OnOff}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> setBillingNoticeBigSwitch(HttpServletRequest request, HttpServletResponse response,  @PathVariable String OnOff) {
@@ -644,7 +659,8 @@ public class BCSBillingNoticeTemplateMsgController {
 	/**
      * 匯出 Push API 成效報表
      */
-	@ControllerLog(description="匯出 BN Push API 成效報表")
+	@WebServiceLog
+//	@ControllerLog(description="匯出 BN Push API 成效報表")
     @RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForBNPushApiEffects")
     @ResponseBody
     public void exportToExcelForBNPushApiEffects(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, @RequestParam String startDate, @RequestParam String endDate) {
@@ -677,7 +693,8 @@ public class BCSBillingNoticeTemplateMsgController {
 	/**
      * 匯出 Push API 成效報表
      */
-	@ControllerLog(description="匯出 BN Push API 成效報表")
+	@WebServiceLog
+//	@ControllerLog(description="匯出 BN Push API 成效報表")
     @RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForBNPushApiEffectsDetail")
     @ResponseBody
     public void exportToExcelForBNPushApiEffectsDetail(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, 

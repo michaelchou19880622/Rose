@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,6 +36,7 @@ public class AdUserSyncController {
 	/** Logger */
 	private static Logger logger = Logger.getLogger(AdUserSyncController.class);
 
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/adUserSync/{ChannelId}", 
 			consumes = MediaType.APPLICATION_JSON_VALUE + "; charset=UTF-8")
 	public ResponseEntity<?> adUserSync(@RequestBody String syncModel, @PathVariable String ChannelId, HttpServletRequest request, HttpServletResponse response) {

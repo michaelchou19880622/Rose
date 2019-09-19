@@ -131,6 +131,19 @@ public class PNPMaintainUIService {
                     "                        bcs_pnp_detail_ming as d " +
                     "                left join bcs_pnp_main_ming as m on d.pnp_main_id = m.pnp_main_id " +
                     "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
+                    "                where d.creat_time >= ?1 and d.creat_time <  dateadd(day, 1, ?2) ");
+
+            if (StringUtils.isNotBlank(account)) {
+                sb.append(String.format(" and account = '%s'", account));
+            }
+            if (StringUtils.isNotBlank(pccCode)) {
+                sb.append(String.format(" and pcc_code = '%s' ", pccCode));
+            }
+            if (StringUtils.isNotBlank(sourceSystem)) {
+                sb.append(String.format(" and source_system = '%s' ", sourceSystem));
+            }
+
+            sb.append(
                     "        ) " +
                     "        union all " +
                     "        ( " +
@@ -156,6 +169,19 @@ public class PNPMaintainUIService {
                     "                        bcs_pnp_detail_mitake as d " +
                     "                left join bcs_pnp_main_mitake as m on d.pnp_main_id = m.pnp_main_id " +
                     "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
+                    "                where d.creat_time >= ?3 and d.creat_time <  dateadd(day, 1, ?4) ");
+
+            if (StringUtils.isNotBlank(account)) {
+                sb.append(String.format(" and account = '%s'", account));
+            }
+            if (StringUtils.isNotBlank(pccCode)) {
+                sb.append(String.format(" and pcc_code = '%s' ", pccCode));
+            }
+            if (StringUtils.isNotBlank(sourceSystem)) {
+                sb.append(String.format(" and source_system = '%s' ", sourceSystem));
+            }
+
+            sb.append(
                     "        ) " +
                     "        union all " +
                     "        ( " +
@@ -181,6 +207,19 @@ public class PNPMaintainUIService {
                     "                        bcs_pnp_detail_unica as d " +
                     "                left join bcs_pnp_main_unica as m on d.pnp_main_id = m.pnp_main_id " +
                     "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
+                    "                where d.creat_time >= ?5 and d.creat_time <  dateadd(day, 1, ?6) ");
+
+            if (StringUtils.isNotBlank(account)) {
+                sb.append(String.format(" and account = '%s'", account));
+            }
+            if (StringUtils.isNotBlank(pccCode)) {
+                sb.append(String.format(" and pcc_code = '%s' ", pccCode));
+            }
+            if (StringUtils.isNotBlank(sourceSystem)) {
+                sb.append(String.format(" and source_system = '%s' ", sourceSystem));
+            }
+
+            sb.append(
                     "        ) " +
                     "        union all " +
                     "        ( " +
@@ -206,10 +245,7 @@ public class PNPMaintainUIService {
                     "                        bcs_pnp_detail_every8d as d " +
                     "                left join bcs_pnp_main_every8d as m on d.pnp_main_id = m.pnp_main_id " +
                     "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
-                    "        ) " +
-                    " ) as r1 " +
-                    " where creat_time >= ?1 " +
-                    " and creat_time <  dateadd(day, 1, ?2) ");
+                    "                where d.creat_time >= ?7 and d.creat_time <  dateadd(day, 1, ?8) ");
 
             if (StringUtils.isNotBlank(account)) {
                 sb.append(String.format(" and account = '%s'", account));
@@ -220,6 +256,10 @@ public class PNPMaintainUIService {
             if (StringUtils.isNotBlank(sourceSystem)) {
                 sb.append(String.format(" and source_system = '%s' ", sourceSystem));
             }
+
+            sb.append("        ) " +
+                    " ) as r1");
+
             boolean oracleUseDepartmentCheck = CoreConfigReader.getBoolean(CONFIG_STR.ORACLE_USE_DEPARTMENT_CHECK, true);
             logger.info("oracleUseDepartmentCheck:" + oracleUseDepartmentCheck);
             if (oracleUseDepartmentCheck) {
@@ -229,13 +269,22 @@ public class PNPMaintainUIService {
                 }
             }
 
-            sb.append(" ) as r2 where rownum >= ?3 and rownum < ?4 ");
+            sb.append(" ) as r2 where rownum >= ?9 and rownum < ?10 ");
 
             logger.info("str1: " + sb.toString());
             logger.info("rowStart:" + rowStart);
             logger.info("rowEnd:" + rowEnd);
-            Query query = entityManager.createNativeQuery(sb.toString()).setParameter(1, startDate).setParameter(2, endDate)
-                    .setParameter(3, rowStart).setParameter(4, rowEnd);
+            Query query = entityManager.createNativeQuery(sb.toString())
+                    .setParameter(1, startDate)
+                    .setParameter(2, endDate)
+                    .setParameter(3, startDate)
+                    .setParameter(4, endDate)
+                    .setParameter(5, startDate)
+                    .setParameter(6, endDate)
+                    .setParameter(7, startDate)
+                    .setParameter(8, endDate)
+                    .setParameter(9, rowStart)
+                    .setParameter(10, rowEnd);
 
             List<Object[]> list = query.getResultList();
 

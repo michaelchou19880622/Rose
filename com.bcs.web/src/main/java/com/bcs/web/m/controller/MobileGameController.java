@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -90,7 +91,7 @@ public class MobileGameController {
 					}
 				});
 	}
-
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/turntableIndexPage")
 	public String turntableIndexPage(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(value = "gameId", required = true) String gameId,
@@ -113,6 +114,7 @@ public class MobileGameController {
 		}
 	}
 
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/scratchCardIndexPage")
 	public String scratchCardIndexPage(HttpServletRequest request, HttpServletResponse response, 
 			@RequestParam(value = "gameId", required = true) String gameId, 
@@ -183,6 +185,7 @@ public class MobileGameController {
 	/**
 	 * 取得刮刮卡遊戲
 	 */
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/Game/scratchCard/{gameId}")
 	@ResponseBody
 	public ResponseEntity<?> getScratchCard(HttpServletRequest request, HttpServletResponse response,
@@ -203,6 +206,7 @@ public class MobileGameController {
 	/**
 	 * 抽一張優惠券
 	 */
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/Game/drawCoupon/{gameId}")
 	@ResponseBody
 	public ResponseEntity<?> drawCoupon(HttpServletRequest request, HttpServletResponse response,
@@ -249,6 +253,7 @@ public class MobileGameController {
 	/**
 	 * 取得獎品資訊
 	 */
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/Game/getPrizeDetail/{gameId}")
 	@ResponseBody
 	public ResponseEntity<?> getPrizeDetail(HttpServletRequest request, HttpServletResponse response,
@@ -267,6 +272,7 @@ public class MobileGameController {
 		}
 	}
 
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/Game/goScratchCardByQRcode/{gameId}")
 	public String goScratchCardByQRcode(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable String gameId, Model model) throws IOException {
@@ -293,7 +299,7 @@ public class MobileGameController {
 			return mobileUserController.indexPage(request, response, model);
 		}
 	}
-
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/Game/ScratchCard/validate")
 	public void validateTracing(HttpServletRequest request, HttpServletResponse response, Model model)
 			throws Exception {
@@ -378,7 +384,8 @@ public class MobileGameController {
 			return;
 		}
 	}
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/Game/getAnnouncementUrl")
 	public ResponseEntity<?> getAnnouncementUrl(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {

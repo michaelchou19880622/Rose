@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +82,8 @@ public class BCSCouponController extends BCSBaseController {
 	ContentRewardCardService contentRewardCardService;
 	@Autowired
 	ContentGameService contentGameService;
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/couponCreatePage")
 	public String couponCreatePage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("couponCreatePage");

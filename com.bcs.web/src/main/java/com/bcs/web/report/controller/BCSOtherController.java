@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,7 +40,8 @@ public class BCSOtherController extends BCSBaseController {
 	private MidToUidUIService midToUidUIService;
 	@Autowired
 	private ExportTextUIService exportTextUIService;
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/otherPage")
 	public String otherPage(
 			@CurrentUser CustomUser customUser,  
@@ -48,7 +50,8 @@ public class BCSOtherController extends BCSBaseController {
 		
 		return BcsPageEnum.OtherPage.toString();
 	}
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/convertingMidToUidPage")
 	public String convertingMidToUidPage(
 			@CurrentUser CustomUser customUser,  
@@ -58,6 +61,7 @@ public class BCSOtherController extends BCSBaseController {
 		return BcsPageEnum.ConvertingMidToUidPage.toString();
 	}
 
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/admin/uploadMidToUidTemp")
 	@ResponseBody
 	public ResponseEntity<?> uploadMidToUidTemp(@RequestPart MultipartFile filePart,
@@ -92,7 +96,8 @@ public class BCSOtherController extends BCSBaseController {
 			}
 		}
 	}
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/downloadMidToUid")
 	@ResponseBody
 	public void downloadMidToUid(HttpServletRequest request,HttpServletResponse response) throws Exception {

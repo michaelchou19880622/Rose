@@ -1,4 +1,4 @@
-package com.bcs.web.aop.annotation;
+package com.bcs.core.aspect.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

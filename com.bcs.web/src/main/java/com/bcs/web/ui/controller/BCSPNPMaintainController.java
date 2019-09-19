@@ -1,6 +1,5 @@
 package com.bcs.web.ui.controller;
 
-import com.bcs.core.aspect.annotation.WebServiceLog;
 import com.bcs.core.db.entity.AdminUser;
 import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
@@ -46,28 +45,24 @@ public class BCSPNPMaintainController extends BCSBaseController {
      */
     private static Logger logger = Logger.getLogger(BCSPNPMaintainController.class);
 
-    @WebServiceLog
     @GetMapping(value = "/pnpAdmin/pnpNormalAccountListPage")
     public String pnpNormalAccountListPage() {
         logger.info("pnpNormalAccountListPage");
         return BcsPageEnum.PNPNormalAccountListPage.toString();
     }
 
-    @WebServiceLog
     @GetMapping(value = "/pnpAdmin/pnpNormalAccountCreatePage")
     public String pnpNormalAccountCreatePage() {
         logger.info("pnpNormalAccountCreatePage");
         return BcsPageEnum.PNPNormalAccountCreatePage.toString();
     }
 
-    @WebServiceLog
     @GetMapping(value = "/pnpAdmin/pnpUnicaAccountListPage")
     public String pnpUnicaAccountListPage() {
         logger.info("pnpUnicaAccountListPage");
         return BcsPageEnum.PNPUnicaAccountListPage.toString();
     }
 
-    @WebServiceLog
     @GetMapping(value = "/pnpAdmin/pnpUnicaAccountCreatePage")
     public String pnpUnicaAccountCreatePage() {
         logger.info("pnpUnicaAccountCreatePage");
@@ -81,7 +76,6 @@ public class BCSPNPMaintainController extends BCSBaseController {
      * @return 員工資訊
      */
     @ResponseBody
-    @WebServiceLog
     @GetMapping("/pnpAdmin/getEmpAccountInfo")
     public ResponseEntity<?> getEmpAccountInfo(@RequestParam("id") String id) {
         try {
@@ -112,7 +106,6 @@ public class BCSPNPMaintainController extends BCSBaseController {
      * @param empId      員工ID
      * @return 員工資訊
      */
-    @WebServiceLog
     @GetMapping(value = "/pnpAdmin/getEmpAccount", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<?> getEmpAccount(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
@@ -141,7 +134,6 @@ public class BCSPNPMaintainController extends BCSBaseController {
         }
     }
 
-    @WebServiceLog
     @PostMapping(value = "/pnpAdmin/createPNPMaintainAccount", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<?> createPNPMaintainAccount(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
@@ -188,7 +180,6 @@ public class BCSPNPMaintainController extends BCSBaseController {
         }
     }
 
-    @WebServiceLog
     @DeleteMapping(value = "/pnpAdmin/deletePNPMaintainAccount")
     @ResponseBody
     public ResponseEntity<?> deletePNPMaintainAccount(HttpServletRequest request, HttpServletResponse response,
@@ -215,7 +206,6 @@ public class BCSPNPMaintainController extends BCSBaseController {
         }
     }
 
-    @WebServiceLog
     @PostMapping(value = "/pnpAdmin/getPNPMaintainAccount", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<?> getPNPMaintainAccount(
@@ -236,7 +226,6 @@ public class BCSPNPMaintainController extends BCSBaseController {
         }
     }
 
-    @WebServiceLog
     @PostMapping(value = "/pnpAdmin/getPNPMaintainAccountList", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<?> getPNPMaintainAccountList(

@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,7 +122,6 @@ public class MobileRewardCardViewController {
 	 * @param response
 	 * @return
 	 */
-	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/userRewardCardContentPage")
 	public String userRewardCardContentPage(@RequestParam(value = "referenceId", required = false) String referenceId,
 			Model model, HttpServletRequest request, HttpServletResponse response) {
@@ -146,7 +144,6 @@ public class MobileRewardCardViewController {
 	 * @param response
 	 * @return
 	 */
-	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/userRewardCardPreviewContentPage")
 	public String userRewardCardPreviewContentPage(
 			@RequestParam(value = "referenceId", required = false) String referenceId, Model model,
@@ -242,7 +239,6 @@ public class MobileRewardCardViewController {
 	 * @return
 	 * @throws IOException
 	 */
-	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/createPreviewContentRewardCard", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createPreviewContentRewardCard(@RequestBody ContentRewardCardModel contentRewardCardModel,
@@ -518,7 +514,6 @@ public class MobileRewardCardViewController {
 	 * @return
 	 * @throws IOException
 	 */
-	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/createActionUserRewardCardForGetApi", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createActionUserRewardCardForGetApi(@RequestBody ActionUserRewardCard actionUserRewardCard,
@@ -578,7 +573,6 @@ public class MobileRewardCardViewController {
 	 * @return
 	 * @throws Exception
 	 */
-	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/getMyRewardCardList")
 	@ResponseBody
 	public ResponseEntity<?> getMyRewardCardList(HttpServletRequest request, HttpServletResponse response)
@@ -610,7 +604,6 @@ public class MobileRewardCardViewController {
 		}
 	}
 
-	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/userRewardCardIndexPage")
 	public String userRewardCardIndexPage(HttpServletRequest request, HttpServletResponse response, Model model) {
 		logger.info("userRewardCardIndexPage");
@@ -630,7 +623,6 @@ public class MobileRewardCardViewController {
 		}
 	}
 
-	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/RewardCard/getPoint/{rewardCardPointId}")
 	public String getPoint(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable String rewardCardPointId, Model model) throws IOException {
@@ -656,7 +648,7 @@ public class MobileRewardCardViewController {
 			return mobileUserController.indexPage(request, response, model);
 		}
 	}
-	@WebServiceLog
+
 	@RequestMapping(method = RequestMethod.GET, value = "/RewardCard/validate")
 	public void validateTracing(HttpServletRequest request, HttpServletResponse response, Model model)
 			throws Exception {
@@ -716,7 +708,7 @@ public class MobileRewardCardViewController {
 			return;
 		}
 	}
-	@WebServiceLog
+
 	@RequestMapping(method = RequestMethod.GET, value = "/RewardCard/removeRewardCardResultAttr")
 	public void removeRewardCardResultAttr(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		logger.info("RewardCard removeRewardCardResultAttr");
@@ -744,7 +736,6 @@ public class MobileRewardCardViewController {
 	 * @return
 	 * @throws Exception 
 	 */
-	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/RewardCard/createActionUserCouponForGetApi", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createActionUserCouponForGetApi(

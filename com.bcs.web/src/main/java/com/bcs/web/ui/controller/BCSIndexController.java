@@ -1,6 +1,5 @@
 package com.bcs.web.ui.controller;
 
-import com.bcs.core.aspect.annotation.WebServiceLog;
 import com.bcs.core.db.entity.SystemLog;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.log.util.SystemLogUtil;
@@ -35,7 +34,6 @@ public class BCSIndexController extends BCSBaseController {
     @Autowired
     private MobileUserController mobileUserController;
 
-    @WebServiceLog
     @GetMapping("/login")
     public String loginPage(@CurrentUser CustomUser customUser, HttpServletRequest request, HttpServletResponse response, Model model) {
         log.info("loginPage");
@@ -54,7 +52,6 @@ public class BCSIndexController extends BCSBaseController {
         return url;
     }
 
-    @WebServiceLog
     @GetMapping("/index")
     public String indexPage(@CurrentUser CustomUser customUser, HttpServletRequest request, HttpServletResponse response, Model model) {
         log.info("indexPage");
@@ -72,7 +69,6 @@ public class BCSIndexController extends BCSBaseController {
         return url;
     }
 
-    @WebServiceLog
     @GetMapping("/doLogin")
     public String doLoginGet(HttpServletRequest request, HttpServletResponse response, Model model) {
         log.info("doLoginGet");
@@ -99,7 +95,6 @@ public class BCSIndexController extends BCSBaseController {
         return url;
     }
 
-    @WebServiceLog
     @GetMapping("/doLogout")
     public String doLogout(@CurrentUser CustomUser customUser, HttpServletRequest request, HttpServletResponse response, Model model) {
         log.info("doLogout");

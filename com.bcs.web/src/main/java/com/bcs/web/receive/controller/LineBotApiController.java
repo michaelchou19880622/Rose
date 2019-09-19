@@ -1,6 +1,5 @@
 package com.bcs.web.receive.controller;
 
-import com.bcs.core.aspect.annotation.WebServiceLog;
 import com.bcs.core.bot.akka.service.AkkaBotService;
 import com.bcs.core.enums.API_TYPE;
 import com.bcs.core.enums.CONFIG_STR;
@@ -44,7 +43,6 @@ public class LineBotApiController {
      * @param request
      * @param response
      */
-    @WebServiceLog
     @PostMapping(value = "/bot/api/receiving/{ChannelId}/{ChannelName}", consumes = MediaType.APPLICATION_JSON_VALUE + "; charset=UTF-8")
     public void lineBotApiReceiving(@RequestBody String receivingMsg, @PathVariable String ChannelId, @PathVariable String ChannelName, HttpServletRequest request, HttpServletResponse response) {
         logger.info("-------lineBotApiReceiving-------");

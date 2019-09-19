@@ -7,7 +7,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +36,7 @@ public class BCSSsoAdminController {
 	private AdminUserService adminUserService;
 	@Autowired
 	private MobileUserController mobileUserController;
-
-	@WebServiceLog
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/loginSSO")
 	public String loginSSO(HttpServletRequest request, HttpServletResponse response, 
 			Model model) throws Exception {
@@ -55,8 +53,7 @@ public class BCSSsoAdminController {
 			return BcsPageEnum.LoginSSOPage.toString();
 		}
 	}
-
-	@WebServiceLog
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/loginSSO/getusername") 
 	public ResponseEntity<?> getUsername(HttpServletRequest request, HttpServletResponse response) throws Exception {
 

@@ -14,7 +14,6 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.junit.Test;
@@ -87,7 +86,6 @@ public class MobileCouponViewController {
 				});
 	}
 
-	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/userCouponIndexPage")
 	public String userCouponIndexPage(HttpServletRequest request, HttpServletResponse response,
 			Model model) {
@@ -118,7 +116,6 @@ public class MobileCouponViewController {
 	 * @param response
 	 * @return
 	 */
-	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/userCouponContentPage")
 	public String userCouponContentPage(
 			@RequestParam(value = "referenceId", required = false) String referenceId,
@@ -144,7 +141,6 @@ public class MobileCouponViewController {
 	 * @param response
 	 * @return
 	 */
-	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/userCouponPreviewContentPage")
 	public String userCouponPreviewContentPage(
 			@RequestParam(value = "referenceId", required = false) String referenceId,
@@ -178,7 +174,6 @@ public class MobileCouponViewController {
 	 * @param response
 	 * @return
 	 */
-	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/userCouponSelectStorePage")
 	public String userCouponSelectStorePage(
 			@RequestParam(value = "referenceId", required = false) String referenceId,
@@ -260,7 +255,6 @@ public class MobileCouponViewController {
 	 * @return
 	 * @throws IOException
 	 */
-	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/createPreviewContentCoupon", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createPreviewContentCoupon(
@@ -301,7 +295,6 @@ public class MobileCouponViewController {
 	 * @return
 	 * @throws IOException
 	 */
-	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/createActionUserCouponForGetApi", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createActionUserCouponForGetApi(
@@ -320,7 +313,6 @@ public class MobileCouponViewController {
 	 * @return
 	 * @throws Exception
 	 */
-	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/getMyCouponList")
 	@ResponseBody
 	public ResponseEntity<?> getMyCouponList(HttpServletRequest request,HttpServletResponse response) throws Exception {
@@ -361,7 +353,6 @@ public class MobileCouponViewController {
 	 * @param response
 	 * @return
 	 */
-	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/sendUserInfo", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> sendUserInfo(
 			@RequestBody UserInfoModel userInfoModel, 
@@ -403,7 +394,6 @@ public class MobileCouponViewController {
 	 * @param response
 	 * @return
 	 */
-	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/getCoupon")
 	public String getCoupon(
 			@RequestParam(value = "counponId", required = true) String counponId,
@@ -430,7 +420,6 @@ public class MobileCouponViewController {
 	 * @return
 	 * @throws IOException
 	 */
-	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/createActionUserCouponForUse", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createActionUserCouponForUse(

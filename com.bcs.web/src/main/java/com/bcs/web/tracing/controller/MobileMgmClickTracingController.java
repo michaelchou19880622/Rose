@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +50,6 @@ public class MobileMgmClickTracingController extends BCSBaseController {
     /** Logger */
     private static Logger logger = Logger.getLogger(MobileMgmClickTracingController.class);
 
-    @WebServiceLog
     @RequestMapping(method = RequestMethod.GET, value = "/{tracingIdStr}")
     public String startMgmClickTracing(@PathVariable String tracingIdStr, HttpServletRequest request,
             HttpServletResponse response, Model model) throws Exception {
@@ -68,7 +66,7 @@ public class MobileMgmClickTracingController extends BCSBaseController {
             return mobileUserController.indexPage(request, response, model);
         }
     }
-    @WebServiceLog
+
     @RequestMapping(method = RequestMethod.GET, value = "/validate")
     public void validateMgmClickTracing(HttpServletRequest request, HttpServletResponse response, Model model)
             throws Exception {
@@ -168,7 +166,7 @@ public class MobileMgmClickTracingController extends BCSBaseController {
             return;
         }
     }
-    @WebServiceLog
+    
     @RequestMapping(method = RequestMethod.GET, value = "/m/{tracingIdStr}")
     public String startMgmTracing(@PathVariable String tracingIdStr, HttpServletRequest request,
             HttpServletResponse response, Model model) throws Exception {
@@ -185,7 +183,7 @@ public class MobileMgmClickTracingController extends BCSBaseController {
             return mobileUserController.indexPage(request, response, model);
         }
     }
-    @WebServiceLog
+
     @RequestMapping(method = RequestMethod.GET, value = "/m/validate")
     public void validateMgmTracing(HttpServletRequest request, HttpServletResponse response, Model model)
             throws Exception {

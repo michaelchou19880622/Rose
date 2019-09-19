@@ -3,7 +3,6 @@ package com.bcs.web.ui.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -20,7 +19,6 @@ import com.bcs.core.web.ui.controller.BCSBaseController;
 @Controller
 public class BCSErrorController extends BCSBaseController {
 
-	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/404")
 	public String go404Page(RedirectAttributes redirectAttributes,
 			HttpServletRequest request, 

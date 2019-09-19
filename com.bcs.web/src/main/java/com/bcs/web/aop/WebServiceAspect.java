@@ -1,9 +1,9 @@
-package com.bcs.core.aspect;
+package com.bcs.web.aop;
 
 
-import com.bcs.core.aspect.annotation.WebServiceLog;
 import com.bcs.core.utils.DataUtils;
 import com.bcs.core.utils.IpUtil;
+import com.bcs.web.aop.annotation.WebServiceLog;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;

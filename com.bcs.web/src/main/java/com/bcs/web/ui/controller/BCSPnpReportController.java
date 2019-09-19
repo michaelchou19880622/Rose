@@ -1,6 +1,5 @@
 package com.bcs.web.ui.controller;
 
-import com.bcs.core.aspect.annotation.WebServiceLog;
 import com.bcs.core.report.builder.ExportExcelBuilder;
 import com.bcs.core.report.service.ExportService;
 import com.bcs.core.resource.CoreConfigReader;
@@ -13,9 +12,11 @@ import com.bcs.core.web.security.CurrentUser;
 import com.bcs.core.web.security.CustomUser;
 import com.bcs.core.web.ui.controller.BCSBaseController;
 import com.bcs.core.web.ui.page.enums.BcsPageEnum;
+import com.bcs.web.aop.annotation.WebServiceLog;
 import com.bcs.web.ui.service.LoadFileUIService;
 import com.bcs.web.ui.service.PNPMaintainUIService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -53,14 +54,12 @@ public class BCSPnpReportController extends BCSBaseController {
     private PNPMaintainAccountModelService pnpMaintainAccountModelService;
 
 
-    @WebServiceLog
     @GetMapping("/pnpEmployee/pnpDetailReportPage")
     public String pnpDetailReportPage(HttpServletRequest request, HttpServletResponse response) {
         log.info("pnpDetailReportPage");
         return BcsPageEnum.PnpDetailReportPage.toString();
     }
 
-    @WebServiceLog
     @GetMapping("/pnpEmployee/getPNPDetailReport")
     @ResponseBody
     public ResponseEntity<?> getPNPDetailReport(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
@@ -86,7 +85,6 @@ public class BCSPnpReportController extends BCSBaseController {
         }
     }
 
-    @WebServiceLog
     @GetMapping(value = "/pnpEmployee/getPNPDetailReportTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public ResponseEntity<?> getPNPDetailReportTotalPages(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
@@ -177,7 +175,7 @@ public class BCSPnpReportController extends BCSBaseController {
 
             ExportService exportService = new ExportService();
             exportService.exportExcel(response, builder);
-        } catch (Exception e) {
+        }catch (Exception e){
             log.error("{}: {}", "Exception", e);
         }
     }

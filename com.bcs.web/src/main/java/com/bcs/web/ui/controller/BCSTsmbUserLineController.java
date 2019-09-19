@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.log4j.Logger;
@@ -55,12 +56,14 @@ public class BCSTsmbUserLineController extends BCSBaseController {
 	/**
 	 *  新增功能(解除綁定介面)
 	 */
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/market/adminUserBoardPage")
 	public String adminUserBoardPage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("adminUserBoardPage");
 		return BcsPageEnum.AdminUserBoardPage.toString();
 	}
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/tsmb/inquireUserLineUrl" , consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> inquireUserLineUrl(HttpServletRequest request, 
 												HttpServletResponse response , 

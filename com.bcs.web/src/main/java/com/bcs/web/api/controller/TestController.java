@@ -5,6 +5,7 @@ import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +23,8 @@ public class TestController {
     
     @Autowired
     private LineUserStatusService lineUserStatusService;
-    
+
+    @WebServiceLog
     @RequestMapping(method=RequestMethod.GET,value="/test/test11")
     @ResponseBody
     public void testPage(HttpServletRequest request) {
@@ -32,7 +34,8 @@ public class TestController {
         
         lineUserStatusService.callLineUserStatusAPI(uid, status, time);
     }
-    
+
+    @WebServiceLog
     @RequestMapping(method=RequestMethod.POST,value="/test/call11")
     @ResponseBody
     public String testCall(HttpServletRequest request) throws Exception {

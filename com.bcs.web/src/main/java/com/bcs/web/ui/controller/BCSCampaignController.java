@@ -6,6 +6,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,7 @@ public class BCSCampaignController extends BCSBaseController {
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSCampaignController.class);
 
+    @WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/campaignCreatePage")
 	public String campaignCreatePage(
 			HttpServletRequest request, 
@@ -51,12 +53,14 @@ public class BCSCampaignController extends BCSBaseController {
 		return BcsPageEnum.CampaignCreatePage.toString();
 	}
 
+    @WebServiceLog
     @RequestMapping(method = RequestMethod.GET, value = "/admin/campaignListPage")
     public String campaignListPage(HttpServletRequest request, HttpServletResponse response) {
         logger.info("campaignListPage");
         return BcsPageEnum.CampaignListPage.toString();
     }
-	
+
+    @WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/getCampaignList")
     @ResponseBody
     public ResponseEntity<?> getCampaignList(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -69,7 +73,8 @@ public class BCSCampaignController extends BCSBaseController {
         logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
-	
+
+    @WebServiceLog
 	@RequestMapping(method = RequestMethod.DELETE, value = "/admin/deleteCampaign")
     @ResponseBody
     public ResponseEntity<?> deleteCampaign(
@@ -101,7 +106,8 @@ public class BCSCampaignController extends BCSBaseController {
             }
         }
     }
-	
+
+    @WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/getCampaign")
     @ResponseBody
     public ResponseEntity<?> getCampaign(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -131,7 +137,8 @@ public class BCSCampaignController extends BCSBaseController {
             }
         }
     }
-	
+
+    @WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/admin/createCampaign", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<?> createCampaign(@RequestBody Campaign campaign,
@@ -168,7 +175,8 @@ public class BCSCampaignController extends BCSBaseController {
             }
         }
     }
-	
+
+    @WebServiceLog
 	@RequestMapping(method = RequestMethod.DELETE, value ="/admin/redesignCampaign")
     @ResponseBody
     public ResponseEntity<?> redesignCampaign(

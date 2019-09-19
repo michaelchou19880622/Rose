@@ -5,6 +5,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -30,7 +31,8 @@ public class PushApiController {
 	
 	@Autowired
 	private PNPService PNPService;
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/message/push", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<?> pushMessage(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBodyString) {
 		try {

@@ -9,6 +9,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,7 @@ public class MobileVIPNightTracingController extends BCSBaseController {
     /** Logger */
     private static Logger logger = Logger.getLogger(MobileVIPNightTracingController.class);
 
+    @WebServiceLog
     @RequestMapping(method = RequestMethod.GET, value = "/VIPNight/auth")
     public void vipNightAuth(HttpServletRequest request, HttpServletResponse response, Model model)
             throws Exception {

@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,19 +60,21 @@ public class BCSTracingController extends BCSBaseController {
 	
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSTracingController.class);
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/tracingGeneratePage")
 	public String tracingGeneratePage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("tracingGeneratePage");
 		return BcsPageEnum.TracingGeneratePage.toString();
 	}
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/tracingGenerateListPage")
 	public String tracingGenerateListPage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("tracingGenerateListPage");
 		return BcsPageEnum.TracingGenerateListPage.toString();
 	}
-	
+	@WebServiceLog
 	@ControllerLog(description="getTracingLinkList")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getTracingLinkList")
 	public ResponseEntity<?> getTracingLinkList(
@@ -147,7 +150,8 @@ public class BCSTracingController extends BCSBaseController {
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 
-	@ControllerLog(description="tracingGenerate")
+	@WebServiceLog
+//	@ControllerLog(description="tracingGenerate")
 	@RequestMapping(method = RequestMethod.POST, value ="/edit/tracingGenerate", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> tracingGenerate(
@@ -199,8 +203,9 @@ public class BCSTracingController extends BCSBaseController {
 			}
 		}
 	}
-	
-	@ControllerLog(description="getTracingLinkData")
+
+	@WebServiceLog
+//	@ControllerLog(description="getTracingLinkData")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getTracingLinkData")
 	public ResponseEntity<?> getTracingLinkData(
 			HttpServletRequest request, 

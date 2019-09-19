@@ -80,7 +80,7 @@ public class LoadFtpPnpDataTask {
 
     private ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1,
             new BasicThreadFactory.Builder()
-                    .namingPattern("FTP-Scheduled--%d")
+                    .namingPattern("PNP-FTP-Scheduled-%d")
                     .daemon(true).build()
     );
     private ScheduledFuture<?> scheduledFuture = null;

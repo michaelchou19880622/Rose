@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +69,7 @@ public class MobileTracingController extends BCSBaseController {
 	/** Logger */
 	private static Logger logger = Logger.getLogger(MobileTracingController.class);
 
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/{tracingIdStr}")
 	public String startTracing(@PathVariable String tracingIdStr, 
 			HttpServletRequest request, 
@@ -238,7 +240,8 @@ public class MobileTracingController extends BCSBaseController {
 			return linkUrl;
 		}
 	}
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/validate")
 	public void validateTracing(HttpServletRequest request, 
 			HttpServletResponse response, 

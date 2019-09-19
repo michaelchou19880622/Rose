@@ -5,6 +5,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,7 +40,8 @@ public class ConversationalCommerceController {
 	private SwitchIconService switchIconService; 
 	@Autowired
 	private LineProfileService lineProfileService;
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/pushMessage", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<?> pushMessage(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBodyString) {
 		logger.info("[pushMessage] Requestbody: " + requestBodyString);
@@ -109,7 +111,8 @@ public class ConversationalCommerceController {
 			}
 		}
 	}
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/getNickname", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<?> getNickname(HttpServletRequest request, HttpServletResponse response, @RequestParam String UID) {
 		try {

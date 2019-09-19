@@ -18,6 +18,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -110,7 +111,8 @@ public class LinePointPushApiController {
 //			System.out.println(e.toString());
 //		}
 //	}
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/linePoint/pushLinePoint", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> pushLinePoint(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
@@ -144,7 +146,8 @@ public class LinePointPushApiController {
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/linePoint/task", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<?> linePointTask(HttpServletRequest request, HttpServletResponse response, @RequestBody LinePointTaskModel linePointTaskModel) {
 		try {
@@ -223,7 +226,8 @@ public class LinePointPushApiController {
 			return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/linePoint/issue", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<?> pushLinePoint(HttpServletRequest request, HttpServletResponse response, @RequestBody LinePointDetail linePointDetail) {
 		try {
@@ -402,7 +406,7 @@ public class LinePointPushApiController {
 			return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/linePoint/cancel", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<?> cancelLinePoint(HttpServletRequest request, HttpServletResponse response, @RequestBody LinePointDetail linePointDetail) {
 		try {

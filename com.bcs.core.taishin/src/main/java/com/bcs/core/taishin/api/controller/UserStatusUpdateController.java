@@ -9,6 +9,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
@@ -55,6 +56,7 @@ public class UserStatusUpdateController {
 	/** Logger */
 	private static Logger logger = Logger.getLogger(UserStatusUpdateController.class);
 
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/userStatusUpdate/{ChannelId}", 
 			consumes = MediaType.APPLICATION_JSON_VALUE + "; charset=UTF-8")
 	public ResponseEntity<?> userStatusUpdate(@RequestBody String updateModel, @PathVariable String ChannelId, HttpServletRequest request, HttpServletResponse response) {
@@ -99,7 +101,8 @@ public class UserStatusUpdateController {
 		SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_BcsApi, LOG_TARGET_ACTION_TYPE.ACTION_BcsApi_UpdateStatus, start, 500, updateModel, "500");
 		return new ResponseEntity<>(createResult(500, error), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/admin/create", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<?> createUser(@RequestBody String requestBodyString, HttpServletRequest request, HttpServletResponse response) {
 		try {

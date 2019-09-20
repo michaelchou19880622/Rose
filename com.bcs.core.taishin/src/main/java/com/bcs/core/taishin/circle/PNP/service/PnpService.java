@@ -442,7 +442,7 @@ public class PnpService {
      * @param pnpMain      pnpMain
      * @param sendRef      sendRef
      * @param selfActorRef selfActorRef
-     * @see PnpMessageActor#onReceive 排程時間過期立即執行
+     * @see PnpMessageActor#immediatePushMessage 排程時間過期立即執行
      * @see com.bcs.core.taishin.circle.PNP.scheduler.PnpTask#execute 排程執行判斷為PNP
      */
     @SuppressWarnings("unchecked")

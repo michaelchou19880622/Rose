@@ -65,14 +65,14 @@ public class LineBotApiController {
             ReceivedModelOriginal msgs = new ReceivedModelOriginal(receivingMsg, ChannelId, ChannelName, channelSignature, API_TYPE.BOT);
 
             akkaBotService.receivingMsgs(msgs);
-            logger.debug("-------lineBotApiReceiving Success-------");
+            logger.info("-------lineBotApiReceiving Success-------");
             response.setStatus(200);
             SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_LineBotApi, LOG_TARGET_ACTION_TYPE.ACTION_Receive, start, 200, receivingMsg, "200");
             return;
         } catch (Throwable e) {
             logger.error(ErrorRecord.recordError(e));
         }
-        logger.debug("-------lineBotApiReceiving Fail-------");
+        logger.info("-------lineBotApiReceiving Fail-------");
         response.setStatus(470);
         SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_LineBotApi, LOG_TARGET_ACTION_TYPE.ACTION_Receive, start, 470, receivingMsg, "470");
         return;

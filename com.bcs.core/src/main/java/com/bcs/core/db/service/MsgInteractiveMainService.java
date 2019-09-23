@@ -91,15 +91,20 @@ public class MsgInteractiveMainService {
 	}
     
 	public MsgInteractiveMain findOne(Long iMsgId){
+		logger.info("iMsgId = " + iMsgId);
 		try {
+			logger.info("dataCache = " + dataCache);
 			MsgInteractiveMain result = dataCache.get(iMsgId);
-			if(notNull(result)){
+			logger.info("result = " + result);
+			if (notNull(result)) {
 				return result;
 			}
-		} catch (Exception e) {}
-		
+		} catch (Exception e) {
+		}
+
 		MsgInteractiveMain result = msgInteractiveMainRepository.findOne(iMsgId);
-		if(result != null){
+		logger.info("result = " + result);
+		if (result != null) {
 			dataCache.put(iMsgId, result);
 		}
 		return result;

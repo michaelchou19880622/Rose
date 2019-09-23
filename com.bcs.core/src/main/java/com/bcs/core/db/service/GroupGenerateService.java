@@ -34,7 +34,7 @@ public class GroupGenerateService {
 	
 	public Boolean checkMIDBySendGroupDetailGroupId(Long groupId, String mid) throws Exception{
 		String result = groupGenerateRepository.checkMIDBySendGroupDetailGroupId(groupId, mid);
-		logger.debug("checkMIDBySendGroupDetailGroupId:" + result);
+		logger.info("checkMIDBySendGroupDetailGroupId:" + result);
 		if(StringUtils.isBlank(result)){
 			return false;
 		}

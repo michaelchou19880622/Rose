@@ -1255,6 +1255,7 @@ public class LoadFtpPnpDataTask {
             for (PNPMaintainAccountModel accountModel : accountList) {
                 logger.info("accountModel ID :" + accountModel.getId());
             }
+            
             return null;
         } else {
             logger.error("validateWhiteList failed!!! account :" + account + " sourceSystem : " + sourceSystem + " CAN NOT FIND ANY SETTING!!");

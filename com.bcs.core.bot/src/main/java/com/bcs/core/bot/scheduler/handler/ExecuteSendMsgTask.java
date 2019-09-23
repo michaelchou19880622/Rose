@@ -33,7 +33,7 @@ public class ExecuteSendMsgTask {
 	private static Logger logger = Logger.getLogger(ExecuteSendMsgTask.class);
 
 	public void executeSendMsg(Long msgId) throws Exception{
-		logger.debug("executeSendMsg msgId ============ :" + msgId);
+		logger.info("executeSendMsg msgId ============ :" + msgId);
 
 		GroupGenerateService groupGenerateService = ApplicationContextProvider.getApplicationContext().getBean(GroupGenerateService.class);
 		SendGroupService sendGroupService = ApplicationContextProvider.getApplicationContext().getBean(SendGroupService.class);
@@ -42,15 +42,16 @@ public class ExecuteSendMsgTask {
 		MsgDetailService msgDetailService = ApplicationContextProvider.getApplicationContext().getBean(MsgDetailService.class);
 
 		MsgMain msgMain = msgMainService.findOne(msgId);
+		logger.info("executeSendMsg : msgMain = " + msgMain);
+		
 		if(msgMain != null){
 			String groupTitle = "---";
 			try{	
 				// Validate GroupId
 				SendGroup sendGroup = sendGroupService.findOne(msgMain.getGroupId());
-				if(sendGroup == null){
-						throw new BcsNoticeException("群組設定錯誤");
-				}
-				else{
+				if (sendGroup == null) {
+					throw new BcsNoticeException("群組設定錯誤");
+				} else {
 					groupTitle = sendGroup.getGroupTitle();
 				}
 				

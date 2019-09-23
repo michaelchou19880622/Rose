@@ -8,6 +8,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
+import org.jcodec.common.Tuple._1;
 
 import com.bcs.core.log.util.SystemLogUtil;
 import com.bcs.core.resource.CoreConfigReader;
@@ -18,6 +19,10 @@ public class SignatureValidationHelper {
 	private static Logger logger = Logger.getLogger(SignatureValidationHelper.class);
 	
 	public static boolean signatureValidation(String receivingMsg, String ChannelId, String channelSignature){
+		
+		logger.info("receivingMsg = " + receivingMsg);
+		logger.info("ChannelId = " + ChannelId);
+		
 		// Signature validation
 		try {
 			String signature = encode(receivingMsg, ChannelId);

@@ -18,15 +18,16 @@ import com.bcs.core.web.security.CustomUser;
  */
 public class CustomUserDetailsService implements UserDetailsService {
 
-	private static Logger logger = Logger
-			.getLogger(CustomUserDetailsService.class);
+	private static Logger logger = Logger.getLogger(CustomUserDetailsService.class);
 
 	@Autowired
 	private AdminUserService adminUserService;
 
 	@Override
-	public UserDetails loadUserByUsername(String account)
-			throws UsernameNotFoundException {
+	public UserDetails loadUserByUsername(String account) throws UsernameNotFoundException {
+
+//		Thread.currentThread().setName(name);
+
 		AdminUser adminUser = adminUserService.findByAccountIgnoreCase(account);
 
 		if (adminUser == null) {

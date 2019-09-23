@@ -89,7 +89,7 @@ public class PNPMaintainUIService {
                     "        select " +
                     "                orig_file_name, " +
                     "                proc_flow, " +
-                    "                source, " +
+                    "                proc_stage, " +
                     "                msg, " +
                     "                phone, " +
                     "                detail_schedule_time1, " +
@@ -112,7 +112,7 @@ public class PNPMaintainUIService {
                     "                select " +
                     "                        m.orig_file_name, " +
                     "                        d.proc_flow, " +
-                    "                        d.source, " +
+                    "                        d.proc_stage, " +
                     "                        msg, " +
                     "                        phone, " +
                     "                        d.detail_schedule_time as detail_schedule_time1, " +
@@ -150,7 +150,7 @@ public class PNPMaintainUIService {
                     "               select " +
                     "                        m.orig_file_name, " +
                     "                        d.proc_flow, " +
-                    "                        d.source, " +
+                    "                        d.proc_stage, " +
                     "                        msg, " +
                     "                        phone, " +
                     "                        null as detail_schedule_time1, " +
@@ -188,7 +188,7 @@ public class PNPMaintainUIService {
                     "                select " +
                     "                        m.orig_file_name, " +
                     "                        d.proc_flow, " +
-                    "                        d.source, " +
+                    "                        d.proc_stage, " +
                     "                        msg, " +
                     "                        phone, " +
                     "                        null as detail_schedule_time1, " +
@@ -226,7 +226,7 @@ public class PNPMaintainUIService {
                     "                select " +
                     "                        m.orig_file_name, " +
                     "                        d.proc_flow, " +
-                    "                        d.source, " +
+                    "                        d.proc_stage, " +
                     "                        msg, " +
                     "                        phone, " +
                     "                        null as detail_schedule_time1, " +

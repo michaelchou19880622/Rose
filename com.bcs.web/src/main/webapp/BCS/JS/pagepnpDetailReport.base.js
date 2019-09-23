@@ -155,15 +155,17 @@ $(function () {
                 }
 
                 // 2	SOURCE
-                if (valueObj[2] == '4') {
-                    resultTr.find('.deliveryPathway').html('UNICA');
-                } else if (valueObj[2] == '3') {
-                    resultTr.find('.deliveryPathway').html('明宣');
-                } else if (valueObj[2] == '2') {
-                    resultTr.find('.deliveryPathway').html('互動');
-                } else if (valueObj[2] == '1') {
-                    resultTr.find('.deliveryPathway').html('三竹');
-                }
+//                if (valueObj[2] == '4') {
+//                    resultTr.find('.deliveryPathway').html('UNICA');
+//                } else if (valueObj[2] == '3') {
+//                    resultTr.find('.deliveryPathway').html('明宣');
+//                } else if (valueObj[2] == '2') {
+//                    resultTr.find('.deliveryPathway').html('互動');
+//                } else if (valueObj[2] == '1') {
+//                    resultTr.find('.deliveryPathway').html('三竹');
+//                }
+
+                resultTr.find('.proc_stage').html(valueObj[2]);
 
                 // 3	MSG
                 resultTr.find('.pnpContent').html(valueObj[3]);

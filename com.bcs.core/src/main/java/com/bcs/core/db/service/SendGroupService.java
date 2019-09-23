@@ -147,16 +147,27 @@ public class SendGroupService {
 	
 	public Boolean checkMidExistDefaultGroup(Long groupId, String mid){
 
+		logger.info("groupId = " + groupId);
+		
+		logger.info("DEFAULT_SEND_GROUP.ALL_USER.getGroupId() = " + DEFAULT_SEND_GROUP.ALL_USER.getGroupId());
+		logger.info("DEFAULT_SEND_GROUP.BINDED_USER.getGroupId() = " + DEFAULT_SEND_GROUP.BINDED_USER.getGroupId());
+		logger.info("DEFAULT_SEND_GROUP.UNBIND_USER.getGroupId() = " + DEFAULT_SEND_GROUP.UNBIND_USER.getGroupId());
+		
+		
 		if(groupId.equals(DEFAULT_SEND_GROUP.ALL_USER.getGroupId())){
+			logger.info("@@@ 1-1");
 			return lineUserService.checkMIDAllActive(mid);
 		}
 		else if(groupId.equals(DEFAULT_SEND_GROUP.BINDED_USER.getGroupId())){
+			logger.info("@@@ 1-2");
 			return  lineUserService.checkMIDByStatus(LineUser.STATUS_BINDED, mid);
 		}
 		else if(groupId.equals(DEFAULT_SEND_GROUP.UNBIND_USER.getGroupId())){
+			logger.info("@@@ 1-3");
 			return lineUserService.checkMIDByStatus(LineUser.STATUS_UNBIND, mid);
 		}
-		
+
+		logger.info("@@@ 1-4");
 		return false;
 	}
 	

@@ -21,15 +21,24 @@ public class InteractiveOtherRoleHandler {
 	private SendGroupService sendGroupService;
 	
 	public  boolean checkMatchOtherRole(String MID, String otherRole){
+
+		logger.info("MID = " + MID);
+		logger.info("otherRole = " + otherRole);
+		
 		if(StringUtils.isNotBlank(otherRole) && otherRole.startsWith("GROUPID")){
 			try{
 				String groupIdStr = otherRole.substring("GROUPID".length());
+				logger.info("groupIdStr = " + groupIdStr);
+				
 				Long groupId = Long.parseLong(groupIdStr);
+				logger.info("groupId = " + groupId);
 				
 				if(groupId > 0){
 					return groupGenerateService.checkMIDBySendGroupDetailGroupId(groupId, MID);
 				}
-				else{
+				else{ 
+					// if groupID = -1, -2, -3 or -4, are the default send group. 
+					// Ref. DEFAULT_SEND_GROUP
 					return sendGroupService.checkMidExistDefaultGroup(groupId, MID);
 				}
 			}

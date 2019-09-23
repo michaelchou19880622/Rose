@@ -168,6 +168,7 @@ public class InteractiveService {
 			
 			List<MsgInteractiveMain> keywordList = msgInteractiveMainService.findByInteractiveTypeAndInteractiveStatus(MsgInteractiveMain.INTERACTIVE_TYPE_KEYWORD, MsgInteractiveMain.INTERACTIVE_STATUS_ACTIVE);
 			settingInteractiveMap(keywordList);
+			logger.info("keywordList = " + keywordList);
 
             List<MsgInteractiveMain> interactiveList = msgInteractiveMainService.findByInteractiveTypeAndInteractiveStatus(MsgInteractiveMain.INTERACTIVE_TYPE_INTERACTIVE, MsgInteractiveMain.INTERACTIVE_STATUS_ACTIVE);
             settingInteractiveMap(interactiveList);
@@ -323,16 +324,19 @@ public class InteractiveService {
 		
 		// MatchBlackKeyword
 		Long iMsgIdBlack = getMatchBlackKeywordMsgId(userStatus, keyword);
+		logger.info("iMsgIdBlack = " + iMsgIdBlack);
 		if(iMsgIdBlack != null){
 			return null;
 		}
 		
 		MsgInteractiveMain main = getMatchKeywordMain(userStatus, keyword, MID);
+		logger.info("main = " + main);
 		if(main == null){
 			return null;
 		}
 		
 		List<MsgDetail> details = getMsgDetails(main.getiMsgId());
+		logger.info("details = " + details);
 		
 		/* 針對活動流程判斷 */
 		if (MsgInteractiveMain.INTERACTIVE_TYPE_CAMPAIGN.equals(main.getInteractiveType())) {
@@ -392,24 +396,37 @@ public class InteractiveService {
 	 */
 	private MsgInteractiveMain getMatchKeywordMain(String userStatus, String keyword, String MID){
 
+		logger.info("getMatchKeywordMain");
+		logger.info("keywordMap = " + keywordMap);
+		
+		logger.info("userStatus = " + userStatus);
+		logger.info("keyword = " + keyword);
+		logger.info("MID = " + MID);
+		
 		synchronized (INIT_FLAG) {
-			
+
+			logger.info("indexSetting = " + indexSetting);
 			// Different Index
 			for(Long index : indexSetting){
-
+				logger.info("index = " + index);
 				Map<String, Map<String, List<Long>>> indexMap = keywordMap.get(index);
+				logger.info("indexMap = " + indexMap);
 				if(indexMap != null){
 					Map<String, List<Long>> map = indexMap.get(userStatus);
-					
+					logger.info("map = " + map);
+
 					if(StringUtils.isNotBlank(keyword)){
 						keyword = keyword.toLowerCase();
+						logger.info("keyword = " + keyword);
 						
 						if(map != null){
 							
 							// Keyword
 							List<Long> list = map.get(keyword);
+							logger.info("list = " + list);
 							if(list != null && list.size() > 0){
 								MsgInteractiveMain main = checkMatch(list, MID);
+								logger.info("main = " + main);
 								if(main != null){
 									return main;
 								}
@@ -430,29 +447,43 @@ public class InteractiveService {
 	
 	private MsgInteractiveMain checkMatch(List<Long> list, String MID){
 		Calendar calendarNow = Calendar.getInstance();
+		logger.info("calendarNow = " + calendarNow);
 		
 		List<Long> match = new ArrayList<Long>();
 
 		if(list != null && list.size() > 0){
 			for(Long iMsgId : list){
+				logger.info("iMsgId = " + iMsgId);
 				MsgInteractiveMain main = getMsgMain(iMsgId);
+				logger.info("main = " + main);
 				// Check Time
+				
+				logger.info("checkActiveTime(main, calendarNow) = " + checkActiveTime(main, calendarNow));
+				
 				if(checkActiveTime(main, calendarNow)){
+					logger.info("main.getOtherRole() = " + main.getOtherRole());
 					// Check Other Role
 					if(StringUtils.isNotBlank(main.getOtherRole())){
-						if(interactiveOtherRoleHandler.checkMatchOtherRole(MID, main.getOtherRole())){
+						
+						boolean isCheckMatchOtherRole = interactiveOtherRoleHandler.checkMatchOtherRole(MID, main.getOtherRole());
+						logger.info("isCheckMatchOtherRole = " + isCheckMatchOtherRole);
+						
+						if(isCheckMatchOtherRole){
 							match.add(iMsgId);
 						}
 					}
 					else{
 						match.add(iMsgId);
 					}
+
+					logger.info("match = " + match);
 				}
 			}
 			
 			// randomOneMsg
 			if(match != null && match.size() > 0){
 				Long iMsgId = randomOneMsg(match);
+				logger.info("iMsgId = " + iMsgId);
 				return getMsgMain(iMsgId);
 			}
 		}
@@ -497,7 +528,7 @@ public class InteractiveService {
 	 * @return
 	 */
 	private Long randomOneMsg(List<Long> list){
-		logger.debug("randomOneMsg Size:" + list.size());
+		logger.info("randomOneMsg Size:" + list.size());
 
         int index = new Random().nextInt(list.size());
         return list.get(index);

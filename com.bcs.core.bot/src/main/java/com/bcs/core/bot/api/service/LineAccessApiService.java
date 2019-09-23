@@ -189,9 +189,12 @@ public class LineAccessApiService {
 	}
 
 	public static Response<BotApiResponse> sendToLine(SendToBotModel sendToBotModel) throws Exception{
-		logger.debug("sendToLine:" + sendToBotModel);
+		logger.info("sendToBotModel:" + sendToBotModel);
+		
 		String ChannelId = sendToBotModel.getChannelId();
 		String ChannelName = sendToBotModel.getChannelName();
+		logger.info("ChannelId:" + ChannelId);
+		logger.info("ChannelName:" + ChannelName);
 		
 		if(ChannelName.equals(CONFIG_STR.InManualReplyButNotSendMsg.toString())){
 			throw new BcsNoticeException("使用者在真人客服無法推播");

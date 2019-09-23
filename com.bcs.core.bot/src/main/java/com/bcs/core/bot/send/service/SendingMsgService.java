@@ -172,11 +172,22 @@ public class SendingMsgService {
 	
 	public void sendMatchMessage(String replyToken, Long iMsgId, List<MsgDetail> details, String ChannelId, String MID, String ApiType, String targetId, int retryCount) throws Exception{
 
+		logger.info("replyToken = " + replyToken);
+		logger.info("iMsgId = " + iMsgId);
+		logger.info("details = " + details);
+		logger.info("ChannelId = " + ChannelId);
+		logger.info("MID = " + MID);
+		logger.info("ApiType = " + ApiType);
+		logger.info("targetId = " + targetId);
+		logger.info("retryCount = " + retryCount);
+		
 		if(details != null && details.size() > 0){
 
 			MsgInteractiveMain msgInteractiveMain = null;
+			
 			if(iMsgId != null){
 				msgInteractiveMain = msgInteractiveMainService.findOne(iMsgId);
+				logger.info("msgInteractiveMain = " + msgInteractiveMain);
 			}
 			
 			Map<String, String> replaceParam = null;

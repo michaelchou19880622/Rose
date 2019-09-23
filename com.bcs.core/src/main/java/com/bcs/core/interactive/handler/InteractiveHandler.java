@@ -60,8 +60,10 @@ public class InteractiveHandler {
 	}
 	
 	public Map<Long, List<MsgDetail>> checkJoinInteractive(String MID, String keyword) throws Exception{
-		logger.debug("checkJoinInteractive");
+		logger.info("checkJoinInteractive");
 		Long iMsgId = linkJoin.get(MID);
+		logger.info("iMsgId = " + iMsgId);
+		
 		if(iMsgId > 0L){
 			logger.debug("Interactive Detail Create Step 2");
 			Map<Long, List<MsgDetail>> result = new HashMap<Long, List<MsgDetail>>();

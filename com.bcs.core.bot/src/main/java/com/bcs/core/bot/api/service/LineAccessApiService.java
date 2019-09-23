@@ -124,11 +124,19 @@ public class LineAccessApiService {
 	
 	private static LineMessagingService getService(String ChannelId,String ChannelName){
 		String Channel = ChannelId + ChannelName;
+		logger.info("Channel = " + Channel);
 		
 		List<LineMessagingService> lineMessagingServices = lineMessagingServiceMap.get(Channel);
 		if(lineMessagingServices == null || lineMessagingServices.size() == 0){
 			String channelToken = CoreConfigReader.getString(ChannelId, CONFIG_STR.ChannelToken.toString(), true);
+			logger.info("channelToken = " + channelToken);
+			
+//			// Michael Test, need modify.
+//			channelToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(), "ChannelToken", true);
+//			logger.info("test channelToken = " + channelToken);
+			
 			final String serviceCode = CoreConfigReader.getString(ChannelName, CONFIG_STR.ChannelServiceCode.toString(), true);
+			logger.info("serviceCode = " + serviceCode);
 			
 			if(lineMessagingServices == null){
 				lineMessagingServices = new ArrayList<LineMessagingService>();
@@ -199,12 +207,14 @@ public class LineAccessApiService {
 		if(ChannelName.equals(CONFIG_STR.InManualReplyButNotSendMsg.toString())){
 			throw new BcsNoticeException("使用者在真人客服無法推播");
 		}
+		
 		if(SEND_TYPE.REPLY_MSG.equals(sendToBotModel.getSendType())){
 
 			Date start = new Date();
 			int status = 0;
 			
 			String postMsg = ObjectUtil.objectToJsonStr(sendToBotModel.getReplyMessage());
+			logger.info("postMsg = " + postMsg);
 			try {
 				Response<BotApiResponse> response = getService(ChannelId,ChannelName)
 				        .replyMessage(sendToBotModel.getReplyMessage())

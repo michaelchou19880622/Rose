@@ -13,6 +13,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -60,13 +61,15 @@ public class BCSPnpTemplateMsgController {
 	
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSPnpTemplateMsgController.class);
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/pnpCreatePage")
 	public String templateMsgCreatePage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("pnpCreatePage");
 		return BcsPageEnum.PnpCreatePage.toString();
 	}
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/pnpListPage")
 	public String templateMsgListPage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("pnpListPage");
@@ -76,7 +79,8 @@ public class BCSPnpTemplateMsgController {
 	/**
 	 * 新增與更新樣板訊息
 	 */
-	@ControllerLog(description="新增與更新PNP樣板訊息")
+	@WebServiceLog
+//	@ControllerLog(description="新增與更新PNP樣板訊息")
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/createPnp", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createTemplateMsg(
@@ -279,7 +283,8 @@ public class BCSPnpTemplateMsgController {
 	/**
 	 * 取得樣板訊息
 	 */
-	@ControllerLog(description="取得PNP樣板訊息")
+	@WebServiceLog
+//	@ControllerLog(description="取得PNP樣板訊息")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getPnp/{templateId}")
 	@ResponseBody
 	public ResponseEntity<?> getTemplateMsg(
@@ -304,7 +309,8 @@ public class BCSPnpTemplateMsgController {
 	/**
 	 * 取得樣板訊息列表
 	 */
-	@ControllerLog(description="取得PNP樣板訊息列表")
+	@WebServiceLog
+//	@ControllerLog(description="取得PNP樣板訊息列表")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getPnpAllList")
 	@ResponseBody
 	public ResponseEntity<?> getAllMsgList(
@@ -328,7 +334,8 @@ public class BCSPnpTemplateMsgController {
 	/**
 	 * 取得ProductionOn樣板訊息列表
 	 */
-	@ControllerLog(description="取得PNP ProductionOn樣板訊息列表")
+	@WebServiceLog
+//	@ControllerLog(description="取得PNP ProductionOn樣板訊息列表")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getPnpOnList")
 	@ResponseBody
 	public ResponseEntity<?> getOnMsgList(
@@ -352,7 +359,8 @@ public class BCSPnpTemplateMsgController {
 	/**
 	 * 取得ProductionOff樣板訊息列表
 	 */
-	@ControllerLog(description="取得PNP ProductionOff樣板訊息列表")
+	@WebServiceLog
+//	@ControllerLog(description="取得PNP ProductionOff樣板訊息列表")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getPnpOffList")
 	@ResponseBody
 	public ResponseEntity<?> getOffMsgList(
@@ -553,7 +561,8 @@ public class BCSPnpTemplateMsgController {
 	/** 
 	 * 刪除樣板訊息
 	 */
-	@ControllerLog(description="刪除PNP樣板訊息")
+	@WebServiceLog
+//	@ControllerLog(description="刪除PNP樣板訊息")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/admin/deletePnp/{templateId}")
 	@ResponseBody
 	public ResponseEntity<?> deleteTemplateMsg(

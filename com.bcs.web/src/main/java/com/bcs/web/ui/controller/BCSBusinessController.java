@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,7 @@ public class BCSBusinessController extends BCSBaseController {
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSBusinessController.class);
 
+    @WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/businessCreatePage")
 	public String businessCreatePage(
 			HttpServletRequest request, 
@@ -62,7 +64,8 @@ public class BCSBusinessController extends BCSBaseController {
 				
 		return BcsPageEnum.BusinessCreatePage.toString();
 	}
-	
+
+    @WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/admin/uploadBusinessList")
     @ResponseBody
     public ResponseEntity<?> uploadBusinessList(@RequestPart MultipartFile filePart,
@@ -95,7 +98,8 @@ public class BCSBusinessController extends BCSBaseController {
             }
         }
     }
-	
+
+    @WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/getBusinessList")
     @ResponseBody
     public ResponseEntity<?> getBusinessList(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -107,7 +111,8 @@ public class BCSBusinessController extends BCSBaseController {
         logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
-	
+
+    @WebServiceLog
 	@RequestMapping(method = RequestMethod.DELETE, value = "/admin/deleteBusiness")
     @ResponseBody
     public ResponseEntity<?> deleteBusiness(
@@ -139,7 +144,8 @@ public class BCSBusinessController extends BCSBaseController {
             }
         }
     }
-	
+
+    @WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/getBusiness")
     @ResponseBody
     public ResponseEntity<?> getBusiness(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -169,7 +175,8 @@ public class BCSBusinessController extends BCSBaseController {
             }
         }
     }
-	
+
+    @WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/admin/createBusiness", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<?> createBusiness(@RequestBody Business business,
@@ -209,7 +216,7 @@ public class BCSBusinessController extends BCSBaseController {
         }
     }
 
-
+    @WebServiceLog
     @RequestMapping(method = RequestMethod.GET, value = "/admin/businessGroupCreatePage")
     public String businessGroupCreatePage(
             HttpServletRequest request, 
@@ -219,12 +226,14 @@ public class BCSBusinessController extends BCSBaseController {
         return BcsPageEnum.BusinessGroupCreatePage.toString();
     }
 
+    @WebServiceLog
     @RequestMapping(method = RequestMethod.GET, value = "/admin/businessGroupListPage")
     public String businessGroupListPage(HttpServletRequest request, HttpServletResponse response) {
         logger.info("businessGroupListPage");
         return BcsPageEnum.BusinessGroupListPage.toString();
     }
-    
+
+    @WebServiceLog
     @RequestMapping(method = RequestMethod.GET, value = "/admin/getBusinessGroupList")
     @ResponseBody
     public ResponseEntity<?> getBusinessGroupList(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -235,7 +244,8 @@ public class BCSBusinessController extends BCSBaseController {
         logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
-    
+
+    @WebServiceLog
     @RequestMapping(method = RequestMethod.DELETE, value = "/admin/deleteBusinessGroup")
     @ResponseBody
     public ResponseEntity<?> deleteBusinessGroup(
@@ -267,7 +277,8 @@ public class BCSBusinessController extends BCSBaseController {
             }
         }
     }
-    
+
+    @WebServiceLog
     @RequestMapping(method = RequestMethod.GET, value = "/admin/getBusinessGroup")
     @ResponseBody
     public ResponseEntity<?> getBusinessGroup(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -297,7 +308,8 @@ public class BCSBusinessController extends BCSBaseController {
             }
         }
     }
-    
+
+    @WebServiceLog
     @RequestMapping(method = RequestMethod.POST, value = "/admin/createBusinessGroup", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<?> createBusinessGroup(@RequestBody BusinessGroup businessGroup,

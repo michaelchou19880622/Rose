@@ -1,9 +1,9 @@
-package com.bcs.web.aop;
+package com.bcs.core.aspect;
 
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import com.bcs.core.utils.DataUtils;
 import com.bcs.core.utils.IpUtil;
-import com.bcs.web.aop.annotation.WebServiceLog;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -36,7 +36,7 @@ public class WebServiceAspect {
     /**
      * Use Annotation On Controller Method
      */
-    private static final String userAnnotationPoint = "@annotation(com.bcs.web.aop.annotation.WebServiceLog)";
+    private static final String userAnnotationPoint = "@annotation(com.bcs.core.aspect.annotation.WebServiceLog)";
 
 
     private Long startTime;

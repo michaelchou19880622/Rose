@@ -6,6 +6,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,8 @@ public class BCSConfigController extends BCSBaseController {
 	private static Logger logger = Logger.getLogger(BCSConfigController.class);
 	@Autowired
 	private SystemConfigService systemConfigService;
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/configListPage")
 	public String configListPage(
 			@CurrentUser CustomUser customUser,  
@@ -44,7 +46,8 @@ public class BCSConfigController extends BCSBaseController {
 		
 		return BcsPageEnum.ConfigListPage.toString();
 	}
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/configCreatePage")
 	public String configCreatePage(
 			@CurrentUser CustomUser customUser,  
@@ -57,6 +60,7 @@ public class BCSConfigController extends BCSBaseController {
 	/**
 	 * 取得參數列表
 	 */
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/getConfigList")
 	@ResponseBody
 	public ResponseEntity<?> getConfigList(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -82,6 +86,7 @@ public class BCSConfigController extends BCSBaseController {
 	/** 
 	 * 刪除參數
 	 */
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.DELETE, value = "/admin/deleteConfig/{configId}")
 	@ResponseBody
 	public ResponseEntity<?> deleteConfig(
@@ -111,7 +116,8 @@ public class BCSConfigController extends BCSBaseController {
 			}	
 		}
 	}
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/getConfig")
 	@ResponseBody
 	public ResponseEntity<?> getConfig(HttpServletRequest request,HttpServletResponse response) throws Exception {
@@ -127,6 +133,7 @@ public class BCSConfigController extends BCSBaseController {
 	/**
 	 * 新增與更新圖文訊息
 	 */
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/admin/settingConfig", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> settingConfig(HttpServletRequest request, HttpServletResponse response,

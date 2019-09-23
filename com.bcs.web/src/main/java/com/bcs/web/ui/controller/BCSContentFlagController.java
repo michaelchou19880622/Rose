@@ -5,6 +5,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -47,7 +48,8 @@ public class BCSContentFlagController extends BCSBaseController {
 	 * @param response
 	 * @return
 	 */
-	@ControllerLog(description="查詢自動完成標籤列表")
+	@WebServiceLog
+//	@ControllerLog(description="查詢自動完成標籤列表")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getAutocompleteContentFlagList")
 	@ResponseBody
 	public ResponseEntity<?> getAutocompleteContentFlagList(
@@ -83,7 +85,8 @@ public class BCSContentFlagController extends BCSBaseController {
 	 * @param response
 	 * @return
 	 */
-	@ControllerLog(description="查詢指定的 referenceId、contentType 所屬的標籤")
+	@WebServiceLog
+//	@ControllerLog(description="查詢指定的 referenceId、contentType 所屬的標籤")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getContentFlagList")
 	@ResponseBody
 	public ResponseEntity<?> getContentFlagList(

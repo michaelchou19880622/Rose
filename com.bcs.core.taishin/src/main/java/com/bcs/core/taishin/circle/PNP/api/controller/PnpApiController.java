@@ -17,6 +17,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -59,7 +60,8 @@ import com.bcs.core.taishin.circle.PNP.api.model.PnpApiModel;
 @RequestMapping("/api")
 public class PnpApiController {
 	private static Logger logger = Logger.getLogger(PnpApiController.class);
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/pnp/push", 
 			consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<?> pushLinePoint(HttpServletRequest request, HttpServletResponse response, @RequestBody PnpApiModel pnpApiModel) {

@@ -16,7 +16,7 @@ $(function(){
 	var template = "";
 	var PNPContent = "";
 	
-	
+	var pathWayIndex = "";
 	// ---- Import Data ----
 	// initialize Page
 	var initPage = function(){
@@ -77,13 +77,19 @@ $(function(){
     			// Pop data
     			template = response.template;
     			PNPContent = response.pnpContent;
-    			if(response.pathway == '3'){
-    				pathway = 'BC-&gt;PNP-&gt;SMS';
-    			}else if(response.pathway == '2'){
-    				pathway = 'BC-&gt;SMS';
-    			}else if(pathway == '1'){
-    				pathway = 'BC';
-    			}
+                if (response.pathway == '3') {
+                    pathway = 'BC-&gt;PNP-&gt;SMS';
+                    $('#pathwayList').get(0).selectedIndex=1;
+                } else if (response.pathway == '2') {
+                    pathway = 'BC-&gt;SMS';
+                    $('#pathwayList').get(0).selectedIndex=2;
+                } else if (pathway == '1') {
+                    pathway = 'BC';
+                    $('#pathwayList').get(0).selectedIndex=3;
+                }
+
+                $('#templateList').get(0).selectedIndex=1;
+
     			
     			$('.popTr').remove();
     			var popTr = originalPopTr.clone(true);
@@ -108,9 +114,9 @@ $(function(){
 	// add option
 	var appendOption = function(listName, value, text){
 		var opt = document.createElement('option');
-		var list = document.getElementById(listName);
 		opt.value = value;
-		opt.innerHTML = text;
+        opt.innerHTML = text;
+		var list = document.getElementById(listName);
 		list.appendChild(opt);
 	};
 	
@@ -129,7 +135,7 @@ $(function(){
             }).success(function (response) {
                 console.info("response:", response);
 
-                $('#account').val(response.account);
+//                $('#account').val(response.account);
                 $('#employeeId').val(response.employeeId);
                 $('#departmentId').val(response.departmentId);
                 $('#divisionName').val(response.divisionName);

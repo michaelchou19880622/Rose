@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,8 @@ public class MobileUserController {
 	
 	/** Logger */
 	private static Logger logger = Logger.getLogger(MobileUserController.class);
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/goIndex")
 	public void goIndex(HttpServletRequest request, HttpServletResponse response) throws IOException{
 		logger.info("goIndex");
@@ -145,7 +147,8 @@ public class MobileUserController {
 			return;
 //		}
 	}
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/index")
 	public String indexPage(HttpServletRequest request, 
 			HttpServletResponse response,

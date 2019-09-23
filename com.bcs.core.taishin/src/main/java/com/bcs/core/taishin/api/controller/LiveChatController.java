@@ -7,6 +7,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -63,6 +64,7 @@ public class LiveChatController {
 	@Autowired
 	private LiveChatApiService liveChatApiService;
 
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/replyMessage", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<?> ReplyMessage(HttpServletRequest request, HttpServletResponse response, @RequestBody LiveChatReplyModel receivedMessage) {
 		try {
@@ -113,7 +115,8 @@ public class LiveChatController {
 			}
 		}
 	}
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/notice/chat/availible/{hour}", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<?> noticeChatAvailible(HttpServletRequest request, HttpServletResponse response, @RequestBody LiveChatUserModel liveChatUser, @PathVariable Long hour) {
 		try {
@@ -184,6 +187,7 @@ public class LiveChatController {
 		}
 	}
 
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/notice/chat/close", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<?> noticeChatClose(HttpServletRequest request, HttpServletResponse response, @RequestBody LiveChatUserModel liveChatUser) {
 		try {
@@ -260,6 +264,7 @@ public class LiveChatController {
 	/*
 	 * 取得使用者與智能客服的對話紀錄
 	 */
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/getChatLogs")
 	public ResponseEntity<?> getChatLog(HttpServletRequest request, HttpServletResponse response,	
 			@RequestParam(value = "uid", required = true) String uid, 

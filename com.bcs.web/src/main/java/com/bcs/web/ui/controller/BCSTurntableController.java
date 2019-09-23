@@ -6,6 +6,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bcs.core.aspect.annotation.WebServiceLog;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -42,7 +43,8 @@ public class BCSTurntableController {
 	
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSTurntableController.class);
-	
+
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/gameCreatePage/turntable")
 	public String TurntableCreatePage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("turntableCreatePage");
@@ -52,6 +54,7 @@ public class BCSTurntableController {
 	/**
 	 * 新增與更新轉盤遊戲
 	 */
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/createGame/turntable", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createGame(HttpServletRequest request, HttpServletResponse response,
@@ -73,6 +76,7 @@ public class BCSTurntableController {
 	/**
 	 * 取得轉盤遊戲
 	 */
+	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getGame/turntable/{gameId}")
 	@ResponseBody
 	public ResponseEntity<?> getTurntable(HttpServletRequest request, HttpServletResponse response,

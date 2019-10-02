@@ -131,13 +131,19 @@ $(function() {
 		        	templateTr.find('.btn_copy').val('過期');
 		        }else{
 		        	if(o.allowToSend == true){
-		        		templateTr.find('.btn_copy').val('取消');
+		        		templateTr.find('.btn_copy').val('取消').css("background-color","red");
 		        	}else{
-		        		templateTr.find('.btn_copy').val('發送');
+		        		templateTr.find('.btn_copy').val('發送').css("background-color","blue");
 		        	}
 		        	
 		        	templateTr.find('.btn_copy').attr('linePointId', o.id);
                     templateTr.find('.btn_copy').click(btn_sendFunc);
+		        }
+		        
+		        if(bcs.user.role == 'ROLE_LINE_SEND'){
+		        	templateTr.find('.btn_copy').attr("disabled",true);
+		        }else if (bcs.user.role == 'ROLE_LINE_VERIFY' && bcs.user.account == o.modifyUser){
+		        	templateTr.find('.btn_copy').attr("disabled",true);
 		        }
 		        
 //                if (bcs.user.admin) {

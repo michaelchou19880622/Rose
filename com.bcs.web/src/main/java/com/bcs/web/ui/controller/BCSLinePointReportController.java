@@ -12,13 +12,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.HttpClientErrorException;
 
 import com.bcs.core.api.msg.MsgGenerator;
 import com.bcs.core.db.entity.AdminUser;
@@ -45,10 +52,12 @@ import com.bcs.core.db.service.MsgMainService;
 import com.bcs.core.db.service.MsgSendMainService;
 import com.bcs.core.db.service.MsgSendRecordService;
 import com.bcs.core.db.service.SendGroupService;
+import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.linepoint.db.entity.LinePointDetail;
 import com.bcs.core.linepoint.db.entity.LinePointMain;
 import com.bcs.core.linepoint.db.service.LinePointDetailService;
+import com.bcs.core.linepoint.db.service.LinePointMainService;
 import com.bcs.core.linepoint.utils.service.LinePointReportExcelService;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
@@ -56,11 +65,13 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMing;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailEvery8dRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMingRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMitakeRepository;
+import com.bcs.core.taishin.circle.db.entity.TaishinEmployee;
 import com.bcs.core.taishin.circle.db.service.OracleService;
 import com.bcs.core.taishin.service.PNPMaintainExcelService;
 import com.bcs.core.taishin.service.PnpReportExcelService;
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.utils.ObjectUtil;
+import com.bcs.core.utils.RestfulUtil;
 import com.bcs.core.web.security.CurrentUser;
 import com.bcs.core.web.security.CustomUser;
 import com.bcs.core.web.ui.controller.BCSBaseController;
@@ -88,6 +99,11 @@ public class BCSLinePointReportController extends BCSBaseController {
 	private LinePointDetailService linePointDetailService;
 	@Autowired
 	private LinePointReportExcelService linePointReportExcelService;
+	@Autowired
+	private LinePointMainService linePointMainService;
+	@Autowired
+	private OracleService oracleService;
+	
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSLinePointReportController.class);
 	
@@ -139,17 +155,8 @@ public class BCSLinePointReportController extends BCSBaseController {
 			// get result list
 			List<LinePointMain> result = new ArrayList();
 			List<LinePointMain> list = linePointUIService.getLinePointStatisticsReport(startDate, endDate, modifyUser, title, page);
-			
-			// reset service name
-			for(LinePointMain main : list) {
-				String serviceName = "BCS";
-				if(main.getSendType().equals(LinePointMain.SEND_TYPE_API)) {
-					List<LinePointDetail> details = linePointDetailService.findByLinePointMainId(main.getId());
-					serviceName = details.get(0).getServiceName();
-				}
-				main.setSendType(serviceName);
-				result.add(main);
-			}
+			//權限後拿到的資料顯示在
+			result = competence( list , customUser);
 
 			logger.info("result:" + ObjectUtil.objectToJsonStr(result));
 			return new ResponseEntity<>(result, HttpStatus.OK);
@@ -201,6 +208,96 @@ public class BCSLinePointReportController extends BCSBaseController {
 		}
 	}
 	
+	
+	@RequestMapping(method = RequestMethod.GET, value ="/edit/linePointCancelFromDetailId")
+	@ResponseBody
+	public ResponseEntity<?> linePointCancelFromDetailId(
+							HttpServletRequest request, 
+							HttpServletResponse response,
+							@CurrentUser CustomUser customUser,
+							@RequestParam(value = "detailId", required=false) Long detailId
+			) throws IOException, BcsNoticeException {
+		logger.info("[linePointCancelFromDetailId]");
+		logger.info(" detailId : " + detailId);
+		SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy/MM/dd");
+		Date current = new Date();
+		String message = customUser.getAccount() + " " +sdFormat.format(current) + " " +"收回點數" ;
+		
+		//取回收回點數的那一筆資料
+		List<LinePointDetail>  result = linePointDetailService.findByDetailId(detailId);
+		LinePointDetail linePointDetail = result.get(0);
+		
+		LinePointMain linePointMain = linePointUIService.linePointMainFindOne(linePointDetail.getLinePointMainId());
+		
+		if(!"ROLE_ADMIN".equals(customUser.getRole())) {
+			if(customUser.getAccount().equals(linePointMain.getModifyUser())) {
+				throw new BcsNoticeException("只有管理者或是發送人員才可收回點數");
+			}
+		}
+		
+		try {
+			HttpHeaders headers = new HttpHeaders();
+			//String accessToken = linePointApiService.getLinePointChannelAccessToken();
+			String accessToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelToken.toString(), true);
+			headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+			headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+			
+			// 收回點數的 jsonbody
+			JSONObject requestBody = new JSONObject();
+			String url = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_MESSAGE_CANCEL_URL.toString(), true); // https://api.line.me/pointConnect/v1/issue
+			url = url.replace("{transactionId}", linePointDetail.getTranscationId());
+			String clientId = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_API_CLIENT_ID.toString(), true); // 10052
+			requestBody.put("clientId", clientId);
+			requestBody.put("memberId", linePointDetail.getUid());
+			requestBody.put("orderKey", linePointDetail.getOrderKey()+"a");  //order key 不能重複
+			requestBody.put("amount", "");
+			requestBody.put("note", message);
+			
+			HttpEntity<String> httpEntity = new HttpEntity<String>(requestBody.toString(), headers);
+			RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
+			JSONObject responseObject = null;
+			
+			try {
+				responseObject = restfulUtil.execute();
+				
+				String Id = responseObject.getString("transactionId");
+				Long Time = responseObject.getLong("transactionTime");
+				String Type = responseObject.getString("transactionType");
+				Integer cancelledAmount = responseObject.getInt("cancelledAmount");					
+				Integer remainingAmount = responseObject.getInt("remainingAmount");					
+				Integer Balance = responseObject.getInt("balance");
+
+				linePointDetail.setMessage(message);
+				linePointDetail.setStatus(LinePointDetail.STATUS_FAIL);
+				linePointDetailService.save(linePointDetail);
+				logger.info(" linePointDetail save: " + linePointDetail);
+				
+				
+				linePointMain.setSuccessfulCount(linePointMain.getSuccessfulCount() - 1L);
+				linePointMain.setFailedCount(linePointMain.getFailedCount() + 1L);
+				linePointMain.setSuccessfulAmount(linePointMain.getSuccessfulAmount() - linePointMain.getAmount());
+				linePointMainService.save(linePointMain);
+				logger.info(" linePointMain save: " +  linePointMain );
+				
+				
+			} catch (HttpClientErrorException e) {
+				logger.info("[LinePointApi] Status code: " + e.getStatusCode());
+				logger.info("[LinePointApi]  Response body: " + e.getResponseBodyAsString());
+				
+				return new ResponseEntity<>(e.getResponseBodyAsString(), HttpStatus.INTERNAL_SERVER_ERROR); //e.getStatusCode()
+			}
+			
+			return new ResponseEntity<>("", HttpStatus.OK);
+		}catch(Exception e) {
+			logger.info("e:"+e.toString());
+			if(e instanceof IllegalArgumentException)
+				return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"" + e.getMessage() + "\"}", HttpStatus.BAD_REQUEST);
+			else if(e instanceof BadPaddingException || e instanceof IllegalBlockSizeException || e instanceof IllegalArgumentException)
+				return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"invalid token\"}", HttpStatus.UNAUTHORIZED);
+			return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
+			
+		}
+	}
     @RequestMapping(method = RequestMethod.GET, value = "/edit/getLPStatisticsReportExcel")
     @ResponseBody
     public void getLPStatisticsReportExcel(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, 
@@ -242,7 +339,12 @@ public class BCSLinePointReportController extends BCSBaseController {
 	
 	        // combine & export excel file
 	        String filePathAndName = filePath + System.getProperty("file.separator") + fileName;
-	        linePointReportExcelService.exportExcel_LinePointStatisticsReport(filePathAndName, startDate, endDate, modifyUser, title);
+	        //取得權限後，才能看到的資料
+	        List<LinePointMain> mains = linePointMainService.findByTitleAndModifyUserAndDate(startDate, endDate, modifyUser, title);
+	        List<LinePointMain> result = competence( mains , customUser);
+	        logger.info("LinePointMain : " + mains);
+	        
+	        linePointReportExcelService.exportExcel_LinePointStatisticsReport(filePathAndName, result);
 	        LoadFileUIService.loadFileToResponse(filePath, fileName, response);
     	} catch (Exception e) {
     		e.printStackTrace();
@@ -281,6 +383,56 @@ public class BCSLinePointReportController extends BCSBaseController {
         }
     }  
     
+    
+    public List<LinePointMain> competence(List<LinePointMain> list , CustomUser customUser) throws Exception{
+    	List<LinePointMain> result = new ArrayList();
+    	
+    	//取得權限
+		String role = customUser.getRole();
+		String empId = customUser.getAccount();
+		// reset service name
+		for(LinePointMain main : list) {
+			String serviceName = "BCS";
+			if(main.getSendType().equals(LinePointMain.SEND_TYPE_API)) {
+				List<LinePointDetail> details = linePointDetailService.findByLinePointMainId(main.getId());
+				serviceName = details.get(0).getServiceName();
+			}
+			main.setSendType(serviceName);
+			
+			if("ROLE_ADMIN".equals(role) || "ROLE_REPORT".equals(role)) {
+				result.add(main);
+			}else if("ROLE_LINE_SEND".equals(role) || "ROLE_LINE_VERIFY".equals(role)){
+				TaishinEmployee employee = oracleService.findByEmployeeId(empId);
+				if(employee == null) {
+					employee.setDivisionName("XTREME" );
+					employee.setDepartmentId("LINEBC");
+					//employee.setDivisionName("TAISHIN");
+				}
+				
+				String Department = main.getDepartmentFullName();
+				String[] Departmentname = Department.split(" ");
+				//Departmentname[0]; 處  DIVISION_NAME
+				//Departmentname[1]; 部  DEPARTMENT_NAME
+					//Departmentname[2]; 組  GROUP_NAME
+				
+				//判斷邏輯  如果登錄者有組 那只能看到同組 顧處部組全都要一樣，沒有組有部 那就是處跟部要一樣才可以，只有處 就是處一樣即可
+				if(StringUtils.isNotBlank(employee.getGroupName())) {
+					if(Departmentname[0].equals(employee.getDivisionName()) && Departmentname[1].equals(employee.getDepartmentId()) && Departmentname[2].equals(employee.getGroupName())) {
+						result.add(main);
+					}
+				}else if (StringUtils.isNotBlank(employee.getDepartmentId())) {
+					if(Departmentname[0].equals(employee.getDivisionName()) && Departmentname[1].equals(employee.getDepartmentId())) {
+						result.add(main);
+					}
+				}else if(StringUtils.isNotBlank(employee.getDivisionName())) {
+					if(Departmentname[0].equals(employee.getDivisionName())) {
+						result.add(main);
+					}
+				}	
+			}
+		}
+    	return result;
+    }
 //	//  匯出 Push API 成效報表
 //	@ControllerLog(description="匯出Line Point Push API 成效報表")
 //    @RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForLPPushApiEffects")
@@ -342,4 +494,5 @@ public class BCSLinePointReportController extends BCSBaseController {
 //			e.printStackTrace();
 //		}
 //    }
+    
 }

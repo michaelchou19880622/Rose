@@ -23,6 +23,11 @@ public interface LinePointDetailRepository extends EntityRepository<LinePointDet
     @Transactional(timeout = 30)
     public List<LinePointDetail> findByLinePointMainId(Long linePointMainId);
     
+    @Transactional(timeout = 30)
+    public List<LinePointDetail> findByDetailId(Long detailId);
+    
+    @Transactional(timeout = 30)
+    public List<LinePointDetail> deleteByLinePointMainId(Long linePointMainId);
     
 //	public LinePointDetail findBySerialId(String serialId);
 //	

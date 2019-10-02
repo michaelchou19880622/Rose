@@ -360,13 +360,13 @@ public class SendGroupUIService {
 		
 		if(mids != null && mids.size() > 0){
 			List<String> list = new ArrayList<String>(mids);
-
+			
 			List<String> existMids = new ArrayList<String>();
 			
 			// Check MID Exist by Part
 			List<String> check = new ArrayList<String>();
 			for(int i = 1; i <= list.size(); i++){
-				
+				logger.info(" UID " + i + " : " +list.get(i-1));
 				check.add(list.get(i-1));
 				
 				if(i % 1000 == 0){
@@ -409,7 +409,7 @@ public class SendGroupUIService {
 				}
 
 				Map<String, Object> result = new HashMap<String, Object>();
-		
+				logger.info("count : " + existMids.size());
 				result.put("referenceId", referenceId);
 				result.put("count", existMids.size());
 				

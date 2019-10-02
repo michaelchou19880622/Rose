@@ -29,6 +29,10 @@ public class LinePointDetailService {
 		LinePointDetail detail = linePointDetailRepository.findOne(msgId);
 		linePointDetailRepository.delete(detail);
 	}
+	
+	public void deleteFromLinePointMainId(Long LinePointMainId){
+		linePointDetailRepository.deleteByLinePointMainId(LinePointMainId);
+	}
     
 	public void save(LinePointDetail linePoint){
 		linePointDetailRepository.save(linePoint);
@@ -52,6 +56,9 @@ public class LinePointDetailService {
 	
 	public List<LinePointDetail> findByLinePointMainId(Long linePointMainId){
 		return linePointDetailRepository.findByLinePointMainId(linePointMainId);
+	}
+	public List<LinePointDetail> findByDetailId(Long detailId){
+		return linePointDetailRepository.findByDetailId(detailId);
 	}
 	
 //	public LinePointDetail findBySerialId(String serialId){

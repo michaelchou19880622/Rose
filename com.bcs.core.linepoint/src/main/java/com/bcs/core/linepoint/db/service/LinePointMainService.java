@@ -73,7 +73,7 @@ public class LinePointMainService {
     		rowEnd = Integer.MAX_VALUE; // get all data
     	}else {
     		page--; // 1~199 => 0~198
-    		rowStart = page * 10 + 1;
+    		rowStart = page * 10 ;
     		rowEnd = rowStart + 10; // 10 as Size
     	}
     	logger.info("rowStart:"+rowStart);

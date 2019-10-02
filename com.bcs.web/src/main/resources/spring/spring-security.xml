@@ -62,11 +62,11 @@
                        access="hasRole('ROLE_ADMIN')"/>
         <!--編輯者-->
         <intercept-url pattern="/bcs/edit/**" 
-                       access="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_MARKET', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_REPORT', 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY', 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY')" />
+                       access="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_MARKET', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_REPORT', 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY')" />
 
         <!--行銷人員-->
         <intercept-url pattern="/bcs/market/**"
-                       access="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN', 'ROLE_MARKET')"/>
+                       access="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN', 'ROLE_MARKET' , 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY')"/>
 
         <!--PNP 管理者-->
         <intercept-url pattern="/bcs/pnpAdmin/**" 

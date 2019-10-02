@@ -2,14 +2,14 @@ $(function() {
 	// ---- Global Variables ----
 	// parameter data
 	var linePointMainId = null;
-	
+	var modifyUser ;
 	// result data
 	var hasData = true; // always true
 	var oringinalTr = {};
 	var originalTable = {};
 	var page = 1, totalPages = 0;
 	var firstFatch = true;
-	
+	var linePointMainId = $.urlParam("linePointMainId");
 	
 	// ---- Functions ----
     // do Split Page
@@ -44,6 +44,7 @@ $(function() {
 	// ---- Initialize Page ----
 	// get Main List
 	var getMainList = function(){
+		$('.LyMain').block($.BCS.blockMsgRead);
         $.ajax({
 			type : 'POST',
 			url : bcs.bcsContextPath + '/edit/findOneLinePointMainByMainId?linePointMainId=' + linePointMainId,
@@ -54,13 +55,15 @@ $(function() {
             $('#serialIdText').html('Campaign：' + o.serialId);
             $('#totalCountText').html('發送總點數：' + o.totalCount);
             $('#modifyUserText').html('建立人員：' + o.modifyUser);
+            modifyUser = o.modifyUser;
             $('#departmentFullNameText').html('建立人員單位：' + o.departmentFullName);
             $('#pccCodeText').html('PCC：' + o.pccCode);
+            getDataList(); // 做完再做表格  不然有時會抓不到modifyUser
         }).fail(function(response) {
             console.info(response);
             $.FailResponse(response);
         }).done(function() {
-        	$('.LyMain').unblock();
+        	
         });		
 	};
 	
@@ -68,8 +71,6 @@ $(function() {
 	var getDataList = function(){
 		$('.LyMain').block($.BCS.blockMsgRead);
 		$('.resultTr').remove();
-		
-
 		
         $.ajax({
 			type : 'GET',
@@ -113,6 +114,11 @@ $(function() {
 		        }else{
 		              resultTr.find('.message').html('-');
 		        }
+                if(o.status=='SUCCESS' && bcs.user.account == modifyUser){
+                	resultTr.find('.btn_copy').attr('detailId', o.detailId).css("background-color","red");
+                    resultTr.find('.btn_copy').click(btn_cancle);
+                }
+                
                 
                 // Append to Table
                 $('.resultTable').append(resultTr);
@@ -164,6 +170,7 @@ $(function() {
 		// clone & remove
 	    originalTr = $('.resultTr').clone(true);
 	    $('.resultTr').remove();
+	    
 	    originalTable = $('.resultTable').clone(true);
 	    
 	    // initialize time picker
@@ -172,15 +179,30 @@ $(function() {
 		$('#startDate').val(startDate);
 		$('#endDate').val(endDate);
 		
-		// start execute
-		console.info("firstFatch:", firstFatch);
-		if(firstFatch){
-			firstFatch = false;
-			//setTotal();
-			getMainList();
-			setExportButtonSource();
-		}
-		getDataList();
+		
+		getMainList();
+		setExportButtonSource();
+		//getDataList();// 这里写sleep之后需要去做的事情
+		
+	};
+	
+	var btn_cancle = function(){
+		$('.LyMain').block($.BCS.blockMsgRead);
+		var detailId = $(this).attr('detailId');
+
+		$.ajax({
+			type : "GET",
+			url : bcs.bcsContextPath + '/edit/linePointCancelFromDetailId?detailId=' + detailId
+		}).success(function(response){
+			console.info(response);
+			alert("收回成功");
+			window.location.replace(bcs.bcsContextPath + '/edit/linePointStatisticsReportDetailPage?linePointMainId=' + linePointMainId);
+		}).fail(function(response){
+			console.info(response);
+			$.FailResponse(response);
+		}).done(function(){
+			$('.LyMain').unblock();
+		});
 	};
 	
     initPage();

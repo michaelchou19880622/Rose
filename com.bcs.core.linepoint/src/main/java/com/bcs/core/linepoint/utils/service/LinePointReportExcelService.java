@@ -34,12 +34,12 @@ public class LinePointReportExcelService {
 	
 	// ---- Statistics Report ---- 
 	
-	public void exportExcel_LinePointStatisticsReport(String filePathAndName, Date startDate, Date endDate, String modifyUser, String title){
+	public void exportExcel_LinePointStatisticsReport(String filePathAndName, List<LinePointMain> result){
 		try {
 			Workbook workbook = new XSSFWorkbook();
 			FileOutputStream out = new FileOutputStream(filePathAndName);
 			
-			this.getExcel_LinePointStatisticsReport(workbook, startDate, endDate, modifyUser, title);
+			this.getExcel_LinePointStatisticsReport(workbook, result);
 			workbook.write(out);
 			out.close();
 			workbook.close();
@@ -48,15 +48,15 @@ public class LinePointReportExcelService {
 		}
 	}
 	
-	private void getExcel_LinePointStatisticsReport(Workbook workbook, Date startDate, Date endDate, String modifyUser, String title){
-		List<LinePointMain> mains = linePointMainService.findByTitleAndModifyUserAndDate(startDate, endDate, modifyUser, title);
+	private void getExcel_LinePointStatisticsReport(Workbook workbook,List<LinePointMain> linePointMain){
+		//List<LinePointMain> mains = linePointMainService.findByTitleAndModifyUserAndDate(startDate, endDate, modifyUser, title);
 
 		try {
 			Integer sheetNumber = 1;
 			Sheet sheet = this.createSheet_LinePointStatisticsReport(workbook, sheetNumber++);
 			Integer rowNumber = 1; 
 
-			for(LinePointMain main : mains) {
+			for(LinePointMain main : linePointMain) {
 				Row row = sheet.createRow(rowNumber);
 
 				// get Service Name
@@ -83,9 +83,9 @@ public class LinePointReportExcelService {
 				row.createCell(4).setCellValue(main.getPccCode());
 				row.createCell(5).setCellValue(serviceName);
 				row.createCell(6).setCellValue(main.getSerialId());
-//				row.createCell(7).setCellValue(main.getSuccessfulCount() + main.getFailedCount());
-//				row.createCell(8).setCellValue(main.getSuccessfulCount());
-//				row.createCell(9).setCellValue(main.getFailedCount());
+				row.createCell(7).setCellValue(main.getTotalCount());
+				row.createCell(8).setCellValue(main.getSuccessfulCount());
+				row.createCell(9).setCellValue(main.getFailedCount());
 				row.createCell(10).setCellValue(main.getTotalAmount());
 
 				rowNumber++;

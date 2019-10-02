@@ -121,25 +121,29 @@ public class BCSLinePointController extends BCSBaseController {
 			if(StringUtils.isBlank(empId)) {
 				throw new BcsNoticeException("empId is Null");
 			}
-			TaishinEmployee taishinEmployee = null;
-			try {
-				taishinEmployee = oracleService.findByEmployeeId(empId);		
-			}catch(Exception e){
-				throw new BcsNoticeException("The Employee Id Is Not Correct!"); 
-			}
-			if(taishinEmployee == null || StringUtils.isBlank(taishinEmployee.getDivisionName())){
-				throw new BcsNoticeException("The Employee Id Is Not Correct!");
-			}
 			
-			// get Department Full Name
-			String departmentFullName = taishinEmployee.getDivisionName() + " " + 
-				taishinEmployee.getDepartmentName() + " " + taishinEmployee.getGroupName();
-			logger.info("departmentFullName:" + departmentFullName);
+//			TaishinEmployee taishinEmployee = null;
+//			try {
+//				taishinEmployee = oracleService.findByEmployeeId(empId);		
+//			}catch(Exception e){
+//				throw new BcsNoticeException("The Employee Id Is Not Correct!"); 
+//			}
+//			if(taishinEmployee == null || StringUtils.isBlank(taishinEmployee.getDivisionName())){
+//				throw new BcsNoticeException("The Employee Id Is Not Correct!");
+//			}
+//			
+//			// get Department Full Name
+//			String departmentFullName = taishinEmployee.getDivisionName() + " " + 
+//				taishinEmployee.getDepartmentName() + " " + taishinEmployee.getGroupName();
+//			logger.info("departmentFullName:" + departmentFullName);
 			
+			
+			String departmentFullName = "XTREME LINEBC TAISHIN";
 			linePointMain.setDepartmentFullName(departmentFullName);
 			linePointMain.setModifyUser(customUser.getAccount());
 			linePointMain.setModifyTime(new Date());
 			LinePointMain result = linePointUIService.saveLinePointMain(linePointMain);
+			logger.info("linePointMain : " + result);
 			return new ResponseEntity<>(result, HttpStatus.OK);
 				
 		} catch (Exception e) {
@@ -161,6 +165,11 @@ public class BCSLinePointController extends BCSBaseController {
 			if (linePointDetail == null) {
 				throw new Exception("linePointDetail is Null");
 			}
+			
+			Long linePointMainId =  linePointDetail.get(0).getLinePointMainId();
+			logger.info("delete linePointDetail from linePointMainId :" + linePointMainId);
+			linePointDetailService.deleteFromLinePointMainId(linePointMainId);
+			logger.info("linePointDetail : " + linePointDetail);
 			List<LinePointDetail> result = linePointUIService.saveLinePointDetailListFromUI(linePointDetail, customUser.getAccount());
 			return new ResponseEntity<>(result, HttpStatus.OK);				
 		} catch (Exception e) {
@@ -242,13 +251,16 @@ public class BCSLinePointController extends BCSBaseController {
 	    	logger.info("startDate:" + startDate);
 		    logger.info("endDate:" + endDate);
 		    
-		    List<LinePointMain> result = new ArrayList<LinePointMain>();
+		    //List<LinePointMain> result = new ArrayList<LinePointMain>();
 		    List<LinePointMain> list = this.linePointUIService.linePointMainFindBcsAndDate(startDate, endDate);
-		    result.addAll(list);
+		    logger.info("list:" + list);
+		    List<LinePointMain> result = competence(list , customUser);
+		    
+//		    result.addAll(list);
 		    logger.info("result:" + ObjectUtil.objectToJsonStr(result));
 			return new ResponseEntity(result, HttpStatus.OK);
 	    } catch (Exception e) {
-	    	logger.error(ErrorRecord.recordError(e));
+	    	logger.info(ErrorRecord.recordError(e));
 	    	return new ResponseEntity(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
 	    }
 	}
@@ -279,7 +291,7 @@ public class BCSLinePointController extends BCSBaseController {
     		for(int i = 0; i < uids.size(); i++) {
     			Boolean isUnactive = lineUserService.checkMIDAllActive(uids.get(i));
     			logger.info("i="+i+", uid="+uids.get(i)+", isUnactive="+isUnactive);
-    			if(isUnactive) {
+    			if(!isUnactive) {
     				removeIndexs.add(i);
     			}
     		}
@@ -301,6 +313,7 @@ public class BCSLinePointController extends BCSBaseController {
     public ResponseEntity<?> csvToExcel(HttpServletRequest request, HttpServletResponse response, 
     		@CurrentUser CustomUser customUser, @RequestPart MultipartFile filePart) throws IOException {
         try {
+        	logger.info("---------csvToExcel----------");
     		// file path
             String filePath = CoreConfigReader.getString("file.path");
             
@@ -322,6 +335,7 @@ public class BCSLinePointController extends BCSBaseController {
 				logger.info("modifyUser:" + modifyUser);
 				
 				Map<String, Object> result = sendGroupUIService.uploadMidSendGroup(isXlsx, modifyUser, new Date(), fileName);
+				logger.info("result :" + result);
 				return new ResponseEntity<>(result, HttpStatus.OK);
 			}else{
 				throw new Exception("Upload isXlsx Null");
@@ -350,6 +364,15 @@ public class BCSLinePointController extends BCSBaseController {
 			if(linePointMain.getSendStartTime() != null) {
 				throw new BcsNoticeException("此專案已發送");
 			}
+			
+			if("ROLE_ADMIN".equals(customUser.getRole()) || "ROLE_LINE_SEND".equals(customUser.getRole())) {
+				if( (!"ROLE_ADMIN".equals(customUser.getRole())) && customUser.getAccount().equals(linePointMain.getModifyUser())) {
+					throw new BcsNoticeException("不可發送自己創專案的line Point");
+				}
+			}else {
+				throw new BcsNoticeException("沒有權限可以發送line Point");
+			}
+			
 			
 			// switch allowToSend
 			linePointMain.setAllowToSend(!linePointMain.getAllowToSend());
@@ -404,7 +427,56 @@ public class BCSLinePointController extends BCSBaseController {
 		}
 	}
 	
-
+	 public List<LinePointMain> competence(List<LinePointMain> list , CustomUser customUser) throws Exception{
+	    	List<LinePointMain> result = new ArrayList();
+	    	
+	    	//取得權限
+			String role = customUser.getRole();
+			String empId = customUser.getAccount();
+			// reset service name
+			for(LinePointMain main : list) {
+				String serviceName = "BCS";
+				if(main.getSendType().equals(LinePointMain.SEND_TYPE_API)) {
+					List<LinePointDetail> details = linePointDetailService.findByLinePointMainId(main.getId());
+					serviceName = details.get(0).getServiceName();
+				}
+				main.setSendType(serviceName);
+				
+				if("ROLE_ADMIN".equals(role) || "ROLE_REPORT".equals(role)) {
+					result.add(main);
+				}else if("ROLE_LINE_SEND".equals(role) || "ROLE_LINE_VERIFY".equals(role)){
+					
+					//TaishinEmployee employee = oracleService.findByEmployeeId(empId);
+					TaishinEmployee employee = new  TaishinEmployee();
+					logger.info("");
+					
+					employee.setDivisionName("XTREME" );
+					employee.setDepartmentId("LINEBC");
+					
+					String Department = main.getDepartmentFullName();
+					String[] Departmentname = Department.split(" ");
+					//Departmentname[0]; 處  DIVISION_NAME
+					//Departmentname[1]; 部  DEPARTMENT_NAME
+						//Departmentname[2]; 組  GROUP_NAME
+					
+					//判斷邏輯  如果登錄者有組 那只能看到同組 顧處部組全都要一樣，沒有組有部 那就是處跟部要一樣才可以，只有處 就是處一樣即可
+					if(StringUtils.isNotBlank(employee.getGroupName())) {
+						if(Departmentname[0].equals(employee.getDivisionName()) && Departmentname[1].equals(employee.getDepartmentId()) && Departmentname[2].equals(employee.getGroupName())) {
+							result.add(main);
+						}
+					}else if (StringUtils.isNotBlank(employee.getDepartmentId())) {
+						if(Departmentname[0].equals(employee.getDivisionName()) && Departmentname[1].equals(employee.getDepartmentId())) {
+							result.add(main);
+						}
+					}else if(StringUtils.isNotBlank(employee.getDivisionName())) {
+						if(Departmentname[0].equals(employee.getDivisionName())) {
+							result.add(main);
+						}
+					}	
+				}
+			}
+	    	return result;
+	    }
 	
 //	@ControllerLog(description = "Get Manual Line Point Main")
 //	@RequestMapping(method = RequestMethod.GET, value = "/edit/getManualLinePointMainList")

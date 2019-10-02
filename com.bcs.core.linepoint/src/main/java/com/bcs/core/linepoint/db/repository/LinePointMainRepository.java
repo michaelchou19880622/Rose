@@ -57,7 +57,7 @@ public interface LinePointMainRepository extends EntityRepository<LinePointMain,
     
     @Transactional(timeout = 30)
     @Query(value = "select x from LinePointMain x where "
-    	+ "x.title like ('%' + ?1 + '%') or x.modifyUser like ('%' + ?2 + '%') "
+    	+ "x.title like ('%' + ?1 + '%') and x.modifyUser like ('%' + ?2 + '%') "
     	+ "and x.modifyTime >= ?3 and x.modifyTime <= ?4 "
     	+ "order by x.modifyTime desc ")	
 	public List<LinePointMain> findByTitleAndModifyUserAndDate(String title, String modifyUser, Date startDate, Date endDate);

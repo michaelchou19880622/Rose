@@ -134,7 +134,7 @@ $(function() {
                 resultTr.find('.pccCode').html(o.pccCode);
 		        resultTr.find('.serviceName').html(o.sendType);
 		        resultTr.find('.campaignCode').html(o.serialId);
-		        resultTr.find('.sendedCount').html(o.successfulCount + o.failedCount);
+		        resultTr.find('.sendedCount').html(o.totalCount);
 		        resultTr.find('.successfulCount').html(o.successfulCount);
 		        resultTr.find('.failedCount').html(o.failedCount);
 		        resultTr.find('.totalAmount').html(o.totalAmount);

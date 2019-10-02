@@ -598,11 +598,14 @@ $(function(){
 					console.info('groupTitle', groupTitle);
 
 					var sendGroup = $('<option value=""></option>');
+					if(groupTitle.substring(0,4) == 'LPSG'){
+						sendGroup.val(key);
+						sendGroup.html(groupTitle);
+						$('.sendGroupSelect').append(sendGroup);
+					}
+					
 
-					sendGroup.val(key);
-					sendGroup.html(groupTitle);
-
-					$('.sendGroupSelect').append(sendGroup);
+					//$('.sendGroupSelect').append(sendGroup);
 				}
 
 				$('.sendGroupSelect').change(optionSelectChange_func);
@@ -760,11 +763,11 @@ $(function(){
 				$.each(response, function(i, o){
 
 					var sendGroup = $('<option value=""></option>');
-
-					sendGroup.val(i);
-					sendGroup.html(o);
-
-					$('.sendGroupSelect').append(sendGroup);
+					if(o.substring(0,4) != 'LPSG'){
+						sendGroup.val(i);
+						sendGroup.html(o);
+						$('.sendGroupSelect').append(sendGroup);
+					}
 				});
 
 				$('.sendGroupSelect').change(optionSelectChange_func);

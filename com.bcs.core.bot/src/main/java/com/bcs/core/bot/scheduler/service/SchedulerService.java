@@ -120,7 +120,7 @@ public class SchedulerService {
 	}
 	
 	public void loadScheduleFromDB() throws Exception{
-		logger.debug("loadScheduleFromDB");
+		logger.info("loadScheduleFromDB start");
 		
 		if(!CoreConfigReader.isMainSystem()){
 			return;
@@ -130,7 +130,7 @@ public class SchedulerService {
 		for(MsgMain msgMain : list){
 			String statusNotice = "";
 			try{
-				logger.debug("msgMain:" + msgMain);
+				logger.info("msgMain:" + msgMain);
 				
 				String sendType = msgMain.getSendType();
 				logger.debug("sendType:" + sendType);
@@ -177,6 +177,7 @@ public class SchedulerService {
 			msgMain.setModifyTime(new Date());
 			msgMainService.save(msgMain);
 		}
+		logger.info("loadScheduleFromDB end");
 	}
 	
 	private void saveLog(Map<String, Object> logContent, String referenceId){
@@ -317,7 +318,7 @@ public class SchedulerService {
 	 * @throws Exception
 	 */
 	public void addMsgSendSchedule(Long msgId, Date startTime) throws Exception{
-		logger.debug("addMsgSendSchedule:" + msgId);
+		logger.info("addMsgSendSchedule:" + msgId);
 
 		String detailName = createDetailName(msgId);
 

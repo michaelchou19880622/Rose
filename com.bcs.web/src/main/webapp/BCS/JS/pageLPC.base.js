@@ -2,6 +2,32 @@
  *
  */
 $(function(){
+	//--------- Initialize --------- 
+	//假如重整 就把已經填好的值放回去
+	if($.urlParam("title")){
+		$('#title').val($.urlParam("title"));
+	}
+	if($.urlParam("pccCode")){
+		$('#pccCode').val($.urlParam("pccCode"));
+	}
+	if($.urlParam("serialId")){
+		$('#serialId').val($.urlParam("serialId"));
+	}
+	if($.urlParam("sendTimeType")){
+		$('[name="sendTimeType"][value="' + $.urlParam("sendTimeType") + '"]').prop("checked",true);
+		$('[name="sendTimeType"][value="' + $.urlParam("sendTimeType") + '"]').click();
+		
+		if($.urlParam("sendTimeType") == 'DELAY'){
+			$('#delaySelect .datepicker').val($.urlParam("datepicker"));
+			//$('#delaySelect .selectHour').val($.urlParam("selectHour"));
+			$('#delaySelect .selectHour').closest('.option').find('.optionLabel').html($.urlParam("selectHour"));
+			//$('#delaySelect .selectMinuteOne').val($.urlParam("selectMinuteOne"));
+			$('#delaySelect .selectMinuteOne').closest('.option').find('.optionLabel').html($.urlParam("selectMinuteOne"));
+			//$('#delaySelect .selectMinuteTwo').val($.urlParam("selectMinuteTwo"));
+			$('#delaySelect .selectMinuteTwo').closest('.option').find('.optionLabel').html($.urlParam("selectMinuteTwo"));
+		}
+		
+	}
 	
 	// ---- Global Variables ----
 	// BCS Parameters
@@ -238,7 +264,7 @@ $(function(){
         	if(needColMaxNum == 2){ // universal
         		if(cols.length == 3){ // check universal but with points
         			alert('您選擇統一發送數量，但上傳的資料格式不符');
-        			window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
+        			windowReplace();
         			//return;
         		}else{
         			pts.push(fixAmount);
@@ -268,7 +294,7 @@ $(function(){
         console.info('colMaxNum:', colMaxNum);
         if(needColMaxNum == 3 && colMaxNum == 2){
 			alert('您上傳的資料中未包含發送數量資訊');
-			window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
+			windowReplace();
 			//return;
         }
         
@@ -318,7 +344,7 @@ $(function(){
         	var amount = parseInt($('#amount').val());
         	if(isNaN(amount) || amount <= 0){
         		alert('發送數量必須大於零');
-        		window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
+        		windowReplace();
         	}
         	sum = uids.length * amount;
         }else{
@@ -646,12 +672,12 @@ $(function(){
 			console.info('sendGroupId:', sendGroupId);
 			
 			//alert('儲存成功');
-	 		//window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
+	 		//windowReplace();
 		}).fail(function(response){
 			console.info(response);
 			$.FailResponse(response);
 			$('.LyMain').unblock();
-			window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
+			windowReplace();
 		}).done(function(){
 			var doAppendMessage = ($('.doAppendMessage')[0].checked)?false:true;
 			
@@ -886,7 +912,7 @@ $(function(){
         }).fail(function(response) {
             console.info(response);
             $.FailResponse(response);
-            window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
+            windowReplace();
             $('.LyMain').unblock();
         }).done(function(){
         	linePointDetailSave();
@@ -921,12 +947,12 @@ $(function(){
             console.info('linePointDetailSave response:', response);
             alert('儲存成功');
             $('.LyMain').unblock();
-            window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
+            windowReplace();
         }).fail(function(response) {
             console.info(response);
             $.FailResponse(response);
             $('.LyMain').unblock();
-            window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
+            windowReplace();
         }).done(function(){
 		});
     }
@@ -1298,12 +1324,35 @@ $(function(){
     sendingMsgLoadDataFunc();
     initLinePointMain();
     
-    
-//    function windowReplace(){
-//    	var title = $('.title').val;
-//    	alert(title);
-//    	window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
-//    }
+    //當匯入的UID有誤的時候會重整介面，為保留以填寫的資料，會判斷是修改還是新增的 然後放回原本的地方。
+    function windowReplace(){
+    	
+    	if($.urlParam("actionType")){
+    		window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage?linePointMainId=' +$.urlParam("linePointMainId")+
+    																				'&sendGroupId='+$.urlParam("sendGroupId")+
+    																				'&msgId='+$.urlParam("msgId")+
+    																				'&actionType='+$.urlParam("actionType"));
+    	}else{
+    		var title 			= $('#title').val();
+	    	var pccCode 		= $('#pccCode').val();
+	    	var serialId 		= $('#serialId').val();
+	    	var sendTimeType 	= $('.sendTimeType:checked').val();
+	    	var datepicker 		= $('#delaySelect .datepicker').val();
+	    	var selectHour 		= $('#delaySelect .selectHour').val();
+	    	var selectMinuteOne = $('#delaySelect .selectMinuteOne').val();
+	    	var selectMinuteTwo = $('#delaySelect .selectMinuteTwo').val();
+	    	window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage?title='				+title+
+	    																			'&pccCode='			+pccCode+
+	    																			'&serialId='		+serialId+
+	    																			'&sendTimeType='	+sendTimeType+
+	    																			'&datepicker='		+datepicker+
+	    																			'&selectHour='		+selectHour+
+	    																			'&selectMinuteOne='	+selectMinuteOne+
+	    																			'&selectMinuteTwo='	+selectMinuteTwo);
+    	}
+    	
+    	
+    }
 });
 
 

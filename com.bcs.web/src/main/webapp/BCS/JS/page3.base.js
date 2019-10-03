@@ -598,7 +598,7 @@ $(function(){
 					console.info('groupTitle', groupTitle);
 
 					var sendGroup = $('<option value=""></option>');
-					if(groupTitle.substring(0,4) == 'LPSG'){
+					if(groupTitle.substring(0,4) != 'LPSG'){
 						sendGroup.val(key);
 						sendGroup.html(groupTitle);
 						$('.sendGroupSelect').append(sendGroup);

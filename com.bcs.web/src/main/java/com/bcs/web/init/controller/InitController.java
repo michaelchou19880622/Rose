@@ -81,13 +81,12 @@ public class InitController {
         registerServer();
         loadScheduleFromDb();
         loadInteractiveMap();
-
         billingNoticeFtpServiceStartCircle();
         billingNoticeSendMsgServiceStartCircle();
         loadFtpPnpDataTaskStartCircle();
         pnpMsgServiceStartCircle();
         pnpSMSMsgServiceStartCircle();
-//        linePointschedulerServiceStartCircle(); //這個service註解掉後，預約發送可以正常發送。暫時先註解掉 - by Michael 20190919
+        linePointschedulerServiceStartCircle(); //這個service註解掉後，預約發送可以正常發送。暫時先註解掉 - by Michael 20190919
         threadStart();
         liveChatTaskServiceCheckUserStatus();
 

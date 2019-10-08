@@ -947,7 +947,7 @@ $(function(){
             console.info('linePointDetailSave response:', response);
             alert('儲存成功');
             $('.LyMain').unblock();
-            windowReplace();
+            window.location.replace(bcs.bcsContextPath + '/edit/linePointCreatePage');
         }).fail(function(response) {
             console.info(response);
             $.FailResponse(response);

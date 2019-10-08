@@ -47,6 +47,10 @@ public class LinePointMainService {
 	public List<LinePointMain> findAll(){
 		return linePointMainRepository.findAll();
 	}
+	
+	public List<LinePointMain> deleteByLinePointMainId(Long linePointMainId){
+		return linePointMainRepository.deleteById(linePointMainId);
+	}
  
 	public List<LinePointMain> findAll(String searchText){
 		return linePointMainRepository.findAll(searchText);

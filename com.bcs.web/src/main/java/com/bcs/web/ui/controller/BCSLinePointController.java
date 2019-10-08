@@ -253,14 +253,14 @@ public class BCSLinePointController extends BCSBaseController {
 		    
 		    //List<LinePointMain> result = new ArrayList<LinePointMain>();
 		    List<LinePointMain> list = this.linePointUIService.linePointMainFindBcsAndDate(startDate, endDate);
-		    logger.info("list:" + list);
+		    //logger.info("list:" + list);
 		    List<LinePointMain> result = competence(list , customUser);
 		    
 //		    result.addAll(list);
 		    logger.info("result:" + ObjectUtil.objectToJsonStr(result));
 			return new ResponseEntity(result, HttpStatus.OK);
 	    } catch (Exception e) {
-	    	logger.info(ErrorRecord.recordError(e));
+	    	logger.error(ErrorRecord.recordError(e));
 	    	return new ResponseEntity(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
 	    }
 	}
@@ -365,7 +365,7 @@ public class BCSLinePointController extends BCSBaseController {
 				throw new BcsNoticeException("此專案已發送");
 			}
 			
-			if("ROLE_ADMIN".equals(customUser.getRole()) || "ROLE_LINE_SEND".equals(customUser.getRole())) {
+			if("ROLE_ADMIN".equals(customUser.getRole()) || "ROLE_LINE_VERIFY".equals(customUser.getRole())) {
 				if( (!"ROLE_ADMIN".equals(customUser.getRole())) && customUser.getAccount().equals(linePointMain.getModifyUser())) {
 					throw new BcsNoticeException("不可發送自己創專案的line Point");
 				}
@@ -391,6 +391,7 @@ public class BCSLinePointController extends BCSBaseController {
 					linePointMain.setSendStartTime(new Date());
 					linePointMain.setStatus(LinePointMain.STATUS_COMPLETE);					
 					linePointMain.setModifyTime(new Date());
+					linePointMain.setSendUser(customUser.getAccount());
 					linePointUIService.saveLinePointMain(linePointMain);
 					
 					// get Details
@@ -427,6 +428,35 @@ public class BCSLinePointController extends BCSBaseController {
 		}
 	}
 	
+	@ControllerLog(description = "deleteLinePointMain")
+	@RequestMapping(method = RequestMethod.POST, value = "/edit/deleteLinePointMain")
+	@ResponseBody
+	public ResponseEntity<?> deleteLinePointMain(HttpServletRequest request, HttpServletResponse response, 
+			@CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
+			logger.info("[deleteLinePointMain]");
+			logger.info("linePointMainId : " + linePointMainId);
+			
+		try{
+			LinePointMain linePointMain = linePointUIService.linePointMainFindOne(linePointMainId);
+			
+			if("ROLE_LINE_SEND".equals(customUser.getRole()) || "ROLE_LINE_VERIFY".equals(customUser.getRole())) {
+				if(!customUser.getAccount().equals(linePointMain.getModifyUser())) {
+					throw new BcsNoticeException("沒有權限可以刪除此line Point專案");
+				}
+			}else if(!"ROLE_ADMIN".equals(customUser.getRole())){
+				throw new BcsNoticeException("沒有權限可以刪除此line Point專案");
+			}
+			
+			List<LinePointMain> result = linePointUIService.deleteByLinePointMainId(linePointMainId);
+			logger.info("delete LinePointMain : " + result );
+			return new ResponseEntity<>("", HttpStatus.OK);
+			
+			}catch(Exception e){
+				logger.error(ErrorRecord.recordError(e));
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			}
+	}
+	
 	 public List<LinePointMain> competence(List<LinePointMain> list , CustomUser customUser) throws Exception{
 	    	List<LinePointMain> result = new ArrayList();
 	    	
@@ -446,26 +476,28 @@ public class BCSLinePointController extends BCSBaseController {
 					result.add(main);
 				}else if("ROLE_LINE_SEND".equals(role) || "ROLE_LINE_VERIFY".equals(role)){
 					
-					//TaishinEmployee employee = oracleService.findByEmployeeId(empId);
-					TaishinEmployee employee = new  TaishinEmployee();
-					logger.info("");
+					TaishinEmployee employee = oracleService.findByEmployeeId(empId);
+//					TaishinEmployee employee = new TaishinEmployee();
+//					
+//					employee.setDivisionName("XTREME");
+//					employee.setDepartmentId("LINEBC");
+						
 					
-					employee.setDivisionName("XTREME" );
-					employee.setDepartmentId("LINEBC");
+					
 					
 					String Department = main.getDepartmentFullName();
 					String[] Departmentname = Department.split(" ");
 					//Departmentname[0]; 處  DIVISION_NAME
 					//Departmentname[1]; 部  DEPARTMENT_NAME
-						//Departmentname[2]; 組  GROUP_NAME
-					
+					//Departmentname[2]; 組  GROUP_NAME
+
 					//判斷邏輯  如果登錄者有組 那只能看到同組 顧處部組全都要一樣，沒有組有部 那就是處跟部要一樣才可以，只有處 就是處一樣即可
 					if(StringUtils.isNotBlank(employee.getGroupName())) {
-						if(Departmentname[0].equals(employee.getDivisionName()) && Departmentname[1].equals(employee.getDepartmentId()) && Departmentname[2].equals(employee.getGroupName())) {
+						if(Departmentname[0].equals(employee.getDivisionName()) && Departmentname[1].equals(employee.getDepartmentName()) && Departmentname[2].equals(employee.getGroupName())) {
 							result.add(main);
 						}
 					}else if (StringUtils.isNotBlank(employee.getDepartmentId())) {
-						if(Departmentname[0].equals(employee.getDivisionName()) && Departmentname[1].equals(employee.getDepartmentId())) {
+						if(Departmentname[0].equals(employee.getDivisionName()) && Departmentname[1].equals(employee.getDepartmentName())) {
 							result.add(main);
 						}
 					}else if(StringUtils.isNotBlank(employee.getDivisionName())) {

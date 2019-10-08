@@ -145,6 +145,24 @@ $(function() {
 		        }else if (bcs.user.role == 'ROLE_LINE_VERIFY' && bcs.user.account == o.modifyUser){
 		        	templateTr.find('.btn_copy').attr("disabled",true);
 		        }
+		        //刪除按鈕
+		        if(o.status == 'COMPLETE'){
+		        	templateTr.find('.btn_detele').remove();
+		        }else{
+		        	if(bcs.user.role == 'ROLE_LINE_SEND' && bcs.user.account == o.modifyUser){
+		        		templateTr.find('.btn_detele').val('刪除');
+		        		templateTr.find('.btn_detele').attr('linePointId', o.id);
+		        		templateTr.find('.btn_detele').click(btn_detele);
+		        	}else if(bcs.user.role == 'ROLE_LINE_VERIFY' && bcs.user.account == o.modifyUser){
+		        		templateTr.find('.btn_detele').val('刪除');
+			        	templateTr.find('.btn_detele').attr('linePointId', o.id);
+			        	templateTr.find('.btn_detele').click(btn_detele);
+		        	}else if(bcs.user.role == 'ROLE_ADMIN'){
+		        		templateTr.find('.btn_detele').val('刪除');
+		        		templateTr.find('.btn_detele').attr('linePointId', o.id);
+		        		templateTr.find('.btn_detele').click(btn_detele);
+		        	}
+		        }
 		        
 //                if (bcs.user.admin) {
 //                } else {
@@ -201,6 +219,32 @@ $(function() {
         }).done(function() {
         });
     };
+    
+    var btn_detele =  function() {
+    	var linePointMainId = $(this).attr('linePointId');
+        if(!linePointMainId){
+        	return;
+        }
+        console.info('btn_detele linePointMainId:' + linePointMainId);
+        var r = confirm("請再次確認是否要刪除？");
+        if (!r) {
+        	return;
+        }
+        
+        $.ajax({
+            type: "POST",
+            url: bcs.bcsContextPath + '/edit/deleteLinePointMain?linePointMainId=' + linePointMainId 
+        }).success(function(response) {
+            console.info(response);
+            alert("刪除成功");
+            window.location.replace(bcs.bcsContextPath + '/edit/linePointListPage');
+        }).fail(function(response) {
+            console.info(response);
+            $.FailResponse(response);
+        }).done(function() {
+        });
+        
+    }
     
 	// [查詢] Button
 	$('.query').click(function(){

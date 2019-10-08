@@ -19,6 +19,9 @@ public interface LinePointMainRepository extends EntityRepository<LinePointMain,
 	
 	@Transactional(timeout = 30)
 	public List<LinePointMain> findByStatus(String status);
+	
+	@Transactional(timeout = 30)
+	public List<LinePointMain> deleteById(Long linePointMainId);
     
     @Transactional(timeout = 30)
     @Query(value = "select x from LinePointMain x order by x.modifyTime desc")	

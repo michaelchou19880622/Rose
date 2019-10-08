@@ -230,7 +230,7 @@ public class BCSLinePointReportController extends BCSBaseController {
 		LinePointMain linePointMain = linePointUIService.linePointMainFindOne(linePointDetail.getLinePointMainId());
 		
 		if(!"ROLE_ADMIN".equals(customUser.getRole())) {
-			if(customUser.getAccount().equals(linePointMain.getModifyUser())) {
+			if(customUser.getAccount().equals(linePointMain.getSendUser())) {
 				throw new BcsNoticeException("只有管理者或是發送人員才可收回點數");
 			}
 		}
@@ -403,12 +403,14 @@ public class BCSLinePointReportController extends BCSBaseController {
 				result.add(main);
 			}else if("ROLE_LINE_SEND".equals(role) || "ROLE_LINE_VERIFY".equals(role)){
 				TaishinEmployee employee = oracleService.findByEmployeeId(empId);
-				if(employee == null) {
-					employee.setDivisionName("XTREME" );
-					employee.setDepartmentId("LINEBC");
-					//employee.setDivisionName("TAISHIN");
-				}
-				
+//				if(employee == null) {
+//					employee.setDivisionName("XTREME" );
+//					employee.setDepartmentId("LINEBC");
+//					//employee.setDivisionName("TAISHIN");
+//					logger.info("employee : " + employee);
+//					throw new BcsNoticeException("The Employee Id Is Not Correct!");
+//				}
+				logger.info("employee : " + employee);
 				String Department = main.getDepartmentFullName();
 				String[] Departmentname = Department.split(" ");
 				//Departmentname[0]; 處  DIVISION_NAME
@@ -417,11 +419,11 @@ public class BCSLinePointReportController extends BCSBaseController {
 				
 				//判斷邏輯  如果登錄者有組 那只能看到同組 顧處部組全都要一樣，沒有組有部 那就是處跟部要一樣才可以，只有處 就是處一樣即可
 				if(StringUtils.isNotBlank(employee.getGroupName())) {
-					if(Departmentname[0].equals(employee.getDivisionName()) && Departmentname[1].equals(employee.getDepartmentId()) && Departmentname[2].equals(employee.getGroupName())) {
+					if(Departmentname[0].equals(employee.getDivisionName()) && Departmentname[1].equals(employee.getDepartmentName()) && Departmentname[2].equals(employee.getGroupName())) {
 						result.add(main);
 					}
 				}else if (StringUtils.isNotBlank(employee.getDepartmentId())) {
-					if(Departmentname[0].equals(employee.getDivisionName()) && Departmentname[1].equals(employee.getDepartmentId())) {
+					if(Departmentname[0].equals(employee.getDivisionName()) && Departmentname[1].equals(employee.getDepartmentName())) {
 						result.add(main);
 					}
 				}else if(StringUtils.isNotBlank(employee.getDivisionName())) {

@@ -50,6 +50,10 @@ public class LinePointUIService {
 		return linePointMainService.getLinePointStatisticsReportTotalPages(startDate, endDate, modifyUser, title);
 	}
 	
+	public List<LinePointMain> deleteByLinePointMainId(Long linePointMainId) {
+		return linePointMainService.deleteByLinePointMainId(linePointMainId);
+	}
+	
 //	public List<LinePointMain> linePointMainFindManual(){
 //		return linePointMainService.findManual();
 //	}

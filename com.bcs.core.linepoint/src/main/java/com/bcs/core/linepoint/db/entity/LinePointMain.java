@@ -73,6 +73,8 @@ public class LinePointMain extends AbstractBcsEntity {
 		
 	@Column(name = "SEND_TIMING_TYPE", columnDefinition="varchar(50)") // IMMEDIATE/SCHEDULE
 	private String sendTimingType;
+	@Column(name = "SEND_USER", columnDefinition="varchar(50)") // IMMEDIATE/SCHEDULE
+	private String sendUser;
 	@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss") 
 	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone = "GMT+8") 
 	@Column(name = "SEND_TIMING_TIME")  // only for sendTimingType = SCHEDULE
@@ -152,6 +154,12 @@ public class LinePointMain extends AbstractBcsEntity {
 	}
 	public void setSendType(String sendType) {
 		this.sendType = sendType;
+	}
+	public String getSendUser() {
+		return sendUser;
+	}
+	public void setSendUser(String sendUser) {
+		this.sendUser = sendUser;
 	}
 	public String getPccCode() {
 		return pccCode;

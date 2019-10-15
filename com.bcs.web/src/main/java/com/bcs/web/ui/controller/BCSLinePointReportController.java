@@ -230,7 +230,9 @@ public class BCSLinePointReportController extends BCSBaseController {
 		LinePointMain linePointMain = linePointUIService.linePointMainFindOne(linePointDetail.getLinePointMainId());
 		
 		if(!"ROLE_ADMIN".equals(customUser.getRole())) {
-			if(customUser.getAccount().equals(linePointMain.getSendUser())) {
+			if(!"ROLE_LINE_VERIFY".equals(customUser.getRole())) {
+				throw new BcsNoticeException("只有管理者或是發送人員才可收回點數");
+			}else if(!customUser.getAccount().equals(linePointMain.getSendUser())) {
 				throw new BcsNoticeException("只有管理者或是發送人員才可收回點數");
 			}
 		}

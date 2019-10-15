@@ -114,7 +114,8 @@ $(function() {
 		        }else{
 		              resultTr.find('.message').html('-');
 		        }
-                if(o.status=='SUCCESS' && bcs.user.account == modifyUser){
+                
+                if(o.status=='SUCCESS'){
                 	resultTr.find('.btn_copy').attr('detailId', o.detailId).css("background-color","red");
                     resultTr.find('.btn_copy').click(btn_cancle);
                 }

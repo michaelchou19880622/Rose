@@ -1,32 +1,11 @@
 package com.bcs.core.taishin.circle.PNP.service;
 
-import akka.actor.ActorRef;
-import com.bcs.core.enums.CONFIG_STR;
-import com.bcs.core.enums.LINE_HEADER;
-import com.bcs.core.resource.CoreConfigReader;
-import com.bcs.core.taishin.circle.PNP.akka.PnpAkkaService;
-import com.bcs.core.taishin.circle.PNP.akka.handler.PnpMessageActor;
-import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpDeliveryRecord;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailEvery8d;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMing;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMitake;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailUnica;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainEvery8d;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainMitake;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainUnica;
-import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailEvery8dRepository;
-import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMingRepository;
-import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMitakeRepository;
-import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailUnicaRepository;
-import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainEvery8dRepository;
-import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainMingRepository;
-import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainMitakeRepository;
-import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainUnicaRepository;
-import com.bcs.core.utils.DataUtils;
-import com.bcs.core.utils.RestfulUtil;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -40,12 +19,31 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 
-import javax.xml.crypto.Data;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
+import com.bcs.core.enums.CONFIG_STR;
+import com.bcs.core.enums.LINE_HEADER;
+import com.bcs.core.resource.CoreConfigReader;
+import com.bcs.core.taishin.circle.PNP.akka.PnpAkkaService;
+import com.bcs.core.taishin.circle.PNP.akka.handler.PnpMessageActor;
+import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
+import com.bcs.core.taishin.circle.PNP.db.entity.PnpDeliveryRecord;
+import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
+import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailEvery8d;
+import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMing;
+import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMitake;
+import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailUnica;
+import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
+import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailEvery8dRepository;
+import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMingRepository;
+import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMitakeRepository;
+import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailUnicaRepository;
+import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainEvery8dRepository;
+import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainMingRepository;
+import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainMitakeRepository;
+import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainUnicaRepository;
+import com.bcs.core.utils.DataUtils;
+import com.bcs.core.utils.RestfulUtil;
+
+import akka.actor.ActorRef;
 
 /**
  * @author ???
@@ -539,7 +537,8 @@ public class PnpService {
         boolean sendSuccessFlag;
         JSONObject requestBody = new JSONObject();
 
-        requestBody.put("to", detail.getPhoneHash());
+//        requestBody.put("to", detail.getPhoneHash());
+        requestBody.put("to", detail.getUid());
         requestBody.put("messages", combineLineTextMessage(detail.getMsg()));
 
         /* 將 headers 跟 body 塞進 HttpEntity 中 */

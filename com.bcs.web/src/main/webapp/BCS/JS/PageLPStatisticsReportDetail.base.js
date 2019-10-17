@@ -53,7 +53,7 @@ $(function() {
             console.info('findOneLinePointMainByMainId response:', o);
             $('#titleText').html('專案名稱：' + o.title);
             $('#serialIdText').html('Campaign：' + o.serialId);
-            $('#totalCountText').html('發送總點數：' + o.totalCount);
+            $('#totalCountText').html('發送總點數：' + o.successfulAmount);
             $('#modifyUserText').html('建立人員：' + o.modifyUser);
             modifyUser = o.modifyUser;
             $('#departmentFullNameText').html('建立人員單位：' + o.departmentFullName);

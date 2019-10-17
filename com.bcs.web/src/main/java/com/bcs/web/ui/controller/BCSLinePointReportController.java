@@ -277,7 +277,7 @@ public class BCSLinePointReportController extends BCSBaseController {
 				
 				linePointMain.setSuccessfulCount(linePointMain.getSuccessfulCount() - 1L);
 				linePointMain.setFailedCount(linePointMain.getFailedCount() + 1L);
-				linePointMain.setSuccessfulAmount(linePointMain.getSuccessfulAmount() - linePointMain.getAmount());
+				linePointMain.setSuccessfulAmount(linePointMain.getSuccessfulAmount() - linePointDetail.getAmount());
 				linePointMainService.save(linePointMain);
 				logger.info(" linePointMain save: " +  linePointMain );
 				

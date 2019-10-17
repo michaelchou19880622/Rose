@@ -137,7 +137,7 @@ $(function() {
 		        resultTr.find('.sendedCount').html(o.totalCount);
 		        resultTr.find('.successfulCount').html(o.successfulCount);
 		        resultTr.find('.failedCount').html(o.failedCount);
-		        resultTr.find('.totalAmount').html(o.totalAmount);
+		        resultTr.find('.successfulAmount').html(o.successfulAmount);
 		        resultTr.find('#toDetail').attr('href', bcs.bcsContextPath + '/edit/linePointStatisticsReportDetailPage?linePointMainId=' + o.id);
                     
 		        setExportButtonSource();

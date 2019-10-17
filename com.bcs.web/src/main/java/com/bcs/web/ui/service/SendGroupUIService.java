@@ -352,9 +352,11 @@ public class SendGroupUIService {
 		}
 	}
 	
-	@Transactional(rollbackFor=Exception.class)
+	@Transactional(rollbackFor=Exception.class ,timeout = 300000)
 	public Map<String, Object> uploadMidSendGroup(InputStream inputStream, String modifyUser, Date modifyTime, String fileName) throws Exception{
-
+		long startTime = System.currentTimeMillis();
+		long endTime = 0;
+		
 		Set<String> mids = null;
 		mids = importMidFromExcel.importData(inputStream);	
 		
@@ -370,7 +372,6 @@ public class SendGroupUIService {
 				check.add(list.get(i-1));
 				
 				if(i % 1000 == 0){
-//					logger.info("check.size():" + check.size());
 					List<String> midResult = lineUserService.findMidByMidInAndActive(check);
 					if(midResult != null && midResult.size() > 0){
 						existMids.addAll(midResult);
@@ -378,7 +379,6 @@ public class SendGroupUIService {
 					check.clear();
 				}
 			}
-//			logger.info("check.size():" + check.size());
 			if(check.size() > 0){
 				List<String> midResult = lineUserService.findMidByMidInAndActive(check);
 				if(midResult != null && midResult.size() > 0){
@@ -391,21 +391,53 @@ public class SendGroupUIService {
 				
 				String referenceId = UUID.randomUUID().toString().toLowerCase();
 				
-				for(String mid : existMids){
-					UserEventSet userEventSet = new UserEventSet();
+				/* 
+				 * 增加Try-Catch，判斷Exception是否為Transaction Timeout Exception?
+				 * 如是，則判斷是否已達Retry上限次數? 是的話拋出Execption{TimeOut}，否則拋Execption{RetrySaveUserEventSet}。
+				*/
+				try {
+					curSaveIndex = 0;
 
-					userEventSet.setTarget(EVENT_TARGET_ACTION_TYPE.EVENT_SEND_GROUP.toString());
-					userEventSet.setAction(EVENT_TARGET_ACTION_TYPE.ACTION_UPLOAD_MID.toString());
+					for (int i = 0; i < existMids.size(); i++) {
+						String mid = existMids.get(i);
 
-					userEventSet.setReferenceId(referenceId);
+						UserEventSet userEventSet = new UserEventSet();
+						userEventSet.setTarget(EVENT_TARGET_ACTION_TYPE.EVENT_SEND_GROUP.toString());
+						userEventSet.setAction(EVENT_TARGET_ACTION_TYPE.ACTION_UPLOAD_MID.toString());
+						userEventSet.setReferenceId(referenceId);
+						userEventSet.setMid(mid);
+						userEventSet.setContent(fileName);
+						userEventSet.setSetTime(modifyTime);
+						userEventSet.setModifyUser(modifyUser);
+
+						logger.info("userEventSet1:" + userEventSet);
+
+						userEventSetService.save(userEventSet);
+					}
+
+					endTime = System.currentTimeMillis();
+
+					logger.info("Save [UserEventSet] - START TIME : " + startTime);
+					logger.info("Save [UserEventSet] - END TIME : " + endTime);
+					logger.info("Save [UserEventSet] - ELAPSED : " + (endTime - startTime));
+
+				}catch(Exception e) {
+					endTime = System.currentTimeMillis();
+
+					logger.info("Save [UserEventSet] - START TIME : " + startTime);
+					logger.info("Save [UserEventSet] - END TIME : " + endTime);
+					logger.info("Save [UserEventSet] - ELAPSED : " + (endTime - startTime));
 					
-					userEventSet.setMid(mid);
-					userEventSet.setContent(fileName);
-					
-					userEventSet.setSetTime(modifyTime);
-					userEventSet.setModifyUser(modifyUser);
-					
-					userEventSetService.save(userEventSet);
+					if (e.getMessage().contains("transaction timeout expired")) {
+						TransactionTimeoutRetry += 1;
+						logger.info("Save [UserEventSet] retry : " + TransactionTimeoutRetry);
+
+						if (TransactionTimeoutRetry > TRANSACTION_TIMEOUT_RETRY_MAX_TIMES) {
+							throw new Exception("TimeOut");
+						} else {
+							throw new Exception("RetrySaveUserEventSet");
+						}
+					}
 				}
 
 				Map<String, Object> result = new HashMap<String, Object>();

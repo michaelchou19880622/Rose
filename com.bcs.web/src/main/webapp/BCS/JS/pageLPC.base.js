@@ -265,7 +265,7 @@ $(function(){
         		if(cols.length == 3){ // check universal but with points
         			alert('您選擇統一發送數量，但上傳的資料格式不符');
         			windowReplace();
-        			//return;
+        			return;
         		}else{
         			pts.push(fixAmount);
         		}
@@ -299,8 +299,10 @@ $(function(){
         }
         
         // no need to check follow-age
-        if($('.sendAmountType')[1].checked){
+        //改成是否檢核加入的uid
+        if($('.doCheckFollowage')[1].checked){
         	calculateSum();
+        	return;
         }
         
         // check follow-age
@@ -350,7 +352,10 @@ $(function(){
         }else{
         	sum = 0;
             for (var i = 0; i < pts.length; i++) {
-            	sum += pts[i];
+            	if(pts[i].trim() == ''){
+            		pts[i] = 0;
+            	}
+            	sum += parseInt(pts[i], 10);
             }
         }
         
@@ -1126,16 +1131,16 @@ $(function(){
                 
 		        // get date data
 		        var currentTime = moment();
-		        var sendStartTime = moment(o.sendStartTime).format('YYYY-MM-DD HH:mm:ss');
+		        var sendTimingTime = moment(o.sendTimingTime).format('YYYY-MM-DD HH:mm:ss');
 		        console.info('currentTime:', currentTime);
-		        console.info('sendStartTime:', sendStartTime);
-		        console.info('isAfter:', currentTime.isAfter(sendStartTime));
+		        console.info('sendTimingTime:', sendTimingTime);
+		        console.info('isAfter:', currentTime.isAfter(sendTimingTime));
 		        
                 // hide Send Group Create Button
                 if(o.status == 'COMPLETE'){
                 	$('.send_group_create').hide();
                 }
-                if(o.sendTimingType == 'SCHEDULE' && currentTime.isAfter(sendStartTime)){
+                if(o.sendTimingType == 'SCHEDULE' && currentTime.isAfter(sendTimingTime)){
                 	$('.send_group_create').hide();
                 }
                 

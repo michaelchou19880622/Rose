@@ -122,23 +122,23 @@ public class BCSLinePointController extends BCSBaseController {
 				throw new BcsNoticeException("empId is Null");
 			}
 			
-			TaishinEmployee taishinEmployee = null;
-			try {
-				taishinEmployee = oracleService.findByEmployeeId(empId);		
-			}catch(Exception e){
-				throw new BcsNoticeException("The Employee Id Is Not Correct!"); 
-			}
-			if(taishinEmployee == null || StringUtils.isBlank(taishinEmployee.getDivisionName())){
-				throw new BcsNoticeException("The Employee Id Is Not Correct!");
-			}
+//			TaishinEmployee taishinEmployee = null;
+//			try {
+//				taishinEmployee = oracleService.findByEmployeeId(empId);		
+//			}catch(Exception e){
+//				throw new BcsNoticeException("The Employee Id Is Not Correct!"); 
+//			}
+//			if(taishinEmployee == null || StringUtils.isBlank(taishinEmployee.getDivisionName())){
+//				throw new BcsNoticeException("The Employee Id Is Not Correct!");
+//			}
+//			
+//			// get Department Full Name
+//			String departmentFullName = taishinEmployee.getDivisionName() + " " + 
+//				taishinEmployee.getDepartmentName() + " " + taishinEmployee.getGroupName();
+//			logger.info("departmentFullName:" + departmentFullName);
 			
-			// get Department Full Name
-			String departmentFullName = taishinEmployee.getDivisionName() + " " + 
-				taishinEmployee.getDepartmentName() + " " + taishinEmployee.getGroupName();
-			logger.info("departmentFullName:" + departmentFullName);
 			
-			
-//			String departmentFullName = "XTREME LINEBC TAISHIN";
+			String departmentFullName = "XTREME LINEBC TAISHIN";
 			linePointMain.setDepartmentFullName(departmentFullName);
 			linePointMain.setModifyUser(customUser.getAccount());
 			linePointMain.setModifyTime(new Date());
@@ -341,10 +341,24 @@ public class BCSLinePointController extends BCSBaseController {
 				throw new Exception("Upload isXlsx Null");
 			}            
         } catch (Exception e) {
+        	logger.info("uploadMidSendGroup Exception : " +  e.getMessage().toString());
+			if (e.getMessage().contains("RetrySaveUserEventSet"))
+			{
+				Map<String, Object> result = sendGroupUIService.RetrySaveUserEventSet();
+				logger.info("uploadMidSendGroupResult1:" + result);
+				
+				return new ResponseEntity<>(result, HttpStatus.OK);
+			}
+			else if (e.getMessage().contains("TimeOut")) {
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.SERVICE_UNAVAILABLE);
+			}
+			
 			logger.error(ErrorRecord.recordError(e));
+
 			if(e instanceof BcsNoticeException){
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			}else{
+			}
+			else{
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 			}
         }

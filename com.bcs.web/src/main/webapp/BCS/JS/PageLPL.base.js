@@ -96,10 +96,10 @@ $(function() {
 		        
 		        // get date data
 		        var currentTime = moment(new Date()).add(-120, 'seconds');
-		        var sendStartTime = moment(o.sendStartTime).format('YYYY-MM-DD HH:mm:ss');
+		        var sendTimingTime = moment(o.sendTimingTime).format('YYYY-MM-DD HH:mm:ss');
 		        console.info('currentTime:', currentTime);
-		        console.info('sendStartTime:', sendStartTime);
-		        console.info('isAfter:', currentTime.isAfter(sendStartTime));
+		        console.info('sendStartTime:', sendTimingTime);
+		        console.info('isAfter:', currentTime.isAfter(sendTimingTime));
 		        
 		        // set status
 		        var statusCh = '';
@@ -113,7 +113,7 @@ $(function() {
 		        	if(o.status == 'COMPLETE'){
 		        		statusCh = '已發送';
 		        	}else{
-		        		if(currentTime.isAfter(sendStartTime)){
+		        		if(currentTime.isAfter(o.sendTimingTime)){
 		        			statusCh = '已逾期';
 		        		}else if(o.allowToSend == true){
 		        			statusCh = '待發送';
@@ -122,13 +122,15 @@ $(function() {
 		        		}
 		        	}
 		        }
+		        
 		        templateTr.find('.status').html(statusCh);
 
 		        // set button
 		        if(o.sendStartTime){
 		        	templateTr.find('.btn_copy').val('已發送');
-		        }else if(currentTime.isAfter(sendStartTime)){
+		        }else if(currentTime.isAfter(sendTimingTime)){
 		        	templateTr.find('.btn_copy').val('過期');
+		        	templateTr.find('.btn_detele').remove();
 		        }else{
 		        	if(o.allowToSend == true){
 		        		templateTr.find('.btn_copy').val('取消').css("background-color","red");

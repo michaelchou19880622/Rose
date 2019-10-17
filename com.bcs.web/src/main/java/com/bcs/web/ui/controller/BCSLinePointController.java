@@ -122,7 +122,7 @@ public class BCSLinePointController extends BCSBaseController {
 				throw new BcsNoticeException("empId is Null");
 			}
 			
-			TaishinEmployee taishinEmployee = null;
+			TaishinEmployee taishinEmployee = null; 
 			try {
 				taishinEmployee = oracleService.findByEmployeeId(empId);		
 			}catch(Exception e){
@@ -148,10 +148,11 @@ public class BCSLinePointController extends BCSBaseController {
 				
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
-			if (e instanceof BcsNoticeException) 
+			if (e instanceof BcsNoticeException) {
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			else 
+				}else{
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+				}
 		}
 	}
 

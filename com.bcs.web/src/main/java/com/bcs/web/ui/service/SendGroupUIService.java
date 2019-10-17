@@ -295,7 +295,6 @@ public class SendGroupUIService {
 		
 
 		try {
-			
 			for (int i = this.curSaveIndex; i < existMids.size(); i++) {
 				String mid = existMids.get(i);
 

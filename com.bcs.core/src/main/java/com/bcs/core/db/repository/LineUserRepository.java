@@ -114,6 +114,16 @@ public interface LineUserRepository extends EntityRepository<LineUser, String>, 
     @Transactional(readOnly = true, timeout = 30)
     @Query("select x.mid from LineUser x where x.status in ( ?1 ) and x.mid = (?2)")
     String checkMIDByStatus(String status, String mid);
+    
+    /**
+     * Get mid by mobile.
+     *
+     * @param mobile the mobile
+     * @return the string
+     */
+    @Transactional(readOnly = true, timeout = 30)
+    @Query("select x.mid from LineUser x where x.mobile in ( ?1 )")
+    String getMidByMobile(String mobile);
 
     /**
      * Find mid all active page.

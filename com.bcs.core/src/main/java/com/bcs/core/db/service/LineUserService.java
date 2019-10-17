@@ -203,6 +203,19 @@ public class LineUserService {
         logger.debug("checkMIDByStatus:" + result);
         return StringUtils.isBlank(result);
     }
+    
+    /**
+     * Get mid by mobile.
+     *
+     * @param mobile the mobile
+     * @return the boolean
+     */
+    public String getMidByMobile(String mobile) {
+
+        String mid = lineUserRepository.getMidByMobile(mobile);
+        logger.debug("getMidByMobile:" + mid);
+        return mid;
+    }
 
     /**
      * Save log.

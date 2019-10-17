@@ -122,23 +122,23 @@ public class BCSLinePointController extends BCSBaseController {
 				throw new BcsNoticeException("empId is Null");
 			}
 			
-//			TaishinEmployee taishinEmployee = null;
-//			try {
-//				taishinEmployee = oracleService.findByEmployeeId(empId);		
-//			}catch(Exception e){
-//				throw new BcsNoticeException("The Employee Id Is Not Correct!"); 
-//			}
-//			if(taishinEmployee == null || StringUtils.isBlank(taishinEmployee.getDivisionName())){
-//				throw new BcsNoticeException("The Employee Id Is Not Correct!");
-//			}
-//			
-//			// get Department Full Name
-//			String departmentFullName = taishinEmployee.getDivisionName() + " " + 
-//				taishinEmployee.getDepartmentName() + " " + taishinEmployee.getGroupName();
-//			logger.info("departmentFullName:" + departmentFullName);
+			TaishinEmployee taishinEmployee = null;
+			try {
+				taishinEmployee = oracleService.findByEmployeeId(empId);		
+			}catch(Exception e){
+				throw new BcsNoticeException("The Employee Id Is Not Correct!"); 
+			}
+			if(taishinEmployee == null || StringUtils.isBlank(taishinEmployee.getDivisionName())){
+				throw new BcsNoticeException("The Employee Id Is Not Correct!");
+			}
+			
+			// get Department Full Name
+			String departmentFullName = taishinEmployee.getDivisionName() + " " + 
+				taishinEmployee.getDepartmentName() + " " + taishinEmployee.getGroupName();
+			logger.info("departmentFullName:" + departmentFullName);
 			
 			
-			String departmentFullName = "XTREME LINEBC TAISHIN";
+			//String departmentFullName = "XTREME LINEBC TAISHIN";
 			linePointMain.setDepartmentFullName(departmentFullName);
 			linePointMain.setModifyUser(customUser.getAccount());
 			linePointMain.setModifyTime(new Date());

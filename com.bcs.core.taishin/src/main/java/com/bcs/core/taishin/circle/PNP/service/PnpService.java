@@ -397,6 +397,7 @@ public class PnpService {
                 logger.info("BC Send Message Success!!");
                 detail.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_BC_COMPLETE);
                 detail.setBcStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_BC_COMPLETE);
+                detail.setLinePushTime(Calendar.getInstance().getTime());
             } else {
                 /* 發送失敗 */
                 logger.warn("BC Send Message Fail!!");

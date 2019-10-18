@@ -59,12 +59,15 @@ $(function(){
 					url: bcs.bcsContextPath + "/edit/getContentFlagList?referenceId=" + referenceId + "&contentType=" + contentType,
 				}).success(function(response){
 					console.info('response', response);
+					console.info('TEST', '99999123456');
 //					self.removeContentFlagList();
 					
 //					for (var i = 0, size = response.length; i < size; i++) {
 //						console.log("testtag = " + response[i]);
 //						tagEditor.tagEditor('addTag', response[i]);
 //					}
+					
+					tagEditor.tagEditor('destroy');
 					
 					var defaultTagEditorConfig2 = {
 							initialTags: response,
@@ -73,8 +76,9 @@ $(function(){
 							},
 							maxLength : 80,
 							forceLowercase: true,
-							placeholder: '請輸入標籤...'
+							placeholder:'請輸入標籤...'
 					};
+					
 					
 					if (typeof elementIdOrElement == 'string') {
 						tagEditor = $('#' + elementIdOrElement).tagEditor(

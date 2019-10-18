@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -158,10 +159,11 @@ public class SendGroupUIService {
 			logger.info("list.size():" + list.size());
 			
 			try {
-				
 				List<String> check = new ArrayList<String>();
+				
+				//TODO:目前existMid會有可能放到重覆的uid，之後要改不然會儲存到重覆的。
+				//解決方案 : 可以把List<String> check 改成 HashSet<String>
 				for (int i = 1; i <= list.size(); i++) {
-
 					check.add(list.get(i - 1));
 
 					if (i % 1000 == 0) {

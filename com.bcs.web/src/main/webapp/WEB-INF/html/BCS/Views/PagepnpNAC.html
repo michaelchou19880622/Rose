@@ -10,38 +10,44 @@
 <style>
 .left {
     float: left;
-    width: 600px;
+    width: 900px;
     background-color: #EEE;
+    /* background-color: #FDA; */
 }
 .right {
     background-color: #EEE;
-    margin-left: 600px;
+    /* background-color: #EEb; */
+    margin-left: 900px;
     /* height: 300px; */
 }
 
-.warp100 {
+.warp10{
     display: inline-block;
-    width: 100%;
+    width: 10%;
 }
-
+.warp20 {
+    display: inline-block;
+    width: 20%;
+}
+.warp30 {
+    display: inline-block;
+    width: 30%;
+}
 .warp40 {
     display: inline-block;
     width: 40%;
 }
-
-.warp8{
-    display: inline-block;
-    width: 10%;
-}
-
 .warp50{
     display: inline-block;
-    width: 40%;
+    width: 50%;
 }
-
 .warp58 {
     display: inline-block;
     width: 58%;
+}
+.warp100 {
+    display: inline-block;
+    width: 100%;
 }
 
 .col1 {
@@ -64,7 +70,7 @@
 }
 
 .input_text {
-    width: 200px;
+    width: 80%;
     border-radius: 8px;
     height: 30px;
     font-size: 18px;
@@ -72,8 +78,31 @@
     padding: 10px;
 }
 
+.color_input_text {
+    width: 84px;
+    border-radius: 8px;
+    height: 30px;
+    font-size: 18px;
+    border: 1px #bbb solid;
+    padding: 10px;
+}
+
+.color_input_text:disabled {
+    color: #ddd;
+    background: #bbb;
+}
+
 .input_text2 {
-    width: 100%;
+    width: 90%;
+    border-radius: 8px;
+    height: 30px;
+    font-size: 18px;
+    border: 1px #bbb solid;
+    padding: 10px;
+}
+
+.input_text3 {
+    width: 60%;
     border-radius: 8px;
     height: 30px;
     font-size: 18px;
@@ -83,12 +112,20 @@
 
 .textarea1 {
     resize: none;
-    width: 100%;
+    width: 90%;
     border-radius: 8px;
     font-size: 18px;
     min-height: 150px;
     border: 1px #bbb solid;
     padding: 10px;
+}
+
+.colorPicker{
+    padding: 30px;
+    background: #222;
+    border-radius: 10px;
+    position : absolute;
+    display: none;
 }
 
 .btn {
@@ -123,6 +160,31 @@
     position: relative;
     left: 1px;
     top: 2px;
+}
+
+.btn-style{
+    color: #000;
+    background: #aaa;
+}
+
+.btn_style:disabled {
+    color: #ddd;
+    background: #bbb;
+}
+
+.btn-style-pressed{
+    color: #FFF;
+    background: #07F;
+}
+
+.btn-bold{
+    font-weight: 800;
+}
+.btn-italic{
+    font-style:italic;
+}
+.btn-underline{
+    text-decoration: underline;
 }
 
 .mainMsg{
@@ -189,8 +251,8 @@
     margin: 20px;
     text-align: center;
 }
-
 </style>
+<script src="/Taishin/BCS/JS/iro-colorPicker/iro.min.js"></script>
 
 <div class="LyContents">
     <div th:replace="/BCS/Views/Common/Menu :: menu ('PagepnpNAC')"/>
@@ -305,8 +367,9 @@
                         </tbody>
                     </table>
                     <div class="CHBtnSet">
-                        <div class="CHRight"><input class="btn_add add" type="button" value="Set"
-                                                    style="cursor: pointer;"></div>
+                        <div class="CHRight">
+                            <input id="popupEditPage" class="btn_add add" type="button" value="Set" style="cursor: pointer;"/>
+                        </div>
                     </div>
                     <table border="1" class="popTable">
                         <colgroup>
@@ -321,16 +384,17 @@
                         </tr>
                         <tbody class="popTbody">
                         <tr class="popTr">
-                            <td class="pathway"></td>
-                            <td class="template"></td>
-                            <td class="PNPContent"></td>
+                            <td id="quickViewPathWay" class="pathway"></td>
+                            <td id="quickViewTemplate" class="template"></td>
+                            <td id="quickViewPNPContent" class="PNPContent"></td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="CHBtnSet">
-                    <div class="CHRight"><input class="btn_add confirm" type="button" value="Confirm"
-                                                style="cursor: pointer;"></div>
+                    <div class="CHRight">
+                        <input id="saveAccountModelBtn" class="btn_add confirm" type="button" value="Confirm" style="cursor: pointer;"/>
+                    </div>
                 </div>
             </section>
         </form>
@@ -385,75 +449,98 @@
     </div> -->
 
     <!-- ================================================================ -->
-    <div class="left">
-        <div id="editArea" class="editArea">
-            <div class="warp40">
-                <label class="col1">通路流</label>
-                <div class="param">
-                    <select class="select1" name="select1" id="pathwayList" >
-                        <option>請選擇</option>
-                    </select>
+    <div style="background: #EEE ">
+        <div class="left">
+            <div id="editArea" class="editArea">
+                <div class="warp30">
+                    <label class="col1">通路流</label>
+                    <div class="param">
+                        <select id="pathwayList" class="select1" name="select1">
+                            <option>請選擇</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <div class="warp58">
-                <label class="col1">標題文字</label>
-                <div class="param">
-                    <input class="input_text2" type="text" id="flexTitle" maxlength="20" placeholder="內容字數上限為20字">
+                <div class="warp30">
+                    <label class="col1">標題文字</label>
+                    <div class="param">
+                        <input class="input_text2" type="text" id="flexTitle" maxlength="20" placeholder="內容字數上限為20字">
+                    </div>
                 </div>
-            </div>
-            <div class="warp100">
-                <label class="col1">簡訊內容</label>
-                <div class="param">
-                    <textarea class="textarea1" type="text" id="flexContent" maxlength="1000" placeholder="內容字數上限為1000字"></textarea>
+                <div id="headerTitleTextStyleArea" class="warp30">
+                    <button id="titleTextBoldBtn" class="btn btn-style btn-bold" value='false'>B</button>
+                    <button id="titleTextItalicBtn" class="btn btn-style btn-italic" value=false>I</button>
+                    <button id="titleTextUnderLineBtn" class="btn btn-style btn-underline" value="false">U</button>
+                    <input id="headerTitleBackgroundColor" class="color_input_text" type="text" name="colorInput" maxlength="7" placeholder="背景顏色"/>
+                    <div id="colorPicker1" class="colorPicker"></div>
                 </div>
-            </div>
-
-            <div class="warp40">
-                <label class="col1">按鈕文字</label>
-            </div>
-            <div class="warp50">
-                <label class="col1">按鈕連結</label>
-            </div>
-            <!-- ======================================================== -->
-            <div id="btnGroup">
-            </div>
-            <!-- ======================================================== -->
-
-            <div style="padding: 10px">
-                <button class="btn btn-pri" id="addButtonBtn">＋</button>
-                <button class="btn btn-pri">儲存</button>
-            </div>
-        </div>
-    </div>
-    <div class="right">
-        <div class="mainMsg">
-            <div class="msgTitle-area">
-                <label id="previewTitle">訊息標題</label>
-            </div>
-            <div class="msgContent-area">
-                <div class="msgContent-label">
-                    <label id="previewContent">台新貴賓您好，謝謝您使用台新信用卡消費，若您在國外需要台新銀行的服務，請利用當地國際台轉接撥打信用卡背面之客服電話確認
-                    </label>
+                <div class="warp100">
+                    <label class="col1">簡訊內容</label>
                 </div>
-            </div>
-            <div class="msgContent-area2">
-                <div class="msgContent-label2">
-                    <label>Minim ea pariatur in mollit in eu veniam consequat et minim laboris sed adipisicing eu aute dolore.
-                    </label>
+                <div class="warp100">
+                    <div class="param">
+                        <button id="heroTextBoldBtn" class="btn btn-style btn-bold" value="false">B</button>
+                        <button id="heroTextItalicBtn" class="btn btn-style btn-italic" value="false">I</button>
+                        <button id="heroTextUnderLineBtn" class="btn btn-style btn-underline" value="false">U</button>
+                        <input id="heroTextColorText" class="color_input_text" type="text" name="colorInput" maxlength="7" placeholder="文字顏色"/>
+                        <div id="colorPicker2" class="colorPicker"></div>
+                        <input id="heroBackgroundColorText" class="color_input_text" type="text" name="colorInput" maxlength="7" placeholder="背景顏色"/>
+                        <div id="colorPicker3" class="colorPicker"></div>
+                    </div>
                 </div>
-            </div>
-            <!-- ==================================== -->
-            <div id="previewBtnGroup">
-            </div>
-            <!-- ==================================== -->
-
-            <div class="msgFooter-area">
-                <div class="msgFooter-label">
-                    <a href="#"><label>為什麼會看到這則訊息呢？</label></a>
+                <div class="warp100">
+                    <div class="param">
+                        <textarea class="textarea1" type="text" id="flexContent" maxlength="1000" placeholder="內容字數上限為1000字"></textarea>
+                    </div>
+                </div>
+                <div class="warp30">
+                    <label class="col1">按鈕文字</label>
+                </div>
+                <div class="warp30">
+                    <label class="col1">按鈕連結</label>
+                </div>
+                <!-- ======================================================== -->
+                <div id="btnGroup">
+                </div>
+                <!-- ======================================================== -->
+                <div style="padding: 10px">
+                    <button class="btn btn-pri" id="addButtonBtn">＋</button>
+                    <button id="saveBtn" class="btn btn-pri">儲存</button>
+                    <button id="showJson" class="btn btn-pri">顯示JSON</button>
                 </div>
             </div>
         </div>
+        <div class="right">
+            <div id="mainMsg" class="mainMsg">
+                <div id="msgTitle-area" class="msgTitle-area">
+                    <label id="previewTitle">訊息標題</label>
+                </div>
+                <div class="msgContent-area">
+                    <div class="msgContent-label">
+                        <label id="previewContent">台新貴賓您好，謝謝您使用台新信用卡消費，若您在國外需要台新銀行的服務，請利用當地國際台轉接撥打信用卡背面之客服電話確認
+                        </label>
+                    </div>
+                </div>
+                <div class="msgContent-area2">
+                    <div class="msgContent-label2">
+                        <label id="bodyDescriptionLabel">Minim ea pariatur in mollit in eu veniam consequat et minim laboris sed adipisicing eu aute dolore.
+                        </label>
+                    </div>
+                </div>
+                <!-- ==================================== -->
+                <div id="previewBtnGroup">
+                </div>
+                <!-- ==================================== -->
+                <div class="msgFooter-area">
+                    <div class="msgFooter-label">
+                        <a id="footerLink" href="#"><label id="footerLinkLabel">為什麼會看到這則訊息呢？</label></a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+    <code>
+        <pre id="console" style="display: inline-block; background: #aea;"></pre>
+    </code>
     <!-- ================================================================ -->
 </div>
 </body>

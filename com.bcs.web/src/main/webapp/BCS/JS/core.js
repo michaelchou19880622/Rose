@@ -59,11 +59,31 @@ $(function(){
 					url: bcs.bcsContextPath + "/edit/getContentFlagList?referenceId=" + referenceId + "&contentType=" + contentType,
 				}).success(function(response){
 					console.info('response', response);
-					self.removeContentFlagList();
+//					self.removeContentFlagList();
 					
-					for (var i = 0, size = response.length; i < size; i++) {
-						tagEditor.tagEditor('addTag', response[i]);
+//					for (var i = 0, size = response.length; i < size; i++) {
+//						console.log("testtag = " + response[i]);
+//						tagEditor.tagEditor('addTag', response[i]);
+//					}
+					
+					var defaultTagEditorConfig2 = {
+							initialTags: response,
+							autocomplete : {
+								source : autocompleteList
+							},
+							maxLength : 80,
+							forceLowercase: true,
+							placeholder: '請輸入標籤...'
+					};
+					
+					if (typeof elementIdOrElement == 'string') {
+						tagEditor = $('#' + elementIdOrElement).tagEditor(
+								$.extend(defaultTagEditorConfig2, config));
+					} else {
+						tagEditor = $(elementIdOrElement).tagEditor(
+								$.extend(defaultTagEditorConfig2, config));
 					}
+					
 					
 					// 呼叫 disabled 函式來更新"純顯示"的 <ul>
 					if (tagEditor.prop('disabled')) {

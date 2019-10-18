@@ -9,6 +9,7 @@ import lombok.experimental.UtilityClass;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * 工具類別
@@ -27,6 +28,10 @@ public class DataUtils {
         return new GsonBuilder().setPrettyPrinting().serializeNulls().create().toJson(obj);
     }
 
+    public static String toNormalJson(Object obj) {
+        return new GsonBuilder().serializeNulls().create().toJson(obj);
+    }
+
 
     /**
      * To Pretty Json user Jackson
@@ -41,6 +46,24 @@ public class DataUtils {
             return mapper.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
             return obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode());
+        }
+    }
+
+    /**
+     * To Pretty Json user Jackson
+     *
+     * @param jsonString onj
+     * @return JSON String
+     */
+    public static String toPrettyJsonUseJackson(String jsonString) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            Object jsonObject = mapper.readValue(jsonString, Object.class);
+
+            mapper.enable(SerializationFeature.INDENT_OUTPUT);
+            return mapper.writeValueAsString(jsonObject);
+        } catch (Exception e) {
+            return "";
         }
     }
 
@@ -79,7 +102,7 @@ public class DataUtils {
     /**
      * Conv str to date date.
      *
-     * @param str    the str
+     * @param str         the str
      * @param inputFormat the format
      * @return the date
      */
@@ -134,5 +157,9 @@ public class DataUtils {
      */
     public static String replaceUnnecessarySpace(String str) {
         return str.replaceAll("\\s{1,}", " ");
+    }
+
+    public static Object getOrDefault(Map map, Object key, Object defaultValue) {
+        return map.get(key) != null || map.containsKey(key) ? map.get(key) : defaultValue;
     }
 }

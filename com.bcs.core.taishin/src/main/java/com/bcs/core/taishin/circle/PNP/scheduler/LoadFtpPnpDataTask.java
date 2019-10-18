@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PreDestroy;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -60,6 +61,7 @@ import com.bcs.core.taishin.circle.PNP.db.repository.PnpRepositoryCustom;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFTPType;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpService;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpSetting;
+import com.bcs.core.taishin.circle.db.entity.CircleEntityManagerControl;
 import com.bcs.core.utils.DataUtils;
 import com.bcs.core.utils.ErrorRecord;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -249,7 +251,7 @@ public class LoadFtpPnpDataTask {
         logger.info(PNPFTPType.getNameByCode(source).toUpperCase() + " => StartCircle!!");
         int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true, false);
 
-        switch(bigSwitch){
+        switch (bigSwitch) {
             case 0:
                 logger.info(bigSwitch + ": Stop Process!!");
                 break;
@@ -485,7 +487,8 @@ public class LoadFtpPnpDataTask {
      * @throws Exception Exception
      * @see this#parseMingFiles
      */
-    private List<? super PnpDetail> parsePnpDetailMing(String fileContent) throws Exception {
+    private List<? super PnpDetail> parsePnpDetailMing(String fileContent, String flexTemplateId) throws Exception {
+        logger.info("flexTemplateId : " + flexTemplateId);
         List<? super PnpDetail> details = new ArrayList<>();
         /* 明宣沒有header所以從0開始 */
         final int columnSize = 9;
@@ -515,7 +518,6 @@ public class LoadFtpPnpDataTask {
                 detail.setVariable1(detailData[6]);
                 detail.setVariable2(detailData[7]);
                 detail.setKeepSecond(detailData[8]);
-                
                 LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
                 
                 logger.info("phone = " + detailData[1]);
@@ -524,6 +526,7 @@ public class LoadFtpPnpDataTask {
                 logger.info("mid = " + mid);
 
                 detail.setUid(mid);
+                detail.setFlexTemplateId(flexTemplateId);
                 details.add(detail);
                 
             } else {
@@ -540,7 +543,7 @@ public class LoadFtpPnpDataTask {
      * @return Mitake物件清單
      * @throws Exception Exception
      */
-    private List<? super PnpDetail> parsePnpDetailMitake(List<String> fileContents) throws Exception {
+    private List<? super PnpDetail> parsePnpDetailMitake(List<String> fileContents, String flexTemplateId) throws Exception {
         List<? super PnpDetail> details = new ArrayList<>();
         /* Mitake有header所以從1開始 */
         for (int i = 1; i < fileContents.size(); i++) {
@@ -560,6 +563,7 @@ public class LoadFtpPnpDataTask {
                     detail.setPhone(detailData[2]);
                     detail.setPhoneHash(toSha256(detailData[2]));
                     detail.setMsg(detailData[3]);
+                    detail.setFlexTemplateId(flexTemplateId);
                     details.add(detail);
                 } else {
                     logger.error("parsePnpDetailMitake error Data:" + Arrays.toString(detailData));
@@ -577,7 +581,7 @@ public class LoadFtpPnpDataTask {
      * @return Every8d物件清單
      * @throws Exception Exception
      */
-    private List<? super PnpDetail> parsePnpDetailEvery8d(List<String> fileContents) throws Exception {
+    private List<? super PnpDetail> parsePnpDetailEvery8d(List<String> fileContents, String flexTemplateId) throws Exception {
         List<? super PnpDetail> details = new ArrayList<>();
         /* Every8D有header所以從1開始 */
         for (int i = 1; i < fileContents.size(); i++) {
@@ -612,6 +616,7 @@ public class LoadFtpPnpDataTask {
                     detail.setProgramId(detailData[7]);
                     detail.setVariable1(detailData[8]);
                     detail.setVariable2(detailData[9]);
+                    detail.setFlexTemplateId(flexTemplateId);
                     details.add(detail);
                 } else {
                     logger.error("parsePnpDetailEvery8d error Data:" + Arrays.toString(detailData));
@@ -628,7 +633,7 @@ public class LoadFtpPnpDataTask {
      * @return Unica物件清單
      * @throws Exception Exception
      */
-    private List<? super PnpDetail> parsePnpDetailUnica(List<String> fileContents) throws Exception {
+    private List<? super PnpDetail> parsePnpDetailUnica(List<String> fileContents, String flexTemplateId) throws Exception {
         List<? super PnpDetail> details = new ArrayList<>();
         /* Unica有header所以從1開始 */
         for (int i = 1; i < fileContents.size(); i++) {
@@ -661,6 +666,7 @@ public class LoadFtpPnpDataTask {
                     detail.setProgramId(detailData[7]);
                     detail.setVariable1(detailData[8]);
                     detail.setVariable2(detailData[9]);
+                    detail.setFlexTemplateId(flexTemplateId);
                     details.add(detail);
                 } else {
                     logger.error("parsePnpDetailUnica error Data:" + Arrays.toString(detailData));
@@ -750,7 +756,7 @@ public class LoadFtpPnpDataTask {
             if (sendType.equals(AbstractPnpMainEntity.SEND_TYPE_DELAY) || sendType.equals(AbstractPnpMainEntity.SEND_TYPE_SCHEDULE_TIME_EXPIRED)) {
                 pnpMainMing.setScheduleTime(orderTime);
             }
-            pnpMainMing.setPnpDetails(parsePnpDetailMing(content));
+            pnpMainMing.setPnpDetails(parsePnpDetailMing(content, accountModel.getTemplate()));
             mains.add(pnpMainMing);
         }
         return mains;
@@ -810,7 +816,7 @@ public class LoadFtpPnpDataTask {
             pnpMainMitake.setScheduleTime(orderTime);
         }
 
-        pnpMainMitake.setPnpDetails(parsePnpDetailMitake(fileContents));
+        pnpMainMitake.setPnpDetails(parsePnpDetailMitake(fileContents, accountModel.getTemplate()));
         List<Object> mains = new ArrayList<>();
         mains.add(pnpMainMitake);
         return mains;
@@ -876,7 +882,7 @@ public class LoadFtpPnpDataTask {
             pnpMainEvery8d.setScheduleTime(orderTime);
         }
 
-        pnpMainEvery8d.setPnpDetails(parsePnpDetailEvery8d(fileContents));
+        pnpMainEvery8d.setPnpDetails(parsePnpDetailEvery8d(fileContents, accountModel.getTemplate()));
         List<Object> mains = new ArrayList<>();
         mains.add(pnpMainEvery8d);
         return mains;
@@ -941,7 +947,7 @@ public class LoadFtpPnpDataTask {
             pnpMainUnica.setScheduleTime(orderTime);
         }
 
-        pnpMainUnica.setPnpDetails(parsePnpDetailUnica(fileContents));
+        pnpMainUnica.setPnpDetails(parsePnpDetailUnica(fileContents, accountModel.getTemplate()));
         List<Object> mains = new ArrayList<>();
         mains.add(pnpMainUnica);
         return mains;
@@ -1024,7 +1030,11 @@ public class LoadFtpPnpDataTask {
             details.add(pnpDetailMitake);
         }
         if (!details.isEmpty()) {
-            pnpRepositoryCustom.batchInsertPnpDetailMitake(details);
+            List<List<PnpDetailMitake>> detailsPartitionList = Lists.partition(details, CircleEntityManagerControl.batchSize);
+            for (List<PnpDetailMitake> detailList : detailsPartitionList) {
+                pnpDetailMitakeRepository.save(detailList);
+            }
+//            pnpRepositoryCustom.batchInsertPnpDetailMitake(details);
             logger.info("Update Status : " + AbstractPnpMainEntity.SOURCE_MING);
         }
     }
@@ -1054,7 +1064,11 @@ public class LoadFtpPnpDataTask {
             details.add(pnpDetailUnica);
         }
         if (!details.isEmpty()) {
-            pnpRepositoryCustom.batchInsertPnpDetailUnica(details);
+            List<List<PnpDetailUnica>> detailsPartitionList = Lists.partition(details, CircleEntityManagerControl.batchSize);
+            for (List<PnpDetailUnica> detailList : detailsPartitionList) {
+                pnpDetailUnicaRepository.save(detailList);
+            }
+//            pnpRepositoryCustom.batchInsertPnpDetailUnica(details);
             logger.info("Update Status : " + AbstractPnpMainEntity.SOURCE_MING);
         }
     }
@@ -1084,7 +1098,11 @@ public class LoadFtpPnpDataTask {
             details.add(pnpDetailEvery8d);
         }
         if (!details.isEmpty()) {
-            pnpRepositoryCustom.batchInsertPnpDetailEvery8d(details);
+            List<List<PnpDetailEvery8d>> detailsPartitionList = Lists.partition(details, CircleEntityManagerControl.batchSize);
+            for (List<PnpDetailEvery8d> detailList : detailsPartitionList) {
+                pnpDetailEvery8dRepository.save(detailList);
+            }
+//            pnpRepositoryCustom.batchInsertPnpDetailEvery8d(details);
             logger.info("Update Status : " + AbstractPnpMainEntity.SOURCE_MING);
         }
     }
@@ -1112,10 +1130,15 @@ public class LoadFtpPnpDataTask {
             pnpDetail.setProcStage(pnpMainMing.getProcStage());
             pnpDetail.setSource(AbstractPnpMainEntity.SOURCE_MING);
             pnpDetail.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
+            logger.info(DataUtils.toPrettyJsonUseJackson(pnpDetail));
             details.add(pnpDetail);
         }
         if (!details.isEmpty()) {
-            pnpRepositoryCustom.batchInsertPnpDetailMing(details);
+            List<List<PnpDetailMing>> detailsPartitionList = Lists.partition(details, CircleEntityManagerControl.batchSize);
+            for (List<PnpDetailMing> detailList : detailsPartitionList) {
+                pnpDetailMingRepository.save(detailList);
+            }
+//            pnpRepositoryCustom.batchInsertPnpDetailMing(details);
             logger.info("Update Status : " + AbstractPnpMainEntity.SOURCE_MING);
         }
     }
@@ -1269,7 +1292,7 @@ public class LoadFtpPnpDataTask {
             for (PNPMaintainAccountModel accountModel : accountList) {
                 logger.info("accountModel ID :" + accountModel.getId());
             }
-            
+
             return null;
         } else {
             logger.error("validateWhiteList failed!!! account :" + account + " sourceSystem : " + sourceSystem + " CAN NOT FIND ANY SETTING!!");

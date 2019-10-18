@@ -31,19 +31,21 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailEvery8d;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMing;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMitake;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailUnica;
+import com.bcs.core.taishin.circle.PNP.db.entity.PnpFlexTemplate;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailEvery8dRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMingRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailMitakeRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpDetailUnicaRepository;
+import com.bcs.core.taishin.circle.PNP.db.repository.PnpFlexTemplateRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainEvery8dRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainMingRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainMitakeRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainUnicaRepository;
 import com.bcs.core.utils.DataUtils;
 import com.bcs.core.utils.RestfulUtil;
-
 import akka.actor.ActorRef;
+
 
 /**
  * @author ???
@@ -73,6 +75,9 @@ public class PnpService {
     private PnpDetailMingRepository pnpDetailMingRepository;
     @Autowired
     private PnpAkkaService pnpAkkaService;
+
+    @Autowired
+    private PnpFlexTemplateRepository pnpFlexTemplateRepository;
 
     /**
      * Save By Source Type
@@ -294,7 +299,7 @@ public class PnpService {
     private void updatePnpMainMingStatusComplete(Long mainId, List<String> status, String procStage) {
         if (pnpDetailMingRepository.countByPnpMainIdAndStatus(mainId, status) == 0) {
             int returnInt = pnpMainMingRepository.updatePnpMainMingStatus(
-                getCompleteStatusByStage(procStage), new Date(), mainId
+                    getCompleteStatusByStage(procStage), new Date(), mainId
             );
             logger.info("After Main Save Return int is : " + returnInt);
         }
@@ -538,9 +543,23 @@ public class PnpService {
         boolean sendSuccessFlag;
         JSONObject requestBody = new JSONObject();
 
-//        requestBody.put("to", detail.getPhoneHash());
-        requestBody.put("to", detail.getUid());
-        requestBody.put("messages", combineLineTextMessage(detail.getMsg()));
+        requestBody.put("to", detail.getPhoneHash());
+        //TODO Alan :整合新Flex樣板
+        String message = combineLineFlexMessage(detail.getMsg(), detail.getFlexTemplateId());
+        if (message == null) {
+            //TODO Alan: 採取預設樣板後移除舊PNP發送
+
+            /* 舊有PNP純文字發送 */
+            requestBody.put("messages", combineLineTextMessage(detail.getMsg()));
+        } else {
+            /* Flex 新樣板 */
+            JSONArray jsonArray = new JSONArray();
+            jsonArray.put(new JSONObject(message));
+            requestBody.put("messages", jsonArray);
+        }
+        logger.info("Pnp Push RequestBody : " + requestBody.toString());
+
+        logger.info("Pnp Push RequestBody : " + DataUtils.toPrettyJsonUseJackson(requestBody.toString()));
 
         /* 將 headers 跟 body 塞進 HttpEntity 中 */
         HttpEntity<String> httpEntity = new HttpEntity<>(requestBody.toString(), headers);
@@ -620,81 +639,79 @@ public class PnpService {
         return messageArray;
     }
 
+    private String combineLineFlexMessage(String msg, String templateId) {
+        logger.info("Msg : " + msg + "Template Id: " + templateId);
+        Long id;
+        try {
+            id = Long.parseLong(templateId);
+        } catch (NumberFormatException e) {
+            // TODO 採取預設樣板
+            return null;
+        }
+        PnpFlexTemplate pnpFlexTemplate = pnpFlexTemplateRepository.findOne(id);
+        String templateJson = PnpFlexTemplate.fetchDefaultTemplateJson()
+                .replace("headerBackground", pnpFlexTemplate.getHeaderBackground())
+                .replace("headerTextSize", pnpFlexTemplate.getHeaderTextSize())
+                .replace("headerTextColor", pnpFlexTemplate.getHeaderTextColor())
+                .replace("headerTextWeight", pnpFlexTemplate.getHeaderTextWeight())
+                .replace("headerTextStyle", pnpFlexTemplate.getHeaderTextStyle())
+                .replace("headerTextDecoration", pnpFlexTemplate.getHeaderTextDecoration())
+                .replace("headerText", pnpFlexTemplate.getHeaderText())
 
-//	/**
-//	 * send email to system admin setting user
-//	 * @param title
-//	 * @param content
-//	 */
-//	public void sendMail(String title, String content) {
-//		logger.info("Billing Notice Send email : [" + title + "]" +  content);
-//		String fromAddress = CoreConfigReader.getString(null, EMAIL_CONFIG.FROM.toString(),true);
-//		if (StringUtils.isBlank(fromAddress)) {
-//			logger.error("Billing Notice Send email from Address is null ");
-//			return;
-//		}
-//		String host = CoreConfigReader.getString(null, EMAIL_CONFIG.HOST.toString(),true);
-//		int port = -1;
-//		try{
-//			port = Integer.parseInt(CoreConfigReader.getString(null, EMAIL_CONFIG.PORT.toString(),true));
-//		}
-//		catch(Exception e){
-//			logger.error("Billing Notice Send email smtp port is not number ");
-//		}
-//		final String username = CoreConfigReader.getString(null, EMAIL_CONFIG.USERNAME.toString(),true);
-//		final String password = CoreConfigReader.getString(null, EMAIL_CONFIG.PASSWORD.toString(),true);// your password
-//		String auth = CoreConfigReader.getString(null, EMAIL_CONFIG.AUTH.toString(),true);
-//		String starttls = CoreConfigReader.getString(null, EMAIL_CONFIG.STARTTLS_ENABLE.toString(),true);
-//		String debug = CoreConfigReader.getString(null, EMAIL_CONFIG.DEBUG.toString(),true);
-//		Properties props = new Properties();
-//		props.put("mail.smtp.host", host);
-//		props.put("mail.smtp.auth", StringUtils.isBlank(auth) ? "false" : auth);
-//		props.put("mail.smtp.starttls.enable", StringUtils.isBlank(starttls) ? "false" : starttls);
-//		props.put("mail.smtp.port", port);
-//		props.put("mail.debug", StringUtils.isBlank(debug) ? "false" : debug);
-//		if (StringUtils.isBlank(host) || port == -1 || StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
-//			logger.error("Billing Notice Send email setting wrong ");
-//			return;
-//		}
-//		String adminMail = CoreConfigReader.getString(null, EMAIL_CONFIG.TO_ADMIN.toString(),true);
-//		if (StringUtils.isBlank(adminMail)) {
-//			logger.error("Billing Notice Send email Recipients is empty ");
-//			return;
-//		}
-//		String secret = CoreConfigReader.getString(CONFIG_STR.AES_SECRET_KEY, true);
-//		String iv = CoreConfigReader.getString(CONFIG_STR.AES_INITIALIZATION_VECTOR, true);
-//
-//
-//		try {
-//			final String decodePassword = CryptUtil.Decrypt(CryptUtil.AES, password, secret, iv);
-//			Session session = Session.getInstance(props, new Authenticator() {
-//				protected javax.mail.PasswordAuthentication getPasswordAuthentication() {
-//					return new javax.mail.PasswordAuthentication(username, decodePassword);
-//				}
-//			});
-//			List<Address> recipients = new ArrayList<>();
-//			String[] toArray = adminMail.split(",");
-//			for (final String address : toArray) {
-//				if (StringUtils.isNotBlank(address)) {
-//					recipients.add(new InternetAddress(address.trim()));
-//				}
-//			}
-//
-//			Message message = new MimeMessage(session);
-//			message.setFrom(new InternetAddress(fromAddress));
-//			message.setRecipients(Message.RecipientType.TO, recipients.toArray(new InternetAddress[0]));
-//			message.setSubject(title);
-//			message.setText(content);
-//
-//			Transport transport = session.getTransport("smtp");
-//			transport.connect(host, port, username, password);
-//
-//			Transport.send(message);
-//
-//		} catch (MessagingException e) {
-//			logger.error("Billing Notice Send email error : " + e.getMessage());
-//		} catch (Exception e1) {
-//			logger.error("Billing Notice Send email error : " + e1.getMessage());
-//		}
-//	}
+
+                .replace("heroBackground", pnpFlexTemplate.getHeroBackground())
+                .replace("heroTextSize", pnpFlexTemplate.getHeroTextSize())
+                .replace("heroTextColor", pnpFlexTemplate.getHeroTextColor())
+                .replace("heroTextWeight", pnpFlexTemplate.getHeroTextWeight())
+                .replace("heroTextStyle", pnpFlexTemplate.getHeroTextStyle())
+                .replace("heroTextDecoration", pnpFlexTemplate.getHeroTextDecoration())
+                .replace("heroText", pnpFlexTemplate.getHeroText())
+
+
+                .replace("bodyDescTextSize", pnpFlexTemplate.getBodyDescTextSize())
+                .replace("bodyDescTextColor", pnpFlexTemplate.getBodyDescTextColor())
+                .replace("bodyDescTextWeight", pnpFlexTemplate.getBodyDescTextWeight())
+                .replace("bodyDescTextStyle", pnpFlexTemplate.getBodyDescTextStyle())
+                .replace("bodyDescTextDecoration", pnpFlexTemplate.getBodyDescTextDecoration())
+                .replace("bodyBackground", pnpFlexTemplate.getBodyBackground())
+                .replace("bodyDescText", pnpFlexTemplate.getBodyDescText())
+
+
+                .replace("footerLinkText", pnpFlexTemplate.getFooterLinkText())
+                .replaceAll("footerLinkUrl", pnpFlexTemplate.getFooterLinkUrl());
+
+        StringBuilder sb = new StringBuilder();
+        String[] buttonTextArray = pnpFlexTemplate.getButtonText().split(",");
+        String[] buttonUrlArray = pnpFlexTemplate.getButtonUrl().split(",");
+        String[] buttonColorArray = pnpFlexTemplate.getButtonColor().split(",");
+
+        for (int i = 0; i < buttonTextArray.length; i++) {
+            String url;
+            String color;
+            String text;
+            try {
+                url = buttonUrlArray[i];
+            } catch (IndexOutOfBoundsException e) {
+                url = "";
+            }
+            try {
+                color = buttonColorArray[i];
+            } catch (IndexOutOfBoundsException e) {
+                color = "";
+            }
+            try {
+                text = buttonTextArray[i];
+            } catch (IndexOutOfBoundsException e) {
+                text = "";
+            }
+            sb.append(PnpFlexTemplate.fetchDefaultButtonTemplateJson()
+                    .replace("bodyButtonText", text)
+                    .replace("bodyLinkUrl", url)
+                    .replace("bodyButtonColor", color));
+        }
+
+        templateJson = templateJson.replace("buttonJsonArea", sb.toString());
+        logger.info("final templateJson: " + DataUtils.toPrettyJsonUseJackson(templateJson));
+        return templateJson;
+    }
 }

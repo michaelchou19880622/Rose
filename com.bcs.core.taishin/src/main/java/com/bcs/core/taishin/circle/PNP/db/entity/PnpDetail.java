@@ -170,6 +170,31 @@ public class PnpDetail extends AbstractBcsEntity {
     @Column(name = "SMS_FILE_NAME", columnDefinition = "nvarchar(200)")
     private String smsFileName;
 
+    /**
+     * Flex Template id
+     */
+    @Column(name = "FLEX_TEMPLATE_ID")
+    private String flexTemplateId;
+
+    /**
+     * 處
+     */
+    @Column(name = "DIVISION_NAME", columnDefinition = "nvarchar(50)")
+    private String divisionName;
+
+    /**
+     * 部
+     */
+    @Column(name = "DEPARTMENT_NAME", columnDefinition = "nvarchar(50)")
+    private String departmentName;
+
+    /**
+     * 組
+     */
+    @Column(name = "GROUP_NAME", columnDefinition = "nvarchar(50)")
+    private String groupName;
+
+
     @PrePersist
     public void prePersist() {
         createTime = new Date();

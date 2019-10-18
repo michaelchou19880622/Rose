@@ -394,7 +394,7 @@ public class PnpService {
                 logger.info("Line UID Not Found in Detail!! =>  PNP!!  " + " Main Id: " + detail.getPnpMainId() + " Detail Id: " + detail.getPnpDetailId());
             } else {
                 /* 發送訊息 */
-                sendSuccessFlag = pushMessage(url, headers, detail);
+                sendSuccessFlag = bcPushMessage(url, headers, detail);
             }
 
             if (sendSuccessFlag) {
@@ -471,7 +471,7 @@ public class PnpService {
                 logger.debug("X-Line-Delivery-Tag : " + deliveryTag);
 
                 /* 發送訊息 */
-                sendSuccessFlag = pushMessage(url, headers, detail);
+                sendSuccessFlag = pnpPushMessage(url, headers, detail);
                 Date pnpSendTime = new Date();
                 detail.setPnpTime(pnpSendTime);
                 if (sendSuccessFlag) {
@@ -537,9 +537,51 @@ public class PnpService {
      * @param detail  went push message object
      * @return Push is success
      * @see this#pushLineMessage(PnpMain, ActorRef, ActorRef) BC Push
+     */
+    private boolean bcPushMessage(String url, HttpHeaders headers, PnpDetail detail) {
+        boolean sendSuccessFlag;
+        JSONObject requestBody = new JSONObject();
+
+        requestBody.put("to", detail.getUid());
+        requestBody.put("messages", combineLineTextMessage(detail.getMsg()));
+        logger.info("BC Push RequestBody : " + requestBody.toString());
+        logger.info("BC Push RequestBody : " + DataUtils.toPrettyJsonUseJackson(requestBody.toString()));
+
+        /* 將 headers 跟 body 塞進 HttpEntity 中 */
+        HttpEntity<String> httpEntity = new HttpEntity<>(requestBody.toString(), headers);
+        try {
+            RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
+            restfulUtil.execute();
+            logger.info("RestfulUtil.getStatusCode: " + restfulUtil.getStatusCode());
+            sendSuccessFlag = "200".equals(restfulUtil.getStatusCode());
+        } catch (HttpClientErrorException he) {
+            sendSuccessFlag = false;
+            logger.error("HttpClientErrorException error : " + he.getMessage());
+            JSONObject errorMessage = new JSONObject(he.getResponseBodyAsString());
+            if (errorMessage.has("message")) {
+                logger.error("HttpClientErrorException statusCode: " + he.getStatusCode().toString());
+                if (errorMessage.has("details")) {
+                    logger.error("HttpClientErrorException details : " + errorMessage.getJSONArray("details").toString());
+                }
+            }
+        } catch (Exception e) {
+            sendSuccessFlag = false;
+            logger.info("Send fail PnpDetailId:" + detail.getPnpDetailId());
+            logger.error("Send fail Exception:" + e.getMessage());
+        }
+        return sendSuccessFlag;
+    }
+
+    /**
+     * BC PNP 通用發送推播訊息程序
+     *
+     * @param url     Line API URL
+     * @param headers request header
+     * @param detail  went push message object
+     * @return Push is success
      * @see this#pushPnpMessage(PnpMain, ActorRef, ActorRef)  PNP Push
      */
-    private boolean pushMessage(String url, HttpHeaders headers, PnpDetail detail) {
+    private boolean pnpPushMessage(String url, HttpHeaders headers, PnpDetail detail) {
         boolean sendSuccessFlag;
         JSONObject requestBody = new JSONObject();
 

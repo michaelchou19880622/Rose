@@ -308,6 +308,7 @@ $(function () {
         btnNameInput.id = 'btnName-' + btnIndex;
         btnNameInput.className = 'input_text';
         btnNameInput.value = btnText || '';
+        btnNameInput.maxlength = 10;
 
         /* 監聽按鈕文字輸入內容即時反映於預覽區 */
         btnNameInput.onkeyup = function () {

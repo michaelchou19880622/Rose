@@ -15,7 +15,7 @@ $(function () {
         pnpMaintainAccountModelId = $.urlParam("pnpMaintainAccountModelId");
         console.log('From URL Path Param -> PNP Maintain Account Model Id : ' + pnpMaintainAccountModelId);
 
-        if (pnpMaintainAccountModelId !== null || pnpMaintainAccountModelId !== '') {
+        if (pnpMaintainAccountModelId !== null && pnpMaintainAccountModelId !== '') {
             $('.LyMain').block($.BCS.blockMsgRead);
             $('.CHTtl').html('編輯一般帳號');
             document.getElementById('popupEditPage').value = 'Edit';
@@ -48,10 +48,11 @@ $(function () {
                 document.getElementById('quickViewPNPContent').textContent = originalPnpContent;
 
             }).fail(function (response) {
-                console.log('Fail!! Response: ' + Response);
+                console.log('Fail!! Response: ' + response);
                 $.FailResponse(response);
             }).done(function () {
                 $('.LyMain').unblock();
+                loadPopupConfig();
             });
         } else {
             console.log('Id is Null!! To Create Mode!!');
@@ -94,7 +95,7 @@ $(function () {
         } else {
             //load user before setting
             var templateId = document.getElementById('quickViewTemplate').textContent;
-            if (templateId !== null && templateId !== '') {
+            if (templateId !== null && templateId !== '' && /^\d+$/.test(templateId)) {
                 $.ajax({
                         url: bcs.bcsContextPath + '/pnpAdmin/getFlexConfig/' + templateId,
                         type: 'GET',
@@ -165,11 +166,13 @@ $(function () {
                     })
                     .fail(function (response) {
                         console.log("error");
-                        $.FailResponse(response);
+                        console.log(response);
+//                        $.FailResponse(response);
                         defaultPopUp();
                     })
                     .always(function () {
                         console.log("complete");
+                        saveBeforeTemplateJson = generateTemplateJson();
                     });
             }
 
@@ -184,40 +187,25 @@ $(function () {
 
 
     var defaultPopUp = function () {
-        $.ajax({
-                url: bcs.bcsContextPath + '/pnpAdmin/getFlexConfig/' + templateId,
-                type: 'GET',
-            })
-            .done(function (response) {
-                console.log("Success!!, Response: " + response);
-                console.log(response);
-                console.log(JSON.stringify(response))
-                // Load Default Config
-                document.getElementById('previewTitle').textContent = document.getElementById('flexTitle').value || config.header.text;
-                document.getElementById('previewContent').textContent = document.getElementById('flexContent').value || config.hero.text;
+        // Load Default Config
+        document.getElementById('previewTitle').textContent = document.getElementById('flexTitle').value || config.header.text;
+        document.getElementById('previewContent').textContent = document.getElementById('flexContent').value || config.hero.text;
 
-                document.getElementById('bodyDescriptionLabel').textContent = config.body.description.text;
-                document.getElementById('footerLink').href = config.footer.linkUrl;
-                document.getElementById('footerLinkLabel').textContent = config.footer.linkText;
+        document.getElementById('bodyDescriptionLabel').textContent = config.body.description.text;
+        document.getElementById('footerLink').href = config.footer.linkUrl;
+        document.getElementById('footerLinkLabel').textContent = config.footer.linkText;
 
-                document.getElementById('msgTitle-area').style.background = config.header.background;
-                document.getElementById('mainMsg').style.background = config.hero.background;
+        document.getElementById('msgTitle-area').style.background = config.header.background;
+        document.getElementById('mainMsg').style.background = config.hero.background;
 
-                document.getElementById('bodyDescriptionLabel').style.color = config.body.description.textColor;
-                document.getElementById('bodyDescriptionLabel').style.fontWeight = config.body.description.textWeight;
-                document.getElementById('bodyDescriptionLabel').style.fontStyle = config.body.description.textStyle;
-                document.getElementById('bodyDescriptionLabel').style.textDecoration = config.body.description.textDecoration;
-                /* Init Create First Button Row */
-                addDefaultButton();
-                triggerFeatureActive();
-            })
-            .fail(function (response) {
-                console.log("error");
-                $.FailResponse(response);
-            })
-            .always(function () {
-                console.log("complete");
-            });
+        document.getElementById('bodyDescriptionLabel').style.color = config.body.description.textColor;
+        document.getElementById('bodyDescriptionLabel').style.fontWeight = config.body.description.textWeight;
+        document.getElementById('bodyDescriptionLabel').style.fontStyle = config.body.description.textStyle;
+        document.getElementById('bodyDescriptionLabel').style.textDecoration = config.body.description.textDecoration;
+        /* Init Create First Button Row */
+        addDefaultButton();
+        triggerFeatureActive();
+        saveBeforeTemplateJson = generateTemplateJson();
     }
 
     var triggerFeatureActive = function(){
@@ -373,7 +361,7 @@ $(function () {
         var colorInput = document.createElement('input');
         colorInput.className = 'color_input_text';
         colorInput.id = 'colorInputBtn' + btnIndex;
-        colorInput.placeholder = '按鈕顏色';
+        colorInput.placeholder = '按鈕#RRGGBB';
         colorInput.maxlength = 7;
         colorInput.type = 'text';
         colorInput.value = btnBackColor;
@@ -383,8 +371,8 @@ $(function () {
 
         var colorDiv = document.createElement('div');
         colorDiv.className = 'warp10';
-        colorDiv.append(colorInput);
-        colorDiv.append(colorPickerDiv);
+        colorDiv.appendChild(colorInput);
+        colorDiv.appendChild(colorPickerDiv);
 
 
 
@@ -545,14 +533,14 @@ $(function () {
             contentType: 'application/json',
         }).success(function (response) {
             console.info("response:", response);
-            $('#account').val(response.account);
+//            $('#account').val(response.account);
             $('#employeeId').val(response.employeeId);
             $('#departmentId').val(response.departmentId);
             $('#divisionName').val(response.divisionName);
             $('#departmentName').val(response.departmentName);
             $('#groupName').val(response.groupName);
             $('#PccCode').val(response.pccCode);
-            $('#accountAttribute').val('批次');
+//            $('#accountAttribute').val('批次');
         }).fail(function (response) {
             console.info(response);
             $.FailResponse(response);
@@ -585,16 +573,16 @@ $(function () {
 
         if (popInstance === null) {
             loadPopupConfig();
-        } else {
-            $('#dialog-modal') = oriPopup;
         }
-
     });
 
     var saveBeforeTemplateJson;
 
     /* 主頁面儲存按鈕 */
     $('#saveAccountModelBtn').click(function () {
+        if (saveBeforeTemplateJson === undefined || saveBeforeTemplateJson === null) {
+            initPopPage();
+        }
         console.log('saveBeforeTemplateJson:' + JSON.stringify(saveBeforeTemplateJson));
 
         var maintainAccountData = {};
@@ -722,29 +710,30 @@ $(function () {
 
     //---------------------Color Picker--------------------------
     var triggerColorPicker = function (elementId, pickerId, previewElementId, styleName) {
-        var colorPicker;
-        var colorPickerCnt = 0;
-        $('#' + elementId).focus(function () {
-            if (colorPickerCnt <= 0) {
-                colorPicker = new iro.ColorPicker('#' + pickerId, {
-                    width: 200,
-                    color: 'rgb(255, 0, 0)',
-                    borderWidth: 0,
-                    borderColor: '#000',
-                    padding: 10
-                });
-                colorPicker.on(["color:init", "color:change"], function (color) {
-                    document.getElementById(elementId).value = color.hexString.toUpperCase();
-                    document.getElementById(previewElementId).style[styleName] = color.hexString.toUpperCase();
-                });
-            }
-            document.getElementById(pickerId).style.display = 'block';
-            colorPickerCnt++;
-        });
+        // var colorPicker;
+        // var colorPickerCnt = 0;
+        // $('#' + elementId).focus(function () {
+        //     if (colorPickerCnt <= 0) {
+        //         console.log(JSON.stringify(iro));
+        //         colorPicker = iro.ColorPicker('#' + pickerId, {
+        //             width: 200,
+        //             color: 'rgb(255, 0, 0)',
+        //             borderWidth: 0,
+        //             borderColor: '#000',
+        //             padding: 10
+        //         });
+        //         colorPicker.on(["color:init", "color:change"], function (color) {
+        //             document.getElementById(elementId).value = color.hexString.toUpperCase();
+        //             document.getElementById(previewElementId).style[styleName] = color.hexString.toUpperCase();
+        //         });
+        //     }
+        //     document.getElementById(pickerId).style.display = 'block';
+        //     colorPickerCnt++;
+        // });
 
-        $('#' + elementId).blur(function () {
-            document.getElementById(pickerId).style.display = 'none';
-        });
+//        $('#' + elementId).blur(function () {
+//            document.getElementById(pickerId).style.display = 'none';
+//        });
 
         $('#' + elementId).keyup(function () {
             var value = document.getElementById(elementId).value;
@@ -762,11 +751,18 @@ $(function () {
                     defValue = '#000000';
                     document.getElementById(previewElementId).style[styleName] = defValue;
                 }
-                colorPicker.color.hexString = defValue;
+                //Comment
+                // colorPicker.color.hexString = defValue;
             } else {
                 var hexPattern = /^#[0-9a-fA-F]{6}$/;
                 if (hexPattern.test(value)) {
-                    colorPicker.color.hexString = value;
+                    // colorPicker.color.hexString = value;
+                    if (styleName === 'background') {
+                        document.getElementById(previewElementId).style[styleName] = value;
+                    }
+                    if (styleName === 'color') {
+                        document.getElementById(previewElementId).style[styleName] = value;
+                    }
                 }
             }
         });

@@ -252,13 +252,14 @@
     text-align: center;
 }
 </style>
-<script src="/Taishin/BCS/JS/iro-colorPicker/iro.min.js"></script>
+<!--<script src="/Taishin/BCS/JS/iro-colorPicker/iro.js"></script>-->
+<!--<script src="/Taishin/BCS/JS/iro-colorPicker/iro.es.js"></script>-->
 
 <div class="LyContents">
     <div th:replace="/BCS/Views/Common/Menu :: menu ('PagepnpNAC')"/>
     <!-- Right Content -->
     <div class="LyMain" role="main">
-        <form>
+<!--        <form>-->
             <section>
                 <header class="ContentHead">
                     <input name="cancel" class="btn_cancel" type="button" value="返回"
@@ -397,7 +398,7 @@
                     </div>
                 </div>
             </section>
-        </form>
+<!--        </form>-->
     </div>
 </div>
 <!-- Dialog -->
@@ -470,8 +471,8 @@
                     <button id="titleTextBoldBtn" class="btn btn-style btn-bold" value='false'>B</button>
                     <button id="titleTextItalicBtn" class="btn btn-style btn-italic" value=false>I</button>
                     <button id="titleTextUnderLineBtn" class="btn btn-style btn-underline" value="false">U</button>
-                    <input id="headerTitleBackgroundColor" class="color_input_text" type="text" name="colorInput" maxlength="7" placeholder="背景顏色"/>
-                    <div id="colorPicker1" class="colorPicker"></div>
+                    <input id="headerTitleBackgroundColor" class="color_input_text" type="text" name="colorInput" maxlength="7" placeholder="背景#RRGGBB"/>
+<!--                    <div id="colorPicker1" class="colorPicker"></div>-->
                 </div>
                 <div class="warp100">
                     <label class="col1">簡訊內容</label>
@@ -481,10 +482,10 @@
                         <button id="heroTextBoldBtn" class="btn btn-style btn-bold" value="false">B</button>
                         <button id="heroTextItalicBtn" class="btn btn-style btn-italic" value="false">I</button>
                         <button id="heroTextUnderLineBtn" class="btn btn-style btn-underline" value="false">U</button>
-                        <input id="heroTextColorText" class="color_input_text" type="text" name="colorInput" maxlength="7" placeholder="文字顏色"/>
-                        <div id="colorPicker2" class="colorPicker"></div>
-                        <input id="heroBackgroundColorText" class="color_input_text" type="text" name="colorInput" maxlength="7" placeholder="背景顏色"/>
-                        <div id="colorPicker3" class="colorPicker"></div>
+                        <input id="heroTextColorText" class="color_input_text" type="text" name="colorInput" maxlength="7" placeholder="文字#RRGGBB"/>
+<!--                        <div id="colorPicker2" class="colorPicker"></div>-->
+                        <input id="heroBackgroundColorText" class="color_input_text" type="text" name="colorInput" maxlength="7" placeholder="背景#RRGGBB"/>
+<!--                        <div id="colorPicker3" class="colorPicker"></div>-->
                     </div>
                 </div>
                 <div class="warp100">

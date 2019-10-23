@@ -81,11 +81,22 @@ public class OracleService {
                     employee.setGroupName(extractGroupName(employee));
                 }
                 logger.info("Taishin Employee: " + new GsonBuilder().serializeNulls().setPrettyPrinting().create().toJson(employee));
+            } catch (Exception e) {
+                //TODO 只有Not Found 才適用該錯誤訊息，其餘錯誤需另外編寫錯誤原因
+                logger.error("Exception", e);
+                throw new BcsNoticeException("查無此員工編號!!");
             }
         }
 
-        if (employee.getDivisionName().trim().isEmpty()) {
-            throw new BcsNoticeException("The Employee ID is not correct!");
+        if (employee.getEmployeeId() == null
+                || employee.getEmployeeId().trim().isEmpty()
+                || employee.getDivisionName() == null
+                || employee.getDivisionName().trim().isEmpty()
+                || employee.getDepartmentId() == null
+                || employee.getDepartmentId().trim().isEmpty()
+                || employee.getGroupName() == null
+                || employee.getGroupName().trim().isEmpty()) {
+            throw new BcsNoticeException("查無此員工編號!!");
         }
         return employee;
     }

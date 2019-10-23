@@ -48,7 +48,7 @@ public class MessageTransmitService {
 		JSONObject replyMessageObject = new JSONObject();
 		JSONArray messageList = new JSONArray();
 		
-        /* 先判斷是否為文字訊息，否的話給予預設回覆 >>>20190128捨棄此判斷，將收到的訊息都拋給碩網處理*/
+        /* 先判斷是否為文字訊息，否的話給予預設回覆 >>>20190128捨棄此判斷，將收到的訊息都拋給Pepper GW處理*/
 //      if(question != null) { 
 			Date now = new Date();
 			

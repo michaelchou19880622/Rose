@@ -160,7 +160,7 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
 
 					return -3L;
 				} else {
-					/* 將其餘的 Postback Event Data 丟給 Gateway */
+					/* 將其餘的 Postback Event Data 丟給 Pepper GW */
 				}
 			}
 
@@ -226,14 +226,14 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
 						return iMsgIdBlack;
 					} else {
 						// 未設定 預設回應
-						logger.info("◎ 不符合任何關鍵字，把訊息丟給碩網處理: " + text);
+						logger.info("◎ 不符合任何關鍵字，把訊息丟給Pepper GW處理: " + text);
 
 						UserLiveChat userLiveChat = ApplicationContextProvider.getApplicationContext().getBean(UserLiveChatService.class).findLeaveMsgUserByUIDAndState(MID,
 								UserLiveChat.LEAVE_MESSAGE);
 
 						if (userLiveChat == null) {
-							// 20190126 新增參數content.getMsgType()供碩網判斷。
-							// 20190126機器人應答狀況下，如使用者傳圖片，須判斷type後在qa-ajax多帶一個參數給碩網判斷
+							// 20190126 新增參數content.getMsgType()供Pepper GW判斷。
+							// 20190126機器人應答狀況下，如使用者傳圖片，須判斷type後在qa-ajax多帶一個參數給Pepper GW判斷
 							ApplicationContextProvider.getApplicationContext().getBean(MessageTransmitService.class).transmitToBOT(ChannelId, MID, replyToken, text, content.getMsgId(),
 									content.getMsgType());
 							return -2L;
@@ -260,8 +260,8 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
 					// 記錄自動回應 iMsgId
 					return iMsgId;
 				} else {
-					// 20190126 新增參數content.getMsgType()供碩網判斷。
-					// 20190126機器人應答狀況下，如使用者傳圖片，須判斷type後在qa-ajax多帶一個參數給碩網判斷
+					// 20190126 新增參數content.getMsgType()供Pepper GW判斷。
+					// 20190126機器人應答狀況下，如使用者傳圖片，須判斷type後在qa-ajax多帶一個參數給Pepper GW判斷
 					ApplicationContextProvider.getApplicationContext().getBean(MessageTransmitService.class).transmitToBOT(ChannelId, MID, replyToken, text, content.getMsgId(), content.getMsgType());
 
 					return -2L;

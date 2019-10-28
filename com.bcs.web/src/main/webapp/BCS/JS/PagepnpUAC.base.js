@@ -17,7 +17,7 @@ $(function () {
 
         if (pnpMaintainAccountModelId !== null && pnpMaintainAccountModelId !== '') {
             $('.LyMain').block($.BCS.blockMsgRead);
-            $('.CHTtl').html('編輯一般帳號');
+            $('.CHTtl').html('編輯Unica帳號');
             document.getElementById('popupEditPage').value = 'Edit';
             $.ajax({
                 type: 'POST',
@@ -56,6 +56,7 @@ $(function () {
             });
         } else {
             console.log('Id is Null!! To Create Mode!!');
+            loadPopupConfig();
         }
     };
 
@@ -174,6 +175,8 @@ $(function () {
                         console.log("complete");
                         saveBeforeTemplateJson = generateTemplateJson();
                     });
+            } else {
+                defaultPopUp();
             }
 
         }
@@ -287,7 +290,7 @@ $(function () {
     var addDefaultButton = function addDefaultButton() {
         addBtn(
             config.body.button.buttonText,
-            '#' + config.body.button.buttonColor,
+            config.body.button.buttonColor,
             ''
         );
     }
@@ -308,7 +311,7 @@ $(function () {
         btnNameInput.id = 'btnName-' + btnIndex;
         btnNameInput.className = 'input_text';
         btnNameInput.value = btnText || '';
-        btnNameInput.maxlength = 10;
+        btnNameInput.maxLength = 10;
 
         /* 監聽按鈕文字輸入內容即時反映於預覽區 */
         btnNameInput.onkeyup = function () {
@@ -363,7 +366,7 @@ $(function () {
         colorInput.className = 'color_input_text';
         colorInput.id = 'colorInputBtn' + btnIndex;
         colorInput.placeholder = '按鈕#RRGGBB';
-        colorInput.maxlength = 7;
+        colorInput.maxLength = 7;
         colorInput.type = 'text';
         colorInput.value = btnBackColor;
 
@@ -518,7 +521,26 @@ $(function () {
     };
     //--------------------- Generate Pop Template Button Json -----------------------
 
-
+    var validateRequireDate = function(){
+        var a1 = document.getElementById('account').value;
+        var a2 = document.getElementById('accountAttribute').value;
+        var a3 = document.getElementById('sourceSystem').value;
+        var a4 = document.getElementById('employeeId').value;
+        var a5 = document.getElementById('departmentId').value;
+        var a6 = document.getElementById('divisionName').value;
+        var a7 = document.getElementById('departmentName').value;
+        var a8 = document.getElementById('groupName').value;
+        var a9 = document.getElementById('PccCode').value;
+        return a1 !== null && a1 !== ''
+            && a2 !== null && a2 !== ''
+            && a3 !== null && a3 !== ''
+            && a4 !== null && a4 !== ''
+            && a5 !== null && a5 !== ''
+            && a6 !== null && a6 !== ''
+            && a7 !== null && a7 !== ''
+            && a8 !== null && a8 !== ''
+            && a9 !== null && a9 !== '';
+    }
 
     //------------------- Event Listener ----------------------
 
@@ -581,60 +603,63 @@ $(function () {
 
     /* 主頁面儲存按鈕 */
     $('#saveAccountModelBtn').click(function () {
-        if (saveBeforeTemplateJson === undefined || saveBeforeTemplateJson === null || saveBeforeTemplateJson === '' || saveBeforeTemplateJson === JSON.stringify({})) {
-            initPopPage();
-        }
-        console.log('saveBeforeTemplateJson:' + JSON.stringify(saveBeforeTemplateJson));
-
-        var maintainAccountData = {};
-        maintainAccountData.account = $('#account').val();
-        maintainAccountData.accountAttribute = $('#accountAttribute').val();
-        maintainAccountData.sourceSystem = $('#sourceSystem').val();
-        maintainAccountData.employeeId = $('#employeeId').val();
-        maintainAccountData.departmentId = $('#departmentId').val();
-        maintainAccountData.divisionName = $('#divisionName').val();
-        maintainAccountData.departmentName = $('#departmentName').val();
-        maintainAccountData.groupName = $('#groupName').val();
-        maintainAccountData.pccCode = $('#PccCode').val();
-        maintainAccountData.accountType = 'Unica';
-        maintainAccountData.accountClass = $('.accountClass')[0].checked ? 'O' : 'M';
-        maintainAccountData.status = $('.status')[0].checked;
-        maintainAccountData.template = document.getElementById('quickViewTemplate').textContent;
-        maintainAccountData.pnpContent = document.getElementById('quickViewPNPContent').textContent;
-        maintainAccountData.id = pnpMaintainAccountModelId;
-
-        var quickViewPathWay = document.getElementById('quickViewPathWay').textContent;
-        var quickViewPathWayCode = pathWayNameToCode(quickViewPathWay);
-        maintainAccountData.pathway = quickViewPathWayCode;
-
-        var sendData = {
-            maintainAccount: JSON.stringify(maintainAccountData),
-            flexTemplate: JSON.stringify(saveBeforeTemplateJson)
-        };
-
-        console.log(JSON.stringify(sendData, null, 4));
-
-        $.ajax({
-            type: 'POST',
-            url: bcs.bcsContextPath + '/pnpAdmin/createPNPMaintainAccount',
-            cache: false,
-            contentType: 'application/json',
-            processData: false,
-            data: JSON.stringify(sendData)
-        }).success(function (response) {
-            console.info(response);
-            alert('儲存成功');
-            window.location.replace('pnpUnicaAccountListPage');
-        }).fail(function (response) {
-            console.info(response);
-            var text = response.responseText;
-            console.info("text:", text);
-            if (text == '帳號、前方來源系統、簡訊內容不可與之前資料重複！') {
-                alert('帳號、前方來源系統、簡訊內容不可與之前資料重複！');
-            } else {
-                $.FailResponse(response);
+        var validIsPass = validateRequireDate();
+        if(validIsPass) {
+            if (saveBeforeTemplateJson === undefined || saveBeforeTemplateJson === null || saveBeforeTemplateJson === '' || saveBeforeTemplateJson === JSON.stringify({})) {
+                loadPopupConfig();
             }
-        })
+            console.log('saveBeforeTemplateJson:' + JSON.stringify(saveBeforeTemplateJson));
+
+            var maintainAccountData = {};
+            maintainAccountData.account = $('#account').val();
+            maintainAccountData.accountAttribute = $('#accountAttribute').val();
+            maintainAccountData.sourceSystem = $('#sourceSystem').val();
+            maintainAccountData.employeeId = $('#employeeId').val();
+            maintainAccountData.departmentId = $('#departmentId').val();
+            maintainAccountData.divisionName = $('#divisionName').val();
+            maintainAccountData.departmentName = $('#departmentName').val();
+            maintainAccountData.groupName = $('#groupName').val();
+            maintainAccountData.pccCode = $('#PccCode').val();
+            maintainAccountData.accountType = 'Unica';
+            maintainAccountData.accountClass = $('.accountClass')[0].checked ? 'O' : 'M';
+            maintainAccountData.status = $('.status')[0].checked;
+            maintainAccountData.template = document.getElementById('quickViewTemplate').textContent;
+            maintainAccountData.pnpContent = document.getElementById('quickViewPNPContent').textContent;
+            maintainAccountData.id = pnpMaintainAccountModelId;
+
+            var quickViewPathWay = document.getElementById('quickViewPathWay').textContent;
+            var quickViewPathWayCode = pathWayNameToCode(quickViewPathWay);
+            maintainAccountData.pathway = quickViewPathWayCode;
+
+            var sendData = {
+                maintainAccount: JSON.stringify(maintainAccountData),
+                flexTemplate: JSON.stringify(saveBeforeTemplateJson)
+            };
+
+            console.log(JSON.stringify(sendData, null, 4));
+
+            $.ajax({
+                type: 'POST',
+                url: bcs.bcsContextPath + '/pnpAdmin/createPNPMaintainAccount',
+                cache: false,
+                contentType: 'application/json',
+                processData: false,
+                data: JSON.stringify(sendData)
+            }).success(function (response) {
+                console.info(response);
+                alert('儲存成功');
+                window.location.replace('pnpUnicaAccountListPage');
+            }).fail(function (response) {
+                console.info(response);
+                var text = response.responseText;
+                console.info("text:", text);
+                if (text == '帳號、前方來源系統、簡訊內容不可與之前資料重複！') {
+                    alert('帳號、前方來源系統、簡訊內容不可與之前資料重複！');
+                } else {
+                    $.FailResponse(response);
+                }
+            })
+        }
     });
     //------------------- Event Listener ----------------------
 
@@ -771,7 +796,7 @@ $(function () {
 
     /* 監聽顏色選取即時反映於預覽區 */
     triggerColorPicker('headerTitleBackgroundColor', 'colorPicker1', 'msgTitle-area', 'background');
-    triggerColorPicker('heroTextColorText', 'colorPicker2', 'mainMsg', 'color');
+    triggerColorPicker('heroTextColorText', 'colorPicker2', 'previewContent', 'color');
     triggerColorPicker('heroBackgroundColorText', 'colorPicker3', 'mainMsg', 'background');
     //---------------------Color Picker--------------------------
     //------------------- Popup Event Listener ----------------------

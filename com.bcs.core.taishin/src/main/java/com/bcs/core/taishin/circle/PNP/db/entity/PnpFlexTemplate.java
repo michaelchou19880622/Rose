@@ -77,7 +77,7 @@ public class PnpFlexTemplate extends AbstractBcsEntity implements Serializable {
     private String heroTextStyle;
     @Column(name = "HERO_TEXT_DECORATION", columnDefinition = "varchar(15) default ''")
     private String heroTextDecoration;
-    @Column(name = "HERO_TEXT", columnDefinition = "nvarchar(50) default ''")
+    @Column(name = "HERO_TEXT", columnDefinition = "nvarchar(200) default ''")
     private String heroText;
 
     @Column(name = "BODY_BACKGROUND", columnDefinition = "varchar(7) default ''")
@@ -92,20 +92,20 @@ public class PnpFlexTemplate extends AbstractBcsEntity implements Serializable {
     private String bodyDescTextStyle;
     @Column(name = "BODY_DESC_TEXT_DECORATION", columnDefinition = "varchar(15) default ''")
     private String bodyDescTextDecoration;
-    @Column(name = "BODY_DESC_TEXT", columnDefinition = "nvarchar(50) default ''")
+    @Column(name = "BODY_DESC_TEXT", columnDefinition = "nvarchar(200) default ''")
     private String bodyDescText;
 
 
-    @Column(name = "BUTTON_TEXT", columnDefinition = "nvarchar(400) default ''")
+    @Column(name = "BUTTON_TEXT", columnDefinition = "nvarchar(600) default ''")
     private String buttonText;
-    @Column(name = "BUTTON_COLOR", columnDefinition = "varchar(400) default ''")
+    @Column(name = "BUTTON_COLOR", columnDefinition = "varchar(600) default ''")
     private String buttonColor;
-    @Column(name = "BUTTON_URL", columnDefinition = "varchar(400) default ''")
+    @Column(name = "BUTTON_URL", columnDefinition = "varchar(600) default ''")
     private String buttonUrl;
 
     @Column(name = "FOOTER_LINK_TEXT", columnDefinition = "nvarchar(20) default ''")
     private String footerLinkText;
-    @Column(name = "FOOTER_LINK_URL", columnDefinition = "nvarchar(100) default ''")
+    @Column(name = "FOOTER_LINK_URL", columnDefinition = "nvarchar(200) default ''")
     private String footerLinkUrl;
 
     /**

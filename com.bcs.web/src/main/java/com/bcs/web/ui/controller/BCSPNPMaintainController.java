@@ -261,7 +261,7 @@ public class BCSPNPMaintainController extends BCSBaseController {
         heroMap.put("textWeight", getOrDefault(configMap, ".flex.ui.hero.default.text.weight", "regular"));
         heroMap.put("textStyle", getOrDefault(configMap, ".flex.ui.hero.default.text.style", "normal"));
         heroMap.put("textDecoration", getOrDefault(configMap, ".flex.ui.hero.default.text.decoration", "none"));
-        heroMap.put("text", getOrDefault(configMap, ".flex.ui.hero.default.text", "此通知在用戶簽約時所註冊之電話號碼和LINE上所註冊之電話號碼一致時發送。"));
+        heroMap.put("text", getOrDefault(configMap, ".flex.ui.hero.default.text", "這是 PNP Flex 訊息內容!!"));
         return heroMap;
     }
 
@@ -287,7 +287,7 @@ public class BCSPNPMaintainController extends BCSBaseController {
         descriptionMap.put("textStyle", getOrDefault(configMap, ".flex.ui.hero.default.desc.text.style", "normal"));
         descriptionMap.put("textDecoration", getOrDefault(configMap, ".flex.ui.hero.default.desc.text.decoration", "none"));
         descriptionMap.put("text", getOrDefault(configMap, ".flex.ui.body.default.desc.text",
-                "!!Minim ea pariatur in mollit in eu veniam consequat et minim laboris sed adipisicing eu aute dolore."));
+                "此通知在用戶簽約時所註冊之電話號碼和LINE上所註冊之電話號碼一致時發送。"));
         return descriptionMap;
     }
 

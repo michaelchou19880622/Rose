@@ -75,7 +75,7 @@ public class WebServiceAspect {
 
         logMap.put("ARGS", Arrays.toString(joinPoint.getArgs()));
 
-        log.info("Request:\n{}", DataUtils.toPrettyJson(logMap));
+        log.info("Request:\n{}", DataUtils.toPrettyJsonUseJackson(logMap));
     }
 
     /**
@@ -104,7 +104,7 @@ public class WebServiceAspect {
 
         logMap.put("RESPONSE", ret);
 
-        log.info("Response: Cast:{} ms \n{}", (System.currentTimeMillis() - startTime), DataUtils.toPrettyJson(logMap));
+        log.info("Response: Cast:{} ms \n{}", (System.currentTimeMillis() - startTime), DataUtils.toPrettyJsonUseJackson(logMap));
     }
 
     /**

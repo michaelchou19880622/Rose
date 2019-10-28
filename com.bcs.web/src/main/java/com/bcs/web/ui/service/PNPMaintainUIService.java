@@ -6,6 +6,7 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
 import com.bcs.core.taishin.circle.PNP.db.repository.PNPMaintainAccountModelCustom;
 import com.bcs.core.taishin.circle.PNP.db.repository.PNPMaintainAccountModelRepository;
 import com.bcs.core.taishin.circle.db.service.OracleService;
+import com.bcs.core.utils.DataUtils;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -68,7 +69,14 @@ public class PNPMaintainUIService {
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String, List<String>> getPNPDetailReport(String startDate, String endDate, String account, String pccCode, String sourceSystem, Integer page, String empId) {
+    public Map<String, List<String>> getPNPDetailReport(String startDate,
+                                                        String endDate,
+                                                        String account,
+                                                        String pccCode,
+                                                        String sourceSystem,
+                                                        Integer page,
+                                                        String empId,
+                                                        String phoneNumber) {
         try {
             int rowStart;
             int rowEnd;
@@ -142,34 +150,37 @@ public class PNPMaintainUIService {
             if (StringUtils.isNotBlank(sourceSystem)) {
                 sb.append(String.format(" and source_system = '%s' ", sourceSystem));
             }
+            if (StringUtils.isNotBlank(phoneNumber)) {
+                sb.append(String.format(" and phone = '%s'", phoneNumber));
+            }
 
             sb.append(
                     "        ) " +
-                    "        union all " +
-                    "        ( " +
-                    "               select " +
-                    "                        m.orig_file_name, " +
-                    "                        d.proc_flow, " +
-                    "                        d.proc_stage, " +
-                    "                        msg, " +
-                    "                        phone, " +
-                    "                        null as detail_schedule_time1, " +
-                    "                        null as detail_schedule_time2, " +
-                    "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
-                    "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
-                    "                        d.bc_status as status1, " +
-                    "                        d.pnp_status as status2, " +
-                    "                        d.sms_status as status3, " +
-                    "                        a.pcc_code, " +
-                    "                        a.account, " +
-                    "                        a.source_system, " +
-                    "                        a.employee_id, " +
-                    "                        d.creat_time " +
-                    "                from " +
-                    "                        bcs_pnp_detail_mitake as d " +
-                    "                left join bcs_pnp_main_mitake as m on d.pnp_main_id = m.pnp_main_id " +
-                    "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
-                    "                where d.creat_time >= ?3 and d.creat_time <  dateadd(day, 1, ?4) ");
+                            "        union all " +
+                            "        ( " +
+                            "               select " +
+                            "                        m.orig_file_name, " +
+                            "                        d.proc_flow, " +
+                            "                        d.proc_stage, " +
+                            "                        msg, " +
+                            "                        phone, " +
+                            "                        null as detail_schedule_time1, " +
+                            "                        null as detail_schedule_time2, " +
+                            "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
+                            "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
+                            "                        d.bc_status as status1, " +
+                            "                        d.pnp_status as status2, " +
+                            "                        d.sms_status as status3, " +
+                            "                        a.pcc_code, " +
+                            "                        a.account, " +
+                            "                        a.source_system, " +
+                            "                        a.employee_id, " +
+                            "                        d.creat_time " +
+                            "                from " +
+                            "                        bcs_pnp_detail_mitake as d " +
+                            "                left join bcs_pnp_main_mitake as m on d.pnp_main_id = m.pnp_main_id " +
+                            "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
+                            "                where d.creat_time >= ?3 and d.creat_time <  dateadd(day, 1, ?4) ");
 
             if (StringUtils.isNotBlank(account)) {
                 sb.append(String.format(" and account = '%s'", account));
@@ -180,34 +191,37 @@ public class PNPMaintainUIService {
             if (StringUtils.isNotBlank(sourceSystem)) {
                 sb.append(String.format(" and source_system = '%s' ", sourceSystem));
             }
+            if (StringUtils.isNotBlank(phoneNumber)) {
+                sb.append(String.format(" and phone = '%s'", phoneNumber));
+            }
 
             sb.append(
                     "        ) " +
-                    "        union all " +
-                    "        ( " +
-                    "                select " +
-                    "                        m.orig_file_name, " +
-                    "                        d.proc_flow, " +
-                    "                        d.proc_stage, " +
-                    "                        msg, " +
-                    "                        phone, " +
-                    "                        null as detail_schedule_time1, " +
-                    "                        null as detail_schedule_time2, " +
-                    "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
-                    "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
-                    "                        d.bc_status as status1, " +
-                    "                        d.pnp_status as status2, " +
-                    "                        d.sms_status as status3, " +
-                    "                        a.pcc_code, " +
-                    "                        a.account, " +
-                    "                        a.source_system, " +
-                    "                        a.employee_id, " +
-                    "                        d.creat_time " +
-                    "                from " +
-                    "                        bcs_pnp_detail_unica as d " +
-                    "                left join bcs_pnp_main_unica as m on d.pnp_main_id = m.pnp_main_id " +
-                    "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
-                    "                where d.creat_time >= ?5 and d.creat_time <  dateadd(day, 1, ?6) ");
+                            "        union all " +
+                            "        ( " +
+                            "                select " +
+                            "                        m.orig_file_name, " +
+                            "                        d.proc_flow, " +
+                            "                        d.proc_stage, " +
+                            "                        msg, " +
+                            "                        phone, " +
+                            "                        null as detail_schedule_time1, " +
+                            "                        null as detail_schedule_time2, " +
+                            "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
+                            "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
+                            "                        d.bc_status as status1, " +
+                            "                        d.pnp_status as status2, " +
+                            "                        d.sms_status as status3, " +
+                            "                        a.pcc_code, " +
+                            "                        a.account, " +
+                            "                        a.source_system, " +
+                            "                        a.employee_id, " +
+                            "                        d.creat_time " +
+                            "                from " +
+                            "                        bcs_pnp_detail_unica as d " +
+                            "                left join bcs_pnp_main_unica as m on d.pnp_main_id = m.pnp_main_id " +
+                            "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
+                            "                where d.creat_time >= ?5 and d.creat_time <  dateadd(day, 1, ?6) ");
 
             if (StringUtils.isNotBlank(account)) {
                 sb.append(String.format(" and account = '%s'", account));
@@ -218,34 +232,37 @@ public class PNPMaintainUIService {
             if (StringUtils.isNotBlank(sourceSystem)) {
                 sb.append(String.format(" and source_system = '%s' ", sourceSystem));
             }
+            if (StringUtils.isNotBlank(phoneNumber)) {
+                sb.append(String.format(" and phone = '%s'", phoneNumber));
+            }
 
             sb.append(
                     "        ) " +
-                    "        union all " +
-                    "        ( " +
-                    "                select " +
-                    "                        m.orig_file_name, " +
-                    "                        d.proc_flow, " +
-                    "                        d.proc_stage, " +
-                    "                        msg, " +
-                    "                        phone, " +
-                    "                        null as detail_schedule_time1, " +
-                    "                        null as detail_schedule_time2, " +
-                    "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
-                    "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
-                    "                        d.bc_status as status1, " +
-                    "                        d.pnp_status as status2, " +
-                    "                        d.sms_status as status3, " +
-                    "                        a.pcc_code, " +
-                    "                        a.account, " +
-                    "                        a.source_system, " +
-                    "                        a.employee_id, " +
-                    "                        d.creat_time " +
-                    "                from " +
-                    "                        bcs_pnp_detail_every8d as d " +
-                    "                left join bcs_pnp_main_every8d as m on d.pnp_main_id = m.pnp_main_id " +
-                    "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
-                    "                where d.creat_time >= ?7 and d.creat_time <  dateadd(day, 1, ?8) ");
+                            "        union all " +
+                            "        ( " +
+                            "                select " +
+                            "                        m.orig_file_name, " +
+                            "                        d.proc_flow, " +
+                            "                        d.proc_stage, " +
+                            "                        msg, " +
+                            "                        phone, " +
+                            "                        null as detail_schedule_time1, " +
+                            "                        null as detail_schedule_time2, " +
+                            "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
+                            "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
+                            "                        d.bc_status as status1, " +
+                            "                        d.pnp_status as status2, " +
+                            "                        d.sms_status as status3, " +
+                            "                        a.pcc_code, " +
+                            "                        a.account, " +
+                            "                        a.source_system, " +
+                            "                        a.employee_id, " +
+                            "                        d.creat_time " +
+                            "                from " +
+                            "                        bcs_pnp_detail_every8d as d " +
+                            "                left join bcs_pnp_main_every8d as m on d.pnp_main_id = m.pnp_main_id " +
+                            "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
+                            "                where d.creat_time >= ?7 and d.creat_time <  dateadd(day, 1, ?8) ");
 
             if (StringUtils.isNotBlank(account)) {
                 sb.append(String.format(" and account = '%s'", account));
@@ -255,6 +272,9 @@ public class PNPMaintainUIService {
             }
             if (StringUtils.isNotBlank(sourceSystem)) {
                 sb.append(String.format(" and source_system = '%s' ", sourceSystem));
+            }
+            if (StringUtils.isNotBlank(phoneNumber)) {
+                sb.append(String.format(" and phone = '%s'", phoneNumber));
             }
 
             sb.append("        ) " +
@@ -304,8 +324,7 @@ public class PNPMaintainUIService {
                     }
                 }
             }
-            logger.info(new GsonBuilder().serializeNulls().setPrettyPrinting().create().toJson(map));
-
+            DataUtils.toPrettyJsonUseJackson(map);
             return map;
         } catch (Exception e) {
             logger.error("Exception", e);
@@ -314,7 +333,7 @@ public class PNPMaintainUIService {
     }
 
     @SuppressWarnings("unchecked")
-    public String getPNPDetailReportTotalPages(String startDate, String endDate, String account, String pccCode, String sourceSystem, String empId) {
+    public String getPNPDetailReportTotalPages(String startDate, String endDate, String account, String pccCode, String sourceSystem, String empId, String phoneNumber) {
         String queryString =
                 "SELECT COUNT(*) FROM ( "
                         + "SELECT ORIG_FILE_NAME, PROC_FLOW, SOURCE, MSG, PHONE, PNP_DELIVERY_EXPIRE_TIME, DETAIL_SCHEDULE_TIME, CREAT_TIME, STATUS, PCC_CODE, ACCOUNT, SOURCE_SYSTEM, EMPLOYEE_ID, "
@@ -342,6 +361,7 @@ public class PNPMaintainUIService {
         if (StringUtils.isNotBlank(account)) queryString += "AND ACCOUNT = '" + account + "' ";
         if (StringUtils.isNotBlank(pccCode)) queryString += "AND PCC_CODE = '" + pccCode + "' ";
         if (StringUtils.isNotBlank(sourceSystem)) queryString += "AND SOURCE_SYSTEM = '" + sourceSystem + "' ";
+        if (StringUtils.isNotBlank(phoneNumber)) queryString += "AND PHONE = '" + phoneNumber + "' ";
 
         boolean oracleUseDepartmentCheck = CoreConfigReader.getBoolean(CONFIG_STR.ORACLE_USE_DEPARTMENT_CHECK, true);
         logger.info("oracleUseDepartmentCheck:" + oracleUseDepartmentCheck);

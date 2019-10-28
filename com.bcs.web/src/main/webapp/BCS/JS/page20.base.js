@@ -31,15 +31,20 @@ $(function(){
 	
 	var loadDataFunc = function(queryFlag){
 		$('.LyMain').block($.BCS.blockMsgRead);
-		
 		console.info("queryFlag", queryFlag);
 		console.info("page", page);
-
+		var postData = {};
+		postData.queryFlag = queryFlag;
+		postData.page = page;
 		$('#pageText').html(page+1);
 		
 		$.ajax({
-			type : "GET",
-			url : bcs.bcsContextPath + '/edit/getLinkUrlReportList?queryFlag=' + queryFlag + '&page=' + page
+			type : "POST",
+			url : bcs.bcsContextPath + '/edit/getLinkUrlReportList',
+			cache: false,
+            contentType: 'application/json',
+            processData: false,
+			data : JSON.stringify(postData)
 		}).success(function(response){
 			$('.dataTemplate').remove();
 			console.info(response);

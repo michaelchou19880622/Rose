@@ -518,8 +518,6 @@ public class BCSLinePointController extends BCSBaseController {
 //					employee.setDepartmentName("LINEBC");
 						
 					
-					
-					
 					String Department = main.getDepartmentFullName();
 					String[] Departmentname = Department.split(" ");
 					//Departmentname[0]; 處  DIVISION_NAME

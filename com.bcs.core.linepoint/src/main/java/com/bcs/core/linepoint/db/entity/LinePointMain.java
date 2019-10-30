@@ -30,11 +30,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
     	    	+ "x.TITLE like ('%' + ?1 + '%') and x.MODIFY_USER like ('%' + ?2 + '%') "
     	    	+ "and x.MODIFY_TIME >= ?3 and x.MODIFY_TIME <= ?4 and x.status = 'COMPLETE' "
     	    	+ "order by x.MODIFY_TIME desc ", resultSetMapping = "LinePointMain"),
-		
-		@NamedNativeQuery(name = "updateLinePoint", query = "update BCS_LINE_POINT_MAIN x " 
- 			+      "set x.SUCCESSFUL_COUNT = (select count(*)  from BCS_LINE_POINT_DETAIL y where y.LINE_POINT_MAIN_ID = :1 and y.status = 'SUCCESS'), "
-			+      "x.SUCCESSFUL_AMOUNT = (select sum(AMOUNT)  from BCS_LINE_POINT_DETAIL y where y.LINE_POINT_MAIN_ID = :1 and y.status = 'SUCCESS') "
-			+      "where x.ID = :1 and status = 'COMPLETE' ", resultSetMapping = "LinePointMain"),
 })
 
 

@@ -61,10 +61,10 @@ public class LinePointMainService {
 	public List<LinePointMain> findBySendTypeAndDate(String sendType, Date startDate, Date endDate){
 		return linePointMainRepository.findBySendTypeAndDate(sendType, startDate, endDate);
 	}	
-	public void updateLinePoint(String linePointId){
-		Query query = entityManager.createNamedQuery("updateLinePoint").setParameter(1, linePointId);
-		query.executeUpdate();
+	public void updateLinePoint(String linePointMainId){
+		//Query query = entityManager.createNamedQuery("updateLinePoint").setParameter(1, linePointId);
 		//query.getResultList();
+		linePointMainRepository.updateLinePoint(linePointMainId);
 	}	
 	public List<LinePointMain> findAllowableIdles(){
 		return linePointMainRepository.findAllowableIdles();

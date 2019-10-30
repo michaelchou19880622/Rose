@@ -266,9 +266,9 @@ public class BCSLinePointController extends BCSBaseController {
 		    
 		    //List<LinePointMain> result = new ArrayList<LinePointMain>();
 		    List<LinePointMain> list = this.linePointUIService.linePointMainFindBcsAndDate(startDate, endDate);
-//		    for(LinePointMain linePointMain : list) {
-//		    	linePointUIService.updateLinePoint(linePointMain.getId().toString());
-//		    }
+		    for(LinePointMain linePointMain : list) {
+		    	linePointUIService.updateLinePoint(linePointMain.getId().toString());
+		    }
 		    list = this.linePointUIService.linePointMainFindBcsAndDate(startDate, endDate);
 		    //logger.info("list:" + list);
 		    List<LinePointMain> result = competence(list , customUser);

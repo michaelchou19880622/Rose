@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,6 +39,7 @@ import com.bcs.core.db.service.ContentRichMsgService;
 import com.bcs.core.db.service.ContentTemplateMsgService;
 import com.bcs.core.db.service.LineUserService;
 import com.bcs.core.db.service.MsgMainService;
+import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.circle.db.entity.TaishinEmployee;
@@ -93,12 +95,20 @@ public class BCSLinePointController extends BCSBaseController {
 		logger.info("linePointCreatePage");
 		return BcsPageEnum.LinePointCreatePage.toString();
 	}
-
+	
 	@ControllerLog(description = "Line Point 活動列表")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/linePointListPage")
 	public String linePointListPage(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser) {
 		logger.info("linePointListPage");
 		return BcsPageEnum.LinePointListPage.toString();
+	}
+	
+	@ControllerLog(description = "getCaveatLinePoint")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getCaveatLinePoint")
+	public ResponseEntity<?> getCaveatLinePoint(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser) {
+		logger.info("getCaveatLinePoint");
+		String CaveatLinePoint = CoreConfigReader.getString(CONFIG_STR.CAVEAT_LINEPOINT_POINT, true);
+		return  new ResponseEntity<>(CaveatLinePoint, HttpStatus.OK);
 	}
 	
 	// ---- Data Creation ----
@@ -136,9 +146,9 @@ public class BCSLinePointController extends BCSBaseController {
 			String departmentFullName = taishinEmployee.getDivisionName() + " " + 
 				taishinEmployee.getDepartmentName() + " " + taishinEmployee.getGroupName();
 			logger.info("departmentFullName:" + departmentFullName);
+//			
 			
-			
-			//String departmentFullName = "XTREME LINEBC TAISHIN";
+//			String departmentFullName = "XTREME LINEBC TAISHIN";
 			linePointMain.setDepartmentFullName(departmentFullName);
 			linePointMain.setModifyUser(customUser.getAccount());
 			linePointMain.setModifyTime(new Date());
@@ -156,7 +166,8 @@ public class BCSLinePointController extends BCSBaseController {
 		}
 	}
 
-	@ControllerLog(description = "Save Line Point Detail List")
+	//@ControllerLog(description = "Save Line Point Detail List")
+	@Transactional(rollbackFor=Exception.class, timeout = 300000)
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/createLinePointDetailList", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createLinePointDetailList(HttpServletRequest request, HttpServletResponse response,
@@ -164,6 +175,7 @@ public class BCSLinePointController extends BCSBaseController {
 		logger.info("[createLinePointDetailList]");
 		try {
 			if (linePointDetail == null) {
+
 				throw new Exception("linePointDetail is Null");
 			}
 			
@@ -254,6 +266,10 @@ public class BCSLinePointController extends BCSBaseController {
 		    
 		    //List<LinePointMain> result = new ArrayList<LinePointMain>();
 		    List<LinePointMain> list = this.linePointUIService.linePointMainFindBcsAndDate(startDate, endDate);
+//		    for(LinePointMain linePointMain : list) {
+//		    	linePointUIService.updateLinePoint(linePointMain.getId().toString());
+//		    }
+		    list = this.linePointUIService.linePointMainFindBcsAndDate(startDate, endDate);
 		    //logger.info("list:" + list);
 		    List<LinePointMain> result = competence(list , customUser);
 		    
@@ -280,7 +296,7 @@ public class BCSLinePointController extends BCSBaseController {
 	
 
 	// ---- Front End Data Upload ----
-	
+	@Transactional(timeout = 300000)
 	@ControllerLog(description="Check Active UIds")
     @RequestMapping(method = RequestMethod.POST, value = "/edit/checkActiveUids", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -289,6 +305,7 @@ public class BCSLinePointController extends BCSBaseController {
         try { 
     		logger.info("[checkActiveUids]");
     		List<Integer> removeIndexs = new ArrayList();
+    		//改寫 這邊  這邊csv太大筆   會掛掉
     		for(int i = 0; i < uids.size(); i++) {
     			Boolean isUnactive = lineUserService.checkMIDAllActive(uids.get(i));
     			logger.info("i="+i+", uid="+uids.get(i)+", isUnactive="+isUnactive);
@@ -402,10 +419,10 @@ public class BCSLinePointController extends BCSBaseController {
 					sendMsgUIService.createExecuteSendMsgRunnable(msgId);
 					
 					// save send start time
-					linePointMain.setModifyUser(customUser.getAccount());
+					//linePointMain.setModifyUser(customUser.getAccount());
 					linePointMain.setSendStartTime(new Date());
 					linePointMain.setStatus(LinePointMain.STATUS_COMPLETE);					
-					linePointMain.setModifyTime(new Date());
+					//linePointMain.setModifyTime(new Date());
 					linePointMain.setSendUser(customUser.getAccount());
 					linePointUIService.saveLinePointMain(linePointMain);
 					
@@ -415,7 +432,10 @@ public class BCSLinePointController extends BCSBaseController {
 					
 					JSONArray detailIds = new JSONArray();
 					for(LinePointDetail linePointDetail: linePointDetails) {
-						detailIds.put(linePointDetail.getDetailId());
+						if(!"FAIL".equals(linePointDetail.getStatus())) {
+							detailIds.put(linePointDetail.getDetailId());
+						}
+						
 					}
 					
 					// combine LinePointPushModel
@@ -493,12 +513,10 @@ public class BCSLinePointController extends BCSBaseController {
 					
 					TaishinEmployee employee = oracleService.findByEmployeeId(empId);
 //					TaishinEmployee employee = new TaishinEmployee();
-//					
+					
 //					employee.setDivisionName("XTREME");
-//					employee.setDepartmentId("LINEBC");
+//					employee.setDepartmentName("LINEBC");
 						
-					
-					
 					
 					String Department = main.getDepartmentFullName();
 					String[] Departmentname = Department.split(" ");
@@ -511,7 +529,7 @@ public class BCSLinePointController extends BCSBaseController {
 						if(Departmentname[0].equals(employee.getDivisionName()) && Departmentname[1].equals(employee.getDepartmentName()) && Departmentname[2].equals(employee.getGroupName())) {
 							result.add(main);
 						}
-					}else if (StringUtils.isNotBlank(employee.getDepartmentId())) {
+					}else if (StringUtils.isNotBlank(employee.getDepartmentName())) {
 						if(Departmentname[0].equals(employee.getDivisionName()) && Departmentname[1].equals(employee.getDepartmentName())) {
 							result.add(main);
 						}

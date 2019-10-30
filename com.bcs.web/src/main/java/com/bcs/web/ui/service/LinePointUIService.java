@@ -39,8 +39,13 @@ public class LinePointUIService {
 	public List<LinePointMain> linePointMainFindBcs(){
 		return linePointMainService.findBySendType(LinePointMain.SEND_TYPE_BCS);
 	}
+	
 	public List<LinePointMain> linePointMainFindBcsAndDate(Date startDate, Date endDate){
 		return linePointMainService.findBySendTypeAndDate(LinePointMain.SEND_TYPE_BCS, startDate, endDate);
+	}
+	
+	public void updateLinePoint(String linePointId){
+		linePointMainService.updateLinePoint(linePointId);
 	}
 	
 	public List<LinePointMain> getLinePointStatisticsReport(Date startDate, Date endDate, String modifyUser, String title, Integer page){
@@ -93,7 +98,7 @@ public class LinePointUIService {
 		return linePointScheduledDetail;
 	}
 	
-	@Transactional(rollbackFor=Exception.class, timeout = 30)
+	@Transactional(rollbackFor=Exception.class, timeout = 300000)
 	public List<LinePointDetail> saveLinePointDetailListFromUI(List<LinePointDetail> linePointDetailList, String adminUserAccount) throws BcsNoticeException{
 		logger.info("saveFromUI:" + linePointDetailList);
 		for(LinePointDetail detail : linePointDetailList) {

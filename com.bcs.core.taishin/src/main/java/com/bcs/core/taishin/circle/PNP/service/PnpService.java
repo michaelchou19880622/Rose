@@ -707,7 +707,8 @@ public class PnpService {
                 .replace("heroTextWeight", pnpFlexTemplate.getHeroTextWeight())
                 .replace("heroTextStyle", pnpFlexTemplate.getHeroTextStyle())
                 .replace("heroTextDecoration", pnpFlexTemplate.getHeroTextDecoration())
-                .replace("heroText", pnpFlexTemplate.getHeroText())
+                //FIXME 換成正確訊息
+                .replace("heroText", msg)
 
 
                 .replace("bodyDescTextSize", pnpFlexTemplate.getBodyDescTextSize())

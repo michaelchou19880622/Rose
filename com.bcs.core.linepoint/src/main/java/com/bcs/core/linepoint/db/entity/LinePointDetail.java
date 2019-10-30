@@ -73,6 +73,8 @@ public class LinePointDetail extends AbstractBcsEntity {
 	private Long applicationTime;
 	@Column(name = "AMOUNT")
 	private Long amount;
+	@Column(name = "IS_MEMBER")
+	private Long isMember;
 	
 	// Success Response Model
 	@Column(name = "TRANSCATION_ID", columnDefinition="varchar(20)")
@@ -145,6 +147,12 @@ public class LinePointDetail extends AbstractBcsEntity {
 	}
 	public String getTranscationId() {
 		return transcationId;
+	}
+	public void setIsMember(Long isMember) {
+		this.isMember = isMember;
+	}
+	public Long getIsMember() {
+		return isMember;
 	}
 	public void setTranscationId(String transcationId) {
 		this.transcationId = transcationId;

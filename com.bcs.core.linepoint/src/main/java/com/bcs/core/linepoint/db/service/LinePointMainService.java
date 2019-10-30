@@ -61,6 +61,11 @@ public class LinePointMainService {
 	public List<LinePointMain> findBySendTypeAndDate(String sendType, Date startDate, Date endDate){
 		return linePointMainRepository.findBySendTypeAndDate(sendType, startDate, endDate);
 	}	
+	public void updateLinePoint(String linePointId){
+		Query query = entityManager.createNamedQuery("updateLinePoint").setParameter(1, linePointId);
+		query.executeUpdate();
+		//query.getResultList();
+	}	
 	public List<LinePointMain> findAllowableIdles(){
 		return linePointMainRepository.findAllowableIdles();
 	}
@@ -85,8 +90,8 @@ public class LinePointMainService {
     	
     	Query query = entityManager.createNamedQuery("queryGetStatisticsReportPage").setParameter(1, title).setParameter(2, modifyUser)
     			.setParameter(3, startDate).setParameter(4, endDate);
-    	query.setFirstResult(rowStart);
-    	query.setMaxResults(rowEnd);
+    	//query.setFirstResult(rowStart);
+    	//query.setMaxResults(rowEnd);
     	
 		return query.getResultList();
 	}

@@ -29,6 +29,12 @@ $(function(){
 		
 	}
 	
+	if($.urlParam("sendAmountType")){
+		$('[name="sendAmountType"][value="' + $.urlParam("sendAmountType") + '"]').click();
+		if($.urlParam("sendAmountType") == 'UNIVERSAL'){
+			$('#amount').val($.urlParam("amount"));
+		}
+	}
 	// ---- Global Variables ----
 	// BCS Parameters
 	$.BCS.actionTypeParam = $.urlParam("actionType");
@@ -44,11 +50,13 @@ $(function(){
 	var draftMsgId = null;
 	var totalCount = 0;
 	var totalAmount = 0;
-	
+	var outCount = 0, outTotalAmount = 0;
+	var TrimmedCount = 0, TrimmedTotalAmount = 0;
 	// LinePointDetails
     var uids = [], custIds = [], pts = [];
-    var colMaxNum = 2;    
-    
+    var outUids = [], outCustIds = [], outPts = [];
+    var colMaxNum = 2;
+    var caveatLinePoint = 0 ;
     // ---- Send Group ----
 	// SendGroup:[匯出MID] Button
 	$('.download_mid').click(function(){
@@ -85,6 +93,13 @@ $(function(){
         //load event will be triggered
 		$('.LyMain').unblock();
     });
+	
+//	$('#amount').blur(function(){
+//		var amount = $('#amount').val();
+//		if(!/^[0-9]{1,10}$/.test(amount)){
+//			alert('每人發送點數格式有誤');
+//		}
+//	});
 	
 	// SendGroup:[上傳UID] Button
 	$('.upload_mid').click(function(){
@@ -147,6 +162,8 @@ $(function(){
     			$('.LyMain').unblock();
     		});
         } 
+
+    	
 	});
 	
 	// SendGroup: Get Send Group Rows
@@ -247,6 +264,7 @@ $(function(){
     	
         // split by column
         uids = []; custIds = []; pts = [];
+        outUids = []; outCustIds = []; outPts = [];
         colMaxNum = 0;
         var maxPts = 0;
         for (var i = 0; i < rows.length; i++) {
@@ -281,14 +299,30 @@ $(function(){
         		}
         	}
         }
-
+        $.ajax({
+            type: 'get',
+            url: bcs.bcsContextPath + '/edit/getCaveatLinePoint',
+            processData: false
+		}).success(function(response){
+			console.info('caveatLinePoint : ' , response);
+			caveatLinePoint = response;
+		}).fail(function(response){
+			console.info(response);
+			$.FailResponse(response);
+			return;
+		}).done(function(){
+			 //重系統參數抓警告點數上限
+			 if(maxPts > caveatLinePoint){
+		    		var r = confirm('您的名單中有單筆超過'+caveatLinePoint+'點的發送需求');
+		    		if (r) {
+		    		} else {
+		    			windowReplace();
+		    			return;
+		    		}
+		        }
+		});
+        
         // check max points
-        if(maxPts > 3000){
-    		var r = confirm('您的名單中有單筆超過3,000點的發送需求');
-    		if (r) {
-    		} else {
-    		}
-        }
         
         // check individual but column max number = 2
         console.info('colMaxNum:', colMaxNum);
@@ -297,13 +331,14 @@ $(function(){
 			windowReplace();
 			//return;
         }
-        
+        $('.sendAmountType').attr('disabled', true);
+        $('#amount').attr('disabled', true);
         // no need to check follow-age
         //改成是否檢核加入的uid
-        if($('.doCheckFollowage')[1].checked){
-        	calculateSum();
-        	return;
-        }
+//        if($('.doCheckFollowage')[1].checked){
+//        	calculateSum();
+//        	return;
+//        }
         
         // check follow-age
         $.ajax({
@@ -321,6 +356,9 @@ $(function(){
         		// trim inactive UIds
                 if(removeIndexs.length > 0) {
         	        removeIndexs.reverse().forEach(function(index){
+        	        	outUids.push(uids[index]);
+        	        	outCustIds.push(custIds[index]);
+        	        	outPts.push( pts[index]);
         	        	uids.splice(index, 1);
         	        	custIds.splice(index, 1);
         	        	pts.splice(index, 1);
@@ -329,7 +367,9 @@ $(function(){
                 console.info('trimmed uids:', uids);
                 console.info('trimmed custIds:', custIds);
                 console.info('trimmed pts:', pts);
-                
+                console.info('out uids:', outUids);
+                console.info('out custIds:', outCustIds);
+                console.info('out pts:', outPts);
         	}
 		}).fail(function(response){
 			console.info(response);
@@ -339,9 +379,11 @@ $(function(){
 			calculateSum();
 		});
     }
+    
     function calculateSum(){
         // calculate sum
         var sum = 0;
+        var outSum = 0;
         if(colMaxNum == 2){
         	var amount = parseInt($('#amount').val());
         	if(isNaN(amount) || amount <= 0){
@@ -349,21 +391,52 @@ $(function(){
         		windowReplace();
         	}
         	sum = uids.length * amount;
+        	outSum = outUids.length * amount;
         }else{
         	sum = 0;
+        	outSum = 0
             for (var i = 0; i < pts.length; i++) {
-            	if(pts[i].trim() == ''){
+            	if(pts[i].trim == ''){
             		pts[i] = 0;
             	}
             	sum += parseInt(pts[i], 10);
             }
+        	for (var i = 0; i < outPts.length; i++) {
+        		if(outPts[i].trim == ''){
+        			outPts[i] = 0;
+        		}
+        		outSum += parseInt(outPts[i], 10);
+        	}
         }
-        
+    	outCount = outUids.length;
+    	outTotalAmount = outSum;
+    	TrimmedCount = uids.length;
+    	TrimmedTotalAmount = sum;
         // export to global variables & front-end
-        totalCount = uids.length;
-        totalAmount = sum;
-        fileInformation.innerHTML = '本次共發送' + totalCount + '筆，合計發送點數為' + sum +'點';
+    	var doCheckFollowage = $('[name="doCheckFollowage"]:checked').val();
+    	if(doCheckFollowage == 'true'){
+    		totalCount  = TrimmedCount;
+    		totalAmount = TrimmedTotalAmount;
+    		fileInformation.innerHTML = '本次共發送' + TrimmedCount + '筆，合計發送點數為' + TrimmedTotalAmount +'點';
+    	}else{
+    		totalCount  = TrimmedCount+outCount;
+    		totalAmount = TrimmedTotalAmount+outTotalAmount;
+    		fileInformation.innerHTML = '本次共發送' + totalCount + '筆，合計發送點數為' + totalAmount +'點';
+    	}
     }
+    //修改aaaaaaa
+    $('[name="doCheckFollowage"]').click(function(){
+    	var doCheckFollowage = $('[name="doCheckFollowage"]:checked').val();
+    	if(doCheckFollowage == 'true'){
+    		totalCount  = TrimmedCount;
+    		totalAmount = TrimmedTotalAmount;
+	   		fileInformation.innerHTML = '本次共發送' + TrimmedCount + '筆，合計發送點數為' + TrimmedTotalAmount +'點';
+	   	}else{
+	   		totalCount  = TrimmedCount+outCount;
+    		totalAmount = TrimmedTotalAmount+outTotalAmount;
+	   		fileInformation.innerHTML = '本次共發送' + totalCount + '筆，合計發送點數為' + totalAmount +'點';
+	   	}
+    });
     function errorHandler(evt) {
       if(evt.target.error.name == "NotReadableError") {
           alert("Canno't read file !");
@@ -547,7 +620,6 @@ $(function(){
 		$('#formSendGroup').find('[name="schedule"]').rules("remove");
 		$('#delaySelect').css('display', 'none');
 		$('.schedule').css('display', 'none');
-
 		if(sendingMsgType == "DELAY"){
 			$('#formSendGroup').find('[name="sendDate"]').rules("add", {
 				required : {
@@ -598,12 +670,88 @@ $(function(){
 		// block
 		$('.LyMain').block($.BCS.blockMsgUpload);
 		
+		//欄位檢核
+		var title = $('#title').val();
+		if(title.length == 0 ){
+			alert('專案名稱不可空白');
+			$('.LyMain').unblock();
+			return;
+		}
+		
+		var pccCode = $('#pccCode').val();
+		if(pccCode.length == 0 ){
+			alert('掛帳PCC不可空白');
+			$('.LyMain').unblock();
+			return;
+		}else if(pccCode.length < 9 || pccCode.length > 12){
+			alert('掛帳PCC格式有誤');
+			$('.LyMain').unblock();
+			return;
+		}else{
+			if(pccCode.indexOf('-') == -1){
+				var pccCodeFormat = /^[0-9]{9,11}$/;
+				if(!pccCodeFormat.test(pccCode)){
+					alert('掛帳PCC格式有誤');
+					$('.LyMain').unblock();
+					return;
+				}
+			}else{
+				pccCode = pccCode.replace("-","");
+				var pccCodeFormat = /^[0-9]{9,10}$/;
+				if(!pccCodeFormat.test(pccCode)){
+					alert('掛帳PCC格式有誤');
+					$('.LyMain').unblock();
+					return;
+				}
+			}
+		}
+		
+		var serialId = $('#serialId').val();
+		var serialIdFormat = /^\d{14}$/;
+		if(serialId.length == 0){
+			alert('campaign code 不可空白');
+			$('.LyMain').unblock();
+			return;
+		}else if(!serialIdFormat.test(serialId)){
+			alert('campaign code 格式有誤');
+			$('.LyMain').unblock();
+			return;
+		}
+		
+		var sendTimeType = $('.sendTimeType:checked').val();
+		if(sendTimeType == "DELAY" ){
+			var datepicker = $('#delaySelect .datepicker').val();
+			if(datepicker.length == 0){
+				alert('請選擇預約發送時間');
+				$('.LyMain').unblock();
+				return;
+			}
+		}
+		
+		var sendAmountType = $('.sendAmountType:checked').val();
+		if( sendAmountType == "UNIVERSAL"){
+			var amount = $('#amount').val();
+			var amountFormat = /^\d{1,10}$/;
+			if(amount.length == 0){
+				alert('請輸入每人發送幾點');
+				$('.LyMain').unblock();
+				return;
+			}else if(!amountFormat.test(amount)){
+				alert('每人發送幾點只能輸入正整數');
+				$('.LyMain').unblock();
+				return;
+			}
+
+		}
+		
 		// set Send Group Id
 		var queryDataDoms = $('.dataTemplate');
 		if(queryDataDoms.length == 0){
 			alert('請設定輸入CSV檔案');
+			$('.LyMain').unblock();
 			return;
 		}
+		
 //		btnTarget = "btn_save";
 //		if (!sendGroupCreationValidator.form()) {
 //			return;
@@ -738,11 +886,13 @@ $(function(){
 		console.info('MsgFrameContents', MsgFrameContents);
 		// Validate Error
 		if(!$.BCS.isValidate){
+			$('.LyMain').unblock();
 			return;
 		}
 
 		var sendingMsgTime = "";
 		if (!sendingMsgValidator.form()) {
+			$('.LyMain').unblock();
 			return;
 		}
 
@@ -750,12 +900,14 @@ $(function(){
 		if(actionType == "SendMsg"){
 			if(!sendingMsgType){
 				alert('請設定發送時間');
+				$('.LyMain').unblock();
 				return;
 			}
 			else{
 				if(sendingMsgType == "SCHEDULE" || sendingMsgType == "DELAY"){
 					sendingMsgTime = getSendMsgTime(sendingMsgType, true);
 					if(!sendingMsgTime){
+						$('.LyMain').unblock();
 						return;
 					}
 				}
@@ -767,11 +919,13 @@ $(function(){
 		
 		
 		if(!MsgFrameContents || MsgFrameContents.length < 1){
-			alert('請設定發送內容');
+			alert('請設定發送推播內容');
+			$('.LyMain').unblock();
 			return;
 		}
 		else if(MsgFrameContents.length > 4){
-			alert('發送內容不能超過4個');
+			alert('發送推播內容不能超過4個');
+			$('.LyMain').unblock();
 			return;
 		}
 
@@ -894,7 +1048,11 @@ $(function(){
         postData.totalAmount = totalAmount;
         postData.successfulCount = 0;
         postData.successfulAmount = 0;
-        postData.failedCount = 0;
+        if(!doCheckFollowage){
+        	 postData.failedCount = 0;
+        }else{
+        	postData.failedCount = outCount;
+        }
         
         console.info('postData', postData);
         linePointMainId = $.urlParam("linePointMainId");
@@ -929,16 +1087,31 @@ $(function(){
     	console.info('linePointDetailSave');
 //    	var detail = {};
     	var detailList = [];
-
-    	for (var i = 0; i < totalCount; i++) {
+    	for (var i = 0; i < TrimmedCount; i++) {
     	//	每次都要新增一筆  不然會出錯
     		var detail = {};
     		detail.linePointMainId = linePointMain;
     		detail.custid = custIds[i];
     		detail.amount = pts[i];
     		detail.uid = uids[i];
+    		detail.isMember = 1;  //紀錄是否是會員
     		detailList.push(detail);
         }
+    	var doCheckFollowage = $('[name="doCheckFollowage"]:checked').val();
+    	for (var i = 0; i < outCount ; i++) {
+        	//	每次都要新增一筆  不然會出錯
+        		var detail = {};
+        		detail.linePointMainId = linePointMain;
+        		detail.custid = outCustIds[i];
+        		detail.amount = outPts[i];
+        		detail.uid = outUids[i];
+        		if(doCheckFollowage == 'true'){
+        			detail.status = 'FAIL';
+        			detail.message = '非會員';
+        		}
+        		detail.isMember = 0;
+        		detailList.push(detail);
+            }
     	console.info('detailList:', detailList);
 
         $.ajax({
@@ -1072,6 +1245,7 @@ $(function(){
                 $('#serialId').val(o.serialId);
                 
                 var fileInformation = document.getElementById("fileInformation");
+
                 fileInformation.innerHTML = '本次共發送' + o.totalCount + '筆，合計發送點數為' + o.totalAmount +'點';
                 totalCount = o.totalCount;
                 totalAmount = o.totalAmount;
@@ -1127,6 +1301,7 @@ $(function(){
                 	$('#amount').val(o.amount);
                 }else{
                 	$('.sendAmountType')[1].click();
+                	colMaxNum = 3 ;
                 }
                 
 		        // get date data
@@ -1168,18 +1343,25 @@ $(function(){
     		}).success(function(response){
     			console.info('LinePointDetail response:', response);
     			uids = []; custIds = []; pts = [];
+    			outUids = []; outCustIds = []; outPts = [];
     			console.info('LinePointDetail length :' ,response.length);
     			for(var i = 0 ; i < response.length ; i++){
-    				uids.push(response[i].uid);
-    				custIds.push(response[i].custid);
-    				pts.push(response[i].amount);
+    				if(response[i].isMember == 0){
+    					outUids.push(response[i].uid);
+    					outCustIds.push(response[i].custid);
+    					outPts.push(response[i].amount);
+    				}else{
+    					uids.push(response[i].uid);
+        				custIds.push(response[i].custid);
+        				pts.push(response[i].amount);
+    				}
     			}
     			console.info('uids :' ,uids);
     			console.info('custIds :' ,custIds);
     			console.info('pts :' ,pts);
     		}).fail(function(response){
     		}).done(function(){
-    		
+    			calculateSum();
     		});
     	}
     }
@@ -1328,7 +1510,6 @@ $(function(){
     sendGroupCreationLoadDataFunc();
     sendingMsgLoadDataFunc();
     initLinePointMain();
-    
     //當匯入的UID有誤的時候會重整介面，為保留以填寫的資料，會判斷是修改還是新增的 然後放回原本的地方。
     function windowReplace(){
     	
@@ -1342,6 +1523,8 @@ $(function(){
 	    	var pccCode 		= $('#pccCode').val();
 	    	var serialId 		= $('#serialId').val();
 	    	var sendTimeType 	= $('.sendTimeType:checked').val();
+	    	var sendAmountType 	= $('.sendAmountType:checked').val();
+	    	var amount		 	= $('#amount').val();
 	    	var datepicker 		= $('#delaySelect .datepicker').val();
 	    	var selectHour 		= $('#delaySelect .selectHour').val();
 	    	var selectMinuteOne = $('#delaySelect .selectMinuteOne').val();
@@ -1353,7 +1536,9 @@ $(function(){
 	    																			'&datepicker='		+datepicker+
 	    																			'&selectHour='		+selectHour+
 	    																			'&selectMinuteOne='	+selectMinuteOne+
-	    																			'&selectMinuteTwo='	+selectMinuteTwo);
+	    																			'&selectMinuteTwo='	+selectMinuteTwo+
+	    																			'&amount='			+amount+
+	    																			'&sendAmountType='	+sendAmountType);
     	}
     	
     	

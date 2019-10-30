@@ -363,32 +363,32 @@ public class SendGroupUIService {
 		
 		if(mids != null && mids.size() > 0){
 			List<String> list = new ArrayList<String>(mids);
-			
+			logger.info("list:" + list);
 			List<String> existMids = new ArrayList<String>();
 			
-			// Check MID Exist by Part
-			List<String> check = new ArrayList<String>();
-			for(int i = 1; i <= list.size(); i++){
-				logger.info(" UID " + i + " : " +list.get(i-1));
-				check.add(list.get(i-1));
-				
-				if(i % 1000 == 0){
-					List<String> midResult = lineUserService.findMidByMidInAndActive(check);
-					if(midResult != null && midResult.size() > 0){
-						existMids.addAll(midResult);
-					}
-					check.clear();
-				}
-			}
-			if(check.size() > 0){
-				List<String> midResult = lineUserService.findMidByMidInAndActive(check);
-				if(midResult != null && midResult.size() > 0){
-					existMids.addAll(midResult);
-				}
-			}
+//			// Check MID Exist by Part
+//			List<String> check = new ArrayList<String>();
+//			for(int i = 1; i <= list.size(); i++){
+//				logger.info(" UID " + i + " : " +list.get(i-1));
+//				check.add(list.get(i-1));
+//				
+//				if(i % 1000 == 0){
+//					List<String> midResult = lineUserService.findMidByMidInAndActive(check);
+//					if(midResult != null && midResult.size() > 0){
+//						existMids.addAll(midResult);
+//					}
+//					check.clear();
+//				}
+//			}
+//			if(check.size() > 0){
+//				List<String> midResult = lineUserService.findMidByMidInAndActive(check);
+//				if(midResult != null && midResult.size() > 0){
+//					existMids.addAll(midResult);
+//				}
+//			}
 
-			if(existMids != null && existMids.size() > 0){
-				logger.debug("existMids:" + existMids);
+			if(list != null && list.size() > 0){
+				logger.debug("list:" + list);
 				
 				String referenceId = UUID.randomUUID().toString().toLowerCase();
 				
@@ -399,8 +399,8 @@ public class SendGroupUIService {
 				try {
 					curSaveIndex = 0;
 
-					for (int i = 0; i < existMids.size(); i++) {
-						String mid = existMids.get(i);
+					for (int i = 0; i < list.size(); i++) {
+						String mid = list.get(i);
 
 						UserEventSet userEventSet = new UserEventSet();
 						userEventSet.setTarget(EVENT_TARGET_ACTION_TYPE.EVENT_SEND_GROUP.toString());
@@ -442,9 +442,9 @@ public class SendGroupUIService {
 				}
 
 				Map<String, Object> result = new HashMap<String, Object>();
-				logger.info("count : " + existMids.size());
+				logger.info("count : " + list.size());
 				result.put("referenceId", referenceId);
-				result.put("count", existMids.size());
+				result.put("count", list.size());
 				
 				return result;
 			}

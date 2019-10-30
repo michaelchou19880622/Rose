@@ -157,7 +157,7 @@ public class BCSLinePointReportController extends BCSBaseController {
 			List<LinePointMain> list = linePointUIService.getLinePointStatisticsReport(startDate, endDate, modifyUser, title, page);
 			//權限後拿到的資料顯示在
 			result = competence( list , customUser);
-
+			
 			logger.info("result:" + ObjectUtil.objectToJsonStr(result));
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		}catch(Exception e){
@@ -194,7 +194,10 @@ public class BCSLinePointReportController extends BCSBaseController {
 			logger.info("modifyUser:"+modifyUser);
 			
 			// calculate count
+			
+			//應該設一個全域變數  來判斷使用者應該會看到幾筆資料
 			Long count = linePointUIService.getLinePointStatisticsReportTotalPages(startDate, endDate, modifyUser, title);
+			System.out.println(count);
 			if(count % 10L == 0L) {
 				count /= 10;
 			}else {
@@ -216,7 +219,7 @@ public class BCSLinePointReportController extends BCSBaseController {
 							HttpServletResponse response,
 							@CurrentUser CustomUser customUser,
 							@RequestParam(value = "detailId", required=false) Long detailId
-			) throws IOException, BcsNoticeException {
+			) throws IOException {
 		logger.info("[linePointCancelFromDetailId]");
 		logger.info(" detailId : " + detailId);
 		SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy/MM/dd");
@@ -228,14 +231,23 @@ public class BCSLinePointReportController extends BCSBaseController {
 		LinePointDetail linePointDetail = result.get(0);
 		
 		LinePointMain linePointMain = linePointUIService.linePointMainFindOne(linePointDetail.getLinePointMainId());
-		
-		if(!"ROLE_ADMIN".equals(customUser.getRole())) {
-			if(!"ROLE_LINE_VERIFY".equals(customUser.getRole())) {
-				throw new BcsNoticeException("只有管理者或是發送人員才可收回點數");
-			}else if(!customUser.getAccount().equals(linePointMain.getSendUser())) {
-				throw new BcsNoticeException("只有管理者或是發送人員才可收回點數");
+		try {
+			if(!"ROLE_ADMIN".equals(customUser.getRole())) {
+				if(!"ROLE_LINE_VERIFY".equals(customUser.getRole())) {
+					throw new BcsNoticeException("只有管理者或是發送人員才可收回點數");
+				}else if(!customUser.getAccount().equals(linePointMain.getSendUser())) {
+					throw new BcsNoticeException("只有管理者或是發送人員才可收回點數");
+				}
 			}
+		}catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+			if (e instanceof BcsNoticeException) {
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+				}else{
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+				}
 		}
+
 		
 		try {
 			HttpHeaders headers = new HttpHeaders();
@@ -405,14 +417,15 @@ public class BCSLinePointReportController extends BCSBaseController {
 				result.add(main);
 			}else if("ROLE_LINE_SEND".equals(role) || "ROLE_LINE_VERIFY".equals(role)){
 				TaishinEmployee employee = oracleService.findByEmployeeId(empId);
-//				if(employee == null) {
-//					employee.setDivisionName("XTREME" );
-//					employee.setDepartmentId("LINEBC");
-//					//employee.setDivisionName("TAISHIN");
-//					logger.info("employee : " + employee);
-//					throw new BcsNoticeException("The Employee Id Is Not Correct!");
-//				}
-				logger.info("employee : " + employee);
+				//logger.info("employee : " + employee);
+				
+				
+//				TaishinEmployee employee = new TaishinEmployee();
+//				
+//				employee.setDivisionName("XTREME");
+//				employee.setDepartmentName("LINEBC");
+				
+				
 				String Department = main.getDepartmentFullName();
 				String[] Departmentname = Department.split(" ");
 				//Departmentname[0]; 處  DIVISION_NAME
@@ -424,7 +437,7 @@ public class BCSLinePointReportController extends BCSBaseController {
 					if(Departmentname[0].equals(employee.getDivisionName()) && Departmentname[1].equals(employee.getDepartmentName()) && Departmentname[2].equals(employee.getGroupName())) {
 						result.add(main);
 					}
-				}else if (StringUtils.isNotBlank(employee.getDepartmentId())) {
+				}else if (StringUtils.isNotBlank(employee.getDepartmentName())) {
 					if(Departmentname[0].equals(employee.getDivisionName()) && Departmentname[1].equals(employee.getDepartmentName())) {
 						result.add(main);
 					}

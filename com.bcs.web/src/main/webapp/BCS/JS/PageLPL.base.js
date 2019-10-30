@@ -144,8 +144,10 @@ $(function() {
 		        
 		        if(bcs.user.role == 'ROLE_LINE_SEND'){
 		        	templateTr.find('.btn_copy').attr("disabled",true);
+		        	templateTr.find('.btn_copy').hide();
 		        }else if (bcs.user.role == 'ROLE_LINE_VERIFY' && bcs.user.account == o.modifyUser){
-		        	templateTr.find('.btn_copy').attr("disabled",true);
+		        	//templateTr.find('.btn_copy').attr("disabled",true);
+		        	templateTr.find('.btn_copy').hide();
 		        }
 		        //刪除按鈕
 		        if(o.status == 'COMPLETE'){
@@ -163,6 +165,8 @@ $(function() {
 		        		templateTr.find('.btn_detele').val('刪除');
 		        		templateTr.find('.btn_detele').attr('linePointId', o.id);
 		        		templateTr.find('.btn_detele').click(btn_detele);
+		        	}else{
+		        		templateTr.find('.btn_detele').remove();
 		        	}
 		        }
 		        

@@ -36,6 +36,7 @@ public interface LinePointMainRepository extends EntityRepository<LinePointMain,
     + "and x.modifyTime >= ?2 and x.modifyTime <= ?3 order by x.modifyTime desc")	
 	public List<LinePointMain> findBySendTypeAndDate(String sendType, Date startDate, Date endDate);
     
+    
     // with searchText
     @Transactional(timeout = 30)
     @Query(value = "select x from LinePointMain x where "

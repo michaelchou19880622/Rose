@@ -34,21 +34,11 @@ $(function () {
     });
 
     $('#backBtn').click(function () {
-//        if (page > 1) {
-//            page--;
-//            loadData();
-//            $('#pageAndTotalPages').text(page + '/' + totalPages);
-//        }
         pageBtnHandler(page > 1, 'back');
     });
 
 
     $('#nextBtn').click(function () {
-//        if (page < totalPages) {
-//            page++;
-//            loadData();
-//            $('#pageAndTotalPages').text(page + '/' + totalPages);
-//        }
         pageBtnHandler(page < totalPages, 'next');
     });
 
@@ -275,12 +265,13 @@ $(function () {
     }
 
     var cleanList = function(){
-        $('#resultList').remove();
+        $('.resultList').remove();
+        console.log('Result List Remove!!')
     }
 
     // initialize Page
     var initPage = function () {
-        originalTr = $('#resultList').clone(true);
+        originalTr = $('.resultList').clone(true);
         cleanList();
         originalTable = $('#resultTable').clone(true);
         startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');

@@ -99,7 +99,7 @@ public class BCSPnpReportController extends BCSBaseController {
         log.info("getPNPDetailReportTotalPages");
         try {
             String empId = customUser.getAccount().toUpperCase();
-            String count = pnpMaintainUIService.getPNPDetailReportTotalPages(startDate, endDate, account, pccCode, sourceSystem, empId, phoneNumber);
+            int count = pnpMaintainUIService.getPNPDetailReportTotalPages(startDate, endDate, account, pccCode, sourceSystem, empId, phoneNumber);
             return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count + "\"}", HttpStatus.OK);
         } catch (Exception e) {
             log.error(ErrorRecord.recordError(e));

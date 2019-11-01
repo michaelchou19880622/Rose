@@ -12,11 +12,10 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainMing;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainMitake;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainUnica;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFTPType;
+import com.bcs.core.taishin.circle.PNP.scheduler.PnpSMSMsgService;
 import com.bcs.core.taishin.circle.db.entity.CircleEntityManagerControl;
-import com.bcs.core.utils.DataUtils;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -27,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -413,29 +413,21 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     /**
      * Find Detail Status is CheckDeliver and Change Status to SMS Sending
      *
-     * @see com.bcs.core.taishin.circle.PNP.scheduler.PnpSMSMsgService
+     * @see PnpSMSMsgService#sendingSmsMainForDeliveryExpired()
      */
     @Override
     @Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
     public List<? super PnpDetail> updateDeliveryExpiredStatus(PNPFTPType type, String procApName, String stage) {
-        logger.debug(" begin PNP updateDeliveryExpiredStatus:" + procApName + " type:" + type);
         try {
-            List<BigInteger> detailIds = findAndUpdateDeliveryExpiredForUpdate(type.getDetailTable(), stage);
-            if (!detailIds.isEmpty()) {
+            List<? super PnpDetail> detailList = findAndUpdateDeliveryExpiredForUpdate(type.getDetailTable());
+            if (CollectionUtils.isNotEmpty(detailList)) {
                 logger.info("Update Status: [PNP][CHECK_DELIVERY] to [PNP][FAIL] and [SMS][SENDING]");
-                List<List<BigInteger>> batchDetailIds = Lists.partition(detailIds, CircleEntityManagerControl.batchSize);
-                for (List<BigInteger> ids : batchDetailIds) {
-                    List<? super PnpDetail> details = findPnpDetailById(type, ids);
-                    if (!details.isEmpty()) {
-                        return details;
-                    }
-                }
+                return detailList;
             } else {
-                logger.info("stage:" + stage + " PNP updateDeliveryExpiredStatus:" + procApName + " type:" + type + " detailIds isEmpty");
+                logger.info("Stage: SMS " + " ProcApName:" + procApName + " type:" + type + " detailIds isEmpty");
             }
-            logger.debug(" end PNP updateDeliveryExpiredStatus:" + procApName + " type:" + type);
         } catch (Exception e) {
-            logger.error(e);
+            logger.error("Exception", e);
             throw e;
         }
         return Collections.emptyList();
@@ -448,45 +440,38 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
      * @see this#updateDeliveryExpiredStatus
      */
     @SuppressWarnings("unchecked")
-    private List<BigInteger> findAndUpdateDeliveryExpiredForUpdate(String detailTable, String stage) {
+    private List<? super PnpDetail> findAndUpdateDeliveryExpiredForUpdate(String detailTable) {
         String sql = String.format(
-                " SELECT d.PNP_DETAIL_ID FROM %s d" +
-                " WHERE 1=1" +
-                "     AND d.STATUS = :CHECK_DELIVERY" +
-                "     AND d.PNP_DELIVERY_EXPIRE_TIME <= :now" +
-                "     AND d.PNP_MAIN_ID in" +
-                "     (" +
-                "        SELECT TOP 1 a.PNP_MAIN_ID FROM %s a" +
-                "        WHERE 1=1" +
-                "            AND a.STATUS = :CHECK_DELIVERY" +
-                "            AND a.PNP_DELIVERY_EXPIRE_TIME <= :now" +
-                "        ORDER BY a.CREAT_TIME" +
-                "     )" +
-                " UPDATE %s SET" +
-                "     PROC_STAGE = :stage," +
-                "     STATUS = :newStatus," +
-                "     PNP_STATUS = :pnp_status," +
-                "     SMS_STATUS = :sms_status," +
-                "     MODIFY_TIME = :modifyTime" +
-                " WHERE" +
-                "     STATUS = :CHECK_DELIVERY" +
-                "     AND PNP_DELIVERY_EXPIRE_TIME <= :now" +
-                "     AND PNP_MAIN_ID in(" +
-                "        SELECT TOP 1 a.PNP_MAIN_ID FROM %s a WITH (ROWLOCK)" +
-                "        WHERE 1=1" +
-                "            AND a.STATUS = :CHECK_DELIVERY" +
-                "            AND a.PNP_DELIVERY_EXPIRE_TIME <= :now" +
-                "        ORDER BY a.CREAT_TIME" +
-                "     )", detailTable, detailTable ,detailTable, detailTable);
-        return (List<BigInteger>) entityManager.createNativeQuery(sql)
-                .setParameter("stage", stage)
-                .setParameter("CHECK_DELIVERY", AbstractPnpMainEntity.MSG_SENDER_STATUS_CHECK_DELIVERY)
-                .setParameter("newStatus", AbstractPnpMainEntity.MSG_SENDER_STATUS_SENDING)
+                " SELECT" +
+                        "    * " +
+                        " FROM" +
+                        "    %s d" +
+                        " WHERE" +
+                        "    d.PNP_STATUS = 'CHECK_DELIVERY'" +
+                        "    AND d.PNP_DELIVERY_EXPIRE_TIME <= :now" +
+                        " ORDER BY CREAT_TIME " +
+
+
+                        " UPDATE" +
+                        "    %s" +
+                        " SET" +
+                        "    PROC_STAGE = 'SMS'," +
+                        "    STATUS = :sms_status," +
+                        "    PNP_STATUS = :pnp_status," +
+                        "    SMS_STATUS = :sms_status," +
+                        "    MODIFY_TIME = :now" +
+                        " WHERE" +
+                        "    PNP_STATUS = 'CHECK_DELIVERY'" +
+                        "    AND PNP_DELIVERY_EXPIRE_TIME <= :now" +
+                        " ORDER BY CREAT_TIME ", detailTable, detailTable);
+        logger.info(sql);
+
+        Query query = entityManager.createNativeQuery(sql, PnpDetail.class)
                 .setParameter("pnp_status", AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_FAIL_SMS_PROCESS)
                 .setParameter("sms_status", AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_SENDING)
-                .setParameter("now", new Date())
-                .setParameter("modifyTime", new Date())
-                .getResultList();
+                .setParameter("now", new Date());
+        logger.info(query.toString());
+        return (List<? super PnpDetail>) query.getResultList();
     }
 
     /**

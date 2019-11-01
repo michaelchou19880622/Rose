@@ -102,6 +102,16 @@ $(function () {
         }
     }
 
+    var parsePathwayCodeToChinese = function(pathwayCode){
+        if (pathwayCode === '3') {
+            return 'BC<br/>PNP<br/>SMS';
+        } else if (pathwayCode === '2') {
+            return 'BC<br/>SMS';
+        } else if (pathwayCode === '1') {
+            return 'BC';
+        }
+    }
+
     // ---- Initialize Page & Load Data ----
     // get List Data
     var loadData = function () {
@@ -133,7 +143,7 @@ $(function () {
                 hasData = true;
             }
 
-            for (key in response) {
+            for (var key in response) {
                 var resultTr = originalTr.clone(true);
                 var valueObj = response[key];
                 //console.info('valueObj : ', valueObj);
@@ -146,13 +156,15 @@ $(function () {
                 resultTr.find('.account').html(splits[2]);
 
                 // 1	PROC_FLOW
-                if (valueObj[1] == '3') {
-                    resultTr.find('.pathway').html('BC-&gt;PNP-&gt;SMS');
-                } else if (valueObj[1] == '2') {
-                    resultTr.find('.pathway').html('BC-&gt;SMS');
-                } else if (valueObj[1] == '1') {
-                    resultTr.find('.pathway').html('BC');
-                }
+//                if (valueObj[1] == '3') {
+//                    resultTr.find('.pathway').html('BC-&gt;PNP-&gt;SMS');
+//                } else if (valueObj[1] == '2') {
+//                    resultTr.find('.pathway').html('BC-&gt;SMS');
+//                } else if (valueObj[1] == '1') {
+//                    resultTr.find('.pathway').html('BC');
+//                }
+
+                resultTr.find('.pathway').html(parsePathwayCodeToChinese(valueObj[1]));
 
                 // 2	SOURCE
 //                if (valueObj[2] == '4') {
@@ -174,19 +186,19 @@ $(function () {
                 resultTr.find('.customerCellPhoneNumber').html(valueObj[4]);
 
                 // 5	預約時間
-                resultTr.find('.scheduleDate').html(moment(valueObj[5], 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD'));
+//                resultTr.find('.scheduleDate').html(moment(valueObj[5], 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD'));
                 // 6
-                resultTr.find('.scheduleTime').html(moment(valueObj[5], 'YYYY-MM-DD HH:mm:ss').format('HH:mm:ss'));
+                resultTr.find('.scheduleTime').html(moment(valueObj[5], 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss'));
 
                 // 7 bc time
-                resultTr.find('.bcTime').html(valueObj[7]);
+//                resultTr.find('.bcTime').html(valueObj[7]);
                 // 8 pnp time
-                resultTr.find('.pnpTime').html(valueObj[8]);
+//                resultTr.find('.pnpTime').html(valueObj[8]);
 
 
-                resultTr.find('.bcStatusCode').html(parseCodeToChinese(valueObj[9]));
+                resultTr.find('.bcStatusCode').html(parseCodeToChinese(valueObj[9]) + '<br/>' + valueObj[7]);
                 // 10 pnp_status
-                resultTr.find('.pnpStatusCode').html(parseCodeToChinese(valueObj[10]));
+                resultTr.find('.pnpStatusCode').html(parseCodeToChinese(valueObj[10]) + '<br/>' + valueObj[8]);
                 // 11 sms_status
                 resultTr.find('.smsStatusCode').html(parseCodeToChinese(valueObj[11]));
 
@@ -235,6 +247,10 @@ $(function () {
                 return "PNP處理程序完成";
             case "PNP_FAIL_SMS_PROCESS":
                 return "轉發SMS";
+            case "SMS_SENDING":
+                return "SMS發送中";
+            case "SMS_CHECK_DELIVERY":
+                return "SMS已發送，等待回應";
             case "SMS_COMPLETE":
                 return "SMS處理程序完成";
             case "SMS_FAIL":

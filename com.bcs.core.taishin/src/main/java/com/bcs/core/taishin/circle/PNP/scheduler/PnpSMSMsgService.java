@@ -141,36 +141,36 @@ public class PnpSMSMsgService {
      * 根據PNPFTPType 依序發送SMS
      */
     private void sendingSmsMainForDeliveryExpired() {
-        logger.info("=========== Sending SMS Main For Delivery Expired ===========");
+        logger.info("======== Start Check Has Pnp Delivery Expired Data =========");
         String procApName = pnpAkkaService.getProcessApName();
         for (PNPFTPType type : PNPFTPType.values()) {
-            PnpMain pnpMain;
             try {
                 List<? super PnpDetail> details = pnpRepositoryCustom.updateDeliveryExpiredStatus(type, procApName, AbstractPnpMainEntity.STAGE_SMS);
-                logger.info("SMS PNP PUSH DeliveryExpired pnpMain details type :" + type + " details size:" + details.size());
+
+
                 if (CollectionUtils.isEmpty(details)) {
-                    logger.info("SMS PNP PUSH DeliveryExpired pnpMain type :" + type + " there is a main has no details!!!");
+                    logger.info("Type :" + type + " No Expired Data!!");
                     return;
                 }
-                PnpDetail oneDetail = (PnpDetail) details.get(0);
-                pnpMain = pnpRepositoryCustom.findMainByMainId(type, oneDetail.getPnpMainId());
 
-                if (null == pnpMain) {
-                    logger.info("SMS PNP PUSH DeliveryExpired pnpMain type :" + type + " not data");
-                    return;
+
+                logger.info("Type :" + type + " Expired Details Size:" + details.size());
+
+                for (int i = 0, size = details.size(); i < size; i++) {
+                    PnpDetail oneDetail = (PnpDetail) details.get(i);
+                    PnpMain pnpMain = pnpRepositoryCustom.findMainByMainId(type, oneDetail.getPnpMainId());
+                    String smsFileName = changeFileName(pnpMain);
+                    pnpMain.setPnpDetails(details);
+                    pnpMain.setSmsFileName(smsFileName);
+                    //傳檔案到SMS FTP
+                    uploadFileToSms(type.getSource(), smsGetTargetStream(type, pnpMain, details), smsFileName);
+                    //update待發送資料 Status(Sending) & Executor name(hostname)
+                    updateStatusSuccess(procApName, pnpMain, details);
+                    pnpAkkaService.tell(pnpMain);
                 }
-                pnpMain.setPnpDetails(details);
-                String smsFileName = changeFileName(pnpMain);
-                pnpMain.setSmsFileName(smsFileName);
-                //傳檔案到SMS FTP
-                uploadFileToSms(type.getSource(), smsGetTargetStream(type, pnpMain, details), smsFileName);
-                //update待發送資料 Status(Sending) & Executor name(hostname)
-                updateStatusSuccess(procApName, pnpMain, details);
-                pnpAkkaService.tell(pnpMain);
-
             } catch (Exception e) {
                 logger.error(e);
-                logger.error("SMS PNP PUSH DeliveryExpired pnpMain type :" + type + " sendingMain error:" + e.getMessage());
+                logger.error("Type :" + type + " sendingMain error:" + e.getMessage());
             }
         }
     }

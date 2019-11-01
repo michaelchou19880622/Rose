@@ -414,10 +414,7 @@ public class PNPMaintainUIService {
                 "                account, " +
                 "                source_system, " +
                 "                employee_id, " +
-                "                creat_time, " +
-                "                row_number() over ( " +
-                "        order by " +
-                "                creat_time desc) as rownum " +
+                "                creat_time " +
                 "        from ( " +
                 "        ( " +
                 "                select " +
@@ -629,9 +626,7 @@ public class PNPMaintainUIService {
 //        return listStr.substring(1, listStr.length() - 3) + (++c10); // [431] => 44
 
         //----------------
-        return (int)query.getSingleResult();
-        //----------------
-
-
+        int totalCount = (int) query.getSingleResult();
+        return totalCount / 10 + 1;
     }
 }

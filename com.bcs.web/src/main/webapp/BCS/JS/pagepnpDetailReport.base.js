@@ -209,6 +209,10 @@ $(function () {
                 return "PNP處理程序完成";
             case "PNP_FAIL_SMS_PROCESS":
                 return "轉發SMS";
+            case "SMS_SENDING":
+                return "SMS發送中";
+            case "SMS_CHECK_DELIVERY":
+                return "SMS已發送，等待回應";
             case "SMS_COMPLETE":
                 return "SMS處理程序完成";
             case "SMS_FAIL":

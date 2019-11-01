@@ -82,7 +82,8 @@ public class PnpPushMessageActor extends UntypedActor {
      */
     private Date getFormatScheduleTime(PnpMain pnpMain) {
         try {
-            return new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(pnpMain.getScheduleTime());
+            log.info("pnpMain.getScheduleTime {}", pnpMain.getScheduleTime());
+            return new SimpleDateFormat("yyyyMMddHHmmss").parse(pnpMain.getScheduleTime());
         } catch (ParseException e) {
             log.error("{}: {}", "Exception", e);
             log.error("ScheduleTime Format Error :" + pnpMain.getScheduleTime());

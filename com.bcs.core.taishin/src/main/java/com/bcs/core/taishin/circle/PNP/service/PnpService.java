@@ -359,6 +359,7 @@ public class PnpService {
             default:
                 break;
         }
+        logger.info("Status is Updated to Delay!!");
     }
 
     /**

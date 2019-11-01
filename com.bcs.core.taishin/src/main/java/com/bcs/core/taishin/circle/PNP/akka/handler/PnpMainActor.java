@@ -48,10 +48,18 @@ public class PnpMainActor extends UntypedActor {
                 PnpMain pnpMain = (PnpMain) object;
                 String stage = pnpMain.getProcStage();
                 log.info("PnpMainActor onReceive object instanceof PnpMain!!! Stage: " + stage);
-                if (AbstractPnpMainEntity.STAGE_BC.equals(stage)) {
-                    tellActor(pushMessageRouterActor, pnpMain);
-                } else if (AbstractPnpMainEntity.STAGE_PNP.equals(stage)) {
-                    tellActor(pnpMessageRouterActor, pnpMain);
+                switch (stage) {
+                    case AbstractPnpMainEntity.STAGE_BC:
+                        tellActor(pushMessageRouterActor, pnpMain);
+                        break;
+                    case AbstractPnpMainEntity.STAGE_PNP:
+                        tellActor(pnpMessageRouterActor, pnpMain);
+                        break;
+                    case AbstractPnpMainEntity.STAGE_SMS:
+                        //TODO SMS Process
+                        break;
+                    default:
+                        break;
                 }
             } else if (object instanceof PnpDetail) {
                 log.info("Tell Update Actor do Update!!");

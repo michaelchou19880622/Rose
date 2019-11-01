@@ -52,11 +52,12 @@ public class MsgBotReceiveRepositoryImpl {
     public void updatePnpDetailStatus(String detailTable, String detailId) {
         String now = DataUtils.formatDateToString(new Date(),"yyyy-MM-dd HH:mm:ss.SSS");
         String queryString = String.format(" update %s set " +
+                        " status = '%s'," +
                         " pnp_status = '%s'," +
                         " modify_time = convert(datetime, '%s', 121)," +
                         " pnp_delivery_time = convert(datetime, '%s', 121) " +
                         " where pnp_detail_id = '%s';",
-                detailTable, "PNP_COMPLETE", now, now, detailId);
+                detailTable, "PNP_COMPLETE", "PNP_COMPLETE", now, now, detailId);
         log.info("queryString:" + queryString);
         int updateNum = entityManager.createNativeQuery(queryString).executeUpdate();
         log.info("Update Status Return Int : " + updateNum);

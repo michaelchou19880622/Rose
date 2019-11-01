@@ -54,6 +54,8 @@ public abstract class AbstractPnpMainEntity implements Serializable, Cloneable {
 
     /* ========================================PNP================================================*/
     /* ========================================SMS================================================*/
+    public static final String MSG_SENDER_STATUS_SMS_SENDING = "SMS_SENDING";
+    public static final String MSG_SENDER_STATUS_SMS_CHECK_DELIVERY = "SMS_CHECK_DELIVERY";
     public static final String DATA_CONVERTER_STATUS_SMS_COMPLETE = "SMS_COMPLETE";
     public static final String MSG_SENDER_STATUS_SMS_FAIL = "SMS_FAIL";
     /* ========================================SMS================================================*/

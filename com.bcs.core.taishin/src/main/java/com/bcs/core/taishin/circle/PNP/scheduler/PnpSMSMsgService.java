@@ -107,7 +107,7 @@ public class PnpSMSMsgService {
         for (PNPFTPType type : PNPFTPType.values()) {
             PnpMain pnpMain;
             try {
-                List<? super PnpDetail> details = pnpRepositoryCustom.updateStatus(type, processApName, AbstractPnpMainEntity.STAGE_SMS);
+                List<? super PnpDetail> details = pnpRepositoryCustom.updateStatusForSms(type, processApName, AbstractPnpMainEntity.STAGE_SMS);
                 logger.info("SMS pnpMain details type :" + type + " details size:" + details.size());
 
                 if (CollectionUtils.isEmpty(details)) {
@@ -141,36 +141,36 @@ public class PnpSMSMsgService {
      * 根據PNPFTPType 依序發送SMS
      */
     private void sendingSmsMainForDeliveryExpired() {
-        logger.info("=========== Sending SMS Main For Delivery Expired ===========");
+        logger.info("======== Start Check Has Pnp Delivery Expired Data =========");
         String procApName = pnpAkkaService.getProcessApName();
         for (PNPFTPType type : PNPFTPType.values()) {
-            PnpMain pnpMain;
             try {
-                List<? super PnpDetail> details = pnpRepositoryCustom.updateDelivertExpiredStatus(type, procApName, AbstractPnpMainEntity.STAGE_SMS);
-                logger.info("SMS PNP PUSH DeliveryExpired pnpMain details type :" + type + " details size:" + details.size());
+                List<? super PnpDetail> details = pnpRepositoryCustom.updateDeliveryExpiredStatus(type, procApName, AbstractPnpMainEntity.STAGE_SMS);
+
+
                 if (CollectionUtils.isEmpty(details)) {
-                    logger.info("SMS PNP PUSH DeliveryExpired pnpMain type :" + type + " there is a main has no details!!!");
+                    logger.info("Type :" + type + " No Expired Data!!");
                     return;
                 }
-                PnpDetail oneDetail = (PnpDetail) details.get(0);
-                pnpMain = pnpRepositoryCustom.findMainByMainId(type, oneDetail.getPnpMainId());
 
-                if (null == pnpMain) {
-                    logger.info("SMS PNP PUSH DeliveryExpired pnpMain type :" + type + " not data");
-                    return;
+
+                logger.info("Type :" + type + " Expired Details Size:" + details.size());
+
+                for (int i = 0, size = details.size(); i < size; i++) {
+                    PnpDetail oneDetail = (PnpDetail) details.get(i);
+                    PnpMain pnpMain = pnpRepositoryCustom.findMainByMainId(type, oneDetail.getPnpMainId());
+                    String smsFileName = changeFileName(pnpMain);
+                    pnpMain.setPnpDetails(details);
+                    pnpMain.setSmsFileName(smsFileName);
+                    //傳檔案到SMS FTP
+                    uploadFileToSms(type.getSource(), smsGetTargetStream(type, pnpMain, details), smsFileName);
+                    //update待發送資料 Status(Sending) & Executor name(hostname)
+                    updateStatusSuccess(procApName, pnpMain, details);
+                    pnpAkkaService.tell(pnpMain);
                 }
-                pnpMain.setPnpDetails(details);
-                String smsFileName = changeFileName(pnpMain);
-                pnpMain.setSmsFileName(smsFileName);
-                //傳檔案到SMS FTP
-                uploadFileToSms(type.getSource(), smsGetTargetStream(type, pnpMain, details), smsFileName);
-                //update待發送資料 Status(Sending) & Executor name(hostname)
-                updateStatusSuccess(procApName, pnpMain, details);
-                pnpAkkaService.tell(pnpMain);
-
             } catch (Exception e) {
                 logger.error(e);
-                logger.error("SMS PNP PUSH DeliveryExpired pnpMain type :" + type + " sendingMain error:" + e.getMessage());
+                logger.error("Type :" + type + " sendingMain error:" + e.getMessage());
             }
         }
     }
@@ -458,12 +458,11 @@ public class PnpSMSMsgService {
         Date now = Calendar.getInstance().getTime();
         if (main != null) {
             List<Object> mains = new ArrayList<>();
-            main.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_COMPLETE);
+            main.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
             main.setProcApName(processApName);
-            main.setModifyTime(now);
             main.setProcStage(AbstractPnpMainEntity.STAGE_SMS);
-            main.setSendTime(now);
             main.setSmsTime(now);
+            main.setModifyTime(now);
             mains.add(main);
             entityManagerControl.merge(mains);
         }
@@ -471,9 +470,10 @@ public class PnpSMSMsgService {
             List<Object> details = new ArrayList<>();
             for (Object detail : allDetails) {
                 ((PnpDetail) detail).setSmsFileName(main != null ? main.getSmsFileName() : null);
+                ((PnpDetail) detail).setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
+                ((PnpDetail) detail).setSmsStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 ((PnpDetail) detail).setSmsTime(now);
-                ((PnpDetail) detail).setSendTime(now);
-                ((PnpDetail) detail).setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_COMPLETE);
+                ((PnpDetail) detail).setModifyTime(now);
                 details.add(detail);
             }
             if (!details.isEmpty()) {

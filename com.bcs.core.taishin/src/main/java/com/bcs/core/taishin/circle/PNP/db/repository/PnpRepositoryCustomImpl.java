@@ -14,6 +14,7 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainUnica;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFTPType;
 import com.bcs.core.taishin.circle.PNP.scheduler.PnpSMSMsgService;
 import com.bcs.core.taishin.circle.db.entity.CircleEntityManagerControl;
+import com.bcs.core.utils.DataUtils;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
@@ -419,9 +420,17 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     @Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
     public List<? super PnpDetail> updateDeliveryExpiredStatus(PNPFTPType type, String procApName, String stage) {
         try {
-            List<? super PnpDetail> detailList = findAndUpdateDeliveryExpiredForUpdate(type.getDetailTable());
-            if (CollectionUtils.isNotEmpty(detailList)) {
+            List<BigInteger> detailIdList = findAndUpdateDeliveryExpiredForUpdate(type.getDetailTable());
+            if (CollectionUtils.isNotEmpty(detailIdList)) {
                 logger.info("Update Status: [PNP][CHECK_DELIVERY] to [PNP][FAIL] and [SMS][SENDING]");
+                logger.info(DataUtils.toPrettyJsonUseJackson(detailIdList));
+                List<List<BigInteger>> idPartitionList = Lists.partition(detailIdList, 1000);
+                List<? super PnpDetail> detailList = new ArrayList<>();
+                for (List<BigInteger> idList : idPartitionList) {
+                    List resultList = findPnpDetailById(type, idList);
+                    logger.info("Detail List Size: " + resultList.size());
+                    detailList.addAll(resultList);
+                }
                 return detailList;
             } else {
                 logger.info("Stage: SMS " + " ProcApName:" + procApName + " type:" + type + " detailIds isEmpty");
@@ -440,17 +449,15 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
      * @see this#updateDeliveryExpiredStatus
      */
     @SuppressWarnings("unchecked")
-    private List<? super PnpDetail> findAndUpdateDeliveryExpiredForUpdate(String detailTable) {
+    private List<BigInteger> findAndUpdateDeliveryExpiredForUpdate(String detailTable) {
         String sql = String.format(
                 " SELECT" +
-                        "    * " +
+                        "   d.PNP_DETAIL_ID " +
                         " FROM" +
                         "    %s d" +
                         " WHERE" +
                         "    d.PNP_STATUS = 'CHECK_DELIVERY'" +
                         "    AND d.PNP_DELIVERY_EXPIRE_TIME <= :now" +
-                        " ORDER BY CREAT_TIME " +
-
 
                         " UPDATE" +
                         "    %s" +
@@ -462,16 +469,17 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                         "    MODIFY_TIME = :now" +
                         " WHERE" +
                         "    PNP_STATUS = 'CHECK_DELIVERY'" +
-                        "    AND PNP_DELIVERY_EXPIRE_TIME <= :now" +
-                        " ORDER BY CREAT_TIME ", detailTable, detailTable);
+                        "    AND PNP_DELIVERY_EXPIRE_TIME <= :now", detailTable, detailTable);
         logger.info(sql);
 
-        Query query = entityManager.createNativeQuery(sql, PnpDetail.class)
+        Query query = entityManager.createNativeQuery(sql)
                 .setParameter("pnp_status", AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_FAIL_SMS_PROCESS)
                 .setParameter("sms_status", AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_SENDING)
                 .setParameter("now", new Date());
+
+
         logger.info(query.toString());
-        return (List<? super PnpDetail>) query.getResultList();
+        return (List<BigInteger>) query.getResultList();
     }
 
     /**

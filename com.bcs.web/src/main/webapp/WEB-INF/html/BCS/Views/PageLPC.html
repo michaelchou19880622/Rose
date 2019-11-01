@@ -171,7 +171,8 @@
 									<td>
 	                                    <label class="mdFRM05Input" style="text-align:left;float:left;">
 	                						<input type="radio" class="sendAmountType" name="sendAmountType" value="UNIVERSAL" style="cursor: pointer;" checked=true>每人
-	                						<input type="text" id="amount" value="" maxlength="10"  required="required">點
+	                						<input type="text" id="amount" value="" maxlength="10" onkeyup="value=value.replace(/[^\d]/g,'') " >點
+	                						<!--<input type="text" id="amount" value="" maxlength="10"  required="required">點-->
 	            						</label>
 	                                    <label class="mdFRM05Input" style="text-align:left;float:left;">
 	                						<input type="radio" class="sendAmountType" name="sendAmountType" value="INDIVIDUAL" style="cursor: pointer;">變動數量

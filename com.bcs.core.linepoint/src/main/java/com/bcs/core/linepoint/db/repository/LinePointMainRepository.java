@@ -3,6 +3,7 @@ package com.bcs.core.linepoint.db.repository;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +36,15 @@ public interface LinePointMainRepository extends EntityRepository<LinePointMain,
     @Query(value = "select x from LinePointMain x where x.sendType = ?1 "
     + "and x.modifyTime >= ?2 and x.modifyTime <= ?3 order by x.modifyTime desc")	
 	public List<LinePointMain> findBySendTypeAndDate(String sendType, Date startDate, Date endDate);
+    
+    @Modifying
+    @Transactional(timeout = 30)
+    @Query(value = " update BCS_LINE_POINT_MAIN  " 
+ 			+      " set SUCCESSFUL_COUNT = (select count(*)  from BCS_LINE_POINT_DETAIL  where LINE_POINT_MAIN_ID = ?1 and status = 'SUCCESS'), "
+			+      " SUCCESSFUL_AMOUNT = (select sum(AMOUNT)  from BCS_LINE_POINT_DETAIL  where LINE_POINT_MAIN_ID = ?1 and status = 'SUCCESS'), "
+ 			+      " FAILED_COUNT = (select count(*) from BCS_LINE_POINT_DETAIL where  LINE_POINT_MAIN_ID = ?1 and status = 'FAIL' ) "
+			+      " where ID = ?1 and status = 'COMPLETE' ", nativeQuery = true)	
+	public void updateLinePoint(String LinePointMainId);
     
     // with searchText
     @Transactional(timeout = 30)

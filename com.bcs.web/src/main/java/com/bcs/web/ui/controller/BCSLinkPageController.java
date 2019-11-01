@@ -23,20 +23,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.bcs.core.db.entity.ContentFlag;
 import com.bcs.core.db.entity.ContentLink;
-import com.bcs.core.db.entity.ShareCampaign;
 import com.bcs.core.db.service.ContentFlagService;
-import com.bcs.core.db.service.ContentGameService;
 import com.bcs.core.db.service.ContentLinkService;
-import com.bcs.core.db.service.ShareCampaignService;
-import com.bcs.core.db.service.TurntableDetailService;
 import com.bcs.core.db.service.UserTraceLogService;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.enums.LOG_TARGET_ACTION_TYPE;
@@ -45,7 +43,6 @@ import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.report.service.ContentLinkReportService;
 import com.bcs.core.report.service.PageVisitReportService;
 import com.bcs.core.resource.CoreConfigReader;
-import com.bcs.core.resource.UriHelper;
 import com.bcs.core.utils.DBResultUtil;
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.web.security.CurrentUser;
@@ -54,6 +51,7 @@ import com.bcs.core.web.ui.controller.BCSBaseController;
 import com.bcs.core.web.ui.page.enums.MobilePageEnum;
 import com.bcs.web.aop.ControllerLog;
 import com.bcs.web.ui.model.LinkClickReportModel;
+import com.bcs.web.ui.model.LinkClickReportSearchModel;
 import com.bcs.web.ui.model.PageVisitReportModel;
 import com.bcs.web.ui.service.ExportExcelUIService;
 
@@ -72,12 +70,6 @@ public class BCSLinkPageController extends BCSBaseController {
 	private ContentFlagService contentFlagService;
 	@Autowired
 	private ExportExcelUIService exportExcelUIService;
-	@Autowired
-	private ContentGameService contentGameService;
-	@Autowired
-	private TurntableDetailService turntableDetailService;
-	@Autowired
-	private ShareCampaignService shareCampaignService;
 	
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSLinkPageController.class);
@@ -240,12 +232,114 @@ public class BCSLinkPageController extends BCSBaseController {
 			
 			// Get ContentFlag, setLinkClickCount
 			for(LinkClickReportModel model : linkResult.values()){
-				
 				List<String> flags = contentFlagService.findFlagValueByReferenceIdAndContentTypeOrderByFlagValueAsc(model.getLinkId(), ContentFlag.CONTENT_TYPE_LINK);
 				model.addFlags(flags);
+				Thread.sleep(10);
+				// setLinkClickCount
+				this.setLinkClickCount(model, nowCalendar, yesterdayCalendar, nextCalendar);
+			}
+
+			return new ResponseEntity<>(linkResult, HttpStatus.OK);
+		}
+		catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));
+
+			if(e instanceof BcsNoticeException){
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			}
+			else{
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		}
+	}
+	
+	/**
+	 * 取得連結列表
+	 */
+	@ControllerLog(description="取得連結列表")
+	@RequestMapping(method = RequestMethod.POST, value = "/edit/getLinkUrlReportList", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> getLinkUrlReportList(
+			HttpServletRequest request, 
+			HttpServletResponse response,
+			@CurrentUser CustomUser customUser,
+			@RequestBody LinkClickReportSearchModel linkClickReportSearchModel) throws IOException {
+		String queryFlag = new String(linkClickReportSearchModel.getQueryFlag().getBytes("utf-8"),"utf-8");
+		Integer page = linkClickReportSearchModel.getPage();
+		logger.info("getLinkUrlReportList, queryFlag=" + queryFlag + " page=" + page);
+		Calendar yesterdayCalendar = Calendar.getInstance();
+		yesterdayCalendar.add(Calendar.DATE, -1);
+		Calendar nowCalendar = Calendar.getInstance();
+		Calendar nextCalendar = Calendar.getInstance();
+		nextCalendar.add(Calendar.DATE, 1);
+		
+		try{ 
+			Map<String, LinkClickReportModel> linkResult = new LinkedHashMap<String, LinkClickReportModel>();
+			List<Object[]> result = null; // LINK_URL, LINK_TITLE, LINK_ID, MODIFY_TIME
+			if(page != null && page != 0 && StringUtils.isBlank(queryFlag)){
+				result = new ArrayList<Object[]>();
+				int size = 20;
+				Sort.Order order = new Sort.Order(Direction.DESC, "modifyTime");
+				Sort sort = new Sort(order);
+				Pageable pageable = new PageRequest(page, size, sort);
+				Page<ContentLink> linkList = contentLinkService.findAll(pageable);
+				for(ContentLink link : linkList.getContent()){
+					if(StringUtils.isBlank(link.getLinkUrl())){
+						continue;
+					}
+					Object[] obj = new Object[4];
+					obj[0] = link.getLinkUrl();
+					obj[1] = link.getLinkTitle();
+					obj[2] = link.getLinkId();
+					obj[3] = link.getModifyTime();
+					result.add(obj);
+				}
+			}
+			else{
+				if(StringUtils.isNotBlank(queryFlag)){
+					result = contentLinkService.findAllLinkUrlByLikeFlag("%" + queryFlag + "%");
+					List<Object[]> links = contentLinkService.findAllLinkUrlByLikeTitle("%" + queryFlag + "%");
+					if(result != null){
+						if(links != null && links.size() > 0){
+							result.addAll(links);
+						}
+					}
+					else{
+						result = links;
+					}
+				}
+				else{
+					result = contentLinkService.getAllContentLinkUrl();
+				}
+			}
+			
+			for(Object[] link : result){
+				String linkUrl = castToString(link[0]);
+				String linkTitle = castToString(link[1]);
+				String linkId = castToString(link[2]);
+				String linkTime = castToString(link[3]);
+				LinkClickReportModel model = linkResult.get(linkUrl);
 				
-				Thread.sleep(200);
-				
+				if(model == null){
+					model = new LinkClickReportModel();
+					model.setLinkUrl(linkUrl);
+					model.setLinkId(linkId);
+					model.setLinkTitle(linkTitle);
+					model.setLinkTime(linkTime);
+					linkResult.put(linkUrl, model);
+				}
+				else{
+					if(StringUtils.isBlank(model.getLinkTitle())){
+						model.setLinkTitle(linkTitle);
+					}
+				}
+			}
+			
+			// Get ContentFlag, setLinkClickCount
+			for(LinkClickReportModel model : linkResult.values()){
+				List<String> flags = contentFlagService.findFlagValueByReferenceIdAndContentTypeOrderByFlagValueAsc(model.getLinkId(), ContentFlag.CONTENT_TYPE_LINK);
+				model.addFlags(flags);
+				Thread.sleep(10);
 				// setLinkClickCount
 				this.setLinkClickCount(model, nowCalendar, yesterdayCalendar, nextCalendar);
 			}
@@ -346,7 +440,7 @@ public class BCSLinkPageController extends BCSBaseController {
 				
 				pageResult.put(pageUrl, model);
 				
-				Thread.sleep(200);
+				Thread.sleep(10);
 
 				// setLinkClickCount
 				this.setPageVisitCount(model, nowCalendar, yesterdayCalendar, nextCalendar);

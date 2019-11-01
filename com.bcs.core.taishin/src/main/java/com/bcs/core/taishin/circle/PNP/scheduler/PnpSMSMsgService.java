@@ -107,7 +107,7 @@ public class PnpSMSMsgService {
         for (PNPFTPType type : PNPFTPType.values()) {
             PnpMain pnpMain;
             try {
-                List<? super PnpDetail> details = pnpRepositoryCustom.updateStatus(type, processApName, AbstractPnpMainEntity.STAGE_SMS);
+                List<? super PnpDetail> details = pnpRepositoryCustom.updateStatusForSms(type, processApName, AbstractPnpMainEntity.STAGE_SMS);
                 logger.info("SMS pnpMain details type :" + type + " details size:" + details.size());
 
                 if (CollectionUtils.isEmpty(details)) {
@@ -146,7 +146,7 @@ public class PnpSMSMsgService {
         for (PNPFTPType type : PNPFTPType.values()) {
             PnpMain pnpMain;
             try {
-                List<? super PnpDetail> details = pnpRepositoryCustom.updateDelivertExpiredStatus(type, procApName, AbstractPnpMainEntity.STAGE_SMS);
+                List<? super PnpDetail> details = pnpRepositoryCustom.updateDeliveryExpiredStatus(type, procApName, AbstractPnpMainEntity.STAGE_SMS);
                 logger.info("SMS PNP PUSH DeliveryExpired pnpMain details type :" + type + " details size:" + details.size());
                 if (CollectionUtils.isEmpty(details)) {
                     logger.info("SMS PNP PUSH DeliveryExpired pnpMain type :" + type + " there is a main has no details!!!");
@@ -458,12 +458,11 @@ public class PnpSMSMsgService {
         Date now = Calendar.getInstance().getTime();
         if (main != null) {
             List<Object> mains = new ArrayList<>();
-            main.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_COMPLETE);
+            main.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
             main.setProcApName(processApName);
-            main.setModifyTime(now);
             main.setProcStage(AbstractPnpMainEntity.STAGE_SMS);
-            main.setSendTime(now);
             main.setSmsTime(now);
+            main.setModifyTime(now);
             mains.add(main);
             entityManagerControl.merge(mains);
         }
@@ -471,9 +470,10 @@ public class PnpSMSMsgService {
             List<Object> details = new ArrayList<>();
             for (Object detail : allDetails) {
                 ((PnpDetail) detail).setSmsFileName(main != null ? main.getSmsFileName() : null);
+                ((PnpDetail) detail).setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
+                ((PnpDetail) detail).setSmsStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 ((PnpDetail) detail).setSmsTime(now);
-                ((PnpDetail) detail).setSendTime(now);
-                ((PnpDetail) detail).setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_COMPLETE);
+                ((PnpDetail) detail).setModifyTime(now);
                 details.add(detail);
             }
             if (!details.isEmpty()) {

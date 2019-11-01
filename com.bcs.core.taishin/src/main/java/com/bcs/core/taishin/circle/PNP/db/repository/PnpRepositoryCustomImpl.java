@@ -12,10 +12,11 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainMing;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainMitake;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainUnica;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFTPType;
-import com.bcs.core.taishin.circle.PNP.scheduler.PnpPNPMsgService;
 import com.bcs.core.taishin.circle.db.entity.CircleEntityManagerControl;
+import com.bcs.core.utils.DataUtils;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -108,7 +109,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
         }
         final Timestamp now = new Timestamp(Calendar.getInstance().getTime().getTime());
         String INSERT = "INSERT INTO BCS_PNP_DETAIL_MING" +
-                " (CREAT_TIME, LINE_PUSH_TIME, MODIFY_TIME, MSG, PHONE, PHONE_HASH, PNP_MAIN_ID, PNP_TIME, PROC_FLOW, PROC_STAGE, SEND_TIME, SMS_TIME, [SOURCE]," + 
+                " (CREAT_TIME, LINE_PUSH_TIME, MODIFY_TIME, MSG, PHONE, PHONE_HASH, PNP_MAIN_ID, PNP_TIME, PROC_FLOW, PROC_STAGE, SEND_TIME, SMS_TIME, [SOURCE]," +
                 " STATUS, UID, SN, VARIABLE1, VARIABLE2, ACCOUNT1, ACCOUNT2, DETAIL_SCHEDULE_TIME, KEEP_SECOND)" +
                 " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         logger.info("batchInsertPnpDetailMing start");
@@ -261,7 +262,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
      * 找出BCS_PNP_DETAIL_X 第一筆 STATUS = 'PROCESS' AND PROC_STAGE = 'PNP' or 'SMS' 的MainId
      * 用此mainId 去找所有同樣MainId AND STATUS = 'PROCESS' AND PROC_STAGE = 'PNP'  or 'SMS' 的BCS_PNP_DETAIL_X 並更新STATUS
      *
-     * @see PnpPNPMsgService#sendingPnpMain()
+     * @see com.bcs.core.taishin.circle.PNP.scheduler.PnpPNPMsgService#sendingPnpMain()
      */
     @Override
     @Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
@@ -272,6 +273,40 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
             List<BigInteger> detailIds = findAndUpdateProcessForUpdate(type.getDetailTable(), stage);
             if (!detailIds.isEmpty()) {
                 logger.info("Update Detail Status: [PROCESS] to [PNP][SENDING]");
+                List<List<BigInteger>> batchDetailIds = Lists.partition(detailIds, CircleEntityManagerControl.batchSize);
+                for (List<BigInteger> ids : batchDetailIds) {
+
+                    List<? super PnpDetail> details = findPnpDetailById(type, ids);
+                    if (!details.isEmpty()) {
+                        return details;
+                    }
+                }
+            } else {
+                logger.info("stage:" + stage + " PNP updateStatus:" + processApName + " type:" + type + " detailIds isEmpty");
+            }
+            logger.debug(" end PNP updateStatus:" + processApName + " type:" + type);
+        } catch (Exception e) {
+            logger.error(e);
+            throw e;
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * 找出BCS_PNP_DETAIL_X 第一筆 STATUS = 'PROCESS' AND PROC_STAGE = 'PNP' or 'SMS' 的MainId
+     * 用此mainId 去找所有同樣MainId AND STATUS = 'PROCESS' AND PROC_STAGE = 'PNP'  or 'SMS' 的BCS_PNP_DETAIL_X 並更新STATUS
+     *
+     * @see com.bcs.core.taishin.circle.PNP.scheduler.PnpSMSMsgService#sendingSmsMain()
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
+    public List<? super PnpDetail> updateStatusForSms(PNPFTPType type, String processApName, String stage) {
+        logger.debug(" begin PNP updateStatus:" + processApName + " type:" + type);
+        try {
+            /* Stage = SMS */
+            List<BigInteger> detailIds = findAndUpdateProcessForUpdateForSms(type.getDetailTable(), stage);
+            if (!detailIds.isEmpty()) {
+                logger.info("Update Detail Status: [PROCESS] to [SMS][SENDING]");
                 List<List<BigInteger>> batchDetailIds = Lists.partition(detailIds, CircleEntityManagerControl.batchSize);
                 for (List<BigInteger> ids : batchDetailIds) {
 
@@ -332,18 +367,62 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 .getResultList();
     }
 
+    /**
+     * 找出最近一筆 PNP 訊息狀態為 PROCESS 的 ID
+     * 並更新 PNP 訊息狀態為 SENDING
+     *
+     * @see PnpRepositoryCustomImpl#updateStatus
+     */
+    @SuppressWarnings("unchecked")
+    private List<BigInteger> findAndUpdateProcessForUpdateForSms(String detailTable, String stage) {
+        String sql = String.format(
+                " SELECT d.PNP_DETAIL_ID FROM %s d" +
+                        " WHERE 1=1" +
+                        "    AND d.PROC_STAGE = :stage" +
+                        "    AND d.PNP_MAIN_ID in" +
+                        "    (" +
+                        "        SELECT top 1 a.PNP_MAIN_ID FROM %s a" +
+                        "        WHERE 1=1" +
+                        "            AND a.BC_STATUS = :bc_status" +
+                        "            AND a.PROC_STAGE = :stage" +
+                        "        ORDER BY a.CREAT_TIME" +
+                        "    )" +
+                        " UPDATE %s SET" +
+                        "    STATUS = :status," +
+                        "    SMS_STATUS = :sms_Status," +
+                        "    MODIFY_TIME = :modifyTime" +
+                        " WHERE 1=1" +
+                        "    AND PROC_STAGE = :stage" +
+                        "    AND PNP_MAIN_ID in(" +
+                        "        SELECT top 1 a.PNP_MAIN_ID FROM %s a WITH (ROWLOCK)" +
+                        "        WHERE 1=1" +
+                        "            AND a.BC_STATUS = :bc_status" +
+                        "            AND a.PROC_STAGE = :stage" +
+                        "        ORDER BY a.CREAT_TIME" +
+                        " )", detailTable, detailTable, detailTable, detailTable);
+        return (List<BigInteger>) entityManager.createNativeQuery(sql)
+                .setParameter("stage", stage)
+                .setParameter("status", AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS)
+                .setParameter("bc_status", AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS)
+                .setParameter("sms_Status", AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_SENDING)
+                .setParameter("modifyTime", new Date())
+                .getResultList();
+    }
+
 
     /**
      * Find Detail Status is CheckDeliver and Change Status to SMS Sending
+     *
+     * @see com.bcs.core.taishin.circle.PNP.scheduler.PnpSMSMsgService
      */
     @Override
     @Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
-    public List<? super PnpDetail> updateDelivertExpiredStatus(PNPFTPType type, String procApName, String stage) {
-        logger.debug(" begin PNP updateDelivertExpiredStatus:" + procApName + " type:" + type);
+    public List<? super PnpDetail> updateDeliveryExpiredStatus(PNPFTPType type, String procApName, String stage) {
+        logger.debug(" begin PNP updateDeliveryExpiredStatus:" + procApName + " type:" + type);
         try {
             List<BigInteger> detailIds = findAndUpdateDeliveryExpiredForUpdate(type.getDetailTable(), stage);
             if (!detailIds.isEmpty()) {
-                logger.info("Update Status: [PNP][CHECK_DELIVERY] to [SMS][SENDING]");
+                logger.info("Update Status: [PNP][CHECK_DELIVERY] to [PNP][FAIL] and [SMS][SENDING]");
                 List<List<BigInteger>> batchDetailIds = Lists.partition(detailIds, CircleEntityManagerControl.batchSize);
                 for (List<BigInteger> ids : batchDetailIds) {
                     List<? super PnpDetail> details = findPnpDetailById(type, ids);
@@ -352,9 +431,9 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                     }
                 }
             } else {
-                logger.info("stage:" + stage + " PNP updateDelivertExpiredStatus:" + procApName + " type:" + type + " detailIds isEmpty");
+                logger.info("stage:" + stage + " PNP updateDeliveryExpiredStatus:" + procApName + " type:" + type + " detailIds isEmpty");
             }
-            logger.debug(" end PNP updateDelivertExpiredStatus:" + procApName + " type:" + type);
+            logger.debug(" end PNP updateDeliveryExpiredStatus:" + procApName + " type:" + type);
         } catch (Exception e) {
             logger.error(e);
             throw e;
@@ -365,35 +444,47 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     /**
      * Find Detail Status is CHECK_DELIVERY
      * Update Status to Sending
-     * @see this#updateDelivertExpiredStatus
+     *
+     * @see this#updateDeliveryExpiredStatus
      */
     @SuppressWarnings("unchecked")
     private List<BigInteger> findAndUpdateDeliveryExpiredForUpdate(String detailTable, String stage) {
-        String sqlString = "select d.PNP_DETAIL_ID from " + detailTable + " d " +
-                " where d.STATUS = 'CHECK_DELIVERY' " +
-                "    and d.PNP_DELIVERY_EXPIRE_TIME < getdate()" +
-                "    and d.PNP_MAIN_ID" +
-                "    in (" +
-                "           select TOP 1 a.PNP_MAIN_ID from " + detailTable + " a " +
-                "           where a.STATUS = 'CHECK_DELIVERY'" +
-                "               and a.PNP_DELIVERY_EXPIRE_TIME < getdate() " +
-                "           order by a.CREAT_TIME" +
-                "       )" +
-
-                " update " + detailTable + " " +
-                "   set PROC_STAGE = 'SMS', STATUS = :newStatus, PNP_STATUS = :pnp_status, MODIFY_TIME = :modifyTime " +
-                " where STATUS = 'CHECK_DELIVERY' " +
-                "    and PNP_DELIVERY_EXPIRE_TIME < getdate() " +
-                "    and PNP_MAIN_ID" +
-                "    in (" +
-                "           select TOP 1 a.PNP_MAIN_ID from " + detailTable + " a with(ROWLOCK) " +
-                "           where a.STATUS = 'CHECK_DELIVERY'" +
-                "               and a.PNP_DELIVERY_EXPIRE_TIME < getdate()  " +
-                "           order by a.CREAT_TIME" +
-                "       )";
-        return (List<BigInteger>) entityManager.createNativeQuery(sqlString)
+        String sql = String.format(
+                " SELECT d.PNP_DETAIL_ID FROM %s d" +
+                " WHERE 1=1" +
+                "     AND d.STATUS = :CHECK_DELIVERY" +
+                "     AND d.PNP_DELIVERY_EXPIRE_TIME <= :now" +
+                "     AND d.PNP_MAIN_ID in" +
+                "     (" +
+                "        SELECT TOP 1 a.PNP_MAIN_ID FROM %s a" +
+                "        WHERE 1=1" +
+                "            AND a.STATUS = :CHECK_DELIVERY" +
+                "            AND a.PNP_DELIVERY_EXPIRE_TIME <= :now" +
+                "        ORDER BY a.CREAT_TIME" +
+                "     )" +
+                " UPDATE %s SET" +
+                "     PROC_STAGE = :stage," +
+                "     STATUS = :newStatus," +
+                "     PNP_STATUS = :pnp_status," +
+                "     SMS_STATUS = :sms_status," +
+                "     MODIFY_TIME = :modifyTime" +
+                " WHERE" +
+                "     STATUS = :CHECK_DELIVERY" +
+                "     AND PNP_DELIVERY_EXPIRE_TIME <= :now" +
+                "     AND PNP_MAIN_ID in(" +
+                "        SELECT TOP 1 a.PNP_MAIN_ID FROM %s a WITH (ROWLOCK)" +
+                "        WHERE 1=1" +
+                "            AND a.STATUS = :CHECK_DELIVERY" +
+                "            AND a.PNP_DELIVERY_EXPIRE_TIME <= :now" +
+                "        ORDER BY a.CREAT_TIME" +
+                "     )", detailTable, detailTable ,detailTable, detailTable);
+        return (List<BigInteger>) entityManager.createNativeQuery(sql)
+                .setParameter("stage", stage)
+                .setParameter("CHECK_DELIVERY", AbstractPnpMainEntity.MSG_SENDER_STATUS_CHECK_DELIVERY)
                 .setParameter("newStatus", AbstractPnpMainEntity.MSG_SENDER_STATUS_SENDING)
                 .setParameter("pnp_status", AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_FAIL_SMS_PROCESS)
+                .setParameter("sms_status", AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_SENDING)
+                .setParameter("now", new Date())
                 .setParameter("modifyTime", new Date())
                 .getResultList();
     }
@@ -405,7 +496,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     @Override
     @Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
     public List<? super PnpDetail> updateStatusByStageBC(PNPFTPType type, String procApName, Set<Long> allMainIds) {
-        logger.info(String.format("ProcessApName: %s, Type: %s",procApName, type));
+        logger.info(String.format("ProcessApName: %s, Type: %s", procApName, type));
         try {
             // 找出第一筆 WAIT MAIN 並更新狀態為Sending
             Long waitMainId = findAndUpdateFirstWaitMainByStageBc(procApName, type.getMainTable());
@@ -462,7 +553,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 "         SELECT d.PNP_DETAIL_ID FROM %s d WITH (ROWLOCK) " +
                 "         WHERE d.PNP_MAIN_ID in(:mainIds) " +
                 "         AND d.STATUS in(:status) " +
-                " ); ", detailTable, detailTable, detailTable) ;
+                " ); ", detailTable, detailTable, detailTable);
 
         return (List<BigInteger>) entityManager.createNativeQuery(sql)
                 .setParameter("status", statusList).setParameter("mainIds", mainIds)
@@ -485,7 +576,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 " order by m.CREAT_TIME " +
 
                 " update " + mainTable +
-                " set STATUS = :newStatus, PROC_AP_NAME = :procApName, MODIFY_TIME = :modifyTime "+
+                " set STATUS = :newStatus, PROC_AP_NAME = :procApName, MODIFY_TIME = :modifyTime " +
                 "   where PNP_MAIN_ID" +
                 "       in (" +
                 "              select TOP 1 a.PNP_MAIN_ID from " + mainTable + " a WITH(ROWLOCK) " +

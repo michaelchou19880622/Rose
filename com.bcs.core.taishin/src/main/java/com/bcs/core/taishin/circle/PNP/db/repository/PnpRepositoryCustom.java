@@ -40,6 +40,17 @@ public interface PnpRepositoryCustom {
     List<? super PnpDetail> updateStatus(PNPFTPType type, String procApName, String stage);
 
     /**
+     * Update status list.
+     *
+     * @param type       the type
+     * @param procApName the proc ap name
+     * @param stage      the stage
+     * @return the list
+     */
+    List<? super PnpDetail> updateStatusForSms(PNPFTPType type, String procApName, String stage);
+
+
+    /**
      * Update delivert expired status list.
      *
      * @param type       the type
@@ -47,7 +58,7 @@ public interface PnpRepositoryCustom {
      * @param stage      the stage
      * @return the list
      */
-    List<? super PnpDetail> updateDelivertExpiredStatus(PNPFTPType type, String procApName, String stage);
+    List<? super PnpDetail> updateDeliveryExpiredStatus(PNPFTPType type, String procApName, String stage);
 
     /**
      * Find main by main id pnp main.

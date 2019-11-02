@@ -4,6 +4,7 @@ import com.bcs.core.taishin.circle.PNP.akka.handler.PnpMessageActor;
 import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.PNP.service.PnpService;
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -21,6 +22,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
 /**
  * @see PnpMessageActor#onReceive
  */
+@Slf4j
 @Service
 public class PnpTaskService {
     @Autowired
@@ -55,6 +57,7 @@ public class PnpTaskService {
         scheduler.scheduleJob(jobDetail, trigger);
         /* 批次開始將訊息狀態更改為Delay */
         pnpService.updateMainAndDetailStatus(pnpMain, AbstractPnpMainEntity.SEND_TYPE_DELAY);
+        log.info("BC Scheduler Start!!");
         scheduler.start();
     }
 }

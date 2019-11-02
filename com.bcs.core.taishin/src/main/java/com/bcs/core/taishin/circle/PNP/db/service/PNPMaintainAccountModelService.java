@@ -187,7 +187,7 @@ public class PNPMaintainAccountModelService {
                 "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
                 "                        a.source_system, " +
                 "                        d.proc_flow, " +
-                "                        isnull(d.proc_stage, '') + ';' + isnull(a.pathway, '') as 'proc', " +
+                "                        isnull(d.proc_stage, '') + ';' + isnull(d.source, '') as 'proc', " +
                 "                        a.account, " +
                 "                        a.pcc_code, " +
                 "                        m.pnp_main_id, " +
@@ -235,7 +235,7 @@ public class PNPMaintainAccountModelService {
                 "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
                 "                        a.source_system, " +
                 "                        d.proc_flow, " +
-                "                        isnull(d.proc_stage, '') + ';' + isnull(a.pathway, '') as 'proc', " +
+                "                        isnull(d.proc_stage, '') + ';' + isnull(d.source, '') as 'proc', " +
                 "                        a.account, " +
                 "                        a.pcc_code, " +
                 "                        m.pnp_main_id, " +
@@ -280,7 +280,7 @@ public class PNPMaintainAccountModelService {
                 "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
                 "                        a.source_system, " +
                 "                        d.proc_flow, " +
-                "                        isnull(d.proc_stage, '') + ';' + isnull(a.pathway, '') as 'proc', " +
+                "                        isnull(d.proc_stage, '') + ';' + isnull(d.source, '') as 'proc', " +
                 "                        a.account, " +
                 "                        a.pcc_code, " +
                 "                        m.pnp_main_id, " +
@@ -326,7 +326,7 @@ public class PNPMaintainAccountModelService {
                 "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
                 "                        a.source_system, " +
                 "                        d.proc_flow, " +
-                "                        isnull(d.proc_stage, '') + ';' + isnull(a.pathway, '') as 'proc', " +
+                "                        isnull(d.proc_stage, '') + ';' + isnull(d.source, '') as 'proc', " +
                 "                        a.account, " +
                 "                        a.pcc_code, " +
                 "                        m.pnp_main_id, " +
@@ -431,6 +431,10 @@ public class PNPMaintainAccountModelService {
                 return "PNP處理程序完成";
             case "PNP_FAIL_SMS_PROCESS":
                 return "轉發SMS";
+            case "SMS_SENDING":
+                return "SMS發送中";
+            case "SMS_CHECK_DELIVERY":
+                return "SMS已發送，等待回應";
             case "SMS_COMPLETE":
                 return "SMS處理程序完成";
             case "SMS_FAIL":

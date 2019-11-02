@@ -69,11 +69,14 @@ public class BCSPnpReportController extends BCSBaseController {
                                                 @RequestParam(value = "account", required = false) String account,
                                                 @RequestParam(value = "pccCode", required = false) String pccCode,
                                                 @RequestParam(value = "sourceSystem", required = false) String sourceSystem,
-                                                @RequestParam(value = "page", required = false) Integer page) {
-        
+                                                @RequestParam(value = "page", required = false) Integer page,
+                                                @RequestParam(value = "phoneNumber", required = false) String phoneNumber
+    ) {
+
         try {
             String empId = customUser.getAccount().toUpperCase();
-            Map<String, List<String>> result = pnpMaintainUIService.getPNPDetailReport(startDate, endDate, account, pccCode, sourceSystem, page, empId);
+            Map<String, List<String>> result = pnpMaintainUIService.getPNPDetailReport(startDate, endDate, account, pccCode, sourceSystem, page, empId, phoneNumber);
+            log.info(DataUtils.toPrettyJsonUseJackson(result));
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             log.error(ErrorRecord.recordError(e));
@@ -89,19 +92,14 @@ public class BCSPnpReportController extends BCSBaseController {
                                                           @RequestParam(value = "endDate", required = false) String endDate,
                                                           @RequestParam(value = "account", required = false) String account,
                                                           @RequestParam(value = "pccCode", required = false) String pccCode,
-                                                          @RequestParam(value = "sourceSystem", required = false) String sourceSystem) throws IOException {
+                                                          @RequestParam(value = "sourceSystem", required = false) String sourceSystem,
+                                                          @RequestParam(value = "phoneNumber", required = false) String phoneNumber
+    ) throws IOException {
 
         log.info("getPNPDetailReportTotalPages");
-        if (startDate == null) {
-            startDate = "1911-01-01";
-        }
-        if (endDate == null) {
-            endDate = "3099-01-01";
-        }
-
         try {
             String empId = customUser.getAccount().toUpperCase();
-            String count = pnpMaintainUIService.getPNPDetailReportTotalPages(startDate, endDate, account, pccCode, sourceSystem, empId);
+            int count = pnpMaintainUIService.getPNPDetailReportTotalPages(startDate, endDate, account, pccCode, sourceSystem, empId, phoneNumber);
             return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count + "\"}", HttpStatus.OK);
         } catch (Exception e) {
             log.error(ErrorRecord.recordError(e));

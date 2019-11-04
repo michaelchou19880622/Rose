@@ -40,11 +40,6 @@ public class PnpDetailMing extends PnpDetail {
     @Column(name = "SN", columnDefinition = "nvarchar(15)")
     private String sn;
     /**
-     * 預約時間
-     */
-    @Column(name = "DETAIL_SCHEDULE_TIME", columnDefinition = "nvarchar(20)")
-    private String detailScheduleTime;
-    /**
      * 批次帳號1
      */
     @Column(name = "ACCOUNT1", columnDefinition = "nvarchar(20)")

@@ -484,7 +484,7 @@ public class LoadFtpPnpDataTask {
      * @throws Exception Exception
      * @see this#parseMingFiles
      */
-    private List<? super PnpDetail> parsePnpDetailMing(String fileContent, String flexTemplateId) throws Exception {
+    private List<? super PnpDetail> parsePnpDetailMing(String fileContent, String flexTemplateId, String scheduleTime) throws Exception {
         log.info("flexTemplateId : " + flexTemplateId);
         List<? super PnpDetail> details = new ArrayList<>();
         /* 明宣沒有header所以從0開始 */
@@ -509,21 +509,17 @@ public class LoadFtpPnpDataTask {
                 detail.setPhone(detailData[1]);
                 detail.setPhoneHash(toSha256(detailData[1]));
                 detail.setMsg(detailData[2]);
-                detail.setDetailScheduleTime(detailData[3]);
+                detail.setDetailScheduleTime(detailData[3] == null ? scheduleTime : detailData[3]);
                 detail.setAccount1(detailData[4]);
                 detail.setAccount2(detailData[5]);
                 detail.setVariable1(detailData[6]);
                 detail.setVariable2(detailData[7]);
                 detail.setKeepSecond(detailData[8]);
-                LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
-
-                log.info("phone = " + detailData[1]);
-
-                String mid = lineUserService.getMidByMobile(detailData[1]);
-                log.info("mid = " + mid);
-
-                detail.setUid(mid);
                 detail.setFlexTemplateId(flexTemplateId);
+
+                LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
+                String mid = lineUserService.getMidByMobile(detail.getPhone());
+                detail.setUid(mid);
                 details.add(detail);
 
             } else {
@@ -540,7 +536,7 @@ public class LoadFtpPnpDataTask {
      * @return Mitake物件清單
      * @throws Exception Exception
      */
-    private List<? super PnpDetail> parsePnpDetailMitake(List<String> fileContents, String flexTemplateId) throws Exception {
+    private List<? super PnpDetail> parsePnpDetailMitake(List<String> fileContents, String flexTemplateId, String scheduleTime) throws Exception {
         List<? super PnpDetail> details = new ArrayList<>();
         /* Mitake有header所以從1開始 */
         for (int i = 1; i < fileContents.size(); i++) {
@@ -561,6 +557,10 @@ public class LoadFtpPnpDataTask {
                     detail.setPhoneHash(toSha256(detailData[2]));
                     detail.setMsg(detailData[3]);
                     detail.setFlexTemplateId(flexTemplateId);
+                    detail.setDetailScheduleTime(scheduleTime);
+                    LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
+                    String mid = lineUserService.getMidByMobile(detail.getPhone());
+                    detail.setUid(mid);
                     details.add(detail);
                 } else {
                     log.error("parsePnpDetailMitake error Data:" + Arrays.toString(detailData));
@@ -578,7 +578,7 @@ public class LoadFtpPnpDataTask {
      * @return Every8d物件清單
      * @throws Exception Exception
      */
-    private List<? super PnpDetail> parsePnpDetailEvery8d(List<String> fileContents, String flexTemplateId) throws Exception {
+    private List<? super PnpDetail> parsePnpDetailEvery8d(List<String> fileContents, String flexTemplateId, String scheduleTime) throws Exception {
         List<? super PnpDetail> details = new ArrayList<>();
         /* Every8D有header所以從1開始 */
         for (int i = 1; i < fileContents.size(); i++) {
@@ -613,7 +613,11 @@ public class LoadFtpPnpDataTask {
                     detail.setProgramId(detailData[7]);
                     detail.setVariable1(detailData[8]);
                     detail.setVariable2(detailData[9]);
+                    detail.setDetailScheduleTime(scheduleTime);
                     detail.setFlexTemplateId(flexTemplateId);
+                    LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
+                    String mid = lineUserService.getMidByMobile(detail.getPhone());
+                    detail.setUid(mid);
                     details.add(detail);
                 } else {
                     log.error("parsePnpDetailEvery8d error Data:" + Arrays.toString(detailData));
@@ -630,7 +634,7 @@ public class LoadFtpPnpDataTask {
      * @return Unica物件清單
      * @throws Exception Exception
      */
-    private List<? super PnpDetail> parsePnpDetailUnica(List<String> fileContents, String flexTemplateId) throws Exception {
+    private List<? super PnpDetail> parsePnpDetailUnica(List<String> fileContents, String flexTemplateId, String scheduleTime) throws Exception {
         List<? super PnpDetail> details = new ArrayList<>();
         /* Unica有header所以從1開始 */
         for (int i = 1; i < fileContents.size(); i++) {
@@ -664,6 +668,10 @@ public class LoadFtpPnpDataTask {
                     detail.setVariable1(detailData[8]);
                     detail.setVariable2(detailData[9]);
                     detail.setFlexTemplateId(flexTemplateId);
+                    detail.setDetailScheduleTime(scheduleTime);
+                    LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
+                    String mid = lineUserService.getMidByMobile(detail.getPhone());
+                    detail.setUid(mid);
                     details.add(detail);
                 } else {
                     log.error("parsePnpDetailUnica error Data:" + Arrays.toString(detailData));
@@ -753,7 +761,7 @@ public class LoadFtpPnpDataTask {
             if (sendType.equals(AbstractPnpMainEntity.SEND_TYPE_DELAY) || sendType.equals(AbstractPnpMainEntity.SEND_TYPE_SCHEDULE_TIME_EXPIRED)) {
                 pnpMainMing.setScheduleTime(orderTime);
             }
-            pnpMainMing.setPnpDetails(parsePnpDetailMing(content, accountModel.getTemplate()));
+            pnpMainMing.setPnpDetails(parsePnpDetailMing(content, accountModel.getTemplate(), pnpMainMing.getScheduleTime()));
             mains.add(pnpMainMing);
         }
         return mains;
@@ -813,7 +821,7 @@ public class LoadFtpPnpDataTask {
             pnpMainMitake.setScheduleTime(orderTime);
         }
 
-        pnpMainMitake.setPnpDetails(parsePnpDetailMitake(fileContents, accountModel.getTemplate()));
+        pnpMainMitake.setPnpDetails(parsePnpDetailMitake(fileContents, accountModel.getTemplate(), pnpMainMitake.getScheduleTime()));
         List<Object> mains = new ArrayList<>();
         mains.add(pnpMainMitake);
         return mains;
@@ -879,7 +887,7 @@ public class LoadFtpPnpDataTask {
             pnpMainEvery8d.setScheduleTime(orderTime);
         }
 
-        pnpMainEvery8d.setPnpDetails(parsePnpDetailEvery8d(fileContents, accountModel.getTemplate()));
+        pnpMainEvery8d.setPnpDetails(parsePnpDetailEvery8d(fileContents, accountModel.getTemplate(), pnpMainEvery8d.getScheduleTime()));
         List<Object> mains = new ArrayList<>();
         mains.add(pnpMainEvery8d);
         return mains;
@@ -944,7 +952,7 @@ public class LoadFtpPnpDataTask {
             pnpMainUnica.setScheduleTime(orderTime);
         }
 
-        pnpMainUnica.setPnpDetails(parsePnpDetailUnica(fileContents, accountModel.getTemplate()));
+        pnpMainUnica.setPnpDetails(parsePnpDetailUnica(fileContents, accountModel.getTemplate(), pnpMainUnica.getScheduleTime()));
         List<Object> mains = new ArrayList<>();
         mains.add(pnpMainUnica);
         return mains;

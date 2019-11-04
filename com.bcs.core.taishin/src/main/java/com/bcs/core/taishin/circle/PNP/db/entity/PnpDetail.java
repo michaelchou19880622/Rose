@@ -194,6 +194,11 @@ public class PnpDetail extends AbstractBcsEntity {
     @Column(name = "GROUP_NAME", columnDefinition = "nvarchar(50)")
     private String groupName;
 
+    /**
+     * 預約時間
+     */
+    @Column(name = "DETAIL_SCHEDULE_TIME", columnDefinition = "nvarchar(20)")
+    private String detailScheduleTime;
 
     @PrePersist
     public void prePersist() {

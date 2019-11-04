@@ -56,6 +56,9 @@ $(function () {
         }
     });
 
+    $('#exportBtn').click(function(){
+        setExportButtonSource();
+    });
 
     //-------------------Event----------------------
 
@@ -92,8 +95,8 @@ $(function () {
                 + '&endDate=' + endDate
                 + '&sourceSystem=' + document.getElementById('sourceSystemInput').value
                 + '&pccCodeInput=' + document.getElementById('pccCodeInput').value
-                + '&account=' + document.getElementById('accountInput').value;
-                //TODO Phone Number
+                + '&account=' + document.getElementById('accountInput').value
+                + '&phoneNumber=' + document.getElementById('phoneNumber').value;
             console.info('getUrl', getUrl);
 
             $('.btn_add.exportToExcel').attr('href', getUrl);
@@ -129,13 +132,10 @@ $(function () {
             contentType: 'application/json',
         }).success(function (response) {
             console.info("response:", response);
-            console.log("response:", JSON.stringify(response, null, 4));
-            console.log('Response Length is ' + response.length);
-            hasData = !response.length == 0;
-            console.log('Has data : ' + hasData);
-
+            console.log("response:", JSON.stringify(response));
+            var i = 1;
             for (var key in response) {
-
+                console.log('i = ' + i);
                 var list = originalTr.clone(true);
                 var valueObj = response[key];
 
@@ -156,7 +156,11 @@ $(function () {
                 list.find('.accountPccCode').html(valueObj[12]);
 
                 $('#resultTable').append(list);
+                i++;
             }
+
+            hasData = i > 0;
+            console.log('Has data : ' + hasData);
 
             setExportButtonSource();
 

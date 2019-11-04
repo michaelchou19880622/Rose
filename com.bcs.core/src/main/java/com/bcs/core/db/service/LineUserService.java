@@ -211,9 +211,8 @@ public class LineUserService {
      * @return the boolean
      */
     public String getMidByMobile(String mobile) {
-
         String mid = lineUserRepository.getMidByMobile(mobile);
-        logger.debug("getMidByMobile:" + mid);
+        logger.info("Mobile: " + mobile + ", Mid: " + mid);
         return mid;
     }
 

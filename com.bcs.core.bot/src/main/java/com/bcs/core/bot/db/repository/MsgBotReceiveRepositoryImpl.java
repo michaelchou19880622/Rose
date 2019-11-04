@@ -49,15 +49,16 @@ public class MsgBotReceiveRepositoryImpl {
      */
     @Modifying
     @Transactional(rollbackFor = Exception.class)
-    public void updatePnpDetailStatus(String detailTable, String detailId) {
+    public synchronized void updatePnpDetailStatus(String detailTable, String detailId) {
         String now = DataUtils.formatDateToString(new Date(),"yyyy-MM-dd HH:mm:ss.SSS");
         String queryString = String.format(" update %s set " +
                         " status = '%s'," +
                         " pnp_status = '%s'," +
+                        " send_time = convert(datetime, '%s', 121)," +
                         " modify_time = convert(datetime, '%s', 121)," +
                         " pnp_delivery_time = convert(datetime, '%s', 121) " +
                         " where pnp_detail_id = '%s';",
-                detailTable, "PNP_COMPLETE", "PNP_COMPLETE", now, now, detailId);
+                detailTable, "PNP_COMPLETE", "PNP_COMPLETE", now, now, now, detailId);
         log.info("queryString:" + queryString);
         int updateNum = entityManager.createNativeQuery(queryString).executeUpdate();
         log.info("Update Status Return Int : " + updateNum);
@@ -72,13 +73,14 @@ public class MsgBotReceiveRepositoryImpl {
      */
     @Modifying
     @Transactional(rollbackFor = Exception.class)
-    public void updatePnpMainStatus(String mainTable, String mainId) {
+    public synchronized void updatePnpMainStatus(String mainTable, String mainId) {
         String now = DataUtils.formatDateToString(new Date(),"yyyy-MM-dd HH:mm:ss.SSS");
         String queryString = String.format(" update %s set " +
                         " status = '%s'," +
+                        " send_time = convert(datetime, '%s', 121)," +
                         " modify_time = convert(datetime, '%s', 121)," +
                         " where pnp_main_id = '%s';",
-                mainTable, "PNP_COMPLETE", now, mainId);
+                mainTable, "PNP_COMPLETE", now, now, mainId);
         log.info("queryString:" + queryString);
         int updateNum = entityManager.createNativeQuery(queryString).executeUpdate();
         log.info("Update Status Return Int : " + updateNum);

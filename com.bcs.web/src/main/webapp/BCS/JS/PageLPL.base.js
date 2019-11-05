@@ -137,7 +137,8 @@ $(function() {
 		        	}else{
 		        		templateTr.find('.btn_copy').val('發送').css("background-color","blue");
 		        	}
-		        	
+		        	templateTr.find('.btn_copy').attr('totalCount',o.totalCount);
+			        templateTr.find('.btn_copy').attr('totalAmount',o.totalAmount);
 		        	templateTr.find('.btn_copy').attr('linePointId', o.id);
                     templateTr.find('.btn_copy').click(btn_sendFunc);
 		        }
@@ -196,6 +197,9 @@ $(function() {
     // do Send
     var btn_sendFunc = function() {
         var linePointMainId = $(this).attr('linePointId');
+        var totalCount		= $(this).attr('totalCount');
+        var totalAmount 	= $(this).attr('totalAmount');
+        alert(linePointMainId);
         if(!linePointMainId){
         	return;
         }
@@ -205,7 +209,7 @@ $(function() {
         var actionText = $(this).attr('value');
         console.info('actionText:', actionText);
         if(actionText == '發送'){
-        	var r = confirm("請再次確認是否要發送？");
+        	var r = confirm("此次發送將發送"+totalCount+"筆共發送"+totalAmount +"點\n請再次確認是否要發送？");
             if (!r) {
             	return;
             }

@@ -3,7 +3,79 @@
 
 <head th:replace="/BCS/Views/Common/Head :: head ('PNP Detail Report Page', ${strList})">
 </head>
+<style type="text/css">
+.table-warp {
+    overflow: auto;
+    width: 100%;
+    height: 500px;
+    /* 固定高度 */
+}
 
+.table-responsive {
+  display: block;
+  width: 100%;
+  /* overflow-x: hidden; */
+  border: none;
+  word-wrap:break-word;
+}
+
+table {
+    table-layout: fixed;
+    width: 200px;
+    /* 固定寬度 */
+}
+
+
+thead tr th {
+    position: sticky;
+    top: 0;
+    /* 列首永遠固定於上 */
+}
+
+.base_td{
+    min-height: 1rem;
+}
+
+.td1{
+    max-width: 1rem;
+    min-width: 1rem;
+}
+
+.td3{
+    max-width: 3rem;
+    min-width: 3rem;
+}
+
+.td5{
+    max-width: 5rem;
+    min-width: 5rem;
+}
+
+.td7{
+    max-width: 7rem;
+    min-width: 7rem;
+}
+
+.td10{
+    max-width: 10rem;
+    min-width: 10rem;
+}
+
+.td20{
+    max-width: 20rem;
+    min-width: 20rem;
+}
+.td30{
+    max-width: 30rem;
+    min-width: 30rem;
+}
+
+.odd-row{
+    background: #e7eaF0;
+}
+
+
+</style>
 <body>
 <header th:replace="/BCS/Views/Common/Header :: header"></header>
 <div class="LyContents">
@@ -53,58 +125,72 @@
                     </div>
                 </div>
                 <div class="mainFrame">
-                    <table border="1" id="resultTable" class="resultTable">
-                        <colgroup>
-                            <col width="100">
-                            <col width="100">
-                            <col width="50">
-                            <col width="100">
-                            <col width="100">
-                            <col width="100">
-                            <col width="100">
-                            <col width="80">
-                            <col width="80">
-                            <col width="100">
-                            <col width="100">
-                            <col width="100">
-                            <col width="100">
-                            <col width="100">
-                        </colgroup>
-                        <tr>
-                            <th>前方來源系統</th>
-                            <th>通路流</th>
-                            <th>發送通路</th>
-                            <th>發送帳號</th>
-                            <th>掛帳PccCode</th>
-                            <th>訊息內文</th>
-                            <th>客戶手機號碼</th>
-                            <th>預約日期</th>
-                            <th>預約時間</th>
-                            <th>BC發送時間</th>
-                            <th>PNP發送時間</th>
-                            <th>BC狀態</th>
-                            <th>PNP狀態</th>
-                            <th>SMS狀態</th>
-                        </tr>
-                        <tbody class="resultTbody">
-                        <tr class="resultList">
-                            <td class="sourceSystem"></td>
-                            <td class="pathway"></td>
-                            <td class="proc_stage"></td>
-                            <td class="account"></td>
-                            <td class="accountPccCode"></td>
-                            <td class="pnpContent"></td>
-                            <td class="customerCellPhoneNumber"></td>
-                            <td class="scheduleDate"></td>
-                            <td class="scheduleTime"></td>
-                            <td class="bcTime"></td>
-                            <td class="pnpTime"></td>
-                            <td class="bcStatusCode"></td>
-                            <td class="pnpStatusCode"></td>
-                            <td class="smsStatusCode"></td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <div class="table-warp">
+                        <table border="1" id="resultTable" class="table-responsive resultTable">
+                            <thead>
+                            <tr>
+                                <th class="td1">#</th>
+                                <th class="td5">前方<br/>來源<br/>系統</th>
+                                <th class="td3">通路流</th>
+                                <th class="td3">發送<br/>通路</th>
+                                <th class="td10">發送帳號</th>
+                                <th class="td5">掛帳PccCode</th>
+                                <th class="td20">訊息內文</th>
+                                <th class="td7">客戶手機號碼</th>
+                                <th class="td10">預約時間</th>
+                                <th class="td10">BC狀態<br/>BC發送時間</th>
+                                <th class="td10">PNP狀態<br/>PNP發送時間</th>
+                                <th class="td10">SMS狀態<br/>SMS發送時間</th>
+                                <th class="td5">動作</th>
+                            </tr>
+                            </thead>
+                            <tbody class="resultTbody">
+                            <!-- ============================ -->
+                            <tr class="resultList">
+                                <td rowspan="2" class="td1 no"></td>
+                                <td rowspan="2" class="td5 sourceSystem"></td>
+                                <td rowspan="2" class="td3 pathway"></td>
+                                <td rowspan="2" class="td3 proc_stage"></td>
+                                <td rowspan="2" class="td10 account"></td>
+                                <td rowspan="2" class="td5 accountPccCode"></td>
+                                <td rowspan="2" class="td20 pnpContent"></td>
+                                <td rowspan="2" class="td7 customerCellPhoneNumber"></td>
+                                <td rowspan="2" class="td10 schedule_time"></td>
+                                <td rowspan="1" class="td10 bcStatusCode"></td>
+                                <td rowspan="1" class="td10 pnpStatusCode"></td>
+                                <td rowspan="1" class="td10 smsStatusCode"></td>
+                                <td rowspan="2" class="td5"><button disabled="true">再次發送SMS</button></td>
+                            </tr>
+                            <tr class="resultList2">
+                                <td class="bc_time"></td>
+                                <td class="pnp_time"></td>
+                                <td class="sms_time"></td>
+                            </tr>
+
+                            <tr class="resultList-odd odd-row">
+                                <td rowspan="2" class="td1 odd-row no"></td>
+                                <td rowspan="2" class="td5 odd-row sourceSystem"></td>
+                                <td rowspan="2" class="td3 odd-row pathway"></td>
+                                <td rowspan="2" class="td3 odd-row proc_stage"></td>
+                                <td rowspan="2" class="td10 odd-row account"></td>
+                                <td rowspan="2" class="td5 odd-row accountPccCode"></td>
+                                <td rowspan="2" class="td20 odd-row pnpContent"></td>
+                                <td rowspan="2" class="td7 odd-row customerCellPhoneNumber"></td>
+                                <td rowspan="2" class="td10 odd-row schedule_time"></td>
+                                <td rowspan="1" class="td10 odd-row bcStatusCode"></td>
+                                <td rowspan="1" class="td10 odd-row pnpStatusCode"></td>
+                                <td rowspan="1" class="td10 odd-row smsStatusCode"></td>
+                                <td rowspan="2" class="td5 odd-row "><button disabled="true">再次發送SMS</button></td>
+                            </tr>
+                            <tr class="resultList2-odd odd-row">
+                                <td class="bc_time odd-row "></td>
+                                <td class="pnp_time odd-row "></td>
+                                <td class="sms_time odd-row "></td>
+                            </tr>
+                            <!-- ============================ -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
         </form>

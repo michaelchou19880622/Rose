@@ -6,6 +6,9 @@ $(function () {
     // ---- Global Variables ----
 
     var originalTr;
+    var originalTr2;
+    var originalTrOdd;
+    var originalTr2Odd;
     var originalTable;
 
     // result data
@@ -106,6 +109,9 @@ $(function () {
     }
 
 
+
+    // ---- Initialize Page & Load Data ----
+    // get List Data
     var loadData = function () {
         $('.LyMain').block($.BCS.blockMsgRead);
         cleanList();
@@ -136,26 +142,31 @@ $(function () {
             var i = 1;
             for (var key in response) {
                 console.log('i = ' + i);
-                var list = originalTr.clone(true);
+                var list = i % 2 == 0 ? originalTrOdd.clone(true) : originalTr.clone(true);
                 var valueObj = response[key];
 
                 var splits = valueObj[0].split('_');
+                list.find('.no').html(i);
                 list.find('.sourceSystem').html(splits[1]);
                 list.find('.account').html(splits[2]);
                 list.find('.pathway').html(converterPathWayCodeToName(valueObj[1]));
                 list.find('.proc_stage').html(valueObj[2]);
                 list.find('.pnpContent').html(valueObj[3]);
                 list.find('.customerCellPhoneNumber').html(valueObj[4]);
-                list.find('.scheduleDate').html(moment(valueObj[5], 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD'));
-                list.find('.scheduleTime').html(moment(valueObj[5], 'YYYY-MM-DD HH:mm:ss').format('HH:mm:ss'));
-                list.find('.bcTime').html(valueObj[7]);
-                list.find('.pnpTime').html(valueObj[8]);
+                list.find('.schedule_time').html(moment(valueObj[5], 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss'));
                 list.find('.bcStatusCode').html(parseCodeToChinese(valueObj[9]));
                 list.find('.pnpStatusCode').html(parseCodeToChinese(valueObj[10]));
                 list.find('.smsStatusCode').html(parseCodeToChinese(valueObj[11]));
                 list.find('.accountPccCode').html(valueObj[12]);
 
                 $('#resultTable').append(list);
+
+                var list2 = i % 2 == 0 ? originalTr2Odd.clone(true) : originalTr2.clone(true);
+                list2.find('.bc_time').html(valueObj[7]);
+                list2.find('.pnp_time').html(valueObj[8]);
+                list2.find('.sms_time').html('');
+
+                $('#resultTable').append(list2);
                 i++;
             }
 
@@ -175,9 +186,9 @@ $(function () {
 
     var converterPathWayCodeToName = function(pathwayCode){
         if (pathwayCode === '3') {
-            return 'BC-&gt;PNP-&gt;SMS';
+            return 'BC<br/>PNP<br/>SMS';
         } else if (pathwayCode === '2') {
-            return 'BC-&gt;SMS';
+            return 'BC<br/>SMS';
         } else if (pathwayCode === '1') {
             return 'BC';
         }
@@ -260,6 +271,7 @@ $(function () {
             console.info('msg1: ', response['msg']);
             totalPages = parseInt(response['msg']);
             console.info('totalPages1: ', totalPages);
+            // set pageAndTotalPage
             page = 1;
             console.info(page + '/' + totalPages);
             $('#pageAndTotalPages').text(page + '/' + totalPages);
@@ -274,12 +286,18 @@ $(function () {
 
     var cleanList = function(){
         $('.resultList').remove();
+        $('.resultList2').remove();
+        $('.resultList-odd').remove();
+        $('.resultList2-odd').remove();
         console.log('Result List Remove!!')
     }
 
     // initialize Page
     var initPage = function () {
         originalTr = $('.resultList').clone(true);
+        originalTr2 = $('.resultList2').clone(true);
+        originalTrOdd = $('.resultList-odd').clone(true);
+        originalTr2Odd = $('.resultList2-odd').clone(true);
         cleanList();
         originalTable = $('#resultTable').clone(true);
         startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');

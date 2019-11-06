@@ -395,7 +395,8 @@ public class PnpService {
                 logger.info("Line UID Not Found in Detail!! =>  PNP!!  " + " Main Id: " + detail.getPnpMainId() + " Detail Id: " + detail.getPnpDetailId());
             } else {
                 /* 發送訊息 */
-                sendSuccessFlag = bcPushMessage(url, headers, detail);
+//                sendSuccessFlag = bcPushMessage(url, headers, detail);
+                sendSuccessFlag = pnpPushMessage(url, headers, detail);
             }
 
             if (sendSuccessFlag) {
@@ -587,11 +588,8 @@ public class PnpService {
         JSONObject requestBody = new JSONObject();
 
         requestBody.put("to", detail.getPhoneHash());
-        //TODO Alan :整合新Flex樣板
         String message = combineLineFlexMessage(detail.getMsg(), detail.getFlexTemplateId());
         if (message == null) {
-            //TODO Alan: 採取預設樣板後移除舊PNP發送
-
             /* 舊有PNP純文字發送 */
             requestBody.put("messages", combineLineTextMessage(detail.getMsg()));
         } else {

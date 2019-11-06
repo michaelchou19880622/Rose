@@ -99,7 +99,7 @@ public class PnpPushMsgService {
             logger.info(String.format("BC Push ProcApName %s, Type: %s", procApName, type));
             try {
                 Set<Long> allMainIds = new HashSet<>();
-                List<? super PnpDetail> details = pnpRepositoryCustom.updateStatusByStageBC(type, procApName, allMainIds);
+                List<? super PnpDetail> details = pnpRepositoryCustom.updateStatusByStageBc(type, procApName, allMainIds);
                 if (details.isEmpty()) {
                     logger.info("details not data type:" + type.toString());
                     continue;

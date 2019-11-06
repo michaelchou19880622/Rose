@@ -9,8 +9,10 @@ import javax.persistence.Index;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -140,6 +142,12 @@ public class PnpMainMitake extends PnpMain {
     private String ValidityTime;
     @Column(name = "MSG_TYPE", columnDefinition = "nvarchar(1)")
     private String MsgType;
+
+    /**
+     * 不會異動ＤＢ 物件傳遞暫存用
+     */
+    @Transient
+    private List<PnpDetailMitake> pnpDetailMitakeList;
 
     @Override
     @PrePersist
@@ -402,5 +410,13 @@ public class PnpMainMitake extends PnpMain {
 
     public void setPnpMaintainAccountId(Long pnpMaintainAccountId) {
         this.pnpMaintainAccountId = pnpMaintainAccountId;
+    }
+
+    public List<PnpDetailMitake> getPnpDetailMitakeList() {
+        return pnpDetailMitakeList;
+    }
+
+    public void setPnpDetailMitakeList(List<PnpDetailMitake> pnpDetailMitakeList) {
+        this.pnpDetailMitakeList = pnpDetailMitakeList;
     }
 }

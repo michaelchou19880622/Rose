@@ -9,8 +9,10 @@ import javax.persistence.Index;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -108,6 +110,12 @@ public class PnpMainMing extends PnpMain {
 
     @Column(name = "PNP_MAINTAIN_ACCOUNT_ID")
     private Long pnpMaintainAccountId;
+
+    /**
+     * 不會異動ＤＢ 物件傳遞暫存用
+     */
+    @Transient
+    private List<PnpDetailMing> pnpDetailMingList;
 
     @Override
     @PrePersist
@@ -321,5 +329,13 @@ public class PnpMainMing extends PnpMain {
 
     public void setPnpMaintainAccountId(Long pnpMaintainAccountId) {
         this.pnpMaintainAccountId = pnpMaintainAccountId;
+    }
+
+    public List<PnpDetailMing> getPnpDetailMingList() {
+        return pnpDetailMingList;
+    }
+
+    public void setPnpDetailMingList(List<PnpDetailMing> pnpDetailMingList) {
+        this.pnpDetailMingList = pnpDetailMingList;
     }
 }

@@ -165,30 +165,35 @@ public class BCSLinePointReportController extends BCSBaseController {
 			// 權限後拿到的資料顯示在
 			result = competence(list, customUser);
 			
-			for(LinePointMain linePointMain : result) {
 				
-				List<Object[]> SuccessandFailCount = linePointDetailService.getSuccessandFailCount(linePointMain.getId(),startDate,endDate);
-				logger.info("SuccessandFailCount" + SuccessandFailCount.get(0));
-				Object[] SuccessandFail = SuccessandFailCount.get(0);
-				//SuccessandFail[0]
-				//SuccessandFail[1]	
-				linePointMain.setSuccessfulCount(Long.parseLong(SuccessandFail[0].toString()));
-				linePointMain.setFailedCount(Long.parseLong(SuccessandFail[1].toString()));
-				if(null == SuccessandFail[2]) {
-					linePointMain.setFailedCount((long) 0);
-				}else {
-					linePointMain.setFailedCount(Long.parseLong(SuccessandFail[2].toString()));
+			List<Object[]> SuccessandFailCount = linePointDetailService.getSuccessandFailCount(startDate,endDate);
+			logger.info("SuccessandFailCount : " + SuccessandFailCount);
+			for(Object[] o : SuccessandFailCount) {
+				String mainId = o[0].toString();
+				String success = o[1].toString();
+				String fail = o[2].toString();
+				String successfulAmount = "";
+				if(null == o[3]) {
+					successfulAmount = "0";
+				}else{
+					successfulAmount = o[3].toString();
+				}
+				logger.info("mainId" + mainId);
+				logger.info("success" + success);
+				logger.info("fail" + fail);
+				logger.info("totleAmount" + successfulAmount);
+
+				for(LinePointMain linePointMain : result) {
+					if(linePointMain.getId().toString().equals(mainId)) {
+						linePointMain.setSuccessfulCount(Long.parseLong(success));
+						linePointMain.setFailedCount(Long.parseLong(fail));
+						linePointMain.setTotalCount(Long.parseLong(success) + Long.parseLong(fail));
+						linePointMain.setSuccessfulAmount(Long.parseLong(successfulAmount));
+						break;
+					}
 				}
 			}
-			
-			
-			
-			
-			
-			
-			
-			
-
+				
 			logger.info("result:" + ObjectUtil.objectToJsonStr(result));
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		} catch (Exception e) {

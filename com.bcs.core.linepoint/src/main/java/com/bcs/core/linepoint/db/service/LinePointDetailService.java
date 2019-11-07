@@ -70,8 +70,8 @@ public class LinePointDetailService {
 		return linePointDetailRepository.getCountLinePointDetailAmountMoreCaveatLinePoint(linePointMainId,caveatLinePoint);
 	}
 	
-	public List<Object[]> getSuccessandFailCount(Long linePointMain,Date startDate,Date endDate){
-		return linePointDetailRepository.getSuccessandFailCount(linePointMain,startDate,endDate);
+	public List<Object[]> getSuccessandFailCount(Date startDate,Date endDate){
+		return linePointDetailRepository.getSuccessandFailCount(startDate,endDate);
 	}
 	
 //	public LinePointDetail findBySerialId(String serialId){

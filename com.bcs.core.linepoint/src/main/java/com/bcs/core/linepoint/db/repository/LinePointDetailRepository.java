@@ -41,25 +41,14 @@ public interface LinePointDetailRepository extends EntityRepository<LinePointDet
     public String getCountLinePointDetailAmountMoreCaveatLinePoint(Long linePointMainId , String caveatLinePoint);
     
     @Transactional(timeout = 30)
-    @Query(value =  "select "
-    				+		" (select count(status) 	"
-    				+		" from BCS_LINE_POINT_DETAIL y "
-    				+		" where y.SEND_TIME >=  ?2 "
-    				+			" and y.SEND_TIME <= ?3 "
-    				+			" and LINE_POINT_MAIN_ID = ?1 and status = 'SUCCESS') as SUCCESS, "
-    				+		" (select count(status) 	"
-    				+		" from BCS_LINE_POINT_DETAIL y "
-    				+		" where y.SEND_TIME >=  ?2 "
-    				+			" and y.SEND_TIME <= ?3 "
-    				+			" and LINE_POINT_MAIN_ID = ?1 and status = 'FAIL') as FAIL, "
-    				+		" (select sum(AMOUNT) 	"
-    				+		" from BCS_LINE_POINT_DETAIL y "
-    				+		" where y.SEND_TIME >=  ?2 "
-    				+			" and y.SEND_TIME <= ?3 "
-    				+			" and LINE_POINT_MAIN_ID = ?1 and status = 'SUCCESS') as TotleAmount "
-    				+" from BCS_LINE_POINT_MAIN "
-    				+" where ID = ?1 " ,nativeQuery = true)
-	public List<Object[]> getSuccessandFailCount(Long linePointMain,Date startDate,Date endDate);
+    @Query(value =  " select Y.ID  ,"
+    		+ "sum(IIF(x.status = 'SUCCESS', 1, 0 )) as success , "
+    		+ "sum(IIF(x.status = 'FAIL', 1, 0 )) as fail , "
+    		+ "sum(IIF(x.status = 'SUCCESS', x.amount, 0 )) as successfulAmount "
+    		+ " from BCS_LINE_POINT_DETAIL x"
+    		+ " join BCS_LINE_POINT_MAIN y on x.LINE_POINT_MAIN_ID = y.ID"
+    		+ " where x.SEND_TIME >= ?1 and x.SEND_TIME <= ?2  group By y.ID  order by y.ID desc",nativeQuery = true)
+	public List<Object[]> getSuccessandFailCount(Date startDate,Date endDate);
     
 //	public LinePointDetail findBySerialId(String serialId);
 //	

@@ -69,11 +69,16 @@ public interface LinePointMainRepository extends EntityRepository<LinePointMain,
 	public List<LinePointMain> findAllowableIdles();
     
     @Transactional(timeout = 30)
-    @Query(value = "select x from LinePointMain x where "
-    	+ "x.title like ('%' + ?1 + '%') and x.modifyUser like ('%' + ?2 + '%') "
-    	+ "and x.modifyTime >= ?3 and x.modifyTime <= ?4 "
-    	+ "order by x.modifyTime desc ")	
-	public List<LinePointMain> findByTitleAndModifyUserAndDate(String title, String modifyUser, Date startDate, Date endDate);
+    @Query(value = "select * from BCS_LINE_POINT_MAIN x "
+			+ "where x.TITLE like ('%' + ?1 + '%') "
+			+ "and x.MODIFY_USER like ('%' + ?2 + '%') "
+	    	+ "and x.ID in (SELECT DISTINCT y.LINE_POINT_MAIN_ID "
+	    	+ "				from BCS_LINE_POINT_DETAIL y "
+	    	+ "				where y.SEND_TIME >=  ?3 " 
+	    	+ "				and y.SEND_TIME <= ?4 ) "
+	    	+ "and (x.status = 'COMPLETE' or x.status is null ) "
+	    	+ "order by x.MODIFY_TIME desc ", nativeQuery = true)	
+	public List<LinePointMain> findByTitleAndModifyUserAndSendDate(String title, String modifyUser, Date startDate, Date endDate);
     
     @Transactional(timeout = 30)
     @Query(value = "select count(x.id) from LinePointMain x where "

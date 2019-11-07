@@ -157,10 +157,37 @@ public class BCSLinePointReportController extends BCSBaseController {
 
 			// get result list
 			List<LinePointMain> result = new ArrayList();
-			List<LinePointMain> list = linePointUIService.getLinePointStatisticsReport(startDate, endDate, modifyUser,
-					title, page);
+//			List<LinePointMain> list = linePointUIService.getLinePointStatisticsReport(startDate, endDate, modifyUser,
+//					title, page);
+			
+			List<LinePointMain> list = linePointMainService.findByTitleAndModifyUserAndSendDate(startDate, endDate,
+					modifyUser, title);
 			// 權限後拿到的資料顯示在
 			result = competence(list, customUser);
+			
+			for(LinePointMain linePointMain : result) {
+				
+				List<Object[]> SuccessandFailCount = linePointDetailService.getSuccessandFailCount(linePointMain.getId(),startDate,endDate);
+				logger.info("SuccessandFailCount" + SuccessandFailCount.get(0));
+				Object[] SuccessandFail = SuccessandFailCount.get(0);
+				//SuccessandFail[0]
+				//SuccessandFail[1]	
+				linePointMain.setSuccessfulCount(Long.parseLong(SuccessandFail[0].toString()));
+				linePointMain.setFailedCount(Long.parseLong(SuccessandFail[1].toString()));
+				if(null == SuccessandFail[2]) {
+					linePointMain.setFailedCount((long) 0);
+				}else {
+					linePointMain.setFailedCount(Long.parseLong(SuccessandFail[2].toString()));
+				}
+			}
+			
+			
+			
+			
+			
+			
+			
+			
 
 			logger.info("result:" + ObjectUtil.objectToJsonStr(result));
 			return new ResponseEntity<>(result, HttpStatus.OK);
@@ -207,7 +234,6 @@ public class BCSLinePointReportController extends BCSBaseController {
 			// 應該設一個全域變數 來判斷使用者應該會看到幾筆資料
 			Long count = linePointUIService.getLinePointStatisticsReportTotalPages(startDate, endDate, modifyUser,
 					title);
-			System.out.println(count);
 			if (count % 10L == 0L) {
 				count /= 10;
 			} else {
@@ -290,6 +316,7 @@ public class BCSLinePointReportController extends BCSBaseController {
 
 				linePointDetail.setMessage(message);
 				linePointDetail.setStatus(LinePointDetail.STATUS_FAIL);
+				linePointDetail.setCancelTime(new Date());
 				linePointDetailService.save(linePointDetail);
 				logger.info(" linePointDetail save: " + linePointDetail);
 
@@ -369,7 +396,7 @@ public class BCSLinePointReportController extends BCSBaseController {
 			// combine & export excel file
 			String filePathAndName = filePath + System.getProperty("file.separator") + fileName;
 			// 取得權限後，才能看到的資料
-			List<LinePointMain> mains = linePointMainService.findByTitleAndModifyUserAndDate(startDate, endDate,
+			List<LinePointMain> mains = linePointMainService.findByTitleAndModifyUserAndSendDate(startDate, endDate,
 					modifyUser, title);
 			List<LinePointMain> result = competence(mains, customUser);
 			logger.info("LinePointMain : " + mains);
@@ -382,15 +409,64 @@ public class BCSLinePointReportController extends BCSBaseController {
 		}
 	}
 
+	@ControllerLog(description = "findLinePointDetailByMainId")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/findLinePointDetailByMainId")
+	@ResponseBody
+	public ResponseEntity<?> findAllLinePointDetailByMainId(HttpServletRequest request, HttpServletResponse response, 
+			@CurrentUser CustomUser customUser, @RequestParam Long linePointMainId
+			, @RequestParam String startDateStr, @RequestParam String endDateStr) throws IOException {
+		try{
+			try {
+				logger.info("[findLinePointDetailByMainId] linePointMainId:"+linePointMainId);
+				
+				
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			    Date startDate = null, endDate = null;
+		    	startDate = sdf.parse(startDateStr);
+		    	endDate = sdf.parse(endDateStr);
+		    	endDate = DateUtils.addDays(endDate, 1);
+		    	logger.info("startDate:" + startDate);
+			    logger.info("endDate:" + endDate);
+			    
+				// get Details
+				List<LinePointDetail> linePointDetails = linePointUIService.findByLinePointMainIdAndSendDate(linePointMainId,startDate,endDate);
+				logger.info("linePointDetails:"+linePointDetails);
+				return new ResponseEntity<>(linePointDetails, HttpStatus.OK);
+			}catch(Exception e) {
+				throw new BcsNoticeException(e.getMessage());
+			}
+		}catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));
+			if(e instanceof BcsNoticeException){
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			}else{
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		}
+	}
+	
+	
+	
+	
 	// ---- Statistics Report Detail ----
 
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getLPStatisticsReportDetailExcel")
 	@ResponseBody
 	public void getLPStatisticsReportDetailExcel(HttpServletRequest request, HttpServletResponse response,
-			@CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
+			@CurrentUser CustomUser customUser, @RequestParam Long linePointMainId
+			, @RequestParam String startDateStr, @RequestParam String endDateStr) throws IOException {
 		try {
 			logger.info("[getLPStatisticsReportDetailExcel]");
 
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		    Date startDate = null, endDate = null;
+	    	startDate = sdf.parse(startDateStr);
+	    	endDate = sdf.parse(endDateStr);
+	    	endDate = DateUtils.addDays(endDate, 1);
+	    	logger.info("startDate:" + startDate);
+		    logger.info("endDate:" + endDate);
+			
+			
 			// set file path
 			String filePath = CoreConfigReader.getString("file.path");
 			File folder = new File(filePath);
@@ -405,7 +481,7 @@ public class BCSLinePointReportController extends BCSBaseController {
 
 			// combine & export excel file
 			String filePathAndName = filePath + System.getProperty("file.separator") + fileName;
-			linePointReportExcelService.exportExcel_LinePointStatisticsReportDetail(filePathAndName, linePointMainId);
+			linePointReportExcelService.exportExcel_LinePointStatisticsReportDetail(filePathAndName, linePointMainId,startDate,endDate);
 			LoadFileUIService.loadFileToResponse(filePath, fileName, response);
 		} catch (Exception e) {
 			e.printStackTrace();

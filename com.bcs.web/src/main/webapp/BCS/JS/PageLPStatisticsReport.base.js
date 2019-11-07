@@ -195,7 +195,7 @@ $(function() {
 		        resultTr.find('.successfulCount').html(o.successfulCount);
 		        resultTr.find('.failedCount').html(o.failedCount);
 		        resultTr.find('.successfulAmount').html(o.successfulAmount);
-		        resultTr.find('#toDetail').attr('href', bcs.bcsContextPath + '/edit/linePointStatisticsReportDetailPage?linePointMainId=' + o.id);
+		        resultTr.find('#toDetail').attr('href', bcs.bcsContextPath + '/edit/linePointStatisticsReportDetailPage?linePointMainId=' + o.id +'&startDate=' + startDate + '&endDate=' + endDate);
 		        
 		        $('.resultTable').append(resultTr);
         	} 

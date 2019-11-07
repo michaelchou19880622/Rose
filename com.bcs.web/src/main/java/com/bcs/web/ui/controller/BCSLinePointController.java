@@ -491,6 +491,27 @@ public class BCSLinePointController extends BCSBaseController {
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
 			}
 	}
+	@ControllerLog(description = "getSumCaveatLinePoint")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/getSumCaveatLinePoint")
+	@ResponseBody
+	public ResponseEntity<?> getSumCaveatLinePoint(HttpServletRequest request, HttpServletResponse response, 
+			@CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
+		
+		logger.info("getSumCaveatLinePoint");
+		logger.info("linePointMainId : " + linePointMainId);
+		
+		String caveatLinePoint = CoreConfigReader.getString(CONFIG_STR.CAVEAT_LINEPOINT_POINT, true);
+		
+		try{
+			String number = linePointDetailService.getCountLinePointDetailAmountMoreCaveatLinePoint(linePointMainId,caveatLinePoint);
+			
+			return new ResponseEntity<>(caveatLinePoint+"@"+number, HttpStatus.OK);
+			
+		}catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+		}
+	}
 	
 	 public List<LinePointMain> competence(List<LinePointMain> list , CustomUser customUser) throws Exception{
 	    	List<LinePointMain> result = new ArrayList();

@@ -199,35 +199,60 @@ $(function() {
         var linePointMainId = $(this).attr('linePointId');
         var totalCount		= $(this).attr('totalCount');
         var totalAmount 	= $(this).attr('totalAmount');
-        alert(linePointMainId);
+        var actionText = $(this).attr('value');
+        var caveatLinePointAndCount = '';
         if(!linePointMainId){
         	return;
         }
         console.info('btn_sendFunc linePointMainId:' + linePointMainId);
-
-        // warning while actionText = Send
-        var actionText = $(this).attr('value');
-        console.info('actionText:', actionText);
-        if(actionText == '發送'){
-        	var r = confirm("此次發送將發送"+totalCount+"筆共發送"+totalAmount +"點\n請再次確認是否要發送？");
-            if (!r) {
-            	return;
-            }
-        }
         
-        // send
         $.ajax({
-            type: "POST",
-            url: bcs.bcsContextPath + '/edit/pressSendLinePointMain?linePointMainId=' + linePointMainId 
-        }).success(function(response) {
-            console.info(response);
-            alert("執行成功");
-            window.location.replace(bcs.bcsContextPath + '/edit/linePointListPage');
-        }).fail(function(response) {
-            console.info(response);
-            $.FailResponse(response);
-        }).done(function() {
-        });
+            type: 'get',
+            url: bcs.bcsContextPath + '/edit/getSumCaveatLinePoint?linePointMainId='+ linePointMainId ,
+		}).success(function(response){
+			console.info('caveatLinePoint and count : ' , response);
+			caveatLinePointAndCount = response;
+			
+			
+			var count = caveatLinePointAndCount.split('@');
+            // warning while actionText = Send
+            console.info('actionText:', actionText);
+            if(actionText == '發送'){
+            	var r = confirm("此次發送將發送"+totalCount+"筆共發送"+totalAmount +"點"
+            			+"\n超過上限"+count[0] +"點的有"+count[1] +"筆"
+            			+"\n請再次確認是否要發送？");
+                if (!r) {
+                	return;
+                }
+            }
+            
+            // send
+            $.ajax({
+                type: "POST",
+                url: bcs.bcsContextPath + '/edit/pressSendLinePointMain?linePointMainId=' + linePointMainId 
+            }).success(function(response) {
+                console.info(response);
+                alert("執行成功");
+                window.location.replace(bcs.bcsContextPath + '/edit/linePointListPage');
+            }).fail(function(response) {
+                console.info(response);
+                $.FailResponse(response);
+            }).done(function() {
+            });
+			
+			
+			
+			
+			
+			
+			
+		}).fail(function(response){
+			console.info(response);
+			$.FailResponse(response);
+			return;
+		}).done(function(){
+		});
+        	
     };
     
     var btn_detele =  function() {
@@ -275,5 +300,9 @@ $(function() {
 	// initialize Page & load Data
     initPage();
     loadDataFunc();
+    
+    function sleep (time) {
+    	 return new Promise((resolve) => setTimeout(resolve, time));
+    }
 
 });

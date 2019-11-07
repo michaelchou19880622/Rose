@@ -70,8 +70,8 @@ public class LinePointMainService {
 		return linePointMainRepository.findAllowableIdles();
 	}
 	
-	public List<LinePointMain> findByTitleAndModifyUserAndDate(Date startDate, Date endDate, String modifyUser, String title){
-		return linePointMainRepository.findByTitleAndModifyUserAndDate(title, modifyUser, startDate, endDate);
+	public List<LinePointMain> findByTitleAndModifyUserAndSendDate(Date startDate, Date endDate, String modifyUser, String title){
+		return linePointMainRepository.findByTitleAndModifyUserAndSendDate(title, modifyUser, startDate, endDate);
 	}
 	@SuppressWarnings("unchecked")
 	public List<LinePointMain> getLinePointStatisticsReport(Date startDate, Date endDate, String modifyUser, String title, Integer page){

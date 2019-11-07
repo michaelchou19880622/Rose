@@ -1,5 +1,6 @@
 package com.bcs.core.linepoint.db.repository;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Modifying;
@@ -23,11 +24,42 @@ public interface LinePointDetailRepository extends EntityRepository<LinePointDet
     @Transactional(timeout = 30)
     public List<LinePointDetail> findByLinePointMainId(Long linePointMainId);
     
+    @Transactional(timeout = 300)
+    @Query(value = "select x from LinePointDetail x where  x.linePointMainId = ?1 "
+    			 + "and x.sendTime >= ?2 "
+    			 + "and x.sendTime <= ?3 order by x.sendTime desc")
+    public List<LinePointDetail> findByLinePointMainIdAndSendDate(Long linePointMainId,Date startDate ,Date endDate);
+    
     @Transactional(timeout = 30)
     public List<LinePointDetail> findByDetailId(Long detailId);
     
     @Transactional(timeout = 30)
     public List<LinePointDetail> deleteByLinePointMainId(Long linePointMainId);
+    
+    @Transactional(timeout = 30)
+    @Query(value = "select count(0) from BCS_LINE_POINT_DETAIL where LINE_POINT_MAIN_ID = ?1 and amount > ?2 " ,nativeQuery = true)
+    public String getCountLinePointDetailAmountMoreCaveatLinePoint(Long linePointMainId , String caveatLinePoint);
+    
+    @Transactional(timeout = 30)
+    @Query(value =  "select "
+    				+		" (select count(status) 	"
+    				+		" from BCS_LINE_POINT_DETAIL y "
+    				+		" where y.SEND_TIME >=  ?2 "
+    				+			" and y.SEND_TIME <= ?3 "
+    				+			" and LINE_POINT_MAIN_ID = ?1 and status = 'SUCCESS') as SUCCESS, "
+    				+		" (select count(status) 	"
+    				+		" from BCS_LINE_POINT_DETAIL y "
+    				+		" where y.SEND_TIME >=  ?2 "
+    				+			" and y.SEND_TIME <= ?3 "
+    				+			" and LINE_POINT_MAIN_ID = ?1 and status = 'FAIL') as FAIL, "
+    				+		" (select sum(AMOUNT) 	"
+    				+		" from BCS_LINE_POINT_DETAIL y "
+    				+		" where y.SEND_TIME >=  ?2 "
+    				+			" and y.SEND_TIME <= ?3 "
+    				+			" and LINE_POINT_MAIN_ID = ?1 and status = 'SUCCESS') as TotleAmount "
+    				+" from BCS_LINE_POINT_MAIN "
+    				+" where ID = ?1 " ,nativeQuery = true)
+	public List<Object[]> getSuccessandFailCount(Long linePointMain,Date startDate,Date endDate);
     
 //	public LinePointDetail findBySerialId(String serialId);
 //	

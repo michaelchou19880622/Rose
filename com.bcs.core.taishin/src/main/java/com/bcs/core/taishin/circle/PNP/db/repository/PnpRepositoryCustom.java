@@ -18,41 +18,6 @@ import java.util.Set;
  * @author ???
  */
 public interface PnpRepositoryCustom {
-
-    /**
-     * Find bc to sms id list list.
-     *
-     * @param detailTable the detail table
-     * @return the list
-     */
-    List<BigInteger> findBcToSmsIdList(String detailTable);
-
-    /**
-     * Update bc to sms list.
-     *
-     * @param detailTable the detail table
-     * @param idList      the id list
-     * @return the list
-     */
-    List<BigInteger> updateBcToSms(String detailTable, List<BigInteger> idList);
-
-    /**
-     * Find delivery expired detail id list.
-     *
-     * @param detailTable the detail table
-     * @return the list
-     */
-    List<BigInteger> findDeliveryExpiredDetailId(String detailTable);
-
-    /**
-     * Update delivery expired int.
-     *
-     * @param detailTable the detail table
-     * @param idList      the id list
-     * @return the int
-     */
-    int updateDeliveryExpired(String detailTable, List<BigInteger> idList);
-
     /**
      * Update status by stage bc list.
      *

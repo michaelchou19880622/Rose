@@ -1,6 +1,7 @@
 package com.bcs.core.taishin.circle.PNP.db.repository;
 
 import com.bcs.core.db.persistence.EntityRepository;
+import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMitake;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailUnica;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -40,11 +41,29 @@ public interface PnpDetailUnicaRepository extends EntityRepository<PnpDetailUnic
     List<PnpDetailUnica> findByBcStatus(String bcStatus);
 
     /**
+     * Find By Bc Status For Sms Schedule
+     *
+     * @param bcStatus BC Status
+     * @return PnpDetailMitake List
+     */
+    List<PnpDetailUnica> findTop1ByBcStatusOrderByCreateTimeAsc(String bcStatus);
+
+    /**
      * find By PnpStatus And PnpDeliveryExpireTime Less And Equals Compare Time
      *
      * @param pnpStatus   pnp Status
      * @param compareTime compare Time
      * @return Detail List
      */
-    List<PnpDetailUnica> findByPnpStatusAndPnpDeliveryExpireTimeLessAndEquals(String pnpStatus, Date compareTime);
+    List<PnpDetailUnica> findByPnpStatusAndPnpDeliveryExpireTimeBefore(String pnpStatus, Date compareTime);
+
+    /**
+     * find By PnpStatus And PnpDeliveryExpireTime Less And Equals Compare Time
+     *
+     * @param pnpStatus   pnp Status
+     * @param compareTime compare Time
+     * @return Detail List
+     */
+    List<PnpDetailUnica> findTop1ByPnpStatusAndPnpDeliveryExpireTimeBeforeOrderByCreateTimeAsc(String pnpStatus, Date compareTime);
+
 }

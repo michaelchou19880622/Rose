@@ -40,11 +40,29 @@ public interface PnpDetailEvery8dRepository extends EntityRepository<PnpDetailEv
     List<PnpDetailEvery8d> findByBcStatus(String bcStatus);
 
     /**
+     * Find By Bc Status For Sms Schedule
+     *
+     * @param bcStatus BC Status
+     * @return PnpDetailMitake List
+     */
+    List<PnpDetailEvery8d> findTop1ByBcStatusOrderByCreateTimeAsc(String bcStatus);
+
+    /**
      * find By PnpStatus And PnpDeliveryExpireTime Less And Equals Compare Time
      *
      * @param pnpStatus   pnp Status
      * @param compareTime compare Time
      * @return Detail List
      */
-    List<PnpDetailEvery8d> findByPnpStatusAndPnpDeliveryExpireTimeLessAndEquals(String pnpStatus, Date compareTime);
+    List<PnpDetailEvery8d> findByPnpStatusAndPnpDeliveryExpireTimeBefore(String pnpStatus, Date compareTime);
+
+    /**
+     * find By PnpStatus And PnpDeliveryExpireTime Less And Equals Compare Time
+     *
+     * @param pnpStatus   pnp Status
+     * @param compareTime compare Time
+     * @return Detail List
+     */
+    List<PnpDetailEvery8d> findTop1ByPnpStatusAndPnpDeliveryExpireTimeBeforeOrderByCreateTimeAsc(String pnpStatus, Date compareTime);
+
 }

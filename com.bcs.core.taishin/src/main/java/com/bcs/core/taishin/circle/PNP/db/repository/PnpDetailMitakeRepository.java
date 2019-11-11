@@ -41,12 +41,29 @@ public interface PnpDetailMitakeRepository extends EntityRepository<PnpDetailMit
     List<PnpDetailMitake> findByBcStatus(String bcStatus);
 
     /**
+     * Find By Bc Status For Sms Schedule
+     *
+     * @param bcStatus BC Status
+     * @return PnpDetailMitake List
+     */
+    List<PnpDetailMitake> findTop1ByBcStatusOrderByCreateTimeAsc(String bcStatus);
+
+    /**
      * find By PnpStatus And PnpDeliveryExpireTime Less And Equals Compare Time
      *
      * @param pnpStatus   pnp Status
      * @param compareTime compare Time
      * @return Detail List
      */
-    List<PnpDetailMitake> findByPnpStatusAndPnpDeliveryExpireTimeLessAndEquals(String pnpStatus, Date compareTime);
+    List<PnpDetailMitake> findByPnpStatusAndPnpDeliveryExpireTimeBefore(String pnpStatus, Date compareTime);
+
+    /**
+     * find By PnpStatus And PnpDeliveryExpireTime Less And Equals Compare Time
+     *
+     * @param pnpStatus   pnp Status
+     * @param compareTime compare Time
+     * @return Detail List
+     */
+    List<PnpDetailMitake> findTop1ByPnpStatusAndPnpDeliveryExpireTimeBeforeOrderByCreateTimeAsc(String pnpStatus, Date compareTime);
 
 }

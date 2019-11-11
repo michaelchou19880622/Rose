@@ -6,12 +6,10 @@ import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.PNP.scheduler.PnpTaskService;
 import com.bcs.core.taishin.circle.PNP.service.PnpService;
+import com.bcs.core.utils.DataUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -66,30 +64,14 @@ public class PnpPushMessageActor extends UntypedActor {
      * @throws SchedulerException SchedulerException
      */
     private void checkScheduleTimeThenDoImmediateOrDelay(PnpMain pnpMain) throws SchedulerException {
-        Date scheduleTime = getFormatScheduleTime(pnpMain);
-        if (scheduleTime != null && Calendar.getInstance().getTime().after(scheduleTime)) {
+        Date scheduleTime = DataUtils.convStrToDate(pnpMain.getScheduleTime(), "yyyyMMddHHmmss");
+        if (DataUtils.isPast(scheduleTime)) {
             immediatePushMessage(pnpMain);
         } else {
             delayPushMessage(pnpMain, scheduleTime);
         }
     }
 
-    /**
-     * 取得格式化後預約發送時間
-     *
-     * @param pnpMain pnpMain
-     * @return 預約時間
-     */
-    private Date getFormatScheduleTime(PnpMain pnpMain) {
-        try {
-            log.info("pnpMain.getScheduleTime {}", pnpMain.getScheduleTime());
-            return new SimpleDateFormat("yyyyMMddHHmmss").parse(pnpMain.getScheduleTime());
-        } catch (ParseException e) {
-            log.error("{}: {}", "Exception", e);
-            log.error("ScheduleTime Format Error :" + pnpMain.getScheduleTime());
-            return null;
-        }
-    }
 
     /**
      * 立即發送BC訊息

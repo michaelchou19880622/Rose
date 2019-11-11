@@ -26,9 +26,11 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 })
 
 @NamedNativeQueries({
-		@NamedNativeQuery(name = "queryGetStatisticsReportPage", query = "select * from BCS_LINE_POINT_MAIN x where "
+		@NamedNativeQuery(name = "queryGetStatisticsReportPage", query = "select * from BCS_LINE_POINT_MAIN x "
+				+ "where x.ID in (SELECT DISTINCT y.LINE_POINT_MAIN_ID from BCS_LINE_POINT_DETAIL y where y.SEND_TIME >=  ?3 "
+				+ "and y.SEND_TIME <= ?4 ) and "
     	    	+ "x.TITLE like ('%' + ?1 + '%') and x.MODIFY_USER like ('%' + ?2 + '%') "
-    	    	+ "and x.MODIFY_TIME >= ?3 and x.MODIFY_TIME <= ?4 and x.status = 'COMPLETE' "
+    	    	+ "and (x.status = 'COMPLETE' or x.status is null ) "
     	    	+ "order by x.MODIFY_TIME desc ", resultSetMapping = "LinePointMain"),
 })
 

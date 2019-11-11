@@ -86,6 +86,9 @@ public class LinePointUIService {
 	public List<LinePointDetail> findByLinePointMainId(Long linePointMainId){
 		return linePointDetailService.findByLinePointMainId(linePointMainId);
 	}
+	public List<LinePointDetail> findByLinePointMainIdAndSendDate(Long linePointMainId,Date startDate ,Date endDate){
+		return linePointDetailService.findByLinePointMainIdAndSendDate(linePointMainId,startDate,endDate);
+	}
 	@Transactional(rollbackFor=Exception.class, timeout = 30)
 	public LinePointMain saveLinePointMain(LinePointMain linePointMain) throws BcsNoticeException{
 		linePointMainService.save(linePointMain);

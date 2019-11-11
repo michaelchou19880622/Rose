@@ -10,6 +10,8 @@ $(function() {
 	var page = 1, totalPages = 0;
 	var firstFatch = true;
 	var linePointMainId = $.urlParam("linePointMainId");
+	var startDate = $.urlParam("startDate");
+	var endDate = $.urlParam("endDate");
 	var linePointDetailCount = 0;
 	var linePointDetail = {};
 	// ---- Functions ----
@@ -33,7 +35,8 @@ $(function() {
 	setExportButtonSource = function(){
 		console.info('hasData:', hasData);
 		if(hasData) {
-			var getUrl = bcs.bcsContextPath + '/edit/getLPStatisticsReportDetailExcel?linePointMainId=' + linePointMainId;
+			var getUrl = bcs.bcsContextPath + '/edit/getLPStatisticsReportDetailExcel?linePointMainId=' + linePointMainId 
+											+'&startDateStr='+startDate+'&endDateStr='+endDate;
 			console.info('getUrl', getUrl);
 			
 			$('.btn_add.exportToExcel').attr('href', getUrl);
@@ -75,7 +78,7 @@ $(function() {
 		
         $.ajax({
 			type : 'GET',
-			url : bcs.bcsContextPath + '/edit/findAllLinePointDetailByMainId?linePointMainId=' + linePointMainId,
+			url : bcs.bcsContextPath + '/edit/findLinePointDetailByMainId?linePointMainId=' + linePointMainId+'&startDateStr='+startDate+'&endDateStr='+endDate,
             contentType: 'application/json',
         }).success(function(response) {
             console.info("response:", response);
@@ -144,7 +147,7 @@ $(function() {
 	                 resultTr.find('.btn_copy').click(btn_cancle);
 	             }
 	             
-	             if(bcs.user.role == 'ROLE_REPORT' || bcs.user.role == 'ROLE_LINE_SEND'){
+	             if(bcs.user.role == 'ROLE_REPORT' || bcs.user.role == 'ROLE_LINE_SEND'||o.detailType == 'ISSUE_API'){
 	             	resultTr.find('.btn_copy').remove();
 	             }
              	$('.resultTable').append(resultTr);
@@ -197,12 +200,6 @@ $(function() {
 	    $('.resultTr').remove();
 	    
 	    originalTable = $('.resultTable').clone(true);
-	    
-	    // initialize time picker
-		startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
-		endDate = moment(new Date()).format('YYYY-MM-DD');
-		$('#startDate').val(startDate);
-		$('#endDate').val(endDate);
 		
 		
 		getMainList();
@@ -221,7 +218,7 @@ $(function() {
 		}).success(function(response){
 			console.info(response);
 			alert("收回成功");
-			window.location.replace(bcs.bcsContextPath + '/edit/linePointStatisticsReportDetailPage?linePointMainId=' + linePointMainId);
+			window.location.replace(bcs.bcsContextPath + '/edit/linePointStatisticsReportDetailPage?linePointMainId=' + linePointMainId+'&startDate=' + startDate + '&endDate=' + endDate);
 		}).fail(function(response){
 			console.info(response);
 			$.FailResponse(response);

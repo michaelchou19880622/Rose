@@ -219,7 +219,7 @@ public class LinePointPushApiController {
 
                 linePointMain.setSerialId("API_" + title);
                 linePointMain.setModifyUser("API");
-                linePointMain.setSerialId("API無此參數");
+                //linePointMain.setSerialId("API無此參數");
                 linePointMain.setDepartmentFullName(linePointDetail.getDepartment());
                 linePointMainService.save(linePointMain);
             }

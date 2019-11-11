@@ -100,6 +100,15 @@ public class LinePointDetail extends AbstractBcsEntity {
 	@Column(name = "DETAILS", columnDefinition="nvarchar(200)") // optional response
 	private String details;
 	
+	@Column(name = "CANCEL_TIME")
+	private Date cancelTime;
+	
+	public Date getCancelTime() {
+		return cancelTime;
+	}
+	public void setCancelTime(Date cancelTime) {
+		this.cancelTime = cancelTime;
+	}
 	public Long getDetailId() {
 		return detailId;
 	}

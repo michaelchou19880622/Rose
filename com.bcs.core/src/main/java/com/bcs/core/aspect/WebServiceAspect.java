@@ -66,14 +66,14 @@ public class WebServiceAspect {
         }
         HttpServletRequest request = attributes.getRequest();
 
-        Map<String, String> logMap = new LinkedHashMap<>(5);
+        Map<String, Object> logMap = new LinkedHashMap<>(5);
         logMap.put("IP", IpUtil.getIpAddress(request));
         logMap.put("HTTP_METHOD", request.getMethod());
         logMap.put("URL", request.getRequestURL().toString());
         logMap.put("CLASS_METHOD", joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName());
         logMap.put("ACTION", getAnnotationActionName(joinPoint));
 
-        logMap.put("ARGS", Arrays.toString(joinPoint.getArgs()));
+        logMap.put("ARGS", joinPoint.getArgs());
 
         log.info("Request:\n{}", DataUtils.toPrettyJsonUseJackson(logMap));
     }

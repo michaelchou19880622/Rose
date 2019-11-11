@@ -2,108 +2,30 @@ package com.bcs.core.taishin.circle.PNP.db.service;
 
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.resource.CoreConfigReader;
-import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
-import com.bcs.core.taishin.circle.PNP.db.repository.PNPMaintainAccountModelCustom;
-import com.bcs.core.taishin.circle.PNP.db.repository.PNPMaintainAccountModelRepository;
 import com.bcs.core.taishin.circle.db.service.OracleService;
 import com.bcs.core.utils.DataUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.xml.crypto.Data;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Slf4j
 @Service
 public class PNPMaintainAccountModelService {
 
     @Autowired
-    private PNPMaintainAccountModelRepository pnpMaintainAccountModelRepository;
-    @Autowired
-    private PNPMaintainAccountModelCustom PNPMaintainAccountModelCustom;
-    @Autowired
     private OracleService oraclePnpService;
     @PersistenceContext
     EntityManager entityManager;
-
-    public void save(PNPMaintainAccountModel pnpMaintainAccountModel) {
-        pnpMaintainAccountModelRepository.save(pnpMaintainAccountModel);
-    }
-
-    public void delete(PNPMaintainAccountModel pnpMaintainAccountModel) {
-        pnpMaintainAccountModelRepository.delete(pnpMaintainAccountModel);
-    }
-
-    public PNPMaintainAccountModel findOne(Long id) {
-        return pnpMaintainAccountModelRepository.findOne(id);
-    }
-
-    public List<PNPMaintainAccountModel> findByDivisionNameAndDepartmentNameAndGroupNameAndPccCodeAndAccountAndEmployeeIdAndAccountType(
-            String divisionName, String departmentName, String groupName, String pccCode, String account, String employeeId, String accountType) {
-        return pnpMaintainAccountModelRepository.findByDivisionNameAndDepartmentNameAndGroupNameAndPccCodeAndAccountAndEmployeeIdAndAccountType(
-                divisionName, departmentName, groupName, pccCode, account, employeeId, accountType);
-    }
-
-    public List<PNPMaintainAccountModel> queryUsePageCoditions(
-            String divisionName, String departmentName, String groupName, String pccCode, String account, String employeeId, String accountType, Boolean status) {
-        return PNPMaintainAccountModelCustom.queryUseConditions(divisionName, departmentName, groupName, pccCode, account, employeeId, accountType, status);
-    }
-
-    public List<PNPMaintainAccountModel> findByAccountAndSourceSystemAndPnpContent(String account, String sourceSystem, String pnpContent) {
-        return pnpMaintainAccountModelRepository.findByAccountAndSourceSystemAndPnpContent(account, sourceSystem, pnpContent);
-    }
-
-    public List<PNPMaintainAccountModel> findByAccountType(String accountType) {
-        return pnpMaintainAccountModelRepository.findByAccountType(accountType);
-    }
-
-    @SuppressWarnings("unchecked")
-    public Map<String, List<String>> getPNPDetailReportExcelList(String startDate, String endDate, String account, String pccCode, String sourceSystem, String empId) {
-
-        StringBuilder sb = getSQL(account, pccCode, sourceSystem, empId);
-        Query query = entityManager.createNativeQuery(sb.toString()).setParameter(1, startDate).setParameter(2, endDate);
-        log.info("query:" + query.toString());
-        List<Object[]> list = query.getResultList();
-        DataUtils.toPrettyJsonUseJackson(list);
-        int j = 0;
-        for (Object[] objArray : list) {
-            log.info(j + ") " + Arrays.toString(objArray));
-            j++;
-        }
-
-        Map<String, List<String>> map = new LinkedHashMap<>();
-
-        int count = 0;
-        for (Object[] o : list) {
-            count++;
-            log.info("c:" + count);
-            List<String> dataList = new ArrayList<>();
-            map.put(Integer.toString(count), dataList);
-            for (int i = 0, max = 27; i < max; i++) {
-                if (o[i] == null) {
-                    dataList.add("");
-                } else {
-                    dataList.add(o[i].toString());
-                }
-            }
-        }
-        log.info("map1: " + map.toString());
-
-        return map;
-    }
-
 
     @SuppressWarnings("unchecked")
     public List<Map<Integer, String>> getPNPDetailReportExcelMapList(String startDate, String endDate, String account, String pccCode, String sourceSystem, String empId) {
@@ -119,10 +41,10 @@ public class PNPMaintainAccountModelService {
                     .setParameter(7, startDate)
                     .setParameter(8, endDate);
 
-            final int maxColumn = 26;
+            /* Max Column eq SQL Column Size */
+            final int maxColumn = 27;
             List<Object[]> rowArrayList = query.getResultList();
 
-            int index = 0;
             List<Map<Integer, String>> rowDataList = new LinkedList<>();
             /* Header */
             Map<Integer, String> columnDataMap = getHeaderMap(maxColumn);
@@ -148,6 +70,7 @@ public class PNPMaintainAccountModelService {
         }
     }
 
+    @Cacheable
     private String columnSpecialProcess(int columnIndex, String value) {
         /* 資料特殊處理 */
         log.info("{},{}", columnIndex, value);
@@ -205,6 +128,7 @@ public class PNPMaintainAccountModelService {
                 "                        d.detail_schedule_time as detail_schedule_time2, " +
                 "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
                 "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
+                "                        convert(varchar, d.sms_time, 120) AS sms_time, " +
                 "                        d.bc_status as status1, " +
                 "                        d.pnp_status as status2, " +
                 "                        d.sms_status as status3, " +
@@ -229,39 +153,40 @@ public class PNPMaintainAccountModelService {
 
         sb.append(
                 "        ) " +
-                "        union all " +
-                "        ( " +
-                "                select " +
-                "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
-                "                        a.source_system, " +
-                "                        d.proc_flow, " +
-                "                        isnull(d.proc_stage, '') + ';' + isnull(d.source, '') as 'proc', " +
-                "                        a.account, " +
-                "                        a.pcc_code, " +
-                "                        m.pnp_main_id, " +
-                "                        d.dest_name, " +
-                "                        a.template, " +
-                "                        d.msg, " +
-                "                        1 as message_point, " +
-                "                        null as campaign_id, " +
-                "                        null as segment_id, " +
-                "                        null as program_id, " +
-                "                        null as pid, " +
-                "                        d.phone, " +//15
-                "                        d.uid, " +
-                "                        null as detail_schedule_time2, " +
-                "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
-                "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
-                "                        d.bc_status as status1, " +//21
-                "                        d.pnp_status as status2, " +
-                "                        d.sms_status as status3, " +
-                "                        null as is_international, " +
-                "                        convert(varchar, d.creat_time, 120) AS create_time, " +//25
-                "                        convert(varchar, d.modify_time, 120) AS modify_time " +//26
-                "                from bcs_pnp_detail_mitake as d " +
-                "                left join bcs_pnp_main_mitake as m on d.pnp_main_id = m.pnp_main_id " +
-                "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
-                "                where d.creat_time >= ?3 and d.creat_time <  dateadd(day, 1, ?4) ");
+                        "        union all " +
+                        "        ( " +
+                        "                select " +
+                        "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
+                        "                        a.source_system, " +
+                        "                        d.proc_flow, " +
+                        "                        isnull(d.proc_stage, '') + ';' + isnull(d.source, '') as 'proc', " +
+                        "                        a.account, " +
+                        "                        a.pcc_code, " +
+                        "                        m.pnp_main_id, " +
+                        "                        d.dest_name, " +
+                        "                        a.template, " +
+                        "                        d.msg, " +
+                        "                        1 as message_point, " +
+                        "                        null as campaign_id, " +
+                        "                        null as segment_id, " +
+                        "                        null as program_id, " +
+                        "                        null as pid, " +
+                        "                        d.phone, " +//15
+                        "                        d.uid, " +
+                        "                        d.detail_schedule_time as detail_schedule_time2, " +
+                        "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
+                        "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
+                        "                        convert(varchar, d.sms_time, 120) AS sms_time, " +
+                        "                        d.bc_status as status1, " +//21
+                        "                        d.pnp_status as status2, " +
+                        "                        d.sms_status as status3, " +
+                        "                        null as is_international, " +
+                        "                        convert(varchar, d.creat_time, 120) AS create_time, " +//25
+                        "                        convert(varchar, d.modify_time, 120) AS modify_time " +//26
+                        "                from bcs_pnp_detail_mitake as d " +
+                        "                left join bcs_pnp_main_mitake as m on d.pnp_main_id = m.pnp_main_id " +
+                        "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
+                        "                where d.creat_time >= ?3 and d.creat_time <  dateadd(day, 1, ?4) ");
 
         if (StringUtils.isNotBlank(account)) {
             sb.append(String.format(" and account = '%s'", account));
@@ -274,39 +199,40 @@ public class PNPMaintainAccountModelService {
         }
         sb.append(
                 "        ) " +
-                "        union all " +
-                "        ( " +
-                "                select " +
-                "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
-                "                        a.source_system, " +
-                "                        d.proc_flow, " +
-                "                        isnull(d.proc_stage, '') + ';' + isnull(d.source, '') as 'proc', " +
-                "                        a.account, " +
-                "                        a.pcc_code, " +
-                "                        m.pnp_main_id, " +
-                "                        d.sn, " +
-                "                        a.template, " +
-                "                        d.msg, " +
-                "                        1 as message_point, " +
-                "                        d.campaign_id, " +
-                "                        d.segment_id, " +
-                "                        d.program_id, " +
-                "                        d.pid, " +
-                "                        d.phone, " +
-                "                        d.uid, " +
-                "                        null as detail_schedule_time2, " +
-                "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
-                "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
-                "                        d.bc_status as status1, " +
-                "                        d.pnp_status as status2, " +
-                "                        d.sms_status as status3, " +
-                "                        null as is_international, " +
-                "                        convert(varchar, d.creat_time, 120) AS create_time, " +
-                "                        convert(varchar, d.modify_time, 120) AS modify_time " +
-                "                from bcs_pnp_detail_unica as d " +
-                "                left join bcs_pnp_main_unica as m on d.pnp_main_id = m.pnp_main_id " +
-                "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
-                "                where d.creat_time >= ?5 and d.creat_time <  dateadd(day, 1, ?6) ");
+                        "        union all " +
+                        "        ( " +
+                        "                select " +
+                        "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
+                        "                        a.source_system, " +
+                        "                        d.proc_flow, " +
+                        "                        isnull(d.proc_stage, '') + ';' + isnull(d.source, '') as 'proc', " +
+                        "                        a.account, " +
+                        "                        a.pcc_code, " +
+                        "                        m.pnp_main_id, " +
+                        "                        d.sn, " +
+                        "                        a.template, " +
+                        "                        d.msg, " +
+                        "                        1 as message_point, " +
+                        "                        d.campaign_id, " +
+                        "                        d.segment_id, " +
+                        "                        d.program_id, " +
+                        "                        d.pid, " +
+                        "                        d.phone, " +
+                        "                        d.uid, " +
+                        "                        d.detail_schedule_time as detail_schedule_time2, " +
+                        "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
+                        "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
+                        "                        convert(varchar, d.sms_time, 120) AS sms_time, " +
+                        "                        d.bc_status as status1, " +
+                        "                        d.pnp_status as status2, " +
+                        "                        d.sms_status as status3, " +
+                        "                        null as is_international, " +
+                        "                        convert(varchar, d.creat_time, 120) AS create_time, " +
+                        "                        convert(varchar, d.modify_time, 120) AS modify_time " +
+                        "                from bcs_pnp_detail_unica as d " +
+                        "                left join bcs_pnp_main_unica as m on d.pnp_main_id = m.pnp_main_id " +
+                        "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
+                        "                where d.creat_time >= ?5 and d.creat_time <  dateadd(day, 1, ?6) ");
 
         if (StringUtils.isNotBlank(account)) {
             sb.append(String.format(" and account = '%s'", account));
@@ -320,41 +246,42 @@ public class PNPMaintainAccountModelService {
 
         sb.append(
                 "        ) " +
-                "        union all " +
-                "        ( " +
-                "                select " +
-                "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
-                "                        a.source_system, " +
-                "                        d.proc_flow, " +
-                "                        isnull(d.proc_stage, '') + ';' + isnull(d.source, '') as 'proc', " +
-                "                        a.account, " +
-                "                        a.pcc_code, " +
-                "                        m.pnp_main_id, " +
-                "                        d.sn, " +
-                "                        a.template, " +
-                "                        d.msg, " +
-                "                        1 as message_point, " +
-                "                        d.campaign_id, " +
-                "                        d.segment_id, " +
-                "                        d.program_id, " +
-                "                        d.pid, " +
-                "                        d.phone, " +
-                "                        d.uid, " +
-                "                        null as detail_schedule_time2, " +
-                "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
-                "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
-                "                        d.bc_status as status1, " +
-                "                        d.pnp_status as status2, " +
-                "                        d.sms_status as status3, " +
-                "                        null as is_international, " +
-                "                        convert(varchar, d.creat_time, 120) AS create_time, " +
-                "                        convert(varchar, d.modify_time, 120) AS modify_time " +
-                "                from bcs_pnp_detail_every8d as d " +
-                "                left join bcs_pnp_main_every8d as m on d.pnp_main_id = m.pnp_main_id " +
-                "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
-                "                where d.creat_time >= ?7 and d.creat_time <  dateadd(day, 1, ?8) " +
-                "        ) " +
-                " ) as r1 ");
+                        "        union all " +
+                        "        ( " +
+                        "                select " +
+                        "                        concat(d.pnp_main_id, '.', d.pnp_detail_id) as 'id', " +
+                        "                        a.source_system, " +
+                        "                        d.proc_flow, " +
+                        "                        isnull(d.proc_stage, '') + ';' + isnull(d.source, '') as 'proc', " +
+                        "                        a.account, " +
+                        "                        a.pcc_code, " +
+                        "                        m.pnp_main_id, " +
+                        "                        d.sn, " +
+                        "                        a.template, " +
+                        "                        d.msg, " +
+                        "                        1 as message_point, " +
+                        "                        d.campaign_id, " +
+                        "                        d.segment_id, " +
+                        "                        d.program_id, " +
+                        "                        d.pid, " +
+                        "                        d.phone, " +
+                        "                        d.uid, " +
+                        "                        d.detail_schedule_time as detail_schedule_time2, " +
+                        "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
+                        "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
+                        "                        convert(varchar, d.sms_time, 120) AS sms_time, " +
+                        "                        d.bc_status as status1, " +
+                        "                        d.pnp_status as status2, " +
+                        "                        d.sms_status as status3, " +
+                        "                        null as is_international, " +
+                        "                        convert(varchar, d.creat_time, 120) AS create_time, " +
+                        "                        convert(varchar, d.modify_time, 120) AS modify_time " +
+                        "                from bcs_pnp_detail_every8d as d " +
+                        "                left join bcs_pnp_main_every8d as m on d.pnp_main_id = m.pnp_main_id " +
+                        "                left join bcs_pnp_maintain_account as a on m.pnp_maintain_account_id = a.id " +
+                        "                where d.creat_time >= ?7 and d.creat_time <  dateadd(day, 1, ?8) " +
+                        "        ) " +
+                        " ) as r1 ");
 
         boolean oracleUseDepartmentCheck = CoreConfigReader.getBoolean(CONFIG_STR.ORACLE_USE_DEPARTMENT_CHECK, true);
         log.info("oracleUseDepartmentCheck:" + oracleUseDepartmentCheck);
@@ -371,6 +298,7 @@ public class PNPMaintainAccountModelService {
         return sb;
     }
 
+    @Cacheable
     private Map<Integer, String> getHeaderMap(int maxColumn) {
         Map<Integer, String> columnDataMap = new LinkedHashMap<>(maxColumn);
         columnDataMap.put(0, "序號");
@@ -391,14 +319,15 @@ public class PNPMaintainAccountModelService {
         columnDataMap.put(15, "客戶手機號碼");
         columnDataMap.put(16, "UID");
         columnDataMap.put(17, "預約時間");
-        columnDataMap.put(18, "BC發送日期");
+        columnDataMap.put(18, "BC發送時間");
         columnDataMap.put(19, "PNP發送時間");
-        columnDataMap.put(20, "BC發送狀態");
-        columnDataMap.put(21, "PNP發送狀態");
-        columnDataMap.put(22, "SMS發送狀態");
-        columnDataMap.put(23, "是否國際簡訊");
-        columnDataMap.put(24, "資料建立日期");
-        columnDataMap.put(25, "資料更新日期");
+        columnDataMap.put(20, "SMS發送時間");
+        columnDataMap.put(21, "BC發送狀態");
+        columnDataMap.put(22, "PNP發送狀態");
+        columnDataMap.put(23, "SMS發送狀態");
+        columnDataMap.put(24, "是否國際簡訊");
+        columnDataMap.put(25, "資料建立日期");
+        columnDataMap.put(26, "資料更新日期");
         return columnDataMap;
     }
 
@@ -410,6 +339,8 @@ public class PNPMaintainAccountModelService {
             case "WAIT":
                 return "等待進入處理程序";
             case "SCHEDULED":
+                return "等待預約發送";
+            case "DELAY":
                 return "等待預約發送";
             case "BC_PROCESS":
                 return "進行BC發送處理中";

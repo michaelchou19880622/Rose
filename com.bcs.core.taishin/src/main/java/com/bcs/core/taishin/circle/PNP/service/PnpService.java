@@ -1,24 +1,7 @@
 package com.bcs.core.taishin.circle.PNP.service;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
-
+import akka.actor.ActorRef;
+import com.bcs.core.db.service.SystemConfigService;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.enums.LINE_HEADER;
 import com.bcs.core.resource.CoreConfigReader;
@@ -44,7 +27,24 @@ import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainMitakeRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainUnicaRepository;
 import com.bcs.core.utils.DataUtils;
 import com.bcs.core.utils.RestfulUtil;
-import akka.actor.ActorRef;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
 
 
 /**
@@ -73,6 +73,8 @@ public class PnpService {
     private PnpMainMingRepository pnpMainMingRepository;
     @Autowired
     private PnpDetailMingRepository pnpDetailMingRepository;
+    @Autowired
+    private SystemConfigService systemConfigService;
     @Autowired
     private PnpAkkaService pnpAkkaService;
 
@@ -206,18 +208,28 @@ public class PnpService {
             logger.error("PnpService save getting source is blank!!! MainID :" + mainId);
         }
 
-        /* 需檢查的狀態清單 */
+        /* 不可更新Main為Complete的Detail狀態清單 */
         List<String> status = new ArrayList<>();
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS);
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_PROCESS);
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_PNP_PROCESS);
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_FAIL_SMS_PROCESS);
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_SENDING);
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_SENDING);
+        /* FTP */
         status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
         status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_WAIT);
         status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_SCHEDULED);
+        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS);
+
+        /* BC */
+        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_PROCESS);
+        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_SENDING);
+        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_PNP_PROCESS);
+        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
+
+        /* PNP */
+        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_SENDING);
+        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_CHECK_DELIVERY);
+        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_FAIL_SMS_PROCESS);
+
+        /* SMS */
+        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
+
 
         switch (source) {
             case AbstractPnpMainEntity.SOURCE_MITAKE:
@@ -317,8 +329,9 @@ public class PnpService {
             case "BC":
                 return AbstractPnpMainEntity.DATA_CONVERTER_STATUS_BC_COMPLETE;
             case "PNP":
-                return AbstractPnpMainEntity.MSG_SENDER_STATUS_CHECK_DELIVERY;
+                return AbstractPnpMainEntity.DATA_CONVERTER_STATUS_PNP_COMPLETE;
             case "SMS":
+                return AbstractPnpMainEntity.DATA_CONVERTER_STATUS_SMS_COMPLETE;
             default:
                 return null;
         }
@@ -395,8 +408,7 @@ public class PnpService {
                 logger.info("Line UID Not Found in Detail!! =>  PNP!!  " + " Main Id: " + detail.getPnpMainId() + " Detail Id: " + detail.getPnpDetailId());
             } else {
                 /* 發送訊息 */
-//                sendSuccessFlag = bcPushMessage(url, headers, detail);
-                sendSuccessFlag = pnpPushMessage(url, headers, detail);
+                sendSuccessFlag = pnpPushMessage(url, headers, detail, detail.getUid());
             }
 
             if (sendSuccessFlag) {
@@ -473,7 +485,7 @@ public class PnpService {
                 logger.debug("X-Line-Delivery-Tag : " + deliveryTag);
 
                 /* 發送訊息 */
-                sendSuccessFlag = pnpPushMessage(url, headers, detail);
+                sendSuccessFlag = pnpPushMessage(url, headers, detail, detail.getPhoneHash());
                 Date pnpSendTime = new Date();
                 detail.setPnpTime(pnpSendTime);
                 if (sendSuccessFlag) {
@@ -580,14 +592,15 @@ public class PnpService {
      * @param url     Line API URL
      * @param headers request header
      * @param detail  went push message object
+     * @param to      UID Or PhoneNumber
      * @return Push is success
      * @see this#pushPnpMessage(PnpMain, ActorRef, ActorRef)  PNP Push
      */
-    private boolean pnpPushMessage(String url, HttpHeaders headers, PnpDetail detail) {
+    private boolean pnpPushMessage(String url, HttpHeaders headers, PnpDetail detail, String to) {
         boolean sendSuccessFlag;
         JSONObject requestBody = new JSONObject();
 
-        requestBody.put("to", detail.getPhoneHash());
+        requestBody.put("to", to);
         String message = combineLineFlexMessage(detail.getMsg(), detail.getFlexTemplateId());
         if (message == null) {
             /* 舊有PNP純文字發送 */
@@ -689,38 +702,41 @@ public class PnpService {
             // TODO 採取預設樣板
             return null;
         }
+        String footerUrl = CoreConfigReader.getString("flex.ui.footer.link.url", true);
+
         PnpFlexTemplate pnpFlexTemplate = pnpFlexTemplateRepository.findOne(id);
         String templateJson = PnpFlexTemplate.fetchDefaultTemplateJson()
-                .replace("headerBackground", pnpFlexTemplate.getHeaderBackground())
-                .replace("headerTextSize", pnpFlexTemplate.getHeaderTextSize())
-                .replace("headerTextColor", pnpFlexTemplate.getHeaderTextColor())
-                .replace("headerTextWeight", pnpFlexTemplate.getHeaderTextWeight())
-                .replace("headerTextStyle", pnpFlexTemplate.getHeaderTextStyle())
-                .replace("headerTextDecoration", pnpFlexTemplate.getHeaderTextDecoration())
-                .replace("headerText", pnpFlexTemplate.getHeaderText())
+                .replace("headerBackground", pnpFlexTemplate.getHeaderBackground().trim())
+                .replace("headerTextSize", pnpFlexTemplate.getHeaderTextSize().trim())
+                .replace("headerTextColor", pnpFlexTemplate.getHeaderTextColor().trim())
+                .replace("headerTextWeight", pnpFlexTemplate.getHeaderTextWeight().trim())
+                .replace("headerTextStyle", pnpFlexTemplate.getHeaderTextStyle().trim())
+                .replace("headerTextDecoration", pnpFlexTemplate.getHeaderTextDecoration().trim())
+                .replace("headerText", pnpFlexTemplate.getHeaderText().trim())
 
 
-                .replace("heroBackground", pnpFlexTemplate.getHeroBackground())
-                .replace("heroTextSize", pnpFlexTemplate.getHeroTextSize())
-                .replace("heroTextColor", pnpFlexTemplate.getHeroTextColor())
-                .replace("heroTextWeight", pnpFlexTemplate.getHeroTextWeight())
-                .replace("heroTextStyle", pnpFlexTemplate.getHeroTextStyle())
-                .replace("heroTextDecoration", pnpFlexTemplate.getHeroTextDecoration())
-                //FIXME 換成正確訊息
-                .replace("heroText", msg)
+                .replace("heroBackground", pnpFlexTemplate.getHeroBackground().trim())
+                .replace("heroTextSize", pnpFlexTemplate.getHeroTextSize().trim())
+                .replace("heroTextColor", pnpFlexTemplate.getHeroTextColor().trim())
+                .replace("heroTextWeight", pnpFlexTemplate.getHeroTextWeight().trim())
+                .replace("heroTextStyle", pnpFlexTemplate.getHeroTextStyle().trim())
+                .replace("heroTextDecoration", pnpFlexTemplate.getHeroTextDecoration().trim())
+                .replace("heroText", msg.trim())
 
 
-                .replace("bodyDescTextSize", pnpFlexTemplate.getBodyDescTextSize())
-                .replace("bodyDescTextColor", pnpFlexTemplate.getBodyDescTextColor())
-                .replace("bodyDescTextWeight", pnpFlexTemplate.getBodyDescTextWeight())
-                .replace("bodyDescTextStyle", pnpFlexTemplate.getBodyDescTextStyle())
-                .replace("bodyDescTextDecoration", pnpFlexTemplate.getBodyDescTextDecoration())
-                .replace("bodyBackground", pnpFlexTemplate.getBodyBackground())
-                .replace("bodyDescText", pnpFlexTemplate.getBodyDescText())
+                .replace("bodyDescTextSize", pnpFlexTemplate.getBodyDescTextSize().trim())
+                .replace("bodyDescTextColor", pnpFlexTemplate.getBodyDescTextColor().trim())
+                .replace("bodyDescTextWeight", pnpFlexTemplate.getBodyDescTextWeight().trim())
+                .replace("bodyDescTextStyle", pnpFlexTemplate.getBodyDescTextStyle().trim())
+                .replace("bodyDescTextDecoration", pnpFlexTemplate.getBodyDescTextDecoration().trim())
+                .replace("bodyBackground", pnpFlexTemplate.getBodyBackground().trim())
+                .replace("bodyDescText", pnpFlexTemplate.getBodyDescText().trim())
 
 
-                .replace("footerLinkText", pnpFlexTemplate.getFooterLinkText())
-                .replaceAll("footerLinkUrl", pnpFlexTemplate.getFooterLinkUrl());
+                .replace("footerLinkText", pnpFlexTemplate.getFooterLinkText().trim())
+
+
+                .replaceAll("footerLinkUrl", "".equals(footerUrl) ? pnpFlexTemplate.getFooterLinkUrl() : footerUrl.trim());
 
         StringBuilder sb = new StringBuilder();
         String[] buttonTextArray = pnpFlexTemplate.getButtonText().split(",");
@@ -746,12 +762,15 @@ public class PnpService {
             } catch (IndexOutOfBoundsException e) {
                 text = "";
             }
-            sb.append(PnpFlexTemplate.fetchDefaultButtonTemplateJson()
-                    .replace("bodyButtonText", text)
-                    .replace("bodyLinkUrl", url)
-                    .replace("bodyButtonColor", color));
-        }
 
+            /* Check button parameter is not empty, Require by Line API!! */
+            if (StringUtils.isNotBlank(url) && StringUtils.isNotBlank(color) && StringUtils.isNotBlank(text)) {
+                sb.append(PnpFlexTemplate.fetchDefaultButtonTemplateJson()
+                        .replace("bodyButtonText", text.trim())
+                        .replace("bodyLinkUrl", url.trim())
+                        .replace("bodyButtonColor", color).trim());
+            }
+        }
         templateJson = templateJson.replace("buttonJsonArea", sb.toString());
         logger.info("final templateJson: " + DataUtils.toPrettyJsonUseJackson(templateJson));
         return templateJson;

@@ -145,10 +145,9 @@ $(function () {
                 var list = i % 2 == 0 ? originalTrOdd.clone(true) : originalTr.clone(true);
                 var valueObj = response[key];
 
-                var splits = valueObj[0].split('_');
                 list.find('.no').html(i);
-                list.find('.sourceSystem').html(splits[1]);
-                list.find('.account').html(splits[2]);
+                list.find('.sourceSystem').html(valueObj[14]);
+                list.find('.account').html(valueObj[13]);
                 list.find('.pathway').html(converterPathWayCodeToName(valueObj[1]));
                 list.find('.proc_stage').html(valueObj[2]);
                 list.find('.pnpContent').html(valueObj[3]);
@@ -164,7 +163,7 @@ $(function () {
                 var list2 = i % 2 == 0 ? originalTr2Odd.clone(true) : originalTr2.clone(true);
                 list2.find('.bc_time').html(valueObj[7]);
                 list2.find('.pnp_time').html(valueObj[8]);
-                list2.find('.sms_time').html('');
+                list2.find('.sms_time').html(valueObj[17]);
 
                 $('#resultTable').append(list2);
                 i++;
@@ -203,6 +202,8 @@ $(function () {
             case "WAIT":
                 return "等待進入處理程序";
             case "SCHEDULED":
+                return "等待預約發送";
+            case "DELAY":
                 return "等待預約發送";
             case "BC_PROCESS":
                 return "進行BC發送處理中";
@@ -300,7 +301,8 @@ $(function () {
         originalTr2Odd = $('.resultList2-odd').clone(true);
         cleanList();
         originalTable = $('#resultTable').clone(true);
-        startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
+//        startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
+        startDate = moment(new Date()).format('YYYY-MM-DD');
         endDate = moment(new Date()).format('YYYY-MM-DD');
         $('#startDate').val(startDate);
         $('#endDate').val(endDate);

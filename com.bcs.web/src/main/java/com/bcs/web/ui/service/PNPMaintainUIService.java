@@ -116,6 +116,7 @@ public class PNPMaintainUIService {
                     "                source_system, " +
                     "                employee_id, " +
                     "                creat_time, " +
+                    "                sms_time, " +
                     "                row_number() over ( " +
                     "        order by " +
                     "                creat_time desc) as rownum " +
@@ -138,7 +139,8 @@ public class PNPMaintainUIService {
                     "                        a.account, " +
                     "                        a.source_system, " +
                     "                        a.employee_id, " +
-                    "                        d.creat_time " +
+                    "                        d.creat_time, " +
+                    "                        convert(varchar, d.sms_time, 120) as sms_time" +
                     "                from " +
                     "                        bcs_pnp_detail_ming as d " +
                     "                left join bcs_pnp_main_ming as m on d.pnp_main_id = m.pnp_main_id " +
@@ -168,8 +170,8 @@ public class PNPMaintainUIService {
                             "                        d.proc_stage, " +
                             "                        msg, " +
                             "                        phone, " +
-                            "                        null as detail_schedule_time1, " +
-                            "                        null as detail_schedule_time2, " +
+                            "                        d.detail_schedule_time as detail_schedule_time1, " +
+                            "                        d.detail_schedule_time as detail_schedule_time2, " +
                             "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
                             "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
                             "                        d.bc_status as status1, " +
@@ -179,7 +181,8 @@ public class PNPMaintainUIService {
                             "                        a.account, " +
                             "                        a.source_system, " +
                             "                        a.employee_id, " +
-                            "                        d.creat_time " +
+                            "                        d.creat_time, " +
+                            "                        convert(varchar, d.sms_time, 120) as sms_time" +
                             "                from " +
                             "                        bcs_pnp_detail_mitake as d " +
                             "                left join bcs_pnp_main_mitake as m on d.pnp_main_id = m.pnp_main_id " +
@@ -209,8 +212,8 @@ public class PNPMaintainUIService {
                             "                        d.proc_stage, " +
                             "                        msg, " +
                             "                        phone, " +
-                            "                        null as detail_schedule_time1, " +
-                            "                        null as detail_schedule_time2, " +
+                            "                        d.detail_schedule_time as detail_schedule_time1, " +
+                            "                        d.detail_schedule_time as detail_schedule_time2, " +
                             "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
                             "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
                             "                        d.bc_status as status1, " +
@@ -220,7 +223,8 @@ public class PNPMaintainUIService {
                             "                        a.account, " +
                             "                        a.source_system, " +
                             "                        a.employee_id, " +
-                            "                        d.creat_time " +
+                            "                        d.creat_time, " +
+                            "                        convert(varchar, d.sms_time, 120) as sms_time" +
                             "                from " +
                             "                        bcs_pnp_detail_unica as d " +
                             "                left join bcs_pnp_main_unica as m on d.pnp_main_id = m.pnp_main_id " +
@@ -250,8 +254,8 @@ public class PNPMaintainUIService {
                             "                        d.proc_stage, " +
                             "                        msg, " +
                             "                        phone, " +
-                            "                        null as detail_schedule_time1, " +
-                            "                        null as detail_schedule_time2, " +
+                            "                        d.detail_schedule_time as detail_schedule_time1, " +
+                            "                        d.detail_schedule_time as detail_schedule_time2, " +
                             "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
                             "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
                             "                        d.bc_status as status1, " +
@@ -261,7 +265,8 @@ public class PNPMaintainUIService {
                             "                        a.account, " +
                             "                        a.source_system, " +
                             "                        a.employee_id, " +
-                            "                        d.creat_time " +
+                            "                        d.creat_time, " +
+                            "                        convert(varchar, d.sms_time, 120) as sms_time" +
                             "                from " +
                             "                        bcs_pnp_detail_every8d as d " +
                             "                left join bcs_pnp_main_every8d as m on d.pnp_main_id = m.pnp_main_id " +
@@ -320,7 +325,7 @@ public class PNPMaintainUIService {
                 log.info("c:" + count);
                 List<String> dataList = new ArrayList<>();
                 map.put(Integer.toString(count), dataList);
-                for (int i = 0, max = 14; i < max; i++) {
+                for (int i = 0, max = 18; i < max; i++) {
                     if (objectArray[i] == null) {
                         dataList.add("");
                     } else {
@@ -338,63 +343,6 @@ public class PNPMaintainUIService {
 
     @SuppressWarnings("unchecked")
     public int getPNPDetailReportTotalPages(String startDate, String endDate, String account, String pccCode, String sourceSystem, String empId, String phoneNumber) {
-//        String queryString =
-//                "SELECT COUNT(*) FROM ( "
-//                        + "SELECT ORIG_FILE_NAME, PROC_FLOW, SOURCE, MSG, PHONE, PNP_DELIVERY_EXPIRE_TIME, DETAIL_SCHEDULE_TIME, CREAT_TIME, STATUS, PCC_CODE, ACCOUNT, SOURCE_SYSTEM, EMPLOYEE_ID, "
-//                        + "ROW_NUMBER() OVER ( ORDER BY CREAT_TIME desc) AS RowNum "
-//                        + "FROM ( "
-//                        + "SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, D.DETAIL_SCHEDULE_TIME, D.CREAT_TIME, D.STATUS, A.PCC_CODE, A.ACCOUNT, A.SOURCE_SYSTEM, A.EMPLOYEE_ID "
-//                        + "FROM BCS_PNP_DETAIL_MING AS D "
-//                        + "LEFT JOIN BCS_PNP_MAIN_MING AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
-//                        + "LEFT JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID "
-//                        + "UNION All "
-//                        + "SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, NULL, D.CREAT_TIME, D.STATUS, A.PCC_CODE, A.ACCOUNT, A.SOURCE_SYSTEM, A.EMPLOYEE_ID "
-//                        + "FROM BCS_PNP_DETAIL_MITAKE AS D "
-//                        + "LEFT JOIN BCS_PNP_MAIN_MITAKE AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
-//                        + "LEFT JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID "
-//                        + "UNION All "
-//                        + "SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, NULL, D.CREAT_TIME, D.STATUS, A.PCC_CODE, A.ACCOUNT, A.SOURCE_SYSTEM, A.EMPLOYEE_ID "
-//                        + "FROM BCS_PNP_DETAIL_UNICA AS D "
-//                        + "LEFT JOIN BCS_PNP_MAIN_UNICA AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
-//                        + "LEFT JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID "
-//                        + "UNION All "
-//                        + "SELECT M.ORIG_FILE_NAME, D.PROC_FLOW, D.SOURCE, MSG, PHONE, D.PNP_DELIVERY_EXPIRE_TIME, NULL, D.CREAT_TIME, D.STATUS, A.PCC_CODE, A.ACCOUNT, A.SOURCE_SYSTEM, A.EMPLOYEE_ID "
-//                        + "FROM BCS_PNP_DETAIL_EVERY8D AS D "
-//                        + "LEFT JOIN BCS_PNP_MAIN_EVERY8D AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID "
-//                        + "LEFT JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID "
-//                        + ") AS R1 "
-//                        + "WHERE CREAT_TIME >= ?1 "
-//                        + "AND CREAT_TIME <  DATEADD(DAY, 1, ?2) ";
-//
-//        if (StringUtils.isNotBlank(account)) {
-//            queryString += "AND ACCOUNT = '" + account + "' ";
-//        }
-//        if (StringUtils.isNotBlank(pccCode)) {
-//            queryString += "AND PCC_CODE = '" + pccCode + "' ";
-//        }
-//        if (StringUtils.isNotBlank(sourceSystem)) {
-//            queryString += "AND SOURCE_SYSTEM = '" + sourceSystem + "' ";
-//        }
-//        if (StringUtils.isNotBlank(phoneNumber)) {
-//            queryString += "AND PHONE = '" + phoneNumber + "' ";
-//        }
-//
-//        boolean oracleUseDepartmentCheck = CoreConfigReader.getBoolean(CONFIG_STR.ORACLE_USE_DEPARTMENT_CHECK, true);
-//        log.info("oracleUseDepartmentCheck:" + oracleUseDepartmentCheck);
-//        if (oracleUseDepartmentCheck) {
-//            String empAva = oraclePnpService.getAvailableEmpIdsByEmpId(empId);
-//            if (StringUtils.isNotBlank(empAva)) {
-//                queryString += empAva;
-//            }
-//        }
-//
-//        queryString +=
-//                ") AS R2 ";
-//
-//        log.info("str1: " + queryString);
-//        Query query = entityManager.createNativeQuery(queryString).setParameter(1, startDate).setParameter(2, endDate);
-
-        //--------------
         StringBuilder sb = new StringBuilder();
         sb.append("select count(*) from ( " +
                 "        select " +
@@ -414,7 +362,8 @@ public class PNPMaintainUIService {
                 "                account, " +
                 "                source_system, " +
                 "                employee_id, " +
-                "                creat_time " +
+                "                creat_time, " +
+                "                sms_time " +
                 "        from ( " +
                 "        ( " +
                 "                select " +
@@ -434,7 +383,8 @@ public class PNPMaintainUIService {
                 "                        a.account, " +
                 "                        a.source_system, " +
                 "                        a.employee_id, " +
-                "                        d.creat_time " +
+                "                        d.creat_time, " +
+                "                        d.sms_time " +
                 "                from " +
                 "                        bcs_pnp_detail_ming as d " +
                 "                left join bcs_pnp_main_ming as m on d.pnp_main_id = m.pnp_main_id " +
@@ -464,8 +414,8 @@ public class PNPMaintainUIService {
                         "                        d.proc_stage, " +
                         "                        msg, " +
                         "                        d.phone, " +
-                        "                        null as detail_schedule_time1, " +
-                        "                        null as detail_schedule_time2, " +
+                        "                        d.detail_schedule_time as detail_schedule_time1, " +
+                        "                        d.detail_schedule_time as detail_schedule_time2, " +
                         "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
                         "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
                         "                        d.bc_status as status1, " +
@@ -475,7 +425,8 @@ public class PNPMaintainUIService {
                         "                        a.account, " +
                         "                        a.source_system, " +
                         "                        a.employee_id, " +
-                        "                        d.creat_time " +
+                        "                        d.creat_time, " +
+                        "                        d.sms_time " +
                         "                from " +
                         "                        bcs_pnp_detail_mitake as d " +
                         "                left join bcs_pnp_main_mitake as m on d.pnp_main_id = m.pnp_main_id " +
@@ -505,8 +456,8 @@ public class PNPMaintainUIService {
                         "                        d.proc_stage, " +
                         "                        msg, " +
                         "                        d.phone, " +
-                        "                        null as detail_schedule_time1, " +
-                        "                        null as detail_schedule_time2, " +
+                        "                        d.detail_schedule_time as detail_schedule_time1, " +
+                        "                        d.detail_schedule_time as detail_schedule_time2, " +
                         "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
                         "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
                         "                        d.bc_status as status1, " +
@@ -516,7 +467,8 @@ public class PNPMaintainUIService {
                         "                        a.account, " +
                         "                        a.source_system, " +
                         "                        a.employee_id, " +
-                        "                        d.creat_time " +
+                        "                        d.creat_time, " +
+                        "                        d.sms_time " +
                         "                from " +
                         "                        bcs_pnp_detail_unica as d " +
                         "                left join bcs_pnp_main_unica as m on d.pnp_main_id = m.pnp_main_id " +
@@ -546,8 +498,8 @@ public class PNPMaintainUIService {
                         "                        d.proc_stage, " +
                         "                        msg, " +
                         "                        d.phone, " +
-                        "                        null as detail_schedule_time1, " +
-                        "                        null as detail_schedule_time2, " +
+                        "                        d.detail_schedule_time as detail_schedule_time1, " +
+                        "                        d.detail_schedule_time as detail_schedule_time2, " +
                         "                        convert(varchar, d.line_push_time, 120) as bc_time, " +
                         "                        convert(varchar, d.pnp_time, 120) as pnp_time, " +
                         "                        d.bc_status as status1, " +
@@ -557,7 +509,8 @@ public class PNPMaintainUIService {
                         "                        a.account, " +
                         "                        a.source_system, " +
                         "                        a.employee_id, " +
-                        "                        d.creat_time " +
+                        "                        d.creat_time, " +
+                        "                        d.sms_time " +
                         "                from " +
                         "                        bcs_pnp_detail_every8d as d " +
                         "                left join bcs_pnp_main_every8d as m on d.pnp_main_id = m.pnp_main_id " +
@@ -601,31 +554,6 @@ public class PNPMaintainUIService {
                 .setParameter(6, endDate)
                 .setParameter(7, startDate)
                 .setParameter(8, endDate);
-        //--------------
-
-//        List<Object[]> list = query.getResultList();
-//        String listStr = list.toString();
-//        log.info("List1:" + list.toString());
-//
-//        // Total = Empty set,  []  => 0
-//        if (listStr.length() <= 2) {
-//            return "0";
-//        }
-//
-//        // Total < 10
-//        char c1 = listStr.charAt(listStr.length() - 2); // 個位數
-//        if (listStr.length() == 3) {
-//            return (c1 == '0') ? "0" : "1"; // [0] => 0 , [1] => 1
-//        }
-//
-//        // Total >= 10
-//        if (c1 == '0') {
-//            return listStr.substring(1, listStr.length() - 2); // [430] => 43
-//        }
-//        char c10 = listStr.charAt(listStr.length() - 3); // 十位數
-//        return listStr.substring(1, listStr.length() - 3) + (++c10); // [431] => 44
-
-        //----------------
         int totalCount = (int) query.getSingleResult();
         return totalCount / 10 + 1;
     }

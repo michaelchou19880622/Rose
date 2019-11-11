@@ -162,4 +162,28 @@ public class DataUtils {
     public static Object getOrDefault(Map map, Object key, Object defaultValue) {
         return map.get(key) != null || map.containsKey(key) ? map.get(key) : defaultValue;
     }
+
+    /**
+     * isFuture
+     * @param compareDate compareDate
+     * @return isFuture
+     */
+    public static boolean isFuture(Date compareDate){
+        if (compareDate == null){
+            return false;
+        }
+        return new Date().before(compareDate);
+    }
+
+    /**
+     * isPast
+     * @param compareDate compareDate
+     * @return isPast
+     */
+    public static boolean isPast(Date compareDate){
+        if (compareDate == null){
+            return false;
+        }
+        return new Date().after(compareDate);
+    }
 }

@@ -140,7 +140,8 @@ public class PnpSMSMsgService {
             String procApName = pnpAkkaService.getProcessApName();
             log.info("======== Start Check Has BC Fail To SMS Data : {} =========", type);
             /* Find Expired Data*/
-            List<PnpDetailMitake> detailList = pnpDetailMitakeRepository.findByBcStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
+//            List<PnpDetailMitake> detailList = pnpDetailMitakeRepository.findByBcStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
+            List<PnpDetailMitake> detailList = pnpDetailMitakeRepository.findTop1ByBcStatusOrderByCreateTimeAsc(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
 
             if (CollectionUtils.isEmpty(detailList)) {
                 log.info("{} No BC Fail Data!!", type);
@@ -202,7 +203,7 @@ public class PnpSMSMsgService {
             String procApName = pnpAkkaService.getProcessApName();
             log.info("======== Start Check Has BC Fail To SMS Data : {} =========", type);
             /* Find Expired Data*/
-            List<PnpDetailMing> detailList = pnpDetailMingRepository.findByBcStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
+            List<PnpDetailMing> detailList = pnpDetailMingRepository.findTop1ByBcStatusOrderByCreateTimeAsc(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
 
             if (CollectionUtils.isEmpty(detailList)) {
                 log.info("{} No BC Fail Data!!", type);
@@ -264,7 +265,7 @@ public class PnpSMSMsgService {
             String procApName = pnpAkkaService.getProcessApName();
             log.info("======== Start Check Has BC Fail To SMS Data : {} =========", type);
             /* Find Expired Data*/
-            List<PnpDetailUnica> detailList = pnpDetailUnicaRepository.findByBcStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
+            List<PnpDetailUnica> detailList = pnpDetailUnicaRepository.findTop1ByBcStatusOrderByCreateTimeAsc(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
 
             if (CollectionUtils.isEmpty(detailList)) {
                 log.info("{} No BC Fail Data!!", type);
@@ -326,7 +327,7 @@ public class PnpSMSMsgService {
             String procApName = pnpAkkaService.getProcessApName();
             log.info("======== Start Check Has BC Fail To SMS Data : {} =========", type);
             /* Find Expired Data*/
-            List<PnpDetailEvery8d> detailList = pnpDetailEvery8dRepository.findByBcStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
+            List<PnpDetailEvery8d> detailList = pnpDetailEvery8dRepository.findTop1ByBcStatusOrderByCreateTimeAsc(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
 
             if (CollectionUtils.isEmpty(detailList)) {
                 log.info("{} No BC Fail Data!!", type);
@@ -403,7 +404,7 @@ public class PnpSMSMsgService {
             Date now = new Date();
 
             /* Find Expired Data*/
-            List<PnpDetailMitake> detailList = pnpDetailMitakeRepository.findByPnpStatusAndPnpDeliveryExpireTimeLessAndEquals(
+            List<PnpDetailMitake> detailList = pnpDetailMitakeRepository.findTop1ByPnpStatusAndPnpDeliveryExpireTimeBeforeOrderByCreateTimeAsc(
                     AbstractPnpMainEntity.MSG_SENDER_STATUS_CHECK_DELIVERY, now);
 
             if (CollectionUtils.isEmpty(detailList)) {
@@ -473,7 +474,7 @@ public class PnpSMSMsgService {
             Date now = new Date();
 
             /* Find Expired Data*/
-            List<PnpDetailMing> detailList = pnpDetailMingRepository.findByPnpStatusAndPnpDeliveryExpireTimeLessAndEquals(
+            List<PnpDetailMing> detailList = pnpDetailMingRepository.findTop1ByPnpStatusAndPnpDeliveryExpireTimeBeforeOrderByCreateTimeAsc(
                     AbstractPnpMainEntity.MSG_SENDER_STATUS_CHECK_DELIVERY, now);
 
             if (CollectionUtils.isEmpty(detailList)) {
@@ -543,7 +544,7 @@ public class PnpSMSMsgService {
             Date now = new Date();
 
             /* Find Expired Data*/
-            List<PnpDetailUnica> detailList = pnpDetailUnicaRepository.findByPnpStatusAndPnpDeliveryExpireTimeLessAndEquals(
+            List<PnpDetailUnica> detailList = pnpDetailUnicaRepository.findTop1ByPnpStatusAndPnpDeliveryExpireTimeBeforeOrderByCreateTimeAsc(
                     AbstractPnpMainEntity.MSG_SENDER_STATUS_CHECK_DELIVERY, now);
 
             if (CollectionUtils.isEmpty(detailList)) {
@@ -613,7 +614,7 @@ public class PnpSMSMsgService {
             Date now = new Date();
 
             /* Find Expired Data*/
-            List<PnpDetailEvery8d> detailList = pnpDetailEvery8dRepository.findByPnpStatusAndPnpDeliveryExpireTimeLessAndEquals(
+            List<PnpDetailEvery8d> detailList = pnpDetailEvery8dRepository.findTop1ByPnpStatusAndPnpDeliveryExpireTimeBeforeOrderByCreateTimeAsc(
                     AbstractPnpMainEntity.MSG_SENDER_STATUS_CHECK_DELIVERY, now);
 
             if (CollectionUtils.isEmpty(detailList)) {

@@ -71,21 +71,17 @@ public class PnpPushMsgService {
             logger.error("PNPSendMsgService TimeUnit error :" + time + unit);
             return;
         }
-        scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                Thread.currentThread().setName("PNP-BC-Scheduled-" + Thread.currentThread().getId());
-                // 排程工作
-                logger.info("PnpSendMsgService startCircle....");
+        scheduledFuture = scheduler.scheduleAtFixedRate(() -> {
+            Thread.currentThread().setName("PNP-BC-Scheduled-" + Thread.currentThread().getId());
 
-                //#.pnp.big switch = 0(停止排程) 1(停止排程，並轉發SMS) 其他(正常運行)
-                int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true, false);
-                if (0 == bigSwitch || 1 == bigSwitch) { //大流程關閉時不做
-                    logger.warn("PNP_BIG_SWITCH : " + bigSwitch + "PnpPushMsgService stop sending...");
-                    return;
-                }
-                sendingMain();
+            logger.info("PnpSendMsgService startCircle....");
+            //#.pnp.big switch = 0(停止排程) 1(停止排程，並轉發SMS) 其他(正常運行)
+            int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true, false);
+            if (0 == bigSwitch || 1 == bigSwitch) {
+                logger.warn("PNP_BIG_SWITCH : " + bigSwitch + "PnpPushMsgService stop sending...");
+                return;
             }
+            sendingMain();
         }, 0, time, TimeUnit.valueOf(unit));
 
     }
@@ -93,7 +89,7 @@ public class PnpPushMsgService {
     /**
      * 根據PNPFTPType 依序Push
      */
-    public void sendingMain() {
+    private void sendingMain() {
         String procApName = pnpAkkaService.getProcessApName();
         for (PNPFTPType type : PNPFTPType.values()) {
             logger.info(String.format("BC Push ProcApName %s, Type: %s", procApName, type));
@@ -105,8 +101,10 @@ public class PnpPushMsgService {
                     continue;
                 }
                 logger.info("details has data type:" + type.toString());
+
                 List<? super PnpDetail> details2 = findDetailUid(details);
                 Long[] mainIds = allMainIds.toArray(new Long[0]);
+
                 PnpMain pnpMain = pnpRepositoryCustom.findMainByMainId(type, mainIds[0]);
                 logger.info("Sending handle Main:" + pnpMain.getOrigFileName() + " type:" + type);
                 pnpMain.setPnpDetails(details2);

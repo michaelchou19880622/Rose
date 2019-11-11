@@ -44,7 +44,6 @@ import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.web.security.CurrentUser;
 import com.bcs.core.web.security.CustomUser;
 import com.bcs.core.web.ui.page.enums.BcsPageEnum;
-import com.bcs.web.aop.ControllerLog;
 import com.bcs.web.ui.service.LoadFileUIService;
 
 
@@ -392,7 +391,6 @@ public class BCSBillingNoticeTemplateMsgController {
 	 * 取得帳務通知成效Total
 	 */
 	@WebServiceLog
-//	@ControllerLog(description="取得帳務通知成效清單")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getBNEffectsTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> getBNEffectsTotalPages(
@@ -401,13 +399,13 @@ public class BCSBillingNoticeTemplateMsgController {
 			@CurrentUser CustomUser customUser,
 			@RequestParam(value = "startDate", required=false) String startDate, 
 			@RequestParam(value = "endDate", required=false) String endDate) throws IOException {
-		logger.info("getBNEffectsTotalPages");
-
+		logger.info("getBNEffectsTotalPages, startDate=" + startDate + " endDate=" + endDate);
 		if(startDate == null) startDate = "1911-01-01";
 		if(endDate == null) endDate = "3099-01-01";
 		
 		try{
 			String count = contentTemplateMsgService.getBNEffectsTotalPages(startDate, endDate);
+			logger.info("getBNEffectsTotalPages, startDate=" + startDate + " endDate=" + endDate + " totalPages=" + count);
 			return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count + "\"}", HttpStatus.OK);
 		}
 		catch(Exception e){
@@ -420,7 +418,6 @@ public class BCSBillingNoticeTemplateMsgController {
 	 * 取得帳務通知成效清單
 	 */
 	@WebServiceLog
-//	@ControllerLog(description="取得帳務通知成效清單")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getBNEffectsList")
 	@ResponseBody
 	public ResponseEntity<?> getBNEffectsList(
@@ -430,17 +427,17 @@ public class BCSBillingNoticeTemplateMsgController {
 			@RequestParam(value = "startDate", required=false) String startDate, 
 			@RequestParam(value = "endDate", required=false) String endDate,
 			@RequestParam(value = "page", required=false) Integer page) throws IOException {
-		logger.info("page1:" + page);
+		logger.info("getBNEffectsList, startDate=" + startDate + " endDate=" + endDate + " page=" + page);
 		if(startDate == null) startDate = "1911-01-01";
 		if(endDate == null) endDate = "3099-01-01";
 		
 		try{
 			Map<String, List<String>> result = contentTemplateMsgService.getBNEffects(startDate, endDate, page);
+			logger.info("getBNEffectsList, page=" + page + " sizeOfList=" + result.size());
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		}
 		catch(Exception e){
-			logger.error(ErrorRecord.recordError(e));
-			
+			logger.error(ErrorRecord.recordError(e));			
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

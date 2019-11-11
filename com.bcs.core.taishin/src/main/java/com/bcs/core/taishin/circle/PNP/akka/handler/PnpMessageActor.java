@@ -6,12 +6,10 @@ import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.PNP.scheduler.PnpTaskService;
 import com.bcs.core.taishin.circle.PNP.service.PnpService;
+import com.bcs.core.utils.DataUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -25,7 +23,7 @@ import java.util.Date;
 public class PnpMessageActor extends UntypedActor {
 
     @Override
-    public void onReceive(Object object) throws Exception {
+    public void onReceive(Object object) {
         try {
             Thread.currentThread().setName("Actor-PNP-PnpPush-" + Thread.currentThread().getId());
 
@@ -66,8 +64,8 @@ public class PnpMessageActor extends UntypedActor {
      * @throws SchedulerException SchedulerException
      */
     private void checkScheduleTimeThenDoImmediateOrDelay(PnpMain pnpMain) throws SchedulerException {
-        Date scheduleTime = getFormatScheduleTime(pnpMain);
-        if (scheduleTime != null && Calendar.getInstance().getTime().after(scheduleTime)) {
+        Date scheduleTime = getFormatScheduleTimeBySourceSystem(pnpMain.getSource(), pnpMain.getScheduleTime());
+        if (DataUtils.isPast(scheduleTime)) {
             immediatePushMessage(pnpMain);
         } else {
             delayPushMessage(pnpMain, scheduleTime);
@@ -77,16 +75,19 @@ public class PnpMessageActor extends UntypedActor {
     /**
      * 取得格式化後預約發送時間
      *
-     * @param pnpMain pnpMain
+     * @param sourceSystem sourceSystem
+     * @param scheduleTime scheduleTIme
      * @return 預約時間
      */
-    private Date getFormatScheduleTime(PnpMain pnpMain) {
-        try {
-            return new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(pnpMain.getScheduleTime());
-        } catch (ParseException e) {
-            log.error("{}: {}", "Exception", e);
-            log.error("ScheduleTime format Error :" + pnpMain.getScheduleTime());
-            return null;
+    private Date getFormatScheduleTimeBySourceSystem(String sourceSystem, String scheduleTime) {
+        switch (sourceSystem) {
+            case AbstractPnpMainEntity.SOURCE_MITAKE:
+            case AbstractPnpMainEntity.SOURCE_UNICA:
+            case AbstractPnpMainEntity.SOURCE_EVERY8D:
+                return DataUtils.convStrToDate(scheduleTime, "yyyyMMddHHmmss");
+            case AbstractPnpMainEntity.SOURCE_MING:
+            default:
+                return DataUtils.convStrToDate(scheduleTime, "yyyy-MM-dd hh:mm:ss");
         }
     }
 

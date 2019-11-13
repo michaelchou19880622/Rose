@@ -524,7 +524,7 @@ public class LinePointPushApiController {
                 // amount = remainingAmount
                 linePointDetail.setAmount(new Long(remainingAmount));
                 linePointDetail.setBalance(Balance);
-                linePointDetail.setMessage("SUCCESS");
+                linePointDetail.setMessage("SUCCESS CANCEL");
                 linePointDetail.setStatus(LinePointDetail.STATUS_SUCCESS);
                 linePointDetail.setSendTime(new Date());
                 linePointDetailService.save(linePointDetail);

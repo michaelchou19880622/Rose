@@ -19,6 +19,9 @@ public interface LinePointMainRepository extends EntityRepository<LinePointMain,
 	public LinePointMain findByTitle(String title);
 	
 	@Transactional(timeout = 30)
+	public LinePointMain findByTitleAndPccCode(String title,String pccCode);
+	
+	@Transactional(timeout = 30)
 	public List<LinePointMain> findByStatus(String status);
 	
 	@Transactional(timeout = 30)

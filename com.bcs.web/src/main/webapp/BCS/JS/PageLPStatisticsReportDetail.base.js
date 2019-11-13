@@ -13,6 +13,7 @@ $(function() {
 	var startDate = $.urlParam("startDate");
 	var endDate = $.urlParam("endDate");
 	var linePointDetailCount = 0;
+	var linePointSuccessAmount = 0;
 	var linePointDetail = {};
 	// ---- Functions ----
     // do Split Page
@@ -92,6 +93,12 @@ $(function() {
 			}
 			$('#pageAndTotalPages').text(page + '/' + totalPages);
 			
+			$.each(linePointDetail, function(i, o) {
+				 if(o.status=='SUCCESS'){
+					 linePointSuccessAmount += o.amount
+				 }
+			});
+			$('#totalCountText').html('發送總點數：' + linePointSuccessAmount);
 			pagelist();
            
             

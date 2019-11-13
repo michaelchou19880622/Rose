@@ -130,6 +130,9 @@ public class LinePointMainService {
 	public LinePointMain findByTitle(String title){
 		return linePointMainRepository.findByTitle(title);
 	}
+	public LinePointMain findByTitleAndPccCode(String title , String pccCode){
+		return linePointMainRepository.findByTitleAndPccCode(title , pccCode);
+	}
 	
 	public List<LinePointMain> findByStatus(String status){
 		return linePointMainRepository.findByStatus(status);

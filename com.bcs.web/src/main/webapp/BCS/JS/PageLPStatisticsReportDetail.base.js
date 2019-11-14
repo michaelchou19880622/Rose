@@ -13,7 +13,7 @@ $(function() {
 	var startDate = $.urlParam("startDate");
 	var endDate = $.urlParam("endDate");
 	var linePointDetailCount = 0;
-	var linePointSuccessAmount = 0;
+	var linePointSuccessAmount = $.urlParam("successfulAmount");;
 	var linePointDetail = {};
 	// ---- Functions ----
     // do Split Page
@@ -58,7 +58,7 @@ $(function() {
             console.info('findOneLinePointMainByMainId response:', o);
             $('#titleText').html('專案名稱：' + o.title);
             $('#serialIdText').html('Campaign：' + o.serialId);
-            $('#totalCountText').html('發送總點數：' + o.successfulAmount);
+            $('#totalCountText').html('發送總點數：' + linePointSuccessAmount);
             $('#modifyUserText').html('建立人員：' + o.modifyUser);
             modifyUser = o.modifyUser;
             $('#departmentFullNameText').html('建立人員單位：' + o.departmentFullName);
@@ -93,12 +93,6 @@ $(function() {
 			}
 			$('#pageAndTotalPages').text(page + '/' + totalPages);
 			
-			$.each(linePointDetail, function(i, o) {
-				 if(o.status=='SUCCESS'){
-					 linePointSuccessAmount += o.amount
-				 }
-			});
-			$('#totalCountText').html('發送總點數：' + linePointSuccessAmount);
 			pagelist();
            
             
@@ -144,7 +138,12 @@ $(function() {
 	
 			        
 	             if (o.status=='FAIL') {
-			              resultTr.find('.message').html(o.message);
+	            	 try {
+	                     var obj=JSON.parse(o.message);
+	                     resultTr.find('.message').html(obj.message);
+	                 } catch(e) {
+	                     resultTr.find('.message').html(o.message);
+	                 }
 			        }else{
 			              resultTr.find('.message').html('-');
 			        }
@@ -154,7 +153,7 @@ $(function() {
 	                 resultTr.find('.btn_copy').click(btn_cancle);
 	             }
 	             
-	             if(bcs.user.role == 'ROLE_REPORT' || bcs.user.role == 'ROLE_LINE_SEND'||o.detailType == 'ISSUE_API'){
+	             if(bcs.user.role == 'ROLE_REPORT' || bcs.user.role == 'ROLE_LINE_SEND'){
 	             	resultTr.find('.btn_copy').remove();
 	             }
              	$('.resultTable').append(resultTr);
@@ -215,6 +214,8 @@ $(function() {
 		
 	};
 	
+
+	
 	var btn_cancle = function(){
 		$('.LyMain').block($.BCS.blockMsgRead);
 		var detailId = $(this).attr('detailId');
@@ -235,4 +236,6 @@ $(function() {
 	};
 	
     initPage();
+    
+    
 });

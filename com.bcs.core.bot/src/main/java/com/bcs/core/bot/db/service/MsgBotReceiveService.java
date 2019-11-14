@@ -108,7 +108,7 @@ public class MsgBotReceiveService {
 
             log.info("Update PNP Main and Detail Status Finish!!");
         } catch (Exception e) {
-            log.error("{}: {}", "Exception", e);
+            log.error("Exception", e);
             throw e;
         }
 

@@ -49,6 +49,14 @@ public interface PnpDetailUnicaRepository extends EntityRepository<PnpDetailUnic
     List<PnpDetailUnica> findTop1ByBcStatusOrderByCreateTimeAsc(String bcStatus);
 
     /**
+     * Find By Pnp Status For Sms Schedule
+     *
+     * @param pnpStatus Pnp Status
+     * @return PnpDetailMitake List
+     */
+    List<PnpDetailUnica> findTop1ByPnpStatusOrderByCreateTimeAsc(String pnpStatus);
+
+    /**
      * find By PnpStatus And PnpDeliveryExpireTime Less And Equals Compare Time
      *
      * @param pnpStatus   pnp Status

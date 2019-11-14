@@ -5,52 +5,140 @@
 <head th:replace="/BCS/Views/Common/Head :: head ('Config List Page', '/BCS/JS/Report/configList.base.js')">
 </head>
 
+<style>
+
+/* _table.scss Basic Table */
+table {
+  width: inherit;
+  border-collapse: collapse;
+}
+
+table th, tr, td {
+  padding: 10px;
+  border: 1px gray solid;
+  vertical-align: middle;
+}
+
+thead tr th {
+  background: silver;
+}
+
+/* _table.scss table-fix-header */
+.table-fix-header-top-wrap {
+  overflow: auto;
+  width: 100%;
+  /* Table Outter Max Height */
+  max-height: 50vh;
+  /* Table Outter Border */
+  border: 3px solid gray;
+}
+
+.table-fix-header-top {
+  display: block;
+  word-wrap: break-word;
+}
+.table-fix-header-top thead tr th {
+  /* header always fix top */
+  position: sticky;
+  top: 0;
+  background: #00695c;
+  color: white;
+}
+
+/* _table.scss table td width */
+.td1 {
+  max-width: 1rem;
+  min-width: 1rem;
+}
+
+.td3 {
+  max-width: 3rem;
+  min-width: 3rem;
+}
+
+.td5 {
+  max-width: 5rem;
+  min-width: 5rem;
+}
+
+.td7 {
+  max-width: 7rem;
+  min-width: 7rem;
+}
+
+.td10 {
+  max-width: 10rem;
+  min-width: 10rem;
+}
+
+.td20 {
+  max-width: 20rem;
+  min-width: 20rem;
+}
+
+/* _table.scss table td align */
+.td-align-left {
+  text-align: left;
+}
+
+.td-align-center {
+  text-align: center;
+}
+
+.td-align-right {
+  text-align: right;
+}
+
+/*# sourceMappingURL=index.css.map */
+
+
+</style>
+
 <body>
-	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+<header th:replace="/BCS/Views/Common/Header :: header"></header>
 
-    <div class="LyContents">
-		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page0')"></div>
+<div class="LyContents">
+    <div th:replace="/BCS/Views/Common/Menu :: menu ('Page0')"></div>
 
-        <!-- Right Content -->
-        <div class="LyMain" role="main">
-            <form>
-                <section>
-                    <header class="ContentHead">
-                        <h3 class="CHTtl">參數列表</h3>
-                    </header>
+    <!-- Right Content -->
+    <div class="LyMain" role="main">
+        <form>
+            <section>
+                <header class="ContentHead">
+                    <h3 class="CHTtl">參數列表</h3>
+                </header>
 
-                    <div class="CHBtnSet">
-                        <div class="CHRight"><input class="btn_add" type="button" value="建立參數"  style="cursor: pointer;"></div>
+                <div class="CHBtnSet">
+                    <div class="CHRight"><input class="btn_add" type="button" value="建立參數" style="cursor: pointer;">
                     </div>
-
-                    <div class="mainFrame">
-                        <table border="1" id="configListTable">
-                            <colgroup><col width="150"><col width="150"><col width="130"><col width="100"><col width="100"></colgroup>
+                </div>
+                <div class="mainFrame">
+                    <div class="table-fix-header-top-wrap">
+                        <table border="1" id="configListTable" class="table-fix-header-top">
                             <tr>
-                                <th>參數</th>
-                                <th>說明</th>
-                                <th>數值</th>
-                                <th>複製/刪除</th>
+                                <th class="td20">參數</th>
+                                <th class="td20">說明</th>
+                                <th class="td20">數值</th>
+                                <th class="td5">複製/刪除</th>
                             </tr>
                             <tbody class="configTrTemplate">
-	                            <tr>
-	                                <td class="configId">
-	                                    <div><a></a></div>
-	                                </td>
-	                                <td class="description"></td>
-	                                <td class="value"></td>
-	                                <td>
-	                                    <input class="btn_copy" type="button" value="複製" style="cursor: pointer;">
-	                                    <input class="btn_detele" type="button" value="刪除" style="cursor: pointer;" sec:authorize="hasAnyRole('ROLE_ADMIN')">
-	                                </td>
-	                            </tr>
+                            <tr>
+                                <td class="configId td10"><div><a></a></div></td>
+                                <td class="description td10"></td>
+                                <td class="value td10"></td>
+                                <td>
+                                    <input class="btn_copy" type="button" value="複製" style="cursor: pointer;">
+                                    <input class="btn_detele" type="button" value="刪除" style="cursor: pointer;">
+                                </td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
-                </section>
-            </form>
-        </div>
+                </div>
+            </section>
+        </form>
     </div>
+</div>
 </body>
 
 </html>

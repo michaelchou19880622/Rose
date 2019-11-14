@@ -2,6 +2,7 @@ package com.bcs.core.taishin.circle.PNP.db.repository;
 
 import com.bcs.core.db.persistence.EntityRepository;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailEvery8d;
+import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMitake;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +47,14 @@ public interface PnpDetailEvery8dRepository extends EntityRepository<PnpDetailEv
      * @return PnpDetailMitake List
      */
     List<PnpDetailEvery8d> findTop1ByBcStatusOrderByCreateTimeAsc(String bcStatus);
+
+    /**
+     * Find By Pnp Status For Sms Schedule
+     *
+     * @param pnpStatus Pnp Status
+     * @return PnpDetailMitake List
+     */
+    List<PnpDetailEvery8d> findTop1ByPnpStatusOrderByCreateTimeAsc(String pnpStatus);
 
     /**
      * find By PnpStatus And PnpDeliveryExpireTime Less And Equals Compare Time

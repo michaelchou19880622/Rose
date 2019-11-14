@@ -97,14 +97,18 @@ public class BCSLinePointReportController extends BCSBaseController {
             logger.info("[getLPStatisticsReport]");
 
             // null translation
-            if (StringUtils.isBlank(startDateStr) || startDateStr.equals("null"))
+            if (StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) {
                 startDateStr = "1911-01-01";
-            if (StringUtils.isBlank(endDateStr) || endDateStr.equals("null"))
+            }
+            if (StringUtils.isBlank(endDateStr) || endDateStr.equals("null")) {
                 endDateStr = "3099-01-01";
-            if (StringUtils.isBlank(title) || title.equals("null"))
+            }
+            if (StringUtils.isBlank(title) || title.equals("null")) {
                 title = "";
-            if (StringUtils.isBlank(modifyUser) || modifyUser.equals("null"))
+            }
+            if (StringUtils.isBlank(modifyUser) || modifyUser.equals("null")) {
                 modifyUser = "";
+            }
 
             // parse date data
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -176,15 +180,18 @@ public class BCSLinePointReportController extends BCSBaseController {
             logger.info("[getLPStatisticsReportTotalPages]");
 
             // null translation
-            if (StringUtils.isBlank(startDateStr) || startDateStr.equals("null"))
+            if (StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) {
                 startDateStr = "1911-01-01";
-            if (StringUtils.isBlank(endDateStr) || endDateStr.equals("null"))
+            }
+            if (StringUtils.isBlank(endDateStr) || endDateStr.equals("null")) {
                 endDateStr = "3099-01-01";
-            if (StringUtils.isBlank(title) || title.equals("null"))
+            }
+            if (StringUtils.isBlank(title) || title.equals("null")) {
                 title = "";
-            if (StringUtils.isBlank(modifyUser) || modifyUser.equals("null"))
+            }
+            if (StringUtils.isBlank(modifyUser) || modifyUser.equals("null")) {
                 modifyUser = "";
-
+            }
             // parse date data
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             Date startDate = null, endDate = null;
@@ -328,14 +335,18 @@ public class BCSLinePointReportController extends BCSBaseController {
             logger.info("[exportLPStatisticsReportExcel]");
 
             // null translation
-            if (StringUtils.isBlank(startDateStr) || startDateStr.equals("null"))
+            if (StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) {
                 startDateStr = "1911-01-01";
-            if (StringUtils.isBlank(endDateStr) || endDateStr.equals("null"))
+            }
+            if (StringUtils.isBlank(endDateStr) || endDateStr.equals("null")) {
                 endDateStr = "3099-01-01";
-            if (StringUtils.isBlank(title) || title.equals("null"))
+            }
+            if (StringUtils.isBlank(title) || title.equals("null")) {
                 title = "";
-            if (StringUtils.isBlank(modifyUser) || modifyUser.equals("null"))
+            }
+            if (StringUtils.isBlank(modifyUser) || modifyUser.equals("null")) {
                 modifyUser = "";
+            }
 
             // parse date data
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");

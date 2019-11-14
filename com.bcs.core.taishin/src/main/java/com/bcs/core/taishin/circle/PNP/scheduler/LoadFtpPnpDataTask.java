@@ -724,6 +724,10 @@ public class LoadFtpPnpDataTask {
         log.info("fileContent List Size: " + fileContents.size());
         String[] contentSp = fileContents.get(0).split(MING_TAG, 9);
         log.info("Content Array: " + Arrays.toString(contentSp));
+        if (contentSp.length < 3) {
+            log.error("File Contents validate is failed");
+            return Collections.emptyList();
+        }
         String content1 = contentSp[2];
         PNPMaintainAccountModel accountModel = validateWhiteListContent(AbstractPnpMainEntity.SOURCE_MING, origFileName, content1);
         log.info("accountModel1:" + accountModel);
@@ -771,6 +775,10 @@ public class LoadFtpPnpDataTask {
         log.info("fileContent List Size: " + fileContents.size());
         String[] contentSp = fileContents.get(1).split(TAG, 4);
         log.info("Content Array: " + Arrays.toString(contentSp));
+        if (contentSp.length < 4) {
+            log.error("File Contents validate is failed");
+            return Collections.emptyList();
+        }
         String content = contentSp[3];
         PNPMaintainAccountModel accountModel = validateWhiteListContent(AbstractPnpMainEntity.SOURCE_MITAKE, origFileName, content);
         if (null == accountModel) {
@@ -831,6 +839,10 @@ public class LoadFtpPnpDataTask {
         log.info("fileContent List Size: " + fileContents.size());
         String[] contentSp = fileContents.get(1).split(TAG, 10);
         log.info("Content Array: " + Arrays.toString(contentSp));
+        if (contentSp.length < 4) {
+            log.error("File Contents validate is failed");
+            return Collections.emptyList();
+        }
         String content = contentSp[3];
         PNPMaintainAccountModel accountModel = validateWhiteListContent(AbstractPnpMainEntity.SOURCE_EVERY8D, origFileName, content);
         if (null == accountModel) {
@@ -896,6 +908,10 @@ public class LoadFtpPnpDataTask {
         log.info("fileContent List Size: " + fileContents.size());
         String[] contentSp = fileContents.get(1).split(TAG, 10);
         log.info("Content Array: " + Arrays.toString(contentSp));
+        if (contentSp.length < 4) {
+            log.error("File Contents validate is failed");
+            return Collections.emptyList();
+        }
         String content1 = contentSp[3];
         PNPMaintainAccountModel accountModel = validateWhiteListContent(AbstractPnpMainEntity.SOURCE_UNICA, origFileName, content1);
         if (null == accountModel) {

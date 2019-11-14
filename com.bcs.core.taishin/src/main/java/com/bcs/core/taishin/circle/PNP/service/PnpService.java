@@ -507,6 +507,20 @@ public class PnpService {
                     //待web hook在24小時內收到DELIVERY則將該則訊息update成COMPLETE，若24小時內沒收到DELIVERY則將該訊息轉發SMS
                     detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_CHECK_DELIVERY);
                     detail.setPnpStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_CHECK_DELIVERY);
+
+                    /* Check Pnp is Complete from Line Call Callback Api Update Complete*/
+                    PnpDetail pnpDetail = findDetailById(detail.getPnpDetailId(), detail.getSource());
+                    if (pnpDetail != null) {
+                        boolean isReceivedLineCallBack = AbstractPnpMainEntity.DATA_CONVERTER_STATUS_PNP_COMPLETE.equals(pnpDetail.getPnpStatus())
+                                && pnpDetail.getPnpDeliveryTime() != null;
+                        if (isReceivedLineCallBack) {
+                            detail.setStatus(pnpDetail.getStatus());
+                            detail.setPnpStatus(pnpDetail.getPnpStatus());
+                            detail.setSendTime(pnpDetail.getSendTime());
+                            detail.setPnpDeliveryTime(pnpDetail.getPnpDeliveryTime());
+                        }
+                    }
+
                 } else {
                     /* 發送失敗 */
                     logger.info("PNP Send Message Fail!! ==> SMS!!");
@@ -526,6 +540,21 @@ public class PnpService {
             }
         } catch (Exception e) {
             logger.error("Exception", e);
+        }
+    }
+
+    private PnpDetail findDetailById(Long detailId, String source){
+        switch(source){
+            case AbstractPnpMainEntity.SOURCE_MITAKE:
+                 return pnpDetailMitakeRepository.findOne(detailId);
+            case AbstractPnpMainEntity.SOURCE_MING:
+                return pnpDetailMingRepository.findOne(detailId);
+            case AbstractPnpMainEntity.SOURCE_EVERY8D:
+                return pnpDetailEvery8dRepository.findOne(detailId);
+            case AbstractPnpMainEntity.SOURCE_UNICA:
+                return pnpDetailUnicaRepository.findOne(detailId);
+            default:
+                return null;
         }
     }
 
@@ -611,8 +640,6 @@ public class PnpService {
             jsonArray.put(new JSONObject(message));
             requestBody.put("messages", jsonArray);
         }
-        logger.info("Pnp Push RequestBody : " + requestBody.toString());
-
         logger.info("Pnp Push RequestBody : " + DataUtils.toPrettyJsonUseJackson(requestBody.toString()));
 
         /* 將 headers 跟 body 塞進 HttpEntity 中 */

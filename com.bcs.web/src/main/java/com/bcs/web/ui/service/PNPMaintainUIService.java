@@ -322,7 +322,6 @@ public class PNPMaintainUIService {
             int count = 0;
             for (Object[] objectArray : list) {
                 count++;
-                log.info("c:" + count);
                 List<String> dataList = new ArrayList<>();
                 map.put(Integer.toString(count), dataList);
                 for (int i = 0, max = 18; i < max; i++) {

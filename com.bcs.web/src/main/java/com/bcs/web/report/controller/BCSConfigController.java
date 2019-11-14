@@ -32,138 +32,185 @@ import com.bcs.core.web.ui.page.enums.BcsPageEnum;
 @Controller
 @RequestMapping("/bcs")
 public class BCSConfigController extends BCSBaseController {
-	/** Logger */
-	private static Logger logger = Logger.getLogger(BCSConfigController.class);
-	@Autowired
-	private SystemConfigService systemConfigService;
+    /**
+     * Logger
+     */
+    private static Logger logger = Logger.getLogger(BCSConfigController.class);
+    @Autowired
+    private SystemConfigService systemConfigService;
 
-	@WebServiceLog
-	@RequestMapping(method = RequestMethod.GET, value = "/admin/configListPage")
-	public String configListPage(
-			@CurrentUser CustomUser customUser,  
-			HttpServletRequest request, HttpServletResponse response) {
-		logger.info("configListPage");
-		
-		return BcsPageEnum.ConfigListPage.toString();
-	}
+    @WebServiceLog
+    @RequestMapping(method = RequestMethod.GET, value = "/admin/configListPage")
+    public String configListPage(
+            @CurrentUser CustomUser customUser,
+            HttpServletRequest request, HttpServletResponse response) {
+        logger.info("configListPage");
 
-	@WebServiceLog
-	@RequestMapping(method = RequestMethod.GET, value = "/admin/configCreatePage")
-	public String configCreatePage(
-			@CurrentUser CustomUser customUser,  
-			HttpServletRequest request, HttpServletResponse response) {
-		logger.info("configCreatePage");
-		
-		return BcsPageEnum.ConfigCreatePage.toString();
-	}
-	
-	/**
-	 * 取得參數列表
-	 */
-	@WebServiceLog
-	@RequestMapping(method = RequestMethod.GET, value = "/admin/getConfigList")
-	@ResponseBody
-	public ResponseEntity<?> getConfigList(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		logger.info("getConfigList");
+        return BcsPageEnum.ConfigListPage.toString();
+    }
 
-		try{
-			List<SystemConfig> result = systemConfigService.findAll();
+    @WebServiceLog
+    @RequestMapping(method = RequestMethod.GET, value = "/admin/configCreatePage")
+    public String configCreatePage(
+            @CurrentUser CustomUser customUser,
+            HttpServletRequest request, HttpServletResponse response) {
+        logger.info("configCreatePage");
 
-			return new ResponseEntity<>(result, HttpStatus.OK);
-		}
-		catch(Exception e){
-			logger.error(ErrorRecord.recordError(e));
+        return BcsPageEnum.ConfigCreatePage.toString();
+    }
 
-			if(e instanceof BcsNoticeException){
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			}
-			else{
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-		}
-	}
-	
-	/** 
-	 * 刪除參數
-	 */
-	@WebServiceLog
-	@RequestMapping(method = RequestMethod.DELETE, value = "/admin/deleteConfig/{configId}")
-	@ResponseBody
-	public ResponseEntity<?> deleteConfig(
-			@CurrentUser CustomUser customUser,  
-			HttpServletRequest request, 
-			HttpServletResponse response,
-			@PathVariable String configId) {
-		logger.info("deleteConfig");
-		
-		try {
-			// Check Delete Right
-			boolean isAdmin = customUser.isAdmin();
-			if(isAdmin) {
-				systemConfigService.delete(configId);
-				return new ResponseEntity<>("Delete Success", HttpStatus.OK);
-			} else {
-				throw new BcsNoticeException("此帳號沒有刪除權限");
-			}
-		} catch(Exception e) {
-			logger.error(ErrorRecord.recordError(e));
+    /**
+     * 取得參數列表
+     */
+    @WebServiceLog
+    @RequestMapping(method = RequestMethod.GET, value = "/admin/getConfigList")
+    @ResponseBody
+    public ResponseEntity<?> getConfigList(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        logger.info("getConfigList");
 
-			if(e instanceof BcsNoticeException){
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			}
-			else{
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}	
-		}
-	}
+        try {
+            List<SystemConfig> result = systemConfigService.findAll();
 
-	@WebServiceLog
-	@RequestMapping(method = RequestMethod.GET, value = "/admin/getConfig")
-	@ResponseBody
-	public ResponseEntity<?> getConfig(HttpServletRequest request,HttpServletResponse response) throws Exception {
-		logger.info("getConfig");
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error(ErrorRecord.recordError(e));
 
-		String configId = request.getParameter("configId");
-		
-		SystemConfig systemConfig = systemConfigService.findSystemConfig(configId);
-		
-		return new ResponseEntity<>(systemConfig, HttpStatus.OK);
-	}
-	
-	/**
-	 * 新增與更新圖文訊息
-	 */
-	@WebServiceLog
-	@RequestMapping(method = RequestMethod.POST, value = "/admin/settingConfig", consumes = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public ResponseEntity<?> settingConfig(HttpServletRequest request, HttpServletResponse response,
-			@CurrentUser CustomUser customUser,  
-			@RequestBody SystemConfig systemConfig) throws IOException {
-		try {
-			if(systemConfig == null){
-				throw new BcsNoticeException("設定錯誤");
-			}
-			
-			if(StringUtils.isBlank(systemConfig.getConfigId())){
-				throw new BcsNoticeException("設定參數錯誤");
-			}
-			
-			if(StringUtils.isBlank(systemConfig.getValue())){
-				throw new BcsNoticeException("設定數值錯誤");
-			}
-			
-			systemConfigService.save(systemConfig);
-			
-			return new ResponseEntity<>("save success", HttpStatus.OK);
-		} catch (Exception e) {
-			logger.error(ErrorRecord.recordError(e));
+            if (e instanceof BcsNoticeException) {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+            } else {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+    }
 
-			if(e instanceof BcsNoticeException){
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			}
-			else{
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}	
-		}
-	}
+    /**
+     * 刪除參數
+     */
+    @WebServiceLog
+    @RequestMapping(method = RequestMethod.DELETE, value = "/admin/deleteConfig/{configId}")
+    @ResponseBody
+    public ResponseEntity<?> deleteConfig(
+            @CurrentUser CustomUser customUser,
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable String configId) {
+        logger.info("deleteConfig");
+
+        try {
+            // Check Delete Right
+            boolean isAdmin = customUser.isAdmin();
+            if (isAdmin) {
+                systemConfigService.delete(configId);
+                return new ResponseEntity<>("Delete Success", HttpStatus.OK);
+            } else {
+                throw new BcsNoticeException("此帳號沒有刪除權限");
+            }
+        } catch (Exception e) {
+            logger.error(ErrorRecord.recordError(e));
+
+            if (e instanceof BcsNoticeException) {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+            } else {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+    }
+
+    @WebServiceLog
+    @RequestMapping(method = RequestMethod.GET, value = "/admin/getConfig")
+    @ResponseBody
+    public ResponseEntity<?> getConfig(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        logger.info("getConfig");
+
+        String configId = request.getParameter("configId");
+
+        SystemConfig systemConfig = systemConfigService.findSystemConfig(configId);
+
+        return new ResponseEntity<>(systemConfig, HttpStatus.OK);
+    }
+
+    /**
+     * 新增與更新圖文訊息
+     */
+    @WebServiceLog
+    @RequestMapping(method = RequestMethod.POST, value = "/admin/settingConfig", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> settingConfig(HttpServletRequest request, HttpServletResponse response,
+                                           @CurrentUser CustomUser customUser,
+                                           @RequestBody SystemConfig systemConfig) throws IOException {
+        try {
+            if (systemConfig == null) {
+                throw new BcsNoticeException("設定錯誤");
+            }
+
+            if (StringUtils.isBlank(systemConfig.getConfigId())) {
+                throw new BcsNoticeException("設定參數錯誤");
+            }
+
+            if (StringUtils.isBlank(systemConfig.getValue())) {
+                throw new BcsNoticeException("設定數值錯誤");
+            }
+
+            systemConfigService.save(systemConfig);
+
+            return new ResponseEntity<>("save success", HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error(ErrorRecord.recordError(e));
+
+            if (e instanceof BcsNoticeException) {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+            } else {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+    }
+
+    /**
+     * [{
+     * configId:,
+     * value:,
+     * description:,
+     * modifyTime:
+     * },{
+     * configId:,
+     * value:,
+     * description:,
+     * modifyTime:
+     * },{
+     * configId:,
+     * value:,
+     * description:,
+     * modifyTime:
+     * }]
+     */
+    @WebServiceLog
+    @RequestMapping(method = RequestMethod.POST, value = "/admin/settingConfigList", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> settingConfigList(@CurrentUser CustomUser customUser,
+                                           @RequestBody List<SystemConfig> systemConfigList) {
+        try {
+
+            for (SystemConfig systemConfig : systemConfigList) {
+
+                if (systemConfig == null) {
+                    continue;
+                }
+
+                if (StringUtils.isBlank(systemConfig.getConfigId())) {
+                    continue;
+                }
+
+                if (StringUtils.isBlank(systemConfig.getValue())) {
+                    continue;
+                }
+
+                systemConfigService.save(systemConfig);
+            }
+
+            return new ResponseEntity<>("save success", HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error(ErrorRecord.recordError(e));
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

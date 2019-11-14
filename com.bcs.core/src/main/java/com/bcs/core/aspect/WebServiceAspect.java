@@ -10,6 +10,7 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.MDC;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -19,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Controller參數攔截器
@@ -52,9 +54,14 @@ public class WebServiceAspect {
      */
     @Before("webLog()")
     public void doBefore(JoinPoint joinPoint) {
+        MDC.put("RequestId", UUID.randomUUID().toString());
         log.info("Current Thread Name : {}", Thread.currentThread().getName());
         log.info("Current Thread ID   : {}", Thread.currentThread().getId());
         Thread.currentThread().setName("WebServiceLog-" + Thread.currentThread().getId());
+        /*
+         * Generate Request UUID
+         * Log Pattern Add %X{RequestId}
+         */
 
         startTime = System.currentTimeMillis();
 
@@ -66,7 +73,7 @@ public class WebServiceAspect {
         }
         HttpServletRequest request = attributes.getRequest();
 
-        Map<String, Object> logMap = new LinkedHashMap<>(5);
+        Map<String, Object> logMap = new LinkedHashMap<>(6);
         logMap.put("IP", IpUtil.getIpAddress(request));
         logMap.put("HTTP_METHOD", request.getMethod());
         logMap.put("URL", request.getRequestURL().toString());
@@ -95,7 +102,7 @@ public class WebServiceAspect {
         }
         HttpServletRequest request = attributes.getRequest();
 
-        Map<String, Object> logMap = new LinkedHashMap<>(5);
+        Map<String, Object> logMap = new LinkedHashMap<>(6);
         logMap.put("IP", IpUtil.getIpAddress(request));
         logMap.put("HTTP_METHOD", request.getMethod());
         logMap.put("URL", request.getRequestURL().toString());
@@ -105,6 +112,8 @@ public class WebServiceAspect {
         logMap.put("RESPONSE", ret);
 
         log.info("Response: Cast:{} ms \n{}", (System.currentTimeMillis() - startTime), DataUtils.toPrettyJsonUseJackson(logMap));
+        /* Remove Request UUID  */
+        MDC.clear();
     }
 
     /**

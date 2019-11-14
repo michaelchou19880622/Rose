@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.gson.GsonBuilder;
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,6 +17,7 @@ import java.util.Map;
  *
  * @author Alan
  */
+@Slf4j
 @UtilityClass
 public class DataUtils {
     /**
@@ -45,6 +47,7 @@ public class DataUtils {
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
             return mapper.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
+            log.error("JsonProcessingException", e);
             return obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode());
         }
     }
@@ -63,6 +66,7 @@ public class DataUtils {
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
             return mapper.writeValueAsString(jsonObject);
         } catch (Exception e) {
+            log.error("JsonProcessingException", e);
             return "";
         }
     }

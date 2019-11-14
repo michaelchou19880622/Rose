@@ -4,23 +4,27 @@ import com.bcs.core.spring.ApplicationContextProvider;
 import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.PNP.service.PnpService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.quartz.SchedulerException;
 
 /**
- * @see PnpTaskService#startTask
  * @author ???
+ * @see PnpTaskService#startTask
  */
+@Slf4j
 public class PnpTask implements Job {
-    private static Logger logger = Logger.getLogger(PnpTask.class);
     private PnpService pnpService = ApplicationContextProvider.getApplicationContext().getBean(PnpService.class);
 
     @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {
+    public void execute(JobExecutionContext context) {
+        log.info("Current Thread Name : {}", Thread.currentThread().getName());
+        log.info("Current Thread ID   : {}", Thread.currentThread().getId());
+        Thread.currentThread().setName("Pnp-QuartzScheduler-" + Thread.currentThread().getId());
 
+        log.info("SCHEDULE TIME IS UP!! RUN PUSH TASK!!");
         try {
             PnpMain pnpMain = (PnpMain) context.getScheduler().getContext().get("PnpMain");
 
@@ -34,7 +38,7 @@ public class PnpTask implements Job {
                 pnpService.pushPnpMessage(pnpMain, null, null);
             }
         } catch (SchedulerException e) {
-            logger.error(e);
+            log.error("Exception", e);
         }
     }
 }

@@ -206,7 +206,7 @@ $(function () {
         document.getElementById('bodyDescriptionLabel').style.fontStyle = config.body.description.textStyle;
         document.getElementById('bodyDescriptionLabel').style.textDecoration = config.body.description.textDecoration;
         /* Init Create First Button Row */
-        addDefaultButton();
+//        addDefaultButton();
         triggerFeatureActive();
         saveBeforeTemplateJson = generateTemplateJson();
     }

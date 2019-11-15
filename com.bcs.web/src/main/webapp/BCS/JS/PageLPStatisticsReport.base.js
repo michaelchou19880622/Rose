@@ -181,11 +181,11 @@ $(function() {
                 var resultTr = originalTr.clone(true); //增加一行
                 console.info("resultTr:", resultTr);
                 resultTr.find('.title').html(o.title);
-                if (o.sendStartTime) {
-		              resultTr.find('.modifyTime').html(moment(o.sendStartTime).format('YYYY-MM-DD HH:mm:ss'));
-		        }else{
-		              resultTr.find('.modifyTime').html('-');
-		        }
+//                if (o.sendStartTime) {
+//		              resultTr.find('.modifyTime').html(moment(o.sendStartTime).format('YYYY-MM-DD HH:mm:ss'));
+//		        }else{
+//		              resultTr.find('.modifyTime').html('-');
+//		        }
                 resultTr.find('.modifyUser').html(o.modifyUser);
                 resultTr.find('.departmentFullName').html(o.departmentFullName);
                 resultTr.find('.pccCode').html(o.pccCode);
@@ -195,7 +195,8 @@ $(function() {
 		        resultTr.find('.successfulCount').html(o.successfulCount);
 		        resultTr.find('.failedCount').html(o.failedCount);
 		        resultTr.find('.successfulAmount').html(o.successfulAmount);
-		        resultTr.find('#toDetail').attr('href', bcs.bcsContextPath + '/edit/linePointStatisticsReportDetailPage?linePointMainId=' + o.id +'&startDate=' + startDate + '&endDate=' + endDate);
+		        resultTr.find('#toDetail').attr('href', bcs.bcsContextPath + '/edit/linePointStatisticsReportDetailPage?linePointMainId=' + o.id +'&startDate=' + startDate 
+		        																										+ '&endDate=' + endDate + '&successfulAmount='+o.successfulAmount );
 		        
 		        $('.resultTable').append(resultTr);
         	} 

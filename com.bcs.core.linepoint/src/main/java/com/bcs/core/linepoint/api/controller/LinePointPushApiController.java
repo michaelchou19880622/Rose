@@ -205,7 +205,8 @@ public class LinePointPushApiController {
 
             // ----- set main information -----
             String title = linePointDetail.getCampName();
-            LinePointMain linePointMain = linePointMainService.findByTitle(title);
+            String pccCode = linePointDetail.getPccCode();
+            LinePointMain linePointMain = linePointMainService.findByTitleAndPccCode(title,pccCode);
             if (linePointMain == null) {
                 linePointMain = new LinePointMain();
                 linePointMain.setSendType(LinePointMain.SEND_TYPE_API);
@@ -216,7 +217,8 @@ public class LinePointPushApiController {
                 linePointMain.setSuccessfulAmount(0L);
                 linePointMain.setSuccessfulCount(0L);
                 linePointMain.setFailedCount(0L);
-
+                linePointMain.setPccCode(pccCode);
+                
                 linePointMain.setSerialId("API_" + title);
                 linePointMain.setModifyUser("API");
                 //linePointMain.setSerialId("API無此參數");
@@ -522,7 +524,7 @@ public class LinePointPushApiController {
                 // amount = remainingAmount
                 linePointDetail.setAmount(new Long(remainingAmount));
                 linePointDetail.setBalance(Balance);
-                linePointDetail.setMessage("SUCCESS");
+                linePointDetail.setMessage("SUCCESS CANCEL");
                 linePointDetail.setStatus(LinePointDetail.STATUS_SUCCESS);
                 linePointDetail.setSendTime(new Date());
                 linePointDetailService.save(linePointDetail);

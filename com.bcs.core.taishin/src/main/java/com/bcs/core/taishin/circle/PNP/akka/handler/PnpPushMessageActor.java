@@ -31,7 +31,7 @@ public class PnpPushMessageActor extends UntypedActor {
             PnpMain pnpMain = (PnpMain) object;
             checkSendTypeThenDoSomething(pnpMain);
         } catch (Exception e) {
-            log.error("{}", e);
+            log.error("Exception", e);
         }
     }
 

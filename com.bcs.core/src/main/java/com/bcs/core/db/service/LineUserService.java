@@ -72,6 +72,16 @@ public class LineUserService {
     }
 
     /**
+     * Find LineUID List by Phone Number List
+     *
+     * @param phoneNumberList the phoneNumberList
+     * @return Object[] 0:Phone Number 1:Line UID
+     */
+    public List<LineUser> findByMobileIn(List<String> phoneNumberList) {
+        return lineUserRepository.findByMobileIn(phoneNumberList);
+    }
+
+    /**
      * Find by mid line user.
      *
      * @param mid the mid

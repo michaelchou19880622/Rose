@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
 import java.util.List;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -45,7 +44,7 @@ public class PnpPNPMsgService {
     private ScheduledFuture<?> scheduledFuture;
 
     @Autowired
-    public PnpPNPMsgService(PnpAkkaService pnpAkkaService, PnpRepositoryCustom pnpRepositoryCustom){
+    public PnpPNPMsgService(PnpAkkaService pnpAkkaService, PnpRepositoryCustom pnpRepositoryCustom) {
         this.pnpAkkaService = pnpAkkaService;
         this.pnpRepositoryCustom = pnpRepositoryCustom;
     }
@@ -67,20 +66,17 @@ public class PnpPNPMsgService {
             logger.error(" PNPSendMsgService TimeUnit error :" + time + unit);
             return;
         }
-        scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                // 排程工作
-                logger.info(" PnpSendMsgService startCircle....");
+        scheduledFuture = scheduler.scheduleAtFixedRate(() -> {
+            // 排程工作
+            logger.info(" PnpSendMsgService startCircle....");
 
-                /* pnp.big switch = 0(停止排程) 1(停止排程，並轉發SMS) 其他(正常運行) */
-                int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true, false);
-                /* 大流程關閉時不做 */
-                if (1 == bigSwitch || 0 == bigSwitch) {
-                    return;
-                }
-                sendingPnpMain();
+            /* pnp.big switch = 0(停止排程) 1(停止排程，並轉發SMS) 其他(正常運行) */
+            int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true, false);
+            /* 大流程關閉時不做 */
+            if (1 == bigSwitch || 0 == bigSwitch) {
+                return;
             }
+            sendingPnpMain();
         }, 0, time, TimeUnit.valueOf(unit));
 
     }

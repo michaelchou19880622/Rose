@@ -1,5 +1,6 @@
 package com.bcs.core.taishin.circle.PNP.scheduler;
 
+import com.bcs.core.db.entity.LineUser;
 import com.bcs.core.db.service.LineUserService;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.resource.CoreConfigReader;
@@ -11,7 +12,6 @@ import com.bcs.core.taishin.circle.PNP.ftp.PNPFTPType;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.log4j.Logger;
-import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -59,11 +59,8 @@ public class PnpPushMsgService {
 
     /**
      * Start Schedule
-     *
-     * @throws SchedulerException   the scheduler exception
-     * @throws InterruptedException the interrupted exception
      */
-    public void startCircle() throws SchedulerException, InterruptedException {
+    public void startCircle() {
 
         String unit = CoreConfigReader.getString(CONFIG_STR.PNP_SCHEDULE_UNIT, true, false);
         int time = CoreConfigReader.getInteger(CONFIG_STR.PNP_SCHEDULE_TIME, true, false);
@@ -131,9 +128,8 @@ public class PnpPushMsgService {
         }
 
         /* 透過電話號碼清單查尋UID */
-        List<Object[]> uidPhoneList = lineUserService.findMidsByMobileIn(phoneNumberList);
-        Map<String, String> uidPhoneNumberMap = generatePhoneNumberUidMap(uidPhoneList);
-
+        List<LineUser> lineUserList = lineUserService.findByMobileIn(phoneNumberList);
+        Map<String, String> uidPhoneNumberMap = generatePhoneNumberUidMapWithoutBlock(lineUserList);
         for (int i = 0; i < details.size(); i++) {
             PnpDetail detail = (PnpDetail) details.get(i);
             String uid = setUidByPhoneNumberMap(uidPhoneNumberMap, detail);
@@ -159,13 +155,16 @@ public class PnpPushMsgService {
     /**
      * 製作電話號碼UID對應表
      *
-     * @param uidAndPhoneList Uid And Phone Number List
+     * @param lineUserList line User List
      * @return Map Key: Phone Number, Value: Uid
      */
-    private Map<String, String> generatePhoneNumberUidMap(List<Object[]> uidAndPhoneList) {
-        Map<String, String> uidPhoneMap = new HashMap<>(uidAndPhoneList.size());
-        for (Object[] midPhone : uidAndPhoneList) {
-            uidPhoneMap.put((String) midPhone[0], (String) midPhone[1]);
+    private Map<String, String> generatePhoneNumberUidMapWithoutBlock(List<LineUser> lineUserList) {
+        Map<String, String> uidPhoneMap = new HashMap<>(lineUserList.size());
+        for (LineUser lineUser : lineUserList) {
+            if (LineUser.STATUS_BLOCK.equals(lineUser.getStatus())) {
+                continue;
+            }
+            uidPhoneMap.put(lineUser.getMobile(), lineUser.getMid());
         }
         return uidPhoneMap;
     }

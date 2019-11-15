@@ -21,14 +21,21 @@ public class ReceivingMsgHandlerMaster extends UntypedActor {
     public final static AtomicLong taskCount = new AtomicLong(0L);
     public static Date updateDate;
 
+    /**
+     * Event Type(PNP Delivery)
+     */
     private final ActorRef routerEventTypeActor;
     private final ActorRef routerMsgReceiveActor;
+
+    /**
+     * Line User Status Update
+     */
     private final ActorRef routerMsgReceiveOpActor;
 
     public ReceivingMsgHandlerMaster() {
-        routerEventTypeActor = new AkkaRouterFactory<ReceivingMsgHandlerEventType>(getContext(), ReceivingMsgHandlerEventType.class, true).routerActor;
-        routerMsgReceiveActor = new AkkaRouterFactory<ReceivingMsgHandlerMsgReceive>(getContext(), ReceivingMsgHandlerMsgReceive.class, true).routerActor;
-        routerMsgReceiveOpActor = new AkkaRouterFactory<ReceivingMsgHandlerMsgReceiveOp>(getContext(), ReceivingMsgHandlerMsgReceiveOp.class, true).routerActor;
+        routerEventTypeActor = new AkkaRouterFactory<>(getContext(), ReceivingMsgHandlerEventType.class, true).routerActor;
+        routerMsgReceiveActor = new AkkaRouterFactory<>(getContext(), ReceivingMsgHandlerMsgReceive.class, true).routerActor;
+        routerMsgReceiveOpActor = new AkkaRouterFactory<>(getContext(), ReceivingMsgHandlerMsgReceiveOp.class, true).routerActor;
     }
 
     @Override

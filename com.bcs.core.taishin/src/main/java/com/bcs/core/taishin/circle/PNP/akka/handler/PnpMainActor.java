@@ -33,9 +33,9 @@ public class PnpMainActor extends UntypedActor {
     private final ActorRef updateStatusRouterActor;
 
     private PnpMainActor() {
-        pushMessageRouterActor = new AkkaRouterFactory<PnpPushMessageActor>(getContext(), PnpPushMessageActor.class, true).routerActor;
-        pnpMessageRouterActor = new AkkaRouterFactory<PnpMessageActor>(getContext(), PnpMessageActor.class, true).routerActor;
-        updateStatusRouterActor = new AkkaRouterFactory<PnpUpdateStatusActor>(getContext(), PnpUpdateStatusActor.class, true).routerActor;
+        pushMessageRouterActor = new AkkaRouterFactory<>(getContext(), PnpPushMessageActor.class, true).routerActor;
+        pnpMessageRouterActor = new AkkaRouterFactory<>(getContext(), PnpMessageActor.class, true).routerActor;
+        updateStatusRouterActor = new AkkaRouterFactory<>(getContext(), PnpUpdateStatusActor.class, true).routerActor;
     }
 
     @Override

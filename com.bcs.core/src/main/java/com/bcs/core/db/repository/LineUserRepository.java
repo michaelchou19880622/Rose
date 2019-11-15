@@ -56,6 +56,16 @@ public interface LineUserRepository extends EntityRepository<LineUser, String>, 
     List<Object[]> findMidsByMobileIn(List<String> phoneNumberList);
 
     /**
+     * Find LineUser List by Phone Number List
+     *
+     * @param phoneNumberList the phoneNumberList
+     * @return LineUser List
+     */
+    @Query
+    List<LineUser> findByMobileIn(List<String> phoneNumberList);
+
+
+    /**
      * Find mid by mid in and active list.
      *
      * @param mids the mids

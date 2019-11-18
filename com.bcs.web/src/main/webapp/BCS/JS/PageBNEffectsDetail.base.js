@@ -3,8 +3,8 @@ $(function(){
 	var date = null, title = null, sendType = null;
 	var startDate = $.urlParam("startDate");
 	var endDate = $.urlParam("endDate");
-	var page = $.urlParam("page");
 	var page = 1, totalPages = 0;
+	var pages = $.urlParam("pages");
 	var firstFatch = true;
 	
 	$('.btn.prev').click(function(){
@@ -13,7 +13,8 @@ $(function(){
 			loadData();
 			// set pageAndTotalPage
 			//console.info(page + '/' + totalPages);
-			$('#pageAndTotalPages').text(page + '/' + totalPages);
+			$('#page').val(page);
+			$('#TotalPages').text('/' + totalPages);
 		}
 	});
 	$('.btn.next').click(function(){
@@ -22,7 +23,23 @@ $(function(){
 			loadData();
 			// set pageAndTotalPage
 			console.info(page + '/' + totalPages);
-			$('#pageAndTotalPages').text(page + '/' + totalPages);
+			$('#page').val(page);
+			$('#TotalPages').text('/' + totalPages);
+		}
+	});
+	
+	$('#jumpPage').click(function(){
+		page = $('#page').val();
+		if(page > totalPages) {
+			alert("欲選取頁數大於總頁數")
+		}else if(page == 0){
+			alert("欲選取頁數不可為0")
+		}else{
+			loadData();
+			// set pageAndTotalPage
+			console.info(page + '/' + totalPages);
+			$('#page').val(page);
+			$('#TotalPages').text('/' + totalPages);
 		}
 	});
 	
@@ -37,7 +54,7 @@ $(function(){
 		sendType = $.urlParam("sendType");
 		
 		// set back button
-		$('.btn_add.back').attr('href', '../admin/reportBNEffectsPage?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page);
+		$('.btn_add.back').attr('href', '../admin/reportBNEffectsPage?startDate=' + startDate + '&endDate=' + endDate + '&pages=' + pages);
 
 		// set ExportButton
 		var exportUrl = '../edit/exportToExcelForBNPushApiEffectsDetail?date=' + date + '&title=' + templateName + '&sendType=' + sendType;
@@ -103,7 +120,8 @@ $(function(){
 			// set pageAndTotalPage
 			page = 1;
 			console.info(page + '/' + totalPages);
-			$('#pageAndTotalPages').text(page + '/' + totalPages);
+			$('#page').val(page);
+			$('#TotalPages').text('/' + totalPages);
 		}).fail(function(response){
 			console.info(response);
 			$.FailResponse(response);

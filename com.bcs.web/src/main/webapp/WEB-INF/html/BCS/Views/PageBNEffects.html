@@ -45,8 +45,12 @@
                             <ul>
                                 <li class="CHLeftBtn">
 	                                <input class="btn prev" type="button" value="<" style="cursor: pointer;">
-	                                <span id="pageAndTotalPages">1/0</span>
+	                                <span style=" width : 25px; valign:center">
+			                        <input id="page" type="text" style=" width : 25px; valign:center" onkeyup="value=value.replace(/[^\d]/g,'') ">
+			                    	</span>
+	                                <span id="TotalPages">/0</span>
 	                                <input class="btn next" type="button" value=">" style="cursor: pointer;">
+			                    	<input id="jumpPage" type="button" value="跳頁"   style="cursor: pointer;" >
                                 </li>
                             </ul>
                         </div>
@@ -54,8 +58,7 @@
 	                    <div class="CHRight">
 	                   		<a class="btn_add exportToExcel" style="cursor: pointer; padding: 7px 12px; text-decoration: none">匯出 EXCEL</a>
 	                   	</div>
-                    </div>
-                    
+                    </div >
                     <p class="MdTxtNotice01 MdAC pad10"></p>
                     <div class="mainFrame" style="border: 0">
                         <table border="1" id="tableBody">

@@ -1,11 +1,11 @@
 $(function(){
 	var originalTr = {};
 	var sumTr = {};
-	var startDate = null, endDate = null;
+	var startDate = null, endDate = null , pages = null;
 	var hasData = false;
 	var page = 1, totalPages = 0;
 	var firstFatch = true;
-	$('.page').removeClass();
+	//$('.page').removeClass();
 	startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
 	endDate = moment(new Date()).format('YYYY-MM-DD');
 	
@@ -15,8 +15,9 @@ $(function(){
 	if($.urlParam("endDate")){
 		endDate = $.urlParam("endDate");
 	}
-	if($.urlParam("page")){
-		page = $.urlParam("page");
+	if($.urlParam("pages")){
+		page = $.urlParam("pages");
+		$('#page').val(page);
 	}
 	
 	
@@ -42,7 +43,8 @@ $(function(){
 			page--;
 			loadData();
 			// set pageAndTotalPage
-			$('#pageAndTotalPages').text(page + '/' + totalPages);
+			$('#page').val(page);
+			$('#TotalPages').text('/' + totalPages);
 		}
 	});
 	$('.btn.next').click(function(){
@@ -50,7 +52,23 @@ $(function(){
 			page++;
 			loadData();
 			// set pageAndTotalPage
-			$('#pageAndTotalPages').text(page + '/' + totalPages);
+			$('#page').val(page);
+			$('#TotalPages').text('/' + totalPages);
+		}
+	});
+	
+	$('#jumpPage').click(function(){
+		page = $('#page').val();
+		if(page > totalPages) {
+			alert("欲選取頁數大於總頁數")
+		}else if(page == 0){
+			alert("欲選取頁數不可為0")
+		}else{
+			loadData();
+			// set pageAndTotalPage
+			console.info(page + '/' + totalPages);
+			$('#page').val(page);
+			$('#TotalPages').text('/' + totalPages);
 		}
 	});
 	
@@ -65,10 +83,10 @@ $(function(){
 			alert('請填寫結束日期！');
 			return false;
 		}
-		if(!moment(startDate).add(31, 'days').isAfter(moment(endDate))){
-			alert('起始日期與結束日期之間不可相隔超過一個月！');
-			return false;
-		}
+//		if(!moment(startDate).add(31, 'days').isAfter(moment(endDate))){
+//			alert('起始日期與結束日期之間不可相隔超過一個月！');
+//			return false;
+//		}
 		if(moment(startDate).isAfter(moment(endDate))){
 			alert('起始日期不可大於結束日期！');
 			return false;
@@ -97,7 +115,6 @@ $(function(){
 			firstFatch = false;
 			setTotal();
 		}
-		
 		$.ajax({
 			type : 'GET',
 			url : bcs.bcsContextPath + '/edit/getBNEffectsList?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page
@@ -119,7 +136,7 @@ $(function(){
 					
 					var encodeTitle = encodeURI(valueObj[1]);
 					var link = bcs.bcsContextPath + '/admin/reportBNEffectsDetailPage?date=' + valueObj[0] + '&templateName=' + valueObj[2] + '&sendType=' + valueObj[3]
-																				     +'&startDate=' + startDate + '&endDate=' + endDate + '&page=' + page;
+																				     +'&startDate=' + startDate + '&endDate=' + endDate + '&pages=' + page;
 					
 					rowDOM.find('.sendDate').html('<a>' + valueObj[0] + '</a>').end().find('a').attr('href', link);
 					rowDOM.find('.templateType').text(valueObj[1]);
@@ -165,9 +182,10 @@ $(function(){
 			totalPages = parseInt(response['msg']);
 			console.info('totalPages1: ', totalPages);
 			// set pageAndTotalPage
-			page = 1;
+			
 			console.info(page + '/' + totalPages);
-			$('#pageAndTotalPages').text(page + '/' + totalPages);
+			$('#page').val(page);
+			$('#TotalPages').text('/' + totalPages);
 		}).fail(function(response){
 			console.info(response);
 			$.FailResponse(response);

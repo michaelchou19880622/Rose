@@ -66,12 +66,13 @@ public class ExportToExcelForBillingNoticePushBNApiEffects {
 				row.createCell(2).setCellValue(list.get(2));
 				row.createCell(3).setCellValue(list.get(3));
 				row.createCell(4).setCellValue(list.get(4));
-				long total =  Long.parseLong(list.get(3).toString()) +  Long.parseLong(list.get(4).toString());
-				row.createCell(5).setCellValue(String.valueOf(total));
+				row.createCell(5).setCellValue(list.get(5));
+				long total =  Long.parseLong(list.get(4).toString()) +  Long.parseLong(list.get(5).toString());
+				row.createCell(6).setCellValue(String.valueOf(total));
 				
 				rowNumber += 1;
-				sumSuccess += Long.parseLong(list.get(3).toString());
-				sumFail += Long.parseLong(list.get(4).toString());
+				sumSuccess += Long.parseLong(list.get(4).toString());
+				sumFail += Long.parseLong(list.get(5).toString());
 				if(rowNumber > 1048500) { // RowLimit = 1048576 
 					sheet = this.createBNPushApiEffectsSheet(workbook, sheetNumber++);
 					rowNumber = 1;
@@ -82,9 +83,10 @@ public class ExportToExcelForBillingNoticePushBNApiEffects {
 			sumRow.createCell(0).setCellValue("總計");
 			sumRow.createCell(1).setCellValue("");
 			sumRow.createCell(2).setCellValue("");
-			sumRow.createCell(3).setCellValue(String.valueOf(sumSuccess));
-			sumRow.createCell(4).setCellValue(String.valueOf(sumFail));
-			sumRow.createCell(5).setCellValue(String.valueOf(sumFail + sumSuccess));
+			sumRow.createCell(3).setCellValue("");
+			sumRow.createCell(4).setCellValue(String.valueOf(sumSuccess));
+			sumRow.createCell(5).setCellValue(String.valueOf(sumFail));
+			sumRow.createCell(6).setCellValue(String.valueOf(sumFail + sumSuccess));
 			
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
@@ -98,11 +100,12 @@ public class ExportToExcelForBillingNoticePushBNApiEffects {
 			// first row
 			Row row = sheet.createRow(0);
 			row.createCell(0).setCellValue("發送時間");
-			row.createCell(1).setCellValue("產品名稱");
-			row.createCell(2).setCellValue("發送類型");
-			row.createCell(3).setCellValue("發送成功數");
-			row.createCell(4).setCellValue("發送失敗數");
-			row.createCell(5).setCellValue("發送數量");
+			row.createCell(1).setCellValue("推播類型");
+			row.createCell(2).setCellValue("樣板名稱");
+			row.createCell(3).setCellValue("發送類型");
+			row.createCell(4).setCellValue("發送成功數");
+			row.createCell(5).setCellValue("發送失敗數");
+			row.createCell(6).setCellValue("發送數量");
 			// column width
 			sheet.setColumnWidth(0, 13*256);
 			sheet.setColumnWidth(1, 50*256);
@@ -175,11 +178,11 @@ public class ExportToExcelForBillingNoticePushBNApiEffects {
 		
 			// first row
 			Row row = sheet.createRow(0);
-			row.createCell(0).setCellValue("產品名稱");
-			row.createCell(1).setCellValue("建立時間");
-			row.createCell(2).setCellValue("修改時間");
-			row.createCell(3).setCellValue("發送時間");
-			row.createCell(4).setCellValue("發送類型");
+			row.createCell(0).setCellValue("發送時間");
+			row.createCell(1).setCellValue("推播時間");
+			row.createCell(2).setCellValue("訊息標題");
+			row.createCell(3).setCellValue("訊息內容");
+			row.createCell(4).setCellValue("發送結果");
 			row.createCell(5).setCellValue("UID");
 			
 			// column width

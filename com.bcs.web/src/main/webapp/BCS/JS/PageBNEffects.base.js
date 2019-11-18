@@ -5,6 +5,20 @@ $(function(){
 	var hasData = false;
 	var page = 1, totalPages = 0;
 	var firstFatch = true;
+	$('.page').removeClass();
+	startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
+	endDate = moment(new Date()).format('YYYY-MM-DD');
+	
+	if($.urlParam("startDate")){
+		startDate = $.urlParam("startDate");
+	}
+	if($.urlParam("endDate")){
+		endDate = $.urlParam("endDate");
+	}
+	if($.urlParam("page")){
+		page = $.urlParam("page");
+	}
+	
 	
 	$(".datepicker").datepicker({
 		 maxDate : 0,
@@ -104,19 +118,20 @@ $(function(){
 					console.info('valueObj : ', valueObj);
 					
 					var encodeTitle = encodeURI(valueObj[1]);
-					var link = bcs.bcsContextPath + '/admin/reportBNEffectsDetailPage?date=' + valueObj[0] + '&title=' + encodeTitle + '&sendType=' + valueObj[2];
+					var link = bcs.bcsContextPath + '/admin/reportBNEffectsDetailPage?date=' + valueObj[0] + '&templateName=' + valueObj[2] + '&sendType=' + valueObj[3]
+																				     +'&startDate=' + startDate + '&endDate=' + endDate + '&page=' + page;
 					
 					rowDOM.find('.sendDate').html('<a>' + valueObj[0] + '</a>').end().find('a').attr('href', link);
-					rowDOM.find('.title').text(valueObj[1]);
-					rowDOM.find('.sendType').text(valueObj[2]);
-					rowDOM.find('.completeCount').text(valueObj[3]);
-					rowDOM.find('.failCount').text(valueObj[4]);
-					rowDOM.find('.total').text( parseInt(valueObj[3], 10) +  parseInt(valueObj[4], 10));
-					
+					rowDOM.find('.templateType').text(valueObj[1]);
+					rowDOM.find('.templateName').text(valueObj[2]);
+					rowDOM.find('.sendType').text(valueObj[3]);
+					rowDOM.find('.completeCount').text(valueObj[4]);
+					rowDOM.find('.failCount').text(valueObj[5]);
+					rowDOM.find('.total').text( parseInt(valueObj[4], 10) +  parseInt(valueObj[5], 10));
 					rowDOM.appendTo($('#tableBody'));
 					hasSum  = true;
-					completeSum = parseInt(valueObj[3], 10) + parseInt(completeSum, 10);
-					failSum = parseInt(valueObj[4], 10) + parseInt(failSum, 10);
+					completeSum = parseInt(valueObj[4], 10) + parseInt(completeSum, 10);
+					failSum = parseInt(valueObj[5], 10) + parseInt(failSum, 10);
 				}
 				
 				if (hasSum){
@@ -167,12 +182,12 @@ $(function(){
 		sumTr = $('.sumTemplate').clone(true);
 		$('.sumTemplate').remove();
 		
-		startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
-		endDate = moment(new Date()).format('YYYY-MM-DD');
+//		startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
+//		endDate = moment(new Date()).format('YYYY-MM-DD');
 		$('#startDate').val(startDate);
 		$('#endDate').val(endDate);
 	}
 	
 	initial();
-	
+	loadData();
 });

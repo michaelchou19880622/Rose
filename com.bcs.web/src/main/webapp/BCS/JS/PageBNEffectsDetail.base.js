@@ -1,6 +1,9 @@
 $(function(){
 	var originalTr = {};
 	var date = null, title = null, sendType = null;
+	var startDate = $.urlParam("startDate");
+	var endDate = $.urlParam("endDate");
+	var page = $.urlParam("page");
 	var page = 1, totalPages = 0;
 	var firstFatch = true;
 	
@@ -30,14 +33,14 @@ $(function(){
 		
 		// params
 		date = $.urlParam("date");
-		title = $.urlParam("title");
+		templateName = $.urlParam("templateName");
 		sendType = $.urlParam("sendType");
 		
 		// set back button
-		$('.btn_add.back').attr('href', '../admin/reportBNEffectsPage');
+		$('.btn_add.back').attr('href', '../admin/reportBNEffectsPage?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page);
 
 		// set ExportButton
-		var exportUrl = '../edit/exportToExcelForBNPushApiEffectsDetail?date=' + date + '&title=' + title + '&sendType=' + sendType;
+		var exportUrl = '../edit/exportToExcelForBNPushApiEffectsDetail?date=' + date + '&title=' + templateName + '&sendType=' + sendType;
 		$('.btn_add.exportToExcel').attr('href', exportUrl);
 		
 		// set table
@@ -56,7 +59,7 @@ $(function(){
 		
 		$.ajax({
 			type : "GET",
-			url : '../edit/getBNEffectsDetailList?date=' + date + '&title=' + title + '&sendType=' + sendType + '&page=' + page
+			url : '../edit/getBNEffectsDetailList?date=' + date + '&templateName=' + templateName + '&sendType=' + sendType + '&page=' + page
 		}).success(function(response){
 			if(response.length === 0) {
 				//$('<tr class="dataTemplate"><td colspan="4">此日期區間無任何資料</td></tr>').appendTo($('#tableBody'));
@@ -69,10 +72,10 @@ $(function(){
 					console.info('key title: ', key);
 					console.info('valueObj : ', valueObj);
 					
-					rowDOM.find('.title').text(valueObj[0]);
-					rowDOM.find('.createTime').text(moment(valueObj[1]).format('YYYY-MM-DD HH:mm:ss'));
-					rowDOM.find('.modifyTime').text(moment(valueObj[2]).format('YYYY-MM-DD HH:mm:ss'));
-					rowDOM.find('.sendTime').text(moment(valueObj[3]).format('YYYY-MM-DD HH:mm:ss'));
+					rowDOM.find('.createTime').text(moment(valueObj[0]).format('YYYY-MM-DD HH:mm:ss'));
+					rowDOM.find('.sendType').text(valueObj[1]);
+					rowDOM.find('.messageTitle').text(valueObj[2]);
+					rowDOM.find('.messageText').text(valueObj[3]);
 					rowDOM.find('.status').text(valueObj[4]);
 					rowDOM.find('.uid').text(valueObj[5]);
 					
@@ -92,7 +95,7 @@ $(function(){
 		$('.LyMain').block($.BCS.blockMsgRead);
 		$.ajax({
 			type : "GET",
-			url : bcs.bcsContextPath + '/edit/getBNEffectsDetailTotalPages?date=' + date + '&title=' + title + '&sendType=' + sendType
+			url : bcs.bcsContextPath + '/edit/getBNEffectsDetailTotalPages?date=' + date + '&templateName=' + templateName + '&sendType=' + sendType
 		}).success(function(response){
 			console.info('msg1: ', response['msg']);
 			totalPages = parseInt(response['msg']);

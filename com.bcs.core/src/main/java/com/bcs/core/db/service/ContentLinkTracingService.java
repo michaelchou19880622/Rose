@@ -36,21 +36,6 @@ public class ContentLinkTracingService {
 //				});
 	}
 	
-	@PreDestroy
-	public void cleanUp() {
-		logger.info("[DESTROY] ContentLinkTracingService cleaning up...");
-		try{
-//			if(dataCache != null){
-//				dataCache.invalidateAll();
-//				dataCache = null;
-//			}
-		}
-		catch(Throwable e){}
-		
-		System.gc();
-		logger.info("[DESTROY] ContentLinkTracingService destroyed.");
-	}
-	
 //	private boolean notNull(ContentLinkTracing result){
 //		if(result != null && StringUtils.isNotBlank(result.getLinkId()) && !"-".equals(result.getLinkId())){
 //			return true;

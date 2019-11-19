@@ -264,13 +264,4 @@ public class InitController {
             logger.error(e);
         }
     }
-
-    /**
-     * cleanUp
-     */
-    @PreDestroy
-    public void cleanUp() {
-        logger.info("[DESTROY] InitController cleaning up...");
-        logger.info("[DESTROY] InitController destroyed.");
-    }
 }

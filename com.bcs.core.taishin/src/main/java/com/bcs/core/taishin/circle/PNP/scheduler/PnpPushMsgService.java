@@ -9,9 +9,10 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpRepositoryCustom;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFTPType;
+import com.bcs.core.utils.DataUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,10 +36,9 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Kenneth
  */
+@Slf4j
 @Service
 public class PnpPushMsgService {
-
-    private static Logger logger = Logger.getLogger(PnpPushMsgService.class);
 
     private PnpAkkaService pnpAkkaService;
     private PnpRepositoryCustom pnpRepositoryCustom;
@@ -65,17 +65,17 @@ public class PnpPushMsgService {
         String unit = CoreConfigReader.getString(CONFIG_STR.PNP_SCHEDULE_UNIT, true, false);
         int time = CoreConfigReader.getInteger(CONFIG_STR.PNP_SCHEDULE_TIME, true, false);
         if (time == -1) {
-            logger.error("PNPSendMsgService TimeUnit error :" + time + unit);
+            log.error("PNPSendMsgService TimeUnit error :" + time + unit);
             return;
         }
         scheduledFuture = scheduler.scheduleAtFixedRate(() -> {
             Thread.currentThread().setName("PNP-BC-Scheduled-" + Thread.currentThread().getId());
 
-            logger.info("PnpSendMsgService startCircle....");
+            log.info("PnpSendMsgService startCircle....");
             //#.pnp.big switch = 0(停止排程) 1(停止排程，並轉發SMS) 其他(正常運行)
             int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true, false);
             if (0 == bigSwitch || 1 == bigSwitch) {
-                logger.warn("PNP_BIG_SWITCH : " + bigSwitch + "PnpPushMsgService stop sending...");
+                log.warn("PNP_BIG_SWITCH : " + bigSwitch + "PnpPushMsgService stop sending...");
                 return;
             }
             sendingMain();
@@ -89,28 +89,28 @@ public class PnpPushMsgService {
     private void sendingMain() {
         String procApName = pnpAkkaService.getProcessApName();
         for (PNPFTPType type : PNPFTPType.values()) {
-            logger.info(String.format("BC Push ProcApName %s, Type: %s", procApName, type));
+            log.info(String.format("BC Push ProcApName %s, Type: %s", procApName, type));
             try {
                 Set<Long> allMainIds = new HashSet<>();
                 List<? super PnpDetail> details = pnpRepositoryCustom.updateStatusByStageBc(type, procApName, allMainIds);
                 if (details.isEmpty()) {
-                    logger.info("details not data type:" + type.toString());
+                    log.info("details not data type:" + type.toString());
                     continue;
                 }
-                logger.info("details has data type:" + type.toString());
+                log.info("details has data type:" + type.toString());
 
                 List<? super PnpDetail> details2 = findDetailUid(details);
                 Long[] mainIds = allMainIds.toArray(new Long[0]);
 
                 PnpMain pnpMain = pnpRepositoryCustom.findMainByMainId(type, mainIds[0]);
-                logger.info("Sending handle Main:" + pnpMain.getOrigFileName() + " type:" + type);
+                log.info("Sending handle Main:" + pnpMain.getOrigFileName() + " type:" + type);
                 pnpMain.setPnpDetails(details2);
-                logger.info("Tell Akka Send BC!!");
+                log.info("Tell Akka Send BC!!");
                 pnpAkkaService.tell(pnpMain);
 
             } catch (Exception e) {
-                logger.error(e);
-                logger.error(" pnpMain type :" + type + " sendingMain error:" + e.getMessage());
+                log.error("Exception", e);
+                log.error(" pnpMain type :" + type + " sendingMain error:" + e.getMessage());
             }
         }
     }
@@ -121,35 +121,60 @@ public class PnpPushMsgService {
      */
     private List<? super PnpDetail> findDetailUid(List<? super PnpDetail> details) {
         List<String> phoneNumberList = addAllFormatPhoneNumberToList(details);
+        log.info("phoneNumberList : {}", DataUtils.toPrettyJsonUseJackson(phoneNumberList));
 
         /* Return Original Object */
-        if (CollectionUtils.isNotEmpty(phoneNumberList)) {
+        if (CollectionUtils.isEmpty(phoneNumberList)) {
             return details;
         }
 
         /* 透過電話號碼清單查尋UID */
         List<LineUser> lineUserList = lineUserService.findByMobileIn(phoneNumberList);
+        log.info("LineUserList:{}", DataUtils.toPrettyJsonUseJackson(lineUserList));
         Map<String, String> uidPhoneNumberMap = generatePhoneNumberUidMapWithoutBlock(lineUserList);
+        Map<String, String> phoneNumberStatusMap = generatePhoneNumberStatusMap(lineUserList);
+        log.info("uidPhoneNumberMap   :{}", DataUtils.toPrettyJsonUseJackson(uidPhoneNumberMap));
+        log.info("phoneNumberStatusMap:{}", DataUtils.toPrettyJsonUseJackson(phoneNumberStatusMap));
         for (int i = 0; i < details.size(); i++) {
             PnpDetail detail = (PnpDetail) details.get(i);
-            String uid = setUidByPhoneNumberMap(uidPhoneNumberMap, detail);
-            detail.setUid(uid);
+            log.info("Phone Number : {}", detail.getPhone());
+            detail.setUid(getUidByPhoneNumberMap(uidPhoneNumberMap, detail.getPhone()));
+            detail.setBindStatus(getBindStatusByPhoneNumber(phoneNumberStatusMap, detail.getPhone()));
             details.set(i, detail);
         }
         return details;
+    }
+
+    private Map<String, String> generatePhoneNumberStatusMap(List<LineUser> lineUserList) {
+        Map<String, String> map = new HashMap<>(lineUserList.size());
+        for (LineUser lineUser : lineUserList) {
+            map.put(lineUser.getMobile(), lineUser.getStatus());
+        }
+        return map;
+    }
+
+    /**
+     * Set Uid By Phone Number Map
+     *
+     * @param phoneNumberStatusMap phoneNumberStatusMap
+     * @param phoneNumber          phoneNumber
+     * @return UID
+     */
+    private String getBindStatusByPhoneNumber(Map<String, String> phoneNumberStatusMap, String phoneNumber) {
+        String phoneE164 = formatPhoneNumberToE164(phoneNumber);
+        return phoneNumberStatusMap.containsKey(phoneE164) ? phoneNumberStatusMap.get(phoneE164) : phoneNumberStatusMap.get(phoneNumber);
     }
 
     /**
      * Set Uid By Phone Number Map
      *
      * @param uidPhoneNumberMap uidPhoneNumberMap
-     * @param detail            detail
+     * @param phoneNumber       phoneNumber
      * @return UID
      */
-    private String setUidByPhoneNumberMap(Map<String, String> uidPhoneNumberMap, PnpDetail detail) {
-        String phone = detail.getPhone();
-        String phoneE164 = formatPhoneNumberToE164(phone);
-        return uidPhoneNumberMap.containsKey(phoneE164) ? uidPhoneNumberMap.get(phoneE164) : uidPhoneNumberMap.get(phone);
+    private String getUidByPhoneNumberMap(Map<String, String> uidPhoneNumberMap, String phoneNumber) {
+        String phoneE164 = formatPhoneNumberToE164(phoneNumber);
+        return uidPhoneNumberMap.containsKey(phoneE164) ? uidPhoneNumberMap.get(phoneE164) : uidPhoneNumberMap.get(phoneNumber);
     }
 
     /**
@@ -211,11 +236,11 @@ public class PnpPushMsgService {
     public void destroy() {
         if (scheduledFuture != null) {
             scheduledFuture.cancel(true);
-            logger.info(" PnpPushMsgService cancel....");
+            log.info(" PnpPushMsgService cancel....");
         }
 
         if (scheduler != null && !scheduler.isShutdown()) {
-            logger.info(" PnpPushMsgService shutdown....");
+            log.info(" PnpPushMsgService shutdown....");
             scheduler.shutdown();
         }
     }

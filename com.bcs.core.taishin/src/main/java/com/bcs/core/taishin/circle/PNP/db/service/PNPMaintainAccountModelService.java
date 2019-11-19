@@ -73,7 +73,7 @@ public class PNPMaintainAccountModelService {
     @Cacheable
     private String columnSpecialProcess(int columnIndex, String value) {
         /* 資料特殊處理 */
-        log.info("{},{}", columnIndex, value);
+        log.debug("Param Input: {},{}", columnIndex, value);
         switch (columnIndex) {
             case 2:
                 /* 通路流(1.2.3.4.) */
@@ -331,6 +331,7 @@ public class PNPMaintainAccountModelService {
         return columnDataMap;
     }
 
+    @Cacheable
     private String englishStatusToChinese(String status) {
         switch (status) {
 
@@ -354,6 +355,8 @@ public class PNPMaintainAccountModelService {
                 return "轉發PNP";
             case "BC_FAIL_SMS_PROCESS":
                 return "轉發SMS";
+            case "USER_BLOCK_SMS_PROCESS":
+                return "用戶封鎖，轉發SMS";
             case "PNP_SENDING":
                 return "PNP發送中";
             case "CHECK_DELIVERY":
@@ -395,6 +398,7 @@ public class PNPMaintainAccountModelService {
      * @param sourceCode Source Code 1. 2. 3. 4.
      * @return Source Chinese Name
      */
+    @Cacheable
     private String englishSourceToChinese(String sourceCode) {
         log.info("sourceCode: " + sourceCode);
         switch (sourceCode) {
@@ -418,6 +422,7 @@ public class PNPMaintainAccountModelService {
      * @param procFlowCode procFlow Code 1. 2. 3. 4.
      * @return Source Chinese Name
      */
+    @Cacheable
     private String englishProcFlowToChinese(String procFlowCode) {
         log.info("procFlowCode: " + procFlowCode);
         switch (procFlowCode) {

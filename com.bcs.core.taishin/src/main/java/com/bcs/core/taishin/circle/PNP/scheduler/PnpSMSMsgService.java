@@ -100,16 +100,16 @@ public class PnpSMSMsgService {
     /**
      * Start Schedule
      */
-    public void startCircle() throws InterruptedException {
+    public void startCircle() {
         String unit = CoreConfigReader.getString(CONFIG_STR.PNP_SCHEDULE_UNIT, true, false);
         int time = CoreConfigReader.getInteger(CONFIG_STR.PNP_SCHEDULE_TIME, true, false);
         if (time == -1) {
-            log.error(" PnpSMSMsgService TimeUnit error :" + time + unit);
+            log.error("TimeUnit error :" + time + unit);
             return;
         }
         /* 排程工作 */
         scheduledFuture = scheduler.scheduleAtFixedRate(() -> {
-            log.info(" PnpSMSMsgService startCircle....");
+            log.info("StartCircle....");
 
             /* 0: 停止排程) 1: 停止排程，並轉發SMS*/
             int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true, false);
@@ -121,13 +121,6 @@ public class PnpSMSMsgService {
             sendingSmsMainForPnpFail();
             sendingSmsMainForDeliveryExpired();
         }, 0, time, TimeUnit.valueOf(unit));
-
-
-//        while (true) {
-//            sendingSmsMain();
-//            sendingSmsMainForDeliveryExpired();
-//            Thread.sleep(10000L);
-//        }
     }
 
     /**
@@ -136,20 +129,25 @@ public class PnpSMSMsgService {
      * @see this#startCircle
      */
     private void sendingSmsMainForBcFail() {
-        mitakeProcess();
-        mingProcess();
-        unicaProcess();
-        every8dProcess();
+        String[] statusArray = {
+                AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS,
+                AbstractPnpMainEntity.MSG_SENDER_STATUS_USER_BLOCK_SMS_PROCESS};
+        for (String status : statusArray) {
+            mitakeProcess(status);
+            mingProcess(status);
+            unicaProcess(status);
+            every8dProcess(status);
+        }
     }
 
-    private void mitakeProcess() {
+    private void mitakeProcess(String status) {
         PNPFTPType type = PNPFTPType.MITAKE;
+
         try {
             String procApName = pnpAkkaService.getProcessApName();
-            log.info("======== Start Check Has BC Fail To SMS Data : {} =========", type);
+            log.info("Start Check Has BC Fail To SMS Data : {}, {} =========", type, status);
             /* Find Expired Data*/
-//            List<PnpDetailMitake> detailList = pnpDetailMitakeRepository.findByBcStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
-            List<PnpDetailMitake> detailList = pnpDetailMitakeRepository.findTop1ByBcStatusOrderByCreateTimeAsc(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
+            List<PnpDetailMitake> detailList = pnpDetailMitakeRepository.findTop1ByBcStatusAndSmsStatusIsNullOrderByCreateTimeAsc(status);
 
             if (CollectionUtils.isEmpty(detailList)) {
                 log.info("{} No BC Fail Data!!", type);
@@ -175,7 +173,8 @@ public class PnpSMSMsgService {
                 /* Find Main By Detail Id */
                 PnpMainMitake main = pnpMainMitakeRepository.findOne(detail.getPnpMainId());
                 main.setPnpDetailMitakeList(detailList);
-                main.setSmsFileName(changeFileName(main.getOrigFileName(), now));
+                String smsFileName = changeFileName(main.getOrigFileName(), now);
+                main.setSmsFileName(smsFileName);
 
                 /* Send File To SMS FTP */
                 uploadFileToSms(type.getSource(), smsMitakeInputStream(main, afterSaveList), main.getSmsFileName());
@@ -190,7 +189,7 @@ public class PnpSMSMsgService {
                 log.info("After Save Main : {}", DataUtils.toPrettyJsonUseJackson(afterSaveMain));
 
                 /* Save Detail */
-                detail.setSmsFileName(afterSaveMain.getSmsFileName());
+                detail.setSmsFileName(smsFileName);
                 detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsTime(now);
@@ -205,13 +204,13 @@ public class PnpSMSMsgService {
         }
     }
 
-    private void mingProcess() {
+    private void mingProcess(String status) {
         PNPFTPType type = PNPFTPType.MING;
         try {
             String procApName = pnpAkkaService.getProcessApName();
-            log.info("======== Start Check Has BC Fail To SMS Data : {} =========", type);
+            log.info("Start Check Has BC Fail To SMS Data : {}, {} =========", type, status);
             /* Find Expired Data*/
-            List<PnpDetailMing> detailList = pnpDetailMingRepository.findTop1ByBcStatusOrderByCreateTimeAsc(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
+            List<PnpDetailMing> detailList = pnpDetailMingRepository.findTop1ByBcStatusAndSmsStatusIsNullOrderByCreateTimeAsc(status);
 
             if (CollectionUtils.isEmpty(detailList)) {
                 log.info("{} No BC Fail Data!!", type);
@@ -237,7 +236,8 @@ public class PnpSMSMsgService {
                 /* Find Main By Detail Id */
                 PnpMainMing main = pnpMainMingRepository.findOne(detail.getPnpMainId());
                 main.setPnpDetailMingList(detailList);
-                main.setSmsFileName(changeFileName(main.getOrigFileName(), now));
+                String smsFileName = changeFileName(main.getOrigFileName(), now);
+                main.setSmsFileName(smsFileName);
 
                 /* Send File To SMS FTP */
                 uploadFileToSms(type.getSource(), smsMingInputStream(afterSaveList), main.getSmsFileName());
@@ -252,7 +252,7 @@ public class PnpSMSMsgService {
                 log.info("After Save Main : {}", DataUtils.toPrettyJsonUseJackson(afterSaveMain));
 
                 /* Save Detail */
-                detail.setSmsFileName(afterSaveMain.getSmsFileName());
+                detail.setSmsFileName(smsFileName);
                 detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsTime(now);
@@ -267,13 +267,13 @@ public class PnpSMSMsgService {
         }
     }
 
-    private void unicaProcess() {
+    private void unicaProcess(String status) {
         PNPFTPType type = PNPFTPType.UNICA;
         try {
             String procApName = pnpAkkaService.getProcessApName();
-            log.info("======== Start Check Has BC Fail To SMS Data : {} =========", type);
+            log.info("Start Check Has BC Fail To SMS Data : {}, {} =========", type, status);
             /* Find Expired Data*/
-            List<PnpDetailUnica> detailList = pnpDetailUnicaRepository.findTop1ByBcStatusOrderByCreateTimeAsc(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
+            List<PnpDetailUnica> detailList = pnpDetailUnicaRepository.findTop1ByBcStatusAndSmsStatusIsNullOrderByCreateTimeAsc(status);
 
             if (CollectionUtils.isEmpty(detailList)) {
                 log.info("{} No BC Fail Data!!", type);
@@ -299,7 +299,8 @@ public class PnpSMSMsgService {
                 /* Find Main By Detail Id */
                 PnpMainUnica main = pnpMainUnicaRepository.findOne(detail.getPnpMainId());
                 main.setPnpDetailUnicaList(detailList);
-                main.setSmsFileName(changeFileName(main.getOrigFileName(), now));
+                String smsFileName = changeFileName(main.getOrigFileName(), now);
+                main.setSmsFileName(smsFileName);
 
                 /* Send File To SMS FTP */
                 uploadFileToSms(type.getSource(), smsUnicaInputStream(main, afterSaveList), main.getSmsFileName());
@@ -314,7 +315,7 @@ public class PnpSMSMsgService {
                 log.info("After Save Main : {}", DataUtils.toPrettyJsonUseJackson(afterSaveMain));
 
                 /* Save Detail */
-                detail.setSmsFileName(afterSaveMain.getSmsFileName());
+                detail.setSmsFileName(smsFileName);
                 detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsTime(now);
@@ -329,13 +330,13 @@ public class PnpSMSMsgService {
         }
     }
 
-    private void every8dProcess() {
+    private void every8dProcess(String status) {
         PNPFTPType type = PNPFTPType.EVERY8D;
         try {
             String procApName = pnpAkkaService.getProcessApName();
-            log.info("======== Start Check Has BC Fail To SMS Data : {} =========", type);
+            log.info("Start Check Has BC Fail To SMS Data : {}, {} =========", type, status);
             /* Find Expired Data*/
-            List<PnpDetailEvery8d> detailList = pnpDetailEvery8dRepository.findTop1ByBcStatusOrderByCreateTimeAsc(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
+            List<PnpDetailEvery8d> detailList = pnpDetailEvery8dRepository.findTop1ByBcStatusAndSmsStatusIsNullOrderByCreateTimeAsc(status);
 
             if (CollectionUtils.isEmpty(detailList)) {
                 log.info("{} No BC Fail Data!!", type);
@@ -361,7 +362,8 @@ public class PnpSMSMsgService {
                 /* Find Main By Detail Id */
                 PnpMainEvery8d main = pnpMainEvery8dRepository.findOne(detail.getPnpMainId());
                 main.setPnpDetailEvery8dList(detailList);
-                main.setSmsFileName(changeFileName(main.getOrigFileName(), now));
+                String smsFileName = changeFileName(main.getOrigFileName(), now);
+                main.setSmsFileName(smsFileName);
 
                 /* Send File To SMS FTP */
                 uploadFileToSms(type.getSource(), smsEvery8dInputStream(main, afterSaveList), main.getSmsFileName());
@@ -376,7 +378,7 @@ public class PnpSMSMsgService {
                 log.info("After Save Main : {}", DataUtils.toPrettyJsonUseJackson(afterSaveMain));
 
                 /* Save Detail */
-                detail.setSmsFileName(afterSaveMain.getSmsFileName());
+                detail.setSmsFileName(smsFileName);
                 detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsTime(now);
@@ -392,7 +394,7 @@ public class PnpSMSMsgService {
     }
 
     /**
-     * 處理BC-Fail過期資料轉發SMS
+     * 處理PNP-Fail過期資料轉發SMS
      *
      * @see this#startCircle
      */
@@ -407,10 +409,10 @@ public class PnpSMSMsgService {
         PNPFTPType type = PNPFTPType.MITAKE;
         try {
             String procApName = pnpAkkaService.getProcessApName();
-            log.info("======== Start Check Has PNP Fail To SMS Data : {} =========", type);
+            log.info("Start Check Has PNP Fail To SMS Data : {} =========", type);
             /* Find Expired Data*/
 //            List<PnpDetailMitake> detailList = pnpDetailMitakeRepository.findByBcStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
-            List<PnpDetailMitake> detailList = pnpDetailMitakeRepository.findTop1ByPnpStatusOrderByCreateTimeAsc(AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_FAIL_SMS_PROCESS);
+            List<PnpDetailMitake> detailList = pnpDetailMitakeRepository.findTop1ByPnpStatusAndSmsStatusIsNullOrderByCreateTimeAsc(AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_FAIL_SMS_PROCESS);
 
             if (CollectionUtils.isEmpty(detailList)) {
                 log.info("{} No PNP Fail Data!!", type);
@@ -436,7 +438,8 @@ public class PnpSMSMsgService {
                 /* Find Main By Detail Id */
                 PnpMainMitake main = pnpMainMitakeRepository.findOne(detail.getPnpMainId());
                 main.setPnpDetailMitakeList(detailList);
-                main.setSmsFileName(changeFileName(main.getOrigFileName(), now));
+                String smsFileName = changeFileName(main.getOrigFileName(), now);
+                main.setSmsFileName(smsFileName);
 
                 /* Send File To SMS FTP */
                 uploadFileToSms(type.getSource(), smsMitakeInputStream(main, afterSaveList), main.getSmsFileName());
@@ -451,7 +454,7 @@ public class PnpSMSMsgService {
                 log.info("After Save Main : {}", DataUtils.toPrettyJsonUseJackson(afterSaveMain));
 
                 /* Save Detail */
-                detail.setSmsFileName(afterSaveMain.getSmsFileName());
+                detail.setSmsFileName(smsFileName);
                 detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsTime(now);
@@ -470,9 +473,9 @@ public class PnpSMSMsgService {
         PNPFTPType type = PNPFTPType.MING;
         try {
             String procApName = pnpAkkaService.getProcessApName();
-            log.info("======== Start Check Has PNP Fail To SMS Data : {} =========", type);
+            log.info("Start Check Has PNP Fail To SMS Data : {} =========", type);
             /* Find Expired Data*/
-            List<PnpDetailMing> detailList = pnpDetailMingRepository.findTop1ByPnpStatusOrderByCreateTimeAsc(AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_FAIL_SMS_PROCESS);
+            List<PnpDetailMing> detailList = pnpDetailMingRepository.findTop1ByPnpStatusAndSmsStatusIsNullOrderByCreateTimeAsc(AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_FAIL_SMS_PROCESS);
 
             if (CollectionUtils.isEmpty(detailList)) {
                 log.info("{} No PNP Fail Data!!", type);
@@ -498,7 +501,8 @@ public class PnpSMSMsgService {
                 /* Find Main By Detail Id */
                 PnpMainMing main = pnpMainMingRepository.findOne(detail.getPnpMainId());
                 main.setPnpDetailMingList(detailList);
-                main.setSmsFileName(changeFileName(main.getOrigFileName(), now));
+                String smsFileName = changeFileName(main.getOrigFileName(), now);
+                main.setSmsFileName(smsFileName);
 
                 /* Send File To SMS FTP */
                 uploadFileToSms(type.getSource(), smsMingInputStream(afterSaveList), main.getSmsFileName());
@@ -513,7 +517,7 @@ public class PnpSMSMsgService {
                 log.info("After Save Main : {}", DataUtils.toPrettyJsonUseJackson(afterSaveMain));
 
                 /* Save Detail */
-                detail.setSmsFileName(afterSaveMain.getSmsFileName());
+                detail.setSmsFileName(smsFileName);
                 detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsTime(now);
@@ -532,9 +536,9 @@ public class PnpSMSMsgService {
         PNPFTPType type = PNPFTPType.UNICA;
         try {
             String procApName = pnpAkkaService.getProcessApName();
-            log.info("======== Start Check Has PNP Fail To SMS Data : {} =========", type);
+            log.info("Start Check Has PNP Fail To SMS Data : {} =========", type);
             /* Find Expired Data*/
-            List<PnpDetailUnica> detailList = pnpDetailUnicaRepository.findTop1ByPnpStatusOrderByCreateTimeAsc(AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_FAIL_SMS_PROCESS);
+            List<PnpDetailUnica> detailList = pnpDetailUnicaRepository.findTop1ByPnpStatusAndSmsStatusIsNullOrderByCreateTimeAsc(AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_FAIL_SMS_PROCESS);
 
             if (CollectionUtils.isEmpty(detailList)) {
                 log.info("{} No PNP Fail Data!!", type);
@@ -560,7 +564,8 @@ public class PnpSMSMsgService {
                 /* Find Main By Detail Id */
                 PnpMainUnica main = pnpMainUnicaRepository.findOne(detail.getPnpMainId());
                 main.setPnpDetailUnicaList(detailList);
-                main.setSmsFileName(changeFileName(main.getOrigFileName(), now));
+                String smsFileName = changeFileName(main.getOrigFileName(), now);
+                main.setSmsFileName(smsFileName);
 
                 /* Send File To SMS FTP */
                 uploadFileToSms(type.getSource(), smsUnicaInputStream(main, afterSaveList), main.getSmsFileName());
@@ -575,7 +580,7 @@ public class PnpSMSMsgService {
                 log.info("After Save Main : {}", DataUtils.toPrettyJsonUseJackson(afterSaveMain));
 
                 /* Save Detail */
-                detail.setSmsFileName(afterSaveMain.getSmsFileName());
+                detail.setSmsFileName(smsFileName);
                 detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsTime(now);
@@ -594,9 +599,9 @@ public class PnpSMSMsgService {
         PNPFTPType type = PNPFTPType.EVERY8D;
         try {
             String procApName = pnpAkkaService.getProcessApName();
-            log.info("======== Start Check Has PNP Fail To SMS Data : {} =========", type);
+            log.info("Start Check Has PNP Fail To SMS Data : {} =========", type);
             /* Find Expired Data*/
-            List<PnpDetailEvery8d> detailList = pnpDetailEvery8dRepository.findTop1ByPnpStatusOrderByCreateTimeAsc(AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_FAIL_SMS_PROCESS);
+            List<PnpDetailEvery8d> detailList = pnpDetailEvery8dRepository.findTop1ByPnpStatusAndSmsStatusIsNullOrderByCreateTimeAsc(AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_FAIL_SMS_PROCESS);
 
             if (CollectionUtils.isEmpty(detailList)) {
                 log.info("{} No PNP Fail Data!!", type);
@@ -622,7 +627,8 @@ public class PnpSMSMsgService {
                 /* Find Main By Detail Id */
                 PnpMainEvery8d main = pnpMainEvery8dRepository.findOne(detail.getPnpMainId());
                 main.setPnpDetailEvery8dList(detailList);
-                main.setSmsFileName(changeFileName(main.getOrigFileName(), now));
+                String smsFileName = changeFileName(main.getOrigFileName(), now);
+                main.setSmsFileName(smsFileName);
 
                 /* Send File To SMS FTP */
                 uploadFileToSms(type.getSource(), smsEvery8dInputStream(main, afterSaveList), main.getSmsFileName());
@@ -637,7 +643,7 @@ public class PnpSMSMsgService {
                 log.info("After Save Main : {}", DataUtils.toPrettyJsonUseJackson(afterSaveMain));
 
                 /* Save Detail */
-                detail.setSmsFileName(afterSaveMain.getSmsFileName());
+                detail.setSmsFileName(smsFileName);
                 detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsTime(now);
@@ -651,7 +657,6 @@ public class PnpSMSMsgService {
             log.error("Exception", e);
         }
     }
-
 
 
     /**
@@ -671,7 +676,7 @@ public class PnpSMSMsgService {
         PNPFTPType type = PNPFTPType.MITAKE;
         try {
             String procApName = pnpAkkaService.getProcessApName();
-            log.info("======== Start Check Has Pnp Delivery Expired Data : {} =========", type);
+            log.info("Start Check Has Pnp Delivery Expired Data : {} =========", type);
             Date now = new Date();
 
             /* Find Expired Data*/
@@ -704,7 +709,8 @@ public class PnpSMSMsgService {
                 /* Find Main By Detail Id */
                 PnpMainMitake main = pnpMainMitakeRepository.findOne(detail.getPnpMainId());
                 main.setPnpDetailMitakeList(detailList);
-                main.setSmsFileName(changeFileName(main.getOrigFileName(), now));
+                String smsFileName = changeFileName(main.getOrigFileName(), now);
+                main.setSmsFileName(smsFileName);
 
                 /* Send File To SMS FTP */
                 uploadFileToSms(type.getSource(), smsMitakeInputStream(main, afterSaveList), main.getSmsFileName());
@@ -719,7 +725,7 @@ public class PnpSMSMsgService {
                 log.info("After Save Main : {}", DataUtils.toPrettyJsonUseJackson(afterSaveMain));
 
                 /* Save Detail */
-                detail.setSmsFileName(afterSaveMain.getSmsFileName());
+                detail.setSmsFileName(smsFileName);
                 detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsTime(now);
@@ -741,7 +747,7 @@ public class PnpSMSMsgService {
         PNPFTPType type = PNPFTPType.MING;
         try {
             String procApName = pnpAkkaService.getProcessApName();
-            log.info("======== Start Check Has Pnp Delivery Expired Data : {} =========", type);
+            log.info("Start Check Has Pnp Delivery Expired Data : {} =========", type);
             Date now = new Date();
 
             /* Find Expired Data*/
@@ -774,7 +780,8 @@ public class PnpSMSMsgService {
                 /* Find Main By Detail Id */
                 PnpMainMing main = pnpMainMingRepository.findOne(detail.getPnpMainId());
                 main.setPnpDetailMingList(detailList);
-                main.setSmsFileName(changeFileName(main.getOrigFileName(), now));
+                String smsFileName = changeFileName(main.getOrigFileName(), now);
+                main.setSmsFileName(smsFileName);
 
                 /* Send File To SMS FTP */
                 uploadFileToSms(type.getSource(), smsMingInputStream(afterSaveList), main.getSmsFileName());
@@ -789,7 +796,7 @@ public class PnpSMSMsgService {
                 log.info("After Save Main : {}", DataUtils.toPrettyJsonUseJackson(afterSaveMain));
 
                 /* Save Detail */
-                detail.setSmsFileName(afterSaveMain.getSmsFileName());
+                detail.setSmsFileName(smsFileName);
                 detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsTime(now);
@@ -811,7 +818,7 @@ public class PnpSMSMsgService {
         PNPFTPType type = PNPFTPType.UNICA;
         try {
             String procApName = pnpAkkaService.getProcessApName();
-            log.info("======== Start Check Has Pnp Delivery Expired Data : {} =========", type);
+            log.info("Start Check Has Pnp Delivery Expired Data : {} =========", type);
             Date now = new Date();
 
             /* Find Expired Data*/
@@ -844,7 +851,8 @@ public class PnpSMSMsgService {
                 /* Find Main By Detail Id */
                 PnpMainUnica main = pnpMainUnicaRepository.findOne(detail.getPnpMainId());
                 main.setPnpDetailUnicaList(detailList);
-                main.setSmsFileName(changeFileName(main.getOrigFileName(), now));
+                String smsFileName = changeFileName(main.getOrigFileName(), now);
+                main.setSmsFileName(smsFileName);
 
                 /* Send File To SMS FTP */
                 uploadFileToSms(type.getSource(), smsUnicaInputStream(main, afterSaveList), main.getSmsFileName());
@@ -859,7 +867,7 @@ public class PnpSMSMsgService {
                 log.info("After Save Main : {}", DataUtils.toPrettyJsonUseJackson(afterSaveMain));
 
                 /* Save Detail */
-                detail.setSmsFileName(afterSaveMain.getSmsFileName());
+                detail.setSmsFileName(smsFileName);
                 detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsTime(now);
@@ -881,7 +889,7 @@ public class PnpSMSMsgService {
         PNPFTPType type = PNPFTPType.EVERY8D;
         try {
             String procApName = pnpAkkaService.getProcessApName();
-            log.info("======== Start Check Has Pnp Delivery Expired Data : {} =========", type);
+            log.info("Start Check Has Pnp Delivery Expired Data : {} =========", type);
             Date now = new Date();
 
             /* Find Expired Data*/
@@ -914,7 +922,8 @@ public class PnpSMSMsgService {
                 /* Find Main By Detail Id */
                 PnpMainEvery8d main = pnpMainEvery8dRepository.findOne(detail.getPnpMainId());
                 main.setPnpDetailEvery8dList(detailList);
-                main.setSmsFileName(changeFileName(main.getOrigFileName(), now));
+                String smsFileName = changeFileName(main.getOrigFileName(), now);
+                main.setSmsFileName(smsFileName);
 
                 /* Send File To SMS FTP */
                 uploadFileToSms(type.getSource(), smsEvery8dInputStream(main, afterSaveList), main.getSmsFileName());
@@ -929,7 +938,7 @@ public class PnpSMSMsgService {
                 log.info("After Save Main : {}", DataUtils.toPrettyJsonUseJackson(afterSaveMain));
 
                 /* Save Detail */
-                detail.setSmsFileName(afterSaveMain.getSmsFileName());
+                detail.setSmsFileName(smsFileName);
                 detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
                 detail.setSmsTime(now);

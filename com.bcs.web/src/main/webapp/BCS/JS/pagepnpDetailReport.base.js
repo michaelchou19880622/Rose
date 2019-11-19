@@ -217,6 +217,8 @@ $(function () {
                 return "轉發PNP";
             case "BC_FAIL_SMS_PROCESS":
                 return "轉發SMS";
+            case "USER_BLOCK_SMS_PROCESS":
+                return "用戶封鎖，轉發SMS";
             case "PNP_SENDING":
                 return "PNP發送中";
             case "CHECK_DELIVERY":

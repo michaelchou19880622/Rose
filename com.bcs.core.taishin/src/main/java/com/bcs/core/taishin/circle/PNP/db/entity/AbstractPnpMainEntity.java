@@ -36,6 +36,8 @@ public abstract class AbstractPnpMainEntity implements Serializable, Cloneable {
 
     public static final String MSG_SENDER_STATUS_BC_PROCESS = "BC_PROCESS";
 
+
+
     /* ========================================BC================================================*/
 
     public static final String MSG_SENDER_STATUS_BC_SENDING = "BC_SENDING";
@@ -43,6 +45,7 @@ public abstract class AbstractPnpMainEntity implements Serializable, Cloneable {
     public static final String MSG_SENDER_STATUS_BC_FAIL = "BC_FAIL";
     public static final String MSG_SENDER_STATUS_BC_FAIL_PNP_PROCESS = "BC_FAIL_PNP_PROCESS";
     public static final String MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS = "BC_FAIL_SMS_PROCESS";
+    public static final String MSG_SENDER_STATUS_USER_BLOCK_SMS_PROCESS = "USER_BLOCK_SMS_PROCESS";
 
     /* ========================================BC================================================*/
     /* ========================================PNP================================================*/

@@ -1,6 +1,9 @@
 package com.bcs.core.taishin.circle.PNP.db.entity;
 
 import com.bcs.core.json.AbstractBcsEntity;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,6 +18,9 @@ import java.util.Date;
  *
  * @author ???
  */
+@Setter
+@Getter
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "BCS_PNP_MAINTAIN_ACCOUNT")
 public class PNPMaintainAccountModel extends AbstractBcsEntity {
@@ -113,26 +119,6 @@ public class PNPMaintainAccountModel extends AbstractBcsEntity {
     private String template;
 
     /**
-     * Flex 主標題
-     */
-//    @Column(name = "flex_title", columnDefinition = "nvarchar(20)")
-    private String flexTitle;
-
-    /**
-     * Flex 按鈕文字JsonArray
-     * [OK, Cancel]
-     */
-//    @Column(name = "flex_button_name", columnDefinition = "nvarchar(60)")
-    private String flexButtonName;
-
-    /**
-     * Flex 按鈕URLJsonArray
-     * ["http://www.goole.com", "http://www.google.com2"]
-     */
-//    @Column(name = "flex_button_url", columnDefinition = "nvarchar(600)")
-    private String flexButtonUrl;
-
-    /**
      * 簡訊內容
      */
     @Column(name = "PNP_CONTENT", columnDefinition = "nvarchar(500)")
@@ -155,145 +141,4 @@ public class PNPMaintainAccountModel extends AbstractBcsEntity {
      */
     @Column(name = "MODIFY_USER", columnDefinition = "nvarchar(50)")
     private String modifyUser;
-
-    public String getEmployeeId() {
-        return employeeId;
-    }
-
-    public void setEmployeeId(String employeeId) {
-        this.employeeId = employeeId;
-    }
-
-    public String getPathway() {
-        return pathway;
-    }
-
-    public void setPathway(String pathway) {
-        this.pathway = pathway;
-    }
-
-    public String getTemplate() {
-        return template;
-    }
-
-    public void setTemplate(String template) {
-        this.template = template;
-    }
-
-    public String getPnpContent() {
-        return pnpContent;
-    }
-
-    public void setPnpContent(String pnpContent) {
-        this.pnpContent = pnpContent;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String accout) {
-        this.account = accout;
-    }
-
-    public String getSourceSystem() {
-        return sourceSystem;
-    }
-
-    public void setSourceSystem(String sourceSystem) {
-        this.sourceSystem = sourceSystem;
-    }
-
-    public String getDepartmentId() {
-        return departmentId;
-    }
-
-    public void setDepartmentId(String departmentId) {
-        this.departmentId = departmentId;
-    }
-
-    public String getDepartmentName() {
-        return departmentName;
-    }
-
-    public void setDepartmentName(String departmentName) {
-        this.departmentName = departmentName;
-    }
-
-    public String getPccCode() {
-        return pccCode;
-    }
-
-    public void setPccCode(String pccCode) {
-        this.pccCode = pccCode;
-    }
-
-    public Boolean getStatus() {
-        return status;
-    }
-
-    public void setStatus(Boolean status) {
-        this.status = status;
-    }
-
-    public String getAccountType() {
-        return accountType;
-    }
-
-    public void setAccountType(String accountType) {
-        this.accountType = accountType;
-    }
-
-    public String getAccountAttribute() {
-        return accountAttribute;
-    }
-
-    public void setAccountAttribute(String accountAttribute) {
-        this.accountAttribute = accountAttribute;
-    }
-
-    public String getAccountClass() {
-        return accountClass;
-    }
-
-    public void setAccountClass(String accountClass) {
-        this.accountClass = accountClass;
-    }
-
-    public String getDivisionName() {
-        return divisionName;
-    }
-
-    public void setDivisionName(String divisionName) {
-        this.divisionName = divisionName;
-    }
-
-    public String getGroupName() {
-        return groupName;
-    }
-
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
-    }
-
-    public Date getModifyTime() {
-        return modifyTime;
-    }
-
-    public void setModifyTime(Date modifyTime) {
-        this.modifyTime = modifyTime;
-    }
-
-    public String getModifyUser() {
-        return modifyUser;
-    }
-
-    public void setModifyUser(String modifyUser) {
-        this.modifyUser = modifyUser;
-    }
-
 }

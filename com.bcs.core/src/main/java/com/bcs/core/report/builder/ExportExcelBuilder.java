@@ -124,7 +124,7 @@ public class ExportExcelBuilder {
     private void recordMaxCellIndex(int cellIndex) {
         if (this.maxCellIndex < cellIndex) {
             maxCellIndex = cellIndex;
-            log.info("Max Cell Index is {}", this.maxCellIndex);
+            log.debug("Max Cell Index is {}", this.maxCellIndex);
         }
     }
 
@@ -188,7 +188,7 @@ public class ExportExcelBuilder {
             this.workbook.write(out);
             out.close();
         } catch (Exception e) {
-            log.error("{}: {}", "Exception", e);
+            log.error("Exception", e);
         }
     }
 

@@ -39,7 +39,7 @@ public class PnpMainActor extends UntypedActor {
     }
 
     @Override
-    public void onReceive(Object object) throws Exception {
+    public void onReceive(Object object) {
         try {
             Thread.currentThread().setName("Actor-PNP-Main-" + Thread.currentThread().getId());
 
@@ -66,7 +66,7 @@ public class PnpMainActor extends UntypedActor {
                 updateStatusRouterActor.tell(object, this.getSelf());
             }
         } catch (Exception e) {
-            log.error("{}", e);
+            log.error("Exception", e);
         }
     }
 

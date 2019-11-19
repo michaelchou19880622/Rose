@@ -12,7 +12,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PreDestroy;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -26,14 +25,6 @@ import java.util.List;
 public class LineUserService {
 
     private static Logger logger = Logger.getLogger(LineUserService.class);
-
-    /**
-     * Clean up.
-     */
-    @PreDestroy
-    public void cleanUp() {
-        logger.info("[DESTROY] LineUserService destroyed.");
-    }
 
     @Autowired
     private LineUserRepository lineUserRepository;
@@ -213,7 +204,7 @@ public class LineUserService {
         logger.debug("checkMIDByStatus:" + result);
         return StringUtils.isBlank(result);
     }
-    
+
     /**
      * Get mid by mobile.
      *

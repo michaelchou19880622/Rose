@@ -13,7 +13,7 @@ $(function() {
 	var startDate = $.urlParam("startDate");
 	var endDate = $.urlParam("endDate");
 	var linePointDetailCount = 0;
-	var linePointSuccessAmount = $.urlParam("successfulAmount");;
+	var linePointSuccessAmount = 0;
 	var linePointDetail = {};
 	// ---- Functions ----
     // do Split Page
@@ -58,7 +58,7 @@ $(function() {
             console.info('findOneLinePointMainByMainId response:', o);
             $('#titleText').html('專案名稱：' + o.title);
             $('#serialIdText').html('Campaign：' + o.serialId);
-            $('#totalCountText').html('發送總點數：' + linePointSuccessAmount);
+            //$('#totalCountText').html('發送總點數：' + linePointSuccessAmount);
             $('#modifyUserText').html('建立人員：' + o.modifyUser);
             modifyUser = o.modifyUser;
             $('#departmentFullNameText').html('建立人員單位：' + o.departmentFullName);
@@ -85,7 +85,12 @@ $(function() {
             console.info("response:", response);
             linePointDetailCount = response.length;
             linePointDetail = response ;
-            
+            $.each(linePointDetail, function(i, o) {
+   	             if(o.status=='SUCCESS'){
+   	            	linePointSuccessAmount += o.amount;
+   	             }
+   			 });
+            $('#totalCountText').html('發送總點數：' + linePointSuccessAmount);
             if(linePointDetailCount % 10 == 0){
 				totalPages = linePointDetailCount/10;
 			}else{

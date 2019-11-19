@@ -1,187 +1,251 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>com.bcs</groupId>
-		<artifactId>com.bcs.project</artifactId>
-		<version>0.0.1.RELEASE</version>
-	</parent>
-	<artifactId>com.bcs.web</artifactId>
-	<dependencies>
-		<dependency>
-			<groupId>com.bcs</groupId>
-			<artifactId>com.bcs.core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.bcs</groupId>
-			<artifactId>com.bcs.core.bot</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.bcs</groupId>
-			<artifactId>com.bcs.core.web</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.bcs</groupId>
-			<artifactId>com.bcs.core.taishin</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.bcs</groupId>
-			<artifactId>com.bcs.core.linepoint</artifactId>
-			<version>${project.version}</version>
-		</dependency>		
-	</dependencies>
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.bcs</groupId>
+        <artifactId>com.bcs.project</artifactId>
+        <version>0.0.1.RELEASE</version>
+    </parent>
+    <artifactId>com.bcs.web</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>com.bcs</groupId>
+            <artifactId>com.bcs.core</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>TSIB</artifactId>
+                    <groupId>TSIB</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>pwd</artifactId>
+                    <groupId>pwd</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.bcs</groupId>
+            <artifactId>com.bcs.core.bot</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>TSIB</artifactId>
+                    <groupId>TSIB</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>pwd</artifactId>
+                    <groupId>pwd</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.bcs</groupId>
+            <artifactId>com.bcs.core.web</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>TSIB</artifactId>
+                    <groupId>TSIB</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>pwd</artifactId>
+                    <groupId>pwd</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.bcs</groupId>
+            <artifactId>com.bcs.core.taishin</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>TSIB</artifactId>
+                    <groupId>TSIB</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>pwd</artifactId>
+                    <groupId>pwd</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.bcs</groupId>
+            <artifactId>com.bcs.core.linepoint</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>TSIB</artifactId>
+                    <groupId>TSIB</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>pwd</artifactId>
+                    <groupId>pwd</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
 
-	<packaging>war</packaging>
-	
-	<profiles>
-		<profile>
-			<id>taishinapi</id> <!-- 台新測試機api -->
-			<build>
-		            <directory>target</directory>
-		        </build>
-			<properties>
-				<package.environment>taishinapi</package.environment>
-				<rp.build.warname>taishinapi</rp.build.warname>
-				<maven.war.webxml>src/main/resources/taishinapi/web/web.xml</maven.war.webxml> <!-- set up webxml location -->
-			</properties>
-		</profile>
-		<profile>
-			<id>taishinuat</id> <!-- 台新測試機後台 -->
-			<build>
-		            <directory>target</directory>
-		        </build>
-			<properties>
-				<package.environment>taishinuat</package.environment>
-				<rp.build.warname>taishinuat</rp.build.warname>
-				<maven.war.webxml>src/main/resources/taishinuat/web/web.xml</maven.war.webxml> <!-- set up webxml location -->
-			</properties>
-		</profile>
-		<profile>
-			<id>taishinoaapi</id> <!-- 台新正式機api -->
-			<build>
-		            <directory>target/AP</directory>
-		        </build>
-			<properties>
-				<package.environment>taishinoaapi</package.environment>
-				<rp.build.warname>taishinoaapi</rp.build.warname>
-				<maven.war.webxml>src/main/resources/taishinoaapi/web/web.xml</maven.war.webxml> <!-- set up webxml location -->
-			</properties>
-		</profile>
-		<profile>
-			<id>api_taishinoa</id> <!-- 台新正式機api的後台 -->
-			<build>
-		            <directory>target/AP</directory>
-		        </build>
-			<properties>
-				<package.environment>api_taishinoa</package.environment>
-				<rp.build.warname>taishinoa</rp.build.warname>
-				<maven.war.webxml>src/main/resources/api_taishinoa/web/web.xml</maven.war.webxml> <!-- set up webxml location -->
-			</properties>
-		</profile>
-		<profile>
-			<id>backend_taishinoaapi</id> <!--  台新正式機後台 的 api -->
-			<build>
-		            <directory>target/backend</directory>
-		        </build>
-			<properties>
-				<package.environment>backend_taishinoaapi</package.environment>
-				<rp.build.warname>taishinoaapi</rp.build.warname>
-				<maven.war.webxml>src/main/resources/backend_taishinoaapi/web/web.xml</maven.war.webxml> <!-- set up webxml location -->
-			</properties>
-		</profile>
-		<profile>
-			<id>taishinoa</id> <!-- 台新正式機後台 -->
-			<build>
-		            <directory>target/backend</directory>
-		        </build>
-			<properties>
-				<package.environment>taishinoa</package.environment>
-				<rp.build.warname>taishinoa</rp.build.warname>
-				<maven.war.webxml>src/main/resources/taishinoa/web/web.xml</maven.war.webxml> <!-- set up webxml location -->
-			</properties>
-		</profile>
-		<profile>
-			<id>test</id>
-			<build>
-	            <directory>target</directory>
-	        </build>
-			<properties>
-				<package.environment>test</package.environment>
-				<rp.build.warname>Taishin</rp.build.warname>
-				<maven.war.webxml>src/main/webapp/WEB-INF/web.xml</maven.war.webxml> <!-- set up webxml location -->
-			</properties>
-		</profile>
-		<profile>
-			<id>local</id>
-			<build>
-	            <directory>target</directory>
-	        </build>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<properties>
-				<package.environment></package.environment>
-				<rp.build.warname>Taishin</rp.build.warname>
-				<maven.war.webxml>src/main/webapp/WEB-INF/web.xml</maven.war.webxml> <!-- set up webxml location -->
-			</properties>
-		</profile>
-	</profiles>
-	<build>
-		<resources>
-			<resource>
-				<directory>${basedir}/src/main/resources</directory>
-				<excludes>
-					<exclude>test/</exclude>
-					<exclude>taishinapi/</exclude>
-					<exclude>taishinuat/</exclude>
-					<exclude>taishinoaapi/</exclude>
-					<exclude>taishinoa/</exclude>
-					<exclude>api_taishinoa/</exclude>
-					<exclude>backend_taishinoaapi/</exclude>
-				</excludes>
-			</resource>
-		</resources>
-		<finalName>bcs</finalName>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>2.4</version>
-				<configuration>
-					<archive>
-						<manifest>
-							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-						</manifest>
-						<addMavenDescriptor>false</addMavenDescriptor> <!-- remove maven folder -->
-					</archive>
-					<webResources>
-						<resource>
-							<directory>src/main/resources/${package.environment}/web</directory>
-							<targetPath>WEB-INF/html/BCS/Views/Common</targetPath>
-							<excludes>
-								<exclude>web.xml</exclude>
-							</excludes>
-						</resource>
-						<resource>
-							<directory>src/main/resources/${package.environment}</directory>
-							<targetPath>WEB-INF/classes</targetPath>
-							<excludes>
-								<exclude>web/</exclude>
-							</excludes>
-						</resource>
-					</webResources>
-					<!-- web.xml is not mandatory since JavaEE 5 -->
-					<failOnMissingWebXml>true</failOnMissingWebXml>
-					<!-- com.bcs.X jar & log jar 要包進去 -->
-					<packagingExcludes>%regex[WEB-INF/lib/(?!log4j.*\.jar)(?!slf4j.*\.jar)(?!logging.*\.jar)(?!com.bcs.*\.jar).*\.jar]</packagingExcludes> <!-- remove third party jar -->
-					<warName>${rp.build.warname}</warName> <!-- set up war name -->
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+    <packaging>war</packaging>
+
+    <profiles>
+        <profile>
+            <id>taishinapi</id> <!-- 台新測試機api -->
+            <build>
+                <directory>target</directory>
+            </build>
+            <properties>
+                <package.environment>taishinapi</package.environment>
+                <rp.build.warname>taishinapi</rp.build.warname>
+                <maven.war.webxml>src/main/resources/taishinapi/web/web.xml
+                </maven.war.webxml> <!-- set up webxml location -->
+            </properties>
+        </profile>
+        <profile>
+            <id>taishinuat</id> <!-- 台新測試機後台 -->
+            <build>
+                <directory>target</directory>
+            </build>
+            <properties>
+                <package.environment>taishinuat</package.environment>
+                <rp.build.warname>taishinuat</rp.build.warname>
+                <maven.war.webxml>src/main/resources/taishinuat/web/web.xml
+                </maven.war.webxml> <!-- set up webxml location -->
+            </properties>
+        </profile>
+        <profile>
+            <id>taishinoaapi</id> <!-- 台新正式機api -->
+            <build>
+                <directory>target/AP</directory>
+            </build>
+            <properties>
+                <package.environment>taishinoaapi</package.environment>
+                <rp.build.warname>taishinoaapi</rp.build.warname>
+                <maven.war.webxml>src/main/resources/taishinoaapi/web/web.xml
+                </maven.war.webxml> <!-- set up webxml location -->
+            </properties>
+        </profile>
+        <profile>
+            <id>api_taishinoa</id> <!-- 台新正式機api的後台 -->
+            <build>
+                <directory>target/AP</directory>
+            </build>
+            <properties>
+                <package.environment>api_taishinoa</package.environment>
+                <rp.build.warname>taishinoa</rp.build.warname>
+                <maven.war.webxml>src/main/resources/api_taishinoa/web/web.xml
+                </maven.war.webxml> <!-- set up webxml location -->
+            </properties>
+        </profile>
+        <profile>
+            <id>backend_taishinoaapi</id> <!--  台新正式機後台 的 api -->
+            <build>
+                <directory>target/backend</directory>
+            </build>
+            <properties>
+                <package.environment>backend_taishinoaapi</package.environment>
+                <rp.build.warname>taishinoaapi</rp.build.warname>
+                <maven.war.webxml>src/main/resources/backend_taishinoaapi/web/web.xml
+                </maven.war.webxml> <!-- set up webxml location -->
+            </properties>
+        </profile>
+        <profile>
+            <id>taishinoa</id> <!-- 台新正式機後台 -->
+            <build>
+                <directory>target/backend</directory>
+            </build>
+            <properties>
+                <package.environment>taishinoa</package.environment>
+                <rp.build.warname>taishinoa</rp.build.warname>
+                <maven.war.webxml>src/main/resources/taishinoa/web/web.xml
+                </maven.war.webxml> <!-- set up webxml location -->
+            </properties>
+        </profile>
+        <profile>
+            <id>test</id>
+            <build>
+                <directory>target</directory>
+            </build>
+            <properties>
+                <package.environment>test</package.environment>
+                <rp.build.warname>Taishin</rp.build.warname>
+                <maven.war.webxml>src/main/webapp/WEB-INF/web.xml</maven.war.webxml> <!-- set up webxml location -->
+            </properties>
+        </profile>
+        <profile>
+            <id>local</id>
+            <build>
+                <directory>target</directory>
+            </build>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <package.environment>local</package.environment>
+                <rp.build.warname>Taishin</rp.build.warname>
+                <maven.war.webxml>src/main/webapp/WEB-INF/web.xml</maven.war.webxml> <!-- set up webxml location -->
+            </properties>
+        </profile>
+    </profiles>
+    <build>
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+                <excludes>
+                    <exclude>local/</exclude>
+                    <exclude>test/</exclude>
+                    <exclude>taishinapi/</exclude>
+                    <exclude>taishinuat/</exclude>
+                    <exclude>taishinoaapi/</exclude>
+                    <exclude>taishinoa/</exclude>
+                    <exclude>api_taishinoa/</exclude>
+                    <exclude>backend_taishinoaapi/</exclude>
+                </excludes>
+            </resource>
+        </resources>
+        <finalName>bcs</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                        <addMavenDescriptor>false</addMavenDescriptor> <!-- remove maven folder -->
+                    </archive>
+                    <webResources>
+                        <resource>
+                            <directory>src/main/resources/${package.environment}/web</directory>
+                            <targetPath>WEB-INF/html/BCS/Views/Common</targetPath>
+                            <excludes>
+                                <exclude>web.xml</exclude>
+                            </excludes>
+                        </resource>
+                        <resource>
+                            <directory>src/main/resources/${package.environment}</directory>
+                            <targetPath>WEB-INF/classes</targetPath>
+                            <excludes>
+                                <exclude>web/</exclude>
+                            </excludes>
+                        </resource>
+                    </webResources>
+                    <!-- web.xml is not mandatory since JavaEE 5 -->
+                    <failOnMissingWebXml>true</failOnMissingWebXml>
+                    <!-- com.bcs.X jar & log jar 要包進去 -->
+<!--                    <packagingExcludes>-->
+<!--                        %regex[WEB-INF/lib/(?!log4j.*\.jar)(?!slf4j.*\.jar)(?!logging.*\.jar)(?!com.bcs.*\.jar).*\.jar]-->
+<!--                    </packagingExcludes>-->
+<!--                      new -->
+                    <packagingExcludes>
+                        WEB-INF/lib/*pwd.jar,
+                        WEB-INF/lib/*TSIB.jar
+                    </packagingExcludes>
+                    <warName>${rp.build.warname}</warName> <!-- set up war name -->
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

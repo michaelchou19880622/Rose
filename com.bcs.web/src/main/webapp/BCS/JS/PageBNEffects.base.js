@@ -83,10 +83,10 @@ $(function(){
 			alert('請填寫結束日期！');
 			return false;
 		}
-//		if(!moment(startDate).add(31, 'days').isAfter(moment(endDate))){
-//			alert('起始日期與結束日期之間不可相隔超過一個月！');
-//			return false;
-//		}
+		if(!moment(startDate).add(31, 'days').isAfter(moment(endDate))){
+			alert('起始日期與結束日期之間不可相隔超過一個月！');
+			return false;
+		}
 		if(moment(startDate).isAfter(moment(endDate))){
 			alert('起始日期不可大於結束日期！');
 			return false;

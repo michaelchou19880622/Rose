@@ -1,7 +1,12 @@
 package com.bcs.core.db.entity;
 
-import java.util.Date;
-import java.util.List;
+import com.bcs.core.json.AbstractBcsEntity;
+import com.bcs.core.json.CustomDateSerializer;
+import com.bcs.core.utils.ObjectUtil;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,166 +15,93 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import java.util.Date;
+import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
-import com.bcs.core.json.AbstractBcsEntity;
-import com.bcs.core.json.CustomDateSerializer;
-import com.bcs.core.utils.ObjectUtil;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
+/**
+ * @author ???
+ */
+@Getter
+@Setter
 @Entity
 @Table(name = "BCS_SYSTEM_LOG",
-indexes = {
-	       @Index(name = "INDEX_0", columnList = "TARGET"),
-	       @Index(name = "INDEX_1", columnList = "ACTION"),
-	       @Index(name = "INDEX_2", columnList = "LEVEL") ,
-	       @Index(name = "INDEX_4", columnList = "MODIFY_USER") ,
-	       @Index(name = "INDEX_5", columnList = "REFERENCE_ID") ,
-	       @Index(name = "INDEX_5", columnList = "MODIFY_DAY") ,
-	})
-public class SystemLog extends AbstractBcsEntity{
-	private static final long serialVersionUID = 1L;
+        indexes = {
+                @Index(name = "INDEX_0", columnList = "TARGET"),
+                @Index(name = "INDEX_1", columnList = "ACTION"),
+                @Index(name = "INDEX_2", columnList = "LEVEL"),
+                @Index(name = "INDEX_4", columnList = "MODIFY_USER"),
+                @Index(name = "INDEX_5", columnList = "REFERENCE_ID"),
+                @Index(name = "INDEX_5", columnList = "MODIFY_DAY"),
+        })
+public class SystemLog extends AbstractBcsEntity {
+    private static final long serialVersionUID = 1L;
 
-	public static final String SYSTEM_EVENT = "SYSTEM";
-	
-	public static final String SYSTEM_LOG_LEVEL_ERROR = "ERROR";
-	public static final String SYSTEM_LOG_LEVEL_INFO = "INFO";
-	public static final String SYSTEM_LOG_LEVEL_DEBUG = "DEBUG";
-	public static final String SYSTEM_LOG_LEVEL_WARN = "WARN";
-	public static final String SYSTEM_LOG_LEVEL_TEST = "TEST";
-	
-	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column(name = "LOG_ID")
-	private Long logId;
+    public static final String SYSTEM_EVENT = "SYSTEM";
 
-	@Column(name = "TARGET", columnDefinition="nvarchar(50)")
-	private String target;
+    public static final String SYSTEM_LOG_LEVEL_ERROR = "ERROR";
+    public static final String SYSTEM_LOG_LEVEL_INFO = "INFO";
+    public static final String SYSTEM_LOG_LEVEL_DEBUG = "DEBUG";
+    public static final String SYSTEM_LOG_LEVEL_WARN = "WARN";
+    public static final String SYSTEM_LOG_LEVEL_TEST = "TEST";
 
-	@Column(name = "ACTION", columnDefinition="nvarchar(50)")
-	private String action;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "LOG_ID")
+    private Long logId;
 
-	@Column(name = "LEVEL", columnDefinition="nvarchar(50)")
-	private String level;
+    @Column(name = "TARGET", columnDefinition = "nvarchar(50)")
+    private String target;
 
-	@Column(name = "MODIFY_USER", columnDefinition="nvarchar(50)")
-	private String modifyUser;
-	
-	@JsonSerialize(using=CustomDateSerializer.class)
-	@Column(name = "MODIFY_TIME")
-	private Date modifyTime;
+    @Column(name = "ACTION", columnDefinition = "nvarchar(50)")
+    private String action;
 
-	@Column(name = "CONTENT", columnDefinition="nvarchar(1000)")
-	private String content;
-	
-	@Column(name = "REFERENCE_ID", columnDefinition="nvarchar(200)")
-	private String referenceId;
+    @Column(name = "LEVEL", columnDefinition = "nvarchar(50)")
+    private String level;
 
-	@Column(name = "MODIFY_DAY", columnDefinition="nvarchar(10)")
-	private String modifyDay;
+    @Column(name = "MODIFY_USER", columnDefinition = "nvarchar(50)")
+    private String modifyUser;
 
-	@Column(name = "SYSTEM_IP", columnDefinition="nvarchar(50)")
-	private String systemIp;
+    @JsonSerialize(using = CustomDateSerializer.class)
+    @Column(name = "MODIFY_TIME")
+    private Date modifyTime;
 
-	public Long getLogId() {
-		return logId;
-	}
+    @Column(name = "CONTENT", columnDefinition = "nvarchar(1000)")
+    private String content;
 
-	public void setLogId(Long logId) {
-		this.logId = logId;
-	}
+    @Column(name = "REFERENCE_ID", columnDefinition = "nvarchar(200)")
+    private String referenceId;
 
-	public String getTarget() {
-		return target;
-	}
+    @Column(name = "MODIFY_DAY", columnDefinition = "nvarchar(10)")
+    private String modifyDay;
 
-	public void setTarget(String target) {
-		this.target = target;
-	}
+    @Column(name = "SYSTEM_IP", columnDefinition = "nvarchar(50)")
+    private String systemIp;
 
-	public String getAction() {
-		return action;
-	}
+    public void setContent(String content) {
+        this.content = content;
+        if (StringUtils.isNotBlank(this.content) && this.content.length() > 1000) {
+            this.content = this.content.substring(0, 999);
+        }
+    }
 
-	public void setAction(String action) {
-		this.action = action;
-	}
+    @SuppressWarnings("unchecked")
+    public void setContent(Object content) {
+        if (content instanceof List) {
+            List<Object> list = (List<Object>) content;
+            this.content = ObjectUtil.listObjectToString(list);
+        } else {
+            this.content = ObjectUtil.objectToJsonStr(content);
+        }
 
-	public String getLevel() {
-		return level;
-	}
+        if (this.content.length() > 1000) {
+            this.content = this.content.substring(0, 999);
+        }
+    }
 
-	public void setLevel(String level) {
-		this.level = level;
-	}
-
-	public String getModifyUser() {
-		return modifyUser;
-	}
-
-	public void setModifyUser(String modifyUser) {
-		this.modifyUser = modifyUser;
-	}
-
-	public Date getModifyTime() {
-		return modifyTime;
-	}
-
-	public void setModifyTime(Date modifyTime) {
-		this.modifyTime = modifyTime;
-	}
-
-	public String getContent() {
-		return content;
-	}
-
-	public void setContent(String content) {
-		this.content = content;
-		if(StringUtils.isNotBlank(this.content) && this.content.length() > 1000){
-			this.content = this.content.substring(0, 999);
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	public void setContent(Object content) {
-		if(content instanceof List){
-			List<Object> list = (List<Object>) content;
-			this.content = ObjectUtil.listObjectToString(list);
-		}
-		else{
-			this.content = ObjectUtil.objectToJsonStr(content);
-		}
-		
-		if(this.content.length() > 1000){
-			this.content = this.content.substring(0, 999);
-		}
-	}
-
-	public String getReferenceId() {
-		return referenceId;
-	}
-
-	public void setReferenceId(String referenceId) {
-		this.referenceId = referenceId;
-		if(StringUtils.isNotBlank(this.referenceId) && this.referenceId.length() > 200){
-			this.referenceId = this.referenceId.substring(0, 199);
-		}
-	}
-
-	public String getModifyDay() {
-		return modifyDay;
-	}
-
-	public void setModifyDay(String modifyDay) {
-		this.modifyDay = modifyDay;
-	}
-
-	public String getSystemIp() {
-		return systemIp;
-	}
-
-	public void setSystemIp(String systemIp) {
-		this.systemIp = systemIp;
-	}
+    public void setReferenceId(String referenceId) {
+        this.referenceId = referenceId;
+        if (StringUtils.isNotBlank(this.referenceId) && this.referenceId.length() > 200) {
+            this.referenceId = this.referenceId.substring(0, 199);
+        }
+    }
 }

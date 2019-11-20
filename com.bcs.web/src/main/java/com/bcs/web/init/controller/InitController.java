@@ -3,6 +3,7 @@ package com.bcs.web.init.controller;
 import com.bcs.core.bot.record.service.CatchRecordReceive;
 import com.bcs.core.bot.scheduler.service.LiveChatTaskService;
 import com.bcs.core.bot.scheduler.service.SchedulerService;
+import com.bcs.core.db.service.SystemLogService;
 import com.bcs.core.interactive.service.InteractiveService;
 import com.bcs.core.record.service.CatchHandleMsgReceiveTimeout;
 import com.bcs.core.record.service.CatchRecordBinded;
@@ -18,19 +19,19 @@ import com.bcs.core.taishin.circle.service.BillingNoticeSendMsgService;
 import com.bcs.core.utils.DataSyncUtil;
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.web.ui.service.LinePointSchedulerService;
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 /**
  * Initial Method When Application Startup
  *
  * @author ???
  */
+@Slf4j
 @Controller
 @RequestMapping("/init")
 public class InitController {
@@ -65,13 +66,8 @@ public class InitController {
     private PnpSMSMsgService pnpSmsMsgService;
     @Autowired
     private LinePointSchedulerService linePointschedulerService;
-
-    /**
-     * Logger
-     */
-    private static Logger logger = Logger.getLogger(InitController.class);
-
-		
+    @Autowired
+    private SystemLogService systemLogService;
 
     /**
      * Init.
@@ -85,11 +81,11 @@ public class InitController {
         billingNoticeSendMsgServiceStartCircle();
         loadFtpPnpDataTaskStartCircle();
         pnpMsgServiceStartCircle();
-        pnpSMSMsgServiceStartCircle();
+        pnpSmsMsgServiceStartCircle();
         linePointschedulerServiceStartCircle(); //這個service註解掉後，預約發送可以正常發送。暫時先註解掉 - by Michael 20190919
         threadStart();
         liveChatTaskServiceCheckUserStatus();
-
+        cleanSystemLogTask();
     }
 
     /**
@@ -97,11 +93,11 @@ public class InitController {
      */
     private void registerServer() {
         try {
-            logger.info("init registerServer");
-            logger.info("init file.encoding:" + System.getProperty("file.encoding"));
+            log.info("init registerServer");
+            log.info("init file.encoding:" + System.getProperty("file.encoding"));
             DataSyncUtil.registerServer();
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
     }
 
@@ -110,10 +106,10 @@ public class InitController {
      */
     private void loadScheduleFromDb() {
         try {
-            logger.info("init loadScheduleFromDB");
+            log.info("init loadScheduleFromDB");
             schedulerService.loadScheduleFromDB();
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
     }
 
@@ -122,10 +118,10 @@ public class InitController {
      */
     private void loadInteractiveMap() {
         try {
-            logger.info("init loadInteractiveMap");
+            log.info("init loadInteractiveMap");
             interactiveService.loadInteractiveMap();
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
     }
 
@@ -136,13 +132,13 @@ public class InitController {
         try {
             /* AP */
             if (CoreConfigReader.isBillingNoticeFtpDownload()) {
-                logger.info("init Billing Notice Data Parse ");
+                log.info("init Billing Notice Data Parse ");
                 billingNoticeFtpService.startCircle();
             } else {
-                logger.info("isBillingNoticeFtpDownload: false");
+                log.info("isBillingNoticeFtpDownload: false");
             }
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
     }
 
@@ -153,13 +149,13 @@ public class InitController {
         try {
             /* WEB */
             if (CoreConfigReader.isBillingNoticeSendMsg()) {
-                logger.info("init Billing Notice send ");
+                log.info("init Billing Notice send ");
                 billingNoticeSendMsgService.startCircle();
             } else {
-                logger.info("isBillingNoticeSendMsg: false");
+                log.info("isBillingNoticeSendMsg: false");
             }
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
     }
 
@@ -171,13 +167,13 @@ public class InitController {
         try {
             /* WEB */
             if (CoreConfigReader.isPNPFtpDownload()) {
-                logger.info("init PNP FTP flow ");
+                log.info("init PNP FTP flow ");
                 loadFtpPnpDataTask.startCircle();
             } else {
-                logger.info("isPNPFtpDownload: false");
+                log.info("isPNPFtpDownload: false");
             }
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
     }
 
@@ -188,35 +184,35 @@ public class InitController {
         try {
             /* WEB */
             if (CoreConfigReader.isPNPSendMsg()) {
-                logger.info("init pnpPushMsg flow ");
+                log.info("init pnpPushMsg flow ");
                 /* PNP pnpPushMsg flow */
                 pnpPushMsgService.startCircle();
-                logger.info("init PNP PHONE NUMBER PUSH flow ");
+                log.info("init PNP PHONE NUMBER PUSH flow ");
                 //PNP PHONE NUMBER PUSH flow
                 pnpMsgService.startCircle();
             } else {
-                logger.info("isPNPSendMsg: false");
+                log.info("isPNPSendMsg: false");
             }
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
     }
 
     /**
      * 8
      */
-    private void pnpSMSMsgServiceStartCircle() {
+    private void pnpSmsMsgServiceStartCircle() {
         //PNP transfer file to SMS flow
         try {
             /* WEB */
             if (CoreConfigReader.isPNPFtpDownload()) {
-                logger.info("init PNP transfer file to SMS flow ");
+                log.info("init PNP transfer file to SMS flow ");
                 pnpSmsMsgService.startCircle();
             } else {
-                logger.info("isPNPFtpDownload: false");
+                log.info("isPNPFtpDownload: false");
             }
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
     }
 
@@ -225,10 +221,10 @@ public class InitController {
      */
     private void linePointschedulerServiceStartCircle() {
         try {
-            logger.info("init LinePoint Scheduler ");
+            log.info("init LinePoint Scheduler ");
             linePointschedulerService.startCircle();
         } catch (Throwable e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
     }
 
@@ -237,22 +233,19 @@ public class InitController {
      */
     private void threadStart() {
         try {
-            Thread thread = new Thread(
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            catchRecordBinded.loadInitData();
-                            catchRecordOpAddReceive.loadInitData();
-                            catchRecordOpBlockedReceive.loadInitData();
-                            catchRecordReceive.loadInitData();
-                            catchHandleMsgReceiveTimeout.loadInitData();
-                        }
-                    });
+            Thread thread = new Thread(() -> {
+                catchRecordBinded.loadInitData();
+                catchRecordOpAddReceive.loadInitData();
+                catchRecordOpBlockedReceive.loadInitData();
+                catchRecordReceive.loadInitData();
+                catchHandleMsgReceiveTimeout.loadInitData();
+            });
             thread.start();
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
     }
+
 
     /**
      * 11. 定期檢查 User Status，避免卡在真人客服頻道
@@ -261,7 +254,20 @@ public class InitController {
         try {
             liveChatTaskService.checkUserStatus();
         } catch (Exception e) {
-            logger.error(e);
+            log.error("", e);
+        }
+    }
+
+    /**
+     * 12. 清System Log
+     */
+    private void cleanSystemLogTask() {
+        try {
+            int scheduleDay = 1;
+            int deleteRangeDay = 30;
+            systemLogService.deleteLogByRange(scheduleDay, deleteRangeDay);
+        } catch (Exception e) {
+            log.error("", e);
         }
     }
 }

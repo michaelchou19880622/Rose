@@ -2,6 +2,8 @@ package com.bcs.core.db.service;
 
 import com.bcs.core.db.entity.SystemLog;
 import com.bcs.core.db.repository.SystemLogRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 public class SystemLogService {
 
@@ -82,7 +85,13 @@ public class SystemLogService {
         scheduler.scheduleAtFixedRate(() -> {
             Thread.currentThread().setName("System-Log-Clean-Scheduled-" + Thread.currentThread().getId());
             List<SystemLog> expiredLogList = systemLogRepository.findByModifyTimeBefore(DateUtils.addDays(new Date(), -deleteRangeDay));
-            systemLogRepository.delete(expiredLogList);
+            log.info("Start Clean Expired System Log!! Size:{}", expiredLogList.size());
+            if (CollectionUtils.isNotEmpty(expiredLogList)) {
+                systemLogRepository.delete(expiredLogList);
+                log.info("Clean done!!");
+            } else {
+                log.info("Expired System Log is Not Found!!");
+            }
         }, 0, scheduleDay, TimeUnit.DAYS);
     }
 }

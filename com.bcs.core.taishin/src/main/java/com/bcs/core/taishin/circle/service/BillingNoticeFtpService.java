@@ -214,7 +214,7 @@ public class BillingNoticeFtpService {
 
                 // TemplateTitle => Details
                 Map<String, List<BillingNoticeFtpDetail>> resultMap = parseDetail(fileContents);
-
+                logger.info("originalFileType : " + originalFileType);
                 for (Map.Entry<String, List<BillingNoticeFtpDetail>> entry : resultMap.entrySet()) {
                     String key = entry.getKey();
                     // get the Main Template
@@ -225,7 +225,7 @@ public class BillingNoticeFtpService {
                         // 拿不到範本取default
                         List<BillingNoticeContentTemplateMsg> defaultTemplates = billingNoticeContentTemplateMsgRepository.findByTemplateTitleAndProductSwitchOn("default");
                         if (defaultTemplates == null || defaultTemplates.isEmpty()) {
-                            logger.error("Default Template is not exist!");
+                            logger.info("Default Template is not exist!");
                         } else {
                             template = defaultTemplates.get(0);
                         }
@@ -233,7 +233,7 @@ public class BillingNoticeFtpService {
                         // carousel button
                         template = templates.get(0);
                     }
-
+                    logger.info("template : "+ template);
                     if (template == null) {
                         logger.error("Template is not exist!:" + key);
                     } else {

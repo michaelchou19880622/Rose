@@ -457,10 +457,10 @@ public class BCSBillingNoticeTemplateMsgController {
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser,
 			@RequestParam  String date, 
-			@RequestParam  String title,
+			@RequestParam  String templateName,
 			@RequestParam  String sendType) throws IOException {		
 		try{
-			String count = contentTemplateMsgService.getBNEffectsDetailTotalPages(date, title, sendType);
+			String count = contentTemplateMsgService.getBNEffectsDetailTotalPages(date, templateName, sendType);
 			return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count + "\"}", HttpStatus.OK);
 		}
 		catch(Exception e){
@@ -482,13 +482,13 @@ public class BCSBillingNoticeTemplateMsgController {
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser,
 			@RequestParam  String date, 
-			@RequestParam  String title,
+			@RequestParam  String templateName,
 			@RequestParam  String sendType,
 			@RequestParam(value = "page", required=false) Integer page) throws IOException {
 		logger.info("page1: " + page);
 		
 		try{
-			Map<String, List<String>> result = contentTemplateMsgService.getBNEffectsDetail(date, title, sendType, page);
+			Map<String, List<String>> result = contentTemplateMsgService.getBNEffectsDetail(date, templateName, sendType, page);
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		}
 		catch(Exception e){

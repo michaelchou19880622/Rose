@@ -367,7 +367,7 @@ public class SendingMsgService {
 						
 						// Set User Status
 						receive.setUserStatus(lineUser.getStatus());
-						
+						logger.info("receive : " + receive);
 				    	// Save Record 
 						ApplicationContextProvider.getApplicationContext().getBean(MsgBotReceiveService.class).bulkPersist(receive);
 					} catch (Exception e) {

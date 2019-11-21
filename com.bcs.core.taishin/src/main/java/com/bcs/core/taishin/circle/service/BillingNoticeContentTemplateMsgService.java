@@ -588,7 +588,7 @@ public class BillingNoticeContentTemplateMsgService {
 		+"AND D.MODIFY_TIME <  DATEADD(DAY, 1, '" + date + "') "
 		+"AND T.TEMPLATE_ID = N'" + templateName +"' "
 		+"AND M.SEND_TYPE = '"+ sendType +"' "
-		+"AND (D.STATUS = 'FAIL' or D.STATUS = 'COMPLETE') "
+		//+"AND (D.STATUS = 'FAIL' or D.STATUS = 'COMPLETE') "
 		+") as result ";
     	logger.info("str1: " + queryString);
     	
@@ -637,7 +637,7 @@ public class BillingNoticeContentTemplateMsgService {
 		+"AND D.MODIFY_TIME <  DATEADD(DAY, 1, '" + date + "') "
 		+"AND T.TEMPLATE_ID = N'" + templateName +"' "
 		+"AND M.SEND_TYPE = '"+ sendType +"' "
-		+"AND (D.STATUS = 'FAIL' or D.STATUS = 'COMPLETE') "
+		//+"AND (D.STATUS = 'FAIL' or D.STATUS = 'COMPLETE') "
 		+") as result "
 		+"where RowNum >= ?1 and RowNum < ?2 ";
 		

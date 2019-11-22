@@ -153,7 +153,9 @@ $(function () {
 
                         for (var i = 0; i < buttonLabelArray.length; i++) {
                             console.log('Label : ' + buttonLabelArray[i] + ' Color : ' + buttonColorArray[i].replace('#') + ' Url : ' + buttonUrlArray[i])
-                            addBtn(buttonLabelArray[i], buttonColorArray[i], buttonUrlArray[i])
+                            if (buttonLabelArray[i] !== '' && buttonColorArray[i] !== '' && buttonUrlArray !== '') {
+                                addBtn(buttonLabelArray[i], buttonColorArray[i], buttonUrlArray[i])
+                            }
                         }
 
                         styleBtnClick('bold', response.headerTextWeight, 'titleTextBoldBtn')

@@ -87,6 +87,7 @@
     </dependencies>
     <packaging>war</packaging>
 
+    <!-- Old  -->
     <profiles>
         <profile>
             <id>taishinapi</id> <!-- 台新測試機api -->
@@ -157,12 +158,13 @@
                 <package.environment>taishinoa</package.environment>
                 <rp.build.warname>taishinoa</rp.build.warname>
                 <maven.war.webxml>src/main/resources/taishinoa/web/web.xml
-                </maven.war.webxml> <!-- set up webxml location -->
+                </maven.war.webxml>
             </properties>
         </profile>
+        <!-- Old  -->
 
         <profile>
-            <id>uat-ap</id> <!-- 台新測試機api -->
+            <id>uat-ap</id>
             <build>
                 <directory>target/UAT-AP</directory>
             </build>
@@ -170,11 +172,11 @@
                 <package.environment>uat-ap</package.environment>
                 <rp.build.warname>taishinapi</rp.build.warname>
                 <maven.war.webxml>src/main/resources/uat-ap/web/web.xml
-                </maven.war.webxml> <!-- set up webxml location -->
+                </maven.war.webxml>
             </properties>
         </profile>
         <profile>
-            <id>uat-be</id> <!-- 台新測試機後台 -->
+            <id>uat-be</id>
             <build>
                 <directory>target/UAT-BE</directory>
             </build>
@@ -182,11 +184,11 @@
                 <package.environment>uat-be</package.environment>
                 <rp.build.warname>taishinuat</rp.build.warname>
                 <maven.war.webxml>src/main/resources/uat-be/web/web.xml
-                </maven.war.webxml> <!-- set up webxml location -->
+                </maven.war.webxml>
             </properties>
         </profile>
         <profile>
-            <id>prod-be-oa</id> <!-- 台新正式機後台 -->
+            <id>prod-be-oa</id>
             <build>
                 <directory>target/PROD-BE</directory>
             </build>
@@ -194,11 +196,11 @@
                 <package.environment>prod-be-oa</package.environment>
                 <rp.build.warname>taishinoa</rp.build.warname>
                 <maven.war.webxml>src/main/resources/prod-be-oa/web/web.xml
-                </maven.war.webxml> <!-- set up webxml location -->
+                </maven.war.webxml>
             </properties>
         </profile>
         <profile>
-            <id>prod-be-oaapi</id> <!--  台新正式機後台 的 api -->
+            <id>prod-be-oaapi</id>
             <build>
                 <directory>target/PROD-BE</directory>
             </build>
@@ -206,11 +208,11 @@
                 <package.environment>prod-be-oaapi</package.environment>
                 <rp.build.warname>taishinoaapi</rp.build.warname>
                 <maven.war.webxml>src/main/resources/prod-be-oaapi/web/web.xml
-                </maven.war.webxml> <!-- set up webxml location -->
+                </maven.war.webxml>
             </properties>
         </profile>
         <profile>
-            <id>prod-ap-oa</id> <!-- 台新正式機api的後台 -->
+            <id>prod-ap-oa</id>
             <build>
                 <directory>target/PROD-AP</directory>
             </build>
@@ -218,11 +220,11 @@
                 <package.environment>prod-ap-oa</package.environment>
                 <rp.build.warname>taishinoa</rp.build.warname>
                 <maven.war.webxml>src/main/resources/prod-ap-oa/web/web.xml
-                </maven.war.webxml> <!-- set up webxml location -->
+                </maven.war.webxml>
             </properties>
         </profile>
         <profile>
-            <id>prod-ap-oaapi</id> <!-- 台新正式機api -->
+            <id>prod-ap-oaapi</id>
             <build>
                 <directory>target/PROD-AP</directory>
             </build>
@@ -230,7 +232,7 @@
                 <package.environment>prod-ap-oaapi</package.environment>
                 <rp.build.warname>taishinoaapi</rp.build.warname>
                 <maven.war.webxml>src/main/resources/prod-ap-oaapi/web/web.xml
-                </maven.war.webxml> <!-- set up webxml location -->
+                </maven.war.webxml>
             </properties>
         </profile>
         <profile>
@@ -245,7 +247,7 @@
             </properties>
         </profile>
         <profile>
-            <id>local</id>
+            <id>linux</id>
             <build>
                 <directory>target</directory>
             </build>
@@ -253,7 +255,7 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <package.environment>local</package.environment>
+                <package.environment>linux</package.environment>
                 <rp.build.warname>Taishin</rp.build.warname>
                 <maven.war.webxml>src/main/webapp/WEB-INF/web.xml</maven.war.webxml> <!-- set up webxml location -->
             </properties>
@@ -264,6 +266,7 @@
             <resource>
                 <directory>${basedir}/src/main/resources</directory>
                 <excludes>
+                    <!-- Old  -->
                     <exclude>local/</exclude>
                     <exclude>test/</exclude>
                     <exclude>taishinapi/</exclude>
@@ -272,7 +275,10 @@
                     <exclude>taishinoa/</exclude>
                     <exclude>api_taishinoa/</exclude>
                     <exclude>backend_taishinoaapi/</exclude>
+                    <!-- Old  -->
 
+                    <exclude>windows/</exclude>
+                    <exclude>linux/</exclude>
                     <exclude>uat-ap/</exclude>
                     <exclude>uat-be/</exclude>
                     <exclude>prod-be-oa/</exclude>

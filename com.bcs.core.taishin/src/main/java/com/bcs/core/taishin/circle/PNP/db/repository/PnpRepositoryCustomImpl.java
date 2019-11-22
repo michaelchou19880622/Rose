@@ -12,24 +12,18 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainMing;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainMitake;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainUnica;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFTPType;
-import com.bcs.core.taishin.circle.PNP.scheduler.PnpPNPMsgService;
 import com.bcs.core.taishin.circle.db.entity.CircleEntityManagerControl;
+import com.bcs.core.utils.DataUtils;
 import com.google.common.collect.Lists;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.JdbcTemplate;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceContext;
 import java.math.BigInteger;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -40,238 +34,27 @@ import java.util.Set;
 /**
  * @author ???
  */
+@Slf4j
 @Repository
 public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
     @PersistenceContext
     private EntityManager entityManager;
-    /**
-     * Logger
-     */
-    private static Logger logger = Logger.getLogger(PnpRepositoryCustomImpl.class);
-
-
-    @Override
-    @Transactional(rollbackFor = Exception.class, timeout = 3000)
-    public void batchInsertPnpDetailMitake(final List<PnpDetailMitake> list) {
-
-        if (CollectionUtils.isEmpty(list)) {
-            return;
-        }
-        final Timestamp now = new Timestamp(Calendar.getInstance().getTime().getTime());
-        String INSERT = "INSERT INTO BCS_PNP_DETAIL_MITAKE" +
-                "(CREAT_TIME, MODIFY_TIME, MSG, PHONE, PHONE_HASH, PNP_MAIN_ID, PNP_TIME, PROC_FLOW, PROC_STAGE, SEND_TIME, SMS_TIME,"
-                + " [SOURCE],STATUS,  UID, LINE_PUSH_TIME, DEST_CATEGORY, DEST_NAME)" +
-                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-        logger.info("batchInsertPnpDetailMitake start");
-        List<List<PnpDetailMitake>> batchLists = Lists.partition(list, CircleEntityManagerControl.batchSize);
-        for (final List<PnpDetailMitake> batch : batchLists) {
-            jdbcTemplate.batchUpdate(INSERT, new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    PnpDetailMitake detail = batch.get(i);
-                    ps.setTimestamp(1, now);
-                    ps.setTimestamp(2, now);
-                    ps.setString(3, detail.getMsg());
-                    ps.setString(4, detail.getPhone());
-                    ps.setString(5, detail.getPhoneHash());
-                    ps.setLong(6, detail.getPnpMainId());
-                    ps.setTimestamp(7, detail.getPnpTime() != null ? new Timestamp(detail.getPnpTime().getTime()) : null);
-                    ps.setString(8, detail.getProcFlow());
-                    ps.setString(9, detail.getProcStage());
-                    ps.setTimestamp(10, detail.getSendTime() != null ? new Timestamp(detail.getSendTime().getTime()) : null);
-                    ps.setTimestamp(11, detail.getSmsTime() != null ? new Timestamp(detail.getSmsTime().getTime()) : null);
-                    ps.setString(12, detail.getSource());
-                    ps.setString(13, detail.getStatus());
-                    ps.setString(14, detail.getUid());
-                    ps.setTimestamp(15, detail.getLinePushTime() != null ? new Timestamp(detail.getLinePushTime().getTime()) : null);
-                    ps.setString(16, detail.getDestCategory());
-                    ps.setString(17, detail.getDestName());
-                }
-
-                @Override
-                public int getBatchSize() {
-                    return batch.size();
-                }
-            });
-        }
-        logger.info("batchInsertPnpDetailMitake end");
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class, timeout = 3000)
-    public void batchInsertPnpDetailMing(final List<PnpDetailMing> list) {
-
-        if (CollectionUtils.isEmpty(list)) {
-            return;
-        }
-        final Timestamp now = new Timestamp(Calendar.getInstance().getTime().getTime());
-        String INSERT = "INSERT INTO BCS_PNP_DETAIL_MING" +
-                " (CREAT_TIME, LINE_PUSH_TIME, MODIFY_TIME, MSG, PHONE, PHONE_HASH, PNP_MAIN_ID, PNP_TIME, PROC_FLOW, PROC_STAGE, SEND_TIME, SMS_TIME, [SOURCE]," + 
-                " STATUS, UID, SN, VARIABLE1, VARIABLE2, ACCOUNT1, ACCOUNT2, DETAIL_SCHEDULE_TIME, KEEP_SECOND)" +
-                " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-        logger.info("batchInsertPnpDetailMing start");
-        List<List<PnpDetailMing>> batchLists = Lists.partition(list, CircleEntityManagerControl.batchSize);
-        for (final List<PnpDetailMing> batch : batchLists) {
-            jdbcTemplate.batchUpdate(INSERT, new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    PnpDetailMing detail = batch.get(i);
-                    ps.setTimestamp(1, now);
-                    ps.setTimestamp(2, detail.getLinePushTime() != null ? new Timestamp(detail.getLinePushTime().getTime()) : null);
-                    ps.setTimestamp(3, now);
-                    ps.setString(4, detail.getMsg());
-                    ps.setString(5, detail.getPhone());
-                    ps.setString(6, detail.getPhoneHash());
-                    ps.setLong(7, detail.getPnpMainId());
-                    ps.setTimestamp(8, detail.getPnpTime() != null ? new Timestamp(detail.getPnpTime().getTime()) : null);
-                    ps.setString(9, detail.getProcFlow());
-                    ps.setString(10, detail.getProcStage());
-                    ps.setTimestamp(11, detail.getSendTime() != null ? new Timestamp(detail.getSendTime().getTime()) : null);
-                    ps.setTimestamp(12, detail.getSmsTime() != null ? new Timestamp(detail.getSmsTime().getTime()) : null);
-                    ps.setString(13, detail.getSource());
-                    ps.setString(14, detail.getStatus());
-                    ps.setString(15, detail.getUid());
-                    ps.setString(16, detail.getSn());
-                    ps.setString(17, detail.getVariable1());
-                    ps.setString(18, detail.getVariable2());
-                    ps.setString(19, detail.getAccount1());
-                    ps.setString(20, detail.getAccount2());
-                    ps.setString(21, detail.getDetailScheduleTime());
-                    ps.setString(22, detail.getKeepSecond());
-                }
-
-                @Override
-                public int getBatchSize() {
-                    return batch.size();
-                }
-            });
-        }
-        logger.info("batchInsertPnpDetailMing end");
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class, timeout = 3000)
-    public void batchInsertPnpDetailUnica(final List<PnpDetailUnica> list) {
-
-        if (CollectionUtils.isEmpty(list)) {
-            return;
-        }
-        final Timestamp now = new Timestamp(Calendar.getInstance().getTime().getTime());
-        String INSERT = "INSERT INTO BCS_PNP_DETAIL_UNICA" +
-                "(CREAT_TIME, MODIFY_TIME, MSG, PHONE, PHONE_HASH, PNP_MAIN_ID, PNP_TIME,  PROC_FLOW, PROC_STAGE, SEND_TIME, SMS_TIME, [SOURCE], "
-                + "STATUS, UID, LINE_PUSH_TIME, CAMPAIGN_ID, DEST_NAME, PID, PROGRAM_ID, SN, SEGMENT_ID, VARIABLE1, VARIABLE2)" +
-                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-        logger.info("batchInserPnpDetailUnica start");
-        List<List<PnpDetailUnica>> batchLists = Lists.partition(list, CircleEntityManagerControl.batchSize);
-        for (final List<PnpDetailUnica> batch : batchLists) {
-            jdbcTemplate.batchUpdate(INSERT, new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    PnpDetailUnica detail = batch.get(i);
-                    ps.setTimestamp(1, now);
-                    ps.setTimestamp(2, now);
-                    ps.setString(3, detail.getMsg());
-                    ps.setString(4, detail.getPhone());
-                    ps.setString(5, detail.getPhoneHash());
-                    ps.setLong(6, detail.getPnpMainId());
-                    ps.setTimestamp(7, detail.getPnpTime() != null ? new Timestamp(detail.getPnpTime().getTime()) : null);
-                    ps.setString(8, detail.getProcFlow());
-                    ps.setString(9, detail.getProcStage());
-                    ps.setTimestamp(10, detail.getSendTime() != null ? new Timestamp(detail.getSendTime().getTime()) : null);
-                    ps.setTimestamp(11, detail.getSmsTime() != null ? new Timestamp(detail.getSmsTime().getTime()) : null);
-                    ps.setString(12, detail.getSource());
-                    ps.setString(13, detail.getStatus());
-                    ps.setString(14, detail.getUid());
-                    ps.setTimestamp(15, detail.getLinePushTime() != null ? new Timestamp(detail.getLinePushTime().getTime()) : null);
-                    ps.setString(16, detail.getCampaignId());
-                    ps.setString(17, detail.getDestName());
-                    ps.setString(18, detail.getPid());
-                    ps.setString(19, detail.getProgramId());
-                    ps.setString(20, detail.getSn());
-                    ps.setString(21, detail.getSegmentId());
-                    ps.setString(22, detail.getVariable1());
-                    ps.setString(23, detail.getVariable2());
-                }
-
-                @Override
-                public int getBatchSize() {
-                    return batch.size();
-                }
-            });
-        }
-        logger.info("batchInsertPnpDetailUnica end");
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class, timeout = 3000)
-    public void batchInsertPnpDetailEvery8d(final List<PnpDetailEvery8d> list) {
-
-        if (CollectionUtils.isEmpty(list)) {
-            return;
-        }
-        final Timestamp now = new Timestamp(Calendar.getInstance().getTime().getTime());
-        String INSERT = "INSERT INTO BCS_PNP_DETAIL_EVERY8D" +
-                "(CREAT_TIME, MODIFY_TIME, MSG, PHONE, PHONE_HASH, PNP_MAIN_ID, PNP_TIME, PROC_FLOW, PROC_STAGE, SEND_TIME, SMS_TIME, [SOURCE], STATUS, UID,LINE_PUSH_TIME, CAMPAIGN_ID,"
-                + " DEST_NAME, PID, PROGRAM_ID, SN, SEGMENT_ID, VARIABLE1, VARIABLE2)" +
-                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-        logger.info("batchInserPnpDetailEvery8d start");
-        List<List<PnpDetailEvery8d>> batchLists = Lists.partition(list, CircleEntityManagerControl.batchSize);
-        for (final List<PnpDetailEvery8d> batch : batchLists) {
-            jdbcTemplate.batchUpdate(INSERT, new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    PnpDetailEvery8d detail = batch.get(i);
-                    ps.setTimestamp(1, now);
-                    ps.setTimestamp(2, now);
-                    ps.setString(3, detail.getMsg());
-                    ps.setString(4, detail.getPhone());
-                    ps.setString(5, detail.getPhoneHash());
-                    ps.setLong(6, detail.getPnpMainId());
-                    ps.setTimestamp(7, detail.getPnpTime() != null ? new Timestamp(detail.getPnpTime().getTime()) : null);
-                    ps.setString(8, detail.getProcFlow());
-                    ps.setString(9, detail.getProcStage());
-                    ps.setTimestamp(10, detail.getSendTime() != null ? new Timestamp(detail.getSendTime().getTime()) : null);
-                    ps.setTimestamp(11, detail.getSmsTime() != null ? new Timestamp(detail.getSmsTime().getTime()) : null);
-                    ps.setString(12, detail.getSource());
-                    ps.setString(13, detail.getStatus());
-                    ps.setString(14, detail.getUid());
-                    ps.setTimestamp(15, detail.getLinePushTime() != null ? new Timestamp(detail.getLinePushTime().getTime()) : null);
-                    ps.setString(16, detail.getCampaignId());
-                    ps.setString(17, detail.getDestName());
-                    ps.setString(18, detail.getPid());
-                    ps.setString(19, detail.getProgramId());
-                    ps.setString(20, detail.getSn());
-                    ps.setString(21, detail.getSegmentId());
-                    ps.setString(22, detail.getVariable1());
-                    ps.setString(23, detail.getVariable2());
-                }
-
-                @Override
-                public int getBatchSize() {
-                    return batch.size();
-                }
-            });
-        }
-        logger.info("batchInsertPnpDetailEvery8d end");
-    }
 
     /**
      * 找出BCS_PNP_DETAIL_X 第一筆 STATUS = 'PROCESS' AND PROC_STAGE = 'PNP' or 'SMS' 的MainId
      * 用此mainId 去找所有同樣MainId AND STATUS = 'PROCESS' AND PROC_STAGE = 'PNP'  or 'SMS' 的BCS_PNP_DETAIL_X 並更新STATUS
      *
-     * @see PnpPNPMsgService#sendingPnpMain()
+     * @see com.bcs.core.taishin.circle.PNP.scheduler.PnpPNPMsgService#sendingPnpMain()
      */
     @Override
     @Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
     public List<? super PnpDetail> updateStatus(PNPFTPType type, String processApName, String stage) {
-        logger.debug(" begin PNP updateStatus:" + processApName + " type:" + type);
+        log.debug(" begin PNP updateStatus:" + processApName + " type:" + type);
         try {
             /* Stage = PNP */
             List<BigInteger> detailIds = findAndUpdateProcessForUpdate(type.getDetailTable(), stage);
             if (!detailIds.isEmpty()) {
-                logger.info("Update Detail Status: [PROCESS] to [PNP][SENDING]");
+                log.info("Update Detail Status: [PROCESS] to [PNP][SENDING]");
                 List<List<BigInteger>> batchDetailIds = Lists.partition(detailIds, CircleEntityManagerControl.batchSize);
                 for (List<BigInteger> ids : batchDetailIds) {
 
@@ -281,11 +64,11 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                     }
                 }
             } else {
-                logger.info("stage:" + stage + " PNP updateStatus:" + processApName + " type:" + type + " detailIds isEmpty");
+                log.info("stage:" + stage + " PNP updateStatus:" + processApName + " type:" + type + " detailIds isEmpty");
             }
-            logger.debug(" end PNP updateStatus:" + processApName + " type:" + type);
+            log.debug(" end PNP updateStatus:" + processApName + " type:" + type);
         } catch (Exception e) {
-            logger.error(e);
+            log.error("Exception", e);
             throw e;
         }
         return Collections.emptyList();
@@ -332,104 +115,38 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 .getResultList();
     }
 
-
-    /**
-     * Find Detail Status is CheckDeliver and Change Status to SMS Sending
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
-    public List<? super PnpDetail> updateDelivertExpiredStatus(PNPFTPType type, String procApName, String stage) {
-        logger.debug(" begin PNP updateDelivertExpiredStatus:" + procApName + " type:" + type);
-        try {
-            List<BigInteger> detailIds = findAndUpdateDeliveryExpiredForUpdate(type.getDetailTable(), stage);
-            if (!detailIds.isEmpty()) {
-                logger.info("Update Status: [PNP][CHECK_DELIVERY] to [SMS][SENDING]");
-                List<List<BigInteger>> batchDetailIds = Lists.partition(detailIds, CircleEntityManagerControl.batchSize);
-                for (List<BigInteger> ids : batchDetailIds) {
-                    List<? super PnpDetail> details = findPnpDetailById(type, ids);
-                    if (!details.isEmpty()) {
-                        return details;
-                    }
-                }
-            } else {
-                logger.info("stage:" + stage + " PNP updateDelivertExpiredStatus:" + procApName + " type:" + type + " detailIds isEmpty");
-            }
-            logger.debug(" end PNP updateDelivertExpiredStatus:" + procApName + " type:" + type);
-        } catch (Exception e) {
-            logger.error(e);
-            throw e;
-        }
-        return Collections.emptyList();
-    }
-
-    /**
-     * Find Detail Status is CHECK_DELIVERY
-     * Update Status to Sending
-     * @see this#updateDelivertExpiredStatus
-     */
-    @SuppressWarnings("unchecked")
-    private List<BigInteger> findAndUpdateDeliveryExpiredForUpdate(String detailTable, String stage) {
-        String sqlString = "select d.PNP_DETAIL_ID from " + detailTable + " d " +
-                " where d.STATUS = 'CHECK_DELIVERY' " +
-                "    and d.PNP_DELIVERY_EXPIRE_TIME < getdate()" +
-                "    and d.PNP_MAIN_ID" +
-                "    in (" +
-                "           select TOP 1 a.PNP_MAIN_ID from " + detailTable + " a " +
-                "           where a.STATUS = 'CHECK_DELIVERY'" +
-                "               and a.PNP_DELIVERY_EXPIRE_TIME < getdate() " +
-                "           order by a.CREAT_TIME" +
-                "       )" +
-
-                " update " + detailTable + " " +
-                "   set PROC_STAGE = 'SMS', STATUS = :newStatus, PNP_STATUS = :pnp_status, MODIFY_TIME = :modifyTime " +
-                " where STATUS = 'CHECK_DELIVERY' " +
-                "    and PNP_DELIVERY_EXPIRE_TIME < getdate() " +
-                "    and PNP_MAIN_ID" +
-                "    in (" +
-                "           select TOP 1 a.PNP_MAIN_ID from " + detailTable + " a with(ROWLOCK) " +
-                "           where a.STATUS = 'CHECK_DELIVERY'" +
-                "               and a.PNP_DELIVERY_EXPIRE_TIME < getdate()  " +
-                "           order by a.CREAT_TIME" +
-                "       )";
-        return (List<BigInteger>) entityManager.createNativeQuery(sqlString)
-                .setParameter("newStatus", AbstractPnpMainEntity.MSG_SENDER_STATUS_SENDING)
-                .setParameter("pnp_status", AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_FAIL_SMS_PROCESS)
-                .setParameter("modifyTime", new Date())
-                .getResultList();
-    }
-
     /**
      * 找出第一個WAIT Main & STAGE = BC 並更新狀態為SENDING
      * 該WAIT MainID的 PnpDetail , status = WAIT  並更新狀態為SENDING
      */
     @Override
     @Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
-    public List<? super PnpDetail> updateStatusByStageBC(PNPFTPType type, String procApName, Set<Long> allMainIds) {
-        logger.info(String.format("ProcessApName: %s, Type: %s",procApName, type));
+    public List<? super PnpDetail> updateStatusByStageBc(PNPFTPType type, String procApName, Set<Long> allMainIds) {
+        log.info(String.format("ProcessApName: %s, Type: %s", procApName, type));
         try {
             // 找出第一筆 WAIT MAIN 並更新狀態為Sending
             Long waitMainId = findAndUpdateFirstWaitMainByStageBc(procApName, type.getMainTable());
             if (waitMainId != null) {
                 allMainIds.add(waitMainId);
             } else {
-                logger.info(String.format("Type %s Main Id Not Found with Status is Wait.", type));
+                log.info(String.format("Type %s Main Id Not Found with Status is Wait.", type));
                 return Collections.emptyList();
             }
 
             if (!allMainIds.isEmpty()) {
-                logger.info(String.format("All BC Sending Type [%s] Mid List: %s", type, allMainIds.toString()));
+                log.info(String.format("All BC Sending Type [%s] Mid List: %s", type, allMainIds.toString()));
                 //  根據MAIN_ID 更新 Detail
                 List<BigInteger> detailIds = findAndUpdateDetailByMainAndStatus(allMainIds, type);
                 if (!detailIds.isEmpty()) {
-                    logger.info("Update Detail Status: [WAIT] to [BC][SENDING]");
+                    log.info("Update Detail Status: [WAIT] to [BC][SENDING]");
                     List<List<BigInteger>> batchDetailIds = Lists.partition(detailIds, CircleEntityManagerControl.batchSize);
                     return findPnpDetailById(type, batchDetailIds.get(0));
                 }
             } else {
-                logger.info(String.format("All BC Sending Type [%s] Mid List: is Empty!!", type));
+                log.info(String.format("All BC Sending Type [%s] Mid List: is Empty!!", type));
             }
         } catch (Exception e) {
-            logger.error(e);
+            log.error("Exception", e);
             throw e;
         }
         return Collections.emptyList();
@@ -445,10 +162,6 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
         Date modifyTime = Calendar.getInstance().getTime();
         String detailTable = type.getDetailTable();
 
-//        String sqlString = "select  b.PNP_DETAIL_ID from " + detailTable + " b where  b.PNP_MAIN_ID in (:mainIds) and b.STATUS in (:status)  "
-//                + "update " + detailTable + "  set STATUS = :newStatus , MODIFY_TIME = :modifyTime  where PNP_DETAIL_ID  IN "
-//                + "	(select d.PNP_DETAIL_ID from " + detailTable + " d WITH(ROWLOCK) where  d.PNP_MAIN_ID in (:mainIds) and d.STATUS in (:status) )  ";
-
         String sql = String.format(" SELECT b.PNP_DETAIL_ID FROM %s b " +
                 " WHERE b.PNP_MAIN_ID in(:mainIds)" +
                 " AND b.STATUS in(:status)" +
@@ -462,7 +175,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 "         SELECT d.PNP_DETAIL_ID FROM %s d WITH (ROWLOCK) " +
                 "         WHERE d.PNP_MAIN_ID in(:mainIds) " +
                 "         AND d.STATUS in(:status) " +
-                " ); ", detailTable, detailTable, detailTable) ;
+                " ); ", detailTable, detailTable, detailTable);
 
         return (List<BigInteger>) entityManager.createNativeQuery(sql)
                 .setParameter("status", statusList).setParameter("mainIds", mainIds)
@@ -485,7 +198,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 " order by m.CREAT_TIME " +
 
                 " update " + mainTable +
-                " set STATUS = :newStatus, PROC_AP_NAME = :procApName, MODIFY_TIME = :modifyTime "+
+                " set STATUS = :newStatus, PROC_AP_NAME = :procApName, MODIFY_TIME = :modifyTime " +
                 "   where PNP_MAIN_ID" +
                 "       in (" +
                 "              select TOP 1 a.PNP_MAIN_ID from " + mainTable + " a WITH(ROWLOCK) " +
@@ -503,7 +216,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
         if (mains == null || mains.isEmpty()) {
             return null;
         }
-        logger.info("Update Main Status: [WAIT] to [BC][SENDING]");
+        log.info("Update Main Status: [WAIT] to [BC][SENDING]");
         return mains.get(0).longValue();
     }
 
@@ -512,7 +225,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
      */
     @Override
     public PnpMain findMainByMainId(PNPFTPType type, Long mainId) {
-        logger.info("Find Main By MainId : " + type);
+        log.info("Find Main By MainId : " + type);
         switch (type) {
             case MITAKE:
                 return findMainByMainIdMitake(mainId);
@@ -535,7 +248,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     @SuppressWarnings("unchecked")
     private PnpMainMitake findMainByMainIdMitake(Long mainId) {
 
-        String sqlString = "select  m.* from BCS_PNP_MAIN_MITAKE m  where m.PNP_MAIN_ID = :mainId ";
+        String sqlString = "select  m.* from BCS_PNP_MAIN_MITAKE m where m.PNP_MAIN_ID = :mainId ";
         List<PnpMainMitake> mains = entityManager.createNativeQuery(sqlString, PnpMainMitake.class)
                 .setParameter("mainId", mainId)
                 .getResultList();
@@ -550,8 +263,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     @SuppressWarnings("unchecked")
     private PnpMainEvery8d findMainByMainIdEvery8d(Long mainId) {
 
-        String sqlString = "select  m.* from BCS_PNP_MAIN_EVERY8D m  "
-                + "where m.PNP_MAIN_ID = :mainId ";
+        String sqlString = "select  m.* from BCS_PNP_MAIN_EVERY8D m where m.PNP_MAIN_ID = :mainId ";
         List<PnpMainEvery8d> mains = entityManager.createNativeQuery(sqlString, PnpMainEvery8d.class)
                 .setParameter("mainId", mainId)
                 .getResultList();
@@ -595,7 +307,8 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
      * @param ids  id list
      * @return PnpDetail List
      */
-    private List<? super PnpDetail> findPnpDetailById(PNPFTPType type, List<BigInteger> ids) {
+    @Override
+    public List<? super PnpDetail> findPnpDetailById(PNPFTPType type, List<BigInteger> ids) {
         switch (type) {
             case MITAKE:
                 return findPnpDetailMitake(ids);
@@ -621,9 +334,16 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     @SuppressWarnings("unchecked")
     private List<? super PnpDetail> findPnpDetailUnica(List<BigInteger> ids) {
         String sqlString = "select * from BCS_PNP_DETAIL_UNICA WHERE PNP_DETAIL_ID in (:ids) ";
-        return entityManager.createNativeQuery(sqlString, PnpDetailUnica.class)
-                .setParameter("ids", ids)
-                .getResultList();
+        List<? super PnpDetail> detailList = new ArrayList<>();
+        List<List<BigInteger>> partitionList = Lists.partition(ids, 1000);
+        for (List<BigInteger> idList : partitionList) {
+            log.info(sqlString);
+            List<PnpDetailUnica> resultList = entityManager.createNativeQuery(sqlString, PnpDetailUnica.class)
+                    .setParameter("ids", idList)
+                    .getResultList();
+            detailList.addAll(resultList);
+        }
+        return detailList;
     }
 
     /**
@@ -637,9 +357,16 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     @SuppressWarnings("unchecked")
     private List<? super PnpDetail> findPnpDetailEvery8d(List<BigInteger> ids) {
         String sqlString = "select * from BCS_PNP_DETAIL_EVERY8D WHERE PNP_DETAIL_ID in (:ids) ";
-        return entityManager.createNativeQuery(sqlString, PnpDetailEvery8d.class)
-                .setParameter("ids", ids)
-                .getResultList();
+        List<? super PnpDetail> detailList = new ArrayList<>();
+        List<List<BigInteger>> partitionList = Lists.partition(ids, 1000);
+        for (List<BigInteger> idList : partitionList) {
+            log.info(sqlString);
+            List<PnpDetailUnica> resultList = entityManager.createNativeQuery(sqlString, PnpDetailEvery8d.class)
+                    .setParameter("ids", idList)
+                    .getResultList();
+            detailList.addAll(resultList);
+        }
+        return detailList;
     }
 
     /**
@@ -653,9 +380,16 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     @SuppressWarnings("unchecked")
     private List<? super PnpDetail> findPnpDetailMing(List<BigInteger> ids) {
         String sqlString = "select * from BCS_PNP_DETAIL_MING WHERE PNP_DETAIL_ID in (:ids) ";
-        return entityManager.createNativeQuery(sqlString, PnpDetailMing.class)
-                .setParameter("ids", ids)
-                .getResultList();
+        List<? super PnpDetail> detailList = new ArrayList<>();
+        List<List<BigInteger>> partitionList = Lists.partition(ids, 1000);
+        for (List<BigInteger> idList : partitionList) {
+            log.info(sqlString);
+            List<PnpDetailUnica> resultList = entityManager.createNativeQuery(sqlString, PnpDetailMing.class)
+                    .setParameter("ids", idList)
+                    .getResultList();
+            detailList.addAll(resultList);
+        }
+        return detailList;
     }
 
     /**
@@ -669,8 +403,15 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     @SuppressWarnings("unchecked")
     private List<? super PnpDetail> findPnpDetailMitake(List<BigInteger> ids) {
         String sqlString = "select * from BCS_PNP_DETAIL_MITAKE WHERE PNP_DETAIL_ID in (:ids) ";
-        return entityManager.createNativeQuery(sqlString, PnpDetailMitake.class)
-                .setParameter("ids", ids)
-                .getResultList();
+        List<? super PnpDetail> detailList = new ArrayList<>();
+        List<List<BigInteger>> partitionList = Lists.partition(ids, 1000);
+        for (List<BigInteger> idList : partitionList) {
+            log.info(sqlString);
+            List<PnpDetailUnica> resultList = entityManager.createNativeQuery(sqlString, PnpDetailMitake.class)
+                    .setParameter("ids", idList)
+                    .getResultList();
+            detailList.addAll(resultList);
+        }
+        return detailList;
     }
 }

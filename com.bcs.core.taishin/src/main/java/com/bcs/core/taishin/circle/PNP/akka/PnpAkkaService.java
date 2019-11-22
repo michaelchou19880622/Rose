@@ -25,7 +25,7 @@ public class PnpAkkaService {
     private List<ActorRef> pnpActorList = new ArrayList<>();
 
     public PnpAkkaService() {
-        new AkkaSystemFactory<PnpMainActor>(actorSystemList, pnpActorList, PnpMainActor.class, "actorSystemList", "PnpActorList");
+        new AkkaSystemFactory<>(actorSystemList, pnpActorList, PnpMainActor.class, "actorSystemList", "PnpActorList");
     }
 
     /**
@@ -39,7 +39,7 @@ public class PnpAkkaService {
     }
 
     /**
-     * FIXME Alan 隨機選取Actor?
+     * 隨機選取Actor
      * @param actors actors
      * @return actorRef
      */
@@ -50,7 +50,6 @@ public class PnpAkkaService {
 
 
     /**
-     * FIXME Alan 是否需要搬移至工具類別？
      * 取得Host Name
      * @return Host Name
      */

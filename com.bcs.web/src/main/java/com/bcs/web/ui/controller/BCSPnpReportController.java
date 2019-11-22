@@ -5,15 +5,10 @@ import com.bcs.core.report.builder.ExportExcelBuilder;
 import com.bcs.core.report.service.ExportService;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.circle.PNP.db.service.PNPMaintainAccountModelService;
-import com.bcs.core.taishin.circle.db.service.OracleService;
-import com.bcs.core.taishin.service.PnpReportExcelService;
 import com.bcs.core.utils.DataUtils;
-import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.web.security.CurrentUser;
 import com.bcs.core.web.security.CustomUser;
-import com.bcs.core.web.ui.controller.BCSBaseController;
 import com.bcs.core.web.ui.page.enums.BcsPageEnum;
-import com.bcs.web.ui.service.LoadFileUIService;
 import com.bcs.web.ui.service.PNPMaintainUIService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,31 +23,44 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 
 /**
+ * Bcs pnp report controller.
+ *
  * @author ???
  */
 @Slf4j
 @Controller
 @RequestMapping("/bcs")
-public class BCSPnpReportController extends BCSBaseController {
-    @Autowired
-    private PNPMaintainUIService pnpMaintainUIService;
-    @Autowired
-    private PnpReportExcelService pnpReportExcelService;
-    @Autowired
-    private OracleService oraclePnpService;
-    @Autowired
+public class BCSPnpReportController {
+    private PNPMaintainUIService pnpMaintainUiService;
     private PNPMaintainAccountModelService pnpMaintainAccountModelService;
 
+    /**
+     * Instantiates a new Bcs pnp report controller.
+     *
+     * @param pnpMaintainUiService           the pnp maintain ui service
+     * @param pnpMaintainAccountModelService the pnp maintain account model service
+     */
+    @Autowired
+    public BCSPnpReportController(PNPMaintainUIService pnpMaintainUiService,
+                                  PNPMaintainAccountModelService pnpMaintainAccountModelService) {
+        this.pnpMaintainUiService = pnpMaintainUiService;
+        this.pnpMaintainAccountModelService = pnpMaintainAccountModelService;
+    }
 
+
+    /**
+     * Pnp detail report page string.
+     *
+     * @param request  the request
+     * @param response the response
+     * @return the string
+     */
     @WebServiceLog
     @GetMapping("/pnpEmployee/pnpDetailReportPage")
     public String pnpDetailReportPage(HttpServletRequest request, HttpServletResponse response) {
@@ -60,108 +68,106 @@ public class BCSPnpReportController extends BCSBaseController {
         return BcsPageEnum.PnpDetailReportPage.toString();
     }
 
+    /**
+     * Gets pnp detail report.
+     *
+     * @param request      the request
+     * @param response     the response
+     * @param customUser   the custom user
+     * @param startDate    the start date
+     * @param endDate      the end date
+     * @param account      the account
+     * @param pccCode      the pcc code
+     * @param sourceSystem the source system
+     * @param page         the page
+     * @param phoneNumber  the phone number
+     * @return the pnp detail report
+     */
     @WebServiceLog
     @GetMapping("/pnpEmployee/getPNPDetailReport")
     @ResponseBody
-    public ResponseEntity<?> getPNPDetailReport(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+    public ResponseEntity<?> getPnpDetailReport(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
                                                 @RequestParam(value = "startDate", required = false) String startDate,
                                                 @RequestParam(value = "endDate", required = false) String endDate,
                                                 @RequestParam(value = "account", required = false) String account,
                                                 @RequestParam(value = "pccCode", required = false) String pccCode,
                                                 @RequestParam(value = "sourceSystem", required = false) String sourceSystem,
-                                                @RequestParam(value = "page", required = false) Integer page) {
-        
+                                                @RequestParam(value = "page", required = false) Integer page,
+                                                @RequestParam(value = "phoneNumber", required = false) String phoneNumber) {
         try {
             String empId = customUser.getAccount().toUpperCase();
-            Map<String, List<String>> result = pnpMaintainUIService.getPNPDetailReport(startDate, endDate, account, pccCode, sourceSystem, page, empId);
+            Map<String, List<String>> result = pnpMaintainUiService.getPNPDetailReport(startDate, endDate, account, pccCode, sourceSystem, page, empId, phoneNumber);
+            log.info(DataUtils.toPrettyJsonUseJackson(result));
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
-            log.error(ErrorRecord.recordError(e));
+            log.error("Exception", e);
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    /**
+     * Gets pnp detail report total pages.
+     *
+     * @param request      the request
+     * @param response     the response
+     * @param customUser   the custom user
+     * @param startDate    the start date
+     * @param endDate      the end date
+     * @param account      the account
+     * @param pccCode      the pcc code
+     * @param sourceSystem the source system
+     * @param phoneNumber  the phone number
+     * @return the pnp detail report total pages
+     */
     @WebServiceLog
     @GetMapping(value = "/pnpEmployee/getPNPDetailReportTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public ResponseEntity<?> getPNPDetailReportTotalPages(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+    public ResponseEntity<?> getPnpDetailReportTotalPages(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
                                                           @RequestParam(value = "startDate", required = false) String startDate,
                                                           @RequestParam(value = "endDate", required = false) String endDate,
                                                           @RequestParam(value = "account", required = false) String account,
                                                           @RequestParam(value = "pccCode", required = false) String pccCode,
-                                                          @RequestParam(value = "sourceSystem", required = false) String sourceSystem) throws IOException {
-
-        log.info("getPNPDetailReportTotalPages");
-        if (startDate == null) {
-            startDate = "1911-01-01";
-        }
-        if (endDate == null) {
-            endDate = "3099-01-01";
-        }
+                                                          @RequestParam(value = "sourceSystem", required = false) String sourceSystem,
+                                                          @RequestParam(value = "phoneNumber", required = false) String phoneNumber) {
 
         try {
             String empId = customUser.getAccount().toUpperCase();
-            String count = pnpMaintainUIService.getPNPDetailReportTotalPages(startDate, endDate, account, pccCode, sourceSystem, empId);
+            int count = pnpMaintainUiService.getPNPDetailReportTotalPages(startDate, endDate, account, pccCode, sourceSystem, empId, phoneNumber);
             return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count + "\"}", HttpStatus.OK);
         } catch (Exception e) {
-            log.error(ErrorRecord.recordError(e));
+            log.error("Exception", e);
             return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+
+    /**
+     * Export pnp detail report excel.
+     *
+     * @param request      the request
+     * @param response     the response
+     * @param customUser   the custom user
+     * @param startDate    the start date
+     * @param endDate      the end date
+     * @param account      the account
+     * @param pccCode      the pcc code
+     * @param sourceSystem the source system
+     */
     @WebServiceLog(action = "Download")
-    @GetMapping("/pnpEmployee/exportPNPDetailReportExcel2")
+    @GetMapping("/pnpEmployee/exportPNPDetailReportExcel")
     @ResponseBody
-    public void exportPNPDetailReportExcel(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+    public void exportPnpDetailReportExcel(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
                                            @RequestParam(value = "startDate", required = false) String startDate,
                                            @RequestParam(value = "endDate", required = false) String endDate,
                                            @RequestParam(value = "account", required = false) String account,
                                            @RequestParam(value = "pccCode", required = false) String pccCode,
                                            @RequestParam(value = "sourceSystem", required = false) String sourceSystem) {
-
-        // file path
-        String filePath = CoreConfigReader.getString("file.path");
-
-        // file name
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
-        Date date = new Date();
-        String fileName = "PNPDetailReport_" + sdf.format(date) + ".xlsx";
-
-        try {
-            File folder = new File(filePath);
-            if (!folder.exists()) {
-                boolean isMakeDirSuccess = folder.mkdirs();
-                log.info("isMakeDirSuccess" + isMakeDirSuccess);
-            }
-            String empId = customUser.getAccount().toUpperCase();
-            pnpReportExcelService.exportPNPDetailReportExcel(filePath, fileName, startDate, endDate, account, pccCode, sourceSystem, empId);
-        } catch (Exception e) {
-            log.error(ErrorRecord.recordError(e));
-        }
-
-        try {
-            LoadFileUIService.loadFileToResponse(filePath, fileName, response);
-        } catch (IOException e) {
-            log.error("Exception", e);
-        }
-    }
-
-
-    @WebServiceLog(action = "Download")
-    @GetMapping("/pnpEmployee/exportPNPDetailReportExcel")
-    @ResponseBody
-    public void exportPNPDetailReportExcel2(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
-                                            @RequestParam(value = "startDate", required = false) String startDate,
-                                            @RequestParam(value = "endDate", required = false) String endDate,
-                                            @RequestParam(value = "account", required = false) String account,
-                                            @RequestParam(value = "pccCode", required = false) String pccCode,
-                                            @RequestParam(value = "sourceSystem", required = false) String sourceSystem) {
         try {
             String empId = customUser.getAccount().toUpperCase();
             List<Map<Integer, String>> list = pnpMaintainAccountModelService.getPNPDetailReportExcelMapList(startDate, endDate, account, pccCode, sourceSystem, empId);
             ExportExcelBuilder builder = ExportExcelBuilder.createWorkBook().setSheetName("TestSheet1");
 
-            for (int i = 0; i < list.size(); i++) {
+            for (int i = 0, listSize = list.size(); i < listSize; i++) {
                 Map<Integer, String> columnDataMap = list.get(i);
                 builder.createRow(i).setRowValue(columnDataMap);
             }
@@ -173,7 +179,7 @@ public class BCSPnpReportController extends BCSBaseController {
             ExportService exportService = new ExportService();
             exportService.exportExcel(response, builder);
         } catch (Exception e) {
-            log.error("{}: {}", "Exception", e);
+            log.error("Exception", e);
         }
     }
 }

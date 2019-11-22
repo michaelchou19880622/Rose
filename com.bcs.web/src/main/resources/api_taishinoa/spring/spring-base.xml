@@ -69,7 +69,7 @@
 				<prop key="hibernate.order_updates">true</prop>
 				<prop key="hibernate.jdbc.fetch_size">50</prop>
 				<prop key="hibernate.max_fetch_depth">3</prop>
-				<prop key="hibernate.generate_statistics">true</prop>
+				<prop key="hibernate.generate_statistics">false</prop>
 	        </props>
 	    </property>
     </bean>

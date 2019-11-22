@@ -129,12 +129,12 @@ public class LinePointReportExcelService {
 	
 	// ---- Statistics Report Detail ---- 
 	
-	public void exportExcel_LinePointStatisticsReportDetail(String filePathAndName, Long linePointMainId){
+	public void exportExcel_LinePointStatisticsReportDetail(String filePathAndName, Long linePointMainId, Date startDate, Date endDate){
 		try {
 			Workbook workbook = new XSSFWorkbook();
 			FileOutputStream out = new FileOutputStream(filePathAndName);
 			
-			this.getExcel_LinePointStatisticsReportDetail(workbook, linePointMainId);
+			this.getExcel_LinePointStatisticsReportDetail(workbook, linePointMainId,startDate,endDate);
 			workbook.write(out);
 			out.close();
 			workbook.close();
@@ -143,8 +143,8 @@ public class LinePointReportExcelService {
 		}
 	}
 	
-	private void getExcel_LinePointStatisticsReportDetail(Workbook workbook, Long linePointMainId){
-		List<LinePointDetail> details = linePointDetailService.findByLinePointMainId(linePointMainId);
+	private void getExcel_LinePointStatisticsReportDetail(Workbook workbook, Long linePointMainId,Date startDate,Date endDate){
+		List<LinePointDetail> details = linePointDetailService.findByLinePointMainIdAndSendDate(linePointMainId,startDate,endDate);
 		logger.info("[getExcel_LinePointStatisticsReportDetail] details:"+details);
 		
 		try {

@@ -3,6 +3,7 @@ package com.bcs.core.linepoint.db.repository;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,9 @@ public interface LinePointMainRepository extends EntityRepository<LinePointMain,
 
 	@Transactional(timeout = 30)
 	public LinePointMain findByTitle(String title);
+	
+	@Transactional(timeout = 30)
+	public LinePointMain findByTitleAndPccCode(String title,String pccCode);
 	
 	@Transactional(timeout = 30)
 	public List<LinePointMain> findByStatus(String status);
@@ -35,6 +39,15 @@ public interface LinePointMainRepository extends EntityRepository<LinePointMain,
     @Query(value = "select x from LinePointMain x where x.sendType = ?1 "
     + "and x.modifyTime >= ?2 and x.modifyTime <= ?3 order by x.modifyTime desc")	
 	public List<LinePointMain> findBySendTypeAndDate(String sendType, Date startDate, Date endDate);
+    
+    @Modifying
+    @Transactional(timeout = 30)
+    @Query(value = " update BCS_LINE_POINT_MAIN  " 
+ 			+      " set SUCCESSFUL_COUNT = (select count(*)  from BCS_LINE_POINT_DETAIL  where LINE_POINT_MAIN_ID = ?1 and status = 'SUCCESS'), "
+			+      " SUCCESSFUL_AMOUNT = (select sum(AMOUNT)  from BCS_LINE_POINT_DETAIL  where LINE_POINT_MAIN_ID = ?1 and status = 'SUCCESS'), "
+ 			+      " FAILED_COUNT = (select count(*) from BCS_LINE_POINT_DETAIL where  LINE_POINT_MAIN_ID = ?1 and status = 'FAIL' ) "
+			+      " where ID = ?1 and status = 'COMPLETE' ", nativeQuery = true)	
+	public void updateLinePoint(String LinePointMainId);
     
     // with searchText
     @Transactional(timeout = 30)
@@ -59,11 +72,16 @@ public interface LinePointMainRepository extends EntityRepository<LinePointMain,
 	public List<LinePointMain> findAllowableIdles();
     
     @Transactional(timeout = 30)
-    @Query(value = "select x from LinePointMain x where "
-    	+ "x.title like ('%' + ?1 + '%') and x.modifyUser like ('%' + ?2 + '%') "
-    	+ "and x.modifyTime >= ?3 and x.modifyTime <= ?4 "
-    	+ "order by x.modifyTime desc ")	
-	public List<LinePointMain> findByTitleAndModifyUserAndDate(String title, String modifyUser, Date startDate, Date endDate);
+    @Query(value = "select * from BCS_LINE_POINT_MAIN x "
+			+ "where x.TITLE like ('%' + ?1 + '%') "
+			+ "and x.MODIFY_USER like ('%' + ?2 + '%') "
+	    	+ "and x.ID in (SELECT DISTINCT y.LINE_POINT_MAIN_ID "
+	    	+ "				from BCS_LINE_POINT_DETAIL y "
+	    	+ "				where y.SEND_TIME >=  ?3 " 
+	    	+ "				and y.SEND_TIME <= ?4 ) "
+	    	+ "and (x.status = 'COMPLETE' or x.status is null ) "
+	    	+ "order by x.MODIFY_TIME desc ", nativeQuery = true)	
+	public List<LinePointMain> findByTitleAndModifyUserAndSendDate(String title, String modifyUser, Date startDate, Date endDate);
     
     @Transactional(timeout = 30)
     @Query(value = "select count(x.id) from LinePointMain x where "

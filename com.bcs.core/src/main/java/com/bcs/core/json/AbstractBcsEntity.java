@@ -18,6 +18,7 @@ public abstract class AbstractBcsEntity implements Serializable, Cloneable {
         return ObjectUtil.objectToJsonStr(this);
     }
 
+    @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
     }

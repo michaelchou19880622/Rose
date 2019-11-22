@@ -6,11 +6,10 @@ import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
 import com.bcs.core.taishin.circle.PNP.service.PnpService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.log4j.Logger;
 
 /**
  * 更新Datail狀態Actor
@@ -20,7 +19,8 @@ import org.apache.log4j.Logger;
  */
 @Slf4j
 public class PnpUpdateStatusActor extends UntypedActor {
-	private static Logger logger = Logger.getLogger(PnpUpdateStatusActor.class);
+    private static Logger logger = Logger.getLogger(PnpUpdateStatusActor.class);
+
     @Override
     public void onReceive(Object object) {
         try {
@@ -35,8 +35,8 @@ public class PnpUpdateStatusActor extends UntypedActor {
                 updateStatus(pnpService, pnpDetail);
             }
             log.info("Update Actor End!!");
-        }catch(Exception e){
-            log.error("{}",e);
+        } catch (Exception e) {
+            log.error("Exception", e);
 
         }
     }
@@ -59,7 +59,7 @@ public class PnpUpdateStatusActor extends UntypedActor {
     private void updateStatus(PnpService pnpService, PnpDetail pnpDetail) {
         log.info("updateStatus");
         if (checkCanUpdateStatusToComplete(pnpDetail)) {
-        	logger.info(String.format("Update Status To Complete!! Main Id: %s, Detail Id: %s", pnpDetail.getPnpMainId(), pnpDetail.getPnpDetailId()));
+            logger.info(String.format("Update Status To Complete!! Main Id: %s, Detail Id: %s", pnpDetail.getPnpMainId(), pnpDetail.getPnpDetailId()));
             pnpService.updatePnpMainStatusComplete(pnpDetail.getPnpMainId(), pnpDetail.getSource(), pnpDetail.getProcStage());
         }
     }
@@ -73,7 +73,10 @@ public class PnpUpdateStatusActor extends UntypedActor {
     private boolean checkCanUpdateStatusToComplete(PnpDetail pnpDetail) {
         List<String> status = new ArrayList<>();
         status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS);
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_SENDING);
+        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_PROCESS);
+        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_PNP_PROCESS);
+        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
+        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_USER_BLOCK_SMS_PROCESS);
         status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
         status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_WAIT);
         status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_SCHEDULED);

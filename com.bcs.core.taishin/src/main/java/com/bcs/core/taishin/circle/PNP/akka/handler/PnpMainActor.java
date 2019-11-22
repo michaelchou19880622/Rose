@@ -33,13 +33,13 @@ public class PnpMainActor extends UntypedActor {
     private final ActorRef updateStatusRouterActor;
 
     private PnpMainActor() {
-        pushMessageRouterActor = new AkkaRouterFactory<PnpPushMessageActor>(getContext(), PnpPushMessageActor.class, true).routerActor;
-        pnpMessageRouterActor = new AkkaRouterFactory<PnpMessageActor>(getContext(), PnpMessageActor.class, true).routerActor;
-        updateStatusRouterActor = new AkkaRouterFactory<PnpUpdateStatusActor>(getContext(), PnpUpdateStatusActor.class, true).routerActor;
+        pushMessageRouterActor = new AkkaRouterFactory<>(getContext(), PnpPushMessageActor.class, true).routerActor;
+        pnpMessageRouterActor = new AkkaRouterFactory<>(getContext(), PnpMessageActor.class, true).routerActor;
+        updateStatusRouterActor = new AkkaRouterFactory<>(getContext(), PnpUpdateStatusActor.class, true).routerActor;
     }
 
     @Override
-    public void onReceive(Object object) throws Exception {
+    public void onReceive(Object object) {
         try {
             Thread.currentThread().setName("Actor-PNP-Main-" + Thread.currentThread().getId());
 
@@ -48,17 +48,25 @@ public class PnpMainActor extends UntypedActor {
                 PnpMain pnpMain = (PnpMain) object;
                 String stage = pnpMain.getProcStage();
                 log.info("PnpMainActor onReceive object instanceof PnpMain!!! Stage: " + stage);
-                if (AbstractPnpMainEntity.STAGE_BC.equals(stage)) {
-                    tellActor(pushMessageRouterActor, pnpMain);
-                } else if (AbstractPnpMainEntity.STAGE_PNP.equals(stage)) {
-                    tellActor(pnpMessageRouterActor, pnpMain);
+                switch (stage) {
+                    case AbstractPnpMainEntity.STAGE_BC:
+                        tellActor(pushMessageRouterActor, pnpMain);
+                        break;
+                    case AbstractPnpMainEntity.STAGE_PNP:
+                        tellActor(pnpMessageRouterActor, pnpMain);
+                        break;
+                    case AbstractPnpMainEntity.STAGE_SMS:
+                        //TODO SMS Process
+                        break;
+                    default:
+                        break;
                 }
             } else if (object instanceof PnpDetail) {
                 log.info("Tell Update Actor do Update!!");
                 updateStatusRouterActor.tell(object, this.getSelf());
             }
         } catch (Exception e) {
-            log.error("{}", e);
+            log.error("Exception", e);
         }
     }
 

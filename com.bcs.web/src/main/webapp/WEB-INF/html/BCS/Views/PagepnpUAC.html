@@ -259,146 +259,146 @@
     <div th:replace="/BCS/Views/Common/Menu :: menu ('PagepnpUAC')"/>
     <!-- Right Content -->
     <div class="LyMain" role="main">
-<!--        <form>-->
-            <section>
-                <header class="ContentHead">
-                    <input name="cancel" class="btn_cancel" type="button" value="返回"
-                           style="float: right; cursor: pointer;">
-                    <h3 class="CHTtl">建立Unica帳號</h3>
-                </header>
-                <div class="mainFrame" id="mainFrame">
-                    <table border="1">
-                        <colgroup>
-                            <col width="400">
-                            <col>
-                        </colgroup>
-                        <tbody>
-                        <tr>
-                            <th>帳號
-                                <font size="3" color="red">*</font>
-                            </th>
-                            <td><input type="text" id="account" name="account" value="" maxlength="50"
-                                       required="required"></td>
-                        </tr>
-                        <tr>
-                            <th>帳號屬性
-                                <font size="3" color="red">*</font>
-                            </th>
-                            <td><input type="text" id="accountAttribute" name="accountAttribute" value="" maxlength="50"
-                                       required="required"></td>
-                        </tr>
-                        <tr>
-                            <th>帳號類別
-                                <font size="3" color="red">*</font>
-                            </th>
-                            <td id="accountClassTd" colspan="2" style="text-align: left;">
-                                <label class="mdFRM05Input">
-                                    <input type="radio" name="accountClass" class="accountClass" id="accountClassO"
-                                           value="O" style="cursor: pointer;">作業
-                                </label> &nbsp;&nbsp;&nbsp;
-                                <label class="mdFRM05Input">
-                                    <input type="radio" name="accountClass" class="accountClass" id="accountClassM"
-                                           value="M" style="cursor: pointer;">行銷
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>前方來源系統
-                                <font size="3" color="red">*</font>
-                            </th>
-                            <td><input type="text" id="sourceSystem" name="sourceSystem" value="" maxlength="50"
-                                       required="required"></td>
-                        </tr>
-                        <tr>
-                            <th>員工編號
-                                <font size="3" color="red">*</font>
-                            </th>
-                            <td colspan="2">
-                                <div style="text-align: left;">
-                                    <input type="text" id="employeeId" name="employeeId" value="" maxlength="50"
-                                           required="required">
-                                    <button id="searchBtn">Search</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>單位代號
-                                <font size="3" color="red">*</font>
-                            </th>
-                            <td><input type="text" id="departmentId" name="departmentId" value="" maxlength="50"
-                                       required="required"></td>
-                        </tr>
-                        <tr>
-                            <th>單位名稱
-                                <font size="3" color="red">*</font>
-                            </th>
-                            <td colspan="2">
-                                <div id="name" style="text-align: left;">
-                                    <input type="text" id="divisionName" name="divisionName" value="" maxlength="10"
-                                           required="required">&nbsp;處&nbsp;
-                                    <input type="text" id="departmentName" name="departmentName" value="" maxlength="10"
-                                           required="required">&nbsp;部&nbsp;
-                                    <input type="text" id="groupName" name="groupName" value="" maxlength="10"
-                                           required="required">&nbsp;組&nbsp;
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>PccCode
-                                <font size="3" color="red">*</font>
-                            </th>
-                            <td><input type="text" id="PccCode" name="PccCode" value="" maxlength="50"
-                                       required="required"></td>
-                        </tr>
-                        <tr>
-                            <th>帳號狀態
-                                <font size="3" color="red">*</font>
-                            </th>
-                            <td colspan="2" style="text-align: left;">
-                                <label class="mdFRM05Input">
-                                    <input type="radio" name="status" class="status" id="statusOn" value="on"
-                                           style="cursor: pointer;">啟用
-                                </label> &nbsp;&nbsp;&nbsp;
-                                <label class="mdFRM05Input">
-                                    <input type="radio" name="status" class="status" id="statusOff" value="off"
-                                           style="cursor: pointer;">停用
-                                </label>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                    <div class="CHBtnSet">
-                        <div class="CHRight">
-                            <input id="popupEditPage" class="btn_add add" type="button" value="Set" style="cursor: pointer;"/>
-                        </div>
-                    </div>
-                    <table border="1" class="popTable">
-                        <colgroup>
-                            <col width="100">
-                            <col width="100">
-                            <col width="100">
-                        </colgroup>
-                        <tr>
-                            <th>通路流</th>
-                            <th>樣板</th>
-                            <th>簡訊內容</th>
-                        </tr>
-                        <tbody class="popTbody">
-                        <tr class="popTr">
-                            <td id="quickViewPathWay" class="pathway"></td>
-                            <td id="quickViewTemplate" class="template"></td>
-                            <td id="quickViewPNPContent" class="PNPContent"></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
+        <!--        <form>-->
+        <section>
+            <header class="ContentHead">
+                <input name="cancel" class="btn_cancel" type="button" value="返回"
+                       style="float: right; cursor: pointer;">
+                <h3 class="CHTtl">建立Unica帳號</h3>
+            </header>
+            <div class="mainFrame" id="mainFrame">
+                <table border="1">
+                    <colgroup>
+                        <col width="400">
+                        <col>
+                    </colgroup>
+                    <tbody>
+                    <tr>
+                        <th>帳號
+                            <font size="3" color="red">*</font>
+                        </th>
+                        <td><input type="text" id="account" name="account" value="" maxlength="50"
+                                   required="required"></td>
+                    </tr>
+                    <tr>
+                        <th>帳號屬性
+                            <font size="3" color="red">*</font>
+                        </th>
+                        <td><input type="text" id="accountAttribute" name="accountAttribute" value="批次" maxlength="50"
+                                   required="required"></td>
+                    </tr>
+                    <tr>
+                        <th>帳號類別
+                            <font size="3" color="red">*</font>
+                        </th>
+                        <td id="accountClassTd" colspan="2" style="text-align: left;">
+                            <label class="mdFRM05Input">
+                                <input type="radio" name="accountClass" class="accountClass" id="accountClassO"
+                                       value="O" style="cursor: pointer;">作業
+                            </label> &nbsp;&nbsp;&nbsp;
+                            <label class="mdFRM05Input">
+                                <input type="radio" name="accountClass" class="accountClass" id="accountClassM"
+                                       value="M" style="cursor: pointer;">行銷
+                            </label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>前方來源系統
+                            <font size="3" color="red">*</font>
+                        </th>
+                        <td><input type="text" id="sourceSystem" name="sourceSystem" value="" maxlength="50"
+                                   required="required"></td>
+                    </tr>
+                    <tr>
+                        <th>員工編號
+                            <font size="3" color="red">*</font>
+                        </th>
+                        <td colspan="2">
+                            <div style="text-align: left;">
+                                <input type="text" id="employeeId" name="employeeId" value="" maxlength="50"
+                                       required="required">
+                                <button id="searchBtn">Search</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>單位代號
+                            <font size="3" color="red">*</font>
+                        </th>
+                        <td><input type="text" id="departmentId" name="departmentId" value="" maxlength="50"
+                                   required="required"></td>
+                    </tr>
+                    <tr>
+                        <th>單位名稱
+                            <font size="3" color="red">*</font>
+                        </th>
+                        <td colspan="2">
+                            <div id="name" style="text-align: left;">
+                                <input type="text" id="divisionName" name="divisionName" value="" maxlength="10"
+                                       required="required">&nbsp;處&nbsp;
+                                <input type="text" id="departmentName" name="departmentName" value="" maxlength="10"
+                                       required="required">&nbsp;部&nbsp;
+                                <input type="text" id="groupName" name="groupName" value="" maxlength="10"
+                                       required="required">&nbsp;組&nbsp;
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>PccCode
+                            <font size="3" color="red">*</font>
+                        </th>
+                        <td><input type="text" id="PccCode" name="PccCode" value="" maxlength="50"
+                                   required="required"></td>
+                    </tr>
+                    <tr>
+                        <th>帳號狀態
+                            <font size="3" color="red">*</font>
+                        </th>
+                        <td colspan="2" style="text-align: left;">
+                            <label class="mdFRM05Input">
+                                <input type="radio" name="status" class="status" id="statusOn" value="on"
+                                       style="cursor: pointer;">啟用
+                            </label> &nbsp;&nbsp;&nbsp;
+                            <label class="mdFRM05Input">
+                                <input type="radio" name="status" class="status" id="statusOff" value="off"
+                                       style="cursor: pointer;">停用
+                            </label>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
                 <div class="CHBtnSet">
                     <div class="CHRight">
-                        <input id="saveAccountModelBtn" class="btn_add confirm" type="button" value="Confirm" style="cursor: pointer;"/>
+                        <input id="popupEditPage" class="btn_add add" type="button" value="Set" style="cursor: pointer;"/>
                     </div>
                 </div>
-            </section>
-<!--        </form>-->
+                <table border="1" class="popTable">
+                    <colgroup>
+                        <col width="100">
+                        <col width="100">
+                        <col width="100">
+                    </colgroup>
+                    <tr>
+                        <th>通路流</th>
+                        <th>樣板</th>
+                        <th>簡訊內容</th>
+                    </tr>
+                    <tbody class="popTbody">
+                    <tr class="popTr">
+                        <td id="quickViewPathWay" class="pathway"></td>
+                        <td id="quickViewTemplate" class="template"></td>
+                        <td id="quickViewPNPContent" class="PNPContent"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="CHBtnSet">
+                <div class="CHRight">
+                    <input id="saveAccountModelBtn" class="btn_add confirm" type="button" value="Confirm" style="cursor: pointer;"/>
+                </div>
+            </div>
+        </section>
+        <!--        </form>-->
     </div>
 </div>
 <!-- Dialog -->

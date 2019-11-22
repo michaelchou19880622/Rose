@@ -89,7 +89,7 @@ public class RestfulUtil {
 			logger.info("---------- Start to execute the request ----------");
 			
 			logger.info("[RestUtil execute] Target url: " + url);
-			logger.info("[RestUtil execute] Request body: " + httpEntity.getBody());
+			logger.info("[RestUtil execute] Request body: " + DataUtils.toPrettyJsonUseJackson(httpEntity.getBody()));
 
 			ResponseEntity<String> gatewayResponse = this.restTemplate.exchange(url, method, httpEntity, String.class);
 			

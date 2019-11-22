@@ -12,7 +12,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PreDestroy;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -26,14 +25,6 @@ import java.util.List;
 public class LineUserService {
 
     private static Logger logger = Logger.getLogger(LineUserService.class);
-
-    /**
-     * Clean up.
-     */
-    @PreDestroy
-    public void cleanUp() {
-        logger.info("[DESTROY] LineUserService destroyed.");
-    }
 
     @Autowired
     private LineUserRepository lineUserRepository;
@@ -69,6 +60,16 @@ public class LineUserService {
      */
     public List<Object[]> findMidsByMobileIn(List<String> phoneNumberList) {
         return lineUserRepository.findMidsByMobileIn(phoneNumberList);
+    }
+
+    /**
+     * Find LineUID List by Phone Number List
+     *
+     * @param phoneNumberList the phoneNumberList
+     * @return Object[] 0:Phone Number 1:Line UID
+     */
+    public List<LineUser> findByMobileIn(List<String> phoneNumberList) {
+        return lineUserRepository.findByMobileIn(phoneNumberList);
     }
 
     /**
@@ -203,7 +204,7 @@ public class LineUserService {
         logger.debug("checkMIDByStatus:" + result);
         return StringUtils.isBlank(result);
     }
-    
+
     /**
      * Get mid by mobile.
      *
@@ -211,9 +212,8 @@ public class LineUserService {
      * @return the boolean
      */
     public String getMidByMobile(String mobile) {
-
         String mid = lineUserRepository.getMidByMobile(mobile);
-        logger.debug("getMidByMobile:" + mid);
+        logger.info("Mobile: " + mobile + ", Mid: " + mid);
         return mid;
     }
 

@@ -1,5 +1,6 @@
 package com.bcs.core.linepoint.db.repository;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Modifying;
@@ -23,11 +24,31 @@ public interface LinePointDetailRepository extends EntityRepository<LinePointDet
     @Transactional(timeout = 30)
     public List<LinePointDetail> findByLinePointMainId(Long linePointMainId);
     
+    @Transactional(timeout = 300)
+    @Query(value = "select x from LinePointDetail x where  x.linePointMainId = ?1 "
+    			 + "and x.sendTime >= ?2 "
+    			 + "and x.sendTime <= ?3 order by x.sendTime desc")
+    public List<LinePointDetail> findByLinePointMainIdAndSendDate(Long linePointMainId,Date startDate ,Date endDate);
+    
     @Transactional(timeout = 30)
     public List<LinePointDetail> findByDetailId(Long detailId);
     
     @Transactional(timeout = 30)
     public List<LinePointDetail> deleteByLinePointMainId(Long linePointMainId);
+    
+    @Transactional(timeout = 30)
+    @Query(value = "select count(0) from BCS_LINE_POINT_DETAIL where LINE_POINT_MAIN_ID = ?1 and amount > ?2 " ,nativeQuery = true)
+    public String getCountLinePointDetailAmountMoreCaveatLinePoint(Long linePointMainId , String caveatLinePoint);
+    
+    @Transactional(timeout = 30)
+    @Query(value =  " select Y.ID  ,"
+    		+ "sum(IIF(x.status = 'SUCCESS', 1, 0 )) as success , "
+    		+ "sum(IIF(x.status = 'FAIL', 1, 0 )) as fail , "
+    		+ "sum(IIF(x.status = 'SUCCESS', x.amount, 0 )) as successfulAmount "
+    		+ " from BCS_LINE_POINT_DETAIL x"
+    		+ " join BCS_LINE_POINT_MAIN y on x.LINE_POINT_MAIN_ID = y.ID"
+    		+ " where x.SEND_TIME >= ?1 and x.SEND_TIME <= ?2  group By y.ID  order by y.ID desc",nativeQuery = true)
+	public List<Object[]> getSuccessandFailCount(Date startDate,Date endDate);
     
 //	public LinePointDetail findBySerialId(String serialId);
 //	

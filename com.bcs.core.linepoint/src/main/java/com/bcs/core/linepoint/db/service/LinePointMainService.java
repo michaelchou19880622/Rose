@@ -61,12 +61,17 @@ public class LinePointMainService {
 	public List<LinePointMain> findBySendTypeAndDate(String sendType, Date startDate, Date endDate){
 		return linePointMainRepository.findBySendTypeAndDate(sendType, startDate, endDate);
 	}	
+	public void updateLinePoint(String linePointMainId){
+		//Query query = entityManager.createNamedQuery("updateLinePoint").setParameter(1, linePointId);
+		//query.getResultList();
+		linePointMainRepository.updateLinePoint(linePointMainId);
+	}	
 	public List<LinePointMain> findAllowableIdles(){
 		return linePointMainRepository.findAllowableIdles();
 	}
 	
-	public List<LinePointMain> findByTitleAndModifyUserAndDate(Date startDate, Date endDate, String modifyUser, String title){
-		return linePointMainRepository.findByTitleAndModifyUserAndDate(title, modifyUser, startDate, endDate);
+	public List<LinePointMain> findByTitleAndModifyUserAndSendDate(Date startDate, Date endDate, String modifyUser, String title){
+		return linePointMainRepository.findByTitleAndModifyUserAndSendDate(title, modifyUser, startDate, endDate);
 	}
 	@SuppressWarnings("unchecked")
 	public List<LinePointMain> getLinePointStatisticsReport(Date startDate, Date endDate, String modifyUser, String title, Integer page){
@@ -85,8 +90,8 @@ public class LinePointMainService {
     	
     	Query query = entityManager.createNamedQuery("queryGetStatisticsReportPage").setParameter(1, title).setParameter(2, modifyUser)
     			.setParameter(3, startDate).setParameter(4, endDate);
-    	query.setFirstResult(rowStart);
-    	query.setMaxResults(rowEnd);
+    	//query.setFirstResult(rowStart);
+    	//query.setMaxResults(rowEnd);
     	
 		return query.getResultList();
 	}
@@ -124,6 +129,9 @@ public class LinePointMainService {
 	
 	public LinePointMain findByTitle(String title){
 		return linePointMainRepository.findByTitle(title);
+	}
+	public LinePointMain findByTitleAndPccCode(String title , String pccCode){
+		return linePointMainRepository.findByTitleAndPccCode(title , pccCode);
 	}
 	
 	public List<LinePointMain> findByStatus(String status){

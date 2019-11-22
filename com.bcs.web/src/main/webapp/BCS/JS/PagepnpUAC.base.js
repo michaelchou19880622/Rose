@@ -206,7 +206,7 @@ $(function () {
         document.getElementById('bodyDescriptionLabel').style.fontStyle = config.body.description.textStyle;
         document.getElementById('bodyDescriptionLabel').style.textDecoration = config.body.description.textDecoration;
         /* Init Create First Button Row */
-        addDefaultButton();
+//        addDefaultButton();
         triggerFeatureActive();
         saveBeforeTemplateJson = generateTemplateJson();
     }
@@ -699,6 +699,7 @@ $(function () {
     });
 
     $('#saveBtn').click(function (event) {
+        validButton();
         saveBeforeTemplateJson = generateTemplateJson();
         console.log(JSON.stringify(saveBeforeTemplateJson));
         document.getElementById('quickViewPathWay').textContent = saveBeforeTemplateJson.pathwayName;
@@ -706,6 +707,23 @@ $(function () {
         document.getElementById('quickViewPNPContent').textContent = saveBeforeTemplateJson.hero.heroText;
         $('#dialog-modal').dialog("close");
     });
+
+    var validButton = function(){
+        var btnGroup = document.getElementById('btnGroup');
+        var btnCount = btnGroup.childElementCount;
+        console.log('Button Count : ' + btnCount);
+        if (btnCount > 0) {
+            for (var i = 0; i < btnCount; i++) {
+                var name = btnGroup.children[row].children[1].children[0].children[0].value;
+                var url = btnGroup.children[row].children[2].children[0].children[0].value;
+                var color = btnGroup.children[row].children[2].children[0].value
+                console.log('Name: ' + name + ',Url: ' + url + ',Color: ' + color);
+                if (name.trim() === '' || url.trim() === '' || color === '') {
+                    btnGroup.removeChild(btnGroup.children[row]);
+                }
+            }
+        }
+    }
 
 
     //---------------------Text Button Press--------------------------

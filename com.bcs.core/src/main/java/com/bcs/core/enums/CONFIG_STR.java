@@ -318,7 +318,7 @@ public enum CONFIG_STR {
 	LINE_POINT_API_CHANNEL_ID("line.point.api.channel.id"),
 	LINE_POINT_API_CHANNEL_SECRET("line.point.api.channel.secret"),
 	
-	
+	CAVEAT_LINEPOINT_POINT("caveat.linepoint.point"),
 //	// Oracle Database
 	ORACLE_DATASOURCE_URL("oracle.datasource.url"),
 	ORACLE_DATASOURCE_USERNAME("oracle.datasource.username"),

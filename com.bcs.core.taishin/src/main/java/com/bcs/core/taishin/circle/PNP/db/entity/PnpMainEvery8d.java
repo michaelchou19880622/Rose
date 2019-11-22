@@ -9,8 +9,10 @@ import javax.persistence.Index;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -132,6 +134,12 @@ public class PnpMainEvery8d extends PnpMain {
     private String MsgType;
     @Column(name = "BATCH_ID", columnDefinition = "nvarchar(36)")
     private String BatchID;
+
+    /**
+     * 不會異動ＤＢ 物件傳遞暫存用
+     */
+    @Transient
+    private List<PnpDetailEvery8d> pnpDetailEvery8dList;
 
     @Override
     @PrePersist
@@ -401,5 +409,13 @@ public class PnpMainEvery8d extends PnpMain {
 
     public void setPnpMaintainAccountId(Long pnpMaintainAccountId) {
         this.pnpMaintainAccountId = pnpMaintainAccountId;
+    }
+
+    public List<PnpDetailEvery8d> getPnpDetailEvery8dList() {
+        return pnpDetailEvery8dList;
+    }
+
+    public void setPnpDetailEvery8dList(List<PnpDetailEvery8d> pnpDetailEvery8dList) {
+        this.pnpDetailEvery8dList = pnpDetailEvery8dList;
     }
 }

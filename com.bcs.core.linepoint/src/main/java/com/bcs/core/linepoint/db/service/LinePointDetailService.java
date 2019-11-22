@@ -57,8 +57,21 @@ public class LinePointDetailService {
 	public List<LinePointDetail> findByLinePointMainId(Long linePointMainId){
 		return linePointDetailRepository.findByLinePointMainId(linePointMainId);
 	}
+	
+	public List<LinePointDetail> findByLinePointMainIdAndSendDate(Long linePointMainId,Date startDate ,Date endDate){
+		return linePointDetailRepository.findByLinePointMainIdAndSendDate(linePointMainId,startDate,endDate);
+	}
+	
 	public List<LinePointDetail> findByDetailId(Long detailId){
 		return linePointDetailRepository.findByDetailId(detailId);
+	}
+	
+	public String getCountLinePointDetailAmountMoreCaveatLinePoint(Long linePointMainId , String caveatLinePoint){
+		return linePointDetailRepository.getCountLinePointDetailAmountMoreCaveatLinePoint(linePointMainId,caveatLinePoint);
+	}
+	
+	public List<Object[]> getSuccessandFailCount(Date startDate,Date endDate){
+		return linePointDetailRepository.getSuccessandFailCount(startDate,endDate);
 	}
 	
 //	public LinePointDetail findBySerialId(String serialId){

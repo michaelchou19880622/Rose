@@ -126,17 +126,14 @@ public class BCSPNPMaintainController extends BCSBaseController {
     /**
      * 透過員工代碼查詢員工資訊
      *
-     * @param request    request
-     * @param response   response
-     * @param customUser
+     * @param customUser customUser
      * @param empId      員工ID
      * @return 員工資訊
      */
     @WebServiceLog
     @GetMapping(value = "/pnpAdmin/getEmpAccount", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<?> getEmpAccount(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
-                                           @RequestParam(required = false) String empId) {
+    public ResponseEntity<?> getEmpAccount(@CurrentUser CustomUser customUser, @RequestParam(required = false) String empId) {
         try {
 
             if (StringUtils.isBlank(empId)) {
@@ -249,7 +246,7 @@ public class BCSPNPMaintainController extends BCSBaseController {
     private Map<String, Object> getFooterMap(Map<String, String> configMap) {
         Map<String, Object> footerMap = new HashMap<>(2);
         footerMap.put("linkText", getOrDefault(configMap, ".flex.ui.footer.link.text", "收到此訊息的原因是？"));
-        footerMap.put("linkUrl", getOrDefault(configMap, ".flex.ui.footer.link.url", "https://linecorp.com"));
+        footerMap.put("linkUrl", getOrDefault(configMap, ".flex.ui.footer.link.url", "https://tsbk.tw/LINEPNP/"));
         return footerMap;
     }
 
@@ -317,8 +314,7 @@ public class BCSPNPMaintainController extends BCSBaseController {
     @WebServiceLog
     @PostMapping(value = "/pnpAdmin/createPNPMaintainAccount", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<?> createPNPMaintainAccount(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
-                                                      @RequestBody Map<String, Object> data) {
+    public ResponseEntity<?> createPNPMaintainAccount(@CurrentUser CustomUser customUser, @RequestBody Map<String, Object> data) {
         try {
             log.info("data: {}", DataUtils.toPrettyJsonUseJackson(data));
 
@@ -380,8 +376,7 @@ public class BCSPNPMaintainController extends BCSBaseController {
     @WebServiceLog
     @DeleteMapping(value = "/pnpAdmin/deletePNPMaintainAccount")
     @ResponseBody
-    public ResponseEntity<?> deletePNPMaintainAccount(HttpServletRequest request, HttpServletResponse response,
-                                                      @CurrentUser CustomUser customUser, @RequestParam Long id) {
+    public ResponseEntity<?> deletePNPMaintainAccount(@CurrentUser CustomUser customUser, @RequestParam Long id) {
         try {
 
             if (!customUser.isAdmin() && !AdminUser.RoleCode.ROLE_PNP_ADMIN.toString().equals(customUser.getRole())) {
@@ -407,9 +402,7 @@ public class BCSPNPMaintainController extends BCSBaseController {
     @WebServiceLog
     @PostMapping(value = "/pnpAdmin/getPNPMaintainAccount", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<?> getPNPMaintainAccount(
-            HttpServletRequest request, HttpServletResponse response,
-            @CurrentUser CustomUser customUser, @RequestParam Long id) {
+    public ResponseEntity<?> getPNPMaintainAccount(@CurrentUser CustomUser customUser, @RequestParam Long id) {
         try {
             PNPMaintainAccountModel pnpMaintainAccountModel = pnpMaintainUIService.findOne(id);
             if (pnpMaintainAccountModel == null) {
@@ -430,8 +423,7 @@ public class BCSPNPMaintainController extends BCSBaseController {
     @WebServiceLog
     @PostMapping(value = "/pnpAdmin/getPNPMaintainAccountList", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<?> getPNPMaintainAccountList(
-            HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+    public ResponseEntity<?> getPNPMaintainAccountList(@CurrentUser CustomUser customUser,
             @RequestBody PNPMaintainAccountModel pnpMaintainAccountModel, @RequestParam Boolean status) {
         try {
             log.info("pnpMaintainAccountModel1:" + pnpMaintainAccountModel);

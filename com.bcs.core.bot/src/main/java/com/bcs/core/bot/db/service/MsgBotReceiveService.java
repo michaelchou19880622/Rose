@@ -89,20 +89,17 @@ public class MsgBotReceiveService {
      *
      * @param deliveryTags delivery Tags from Line
      */
-    public void updatePnpStatus(String deliveryTags) {
+    public synchronized void updatePnpStatus(String deliveryTags) {
         log.info("Received PNP Delivery Tag : " + deliveryTags + " Update Status To PNP Send Completed!!");
         try {
             String[] deliveryData = deliveryTags.split("\\;;", 5);
             String source = deliveryData[1];
             String mainId = deliveryData[2];
             String detailId = deliveryData[3];
-            String hashPhone = deliveryData[4];
-
             String detailTable = PNPFTPType.getDetailTableNameByCode(source);
             String mainTable = PNPFTPType.getMainTableNameByCode(source);
 
-            log.info("Detail Table : " + detailTable);
-            log.info("Detail Id    : " + detailId);
+            log.info("Detail Table : {}, Detail Id: {}", detailTable, detailId);
 
             /* 更新Detail Table狀態 */
             msgBotReceiveRepositoryImpl.updatePnpDetailStatus(detailTable, detailId);
@@ -111,7 +108,7 @@ public class MsgBotReceiveService {
 
             log.info("Update PNP Main and Detail Status Finish!!");
         } catch (Exception e) {
-            log.error("{}: {}", "Exception", e);
+            log.error("Exception", e);
             throw e;
         }
 

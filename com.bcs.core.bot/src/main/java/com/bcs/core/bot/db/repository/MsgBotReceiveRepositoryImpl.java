@@ -15,7 +15,6 @@ import java.util.Date;
 import java.util.List;
 
 /**
- *
  * @author ???
  */
 @Slf4j
@@ -49,17 +48,27 @@ public class MsgBotReceiveRepositoryImpl {
      */
     @Modifying
     @Transactional(rollbackFor = Exception.class)
-    public void updatePnpDetailStatus(String detailTable, String detailId) {
-        String now = DataUtils.formatDateToString(new Date(),"yyyy-MM-dd HH:mm:ss.SSS");
-        String queryString = String.format(" update %s set " +
-                        " pnp_status = '%s'," +
-                        " modify_time = convert(datetime, '%s', 121)," +
-                        " pnp_delivery_time = convert(datetime, '%s', 121) " +
-                        " where pnp_detail_id = '%s';",
-                detailTable, "PNP_COMPLETE", now, now, detailId);
-        log.info("queryString:" + queryString);
-        int updateNum = entityManager.createNativeQuery(queryString).executeUpdate();
-        log.info("Update Status Return Int : " + updateNum);
+    public synchronized void updatePnpDetailStatus(String detailTable, String detailId) {
+        try {
+
+            String now = DataUtils.formatDateToString(new Date(), "yyyy-MM-dd HH:mm:ss.SSS");
+            String queryString = String.format(" update %s set " +
+                            " status = '%s'," +
+                            " pnp_status = '%s'," +
+                            " send_time = convert(datetime, '%s', 121)," +
+                            " modify_time = convert(datetime, '%s', 121)," +
+                            " pnp_delivery_time = convert(datetime, '%s', 121) " +
+                            " where pnp_detail_id = '%s';",
+                    detailTable, "PNP_COMPLETE", "PNP_COMPLETE", now, now, now, detailId);
+            log.info("queryString:" + queryString);
+            int updateNum = entityManager.createNativeQuery(queryString).executeUpdate();
+            log.info("Update Status Return Int : " + updateNum);
+            entityManager.flush();
+            entityManager.clear();
+        } catch (Exception e) {
+            log.error("Exception", e);
+            throw e;
+        }
     }
 
     /**
@@ -71,16 +80,24 @@ public class MsgBotReceiveRepositoryImpl {
      */
     @Modifying
     @Transactional(rollbackFor = Exception.class)
-    public void updatePnpMainStatus(String mainTable, String mainId) {
-        String now = DataUtils.formatDateToString(new Date(),"yyyy-MM-dd HH:mm:ss.SSS");
-        String queryString = String.format(" update %s set " +
-                        " status = '%s'," +
-                        " modify_time = convert(datetime, '%s', 121)," +
-                        " where pnp_main_id = '%s';",
-                mainTable, "PNP_COMPLETE", now, mainId);
-        log.info("queryString:" + queryString);
-        int updateNum = entityManager.createNativeQuery(queryString).executeUpdate();
-        log.info("Update Status Return Int : " + updateNum);
+    public synchronized void updatePnpMainStatus(String mainTable, String mainId) {
+        try {
+            String now = DataUtils.formatDateToString(new Date(), "yyyy-MM-dd HH:mm:ss.SSS");
+            String queryString = String.format(" update %s set" +
+                            " status = '%s'," +
+                            " send_time = convert(datetime, '%s', 121)," +
+                            " modify_time = convert(datetime, '%s', 121)" +
+                            " where pnp_main_id = '%s'",
+                    mainTable, "PNP_COMPLETE", now, now, mainId);
+            log.info("queryString:" + queryString);
+            int updateNum = entityManager.createNativeQuery(queryString).executeUpdate();
+            log.info("Update Status Return Int : " + updateNum);
+            entityManager.flush();
+            entityManager.clear();
+        } catch (Exception e) {
+            log.error("Exception", e);
+            throw e;
+        }
     }
 
 

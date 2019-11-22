@@ -1,5 +1,6 @@
 package com.bcs.core.report.builder;
 
+import com.bcs.core.utils.DataUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -105,12 +106,11 @@ public class ExportExcelBuilder {
      * @return this
      */
     public ExportExcelBuilder setRowValue(Map<Integer, String> rowValueMap) {
-        log.info("Current Row Number is {}", this.row.getRowNum());
+        log.info("Current Row Number is {}\n{}", this.row.getRowNum(), DataUtils.toPrettyJsonUseJackson(rowValueMap));
         for (Map.Entry<Integer, String> entry : rowValueMap.entrySet()) {
             Integer cellIndex = entry.getKey();
             String cellValue = entry.getValue();
             this.row.createCell(cellIndex).setCellValue(cellValue);
-            log.info("{} : {}", cellIndex, cellValue);
             recordMaxCellIndex(cellIndex);
         }
         return this;
@@ -124,7 +124,7 @@ public class ExportExcelBuilder {
     private void recordMaxCellIndex(int cellIndex) {
         if (this.maxCellIndex < cellIndex) {
             maxCellIndex = cellIndex;
-            log.info("Max Cell Index is {}", this.maxCellIndex);
+            log.debug("Max Cell Index is {}", this.maxCellIndex);
         }
     }
 
@@ -188,7 +188,7 @@ public class ExportExcelBuilder {
             this.workbook.write(out);
             out.close();
         } catch (Exception e) {
-            log.error("{}: {}", "Exception", e);
+            log.error("Exception", e);
         }
     }
 

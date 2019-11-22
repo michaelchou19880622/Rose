@@ -10,20 +10,24 @@ $(function() {
 	var page = 1, totalPages = 0;
 	var firstFatch = true;
 	var linePointMainId = $.urlParam("linePointMainId");
-	
+	var startDate = $.urlParam("startDate");
+	var endDate = $.urlParam("endDate");
+	var linePointDetailCount = 0;
+	var linePointSuccessAmount = 0;
+	var linePointDetail = {};
 	// ---- Functions ----
     // do Split Page
 	$('.btn.prev').click(function(){
 		if(page > 1) {
 			page--;
-			getDataList();
+			pagelist();
 			$('#pageAndTotalPages').text(page + '/' + totalPages);
 		}
 	});
 	$('.btn.next').click(function(){
 		if(page < totalPages) {
 			page++;
-			getDataList();
+			pagelist();
 			$('#pageAndTotalPages').text(page + '/' + totalPages);
 		}
 	});
@@ -32,7 +36,8 @@ $(function() {
 	setExportButtonSource = function(){
 		console.info('hasData:', hasData);
 		if(hasData) {
-			var getUrl = bcs.bcsContextPath + '/edit/getLPStatisticsReportDetailExcel?linePointMainId=' + linePointMainId;
+			var getUrl = bcs.bcsContextPath + '/edit/getLPStatisticsReportDetailExcel?linePointMainId=' + linePointMainId 
+											+'&startDateStr='+startDate+'&endDateStr='+endDate;
 			console.info('getUrl', getUrl);
 			
 			$('.btn_add.exportToExcel').attr('href', getUrl);
@@ -53,7 +58,7 @@ $(function() {
             console.info('findOneLinePointMainByMainId response:', o);
             $('#titleText').html('專案名稱：' + o.title);
             $('#serialIdText').html('Campaign：' + o.serialId);
-            $('#totalCountText').html('發送總點數：' + o.successfulAmount);
+            //$('#totalCountText').html('發送總點數：' + linePointSuccessAmount);
             $('#modifyUserText').html('建立人員：' + o.modifyUser);
             modifyUser = o.modifyUser;
             $('#departmentFullNameText').html('建立人員單位：' + o.departmentFullName);
@@ -74,56 +79,28 @@ $(function() {
 		
         $.ajax({
 			type : 'GET',
-			url : bcs.bcsContextPath + '/edit/findAllLinePointDetailByMainId?linePointMainId=' + linePointMainId,
+			url : bcs.bcsContextPath + '/edit/findLinePointDetailByMainId?linePointMainId=' + linePointMainId+'&startDateStr='+startDate+'&endDateStr='+endDate,
             contentType: 'application/json',
         }).success(function(response) {
             console.info("response:", response);
-			
-            $.each(response, function(i, o) {
-                var responseStatus = "";
-                if(o.status=='SUCCESS'){
-                	responseStatus = '成功';
-                }else if(o.status=='FAIL'){
-                	responseStatus = '失敗';
-                }else {
-                	responseStatus = '等待';
-                	return; // == continue
-                }
-                if(o.detailType == 'CANCEL_API' || o.detailType == 'CANCEL_BCS'){
-                	responseStatus = '取消' + responseStatus;
-                }
-		        
-		        
-            	var resultTr = originalTr.clone(true); //增加一行
-                
-                if (o.sendTime) {
-		              resultTr.find('.sendTime').html(moment(o.sendTime).format('YYYY-MM-DD HH:mm:ss'));
-		        }else{
-		              resultTr.find('.sendTime').html('-');
-		        }
-                
-                resultTr.find('.orderKey').html(o.orderKey);
-                resultTr.find('.uid').html(o.uid);
-                resultTr.find('.custId').html(o.custid);
-                resultTr.find('.amount').html(o.amount);
-                resultTr.find('.responseStatus').html(responseStatus);
-
-		        
-                if (o.status=='FAIL') {
-		              resultTr.find('.message').html(o.message);
-		        }else{
-		              resultTr.find('.message').html('-');
-		        }
-                
-                if(o.status=='SUCCESS'){
-                	resultTr.find('.btn_copy').attr('detailId', o.detailId).css("background-color","red");
-                    resultTr.find('.btn_copy').click(btn_cancle);
-                }
-                
-                
-                // Append to Table
-                $('.resultTable').append(resultTr);
+            linePointDetailCount = response.length;
+            linePointDetail = response ;
+            $.each(linePointDetail, function(i, o) {
+            	if(o.status=='SUCCESS'){
+            		linePointSuccessAmount += o.amount;
+            	}
             });
+            $('#totalCountText').html('發送總點數：' + linePointSuccessAmount);
+            if(linePointDetailCount % 10 == 0){
+				totalPages = linePointDetailCount/10;
+			}else{
+				totalPages = Math.floor(linePointDetailCount/10) + 1 ;
+			}
+			$('#pageAndTotalPages').text(page + '/' + totalPages);
+			
+			pagelist();
+           
+            
         }).fail(function(response) {
             console.info(response);
             $.FailResponse(response);
@@ -131,6 +108,67 @@ $(function() {
         	$('.LyMain').unblock();
         });		
 	};
+	
+	function pagelist(){
+		 $('.resultTr').remove();
+		 $.each(linePointDetail, function(i, o) {
+			 if(Math.floor(i/10)+1 == page){
+	             var responseStatus = "";
+	             if(o.status=='SUCCESS'){
+	             	responseStatus = '成功';
+	             }else if(o.status=='FAIL'){
+	             	responseStatus = '失敗';
+	             }else {
+	             	responseStatus = '等待';
+	             	return; // == continue
+	             }
+	             if(o.detailType == 'CANCEL_API' || o.detailType == 'CANCEL_BCS'){
+	             	responseStatus = '取消' + responseStatus;
+	             }
+			        
+			        
+	         	var resultTr = originalTr.clone(true); //增加一行
+	             
+	             if (o.sendTime) {
+			              resultTr.find('.sendTime').html(moment(o.sendTime).format('YYYY-MM-DD HH:mm:ss'));
+			        }else{
+			              resultTr.find('.sendTime').html('-');
+			        }
+	             
+	             resultTr.find('.orderKey').html(o.orderKey);
+	             resultTr.find('.uid').html(o.uid);
+	             resultTr.find('.custId').html(o.custid);
+	             resultTr.find('.amount').html(o.amount);
+	             resultTr.find('.responseStatus').html(responseStatus);
+	
+			        
+	             if (o.status=='FAIL') {
+	            	 try {
+	                     var obj=JSON.parse(o.message);
+	                     resultTr.find('.message').html(obj.message);
+	                 } catch(e) {
+	                     resultTr.find('.message').html(o.message);
+	                 }
+			        }else{
+			              resultTr.find('.message').html('-');
+			        }
+	             
+	             if(o.status=='SUCCESS'){
+	             	resultTr.find('.btn_copy').attr('detailId', o.detailId).css("background-color","red");
+	                resultTr.find('.btn_copy').click(btn_cancle);
+	             }
+	             
+	             if(bcs.user.role == 'ROLE_REPORT' || bcs.user.role == 'ROLE_LINE_SEND'){
+	             	resultTr.find('.btn_copy').remove();
+	             }
+             	$('.resultTable').append(resultTr);
+			 }
+             
+             
+             // Append to Table
+             
+		 });
+	}
     
 	// get Total Count
 	var setTotal = function(){
@@ -173,12 +211,6 @@ $(function() {
 	    $('.resultTr').remove();
 	    
 	    originalTable = $('.resultTable').clone(true);
-	    
-	    // initialize time picker
-		startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
-		endDate = moment(new Date()).format('YYYY-MM-DD');
-		$('#startDate').val(startDate);
-		$('#endDate').val(endDate);
 		
 		
 		getMainList();
@@ -186,6 +218,8 @@ $(function() {
 		//getDataList();// 这里写sleep之后需要去做的事情
 		
 	};
+	
+
 	
 	var btn_cancle = function(){
 		$('.LyMain').block($.BCS.blockMsgRead);
@@ -197,7 +231,7 @@ $(function() {
 		}).success(function(response){
 			console.info(response);
 			alert("收回成功");
-			window.location.replace(bcs.bcsContextPath + '/edit/linePointStatisticsReportDetailPage?linePointMainId=' + linePointMainId);
+			window.location.replace(bcs.bcsContextPath + '/edit/linePointStatisticsReportDetailPage?linePointMainId=' + linePointMainId+'&startDate=' + startDate + '&endDate=' + endDate);
 		}).fail(function(response){
 			console.info(response);
 			$.FailResponse(response);
@@ -207,4 +241,6 @@ $(function() {
 	};
 	
     initPage();
+    
+    
 });

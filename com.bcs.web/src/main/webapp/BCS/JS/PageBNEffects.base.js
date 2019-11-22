@@ -146,13 +146,19 @@ $(function(){
 			type : "GET",
 			url : bcs.bcsContextPath + '/edit/getBNEffectsTotalPages?startDate=' + startDate + '&endDate=' + endDate
 		}).success(function(response){
-			console.info('msg1: ', response['msg']);
+			console.info('msg: ', response['msg']);
 			totalPages = parseInt(response['msg']);
-			console.info('totalPages1: ', totalPages);
+			console.info('totalPages: ', totalPages);
 			// set pageAndTotalPage
 			page = 1;
 			console.info(page + '/' + totalPages);
 			$('#pageAndTotalPages').text(page + '/' + totalPages);
+			if (totalPages == 0) {
+				$('#pageControl').hide();
+			}
+			else {
+				$('#pageControl').show();
+			}
 		}).fail(function(response){
 			console.info(response);
 			$.FailResponse(response);

@@ -11,7 +11,8 @@ $(function() {
 	var startDate = null, endDate = null;
 	var page = 1, totalPages = 0;
 	var firstFatch = true;
-	
+	var count = 0 ;
+	var linepointMainResponse = {};
 	// date module
 	$('.datepicker').datepicker({
 		 maxDate : 0,
@@ -46,14 +47,14 @@ $(function() {
 	$('.btn.prev').click(function(){
 		if(page > 1) {
 			page--;
-			getDataList();
+			pageList();
 			$('#pageAndTotalPages').text(page + '/' + totalPages);
 		}
 	});
 	$('.btn.next').click(function(){
 		if(page < totalPages) {
 			page++;
-			getDataList();
+			pageList();
 			$('#pageAndTotalPages').text(page + '/' + totalPages);
 		}
 	});
@@ -98,7 +99,7 @@ $(function() {
 		console.info("firstFatch:", firstFatch);
 		if(firstFatch){
 			firstFatch = false;
-			setTotal();
+			//setTotal();
 		}
 		
 		var modifyUserInput = $('#modifyUserInput').val();
@@ -118,33 +119,21 @@ $(function() {
 			} else {
 				hasData = true;
 			}
-			
-            $.each(response, function(i, o) {
-                var resultTr = originalTr.clone(true); //增加一行
-                console.info("resultTr:", resultTr);
-               
-                resultTr.find('.title').html(o.title);
-                if (o.modifyTime) {
-		              resultTr.find('.modifyTime').html(moment(o.modifyTime).format('YYYY-MM-DD HH:mm:ss'));
-		        }else{
-		              resultTr.find('.modifyTime').html('-');
-		        }
-                resultTr.find('.modifyUser').html(o.modifyUser);
-                resultTr.find('.departmentFullName').html(o.departmentFullName);
-                resultTr.find('.pccCode').html(o.pccCode);
-		        resultTr.find('.serviceName').html(o.sendType);
-		        resultTr.find('.campaignCode').html(o.serialId);
-		        resultTr.find('.sendedCount').html(o.totalCount);
-		        resultTr.find('.successfulCount').html(o.successfulCount);
-		        resultTr.find('.failedCount').html(o.failedCount);
-		        resultTr.find('.successfulAmount').html(o.successfulAmount);
-		        resultTr.find('#toDetail').attr('href', bcs.bcsContextPath + '/edit/linePointStatisticsReportDetailPage?linePointMainId=' + o.id);
-                    
-		        setExportButtonSource();
+			count = response.length ; //計算一共有幾筆
+			if(count % 10 == 0){
+				totalPages = count/10;
+			}else{
+				totalPages = Math.floor(count/10) + 1 ;
+			}
+			$('#pageAndTotalPages').text(page + '/' + totalPages);
+			linepointMainResponse = response;
+			pageList();
+         
+		    setExportButtonSource();
 		        
-                // Append to Table
-                $('.resultTable').append(resultTr);
-            });
+            // Append to Table
+           
+            
         }).fail(function(response) {
             console.info(response);
             $.FailResponse(response);
@@ -154,37 +143,67 @@ $(function() {
 	};
     
 	// get Total Count
-	var setTotal = function(){
-		// block
-		$('.LyMain').block($.BCS.blockMsgRead);
-		
-		// get URL
-		var modifyUserInput = $('#modifyUserInput').val();
-		var titleInput = $('#titleInput').val();
-		var getUrl = bcs.bcsContextPath + '/edit/getLPStatisticsReportTotalPages?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page + 
-		'&modifyUser=' + modifyUserInput + '&title=' + titleInput;
-		console.info('getUrl', getUrl);
-		
-		// get data
-		$.ajax({
-			type : 'GET',
-			url : getUrl
-		}).success(function(response){
-			console.info('msg1: ', response['msg']);
-			totalPages = parseInt(response['msg']);
-			console.info('totalPages1: ', totalPages);
-			// set pageAndTotalPage
-			page = 1;
-			console.info(page + '/' + totalPages);
-			$('#pageAndTotalPages').text(page + '/' + totalPages);
-		}).fail(function(response){
-			console.info(response);
-			$.FailResponse(response);
-			$('.LyMain').unblock();
-		}).done(function(){
-			$('.LyMain').unblock();
+//	var setTotal = function(){
+//		// block
+//		$('.LyMain').block($.BCS.blockMsgRead);
+//		
+//		// get URL
+//		var modifyUserInput = $('#modifyUserInput').val();
+//		var titleInput = $('#titleInput').val();
+//		var getUrl = bcs.bcsContextPath + '/edit/getLPStatisticsReportTotalPages?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page + 
+//		'&modifyUser=' + modifyUserInput + '&title=' + titleInput;
+//		console.info('getUrl', getUrl);
+//		
+//		// get data
+//		$.ajax({
+//			type : 'GET',
+//			url : getUrl
+//		}).success(function(response){
+//			console.info('msg1: ', response['msg']);
+//			totalPages = parseInt(response['msg']);
+//			console.info('totalPages1: ', totalPages);
+//			// set pageAndTotalPage
+//			page = 1;
+//			console.info(page + '/' + totalPages);
+//			$('#pageAndTotalPages').text(page + '/' + totalPages);
+//		}).fail(function(response){
+//			console.info(response);
+//			$.FailResponse(response);
+//			$('.LyMain').unblock();
+//		}).done(function(){
+//			$('.LyMain').unblock();
+//		});
+//	}
+	var pageList = function(){
+		$('.resultTr').remove();
+		$.each(linepointMainResponse, function(i, o) {
+        	if(Math.floor(i/10)+1 == page){
+                var resultTr = originalTr.clone(true); //增加一行
+                console.info("resultTr:", resultTr);
+                resultTr.find('.title').html(o.title);
+//                if (o.sendStartTime) {
+//		              resultTr.find('.modifyTime').html(moment(o.sendStartTime).format('YYYY-MM-DD HH:mm:ss'));
+//		        }else{
+//		              resultTr.find('.modifyTime').html('-');
+//		        }
+                resultTr.find('.modifyUser').html(o.modifyUser);
+                resultTr.find('.departmentFullName').html(o.departmentFullName);
+                resultTr.find('.pccCode').html(o.pccCode);
+		        resultTr.find('.serviceName').html(o.sendType);
+		        resultTr.find('.campaignCode').html(o.serialId);
+		        resultTr.find('.sendedCount').html(o.totalCount);
+		        resultTr.find('.successfulCount').html(o.successfulCount);
+		        resultTr.find('.failedCount').html(o.failedCount);
+		        resultTr.find('.successfulAmount').html(o.successfulAmount);
+		        resultTr.find('#toDetail').attr('href', bcs.bcsContextPath + '/edit/linePointStatisticsReportDetailPage?linePointMainId=' + o.id +'&startDate=' + startDate 
+		        																										+ '&endDate=' + endDate + '&successfulAmount='+o.successfulAmount );
+		        
+		        $('.resultTable').append(resultTr);
+        	} 
 		});
-	}
+		
+	};
+	
 	
 	// initialize Page
 	var initPage = function(){

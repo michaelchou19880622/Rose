@@ -8,11 +8,11 @@ import com.bcs.core.db.service.UserTraceLogService;
 @Service
 public class CatchRecordOpBlockedReceive extends CatchRecordAbstractSystemLog {
 
-	@Autowired
-	private UserTraceLogService systemLogService;
-	
-	@Override
-	public void loadInitData() {
-		this.loadFromSystemLog(systemLogService, "LineUser", "Block");
-	}
+    @Autowired
+    private UserTraceLogService systemLogService;
+
+    @Override
+    public void loadInitData() {
+        this.loadFromSystemLog(systemLogService, "LineUser", "Block");
+    }
 }

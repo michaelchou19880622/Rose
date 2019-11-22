@@ -165,7 +165,7 @@ public class InitController {
     private void loadFtpPnpDataTaskStartCircle() {
         /* PNP FTP flow */
         try {
-            /* WEB */
+            /* BE-OA : .pnp.ftpDownload */
             if (CoreConfigReader.isPNPFtpDownload()) {
                 log.info("init PNP FTP flow ");
                 loadFtpPnpDataTask.startCircle();
@@ -182,7 +182,7 @@ public class InitController {
      */
     private void pnpMsgServiceStartCircle() {
         try {
-            /* WEB */
+            /* BE-OAAPI : .pnp.sendMsg */
             if (CoreConfigReader.isPNPSendMsg()) {
                 log.info("init pnpPushMsg flow ");
                 /* PNP pnpPushMsg flow */
@@ -204,7 +204,7 @@ public class InitController {
     private void pnpSmsMsgServiceStartCircle() {
         //PNP transfer file to SMS flow
         try {
-            /* WEB */
+            /* BE-OA : .pnp.ftpDownload */
             if (CoreConfigReader.isPNPFtpDownload()) {
                 log.info("init PNP transfer file to SMS flow ");
                 pnpSmsMsgService.startCircle();

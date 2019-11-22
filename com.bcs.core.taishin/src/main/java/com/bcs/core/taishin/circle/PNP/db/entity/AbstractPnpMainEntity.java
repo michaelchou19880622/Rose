@@ -9,72 +9,54 @@ public abstract class AbstractPnpMainEntity implements Serializable, Cloneable {
     private static final long serialVersionUID = 1L;
 
     /* ================================ FTP ==================================== */
-    /**
-     * 草稿 - 儲存至Detail Table後
-     */
-    public static final String DATA_CONVERTER_STATUS_DRAFT = "DRAFT";
 
-    /**
-     * 等待 - 草稿後建立Main及更新Detail後
-     */
-    public static final String DATA_CONVERTER_STATUS_WAIT = "WAIT";
+    public static final String FTP_DETAIL_SAVE = "DRAFT";
+    public static final String FTP_MAIN_SAVE = "WAIT";
 
-    /**
-     * 即時發送(Default)
-     */
     public static final String SEND_TYPE_IMMEDIATE = "IMMEDIATE";
-    /**
-     * 排程過期 - 預約時間 < 現在時間過期(即時發送)
-     */
     public static final String SEND_TYPE_SCHEDULE_TIME_EXPIRED = "SCH_EXPRED";
-    /**
-     * 排程未過期 - 預約時間 > 現在時間過期(進入排程)
-     */
     public static final String SEND_TYPE_DELAY = "DELAY";
-    //預約
     public static final String DATA_CONVERTER_STATUS_SCHEDULED = "SCHEDULED";
 
-    public static final String MSG_SENDER_STATUS_BC_PROCESS = "BC_PROCESS";
-
 
 
     /* ========================================BC================================================*/
 
-    public static final String MSG_SENDER_STATUS_BC_SENDING = "BC_SENDING";
-    public static final String DATA_CONVERTER_STATUS_BC_COMPLETE = "BC_COMPLETE";
-    public static final String MSG_SENDER_STATUS_BC_FAIL = "BC_FAIL";
-    public static final String MSG_SENDER_STATUS_BC_FAIL_PNP_PROCESS = "BC_FAIL_PNP_PROCESS";
-    public static final String MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS = "BC_FAIL_SMS_PROCESS";
-    public static final String MSG_SENDER_STATUS_USER_BLOCK_SMS_PROCESS = "USER_BLOCK_SMS_PROCESS";
-
-    /* ========================================BC================================================*/
-    /* ========================================PNP================================================*/
-    public static final String MSG_SENDER_STATUS_PNP_SENDING = "PNP_SENDING";
-    public static final String MSG_SENDER_STATUS_CHECK_DELIVERY = "CHECK_DELIVERY";
-    public static final String DATA_CONVERTER_STATUS_PNP_COMPLETE = "PNP_COMPLETE";
-    public static final String MSG_SENDER_STATUS_PNP_FAIL_SMS_PROCESS = "PNP_FAIL_SMS_PROCESS";
-
+    public static final String BC_PROCESS = "BC_PROCESS";
+    public static final String BC_SENDING = "BC_SENDING";
+    public static final String BC_SENT_COMPLETE = "BC_COMPLETE";
+    public static final String BC_SENT_FAIL = "BC_FAIL";
+    public static final String BC_SENT_FAIL_PNP_PROCESS = "BC_FAIL_PNP_PROCESS";
+    public static final String BC_SENT_FAIL_SMS_PROCESS = "BC_FAIL_SMS_PROCESS";
+    public static final String BC_USER_BLOCKED_SMS_PROCESS = "USER_BLOCK_SMS_PROCESS";
 
     /* ========================================PNP================================================*/
-    /* ========================================SMS================================================*/
-    public static final String MSG_SENDER_STATUS_SMS_SENDING = "SMS_SENDING";
-    public static final String MSG_SENDER_STATUS_SMS_CHECK_DELIVERY = "SMS_CHECK_DELIVERY";
-    public static final String DATA_CONVERTER_STATUS_SMS_COMPLETE = "SMS_COMPLETE";
-    public static final String MSG_SENDER_STATUS_SMS_FAIL = "SMS_FAIL";
+
+    public static final String PNP_SENDING = "PNP_SENDING";
+    public static final String PNP_SENT_CHECK_DELIVERY = "CHECK_DELIVERY";
+    public static final String PNP_SENT_COMPLETE = "PNP_COMPLETE";
+    public static final String PNP_SENT_FAIL_SMS_PROCESS = "PNP_FAIL_SMS_PROCESS";
+
+
     /* ========================================SMS================================================*/
 
+    public static final String SMS_SENDING = "SMS_SENDING";
+    public static final String SMS_SENT_CHECK_DELIVERY = "SMS_CHECK_DELIVERY";
+    public static final String SMS_SENT_COMPLETE = "SMS_COMPLETE";
+    public static final String SMS_SENT_FAIL = "SMS_FAIL";
+
     @Deprecated
-    public static final String MSG_SENDER_STATUS_PROCESS = "PROCESS";
+    public static final String PROCESS = "PROCESS";
     @Deprecated
-    public static final String MSG_SENDER_STATUS_SENDING = "SENDING";
+    public static final String SENDING = "SENDING";
     @Deprecated
-    public static final String MSG_SENDER_STATUS_FINISH = "FINISH";
+    public static final String FINISH = "FINISH";
     @Deprecated
-    public static final String MSG_SENDER_STATUS_FAIL = "FAIL";
+    public static final String FAIL = "FAIL";
     @Deprecated
-    public static final String MSG_SENDER_STATUS_DELETE = "DELETE";
+    public static final String DELETE = "DELETE";
     @Deprecated
-    public static final String DATA_CONVERTER_STATUS_COMPLETE = "COMPLETE";
+    public static final String COMPLETE = "COMPLETE";
 
 
     /**

@@ -1,12 +1,11 @@
 package com.bcs.core.taishin.circle.PNP.db.repository;
 
+import com.bcs.core.taishin.circle.PNP.code.PnpFtpSourceEnum;
+import com.bcs.core.taishin.circle.PNP.code.PnpStageEnum;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailEvery8d;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMing;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMitake;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailUnica;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
-import com.bcs.core.taishin.circle.PNP.ftp.PNPFTPType;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -18,6 +17,10 @@ import java.util.Set;
  * @author ???
  */
 public interface PnpRepositoryCustom {
+
+    @Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
+    List<? super PnpDetail> updateStatus(PnpFtpSourceEnum type, String processApName, PnpStageEnum stage);
+
     /**
      * Update status by stage bc list.
      *
@@ -26,17 +29,8 @@ public interface PnpRepositoryCustom {
      * @param allMainIds the all main ids
      * @return the list
      */
-    List<? super PnpDetail> updateStatusByStageBc(PNPFTPType type, String procApName, Set<Long> allMainIds);
-
-    /**
-     * Update status list.
-     *
-     * @param type       the type
-     * @param procApName the proc ap name
-     * @param stage      the stage
-     * @return the list
-     */
-    List<? super PnpDetail> updateStatus(PNPFTPType type, String procApName, String stage);
+    @Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
+    List<? super PnpDetail> updateStatusByStageBc(PnpFtpSourceEnum type, String procApName, Set<Long> allMainIds);
 
     /**
      * Find main by main id pnp main.
@@ -45,9 +39,7 @@ public interface PnpRepositoryCustom {
      * @param mainId the main id
      * @return the pnp main
      */
-    PnpMain findMainByMainId(PNPFTPType type, Long mainId);
-
-
+    PnpMain findMainByMainId(PnpFtpSourceEnum type, Long mainId);
 
     /**
      * Find pnp detail by id list.
@@ -56,5 +48,5 @@ public interface PnpRepositoryCustom {
      * @param ids  the ids
      * @return the list
      */
-    List<? super PnpDetail> findPnpDetailById(PNPFTPType type, List<BigInteger> ids);
+    List<? super PnpDetail> findPnpDetailById(PnpFtpSourceEnum type, List<BigInteger> ids);
 }

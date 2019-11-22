@@ -82,7 +82,7 @@ public class InitController {
         loadFtpPnpDataTaskStartCircle();
         pnpMsgServiceStartCircle();
         pnpSmsMsgServiceStartCircle();
-        linePointschedulerServiceStartCircle(); //這個service註解掉後，預約發送可以正常發送。暫時先註解掉 - by Michael 20190919
+        linePointSchedulerServiceStartCircle(); //這個service註解掉後，預約發送可以正常發送。暫時先註解掉 - by Michael 20190919
         threadStart();
         liveChatTaskServiceCheckUserStatus();
         cleanSystemLogTask();
@@ -219,7 +219,7 @@ public class InitController {
     /**
      * 9. LinePoint Scheduler
      */
-    private void linePointschedulerServiceStartCircle() {
+    private void linePointSchedulerServiceStartCircle() {
         try {
             log.info("init LinePoint Scheduler ");
             linePointschedulerService.startCircle();

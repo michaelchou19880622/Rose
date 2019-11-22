@@ -2,6 +2,7 @@ package com.bcs.core.taishin.circle.PNP.akka.handler;
 
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
+import com.bcs.core.taishin.circle.PNP.code.PnpStageEnum;
 import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
@@ -46,16 +47,16 @@ public class PnpMainActor extends UntypedActor {
 
             if (object instanceof PnpMain) {
                 PnpMain pnpMain = (PnpMain) object;
-                String stage = pnpMain.getProcStage();
+                PnpStageEnum stage = PnpStageEnum.findEnumByName(pnpMain.getProcStage());
                 log.info("PnpMainActor onReceive object instanceof PnpMain!!! Stage: " + stage);
                 switch (stage) {
-                    case AbstractPnpMainEntity.STAGE_BC:
+                    case BC:
                         tellActor(pushMessageRouterActor, pnpMain);
                         break;
-                    case AbstractPnpMainEntity.STAGE_PNP:
+                    case PNP:
                         tellActor(pnpMessageRouterActor, pnpMain);
                         break;
-                    case AbstractPnpMainEntity.STAGE_SMS:
+                    case SMS:
                         //TODO SMS Process
                         break;
                     default:

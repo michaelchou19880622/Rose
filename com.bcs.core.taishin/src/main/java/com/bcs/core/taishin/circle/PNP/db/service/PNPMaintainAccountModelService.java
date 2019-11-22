@@ -334,7 +334,7 @@ public class PNPMaintainAccountModelService {
     @Cacheable
     private String englishStatusToChinese(String status) {
         switch (status) {
-
+            //FTP
             case "DRAFT":
                 return "正在存進資料庫";
             case "WAIT":
@@ -343,6 +343,8 @@ public class PNPMaintainAccountModelService {
                 return "等待預約發送";
             case "DELAY":
                 return "等待預約發送";
+
+            //BC
             case "BC_PROCESS":
                 return "進行BC發送處理中";
             case "BC_SENDING":
@@ -357,6 +359,8 @@ public class PNPMaintainAccountModelService {
                 return "轉發SMS";
             case "USER_BLOCK_SMS_PROCESS":
                 return "用戶封鎖，轉發SMS";
+
+            //PNP
             case "PNP_SENDING":
                 return "PNP發送中";
             case "CHECK_DELIVERY":
@@ -365,6 +369,8 @@ public class PNPMaintainAccountModelService {
                 return "PNP處理程序完成";
             case "PNP_FAIL_SMS_PROCESS":
                 return "轉發SMS";
+
+            //SMS
             case "SMS_SENDING":
                 return "SMS發送中";
             case "SMS_CHECK_DELIVERY":

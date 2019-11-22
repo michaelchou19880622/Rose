@@ -1,6 +1,8 @@
 package com.bcs.core.taishin.circle.PNP.db.repository;
 
-import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
+import com.bcs.core.taishin.circle.PNP.code.PnpFtpSourceEnum;
+import com.bcs.core.taishin.circle.PNP.code.PnpStageEnum;
+import com.bcs.core.taishin.circle.PNP.code.PnpStatusEnum;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailEvery8d;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMing;
@@ -11,9 +13,7 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainEvery8d;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainMing;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainMitake;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMainUnica;
-import com.bcs.core.taishin.circle.PNP.ftp.PNPFTPType;
 import com.bcs.core.taishin.circle.db.entity.CircleEntityManagerControl;
-import com.bcs.core.utils.DataUtils;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceContext;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -48,11 +47,11 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
      */
     @Override
     @Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
-    public List<? super PnpDetail> updateStatus(PNPFTPType type, String processApName, String stage) {
+    public List<? super PnpDetail> updateStatus(PnpFtpSourceEnum type, String processApName, PnpStageEnum stage) {
         log.debug(" begin PNP updateStatus:" + processApName + " type:" + type);
         try {
             /* Stage = PNP */
-            List<BigInteger> detailIds = findAndUpdateProcessForUpdate(type.getDetailTable(), stage);
+            List<BigInteger> detailIds = findAndUpdateProcessForUpdate(type.detailTable, stage.value);
             if (!detailIds.isEmpty()) {
                 log.info("Update Detail Status: [PROCESS] to [PNP][SENDING]");
                 List<List<BigInteger>> batchDetailIds = Lists.partition(detailIds, CircleEntityManagerControl.batchSize);
@@ -107,10 +106,10 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 " ) ";
         return (List<BigInteger>) entityManager.createNativeQuery(sqlString)
                 .setParameter("stage", stage)
-                .setParameter("status", AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS)
-                .setParameter("bc_status", AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_PNP_PROCESS)
-                .setParameter("newStatus", AbstractPnpMainEntity.MSG_SENDER_STATUS_SENDING)
-                .setParameter("pnp_Status", AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_SENDING)
+                .setParameter("status", PnpStatusEnum.PROCESS.value)
+                .setParameter("bc_status", PnpStatusEnum.BC_SENT_FAIL_PNP_PROCESS.value)
+                .setParameter("newStatus", PnpStatusEnum.SENDING.value)
+                .setParameter("pnp_Status", PnpStatusEnum.PNP_SENDING.value)
                 .setParameter("modifyTime", new Date())
                 .getResultList();
     }
@@ -121,11 +120,11 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
      */
     @Override
     @Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
-    public List<? super PnpDetail> updateStatusByStageBc(PNPFTPType type, String procApName, Set<Long> allMainIds) {
+    public List<? super PnpDetail> updateStatusByStageBc(PnpFtpSourceEnum type, String procApName, Set<Long> allMainIds) {
         log.info(String.format("ProcessApName: %s, Type: %s", procApName, type));
         try {
             // 找出第一筆 WAIT MAIN 並更新狀態為Sending
-            Long waitMainId = findAndUpdateFirstWaitMainByStageBc(procApName, type.getMainTable());
+            Long waitMainId = findAndUpdateFirstWaitMainByStageBc(procApName, type.mainTable);
             if (waitMainId != null) {
                 allMainIds.add(waitMainId);
             } else {
@@ -156,11 +155,11 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
      * 根據Main ID && STATUS = WAIT 找出PNP Detail 並更新 status 為SENDING
      */
     @SuppressWarnings("unchecked")
-    private List<BigInteger> findAndUpdateDetailByMainAndStatus(Set<Long> mainIds, PNPFTPType type) {
+    private List<BigInteger> findAndUpdateDetailByMainAndStatus(Set<Long> mainIds, PnpFtpSourceEnum type) {
         List<String> statusList = new ArrayList<>();
-        statusList.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_WAIT);
+        statusList.add(PnpStatusEnum.FTP_MAIN_SAVE.value);
         Date modifyTime = Calendar.getInstance().getTime();
-        String detailTable = type.getDetailTable();
+        String detailTable = type.detailTable;
 
         String sql = String.format(" SELECT b.PNP_DETAIL_ID FROM %s b " +
                 " WHERE b.PNP_MAIN_ID in(:mainIds)" +
@@ -180,8 +179,8 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
         return (List<BigInteger>) entityManager.createNativeQuery(sql)
                 .setParameter("status", statusList).setParameter("mainIds", mainIds)
                 .setParameter("modifyTime", modifyTime)
-                .setParameter("newStatus", AbstractPnpMainEntity.MSG_SENDER_STATUS_SENDING)
-                .setParameter("bc_status", AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_SENDING)
+                .setParameter("newStatus", PnpStatusEnum.SENDING.value)
+                .setParameter("bc_status", PnpStatusEnum.BC_SENDING.value)
                 .getResultList();
     }
 
@@ -208,11 +207,11 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 "              order by a.CREAT_TIME" +
                 "          )";
         List<BigInteger> mains = (List<BigInteger>) entityManager.createNativeQuery(waitMainString)
-                .setParameter("status", AbstractPnpMainEntity.DATA_CONVERTER_STATUS_WAIT)
-                .setParameter("stage", AbstractPnpMainEntity.STAGE_BC)
+                .setParameter("status", PnpStatusEnum.FTP_MAIN_SAVE.value)
+                .setParameter("stage", PnpStageEnum.BC.value)
                 .setParameter("procApName", procApName)
                 .setParameter("modifyTime", new Date())
-                .setParameter("newStatus", AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_SENDING).getResultList();
+                .setParameter("newStatus", PnpStatusEnum.BC_SENDING.value).getResultList();
         if (mains == null || mains.isEmpty()) {
             return null;
         }
@@ -224,7 +223,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
      * 根據mainId 找出物件
      */
     @Override
-    public PnpMain findMainByMainId(PNPFTPType type, Long mainId) {
+    public PnpMain findMainByMainId(PnpFtpSourceEnum type, Long mainId) {
         log.info("Find Main By MainId : " + type);
         switch (type) {
             case MITAKE:
@@ -308,7 +307,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
      * @return PnpDetail List
      */
     @Override
-    public List<? super PnpDetail> findPnpDetailById(PNPFTPType type, List<BigInteger> ids) {
+    public List<? super PnpDetail> findPnpDetailById(PnpFtpSourceEnum type, List<BigInteger> ids) {
         switch (type) {
             case MITAKE:
                 return findPnpDetailMitake(ids);

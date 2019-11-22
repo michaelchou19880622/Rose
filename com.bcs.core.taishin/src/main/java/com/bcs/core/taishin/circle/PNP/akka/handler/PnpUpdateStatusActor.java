@@ -72,13 +72,13 @@ public class PnpUpdateStatusActor extends UntypedActor {
      */
     private boolean checkCanUpdateStatusToComplete(PnpDetail pnpDetail) {
         List<String> status = new ArrayList<>();
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS);
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_PROCESS);
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_PNP_PROCESS);
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_USER_BLOCK_SMS_PROCESS);
-        status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
-        status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_WAIT);
+        status.add(AbstractPnpMainEntity.PROCESS);
+        status.add(AbstractPnpMainEntity.BC_PROCESS);
+        status.add(AbstractPnpMainEntity.BC_SENT_FAIL_PNP_PROCESS);
+        status.add(AbstractPnpMainEntity.BC_SENT_FAIL_SMS_PROCESS);
+        status.add(AbstractPnpMainEntity.BC_USER_BLOCKED_SMS_PROCESS);
+        status.add(AbstractPnpMainEntity.FTP_DETAIL_SAVE);
+        status.add(AbstractPnpMainEntity.FTP_MAIN_SAVE);
         status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_SCHEDULED);
         logger.info(String.format("Check Status: %s, Can Update: %s", pnpDetail.getStatus(), !status.contains(pnpDetail.getStatus())));
         return !status.contains(pnpDetail.getStatus());

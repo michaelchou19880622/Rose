@@ -314,14 +314,14 @@
                     <!-- web.xml is not mandatory since JavaEE 5 -->
                     <failOnMissingWebXml>true</failOnMissingWebXml>
                     <!-- com.bcs.X jar & log jar 要包進去 -->
-                    <packagingExcludes>
-                        %regex[WEB-INF/lib/(?!log4j.*\.jar)(?!slf4j.*\.jar)(?!logging.*\.jar)(?!com.bcs.*\.jar).*\.jar]
-                    </packagingExcludes>
-                    <!-- 開啟這個需要註解Tomcat Share Libery 的設定，並與Richart同步上線 -->
 <!--                    <packagingExcludes>-->
-<!--                        WEB-INF/lib/*pwd.jar,-->
-<!--                        WEB-INF/lib/*TSIB.jar-->
+<!--                        %regex[WEB-INF/lib/(?!log4j.*\.jar)(?!slf4j.*\.jar)(?!logging.*\.jar)(?!com.bcs.*\.jar).*\.jar]-->
 <!--                    </packagingExcludes>-->
+<!--                     開啟這個需要註解Tomcat Share Libery 的設定，並與Richart同步上線-->
+                    <packagingExcludes>
+                        WEB-INF/lib/*pwd.jar,
+                        WEB-INF/lib/*TSIB.jar
+                    </packagingExcludes>
                     <warName>${rp.build.warname}</warName> <!-- set up war name -->
                 </configuration>
             </plugin>

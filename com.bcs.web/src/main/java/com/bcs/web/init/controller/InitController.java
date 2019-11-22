@@ -25,6 +25,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.annotation.PostConstruct;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Initial Method When Application Startup
@@ -263,9 +264,11 @@ public class InitController {
      */
     private void cleanSystemLogTask() {
         try {
-            int scheduleDay = 1;
-            int deleteRangeDay = 30;
-            systemLogService.deleteLogByRange(scheduleDay, deleteRangeDay);
+            if (CoreConfigReader.getBoolean("system.log.clean.schedule.enable")) {
+                int scheduleTime = 30;
+                int deleteRangeDay = 30;
+                systemLogService.deleteLogByRange(scheduleTime, TimeUnit.SECONDS, deleteRangeDay);
+            }
         } catch (Exception e) {
             log.error("", e);
         }

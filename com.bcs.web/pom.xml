@@ -85,7 +85,6 @@
             </exclusions>
         </dependency>
     </dependencies>
-
     <packaging>war</packaging>
 
     <profiles>
@@ -162,6 +161,54 @@
             </properties>
         </profile>
         <profile>
+            <id>prod-be-oa</id> <!-- 台新正式機後台 -->
+            <build>
+                <directory>target/PROD-BE</directory>
+            </build>
+            <properties>
+                <package.environment>prod-be-oa</package.environment>
+                <rp.build.warname>taishinoa</rp.build.warname>
+                <maven.war.webxml>src/main/resources/prod-be-oa/web/web.xml
+                </maven.war.webxml> <!-- set up webxml location -->
+            </properties>
+        </profile>
+        <profile>
+            <id>prod-be-oaapi</id> <!--  台新正式機後台 的 api -->
+            <build>
+                <directory>target/PROD-BE</directory>
+            </build>
+            <properties>
+                <package.environment>prod-be-oaapi</package.environment>
+                <rp.build.warname>taishinoaapi</rp.build.warname>
+                <maven.war.webxml>src/main/resources/prod-be-oaapi/web/web.xml
+                </maven.war.webxml> <!-- set up webxml location -->
+            </properties>
+        </profile>
+        <profile>
+            <id>prod-ap-oa</id> <!-- 台新正式機api的後台 -->
+            <build>
+                <directory>target/PROD-AP</directory>
+            </build>
+            <properties>
+                <package.environment>prod-ap-oa</package.environment>
+                <rp.build.warname>taishinoa</rp.build.warname>
+                <maven.war.webxml>src/main/resources/prod-ap-oa/web/web.xml
+                </maven.war.webxml> <!-- set up webxml location -->
+            </properties>
+        </profile>
+        <profile>
+            <id>prod-ap-oaapi</id> <!-- 台新正式機api -->
+            <build>
+                <directory>target/PROD-AP</directory>
+            </build>
+            <properties>
+                <package.environment>prod-ap-oaapi</package.environment>
+                <rp.build.warname>taishinoaapi</rp.build.warname>
+                <maven.war.webxml>src/main/resources/prod-ap-oaapi/web/web.xml
+                </maven.war.webxml> <!-- set up webxml location -->
+            </properties>
+        </profile>
+        <profile>
             <id>test</id>
             <build>
                 <directory>target</directory>
@@ -200,6 +247,11 @@
                     <exclude>taishinoa/</exclude>
                     <exclude>api_taishinoa/</exclude>
                     <exclude>backend_taishinoaapi/</exclude>
+
+                    <exclude>prod-be-oa/</exclude>
+                    <exclude>prod-be-oa-api/</exclude>
+                    <exclude>prod-ap-oa/</exclude>
+                    <exclude>prod-ap-oa-api/</exclude>
                 </excludes>
             </resource>
         </resources>
@@ -235,14 +287,14 @@
                     <!-- web.xml is not mandatory since JavaEE 5 -->
                     <failOnMissingWebXml>true</failOnMissingWebXml>
                     <!-- com.bcs.X jar & log jar 要包進去 -->
-<!--                    <packagingExcludes>-->
-<!--                        %regex[WEB-INF/lib/(?!log4j.*\.jar)(?!slf4j.*\.jar)(?!logging.*\.jar)(?!com.bcs.*\.jar).*\.jar]-->
-<!--                    </packagingExcludes>-->
-<!--                      new -->
                     <packagingExcludes>
-                        WEB-INF/lib/*pwd.jar,
-                        WEB-INF/lib/*TSIB.jar
+                        %regex[WEB-INF/lib/(?!log4j.*\.jar)(?!slf4j.*\.jar)(?!logging.*\.jar)(?!com.bcs.*\.jar).*\.jar]
                     </packagingExcludes>
+                    <!-- 開啟這個需要註解Tomcat Share Libery 的設定，並與Richart同步上線 -->
+<!--                    <packagingExcludes>-->
+<!--                        WEB-INF/lib/*pwd.jar,-->
+<!--                        WEB-INF/lib/*TSIB.jar-->
+<!--                    </packagingExcludes>-->
                     <warName>${rp.build.warname}</warName> <!-- set up war name -->
                 </configuration>
             </plugin>

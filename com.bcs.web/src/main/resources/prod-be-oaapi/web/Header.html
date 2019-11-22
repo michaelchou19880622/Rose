@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<body>
+    <header th:fragment="header" class="LyHead">
+        <div class="lyHeadInner">
+            <!--<h1 class="MdGHD01Logo"><a th:href="@{/bcs/index}" class="mdGHD01AT" style="background-color: #001d59;"></a></h1>-->
+            <h1 class="MdGHD01Logo"><a th:href="@{/bcs/index}" class="mdGHD01AT"></a></h1>
+            <ul class="MdGHD03Util">
+                <li><a th:text="${#authentication.principal.username}" href="">登入者 先生／小姐</a></li>
+                <li><a th:href="@{/bcs/market/adminUserCreatePage?actionType=userEdit&account=} + ${#authentication.principal.account}">編輯</a></li>
+                <li><a th:href="@{/bcs/doLogout}">登出</a></li>
+            </ul>
+        </div>
+    </header>
+</body>
+</html>

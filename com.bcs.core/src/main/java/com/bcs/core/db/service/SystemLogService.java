@@ -81,10 +81,10 @@ public class SystemLogService {
         return systemLogRepository.findByModifyUserAndLevel(modifyUser, level, start, end);
     }
 
-    public void deleteLogByRange(int scheduleDay, int deleteRangeDay) {
+    public void deleteLogByRange(int scheduleTime, int deleteRangeDay) {
         scheduler.scheduleAtFixedRate(() -> {
             Thread.currentThread().setName("System-Log-Clean-Scheduled-" + Thread.currentThread().getId());
-            List<SystemLog> expiredLogList = systemLogRepository.findByModifyTimeBefore(DateUtils.addDays(new Date(), -deleteRangeDay));
+            List<SystemLog> expiredLogList = systemLogRepository.findTop10ByModifyTimeBefore(DateUtils.addDays(new Date(), -deleteRangeDay));
             log.info("Start Clean Expired System Log!! Size:{}", expiredLogList.size());
             if (CollectionUtils.isNotEmpty(expiredLogList)) {
                 systemLogRepository.delete(expiredLogList);
@@ -92,6 +92,6 @@ public class SystemLogService {
             } else {
                 log.info("Expired System Log is Not Found!!");
             }
-        }, 0, scheduleDay, TimeUnit.DAYS);
+        }, 0, scheduleTime, TimeUnit.HOURS);
     }
 }

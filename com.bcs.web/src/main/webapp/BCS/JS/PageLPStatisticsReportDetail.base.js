@@ -86,10 +86,10 @@ $(function() {
             linePointDetailCount = response.length;
             linePointDetail = response ;
             $.each(linePointDetail, function(i, o) {
-            	if(o.status=='SUCCESS'){
-            		linePointSuccessAmount += o.amount;
-            	}
-            });
+   	             if(o.status=='SUCCESS'){
+   	            	linePointSuccessAmount += o.amount;
+   	             }
+   			 });
             $('#totalCountText').html('發送總點數：' + linePointSuccessAmount);
             if(linePointDetailCount % 10 == 0){
 				totalPages = linePointDetailCount/10;
@@ -155,7 +155,7 @@ $(function() {
 	             
 	             if(o.status=='SUCCESS'){
 	             	resultTr.find('.btn_copy').attr('detailId', o.detailId).css("background-color","red");
-	                resultTr.find('.btn_copy').click(btn_cancle);
+	                 resultTr.find('.btn_copy').click(btn_cancle);
 	             }
 	             
 	             if(bcs.user.role == 'ROLE_REPORT' || bcs.user.role == 'ROLE_LINE_SEND'){

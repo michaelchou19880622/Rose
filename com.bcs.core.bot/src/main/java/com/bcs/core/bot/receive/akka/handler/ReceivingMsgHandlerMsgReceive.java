@@ -51,7 +51,7 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
 			Map<String, Object> map = (Map<String, Object>) message;
 			MsgBotReceive receive = (MsgBotReceive) map.get("Content");
 			Long iMsgId = (Long) map.get("iMsgId");
-
+			receive.setReferenceId(iMsgId.toString());
 			LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
 
 			String MID = receive.getSourceId();
@@ -74,7 +74,8 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
 						receive.setText("-RemoveBySystemForSecurity-");
 					}
 				}
-
+				logger.info("map : " + map );
+				logger.info("receive : " + receive );
 				// Save Record
 				ApplicationContextProvider.getApplicationContext().getBean(MsgBotReceiveService.class).bulkPersist(receive);
 			} catch (Exception e) {

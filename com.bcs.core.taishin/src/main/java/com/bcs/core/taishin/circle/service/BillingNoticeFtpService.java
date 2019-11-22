@@ -162,20 +162,25 @@ public class BillingNoticeFtpService {
         List<BillingNoticeFtpDetail> details = new ArrayList<>();
         for (int i = 1; i < fileContents.size(); i++) {
             if (StringUtils.isNotBlank(fileContents.get(i))) {
+            	logger.info( "fileContents" + fileContents);          	
                 String[] detailData = fileContents.get(i).split("\\|");
-                if (detailData.length == 4) {
+                if (detailData.length == 4 || detailData.length == 3) {
                     BillingNoticeFtpDetail detail = new BillingNoticeFtpDetail();
                     detail.setUid(detailData[0]);
                     detail.setTitle(detailData[1]);
                     detail.setText(detailData[2]);
-                    detail.setTemplate(detailData[3]);
+                    if(detailData.length == 4 ) {
+                    	detail.setTemplate(detailData[3]);
+                    }else {
+                    	detail.setTemplate("default");
+                    }
                     details.add(detail);
                 } else {
                     logger.error("parseFtpFile error Data:" + Arrays.toString(detailData));
                 }
             }
         }
-
+        logger.info("details : " + details);
         Map<String, List<BillingNoticeFtpDetail>> resultMap = new HashMap<>();
 
         for (BillingNoticeFtpDetail deatil : details) {
@@ -191,6 +196,7 @@ public class BillingNoticeFtpService {
             }
 
         }
+        logger.info("BillingNoticeFtpDetail resultMap : " + resultMap);
         return resultMap;
     }
 
@@ -202,6 +208,8 @@ public class BillingNoticeFtpService {
      */
     private List<BillingNoticeMain> parseFtpFile(String origFileName, List<String> fileContents) {
         List<BillingNoticeMain> mains = new ArrayList<>();
+        logger.info("----------parseFtpFile---------");
+        logger.info("fileContents.isEmpty() : " + fileContents.isEmpty());
         if (!fileContents.isEmpty()) {
             String header = fileContents.get(0);
             if (validateHeader(header)) {
@@ -214,7 +222,8 @@ public class BillingNoticeFtpService {
 
                 // TemplateTitle => Details
                 Map<String, List<BillingNoticeFtpDetail>> resultMap = parseDetail(fileContents);
-
+                logger.info("originalFileType : " + originalFileType);
+                logger.info("resultMap : " + resultMap);
                 for (Map.Entry<String, List<BillingNoticeFtpDetail>> entry : resultMap.entrySet()) {
                     String key = entry.getKey();
                     // get the Main Template
@@ -225,7 +234,7 @@ public class BillingNoticeFtpService {
                         // 拿不到範本取default
                         List<BillingNoticeContentTemplateMsg> defaultTemplates = billingNoticeContentTemplateMsgRepository.findByTemplateTitleAndProductSwitchOn("default");
                         if (defaultTemplates == null || defaultTemplates.isEmpty()) {
-                            logger.error("Default Template is not exist!");
+                            logger.info("Default Template is not exist!");
                         } else {
                             template = defaultTemplates.get(0);
                         }
@@ -233,7 +242,7 @@ public class BillingNoticeFtpService {
                         // carousel button
                         template = templates.get(0);
                     }
-
+                    logger.info("template : "+ template);
                     if (template == null) {
                         logger.error("Template is not exist!:" + key);
                     } else {

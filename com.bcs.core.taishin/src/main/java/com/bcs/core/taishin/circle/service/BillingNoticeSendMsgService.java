@@ -77,9 +77,11 @@ public class BillingNoticeSendMsgService {
 	
 	private void sendingBillingNoticeMain() {
 		boolean bigSwitch = CoreConfigReader.getBoolean(CONFIG_STR.BN_BIGSWITCH, true, false);
+		logger.info("帳務通知大開關 : " + bigSwitch);
 		if (!bigSwitch) { //大流程關閉時不做
 			return;
 		}
+		logger.info(" BillingNoticeSendMsgService startCircle.... " );
 		String procApName = null;
 		try {
 			InetAddress localAddress = InetAddress.getLocalHost();

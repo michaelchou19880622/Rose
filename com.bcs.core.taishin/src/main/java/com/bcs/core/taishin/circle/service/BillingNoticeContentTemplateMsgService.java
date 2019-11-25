@@ -399,7 +399,7 @@ public class BillingNoticeContentTemplateMsgService {
 //		+"AND D.MODIFY_TIME < DATEADD(DAY, 1, '" + endDate + "') "
 //		+"GROUP BY FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd'), D.TITLE, M.SEND_TYPE "
 //		+") as result ";
-    			"select count(*) from ( "
+    			"select count(result.Day) from ( "
     			+" select FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd') as 'Day',"
     			+   " BCT.TEMPLATE_TYPE as 'TTYPE',"
     			+   " BCT.TEMPLATE_ID as 'TID',"
@@ -577,7 +577,7 @@ public class BillingNoticeContentTemplateMsgService {
 //		+"GROUP BY D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd'), M.SEND_TYPE) as result; ";
 
     			
-		"select count(*) from ( "	
+		"select count(result.Day) from ( "	
 		//+"SELECT D.TITLE, D.CREAT_TIME, D.MODIFY_TIME, D.SEND_TIME, D.STATUS, D.UID, "
 		+"SELECT D.CREAT_TIME, T.TEMPLATE_TYPE, D.TITLE, D.TEXT, D.STATUS, D.UID, "
         +"DENSE_RANK() OVER ( ORDER BY D.MODIFY_TIME desc, D.NOTICE_DETAIL_ID) AS RowNum "

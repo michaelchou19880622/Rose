@@ -258,7 +258,7 @@
 <div class="LyContents">
     <div th:replace="/BCS/Views/Common/Menu :: menu ('PagepnpNAC')"/>
     <!-- Right Content -->
-    <div class="LyMain" role="main">
+    <input class="LyMain" role="main">
         <!--        <form>-->
         <section>
             <header class="ContentHead">
@@ -539,6 +539,7 @@
             </div>
         </div>
     </div>
+    <input hidden id="t" th:value="${t}" />
     <code>
         <pre id="console" style="display: inline-block; background: #aea;"></pre>
     </code>

@@ -719,9 +719,9 @@ $(function () {
         var btnCount = btnGroup.childElementCount;
         console.log('Button Count : ' + btnCount);
         if (btnCount > 0) {
-            for (var i = 0; i < btnCount; i++) {
-                var name = btnGroup.children[row].children[1].children[0].children[0].value;
-                var url = btnGroup.children[row].children[2].children[0].children[0].value;
+            for (var row = 0; row < btnCount; row++) {
+                var name = btnGroup.children[row].children[0].children[0].children[0].value;
+                var url = btnGroup.children[row].children[1].children[0].children[0].value
                 var color = btnGroup.children[row].children[2].children[0].value
                 console.log('Name: ' + name + ',Url: ' + url + ',Color: ' + color);
                 if (name.trim() === '' || url.trim() === '' || color === '') {

@@ -24,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -68,30 +69,35 @@ public class BCSPNPMaintainController extends BCSBaseController {
 
     @WebServiceLog
     @GetMapping(value = "/pnpAdmin/pnpNormalAccountListPage")
-    public String pnpNormalAccountListPage() {
+    public String pnpNormalAccountListPage(Model model) {
         log.info("pnpNormalAccountListPage");
+        model.addAttribute("t", "Normal");
         return BcsPageEnum.PNPNormalAccountListPage.toString();
     }
 
     @WebServiceLog
     @GetMapping(value = "/pnpAdmin/pnpNormalAccountCreatePage")
-    public String pnpNormalAccountCreatePage() {
+    public String pnpNormalAccountCreatePage(Model model) {
         log.info("pnpNormalAccountCreatePage");
+        model.addAttribute("t", "Normal");
         return BcsPageEnum.PNPNormalAccountCreatePage.toString();
     }
 
     @WebServiceLog
     @GetMapping(value = "/pnpAdmin/pnpUnicaAccountListPage")
-    public String pnpUnicaAccountListPage() {
+    public String pnpUnicaAccountListPage(Model model) {
         log.info("pnpUnicaAccountListPage");
-        return BcsPageEnum.PNPUnicaAccountListPage.toString();
+        model.addAttribute("t", "Unica");
+//        return BcsPageEnum.PNPUnicaAccountListPage.toString();
+        return BcsPageEnum.PNPNormalAccountListPage.toString();
     }
 
     @WebServiceLog
     @GetMapping(value = "/pnpAdmin/pnpUnicaAccountCreatePage")
-    public String pnpUnicaAccountCreatePage() {
+    public String pnpUnicaAccountCreatePage(Model model) {
         log.info("pnpUnicaAccountCreatePage");
-        return BcsPageEnum.PNPUnicaAccountCreatePage.toString();
+        model.addAttribute("t", "Unica");
+        return BcsPageEnum.PNPNormalAccountCreatePage.toString();
     }
 
     /**

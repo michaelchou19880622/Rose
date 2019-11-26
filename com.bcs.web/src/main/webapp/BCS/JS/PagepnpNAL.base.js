@@ -3,6 +3,18 @@
  */
 
 $(function(){
+
+    var t = document.getElementById('t').value;
+    console.log(t);
+
+    var source = {
+        type : t === 'Normal' ? 'Normal' : 'Unica',
+        pageTitle : t === 'Normal' ? '編輯一般帳號' : '編輯Unica帳號',
+        listPageUrl : t === 'Normal' ? 'pnpUnicaAccountListPage' : 'pnpNormalAccountListPage'
+        createPageUrl : t === 'Normal' ? 'pnpUnicaAccountCreatePage' : 'pnpNormalAccountCreatePage'
+    }
+
+    document.getElementById('pageTitle').value = source.pageTitle;
 	// ---- Global Variables ----
 	// input data
 	var employeeRecordId = "";
@@ -70,7 +82,7 @@ $(function(){
 				pccCode: pccCode,
 				account: account,
 				employeeId: employeeId,
-				accountType: 'Normal'
+				accountType: source.type
 		};
 		console.info('postData:', postData);
 	        
@@ -195,7 +207,7 @@ $(function(){
 			$.FailResponse(response);
 		}).done(function() {
 			confirm("刪除成功");
-			window.location.replace('pnpNormalAccountListPage');
+			window.location.replace(source.listPageUrl);
         });
 	});
 	
@@ -224,7 +236,7 @@ $(function(){
 		
 		var exportUrl = '../pnpAdmin/exportToExcelForPNPMaintainAccount?' + 
 		'divisionName='+ divisionName + '&departmentName='+ departmentName + '&groupName='+ groupName + 
-		'&pccCode=' + pccCode + '&account=' + account + '&employeeId=' + employeeId + '&accountType=Normal';
+		'&pccCode=' + pccCode + '&account=' + account + '&employeeId=' + employeeId + '&accountType=' + source.type;
 	
 		$('.btn_add.download').attr('href', exportUrl);
 	});
@@ -234,12 +246,12 @@ $(function(){
 		var editAndDeleteTr = $(this).parent();
 		var pnpMaintainAccountId = editAndDeleteTr.find('.pnpMaintainAccountId').val();
 		console.info("id:", pnpMaintainAccountId);
-		window.location.replace('pnpNormalAccountCreatePage?pnpMaintainAccountModelId=' + pnpMaintainAccountId);
+		window.location.replace(source.createPageUrl + '?pnpMaintainAccountModelId=' + pnpMaintainAccountId);
 	});
 	
 	// to Create Page
 	$('.btn_add.create').click(function(){
-		window.location.replace('pnpNormalAccountCreatePage');
+		window.location.replace(source.createPageUrl);
 	});
 	
 	

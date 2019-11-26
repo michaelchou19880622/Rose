@@ -36,39 +36,57 @@ import java.util.concurrent.TimeUnit;
 @Controller
 @RequestMapping("/init")
 public class InitController {
+    private SchedulerService schedulerService;
+    private InteractiveService interactiveService;
+    private CatchRecordBinded catchRecordBinded;
+    private CatchRecordOpAddReceive catchRecordOpAddReceive;
+    private CatchRecordOpBlockedReceive catchRecordOpBlockedReceive;
+    private CatchHandleMsgReceiveTimeout catchHandleMsgReceiveTimeout;
+    private CatchRecordReceive catchRecordReceive;
+    private LiveChatTaskService liveChatTaskService;
+    private BillingNoticeFtpService billingNoticeFtpService;
+    private BillingNoticeSendMsgService billingNoticeSendMsgService;
+    private LoadFtpPnpDataTask loadFtpPnpDataTask;
+    private PnpPushMsgService pnpPushMsgService;
+    private PnpPNPMsgService pnpMsgService;
+    private PnpSMSMsgService pnpSmsMsgService;
+    private LinePointSchedulerService linePointschedulerService;
+    private SystemLogService systemLogService;
 
     @Autowired
-    private SchedulerService schedulerService;
-    @Autowired
-    private InteractiveService interactiveService;
-    @Autowired
-    private CatchRecordBinded catchRecordBinded;
-    @Autowired
-    private CatchRecordOpAddReceive catchRecordOpAddReceive;
-    @Autowired
-    private CatchRecordOpBlockedReceive catchRecordOpBlockedReceive;
-    @Autowired
-    private CatchHandleMsgReceiveTimeout catchHandleMsgReceiveTimeout;
-    @Autowired
-    private CatchRecordReceive catchRecordReceive;
-    @Autowired
-    private LiveChatTaskService liveChatTaskService;
-    @Autowired
-    private BillingNoticeFtpService billingNoticeFtpService;
-    @Autowired
-    private BillingNoticeSendMsgService billingNoticeSendMsgService;
-    @Autowired
-    private LoadFtpPnpDataTask loadFtpPnpDataTask;
-    @Autowired
-    private PnpPushMsgService pnpPushMsgService;
-    @Autowired
-    private PnpPNPMsgService pnpMsgService;
-    @Autowired
-    private PnpSMSMsgService pnpSmsMsgService;
-    @Autowired
-    private LinePointSchedulerService linePointschedulerService;
-    @Autowired
-    private SystemLogService systemLogService;
+    public InitController(SchedulerService schedulerService,
+                          InteractiveService interactiveService,
+                          CatchRecordBinded catchRecordBinded,
+                          CatchRecordOpAddReceive catchRecordOpAddReceive,
+                          CatchRecordOpBlockedReceive catchRecordOpBlockedReceive,
+                          CatchHandleMsgReceiveTimeout catchHandleMsgReceiveTimeout,
+                          CatchRecordReceive catchRecordReceive,
+                          LiveChatTaskService liveChatTaskService,
+                          BillingNoticeFtpService billingNoticeFtpService,
+                          BillingNoticeSendMsgService billingNoticeSendMsgService,
+                          LoadFtpPnpDataTask loadFtpPnpDataTask,
+                          PnpPushMsgService pnpPushMsgService,
+                          PnpPNPMsgService pnpMsgService,
+                          PnpSMSMsgService pnpSmsMsgService,
+                          LinePointSchedulerService linePointschedulerService,
+                          SystemLogService systemLogService) {
+        this.schedulerService = schedulerService;
+        this.interactiveService = interactiveService;
+        this.catchRecordBinded = catchRecordBinded;
+        this.catchRecordOpAddReceive = catchRecordOpAddReceive;
+        this.catchRecordOpBlockedReceive = catchRecordOpBlockedReceive;
+        this.catchHandleMsgReceiveTimeout = catchHandleMsgReceiveTimeout;
+        this.catchRecordReceive = catchRecordReceive;
+        this.liveChatTaskService = liveChatTaskService;
+        this.billingNoticeFtpService = billingNoticeFtpService;
+        this.billingNoticeSendMsgService = billingNoticeSendMsgService;
+        this.loadFtpPnpDataTask = loadFtpPnpDataTask;
+        this.pnpPushMsgService = pnpPushMsgService;
+        this.pnpMsgService = pnpMsgService;
+        this.pnpSmsMsgService = pnpSmsMsgService;
+        this.linePointschedulerService = linePointschedulerService;
+        this.systemLogService = systemLogService;
+    }
 
     /**
      * Init.

@@ -2,6 +2,9 @@ package com.bcs.core.taishin.circle.PNP.akka.handler;
 
 import akka.actor.UntypedActor;
 import com.bcs.core.spring.ApplicationContextProvider;
+import com.bcs.core.taishin.circle.PNP.code.PnpFtpSourceEnum;
+import com.bcs.core.taishin.circle.PNP.code.PnpStageEnum;
+import com.bcs.core.taishin.circle.PNP.code.PnpStatusEnum;
 import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
 import com.bcs.core.taishin.circle.PNP.service.PnpService;
@@ -60,7 +63,7 @@ public class PnpUpdateStatusActor extends UntypedActor {
         log.info("updateStatus");
         if (checkCanUpdateStatusToComplete(pnpDetail)) {
             logger.info(String.format("Update Status To Complete!! Main Id: %s, Detail Id: %s", pnpDetail.getPnpMainId(), pnpDetail.getPnpDetailId()));
-            pnpService.updatePnpMainStatusComplete(pnpDetail.getPnpMainId(), pnpDetail.getSource(), pnpDetail.getProcStage());
+            pnpService.updatePnpMainStatusComplete(pnpDetail.getPnpMainId(), PnpFtpSourceEnum.findEnumByCode(pnpDetail.getSource()), PnpStageEnum.findEnumByName(pnpDetail.getProcStage()));
         }
     }
 
@@ -72,14 +75,13 @@ public class PnpUpdateStatusActor extends UntypedActor {
      */
     private boolean checkCanUpdateStatusToComplete(PnpDetail pnpDetail) {
         List<String> status = new ArrayList<>();
-        status.add(AbstractPnpMainEntity.PROCESS);
-        status.add(AbstractPnpMainEntity.BC_PROCESS);
-        status.add(AbstractPnpMainEntity.BC_SENT_FAIL_PNP_PROCESS);
-        status.add(AbstractPnpMainEntity.BC_SENT_FAIL_SMS_PROCESS);
-        status.add(AbstractPnpMainEntity.BC_USER_BLOCKED_SMS_PROCESS);
-        status.add(AbstractPnpMainEntity.FTP_DETAIL_SAVE);
-        status.add(AbstractPnpMainEntity.FTP_MAIN_SAVE);
-        status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_SCHEDULED);
+        status.add(PnpStatusEnum.PROCESS.value);
+        status.add(PnpStatusEnum.BC_PROCESS.value);
+        status.add(PnpStatusEnum.BC_SENT_FAIL_PNP_PROCESS.value);
+        status.add(PnpStatusEnum.BC_SENT_FAIL_SMS_PROCESS.value);
+        status.add(PnpStatusEnum.BC_USER_BLOCKED_SMS_PROCESS.value);
+        status.add(PnpStatusEnum.FTP_DETAIL_SAVE.value);
+        status.add(PnpStatusEnum.FTP_MAIN_SAVE.value);
         logger.info(String.format("Check Status: %s, Can Update: %s", pnpDetail.getStatus(), !status.contains(pnpDetail.getStatus())));
         return !status.contains(pnpDetail.getStatus());
     }

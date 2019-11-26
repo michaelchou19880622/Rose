@@ -75,7 +75,7 @@ public class PnpMainActor extends UntypedActor {
         Integer buffer = 19;
         List<? super PnpDetail> details = tellSomething.getPnpDetails();
         List<? super PnpDetail> partition;
-        log.info("PnpMainActor onReceive details.size :" + details.size());
+        log.info("PnpMainActor onReceive details.size : {}", details.size());
         Integer arrayLength = details.size();
         Integer pointer = 0;
         while (pointer < arrayLength) {

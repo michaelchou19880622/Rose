@@ -110,7 +110,6 @@ public class PnpPushMsgService {
 
             } catch (Exception e) {
                 log.error("Exception", e);
-                log.error(" pnpMain type :" + type + " sendingMain error:" + e.getMessage());
             }
         }
     }

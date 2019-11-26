@@ -47,4 +47,13 @@ public enum PnpFtpSourceEnum {
         this.mainTable = mainTable;
         this.detailTable = detailTable;
     }
+
+    public static PnpFtpSourceEnum findEnumByCode(String code){
+        for (PnpFtpSourceEnum e : PnpFtpSourceEnum.values()){
+            if (e.code.equals(code)) {
+                return e;
+            }
+        }
+        return null;
+    }
 }

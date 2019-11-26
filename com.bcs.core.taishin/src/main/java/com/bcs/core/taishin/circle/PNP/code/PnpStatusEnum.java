@@ -77,4 +77,13 @@ public enum PnpStatusEnum {
         this.value = value;
         this.chinese = chinese;
     }
+
+    public static PnpStatusEnum findEnumByName(String value){
+        for (PnpStatusEnum e : PnpStatusEnum.values()){
+            if (e.value.equals(value)) {
+                return e;
+            }
+        }
+        return null;
+    }
 }

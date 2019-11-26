@@ -27,4 +27,13 @@ public enum PnpSendTypeEnum {
     PnpSendTypeEnum(String value) {
         this.value = value;
     }
+
+    public static PnpSendTypeEnum findEnumByName(String value){
+        for (PnpSendTypeEnum e : PnpSendTypeEnum.values()){
+            if (e.value.equals(value)) {
+                return e;
+            }
+        }
+        return IMMEDIATE;
+    }
 }

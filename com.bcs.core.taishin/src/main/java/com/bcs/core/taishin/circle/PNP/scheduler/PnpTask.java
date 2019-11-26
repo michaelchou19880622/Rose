@@ -1,6 +1,7 @@
 package com.bcs.core.taishin.circle.PNP.scheduler;
 
 import com.bcs.core.spring.ApplicationContextProvider;
+import com.bcs.core.taishin.circle.PNP.code.PnpStageEnum;
 import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.PNP.service.PnpService;
@@ -31,10 +32,16 @@ public class PnpTask implements Job {
             String processStage = pnpMain.getProcStage();
 
             /* 依據排程傳進來的資訊判斷執行BC還是PNP */
-            if (AbstractPnpMainEntity.STAGE_BC.equals(processStage)) {
-                pnpService.pushLineMessage(pnpMain, null, null);
-            } else if (AbstractPnpMainEntity.STAGE_PNP.equals(processStage)) {
-                pnpService.pushPnpMessage(pnpMain, null, null);
+            PnpStageEnum stage = PnpStageEnum.findEnumByName(processStage);
+            switch (stage) {
+                case BC:
+                    pnpService.pushLineMessage(pnpMain, null, null);
+                    break;
+                case PNP:
+                    pnpService.pushPnpMessage(pnpMain, null, null);
+                    break;
+                default:
+                    break;
             }
         } catch (SchedulerException e) {
             log.error("Exception", e);

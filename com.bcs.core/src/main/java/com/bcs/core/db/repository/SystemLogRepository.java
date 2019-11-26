@@ -39,5 +39,5 @@ public interface SystemLogRepository extends EntityRepository<SystemLog, Long>, 
     List<SystemLog> findByModifyUserAndLevel(String modifyUser, String level, String start, String end);
 
     @Query
-    List<SystemLog> findByModifyTimeBefore(Date compareDate);
+    List<SystemLog> findTop10ByModifyTimeBefore(Date compareDate);
 }

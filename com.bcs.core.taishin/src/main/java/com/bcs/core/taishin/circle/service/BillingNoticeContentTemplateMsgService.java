@@ -380,30 +380,52 @@ public class BillingNoticeContentTemplateMsgService {
     @SuppressWarnings("unchecked")
     public String getBNEffectsTotalPages(String startDate, String endDate){
     	String queryString = 
-		"SELECT COUNT(result.Day) FROM ( "
-		+"SELECT FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd') AS 'Day', D.TITLE, M.SEND_TYPE, "
-		+"SUM(case when D.STATUS = 'COMPLETE' then 1 else 0 end) AS 'Complete', "
-		+"SUM(case when D.STATUS = 'FAIL' then 1 else 0 end) AS 'Fail', "
-		+"DENSE_RANK() OVER ( ORDER BY FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd') desc, D.TITLE, M.SEND_TYPE) AS RowNum "
-		+"FROM BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M "
-		+"ON D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
-		+"WHERE D.MODIFY_TIME >= '" + startDate + "' "
-		+"AND D.MODIFY_TIME < DATEADD(DAY, 1, '" + endDate + "') "
-		+"GROUP BY FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd'), D.TITLE, M.SEND_TYPE "
+//		"select count(*) from "
+//		+"(SELECT D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') AS 'Day', M.SEND_TYPE "
+//		+"FROM BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M  "
+//		+"ON D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
+//		+"WHERE FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') >= '" + startDate + "' "
+//		+"AND FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') <= '" + endDate + "' "
+//		+"GROUP BY D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd'), M.SEND_TYPE) as result; ";
+
+//		"select count(*) from ( "
+//		+"SELECT FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd') AS 'Day', D.TITLE, M.SEND_TYPE, "
+//		+"SUM(case when D.STATUS = 'COMPLETE' then 1 else 0 end) AS 'Complete', "
+//		+"SUM(case when D.STATUS = 'FAIL' then 1 else 0 end) AS 'Fail', "
+//		+"DENSE_RANK() OVER ( ORDER BY FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd') desc, D.TITLE, M.SEND_TYPE) AS RowNum "
+//		+"FROM BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M "
+//		+"ON D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
+//		+"WHERE D.MODIFY_TIME >= '" + startDate + "' "
+//		+"AND D.MODIFY_TIME < DATEADD(DAY, 1, '" + endDate + "') "
+//		+"GROUP BY FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd'), D.TITLE, M.SEND_TYPE "
+//		+") as result ";
+    			"select count(*) from ( "
+    			+" select FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd') as 'Day',"
+    			+   " BCT.TEMPLATE_TYPE as 'TTYPE',"
+    			+   " BCT.TEMPLATE_ID as 'TID',"
+    			+   " BNM.SEND_TYPE as 'STYPE',"
+    			+   " SUM(case when BND.STATUS = 'COMPLETE' then 1 else 0 end) AS 'Complete',"
+    			+  " SUM(case when BND.STATUS = 'FAIL' then 1 else 0 end) AS 'Fail',"
+    			+  " DENSE_RANK() OVER ( ORDER BY FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd') desc, "
+										+ "	BCT.TEMPLATE_TYPE, "
+										+ "	BCT.TEMPLATE_ID ) AS RowNum"
+    		+" from  BCS_BILLING_NOTICE_MAIN BNM "
+    			+  " left join BCS_BILLING_NOTICE_DETAIL BND on BND.NOTICE_MAIN_ID = BNM.NOTICE_MAIN_ID"
+    			+  " left join BCS_BN_CONTENT_TEMPLATE BCT on BNM.TEMP_ID  = BCT.TEMPLATE_ID"
+    		+" WHERE BNM.MODIFY_TIME >= '" + startDate + "' "
+    			+  " AND BNM.MODIFY_TIME < DATEADD(DAY, 1, '" + endDate + "') "
+    			+  " group by FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd'), "
+    			+		   " BCT.TEMPLATE_TYPE ,"
+    			+		   " BCT.TEMPLATE_ID,"
+    			+		   " BNM.SEND_TYPE"
 		+") as result ";
-/*
-  		"SELECT COUNT(D.TITLE) "
-  		+"FROM BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M "
-  		+"ON D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
-  		+"WHERE D.MODIFY_TIME >= '" + startDate + "' "
-  		+"AND D.MODIFY_TIME < DATEADD(DAY, 1, '" + endDate + "') "
-  		+"GROUP BY FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd'), D.TITLE, M.SEND_TYPE";
- */
-    	logger.info("getBNEffectsTotalPages, queryString= " + queryString);
+
+    	logger.info("str1: " + queryString);
+    	
     	Query query = entityManager.createNativeQuery(queryString);
 		List<Object[]> list = query.getResultList();
 		String listStr = list.toString();
-    	logger.info("getBNEffectsTotalPages, list=" + list.toString());
+    	logger.info("List1:" + list.toString());
 		
 		// Total = Empty set,  []  => 0
 		if(listStr.length() <= 2) return "0"; 
@@ -417,6 +439,24 @@ public class BillingNoticeContentTemplateMsgService {
 		char c10 = listStr.charAt(listStr.length() - 3); // 十位數
     	return listStr.substring(1, listStr.length() - 3) + (++c10); // [431] => 44
     }
+ 
+//    public static String getString(String listStr) {
+//		// Total = Empty set. []  => 0
+//		if(listStr.length() <= 2) return "0"; 
+//		
+//		// Total < 10
+//		char c1 = listStr.charAt(listStr.length() - 2); // 個位數
+//		if(listStr.length() == 3) return (c1=='0') ? "0" : "1"; // [0] => 0 , [x] => 1
+//		
+//		// Total >= 10
+//		if(c1 == '0') return listStr.substring(1, listStr.length() - 2); // [430] => 43
+//		char c10 = listStr.charAt(listStr.length() - 3); // 十位數
+//    	return listStr.substring(1, listStr.length() - 3) + (++c10); // [431] => 44
+//    }
+//    public static void main(String[] Args) {
+//		String listStr = "[431]";
+//    	System.out.println( getString(listStr));
+//    }
     
     /**
 	 * 取得帳務通知成效清單
@@ -459,44 +499,74 @@ public class BillingNoticeContentTemplateMsgService {
 //		+"GROUP BY D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd'), M.SEND_TYPE  "
 //		+") as result where RowNum >= ?1 and RowNum <= ?2 ; ";
 
-		"SELECT * FROM ( "
-		+"SELECT FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd') AS 'Day', D.TITLE, M.SEND_TYPE, "
-		+"SUM(case when D.STATUS = 'COMPLETE' then 1 else 0 end) AS 'Complete', "
-		+"SUM(case when D.STATUS = 'FAIL' then 1 else 0 end) AS 'Fail', "
-		+"DENSE_RANK() OVER ( ORDER BY FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd') desc, D.TITLE, M.SEND_TYPE) AS RowNum "
-		+"FROM BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M "
-		+"ON D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
-		+"WHERE D.MODIFY_TIME >= '" + startDate + "' "
-		+"AND D.MODIFY_TIME < DATEADD(DAY, 1, '" + endDate + "') "
-		+"GROUP BY FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd'), D.TITLE, M.SEND_TYPE "
+    	//2019/11/18 SUN 修改帳務通知報表顯示內容
+//		"select * from ( "
+//		+"SELECT FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd') AS 'Day', D.TITLE, M.SEND_TYPE, "
+//		+"SUM(case when D.STATUS = 'COMPLETE' then 1 else 0 end) AS 'Complete', "
+//		+"SUM(case when D.STATUS = 'FAIL' then 1 else 0 end) AS 'Fail', "
+//		+"DENSE_RANK() OVER ( ORDER BY FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd') desc, D.TITLE, M.SEND_TYPE) AS RowNum "
+//		+"FROM BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M "
+//		+"ON D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
+//		+"WHERE D.MODIFY_TIME >= '" + startDate + "' "
+//		+"AND D.MODIFY_TIME < DATEADD(DAY, 1, '" + endDate + "') "
+//		+"GROUP BY FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd'), D.TITLE, M.SEND_TYPE "
+//		+") as result "
+//		+"where RowNum >= ?1 and RowNum < ?2 ";
+
+		"select * from ( "
+    			+" select FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd') as 'Day',"
+    			+   " BCT.TEMPLATE_TYPE as 'TTYPE',"
+    			+   " BCT.TEMPLATE_ID as 'TID',"
+    			+   " BNM.SEND_TYPE as 'STYPE',"
+    			+   " SUM(case when BND.STATUS = 'COMPLETE' then 1 else 0 end) AS 'Complete',"
+    			+  " SUM(case when BND.STATUS = 'FAIL' then 1 else 0 end) AS 'Fail',"
+    			+  " DENSE_RANK() OVER ( ORDER BY FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd') desc, "
+    									+  "	BCT.TEMPLATE_TYPE, "
+    									+ "	BCT.TEMPLATE_ID ) AS RowNum"
+    		+" from  BCS_BILLING_NOTICE_MAIN BNM "
+    			+  " left join BCS_BILLING_NOTICE_DETAIL BND on BND.NOTICE_MAIN_ID = BNM.NOTICE_MAIN_ID"
+    			+  " left join BCS_BN_CONTENT_TEMPLATE BCT on BNM.TEMP_ID  = BCT.TEMPLATE_ID"
+    		+" WHERE BNM.MODIFY_TIME >= '" + startDate + "' "
+    			+  " AND BNM.MODIFY_TIME < DATEADD(DAY, 1, '" + endDate + "') "
+    			+  " group by FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd'), "
+    			+		   " BCT.TEMPLATE_TYPE ,"
+    			+		   " BCT.TEMPLATE_ID,"
+    			+		   " BNM.SEND_TYPE"
 		+") as result "
 		+"where RowNum >= ?1 and RowNum < ?2 ";
     	
-    	logger.info("getBNEffects, rowStart=" + rowStart + " rowEnd=" + rowEnd + " queryString=" + queryString);
+    	
+
+    	logger.info("str1: " + queryString);
+    	
     	Query query = entityManager.createNativeQuery(queryString).setParameter(1, rowStart).setParameter(2, rowEnd);
 		List<Object[]> list = query.getResultList();
-    	logger.info("getBNEffects, result=" + list.toString());
+    	logger.info("List1: " + list.toString());
     		
     	Map<String, List<String>> map = new LinkedHashMap<>();
     	Integer count = 0;
 		for (Object[] o : list) {
 			count++;
+			//logger.info("c:" + count);
 			List<String> dataList = new ArrayList<String>();
 			map.put(count.toString(), dataList);
-			for (int i=0, max=5; i<max; i++) {
+			for (int i=0, max=6; i<max; i++) {
 				if (o[i] == null) {
 					dataList.add("");
+					//logger.info("i=" + i  + ", null");
 				} else {
 					dataList.add(o[i].toString());
+					//logger.info("i=" + i  + ", " + o[i].toString());
 				}
 			}
 		}
-    	logger.info("getBNEffects, map=" + map.toString());
+    	logger.info("map1: " + map.toString());
+    	
 		return map;
     }
     
     @SuppressWarnings("unchecked")
-    public String getBNEffectsDetailTotalPages(String date, String title, String sendType){
+    public String getBNEffectsDetailTotalPages(String date, String templateName, String sendType){
     	String queryString = 
 //		"select count(*) from "
 //		+"(SELECT D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') AS 'Day', M.SEND_TYPE "
@@ -508,14 +578,17 @@ public class BillingNoticeContentTemplateMsgService {
 
     			
 		"select count(*) from ( "	
-		+"SELECT D.TITLE, D.CREAT_TIME, D.MODIFY_TIME, D.SEND_TIME, D.STATUS, D.UID, "
-        +"DENSE_RANK() OVER ( ORDER BY D.MODIFY_TIME desc) AS RowNum "
-		+"FROM BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M "
-		+"ON D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
+		//+"SELECT D.TITLE, D.CREAT_TIME, D.MODIFY_TIME, D.SEND_TIME, D.STATUS, D.UID, "
+		+"SELECT D.CREAT_TIME, T.TEMPLATE_TYPE, D.TITLE, D.TEXT, D.STATUS, D.UID, "
+        +"DENSE_RANK() OVER ( ORDER BY D.MODIFY_TIME desc, D.NOTICE_DETAIL_ID) AS RowNum "
+        +"from BCS_BILLING_NOTICE_DETAIL D "
+        +"join BCS_BILLING_NOTICE_MAIN M on D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
+        +"join BCS_BN_CONTENT_TEMPLATE T on M.TEMP_ID  = T.TEMPLATE_ID "
 		+"WHERE D.MODIFY_TIME >= '" + date + "' "
 		+"AND D.MODIFY_TIME <  DATEADD(DAY, 1, '" + date + "') "
-		+"AND D.TITLE = N'" + title +"' "
+		+"AND T.TEMPLATE_ID = N'" + templateName +"' "
 		+"AND M.SEND_TYPE = '"+ sendType +"' "
+		//+"AND (D.STATUS = 'FAIL' or D.STATUS = 'COMPLETE') "
 		+") as result ";
     	logger.info("str1: " + queryString);
     	
@@ -540,7 +613,7 @@ public class BillingNoticeContentTemplateMsgService {
 	 * 取得帳務通知成效清單
      */
     @SuppressWarnings("unchecked")
-    public  Map<String, List<String>> getBNEffectsDetail(String date, String title, String sendType, Integer page){
+    public  Map<String, List<String>> getBNEffectsDetail(String date, String templateName, String sendType, Integer page){
     	Integer rowStart, rowEnd;
     	if(page == null) {
     		rowStart = 1;
@@ -554,14 +627,17 @@ public class BillingNoticeContentTemplateMsgService {
     	logger.info("getBNEffectsDetail:");
     	String queryString = 
 		"select * from ( "    			
-		+"SELECT D.TITLE, D.CREAT_TIME, D.MODIFY_TIME, D.SEND_TIME, D.STATUS, D.UID, "
+		//+"SELECT D.TITLE, D.CREAT_TIME, D.MODIFY_TIME, D.SEND_TIME, D.STATUS, D.UID, "
+		+"SELECT D.CREAT_TIME, T.TEMPLATE_TYPE, D.TITLE, D.TEXT, D.STATUS, D.UID, "
         +"DENSE_RANK() OVER ( ORDER BY D.MODIFY_TIME desc, D.NOTICE_DETAIL_ID) AS RowNum "
-		+"FROM BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M "
-		+"ON D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
+        +"from BCS_BILLING_NOTICE_DETAIL D "
+        +"join BCS_BILLING_NOTICE_MAIN M on D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
+        +"join BCS_BN_CONTENT_TEMPLATE T on M.TEMP_ID  = T.TEMPLATE_ID "
 		+"WHERE D.MODIFY_TIME >= '" + date + "' "
 		+"AND D.MODIFY_TIME <  DATEADD(DAY, 1, '" + date + "') "
-		+"AND D.TITLE = N'" + title +"' "
+		+"AND T.TEMPLATE_ID = N'" + templateName +"' "
 		+"AND M.SEND_TYPE = '"+ sendType +"' "
+		//+"AND (D.STATUS = 'FAIL' or D.STATUS = 'COMPLETE') "
 		+") as result "
 		+"where RowNum >= ?1 and RowNum < ?2 ";
 		

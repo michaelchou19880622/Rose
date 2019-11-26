@@ -17,7 +17,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -112,6 +111,7 @@ public class WebServiceAspect {
         logMap.put("RESPONSE", ret);
 
         log.info("Response: Cast:{} ms \n{}", (System.currentTimeMillis() - startTime), DataUtils.toPrettyJsonUseJackson(logMap));
+
         /* Remove Request UUID  */
         MDC.clear();
     }
@@ -137,7 +137,7 @@ public class WebServiceAspect {
                 }
             }
         } catch (Exception e) {
-            log.error("{}: {}", "Exception", e);
+            log.error("Exception", e);
         }
         return null;
     }

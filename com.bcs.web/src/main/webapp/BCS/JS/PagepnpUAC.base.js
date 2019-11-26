@@ -153,8 +153,11 @@ $(function () {
 
                         for (var i = 0; i < buttonLabelArray.length; i++) {
                             console.log('Label : ' + buttonLabelArray[i] + ' Color : ' + buttonColorArray[i].replace('#') + ' Url : ' + buttonUrlArray[i])
-                            addBtn(buttonLabelArray[i], buttonColorArray[i], buttonUrlArray[i])
+                            if (buttonLabelArray[i] !== '' && buttonColorArray[i] !== '' && buttonUrlArray !== '') {
+                                addBtn(buttonLabelArray[i], buttonColorArray[i], buttonUrlArray[i])
+                            }
                         }
+
 
                         styleBtnClick('bold', response.headerTextWeight, 'titleTextBoldBtn')
                         styleBtnClick('italic', response.headerTextStyle, 'titleTextItalicBtn')
@@ -509,13 +512,16 @@ $(function () {
             var bodyButtonText = rowArray[i].children[0].children[0].children[0].value;
             var bodyLinkUrl = rowArray[i].children[1].children[0].children[0].value;
             var bodyButtonColor = rowArray[i].children[2].children[0].value;
-            var newBtn = {
-                id: i,
-                label: bodyButtonText,
-                uri: bodyLinkUrl,
-                color: bodyButtonColor
-            };
-            btnArray.push(newBtn);
+            if (bodyButtonText !== '' && bodyLinkUrl !== '') {
+                bodyButtonColor = bodyButtonColor === '' ? config.body.button.buttonColor : bodyButtonColor
+                var newBtn = {
+                    id: i,
+                    label: bodyButtonText,
+                    uri: bodyLinkUrl,
+                    color: bodyButtonColor
+                };
+                btnArray.push(newBtn);
+            }
         }
         return btnArray;
     };

@@ -25,6 +25,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.annotation.PostConstruct;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Initial Method When Application Startup
@@ -165,7 +166,7 @@ public class InitController {
     private void loadFtpPnpDataTaskStartCircle() {
         /* PNP FTP flow */
         try {
-            /* WEB */
+            /* BE-OA : .pnp.ftpDownload */
             if (CoreConfigReader.isPNPFtpDownload()) {
                 log.info("init PNP FTP flow ");
                 loadFtpPnpDataTask.startCircle();
@@ -182,7 +183,7 @@ public class InitController {
      */
     private void pnpMsgServiceStartCircle() {
         try {
-            /* WEB */
+            /* BE-OAAPI : .pnp.sendMsg */
             if (CoreConfigReader.isPNPSendMsg()) {
                 log.info("init pnpPushMsg flow ");
                 /* PNP pnpPushMsg flow */
@@ -204,7 +205,7 @@ public class InitController {
     private void pnpSmsMsgServiceStartCircle() {
         //PNP transfer file to SMS flow
         try {
-            /* WEB */
+            /* BE-OA : .pnp.ftpDownload */
             if (CoreConfigReader.isPNPFtpDownload()) {
                 log.info("init PNP transfer file to SMS flow ");
                 pnpSmsMsgService.startCircle();
@@ -263,9 +264,11 @@ public class InitController {
      */
     private void cleanSystemLogTask() {
         try {
-            int scheduleDay = 1;
-            int deleteRangeDay = 30;
-            systemLogService.deleteLogByRange(scheduleDay, deleteRangeDay);
+            if (CoreConfigReader.getBoolean("system.log.clean.schedule.enable")) {
+                int scheduleTime = 30;
+                int deleteRangeDay = 30;
+                systemLogService.deleteLogByRange(scheduleTime, TimeUnit.SECONDS, deleteRangeDay);
+            }
         } catch (Exception e) {
             log.error("", e);
         }

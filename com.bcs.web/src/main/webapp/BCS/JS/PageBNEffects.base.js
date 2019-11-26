@@ -1,11 +1,26 @@
 $(function(){
 	var originalTr = {};
 	var sumTr = {};
-	var startDate = null, endDate = null;
+	var startDate = null, endDate = null , pages = null;
 	var hasData = false;
 	var page = 1, totalPages = 0;
 	var firstFatch = true;
-	
+	//$('.page').removeClass();
+	startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
+	endDate = moment(new Date()).format('YYYY-MM-DD');
+
+	if($.urlParam("startDate")){
+		startDate = $.urlParam("startDate");
+	}
+	if($.urlParam("endDate")){
+		endDate = $.urlParam("endDate");
+	}
+	if($.urlParam("pages")){
+		page = $.urlParam("pages");
+		$('#page').val(page);
+	}
+
+
 	$(".datepicker").datepicker({
 		 maxDate : 0,
 		 dateFormat : 'yy-mm-dd',
@@ -28,7 +43,8 @@ $(function(){
 			page--;
 			loadData();
 			// set pageAndTotalPage
-			$('#pageAndTotalPages').text(page + '/' + totalPages);
+			$('#page').val(page);
+			$('#TotalPages').text('/' + totalPages);
 		}
 	});
 	$('.btn.next').click(function(){
@@ -36,7 +52,23 @@ $(function(){
 			page++;
 			loadData();
 			// set pageAndTotalPage
-			$('#pageAndTotalPages').text(page + '/' + totalPages);
+			$('#page').val(page);
+			$('#TotalPages').text('/' + totalPages);
+		}
+	});
+
+	$('#jumpPage').click(function(){
+		page = $('#page').val();
+		if(page > totalPages) {
+			alert("欲選取頁數大於總頁數")
+		}else if(page == 0){
+			alert("欲選取頁數不可為0")
+		}else{
+			loadData();
+			// set pageAndTotalPage
+			console.info(page + '/' + totalPages);
+			$('#page').val(page);
+			$('#TotalPages').text('/' + totalPages);
 		}
 	});
 	
@@ -83,7 +115,6 @@ $(function(){
 			firstFatch = false;
 			setTotal();
 		}
-		
 		$.ajax({
 			type : 'GET',
 			url : bcs.bcsContextPath + '/edit/getBNEffectsList?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page
@@ -104,19 +135,20 @@ $(function(){
 					console.info('valueObj : ', valueObj);
 					
 					var encodeTitle = encodeURI(valueObj[1]);
-					var link = bcs.bcsContextPath + '/admin/reportBNEffectsDetailPage?date=' + valueObj[0] + '&title=' + encodeTitle + '&sendType=' + valueObj[2];
+					var link = bcs.bcsContextPath + '/admin/reportBNEffectsDetailPage?date=' + valueObj[0] + '&templateName=' + valueObj[2] + '&sendType=' + valueObj[3]
+																				     +'&startDate=' + startDate + '&endDate=' + endDate + '&pages=' + page;
 					
 					rowDOM.find('.sendDate').html('<a>' + valueObj[0] + '</a>').end().find('a').attr('href', link);
-					rowDOM.find('.title').text(valueObj[1]);
-					rowDOM.find('.sendType').text(valueObj[2]);
-					rowDOM.find('.completeCount').text(valueObj[3]);
-					rowDOM.find('.failCount').text(valueObj[4]);
-					rowDOM.find('.total').text( parseInt(valueObj[3], 10) +  parseInt(valueObj[4], 10));
-					
+					rowDOM.find('.templateType').text(valueObj[1]);
+					rowDOM.find('.templateName').text(valueObj[2]);
+					rowDOM.find('.sendType').text(valueObj[3]);
+					rowDOM.find('.completeCount').text(valueObj[4]);
+					rowDOM.find('.failCount').text(valueObj[5]);
+					rowDOM.find('.total').text( parseInt(valueObj[4], 10) +  parseInt(valueObj[5], 10));
 					rowDOM.appendTo($('#tableBody'));
 					hasSum  = true;
-					completeSum = parseInt(valueObj[3], 10) + parseInt(completeSum, 10);
-					failSum = parseInt(valueObj[4], 10) + parseInt(failSum, 10);
+					completeSum = parseInt(valueObj[4], 10) + parseInt(completeSum, 10);
+					failSum = parseInt(valueObj[5], 10) + parseInt(failSum, 10);
 				}
 				
 				if (hasSum){
@@ -146,19 +178,14 @@ $(function(){
 			type : "GET",
 			url : bcs.bcsContextPath + '/edit/getBNEffectsTotalPages?startDate=' + startDate + '&endDate=' + endDate
 		}).success(function(response){
-			console.info('msg: ', response['msg']);
+			console.info('msg1: ', response['msg']);
 			totalPages = parseInt(response['msg']);
-			console.info('totalPages: ', totalPages);
+			console.info('totalPages1: ', totalPages);
 			// set pageAndTotalPage
-			page = 1;
+
 			console.info(page + '/' + totalPages);
-			$('#pageAndTotalPages').text(page + '/' + totalPages);
-			if (totalPages == 0) {
-				$('#pageControl').hide();
-			}
-			else {
-				$('#pageControl').show();
-			}
+			$('#page').val(page);
+			$('#TotalPages').text('/' + totalPages);
 		}).fail(function(response){
 			console.info(response);
 			$.FailResponse(response);
@@ -173,12 +200,12 @@ $(function(){
 		sumTr = $('.sumTemplate').clone(true);
 		$('.sumTemplate').remove();
 		
-		startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
-		endDate = moment(new Date()).format('YYYY-MM-DD');
+//		startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
+//		endDate = moment(new Date()).format('YYYY-MM-DD');
 		$('#startDate').val(startDate);
 		$('#endDate').val(endDate);
 	}
 	
 	initial();
-	
+	loadData();
 });

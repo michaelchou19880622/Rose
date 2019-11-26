@@ -292,7 +292,7 @@ $(function () {
     var addDefaultButton = function addDefaultButton() {
         addBtn(
             config.body.button.buttonText,
-            '#' + config.body.button.buttonColor,
+            config.body.button.buttonColor,
             ''
         );
     }
@@ -301,6 +301,7 @@ $(function () {
     var btnSize = 0;
     var btnIndex = 0;
     var addBtn = function addBtn(btnText, btnBackColor, btnUrl) {
+        console.log('btnText:' + btnText + ',btnBackColor:' + btnBackColor  + ',btnUrl:' + btnUrl);
         console.log('All Btn size: ' + btnSize);
         if (btnSize >= config.buttonMaxQuantity) {
             alert('已達最大按鈕數量!!');
@@ -511,13 +512,16 @@ $(function () {
             var bodyButtonText = rowArray[i].children[0].children[0].children[0].value;
             var bodyLinkUrl = rowArray[i].children[1].children[0].children[0].value;
             var bodyButtonColor = rowArray[i].children[2].children[0].value;
-            var newBtn = {
-                id: i,
-                label: bodyButtonText,
-                uri: bodyLinkUrl,
-                color: bodyButtonColor
-            };
-            btnArray.push(newBtn);
+            if (bodyButtonText !== '' && bodyLinkUrl !== '') {
+                bodyButtonColor = bodyButtonColor === '' ? config.body.button.buttonColor : bodyButtonColor
+                var newBtn = {
+                    id: i,
+                    label: bodyButtonText,
+                    uri: bodyLinkUrl,
+                    color: bodyButtonColor
+                };
+                btnArray.push(newBtn);
+            }
         }
         return btnArray;
     };
@@ -769,8 +773,10 @@ $(function () {
             if (value === null || value === undefined || value === '') {
                 var defValue;
                 if (styleName === 'background') {
-                    if (elementId === 'headerTitleBackgroundColor') {
+                    if (elementId === 'headerTitleBackgroundColor'){
                         defValue = config.header.background;
+                    } else if (/^colorInputBtn/.test(elementId)) {
+                        defValue = config.body.button.buttonColor;
                     } else {
                         defValue = config.hero.background;
                     }

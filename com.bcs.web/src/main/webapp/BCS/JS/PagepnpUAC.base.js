@@ -512,13 +512,16 @@ $(function () {
             var bodyButtonText = rowArray[i].children[0].children[0].children[0].value;
             var bodyLinkUrl = rowArray[i].children[1].children[0].children[0].value;
             var bodyButtonColor = rowArray[i].children[2].children[0].value;
-            var newBtn = {
-                id: i,
-                label: bodyButtonText,
-                uri: bodyLinkUrl,
-                color: bodyButtonColor
-            };
-            btnArray.push(newBtn);
+            if (bodyButtonText !== '' && bodyLinkUrl !== '') {
+                bodyButtonColor = bodyButtonColor === '' ? config.body.button.buttonColor : bodyButtonColor
+                var newBtn = {
+                    id: i,
+                    label: bodyButtonText,
+                    uri: bodyLinkUrl,
+                    color: bodyButtonColor
+                };
+                btnArray.push(newBtn);
+            }
         }
         return btnArray;
     };

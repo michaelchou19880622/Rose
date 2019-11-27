@@ -59,7 +59,7 @@ public class LineWebLoginApiService {
             requestPost.setEntity(entity);
 
             // print requestPost
-            logger.debug("postMsg : " + postMsg);
+            logger.info("postMsg : " + postMsg);
 
             // execute Call
             HttpResponse clientResponse = httpClient.execute(requestPost);

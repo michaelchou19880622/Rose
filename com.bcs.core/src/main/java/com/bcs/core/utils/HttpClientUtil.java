@@ -31,6 +31,7 @@ public class HttpClientUtil {
     /**
      * Logger
      */
+	
     private static Logger logger = Logger.getLogger(HttpClientUtil.class);
 
     private static final String INIT_FLAG = "INIT_FLAG";

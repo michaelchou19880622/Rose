@@ -212,7 +212,7 @@ public class MobileTracingController extends BCSBaseController {
             return MobilePageEnum.UserTracingStartPage.toString();
 
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            logger.info(ErrorRecord.recordError(e));
             return mobileUserController.indexPage(request, response, model);
         }
     }

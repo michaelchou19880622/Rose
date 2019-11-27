@@ -9,6 +9,9 @@ import com.bcs.core.utils.HttpClientUtil;
 import com.bcs.core.utils.InputStreamUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -22,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@Slf4j
 @Service
 public class LineWebLoginApiService {
 
@@ -32,11 +36,18 @@ public class LineWebLoginApiService {
 
     public ObjectNode callRetrievingAPI(String client_id, String client_secret, String code, String redirect_uri) throws Exception {
         Date start = new Date();
+
+        log.info("start = ", start);
+        log.info("client_id = ", client_id);
+        log.info("client_secret = ", client_secret);
+        log.info("code = ", code);
+        log.info("redirect_uri = ", redirect_uri);
+        
         return this.callRetrievingAPI(start, client_id, client_secret, code, redirect_uri, 0);
     }
 
     public ObjectNode callRetrievingAPI(Date start, String client_id, String client_secret, String code, String redirect_uri, int retryCount) throws Exception {
-        logger.debug("callRetrievingAPI");
+        logger.info("callRetrievingAPI");
 
         int status = 0;
         try (CloseableHttpClient httpClient = HttpClientUtil.getSingleInstance()) {
@@ -47,8 +58,10 @@ public class LineWebLoginApiService {
             list.add("client_secret=" + client_secret);
             list.add("code=" + code);
             list.add("redirect_uri=" + URLEncoder.encode(redirect_uri, "UTF-8"));
-
+            log.info("list = ", list);
+            
             String postMsg = StringUtils.join(list.toArray(), "&");
+            log.info("postMsg = ", postMsg);
 
             StringEntity entity = new StringEntity(postMsg, "UTF-8");
             entity.setContentType("application/x-www-form-urlencoded");
@@ -59,7 +72,7 @@ public class LineWebLoginApiService {
             requestPost.setEntity(entity);
 
             // print requestPost
-            logger.debug("postMsg : " + postMsg);
+            logger.info("postMsg : " + postMsg);
 
             // execute Call
             HttpResponse clientResponse = httpClient.execute(requestPost);

@@ -9,8 +9,10 @@ $(function () {
     var source = {
         type : t === 'Normal' ? 'Normal' : 'Unica',
         pageTitle : t === 'Normal' ? '編輯一般帳號' : '編輯Unica帳號',
-        listPageUrl : t === 'Normal' ? 'pnpUnicaAccountListPage' : 'pnpNormalAccountListPage'
+        listPageUrl : t === 'Normal' ? 'pnpNormalAccountListPage' : 'pnpUnicaAccountListPage',
+        createPageUrl : t === 'Normal' ? 'pnpNormalAccountCreatePage' : 'pnpUnicaAccountCreatePage'
     }
+    console.log(source);
 
 
     var pnpMaintainAccountModelId = null;
@@ -665,7 +667,7 @@ $(function () {
                 console.info(response);
                 alert('儲存成功');
                 //FIXME 文字不同處
-                window.location.replace('pnpNormalAccountListPage');
+                window.location.replace(source.listPageUrl);
             }).fail(function (response) {
                 console.info(response);
                 var text = response.responseText;

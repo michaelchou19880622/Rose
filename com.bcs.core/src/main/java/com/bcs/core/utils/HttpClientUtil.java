@@ -12,6 +12,7 @@ import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.log4j.Logger;
@@ -30,12 +31,34 @@ public class HttpClientUtil {
     /**
      * Logger
      */
+	
     private static Logger logger = Logger.getLogger(HttpClientUtil.class);
 
     private static final String INIT_FLAG = "INIT_FLAG";
 
     private static List<CloseableHttpClient> httpClientList = new ArrayList<>();
     private final static int timeout = 1;
+
+    public static CloseableHttpClient getSingleInstance() {
+        RequestConfig config = RequestConfig.custom()
+                .setSocketTimeout(timeout * 20000)
+                .setConnectTimeout(timeout * 20000)
+                .setConnectionRequestTimeout(timeout * 20000).build();
+
+        HttpClientBuilder builder = HttpClientBuilder.create().setDefaultRequestConfig(config);
+
+        try {
+            String proxyUrl = CoreConfigReader.getString(CONFIG_STR.TAISHIN_PROXY_URL.toString(), true);
+            if (StringUtils.isNotBlank(proxyUrl)) {
+                HttpHost proxy = new HttpHost(proxyUrl, 80, "http");
+                builder.setProxy(proxy);
+            }
+        } catch (Exception e) {
+            logger.error(ErrorRecord.recordError(e));
+        }
+
+        return builder.build();
+    }
 
     public static HttpClient generateClient() throws Exception {
         synchronized (INIT_FLAG) {

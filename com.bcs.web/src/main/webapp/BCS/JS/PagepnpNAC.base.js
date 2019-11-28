@@ -30,7 +30,7 @@ $(function () {
 
         if (pnpMaintainAccountModelId !== null && pnpMaintainAccountModelId !== '') {
             $('.LyMain').block($.BCS.blockMsgRead);
-            $('.CHTtl').html(source.pageTitle);
+            $('#pageTitle').html(source.pageTitle);
             document.getElementById('popupEditPage').value = 'Edit';
             $.ajax({
                 type: 'POST',
@@ -69,6 +69,7 @@ $(function () {
             });
         } else {
             console.log('Id is Null!! To Create Mode!!');
+            $('#pageTitle').html(source.pageTitle);
             loadPopupConfig();
         }
     };

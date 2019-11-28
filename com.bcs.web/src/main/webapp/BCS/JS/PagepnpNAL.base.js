@@ -9,7 +9,7 @@ $(function () {
 
     var source = {
         type: t === 'Normal' ? 'Normal' : 'Unica',
-        pageTitle: t === 'Normal' ? '編輯一般帳號' : '編輯Unica帳號',
+        pageTitle: t === 'Normal' ? '帳號維護清單' : '帳號維護清單',
         listPageUrl: t === 'Normal' ? 'pnpNormalAccountListPage' : 'pnpUnicaAccountListPage',
         createPageUrl: t === 'Normal' ? 'pnpNormalAccountCreatePage' : 'pnpUnicaAccountCreatePage'
     }
@@ -159,8 +159,6 @@ $(function () {
 
     // add tab
     var addTab = function (name) {
-        var target;
-
         $("#tabs ul").append(
             "<li class='tabLi'><a href='#tab" + templateCount + "'>" + name + "</a></li>"
         );
@@ -254,8 +252,12 @@ $(function () {
         $('.LyMain').block($.BCS.blockMsgRead);
         getListData('啟用', '/pnpAdmin/getPNPMaintainAccountList?status=true', 'All');
     });
-    $('#normalCreate').click(function () {});
-    $('#unicaCreate').click(function () {});
+    $('#normalCreate').click(function () {
+        window.location.replace('pnpNormalAccountCreatePage');
+    });
+    $('#unicaCreate').click(function () {
+        window.location.replace('pnpUnicaAccountCreatePage');
+    });
 
 
 

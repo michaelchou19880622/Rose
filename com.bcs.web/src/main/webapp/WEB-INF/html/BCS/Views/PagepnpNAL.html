@@ -4,10 +4,10 @@
 <head th:replace="/BCS/Views/Common/Head :: head ('PNP Normal Account Maintain Page', ${strList})">
 </head>
 <style type="text/css">
-.searchArea{
-    border: 1px solid #aaa;
+.searchArea {
     padding: 10px;
 }
+
 .searchArea-section {
     box-sizing: border-box;
     display: inline-block;
@@ -17,11 +17,71 @@
 .searchArea .paramGroup label {
     display: inline-block;
     min-width: 6rem;
-    text-align: right
+    text-align: right;
+    margin: 5px;
+}
+
+.searchArea .paramGroup input {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px #ddd solid;
+    font-size: 1rem;
+    width: 100px;
 }
 
 .searchArea .paramGroup button {
     display: inline-block;
+}
+
+.btn {
+    border: none;
+    border-radius: 5px;
+    /* height: 50px; */
+    padding: 10px;
+    font-size: 14px;
+    min-width: 8rem;
+}
+
+.btn-warn {
+    color: #FFF;
+    background: #F55
+}
+
+.btn-warn:hover {
+    position: relative;
+    background: #C00
+}
+
+.btn-pri {
+    color: #FFF;
+    background: #07F
+}
+
+.btn-pri:hover {
+    position: relative;
+    background: #05C
+}
+
+.btn-pri:active {
+    position: relative;
+    left: 1px;
+    top: 2px;
+}
+
+.btn-create {
+    color: #FFF;
+    background:#3d9970;
+}
+
+.btn-create:hover {
+    position: relative;
+    background: #2c8859;
+}
+
+.btn-create:active {
+    position: relative;
+    left: 1px;
+    top: 2px;
 }
 </style>
 <body>
@@ -32,10 +92,10 @@
 
         <!-- Right Content -->
         <div class="LyMain" role="main">
-            <form>
+<!--            <form>-->
                 <section>
                     <header class="ContentHead">
-                        <h3 id="pageTitle" class="CHTtl">一般帳號維護</h3>
+                        <h3 id="pageTitle" class="CHTtl">帳號維護清單</h3>
                     </header>
 <!--                    <div>                      -->
 <!--               		            帳號&lt;!&ndash; <font size="3" color="red">*</font> &ndash;&gt;-->
@@ -68,40 +128,52 @@
                         <div class="searchArea-section">
                             <div class="paramGroup">
                                 <label class="param-label">帳號</label>
-                                <input type="text" id="account" name="account" value="" maxlength="50" required="required">
+                                <input type="text" id="account" name="account" value="" maxlength="50">
                             </div>
                             <div class="paramGroup">
                                 <label class="param-label">員工編號</label>
-                                <input type="text" id="employeeId" name="employeeId" value="" maxlength="50" required="required">
+                                <input type="text" id="employeeId" name="employeeId" value="" maxlength="50">
                             </div>
                             <div class="paramGroup">
                                 <label class="param-label">PCC-CODE</label>
-                                <input type="text" id="pccCode" name="PccCode" value="" maxlength="50" required="required">
+                                <input type="text" id="pccCode" name="PccCode" value="" maxlength="50">
                             </div>
                         </div>
                         <div class="searchArea-section">
                             <div class="paramGroup">
                                 <label class="param-label">處</label>
-                                <input type="text" id="divisionName" name="divisionName" value="" maxlength="50" required="required">
+                                <input type="text" id="divisionName" name="divisionName" value="" maxlength="50">
                             </div>
                             <div class="paramGroup">
                                 <label class="param-label">部</label>
-                                <input type="text" id="departmentName" name="departmentName" value="" maxlength="50" required="required">
+                                <input type="text" id="departmentName" name="departmentName" value="" maxlength="50">
                             </div>
                             <div class="paramGroup">
                                 <label class="param-label">組</label>
-                                <input type="text" id="groupName" name="groupName" value="" maxlength="50" required="required">
+                                <input type="text" id="groupName" name="groupName" value="" maxlength="50">
                             </div>
                         </div>
                         <div class="searchArea-section">
                             <div class="paramGroup">
-                                <button id="normalSearchBtn">一般查詢</button>
-                                <button id="unicaSearchBtn">Unica查詢</button>
-                                <button id="allSearchBtn">全部查詢</button>
+                                <div>
+                                    <button id="normalSearchBtn" class="btn btn-pri">一般查詢</button>
+                                </div>
+                                <div>
+                                    <button id="unicaSearchBtn" class="btn btn-pri">Unica查詢</button>
+                                </div>
+                                <div>
+                                    <button id="allSearchBtn" class="btn btn-pri">全部查詢</button>
+                                </div>
                             </div>
+                        </div>
+                        <div class="searchArea-section">
                             <div class="paramGroup">
-                                <button id="normalCreate">一般建立</button>
-                                <button id="unicaCreate">Unica建立</button>
+                                <div>
+                                    <button id="normalCreate" class="btn btn-create">一般建立</button>
+                                </div>
+                                <div>
+                                    <button id="unicaCreate" class="btn btn-create">Unica建立</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -178,7 +250,7 @@
                         </div> 
                     </div>-->
                 </section>
-            </form>
+<!--            </form>-->
             <input style="display:none" id="t" th:value="${t}" />
         </div>
     </div>

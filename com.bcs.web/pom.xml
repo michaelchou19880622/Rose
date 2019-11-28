@@ -87,82 +87,7 @@
     </dependencies>
     <packaging>war</packaging>
 
-    <!-- Old  -->
     <profiles>
-        <profile>
-            <id>taishinapi</id> <!-- 台新測試機api -->
-            <build>
-                <directory>target</directory>
-            </build>
-            <properties>
-                <package.environment>taishinapi</package.environment>
-                <rp.build.warname>taishinapi</rp.build.warname>
-                <maven.war.webxml>src/main/resources/taishinapi/web/web.xml
-                </maven.war.webxml> <!-- set up webxml location -->
-            </properties>
-        </profile>
-        <profile>
-            <id>taishinuat</id> <!-- 台新測試機後台 -->
-            <build>
-                <directory>target</directory>
-            </build>
-            <properties>
-                <package.environment>taishinuat</package.environment>
-                <rp.build.warname>taishinuat</rp.build.warname>
-                <maven.war.webxml>src/main/resources/taishinuat/web/web.xml
-                </maven.war.webxml> <!-- set up webxml location -->
-            </properties>
-        </profile>
-        <profile>
-            <id>taishinoaapi</id> <!-- 台新正式機api -->
-            <build>
-                <directory>target/AP</directory>
-            </build>
-            <properties>
-                <package.environment>taishinoaapi</package.environment>
-                <rp.build.warname>taishinoaapi</rp.build.warname>
-                <maven.war.webxml>src/main/resources/taishinoaapi/web/web.xml
-                </maven.war.webxml> <!-- set up webxml location -->
-            </properties>
-        </profile>
-        <profile>
-            <id>api_taishinoa</id> <!-- 台新正式機api的後台 -->
-            <build>
-                <directory>target/AP</directory>
-            </build>
-            <properties>
-                <package.environment>api_taishinoa</package.environment>
-                <rp.build.warname>taishinoa</rp.build.warname>
-                <maven.war.webxml>src/main/resources/api_taishinoa/web/web.xml
-                </maven.war.webxml> <!-- set up webxml location -->
-            </properties>
-        </profile>
-        <profile>
-            <id>backend_taishinoaapi</id> <!--  台新正式機後台 的 api -->
-            <build>
-                <directory>target/backend</directory>
-            </build>
-            <properties>
-                <package.environment>backend_taishinoaapi</package.environment>
-                <rp.build.warname>taishinoaapi</rp.build.warname>
-                <maven.war.webxml>src/main/resources/backend_taishinoaapi/web/web.xml
-                </maven.war.webxml> <!-- set up webxml location -->
-            </properties>
-        </profile>
-        <profile>
-            <id>taishinoa</id> <!-- 台新正式機後台 -->
-            <build>
-                <directory>target/backend</directory>
-            </build>
-            <properties>
-                <package.environment>taishinoa</package.environment>
-                <rp.build.warname>taishinoa</rp.build.warname>
-                <maven.war.webxml>src/main/resources/taishinoa/web/web.xml
-                </maven.war.webxml>
-            </properties>
-        </profile>
-        <!-- Old  -->
-
         <profile>
             <id>uat-ap</id>
             <build>
@@ -171,8 +96,7 @@
             <properties>
                 <package.environment>uat-ap</package.environment>
                 <rp.build.warname>taishinapi</rp.build.warname>
-                <maven.war.webxml>src/main/resources/uat-ap/web/web.xml
-                </maven.war.webxml>
+                <maven.war.webxml>src/main/resources/uat-ap/web/web.xml</maven.war.webxml>
             </properties>
         </profile>
         <profile>
@@ -183,8 +107,7 @@
             <properties>
                 <package.environment>uat-be</package.environment>
                 <rp.build.warname>taishinuat</rp.build.warname>
-                <maven.war.webxml>src/main/resources/uat-be/web/web.xml
-                </maven.war.webxml>
+                <maven.war.webxml>src/main/resources/uat-be/web/web.xml</maven.war.webxml>
             </properties>
         </profile>
         <profile>
@@ -195,8 +118,7 @@
             <properties>
                 <package.environment>prod-be-oa</package.environment>
                 <rp.build.warname>taishinoa</rp.build.warname>
-                <maven.war.webxml>src/main/resources/prod-be-oa/web/web.xml
-                </maven.war.webxml>
+                <maven.war.webxml>src/main/resources/prod-be-oa/web/web.xml</maven.war.webxml>
             </properties>
         </profile>
         <profile>
@@ -207,8 +129,7 @@
             <properties>
                 <package.environment>prod-be-oaapi</package.environment>
                 <rp.build.warname>taishinoaapi</rp.build.warname>
-                <maven.war.webxml>src/main/resources/prod-be-oaapi/web/web.xml
-                </maven.war.webxml>
+                <maven.war.webxml>src/main/resources/prod-be-oaapi/web/web.xml</maven.war.webxml>
             </properties>
         </profile>
         <profile>
@@ -219,8 +140,7 @@
             <properties>
                 <package.environment>prod-ap-oa</package.environment>
                 <rp.build.warname>taishinoa</rp.build.warname>
-                <maven.war.webxml>src/main/resources/prod-ap-oa/web/web.xml
-                </maven.war.webxml>
+                <maven.war.webxml>src/main/resources/prod-ap-oa/web/web.xml</maven.war.webxml>
             </properties>
         </profile>
         <profile>
@@ -231,19 +151,18 @@
             <properties>
                 <package.environment>prod-ap-oaapi</package.environment>
                 <rp.build.warname>taishinoaapi</rp.build.warname>
-                <maven.war.webxml>src/main/resources/prod-ap-oaapi/web/web.xml
-                </maven.war.webxml>
+                <maven.war.webxml>src/main/resources/prod-ap-oaapi/web/web.xml</maven.war.webxml>
             </properties>
         </profile>
         <profile>
-            <id>test</id>
+            <id>windows</id>
             <build>
                 <directory>target</directory>
             </build>
             <properties>
-                <package.environment>test</package.environment>
+                <package.environment>windows</package.environment>
                 <rp.build.warname>Taishin</rp.build.warname>
-                <maven.war.webxml>src/main/webapp/WEB-INF/web.xml</maven.war.webxml> <!-- set up webxml location -->
+                <maven.war.webxml>src/main/resources/windows/web/web.xml</maven.war.webxml>
             </properties>
         </profile>
         <profile>
@@ -257,7 +176,7 @@
             <properties>
                 <package.environment>linux</package.environment>
                 <rp.build.warname>Taishin</rp.build.warname>
-                <maven.war.webxml>src/main/webapp/WEB-INF/web.xml</maven.war.webxml> <!-- set up webxml location -->
+                <maven.war.webxml>src/main/resources/linux/web/web.xml</maven.war.webxml>
             </properties>
         </profile>
     </profiles>
@@ -266,17 +185,6 @@
             <resource>
                 <directory>${basedir}/src/main/resources</directory>
                 <excludes>
-                    <!-- Old  -->
-                    <exclude>local/</exclude>
-                    <exclude>test/</exclude>
-                    <exclude>taishinapi/</exclude>
-                    <exclude>taishinuat/</exclude>
-                    <exclude>taishinoaapi/</exclude>
-                    <exclude>taishinoa/</exclude>
-                    <exclude>api_taishinoa/</exclude>
-                    <exclude>backend_taishinoaapi/</exclude>
-                    <!-- Old  -->
-
                     <exclude>windows/</exclude>
                     <exclude>linux/</exclude>
                     <exclude>uat-ap/</exclude>

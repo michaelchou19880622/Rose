@@ -2,7 +2,6 @@ package com.bcs.core.taishin.circle.PNP.scheduler;
 
 import com.bcs.core.spring.ApplicationContextProvider;
 import com.bcs.core.taishin.circle.PNP.code.PnpStageEnum;
-import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.PNP.service.PnpService;
 import lombok.extern.slf4j.Slf4j;

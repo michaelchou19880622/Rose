@@ -103,7 +103,7 @@ public class PnpService {
      * @see com.bcs.core.taishin.circle.PNP.akka.handler.PnpUpdateStatusActor#onReceive
      */
     public PnpDetail saveBySourceType(Object pnpDetail) {
-        PnpFtpSourceEnum source = PnpFtpSourceEnum.findEnumByCode(((PnpDetail)pnpDetail).getSource());
+        PnpFtpSourceEnum source = PnpFtpSourceEnum.findEnumByCode(((PnpDetail) pnpDetail).getSource());
         if (source == null) {
             log.error("PnpService save getting source is blank!!! MainID :" + ((PnpDetail) pnpDetail).getPnpMainId());
             return null;
@@ -132,9 +132,16 @@ public class PnpService {
      */
     private PnpDetail saveMitakeDetailStatus(PnpDetailMitake pnpDetail) {
         PnpStatusEnum status = PnpStatusEnum.findEnumByName(pnpDetail.getStatus());
-        if (status != null && (status.equals(PnpStatusEnum.COMPLETE) || status.equals(PnpStatusEnum.BC_SENT_COMPLETE) || status.equals(PnpStatusEnum.PNP_SENT_COMPLETE))) {
-            pnpDetail.setSendTime(Calendar.getInstance().getTime());
-            log.info(String.format("Update SendTime: %s, Status: %s", pnpDetail.getSendTime(), status));
+        if (status != null) {
+            switch (status) {
+                case COMPLETE:
+                case BC_SENT_COMPLETE:
+                case PNP_SENT_COMPLETE:
+                    pnpDetail.setSendTime(Calendar.getInstance().getTime());
+                    log.info(String.format("Update SendTime: %s, Status: %s", pnpDetail.getSendTime(), status));
+                    break;
+                default:
+            }
         }
         pnpDetail.setModifyTime(new Date());
         log.info(String.format("Before Save Detail:%n%s", pnpDetail.toString()));
@@ -151,9 +158,16 @@ public class PnpService {
      */
     private PnpDetail saveEvery8dDetailStatus(PnpDetailEvery8d pnpDetail) {
         PnpStatusEnum status = PnpStatusEnum.findEnumByName(pnpDetail.getStatus());
-        if (status != null && (status.equals(PnpStatusEnum.COMPLETE) || status.equals(PnpStatusEnum.BC_SENT_COMPLETE) || status.equals(PnpStatusEnum.PNP_SENT_COMPLETE))) {
-            pnpDetail.setSendTime(Calendar.getInstance().getTime());
-            log.info(String.format("Update SendTime: %s, Status: %s", pnpDetail.getSendTime(), status));
+        if (status != null) {
+            switch (status) {
+                case COMPLETE:
+                case BC_SENT_COMPLETE:
+                case PNP_SENT_COMPLETE:
+                    pnpDetail.setSendTime(Calendar.getInstance().getTime());
+                    log.info(String.format("Update SendTime: %s, Status: %s", pnpDetail.getSendTime(), status));
+                    break;
+                default:
+            }
         }
         pnpDetail.setModifyTime(new Date());
         log.info(String.format("Before Save Detail:%n%s", pnpDetail.toString()));
@@ -170,9 +184,16 @@ public class PnpService {
      */
     private PnpDetail saveUnicaDetailStatus(PnpDetailUnica pnpDetail) {
         PnpStatusEnum status = PnpStatusEnum.findEnumByName(pnpDetail.getStatus());
-        if (status != null && (status.equals(PnpStatusEnum.COMPLETE) || status.equals(PnpStatusEnum.BC_SENT_COMPLETE) || status.equals(PnpStatusEnum.PNP_SENT_COMPLETE))) {
-            pnpDetail.setSendTime(Calendar.getInstance().getTime());
-            log.info(String.format("Update SendTime: %s, Status: %s", pnpDetail.getSendTime(), status));
+        if (status != null) {
+            switch (status) {
+                case COMPLETE:
+                case BC_SENT_COMPLETE:
+                case PNP_SENT_COMPLETE:
+                    pnpDetail.setSendTime(Calendar.getInstance().getTime());
+                    log.info(String.format("Update SendTime: %s, Status: %s", pnpDetail.getSendTime(), status));
+                    break;
+                default:
+            }
         }
         pnpDetail.setModifyTime(new Date());
         log.info(String.format("Before Save Detail:%n%s", pnpDetail.toString()));
@@ -189,9 +210,16 @@ public class PnpService {
      */
     private PnpDetail saveMingDetailStatus(PnpDetailMing pnpDetail) {
         PnpStatusEnum status = PnpStatusEnum.findEnumByName(pnpDetail.getStatus());
-        if (status != null && (status.equals(PnpStatusEnum.COMPLETE) || status.equals(PnpStatusEnum.BC_SENT_COMPLETE) || status.equals(PnpStatusEnum.PNP_SENT_COMPLETE))) {
-            pnpDetail.setSendTime(Calendar.getInstance().getTime());
-            log.info(String.format("Update SendTime: %s, Status: %s", pnpDetail.getSendTime(), status));
+        if (status != null) {
+            switch (status) {
+                case COMPLETE:
+                case BC_SENT_COMPLETE:
+                case PNP_SENT_COMPLETE:
+                    pnpDetail.setSendTime(Calendar.getInstance().getTime());
+                    log.info(String.format("Update SendTime: %s, Status: %s", pnpDetail.getSendTime(), status));
+                    break;
+                default:
+            }
         }
         pnpDetail.setModifyTime(new Date());
         log.info(String.format("Before Save Detail:%n%s", pnpDetail.toString()));
@@ -791,25 +819,9 @@ public class PnpService {
         String[] buttonColorArray = pnpFlexTemplate.getButtonColor().split(",");
 
         for (int i = 0; i < buttonTextArray.length; i++) {
-            String url;
-            String color;
-            String text;
-            try {
-                url = buttonUrlArray[i];
-            } catch (IndexOutOfBoundsException e) {
-                url = "";
-            }
-            try {
-                color = buttonColorArray[i];
-            } catch (IndexOutOfBoundsException e) {
-                color = "";
-            }
-            try {
-                text = buttonTextArray[i];
-            } catch (IndexOutOfBoundsException e) {
-                text = "";
-            }
-
+            String url = buttonTextArray[i];
+            String color = i < buttonUrlArray.length ? buttonUrlArray[i] : "";
+            String text = i < buttonColorArray.length ? buttonColorArray[i] : "";
             /* Check button parameter is not empty, Require by Line API!! */
             if (StringUtils.isNotBlank(url) && StringUtils.isNotBlank(color) && StringUtils.isNotBlank(text)) {
                 sb.append(PnpFlexTemplate.fetchDefaultButtonTemplateJson()

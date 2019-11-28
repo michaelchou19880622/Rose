@@ -3,7 +3,6 @@ package com.bcs.core.taishin.circle.PNP.akka.handler;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import com.bcs.core.taishin.circle.PNP.code.PnpStageEnum;
-import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
 import com.bcs.core.utils.AkkaRouterFactory;

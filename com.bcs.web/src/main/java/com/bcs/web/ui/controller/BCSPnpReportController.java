@@ -4,6 +4,7 @@ import com.bcs.core.aspect.annotation.WebServiceLog;
 import com.bcs.core.report.builder.ExportExcelBuilder;
 import com.bcs.core.report.service.ExportService;
 import com.bcs.core.resource.CoreConfigReader;
+import com.bcs.core.taishin.circle.PNP.code.PnpStatusEnum;
 import com.bcs.core.taishin.circle.PNP.db.service.PNPMaintainAccountModelService;
 import com.bcs.core.utils.DataUtils;
 import com.bcs.core.web.security.CurrentUser;
@@ -21,9 +22,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ import java.util.Map;
  */
 @Slf4j
 @Controller
-@RequestMapping("/bcs")
+@RequestMapping("/bcs/pnpEmployee")
 public class BCSPnpReportController {
     private PNPMaintainUIService pnpMaintainUiService;
     private PNPMaintainAccountModelService pnpMaintainAccountModelService;
@@ -57,13 +58,11 @@ public class BCSPnpReportController {
     /**
      * Pnp detail report page string.
      *
-     * @param request  the request
-     * @param response the response
      * @return the string
      */
     @WebServiceLog
-    @GetMapping("/pnpEmployee/pnpDetailReportPage")
-    public String pnpDetailReportPage(HttpServletRequest request, HttpServletResponse response) {
+    @GetMapping("/pnpDetailReportPage")
+    public String pnpDetailReportPage() {
         log.info("pnpDetailReportPage");
         return BcsPageEnum.PnpDetailReportPage.toString();
     }
@@ -71,8 +70,6 @@ public class BCSPnpReportController {
     /**
      * Gets pnp detail report.
      *
-     * @param request      the request
-     * @param response     the response
      * @param customUser   the custom user
      * @param startDate    the start date
      * @param endDate      the end date
@@ -84,9 +81,9 @@ public class BCSPnpReportController {
      * @return the pnp detail report
      */
     @WebServiceLog
-    @GetMapping("/pnpEmployee/getPNPDetailReport")
+    @GetMapping("/getPNPDetailReport")
     @ResponseBody
-    public ResponseEntity<?> getPnpDetailReport(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+    public ResponseEntity<?> getPnpDetailReport(@CurrentUser CustomUser customUser,
                                                 @RequestParam(value = "startDate", required = false) String startDate,
                                                 @RequestParam(value = "endDate", required = false) String endDate,
                                                 @RequestParam(value = "account", required = false) String account,
@@ -108,8 +105,6 @@ public class BCSPnpReportController {
     /**
      * Gets pnp detail report total pages.
      *
-     * @param request      the request
-     * @param response     the response
      * @param customUser   the custom user
      * @param startDate    the start date
      * @param endDate      the end date
@@ -120,9 +115,9 @@ public class BCSPnpReportController {
      * @return the pnp detail report total pages
      */
     @WebServiceLog
-    @GetMapping(value = "/pnpEmployee/getPNPDetailReportTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = "/getPNPDetailReportTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public ResponseEntity<?> getPnpDetailReportTotalPages(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+    public ResponseEntity<?> getPnpDetailReportTotalPages(@CurrentUser CustomUser customUser,
                                                           @RequestParam(value = "startDate", required = false) String startDate,
                                                           @RequestParam(value = "endDate", required = false) String endDate,
                                                           @RequestParam(value = "account", required = false) String account,
@@ -144,7 +139,6 @@ public class BCSPnpReportController {
     /**
      * Export pnp detail report excel.
      *
-     * @param request      the request
      * @param response     the response
      * @param customUser   the custom user
      * @param startDate    the start date
@@ -154,9 +148,9 @@ public class BCSPnpReportController {
      * @param sourceSystem the source system
      */
     @WebServiceLog(action = "Download")
-    @GetMapping("/pnpEmployee/exportPNPDetailReportExcel")
+    @GetMapping("/exportPNPDetailReportExcel")
     @ResponseBody
-    public void exportPnpDetailReportExcel(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+    public void exportPnpDetailReportExcel(HttpServletResponse response, @CurrentUser CustomUser customUser,
                                            @RequestParam(value = "startDate", required = false) String startDate,
                                            @RequestParam(value = "endDate", required = false) String endDate,
                                            @RequestParam(value = "account", required = false) String account,
@@ -180,6 +174,26 @@ public class BCSPnpReportController {
             exportService.exportExcel(response, builder);
         } catch (Exception e) {
             log.error("Exception", e);
+        }
+    }
+
+    /**
+     * Get Status Map
+     * @return status map
+     */
+    @WebServiceLog(action = "getConfig")
+    @ResponseBody
+    @GetMapping("/getPnpStatusEnum")
+    public ResponseEntity<?> getPnpStatusEnum() {
+        try {
+            Map<String, String> map = new HashMap<>(PnpStatusEnum.values().length);
+            for(PnpStatusEnum e : PnpStatusEnum.values()){
+                map.put(e.value, e.chinese);
+            }
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Exception", e);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

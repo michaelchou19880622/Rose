@@ -819,9 +819,9 @@ public class PnpService {
         String[] buttonColorArray = pnpFlexTemplate.getButtonColor().split(",");
 
         for (int i = 0; i < buttonTextArray.length; i++) {
-            String url = buttonTextArray[i];
-            String color = i < buttonUrlArray.length ? buttonUrlArray[i] : "";
-            String text = i < buttonColorArray.length ? buttonColorArray[i] : "";
+            String text = buttonTextArray[i];
+            String url = i < buttonUrlArray.length ? buttonUrlArray[i] : "";
+            String color = i < buttonColorArray.length ? buttonColorArray[i] : "";
             /* Check button parameter is not empty, Require by Line API!! */
             if (StringUtils.isNotBlank(url) && StringUtils.isNotBlank(color) && StringUtils.isNotBlank(text)) {
                 sb.append(PnpFlexTemplate.fetchDefaultButtonTemplateJson()

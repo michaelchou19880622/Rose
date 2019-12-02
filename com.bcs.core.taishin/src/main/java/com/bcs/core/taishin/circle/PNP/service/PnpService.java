@@ -726,8 +726,9 @@ public class PnpService {
         try {
             RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
             restfulUtil.execute();
-            log.info("RestfulUtil.getStatusCode: " + restfulUtil.getStatusCode());
-            sendSuccessFlag = "200".equals(restfulUtil.getStatusCode());
+            httpStatusCode = restfulUtil.getStatusCode();
+            sendSuccessFlag = "200".equals(httpStatusCode);
+            log.info("RestfulUtil.getStatusCode: " + httpStatusCode);
         } catch (HttpClientErrorException he) {
             JSONObject errorMessage = new JSONObject(he.getResponseBodyAsString());
 
@@ -750,6 +751,7 @@ public class PnpService {
             httpStatusCode = "500";
             errorMsg = "BC伺服器錯誤，請洽資訊人員";
         }
+        log.info("sendSuccessFlag: {}, httpStatusCode: {}, errorMsg: {}", new Object[]{sendSuccessFlag, httpStatusCode, errorMsg});
         return new Object[]{sendSuccessFlag, httpStatusCode, errorMsg};
     }
 

@@ -206,6 +206,20 @@ public class PnpDetail extends AbstractBcsEntity {
     @Column(name = "BIND_STATUS", columnDefinition = "varchar(10)")
     private String bindStatus;
 
+    /**
+     * BC Http Status Code
+     */
+    @Column(name = "BC_HTTP_STATUS_CODE", columnDefinition = "char(3)")
+    private String bcHttpStatusCode;
+
+    /**
+     * PNP Http Status Code
+     */
+    @Column(name = "PNP_HTTP_STATUS_CODE", columnDefinition = "char(3)")
+    private String pnpHttpStatusCode;
+
+
+
     @PrePersist
     public void prePersist() {
         createTime = new Date();

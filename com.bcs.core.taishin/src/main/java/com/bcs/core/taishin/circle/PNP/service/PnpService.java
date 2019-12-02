@@ -412,6 +412,8 @@ public class PnpService {
         log.info("pushLineMessage pnpMain.getProcessFlow():" + pnpMain.getProcFlow());
 
         boolean sendSuccessFlag;
+        String httpStatusCode = "";
+        String errorMsg = "";
         for (PnpDetail detail : details) {
             /* User Block To Sms */
             if (LineUser.STATUS_BLOCK.equals(detail.getBindStatus())) {
@@ -430,11 +432,18 @@ public class PnpService {
             if (StringUtils.isBlank(detail.getUid())) {
                 /* UID is Empty 轉發 PNP */
                 sendSuccessFlag = false;
+                httpStatusCode = "";
+                errorMsg = "Line Uid Not Found!!";
                 log.info("Line UID Not Found in Detail!! =>  PNP!!  " + " Main Id: " + detail.getPnpMainId() + " Detail Id: " + detail.getPnpDetailId());
             } else {
                 /* 發送訊息 */
-                sendSuccessFlag = pnpPushMessage(url, headers, detail, detail.getUid());
+                Object[] pushResult = pnpPushMessage(url, headers, detail, detail.getUid());
+                sendSuccessFlag = (boolean) pushResult[0];
+                httpStatusCode = (String) pushResult[1];
+                errorMsg = (String) pushResult[2];
             }
+
+            detail.setBcHttpStatusCode(httpStatusCode);
 
             if (sendSuccessFlag) {
                 /* 發送成功 */
@@ -445,7 +454,6 @@ public class PnpService {
             } else {
                 /* 發送失敗 */
                 log.warn("BC Send Message Fail!!");
-                /* FIXME 20190822 Record ReturnCode*/
                 String processFlow = pnpMain.getProcFlow();
                 detail.setLinePushTime(Calendar.getInstance().getTime());
                 switch (processFlow) {
@@ -503,6 +511,8 @@ public class PnpService {
             String source = pnpMain.getSource();
 
             boolean sendSuccessFlag;
+            String httpStatusCode = "";
+            String errorMsg = "";
             for (PnpDetail detail : details) {
 
                 String deliveryTag = formatMessageToLineDeliveryTag(source, detail);
@@ -510,7 +520,13 @@ public class PnpService {
                 log.debug("X-Line-Delivery-Tag : " + deliveryTag);
 
                 /* 發送訊息 */
-                sendSuccessFlag = pnpPushMessage(url, headers, detail, detail.getPhoneHash());
+                Object[] pushResult = pnpPushMessage(url, headers, detail, detail.getPhoneHash());
+                sendSuccessFlag = (boolean) pushResult[0];
+                httpStatusCode = (String) pushResult[1];
+                errorMsg = (String) pushResult[2];
+
+                detail.setPnpHttpStatusCode(httpStatusCode);
+
                 Date pnpSendTime = new Date();
                 detail.setPnpTime(pnpSendTime);
                 if (sendSuccessFlag) {
@@ -598,7 +614,7 @@ public class PnpService {
     }
 
     /**
-     * BC PNP 通用發送推播訊息程序
+     * BC 發送推播訊息程序
      *
      * @param url     Line API URL
      * @param headers request header
@@ -606,8 +622,10 @@ public class PnpService {
      * @return Push is success
      * @see this#pushLineMessage(PnpMain, ActorRef, ActorRef) BC Push
      */
-    private boolean bcPushMessage(String url, HttpHeaders headers, PnpDetail detail) {
+    private Object[] bcPushMessage(String url, HttpHeaders headers, PnpDetail detail) {
         boolean sendSuccessFlag;
+        String httpStatusCode = "";
+        String errorMsg = "";
         JSONObject requestBody = new JSONObject();
 
         requestBody.put("to", detail.getUid());
@@ -623,35 +641,45 @@ public class PnpService {
             log.info("RestfulUtil.getStatusCode: " + restfulUtil.getStatusCode());
             sendSuccessFlag = "200".equals(restfulUtil.getStatusCode());
         } catch (HttpClientErrorException he) {
-            sendSuccessFlag = false;
-            log.error("HttpClientErrorException error : " + he.getMessage());
             JSONObject errorMessage = new JSONObject(he.getResponseBodyAsString());
+
+            sendSuccessFlag = false;
+            httpStatusCode = he.getStatusCode().toString();
+            errorMsg = he.getMessage();
+
+            log.error("HttpClientErrorException error : {}", errorMsg);
             if (errorMessage.has("message")) {
-                log.error("HttpClientErrorException statusCode: " + he.getStatusCode().toString());
+                log.error("HttpClientErrorException statusCode: {}", httpStatusCode);
                 if (errorMessage.has("details")) {
                     log.error("HttpClientErrorException details : " + errorMessage.getJSONArray("details").toString());
                 }
             }
+
         } catch (Exception e) {
             sendSuccessFlag = false;
             log.info("Send fail PnpDetailId:" + detail.getPnpDetailId());
             log.error("Send fail Exception:" + e.getMessage());
+            sendSuccessFlag = false;
+            httpStatusCode = "500";
+            errorMsg = "BC伺服器錯誤，請洽資訊人員";
         }
-        return sendSuccessFlag;
+        return new Object[]{sendSuccessFlag, httpStatusCode, errorMsg};
     }
 
     /**
-     * BC PNP 通用發送推播訊息程序
+     * PNP 通用發送推播訊息程序
      *
      * @param url     Line API URL
      * @param headers request header
      * @param detail  went push message object
      * @param to      UID Or PhoneNumber
-     * @return Push is success
+     * @return Object[]{sendSuccessFlag, httpStatusCode, errorMsg};
      * @see this#pushPnpMessage(PnpMain, ActorRef, ActorRef)  PNP Push
      */
-    private boolean pnpPushMessage(String url, HttpHeaders headers, PnpDetail detail, String to) {
+    private Object[] pnpPushMessage(String url, HttpHeaders headers, PnpDetail detail, String to) {
         boolean sendSuccessFlag;
+        String httpStatusCode = "";
+        String errorMsg = "";
         JSONObject requestBody = new JSONObject();
 
         requestBody.put("to", to);
@@ -669,27 +697,35 @@ public class PnpService {
 
         /* 將 headers 跟 body 塞進 HttpEntity 中 */
         HttpEntity<String> httpEntity = new HttpEntity<>(requestBody.toString(), headers);
+
         try {
             RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
             restfulUtil.execute();
             log.info("RestfulUtil.getStatusCode: " + restfulUtil.getStatusCode());
             sendSuccessFlag = "200".equals(restfulUtil.getStatusCode());
         } catch (HttpClientErrorException he) {
-            sendSuccessFlag = false;
-            log.error("HttpClientErrorException error : " + he.getMessage());
             JSONObject errorMessage = new JSONObject(he.getResponseBodyAsString());
+
+            sendSuccessFlag = false;
+            httpStatusCode = he.getStatusCode().toString();
+            errorMsg = he.getMessage();
+
+            log.error("HttpClientErrorException error : {}", errorMsg);
             if (errorMessage.has("message")) {
-                log.error("HttpClientErrorException statusCode: " + he.getStatusCode().toString());
+                log.error("HttpClientErrorException statusCode: {}", httpStatusCode);
                 if (errorMessage.has("details")) {
                     log.error("HttpClientErrorException details : " + errorMessage.getJSONArray("details").toString());
                 }
             }
+
         } catch (Exception e) {
-            sendSuccessFlag = false;
             log.info("Send fail PnpDetailId:" + detail.getPnpDetailId());
             log.error("Send fail Exception:" + e.getMessage());
+            sendSuccessFlag = false;
+            httpStatusCode = "500";
+            errorMsg = "BC伺服器錯誤，請洽資訊人員";
         }
-        return sendSuccessFlag;
+        return new Object[]{sendSuccessFlag, httpStatusCode, errorMsg};
     }
 
     /**

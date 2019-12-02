@@ -2,7 +2,7 @@ package com.bcs.core.taishin.circle.PNP.akka.handler;
 
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
-import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
+import com.bcs.core.taishin.circle.PNP.code.PnpStageEnum;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
 import com.bcs.core.utils.AkkaRouterFactory;
@@ -46,16 +46,16 @@ public class PnpMainActor extends UntypedActor {
 
             if (object instanceof PnpMain) {
                 PnpMain pnpMain = (PnpMain) object;
-                String stage = pnpMain.getProcStage();
+                PnpStageEnum stage = PnpStageEnum.findEnumByName(pnpMain.getProcStage());
                 log.info("PnpMainActor onReceive object instanceof PnpMain!!! Stage: " + stage);
                 switch (stage) {
-                    case AbstractPnpMainEntity.STAGE_BC:
+                    case BC:
                         tellActor(pushMessageRouterActor, pnpMain);
                         break;
-                    case AbstractPnpMainEntity.STAGE_PNP:
+                    case PNP:
                         tellActor(pnpMessageRouterActor, pnpMain);
                         break;
-                    case AbstractPnpMainEntity.STAGE_SMS:
+                    case SMS:
                         //TODO SMS Process
                         break;
                     default:
@@ -74,7 +74,7 @@ public class PnpMainActor extends UntypedActor {
         Integer buffer = 19;
         List<? super PnpDetail> details = tellSomething.getPnpDetails();
         List<? super PnpDetail> partition;
-        log.info("PnpMainActor onReceive details.size :" + details.size());
+        log.info("PnpMainActor onReceive details.size : {}", details.size());
         Integer arrayLength = details.size();
         Integer pointer = 0;
         while (pointer < arrayLength) {

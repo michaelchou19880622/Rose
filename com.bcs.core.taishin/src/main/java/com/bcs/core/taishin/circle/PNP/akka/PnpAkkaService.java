@@ -5,7 +5,7 @@ import akka.actor.ActorSystem;
 import com.bcs.core.taishin.circle.PNP.akka.handler.PnpMainActor;
 import com.bcs.core.taishin.circle.PNP.scheduler.PnpPNPMsgService;
 import com.bcs.core.utils.AkkaSystemFactory;
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
@@ -15,12 +15,12 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * @see com.bcs.core.taishin.circle.PNP.service.PnpService#pushLineMessage
  * @author ???
+ * @see com.bcs.core.taishin.circle.PNP.service.PnpService#pushLineMessage
  */
+@Slf4j
 @Service
 public class PnpAkkaService {
-    private static Logger logger = Logger.getLogger(PnpAkkaService.class);
     private List<ActorSystem> actorSystemList = new ArrayList<>();
     private List<ActorRef> pnpActorList = new ArrayList<>();
 
@@ -40,6 +40,7 @@ public class PnpAkkaService {
 
     /**
      * 隨機選取Actor
+     *
      * @param actors actors
      * @return actorRef
      */
@@ -51,6 +52,7 @@ public class PnpAkkaService {
 
     /**
      * 取得Host Name
+     *
      * @return Host Name
      */
     public String getProcessApName() {
@@ -58,9 +60,9 @@ public class PnpAkkaService {
             if (InetAddress.getLocalHost() != null) {
                 return InetAddress.getLocalHost().getHostName();
             }
-            logger.error(" getHostName error: LocalHost is Null!!");
+            log.error("LocalHost is Null!!");
         } catch (Exception e) {
-            logger.error(" getHostName error:" + e.getMessage());
+            log.error("", e);
         }
         return null;
     }
@@ -70,19 +72,19 @@ public class PnpAkkaService {
      */
     @PreDestroy
     public void shutdownNow() {
-        logger.info("[DESTROY] Pnp AkkaService shutdownNow cleaning up...");
+        log.info("[DESTROY] Pnp AkkaService shutdownNow cleaning up...");
         try {
             int count = 0;
 
             for (ActorSystem actorSystem : actorSystemList) {
                 actorSystem.stop(pnpActorList.get(count));
                 actorSystem.shutdown();
-                logger.info("Shutdown Actor[" + count + "]");
+                log.info("Shutdown Actor[" + count + "]");
                 count++;
             }
         } catch (Exception e) {
-            logger.error(e);
+            log.error("", e);
         }
-        logger.info("[DESTROY] Pnp AkkaService Shutdown Destroyed");
+        log.info("[DESTROY] Pnp AkkaService Shutdown Destroyed");
     }
 }

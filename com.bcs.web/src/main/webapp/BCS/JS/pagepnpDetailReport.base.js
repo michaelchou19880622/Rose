@@ -18,7 +18,7 @@ $(function () {
         endDate = null;
     var page = 1,
         totalPages = 0;
-
+    var pnpStatusMap = {};
 
     var pageBtnHandler = function(condition, actionName){
         if(condition){
@@ -27,6 +27,23 @@ $(function () {
             loadData();
             $('#pageAndTotalPages').text(page + '/' + totalPages);
         }
+    }
+
+    var getPnpStatusMap = function(){
+        $.ajax({
+            type: 'GET',
+            url: bcs.bcsContextPath + '/pnpEmployee/getPnpStatusEnum',
+            contentType: 'application/json',
+        }).success(function(response){
+            console.log(response);
+            if (response !== null) {
+                pnpStatusMap = response;
+            }
+        }).fail(function(response){
+            console.log(response);
+        }).done(function(response){
+            console.log("Fetch PnpStatusMap done!!")
+        })
     }
 
     //-------------------Event----------------------
@@ -196,60 +213,61 @@ $(function () {
 
 
     var parseCodeToChinese = function(status){
-        switch (status) {
-            case "DRAFT":
-                return "正在存進資料庫";
-            case "WAIT":
-                return "等待進入處理程序";
-            case "SCHEDULED":
-                return "等待預約發送";
-            case "DELAY":
-                return "等待預約發送";
-            case "BC_PROCESS":
-                return "進行BC發送處理中";
-            case "BC_SENDING":
-                return "BC發送中";
-            case "BC_COMPLETE":
-                return "BC處理程序完成";
-            case "BC_FAIL":
-                return "BC發送失敗";
-            case "BC_FAIL_PNP_PROCESS":
-                return "轉發PNP";
-            case "BC_FAIL_SMS_PROCESS":
-                return "轉發SMS";
-            case "USER_BLOCK_SMS_PROCESS":
-                return "用戶封鎖，轉發SMS";
-            case "PNP_SENDING":
-                return "PNP發送中";
-            case "CHECK_DELIVERY":
-                return "已發送，等待回應";
-            case "PNP_COMPLETE":
-                return "PNP處理程序完成";
-            case "PNP_FAIL_SMS_PROCESS":
-                return "轉發SMS";
-            case "SMS_SENDING":
-                return "SMS發送中";
-            case "SMS_CHECK_DELIVERY":
-                return "SMS已發送，等待回應";
-            case "SMS_COMPLETE":
-                return "SMS處理程序完成";
-            case "SMS_FAIL":
-                return "SMS發送失敗";
-
-
-            case "PROCESS":
-                return "發送處理進行中";
-            case "FINISH":
-                return "發送處理完成";
-            case "SENDING":
-                return "發送中";
-            case "DELETE":
-                return "已刪除";
-            case "COMPLETE":
-                return "處理程序完成";
-            default:
-                return status;
-        }
+        return pnpStatusMap[status];
+//        switch (status) {
+//            case "DRAFT":
+//                return "正在存進資料庫";
+//            case "WAIT":
+//                return "等待進入處理程序";
+//            case "SCHEDULED":
+//                return "等待預約發送";
+//            case "DELAY":
+//                return "等待預約發送";
+//            case "BC_PROCESS":
+//                return "進行BC發送處理中";
+//            case "BC_SENDING":
+//                return "BC發送中";
+//            case "BC_COMPLETE":
+//                return "BC處理程序完成";
+//            case "BC_FAIL":
+//                return "BC發送失敗";
+//            case "BC_FAIL_PNP_PROCESS":
+//                return "轉發PNP";
+//            case "BC_FAIL_SMS_PROCESS":
+//                return "轉發SMS";
+//            case "USER_BLOCK_SMS_PROCESS":
+//                return "用戶封鎖，轉發SMS";
+//            case "PNP_SENDING":
+//                return "PNP發送中";
+//            case "CHECK_DELIVERY":
+//                return "已發送，等待回應";
+//            case "PNP_COMPLETE":
+//                return "PNP處理程序完成";
+//            case "PNP_FAIL_SMS_PROCESS":
+//                return "轉發SMS";
+//            case "SMS_SENDING":
+//                return "SMS發送中";
+//            case "SMS_CHECK_DELIVERY":
+//                return "SMS已發送，等待回應";
+//            case "SMS_COMPLETE":
+//                return "SMS處理程序完成";
+//            case "SMS_FAIL":
+//                return "SMS發送失敗";
+//
+//
+//            case "PROCESS":
+//                return "發送處理進行中";
+//            case "FINISH":
+//                return "發送處理完成";
+//            case "SENDING":
+//                return "發送中";
+//            case "DELETE":
+//                return "已刪除";
+//            case "COMPLETE":
+//                return "處理程序完成";
+//            default:
+//                return status;
+//        }
     }
 
     /* 取得分頁總數並變更畫面 */
@@ -308,6 +326,7 @@ $(function () {
         endDate = moment(new Date()).format('YYYY-MM-DD');
         $('#startDate').val(startDate);
         $('#endDate').val(endDate);
+        getPnpStatusMap();
     };
 
     initPage();

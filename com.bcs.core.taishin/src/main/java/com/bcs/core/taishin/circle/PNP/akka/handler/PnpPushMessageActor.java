@@ -2,6 +2,7 @@ package com.bcs.core.taishin.circle.PNP.akka.handler;
 
 import akka.actor.UntypedActor;
 import com.bcs.core.spring.ApplicationContextProvider;
+import com.bcs.core.taishin.circle.PNP.code.PnpSendTypeEnum;
 import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.PNP.scheduler.PnpTaskService;
@@ -23,7 +24,7 @@ import java.util.Date;
 public class PnpPushMessageActor extends UntypedActor {
 
     @Override
-    public void onReceive(Object object) throws Exception {
+    public void onReceive(Object object) {
         try {
             Thread.currentThread().setName("Actor-PNP-BCPush-" + Thread.currentThread().getId());
 
@@ -43,12 +44,13 @@ public class PnpPushMessageActor extends UntypedActor {
      */
     private void checkSendTypeThenDoSomething(PnpMain pnpMain) throws SchedulerException {
         log.info("Send Type : " + pnpMain.getSendType());
-        switch (pnpMain.getSendType()) {
-            case AbstractPnpMainEntity.SEND_TYPE_IMMEDIATE:
-            case AbstractPnpMainEntity.SEND_TYPE_SCHEDULE_TIME_EXPIRED:
+        PnpSendTypeEnum sendType = PnpSendTypeEnum.findEnumByName(pnpMain.getSendType());
+        switch (sendType) {
+            case IMMEDIATE:
+            case SCHEDULE_TIME_EXPIRED:
                 immediatePushMessage(pnpMain);
                 break;
-            case AbstractPnpMainEntity.SEND_TYPE_DELAY:
+            case DELAY:
                 checkScheduleTimeThenDoImmediateOrDelay(pnpMain);
                 break;
             default:

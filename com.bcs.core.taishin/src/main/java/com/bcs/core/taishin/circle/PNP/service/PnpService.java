@@ -7,7 +7,10 @@ import com.bcs.core.enums.LINE_HEADER;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.circle.PNP.akka.PnpAkkaService;
 import com.bcs.core.taishin.circle.PNP.akka.handler.PnpMessageActor;
-import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
+import com.bcs.core.taishin.circle.PNP.code.PnpFtpSourceEnum;
+import com.bcs.core.taishin.circle.PNP.code.PnpProcessFlowEnum;
+import com.bcs.core.taishin.circle.PNP.code.PnpStageEnum;
+import com.bcs.core.taishin.circle.PNP.code.PnpStatusEnum;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDeliveryRecord;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailEvery8d;
@@ -100,19 +103,20 @@ public class PnpService {
      * @see com.bcs.core.taishin.circle.PNP.akka.handler.PnpUpdateStatusActor#onReceive
      */
     public PnpDetail saveBySourceType(Object pnpDetail) {
-        String source = ((PnpDetail) pnpDetail).getSource();
-        if (StringUtils.isBlank(source)) {
+        PnpFtpSourceEnum source = PnpFtpSourceEnum.findEnumByCode(((PnpDetail) pnpDetail).getSource());
+        if (source == null) {
             log.error("PnpService save getting source is blank!!! MainID :" + ((PnpDetail) pnpDetail).getPnpMainId());
+            return null;
         }
 
         switch (source) {
-            case AbstractPnpMainEntity.SOURCE_MITAKE:
+            case MITAKE:
                 return saveMitakeDetailStatus((PnpDetailMitake) pnpDetail);
-            case AbstractPnpMainEntity.SOURCE_MING:
+            case MING:
                 return saveMingDetailStatus((PnpDetailMing) pnpDetail);
-            case AbstractPnpMainEntity.SOURCE_EVERY8D:
+            case EVERY8D:
                 return saveEvery8dDetailStatus((PnpDetailEvery8d) pnpDetail);
-            case AbstractPnpMainEntity.SOURCE_UNICA:
+            case UNICA:
                 return saveUnicaDetailStatus((PnpDetailUnica) pnpDetail);
             default:
                 return null;
@@ -127,12 +131,17 @@ public class PnpService {
      * @see this#saveBySourceType
      */
     private PnpDetail saveMitakeDetailStatus(PnpDetailMitake pnpDetail) {
-        String status = pnpDetail.getStatus();
-        if (status.equals(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_COMPLETE)
-                || status.equals(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_BC_COMPLETE)
-                || status.equals(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_PNP_COMPLETE)) {
-            pnpDetail.setSendTime(Calendar.getInstance().getTime());
-            log.info(String.format("Update SendTime: %s, Status: %s", pnpDetail.getSendTime(), status));
+        PnpStatusEnum status = PnpStatusEnum.findEnumByName(pnpDetail.getStatus());
+        if (status != null) {
+            switch (status) {
+                case COMPLETE:
+                case BC_SENT_COMPLETE:
+                case PNP_SENT_COMPLETE:
+                    pnpDetail.setSendTime(Calendar.getInstance().getTime());
+                    log.info(String.format("Update SendTime: %s, Status: %s", pnpDetail.getSendTime(), status));
+                    break;
+                default:
+            }
         }
         pnpDetail.setModifyTime(new Date());
         log.info(String.format("Before Save Detail:%n%s", pnpDetail.toString()));
@@ -148,12 +157,17 @@ public class PnpService {
      * @see this#saveBySourceType
      */
     private PnpDetail saveEvery8dDetailStatus(PnpDetailEvery8d pnpDetail) {
-        String status = pnpDetail.getStatus();
-        if (status.equals(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_COMPLETE)
-                || status.equals(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_BC_COMPLETE)
-                || status.equals(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_PNP_COMPLETE)) {
-            pnpDetail.setSendTime(Calendar.getInstance().getTime());
-            log.info(String.format("Update SendTime: %s, Status: %s", pnpDetail.getSendTime(), status));
+        PnpStatusEnum status = PnpStatusEnum.findEnumByName(pnpDetail.getStatus());
+        if (status != null) {
+            switch (status) {
+                case COMPLETE:
+                case BC_SENT_COMPLETE:
+                case PNP_SENT_COMPLETE:
+                    pnpDetail.setSendTime(Calendar.getInstance().getTime());
+                    log.info(String.format("Update SendTime: %s, Status: %s", pnpDetail.getSendTime(), status));
+                    break;
+                default:
+            }
         }
         pnpDetail.setModifyTime(new Date());
         log.info(String.format("Before Save Detail:%n%s", pnpDetail.toString()));
@@ -169,12 +183,17 @@ public class PnpService {
      * @see this#saveBySourceType
      */
     private PnpDetail saveUnicaDetailStatus(PnpDetailUnica pnpDetail) {
-        String status = pnpDetail.getStatus();
-        if (status.equals(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_COMPLETE)
-                || status.equals(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_BC_COMPLETE)
-                || status.equals(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_PNP_COMPLETE)) {
-            pnpDetail.setSendTime(Calendar.getInstance().getTime());
-            log.info(String.format("Update SendTime: %s, Status: %s", pnpDetail.getSendTime(), status));
+        PnpStatusEnum status = PnpStatusEnum.findEnumByName(pnpDetail.getStatus());
+        if (status != null) {
+            switch (status) {
+                case COMPLETE:
+                case BC_SENT_COMPLETE:
+                case PNP_SENT_COMPLETE:
+                    pnpDetail.setSendTime(Calendar.getInstance().getTime());
+                    log.info(String.format("Update SendTime: %s, Status: %s", pnpDetail.getSendTime(), status));
+                    break;
+                default:
+            }
         }
         pnpDetail.setModifyTime(new Date());
         log.info(String.format("Before Save Detail:%n%s", pnpDetail.toString()));
@@ -190,15 +209,17 @@ public class PnpService {
      * @see this#saveBySourceType
      */
     private PnpDetail saveMingDetailStatus(PnpDetailMing pnpDetail) {
-        String status = pnpDetail.getStatus();
-        if (status.equals(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_COMPLETE)
-                || status.equals(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_BC_COMPLETE)
-                || status.equals(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_PNP_COMPLETE)) {
-            // FIXME PNP CHECK_DELIVERY 接收Line回傳訊息不是呼叫這隻Method處理，於是PNP_COMPLETE根本不會進行
-            // TODO 須將com.bcs.core.bot/src/main/java/com/bcs/core/bot/db/service/MsgBotReceiveService.java
-            //  透過APi打到這邊讓Akka處理
-            pnpDetail.setSendTime(Calendar.getInstance().getTime());
-            log.info(String.format("Update SendTime: %s, Status: %s", pnpDetail.getSendTime(), status));
+        PnpStatusEnum status = PnpStatusEnum.findEnumByName(pnpDetail.getStatus());
+        if (status != null) {
+            switch (status) {
+                case COMPLETE:
+                case BC_SENT_COMPLETE:
+                case PNP_SENT_COMPLETE:
+                    pnpDetail.setSendTime(Calendar.getInstance().getTime());
+                    log.info(String.format("Update SendTime: %s, Status: %s", pnpDetail.getSendTime(), status));
+                    break;
+                default:
+            }
         }
         pnpDetail.setModifyTime(new Date());
         log.info(String.format("Before Save Detail:%n%s", pnpDetail.toString()));
@@ -214,45 +235,45 @@ public class PnpService {
      * @param procStage BC PNP SMS
      * @see com.bcs.core.taishin.circle.PNP.akka.handler.PnpUpdateStatusActor#onReceive
      */
-    public void updatePnpMainStatusComplete(Long mainId, String source, String procStage) {
-        if (StringUtils.isBlank(source)) {
+    public void updatePnpMainStatusComplete(Long mainId, PnpFtpSourceEnum source, PnpStageEnum procStage) {
+        if (source == null) {
             log.error("PnpService save getting source is blank!!! MainID :" + mainId);
+            return;
         }
 
         /* 不可更新Main為Complete的Detail狀態清單 */
         List<String> status = new ArrayList<>();
         /* FTP */
-        status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
-        status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_WAIT);
-        status.add(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_SCHEDULED);
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS);
+        status.add(PnpStatusEnum.FTP_DETAIL_SAVE.value);
+        status.add(PnpStatusEnum.FTP_MAIN_SAVE.value);
+        status.add(PnpStatusEnum.PROCESS.value);
 
         /* BC */
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_PROCESS);
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_SENDING);
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_PNP_PROCESS);
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
+        status.add(PnpStatusEnum.BC_PROCESS.value);
+        status.add(PnpStatusEnum.BC_SENDING.value);
+        status.add(PnpStatusEnum.BC_SENT_FAIL_PNP_PROCESS.value);
+        status.add(PnpStatusEnum.BC_SENT_FAIL_SMS_PROCESS.value);
 
         /* PNP */
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_SENDING);
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_CHECK_DELIVERY);
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_FAIL_SMS_PROCESS);
+        status.add(PnpStatusEnum.PNP_SENDING.value);
+        status.add(PnpStatusEnum.PNP_SENT_CHECK_DELIVERY.value);
+        status.add(PnpStatusEnum.PNP_SENT_FAIL_SMS_PROCESS.value);
 
         /* SMS */
-        status.add(AbstractPnpMainEntity.MSG_SENDER_STATUS_SMS_CHECK_DELIVERY);
+        status.add(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
 
 
         switch (source) {
-            case AbstractPnpMainEntity.SOURCE_MITAKE:
+            case MITAKE:
                 updatePnpMainMitakeStatusComplete(mainId, status, procStage);
                 break;
-            case AbstractPnpMainEntity.SOURCE_MING:
+            case MING:
                 updatePnpMainMingStatusComplete(mainId, status, procStage);
                 break;
-            case AbstractPnpMainEntity.SOURCE_EVERY8D:
+            case EVERY8D:
                 updatePnpMainEvery8dStatusComplete(mainId, status, procStage);
                 break;
-            case AbstractPnpMainEntity.SOURCE_UNICA:
+            case UNICA:
                 updatePnpMainUnicaStatusComplete(mainId, status, procStage);
                 break;
             default:
@@ -268,7 +289,7 @@ public class PnpService {
      * @param status 訊息狀態清單
      * @see this#updatePnpMainStatusComplete
      */
-    private void updatePnpMainMitakeStatusComplete(Long mainId, List<String> status, String procStage) {
+    private void updatePnpMainMitakeStatusComplete(Long mainId, List<String> status, PnpStageEnum procStage) {
         if (pnpDetailMitakeRepository.countByPnpMainIdAndStatus(mainId, status) == 0) {
             int returnInt = pnpMainMitakeRepository.updatePnpMainMitakeStatus(
                     getCompleteStatusByStage(procStage), new Date(), mainId
@@ -285,7 +306,7 @@ public class PnpService {
      * @param status 訊息狀態清單
      * @see this#updatePnpMainStatusComplete
      */
-    private void updatePnpMainEvery8dStatusComplete(Long mainId, List<String> status, String procStage) {
+    private void updatePnpMainEvery8dStatusComplete(Long mainId, List<String> status, PnpStageEnum procStage) {
         if (pnpDetailEvery8dRepository.countByPnpMainIdAndStatus(mainId, status) == 0) {
             int returnInt = pnpMainEvery8dRepository.updatePnpMainEvery8dStatus(
                     getCompleteStatusByStage(procStage), new Date(), mainId
@@ -302,7 +323,7 @@ public class PnpService {
      * @param status 訊息狀態清單
      * @see this#updatePnpMainStatusComplete
      */
-    private void updatePnpMainUnicaStatusComplete(Long mainId, List<String> status, String procStage) {
+    private void updatePnpMainUnicaStatusComplete(Long mainId, List<String> status, PnpStageEnum procStage) {
         if (pnpDetailUnicaRepository.countByPnpMainIdAndStatus(mainId, status) == 0) {
             int returnInt = pnpMainUnicaRepository.updatePnpMainUnicaStatus(
                     getCompleteStatusByStage(procStage), new Date(), mainId
@@ -319,7 +340,7 @@ public class PnpService {
      * @param status 訊息狀態清單
      * @see this#updatePnpMainStatusComplete
      */
-    private void updatePnpMainMingStatusComplete(Long mainId, List<String> status, String procStage) {
+    private void updatePnpMainMingStatusComplete(Long mainId, List<String> status, PnpStageEnum procStage) {
         if (pnpDetailMingRepository.countByPnpMainIdAndStatus(mainId, status) == 0) {
             int returnInt = pnpMainMingRepository.updatePnpMainMingStatus(
                     getCompleteStatusByStage(procStage), new Date(), mainId
@@ -334,15 +355,15 @@ public class PnpService {
      * @param procStage BC PNP SMS
      * @return 各自的Complete Status
      */
-    private String getCompleteStatusByStage(String procStage) {
+    private String getCompleteStatusByStage(PnpStageEnum procStage) {
         log.info("ProcStage: " + procStage);
         switch (procStage) {
-            case "BC":
-                return AbstractPnpMainEntity.DATA_CONVERTER_STATUS_BC_COMPLETE;
-            case "PNP":
-                return AbstractPnpMainEntity.DATA_CONVERTER_STATUS_PNP_COMPLETE;
-            case "SMS":
-                return AbstractPnpMainEntity.DATA_CONVERTER_STATUS_SMS_COMPLETE;
+            case BC:
+                return PnpStatusEnum.BC_SENT_COMPLETE.value;
+            case PNP:
+                return PnpStatusEnum.PNP_SENT_COMPLETE.value;
+            case SMS:
+                return PnpStatusEnum.SMS_SENT_COMPLETE.value;
             default:
                 return null;
         }
@@ -365,19 +386,22 @@ public class PnpService {
         }
         Date now = Calendar.getInstance().getTime();
 
-        String source = pnpMain.getSource();
+        PnpFtpSourceEnum source = PnpFtpSourceEnum.findEnumByCode(pnpMain.getSource());
+        if (source == null) {
+            return;
+        }
 
         switch (source) {
-            case AbstractPnpMainEntity.SOURCE_MITAKE:
+            case MITAKE:
                 pnpMainMitakeRepository.updatePnpMainMitakeStatus(status, now, pnpMain.getPnpMainId());
                 break;
-            case AbstractPnpMainEntity.SOURCE_MING:
+            case MING:
                 pnpMainMingRepository.updatePnpMainMingStatus(status, now, pnpMain.getPnpMainId());
                 break;
-            case AbstractPnpMainEntity.SOURCE_EVERY8D:
+            case EVERY8D:
                 pnpMainEvery8dRepository.updatePnpMainEvery8dStatus(status, now, pnpMain.getPnpMainId());
                 break;
-            case AbstractPnpMainEntity.SOURCE_UNICA:
+            case UNICA:
                 pnpMainUnicaRepository.updatePnpMainUnicaStatus(status, now, pnpMain.getPnpMainId());
                 break;
             default:
@@ -400,10 +424,8 @@ public class PnpService {
     public void pushLineMessage(PnpMain pnpMain, ActorRef sendRef, ActorRef selfActorRef) {
 
         String url = CoreConfigReader.getString(CONFIG_STR.LINE_MESSAGE_PUSH_URL.toString());
-        String accessToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(),
-                CONFIG_STR.ChannelToken.toString(), true);
-        String serviceCode = CoreConfigReader.getString(CONFIG_STR.AutoReply.toString(),
-                CONFIG_STR.ChannelServiceCode.toString(), true);
+        String accessToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelToken.toString(), true);
+        String serviceCode = CoreConfigReader.getString(CONFIG_STR.AutoReply.toString(), CONFIG_STR.ChannelServiceCode.toString(), true);
 
         /* 設定 request headers */
         HttpHeaders headers = getLineApiHttpHeaders(accessToken, serviceCode);
@@ -418,9 +440,9 @@ public class PnpService {
             /* User Block To Sms */
             if (LineUser.STATUS_BLOCK.equals(detail.getBindStatus())) {
                 log.info("This is Detail User status is [BLOCK] To SMS!!");
-                detail.setProcStage(AbstractPnpMainEntity.STAGE_SMS);
-                detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS);
-                detail.setBcStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_USER_BLOCK_SMS_PROCESS);
+                detail.setProcStage(PnpStageEnum.SMS.value);
+                detail.setStatus(PnpStatusEnum.PROCESS.value);
+                detail.setBcStatus(PnpStatusEnum.BC_USER_BLOCKED_SMS_PROCESS.value);
                 if (sendRef != null) {
                     sendRef.tell(detail, selfActorRef);
                 } else {
@@ -448,29 +470,29 @@ public class PnpService {
             if (sendSuccessFlag) {
                 /* 發送成功 */
                 log.info("BC Send Message Success!!");
-                detail.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_BC_COMPLETE);
-                detail.setBcStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_BC_COMPLETE);
-                detail.setLinePushTime(Calendar.getInstance().getTime());
+                detail.setStatus(PnpStatusEnum.BC_SENT_COMPLETE.value);
+                detail.setBcStatus(PnpStatusEnum.BC_SENT_COMPLETE.value);
+                detail.setLinePushTime(new Date());
             } else {
                 /* 發送失敗 */
                 log.warn("BC Send Message Fail!!");
-                String processFlow = pnpMain.getProcFlow();
-                detail.setLinePushTime(Calendar.getInstance().getTime());
+                PnpProcessFlowEnum processFlow = PnpProcessFlowEnum.findEnumByName(pnpMain.getProcFlow());
+                detail.setLinePushTime(new Date());
                 switch (processFlow) {
-                    case AbstractPnpMainEntity.PROC_FLOW_BC:
-                        detail.setProcStage(AbstractPnpMainEntity.STAGE_BC);
-                        detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_FINISH);
-                        detail.setBcStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL);
+                    case BC:
+                        detail.setProcStage(PnpStageEnum.BC.value);
+                        detail.setStatus(PnpStatusEnum.FINISH.value);
+                        detail.setBcStatus(PnpStatusEnum.BC_SENT_FAIL.value);
                         break;
-                    case AbstractPnpMainEntity.PROC_FLOW_BC_SMS:
-                        detail.setProcStage(AbstractPnpMainEntity.STAGE_SMS);
-                        detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS);
-                        detail.setBcStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_SMS_PROCESS);
+                    case BC_SMS:
+                        detail.setProcStage(PnpStageEnum.SMS.value);
+                        detail.setStatus(PnpStatusEnum.PROCESS.value);
+                        detail.setBcStatus(PnpStatusEnum.BC_SENT_FAIL_SMS_PROCESS.value);
                         break;
-                    case AbstractPnpMainEntity.PROC_FLOW_BC_PNP_SMS:
-                        detail.setProcStage(AbstractPnpMainEntity.STAGE_PNP);
-                        detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS);
-                        detail.setBcStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_BC_FAIL_PNP_PROCESS);
+                    case BC_PNP_SMS:
+                        detail.setProcStage(PnpStageEnum.PNP.value);
+                        detail.setStatus(PnpStatusEnum.PROCESS.value);
+                        detail.setBcStatus(PnpStatusEnum.BC_SENT_FAIL_PNP_PROCESS.value);
                         break;
                     default:
                         break;
@@ -500,10 +522,8 @@ public class PnpService {
     public void pushPnpMessage(PnpMain pnpMain, ActorRef sendRef, ActorRef selfActorRef) {
         try {
             String url = CoreConfigReader.getString(CONFIG_STR.LINE_PNP_PUSH_VERIFIED.toString());
-            String accessToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(),
-                    CONFIG_STR.ChannelToken.toString(), true);
-            String serviceCode = CoreConfigReader.getString(CONFIG_STR.AutoReply.toString(),
-                    CONFIG_STR.ChannelServiceCode.toString(), true);
+            String accessToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelToken.toString(), true);
+            String serviceCode = CoreConfigReader.getString(CONFIG_STR.AutoReply.toString(), CONFIG_STR.ChannelServiceCode.toString(), true);
             HttpHeaders headers = getLineApiHttpHeaders(accessToken, serviceCode);
 
             List<PnpDetail> details = (List<PnpDetail>) pnpMain.getPnpDetails();
@@ -546,13 +566,13 @@ public class PnpService {
                     log.info("Pnp Send Time            : " + DataUtils.formatDateToString(pnpSendTime, "yyyy-MM-dd HH:mm:ss"));
                     log.info("Pnp Delivery Expire Time : " + DataUtils.formatDateToString(calendar.getTime(), "yyyy-MM-dd HH:mm:ss"));
                     //待web hook在24小時內收到DELIVERY則將該則訊息update成COMPLETE，若24小時內沒收到DELIVERY則將該訊息轉發SMS
-                    detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_CHECK_DELIVERY);
-                    detail.setPnpStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_CHECK_DELIVERY);
+                    detail.setStatus(PnpStatusEnum.PNP_SENT_CHECK_DELIVERY.value);
+                    detail.setPnpStatus(PnpStatusEnum.PNP_SENT_CHECK_DELIVERY.value);
 
                     /* Check Pnp is Complete from Line Call Callback Api Update Complete*/
-                    PnpDetail pnpDetail = findDetailById(detail.getPnpDetailId(), detail.getSource());
+                    PnpDetail pnpDetail = findDetailById(detail.getPnpDetailId(), PnpFtpSourceEnum.findEnumByCode(detail.getSource()));
                     if (pnpDetail != null) {
-                        boolean isReceivedLineCallBack = AbstractPnpMainEntity.DATA_CONVERTER_STATUS_PNP_COMPLETE.equals(pnpDetail.getPnpStatus())
+                        boolean isReceivedLineCallBack = PnpStatusEnum.PNP_SENT_COMPLETE.value.equals(pnpDetail.getPnpStatus())
                                 && pnpDetail.getPnpDeliveryTime() != null;
                         if (isReceivedLineCallBack) {
                             detail.setStatus(pnpDetail.getStatus());
@@ -565,9 +585,9 @@ public class PnpService {
                 } else {
                     /* 發送失敗 */
                     log.info("PNP Send Message Fail!! ==> SMS!!");
-                    detail.setProcStage(AbstractPnpMainEntity.STAGE_SMS);
-                    detail.setStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_PROCESS);
-                    detail.setPnpStatus(AbstractPnpMainEntity.MSG_SENDER_STATUS_PNP_FAIL_SMS_PROCESS);
+                    detail.setProcStage(PnpStageEnum.SMS.value);
+                    detail.setStatus(PnpStatusEnum.PROCESS.value);
+                    detail.setPnpStatus(PnpStatusEnum.PNP_SENT_FAIL_SMS_PROCESS.value);
                 }
                 log.info(String.format("Process Flow: %s, After Proc Stage: %s, After Status: %s"
                         , detail.getProcFlow(), detail.getProcStage(), detail.getStatus()));
@@ -584,15 +604,18 @@ public class PnpService {
         }
     }
 
-    private PnpDetail findDetailById(Long detailId, String source) {
+    private PnpDetail findDetailById(Long detailId, PnpFtpSourceEnum source) {
+        if (source == null) {
+            return null;
+        }
         switch (source) {
-            case AbstractPnpMainEntity.SOURCE_MITAKE:
+            case MITAKE:
                 return pnpDetailMitakeRepository.findOne(detailId);
-            case AbstractPnpMainEntity.SOURCE_MING:
+            case MING:
                 return pnpDetailMingRepository.findOne(detailId);
-            case AbstractPnpMainEntity.SOURCE_EVERY8D:
+            case EVERY8D:
                 return pnpDetailEvery8dRepository.findOne(detailId);
-            case AbstractPnpMainEntity.SOURCE_UNICA:
+            case UNICA:
                 return pnpDetailUnicaRepository.findOne(detailId);
             default:
                 return null;
@@ -641,6 +664,8 @@ public class PnpService {
             log.info("RestfulUtil.getStatusCode: " + restfulUtil.getStatusCode());
             sendSuccessFlag = "200".equals(restfulUtil.getStatusCode());
         } catch (HttpClientErrorException he) {
+            sendSuccessFlag = false;
+            log.error("HttpClientErrorException error : " + he.getMessage());
             JSONObject errorMessage = new JSONObject(he.getResponseBodyAsString());
 
             sendSuccessFlag = false;
@@ -832,25 +857,9 @@ public class PnpService {
         String[] buttonColorArray = pnpFlexTemplate.getButtonColor().split(",");
 
         for (int i = 0; i < buttonTextArray.length; i++) {
-            String url;
-            String color;
-            String text;
-            try {
-                url = buttonUrlArray[i];
-            } catch (IndexOutOfBoundsException e) {
-                url = "";
-            }
-            try {
-                color = buttonColorArray[i];
-            } catch (IndexOutOfBoundsException e) {
-                color = "";
-            }
-            try {
-                text = buttonTextArray[i];
-            } catch (IndexOutOfBoundsException e) {
-                text = "";
-            }
-
+            String text = buttonTextArray[i];
+            String url = i < buttonUrlArray.length ? buttonUrlArray[i] : "";
+            String color = i < buttonColorArray.length ? buttonColorArray[i] : "";
             /* Check button parameter is not empty, Require by Line API!! */
             if (StringUtils.isNotBlank(url) && StringUtils.isNotBlank(color) && StringUtils.isNotBlank(text)) {
                 sb.append(PnpFlexTemplate.fetchDefaultButtonTemplateJson()

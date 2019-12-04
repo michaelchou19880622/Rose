@@ -169,11 +169,12 @@ public class DataUtils {
 
     /**
      * isFuture
+     *
      * @param compareDate compareDate
      * @return isFuture
      */
-    public static boolean isFuture(Date compareDate){
-        if (compareDate == null){
+    public static boolean isFuture(Date compareDate) {
+        if (compareDate == null) {
             return false;
         }
         return new Date().before(compareDate);
@@ -181,13 +182,29 @@ public class DataUtils {
 
     /**
      * isPast
+     *
      * @param compareDate compareDate
      * @return isPast
      */
-    public static boolean isPast(Date compareDate){
-        if (compareDate == null){
+    public static boolean isPast(Date compareDate) {
+        if (compareDate == null) {
             return false;
         }
         return new Date().after(compareDate);
+    }
+
+    /**
+     * Get Page Row Start And Row End;
+     * @param page page number
+     * @param pageRow one page row number
+     * @return int[rowStart, rowEnd]
+     */
+    public static int[] pageRowCalculate(final Integer page, final Integer pageRow) {
+        int rowStart;
+        int rowEnd;
+        int index = page == null || page == 0 ? 0 : page - 1;
+        rowStart = index * pageRow + 1;
+        rowEnd = rowStart + pageRow;
+        return new int[]{rowStart, rowEnd};
     }
 }

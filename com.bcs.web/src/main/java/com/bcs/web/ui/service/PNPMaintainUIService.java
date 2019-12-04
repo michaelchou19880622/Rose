@@ -82,19 +82,11 @@ public class PNPMaintainUIService {
                                                         String empId,
                                                         String phoneNumber) {
         try {
-            int rowStart;
-            int rowEnd;
-            if (page == null) {
-                rowStart = 1;
-                /* Equal Get all data */
-                rowEnd = Integer.MAX_VALUE;
-            } else {
-                // 1~199 => 0~198
-                page--;
-                rowStart = page * 10 + 1;
-                // 10 as Size
-                rowEnd = rowStart + 10;
-            }
+
+            int[] pageRowArray = DataUtils.pageRowCalculate(page, 10);
+            int rowStart = pageRowArray[0];
+            int rowEnd = pageRowArray[1];
+
 
             StringBuilder sb = new StringBuilder();
             sb.append("select * from ( " +

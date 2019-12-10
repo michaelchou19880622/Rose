@@ -1,5 +1,15 @@
 package com.bcs.core.taishin.circle.PNP.db.service;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+
 import com.bcs.core.taishin.circle.PNP.code.PnpFtpSourceEnum;
 import com.bcs.core.taishin.circle.PNP.code.PnpProcessFlowEnum;
 import com.bcs.core.taishin.circle.PNP.code.PnpStatusEnum;
@@ -7,21 +17,13 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailReport;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailReportParam;
 import com.bcs.core.taishin.circle.db.service.OracleService;
 import com.bcs.core.utils.DataUtils;
-import com.google.gson.Gson;
-import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Pnp Report Service
@@ -37,7 +39,7 @@ public class PnpReportService {
     private EntityManager entityManager;
 
     @Autowired
-    PnpReportService(OracleService oracleService) {
+    public PnpReportService(OracleService oracleService) {
         this.oracleService = oracleService;
     }
 
@@ -56,7 +58,6 @@ public class PnpReportService {
             log.info("List is Empty!!");
             return Collections.emptyList();
         }
-
         pnpDetailReportList.forEach(report -> {
             report.setProcessFlow(englishProcFlowToChinese(report.getProcessFlow()));
             report.setFtpSource(englishSourceToChinese(report.getFtpSource()));
@@ -64,7 +65,9 @@ public class PnpReportService {
             report.setPnpStatus(englishStatusToChinese(report.getPnpStatus()));
             report.setSmsStatus(englishStatusToChinese(report.getSmsStatus()));
         });
-        return pnpDetailReportList;
+        List<PnpDetailReport> reportList = pnpDetailReportList.stream().sorted(Comparator.comparing(PnpDetailReport::getCreateTime).reversed()).collect(Collectors.toList());
+        log.info("Sorted Report List", DataUtils.toPrettyJsonUseJackson(reportList));
+        return reportList;
     }
 
     private StringBuilder getDetailReportSql(final PnpDetailReportParam pnpDetailReportParam) {
@@ -280,15 +283,15 @@ public class PnpReportService {
         final String sourceSystem = pnpDetailReportParam.getSourceSystem().trim();
         final String phoneNumber = pnpDetailReportParam.getPhone().trim();
         final String employeeId = pnpDetailReportParam.getEmployeeId().trim();
-        final String startDate = pnpDetailReportParam.getStartDate().trim();
-        final String endDate = pnpDetailReportParam.getEndDate().trim();
+        final Date startDate = pnpDetailReportParam.getStartDate();
+        final Date endDate = pnpDetailReportParam.getEndDate();
 
         /* 依照篩選條件過濾 */
-        if (StringUtils.isNotBlank(startDate)) {
-            sb.append(String.format(" AND R1.CREATE_TIME >= '%s'", startDate));
+        if (startDate != null) {
+            sb.append(String.format(" AND R1.CREATE_TIME >= '%s'", DataUtils.convDateToStr(DataUtils.truncDate(startDate), "yyyy-MM-dd HH:mm:ss")));
         }
-        if (StringUtils.isNotBlank(endDate)) {
-            sb.append(String.format(" AND R1.CREATE_TIME <= '%s'", endDate));
+        if (endDate != null) {
+            sb.append(String.format(" AND R1.CREATE_TIME <= '%s'", DataUtils.convDateToStr(DataUtils.truncEndDate(endDate), "yyyy-MM-dd HH:mm:ss")));
         }
         if (StringUtils.isNotBlank(account)) {
             sb.append(String.format(" AND R1.ACCOUNT = '%s'", account));
@@ -313,8 +316,8 @@ public class PnpReportService {
         if (pnpDetailReportParam.isPageable()) {
             final Integer page = pnpDetailReportParam.getPage();
             final int[] pageRowArray = DataUtils.pageRowCalculate(page, 10);
-            sb.append(String.format(" OFFSET %s ROWS ", pageRowArray[0]));
-            sb.append(String.format(" FETCH NEXT %s ROWS ONLY", pageRowArray[1]));
+            sb.append(String.format(" OFFSET %s ROWS ", pageRowArray[0]-1));
+            sb.append(String.format(" FETCH NEXT %s ROWS ONLY", 10));
         }
 
         log.info("str1: " + DataUtils.replaceUnnecessarySpace(sb.toString()));

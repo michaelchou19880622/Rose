@@ -1,5 +1,7 @@
 package com.bcs.core.taishin.circle.PNP.db.entity;
 
+import java.util.Date;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,8 +14,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class PnpDetailReportParam {
-    private String startDate;
-    private String endDate;
+    private Date startDate;
+    private Date endDate;
     private boolean isPageable = false;
     private Integer page = 1;
     private String account;

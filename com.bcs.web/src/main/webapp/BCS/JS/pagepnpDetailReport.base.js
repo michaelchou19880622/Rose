@@ -110,28 +110,29 @@ $(function() {
   // do Download
   var setExportButtonSource = function() {
     if (hasData) {
-        var getUrl = bcs.bcsContextPath + '/pnpEmployee/exportPNPDetailReportExcel';
-        console.info('getUrl', getUrl);
-        $.ajax({
-          type: 'POST',
-          url: getUrl,
-          contentType: 'application/json',
-          data: JSON.stringify({
-            startDate: startDate,
-            endDate: endDate,
-            isPageable: false,
-            page: page,
-            account: document.getElementById('accountInput').value,
-            pccCode: document.getElementById('pccCodeInput').value,
-            sourceSystem: document.getElementById('sourceSystemInput').value,
-            employeeId: null,
-            phone: document.getElementById('phoneNumber').value
-          })
-        }).success(function(){
-            console.log('export success');
-        }).fail(function(e){
-            console.log(e);
-        })
+      var getUrl =
+        bcs.bcsContextPath +
+        '/pnpEmployee/exportPNPDetailReportExcel' +
+        '?startDate=' +
+        startDate +
+        '&endDate=' +
+        endDate +
+        '&isPageable=false' +
+        '&page=' +
+        page +
+        '&account=' +
+        document.getElementById('accountInput').value +
+        '&pccCode=' +
+        document.getElementById('pccCodeInput').value +
+        '&sourceSystem=' +
+        document.getElementById('sourceSystemInput').value +
+        '&phone=' +
+        document.getElementById('phoneNumber').value;
+      console.info('getUrl', getUrl);
+
+      $('.btn_add.exportToExcel').attr('href', getUrl);
+    } else {
+      $('.btn_add.exportToExcel').attr('href', '#');
     }
   };
 
@@ -172,8 +173,7 @@ $(function() {
         var i = 1;
         response.forEach(function(obj) {
           console.log('i = ' + i);
-          var list =
-            i % 2 == 0 ? originalTrOdd.clone(true) : originalTr.clone(true);
+          var list = originalTr.clone(true);
 
           list.find('.no').html(i);
           list.find('.sourceSystem').html(obj.sourceSystem);
@@ -182,8 +182,20 @@ $(function() {
           list.find('.proc_stage').html(obj.processStage);
           list.find('.pnpContent').html(obj.message);
           list.find('.customerCellPhoneNumber').html(obj.phone);
-          list.find('.bcStatusCode').html(obj.bcStatus + (obj.bcHttpStatusCode === null ? '' : obj.bcHttpStatusCode));
-          list.find('.pnpStatusCode').html(obj.pnpStatus + (obj.pnpHttpStatusCode === null ? '' : obj.pnpHttpStatusCode));
+          var bcStatus = '';
+          if (obj.bcHttpStatusCode !== null) {
+            bcStatus = obj.bcStatus + ' [' + obj.bcHttpStatusCode + ']';
+          } else {
+            bcStatus = obj.bcStatus;
+          }
+          list.find('.bcStatusCode').html(bcStatus);
+          var pnpStatus = '';
+          if (obj.pnpHttpStatusCode !== null) {
+            pnpStatus = obj.pnpStatus + ' [' + obj.pnpHttpStatusCode + ']';
+          } else {
+            pnpStatus = obj.pnpStatus;
+          }
+          list.find('.pnpStatusCode').html(pnpStatus);
           list.find('.smsStatusCode').html(obj.smsStatus);
           list.find('.accountPccCode').html(obj.pccCode);
           list
@@ -193,14 +205,21 @@ $(function() {
                 'YYYY-MM-DD HH:mm:ss'
               )
             );
+          list.find('.resendBtn').click(function() {
+            resendSms(obj.detailId, obj.ftpSource);
+          });
 
           $('#resultTable').append(list);
 
-          var list2 =
-            i % 2 == 0 ? originalTr2Odd.clone(true) : originalTr2.clone(true);
+          var list2 = originalTr2.clone(true);
           list2.find('.bc_time').html(obj.bcTime);
           list2.find('.pnp_time').html(obj.pnpTime);
           list2.find('.sms_time').html(obj.smsTime);
+
+          // <button id="resendBtn"
+          // sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_PNP_ADMIN','ROLE_MARKET','ROLE_PNP_SEND_LINE_SEND','ROLE_PNP_SEND_LINE_VERIFY')">
+          //     再次發送SMS
+          // </button>
 
           $('#resultTable').append(list2);
           i++;
@@ -221,18 +240,48 @@ $(function() {
       });
   };
 
-  var converterPathWayCodeToName = function(pathwayCode) {
-    if (pathwayCode === '3') {
-      return 'BC<br/>PNP<br/>SMS';
-    } else if (pathwayCode === '2') {
-      return 'BC<br/>SMS';
-    } else if (pathwayCode === '1') {
-      return 'BC';
+  var resendSms = function(id, ftp) {
+    switch (ftp) {
+      case '明軒':
+        ftp = 'MING';
+        break;
+      case '三竹':
+        ftp = 'MITAKE';
+        break;
+      case 'Unica':
+        ftp = 'UNICA';
+        break;
+      case '互動':
+        ftp = 'EVERY8D';
+        break;
+      default:
+        break;
     }
-  };
-
-  var parseCodeToChinese = function(status) {
-    return pnpStatusMap[status];
+    $('.LyMain').block($.BCS.blockMsgRead);
+    var apiUrl =
+      bcs.bcsContextPath +
+      '/pnpEmployee/resend/sms' +
+      '?detailId=' +
+      id +
+      '&ftpSourceName=' +
+      ftp;
+    console.log(apiUrl);
+    $.ajax({
+      type: 'POST',
+      url: apiUrl,
+      contentType: 'application/x-www-form-urlencoded'
+    })
+      .success(function(response) {
+        console.log(response);
+        alert('已設定重發排程!!');
+      })
+      .fail(function(e) {
+        $.FailResponse(e);
+        $('.LyMain').unblock();
+      })
+      .done(function() {
+        $('.LyMain').unblock();
+      });
   };
 
   /* 取得分頁總數並變更畫面 */
@@ -241,38 +290,36 @@ $(function() {
     $('.LyMain').block($.BCS.blockMsgRead);
 
     var getUrl =
-      bcs.bcsContextPath +
-      '/pnpEmployee/getPNPDetailReportTotalPages?' +
-      'startDate=' +
-      startDate +
-      '&endDate=' +
-      endDate +
-      '&sourceSystem=' +
-      document.getElementById('sourceSystemInput').value +
-      '&pccCode=' +
-      document.getElementById('pccCodeInput').value +
-      '&account=' +
-      document.getElementById('accountInput').value +
-      '&phoneNumber=' +
-      document.getElementById('phoneNumber').value;
+      bcs.bcsContextPath + '/pnpEmployee/getPNPDetailReportTotalPages';
 
     console.info('getUrl', getUrl);
 
     $.ajax({
-      type: 'GET',
-      url: getUrl
+      type: 'POST',
+      url: getUrl,
+      contentType: 'application/json',
+      data: JSON.stringify({
+        startDate: startDate,
+        endDate: endDate,
+        isPageable: false,
+        page: page,
+        account: document.getElementById('accountInput').value,
+        pccCode: document.getElementById('pccCodeInput').value,
+        sourceSystem: document.getElementById('sourceSystemInput').value,
+        employeeId: null,
+        phone: document.getElementById('phoneNumber').value
+      })
     })
       .success(function(response) {
-        console.info('msg1: ', response['msg']);
-        totalPages = parseInt(response['msg']);
+        console.log(response);
+        totalPages = parseInt(response);
         console.info('totalPages1: ', totalPages);
-        // set pageAndTotalPage
         page = 1;
         console.info(page + '/' + totalPages);
         $('#pageAndTotalPages').text(page + '/' + totalPages);
       })
       .fail(function(response) {
-        console.info(response);
+        console.log(response);
         $.FailResponse(response);
         $('.LyMain').unblock();
       })

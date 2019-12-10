@@ -3,7 +3,7 @@ package com.bcs.core.taishin.circle.PNP.code;
 
 /**
  * Pnp Ftp Source Enum
- * 
+ *
  * @author Alan
  */
 public enum PnpFtpSourceEnum {
@@ -51,6 +51,15 @@ public enum PnpFtpSourceEnum {
     public static PnpFtpSourceEnum findEnumByCode(String code){
         for (PnpFtpSourceEnum e : PnpFtpSourceEnum.values()){
             if (e.code.equals(code)) {
+                return e;
+            }
+        }
+        return null;
+    }
+
+    public static PnpFtpSourceEnum findEnumByChinese(String chinese){
+        for (PnpFtpSourceEnum e : PnpFtpSourceEnum.values()){
+            if (e.chinese.equals(chinese)) {
                 return e;
             }
         }

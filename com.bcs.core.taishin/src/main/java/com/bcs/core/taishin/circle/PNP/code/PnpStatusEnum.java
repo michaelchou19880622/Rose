@@ -22,8 +22,11 @@ public enum PnpStatusEnum {
     BC_SENT_FAIL("BC_FAIL", "BC發送失敗"),
     BC_SENT_FAIL_PNP_PROCESS("BC_FAIL_PNP_PROCESS", "BC發送失敗，轉發PNP"),
     BC_SENT_FAIL_SMS_PROCESS("BC_FAIL_SMS_PROCESS", "BC發送失敗，轉發SMS"),
-    BC_USER_BLOCKED("USER_BLOCK", "使用者封鎖無法發送"),
-    BC_USER_BLOCKED_SMS_PROCESS("USER_BLOCK_SMS_PROCESS", "使用者封鎖，轉發SMS"),
+    BC_UID_NOT_FOUND_SMS_PROCESS("BC_UID_NOT_FOUND_SMS_PROCESS", "BC-手機號碼查無UID，轉發SMS"),
+    BC_USER_IN_BLOCK_LIST("BC_USER_IN_BLOCK_LIST", "該使用者於黑名單中"),
+    BC_USER_IN_BLOCK_LIST_SMS_PROCESS("BC_USER_IN_BLOCK_LIST_SMS_PROCESS", "該使用於黑名單中，轉發SMS"),
+    BC_USER_BLOCKED("USER_BLOCK", "使用者關閉接收通知"),
+    BC_USER_BLOCKED_SMS_PROCESS("USER_BLOCK_SMS_PROCESS", "使用者關閉接收通知，轉發SMS"),
 
     /* ========================================PNP================================================*/
 
@@ -32,10 +35,12 @@ public enum PnpStatusEnum {
     PNP_SENT_COMPLETE("PNP_COMPLETE", "PNP發送成功"),
     PNP_SENT_FAIL("PNP_FAIL", "PNP發送失敗"),
     PNP_SENT_FAIL_SMS_PROCESS("PNP_FAIL_SMS_PROCESS", "PNP發送失敗，轉發SMS"),
+    PNP_USER_IN_BLOCK_LIST_SMS_PROCESS("PNP_USER_IN_BLOCK_LIST_SMS_PROCESS", "該使用於黑名單中，轉發SMS"),
 
 
     /* ========================================SMS================================================*/
 
+    SMS_RESEND("SMS_RESEND", "SMS重發"),
     SMS_SENDING("SMS_SENDING", "SMS發送中"),
     SMS_SENT_CHECK_DELIVERY("SMS_CHECK_DELIVERY", "SMS已發送至簡訊平台"),
     SMS_SENT_COMPLETE("SMS_COMPLETE", "SMS發送成功"),

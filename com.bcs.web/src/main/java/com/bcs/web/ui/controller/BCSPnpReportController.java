@@ -4,18 +4,18 @@ import com.bcs.core.aspect.annotation.WebServiceLog;
 import com.bcs.core.report.builder.ExportExcelBuilder;
 import com.bcs.core.report.service.ExportService;
 import com.bcs.core.resource.CoreConfigReader;
+import com.bcs.core.taishin.circle.PNP.code.PnpFtpSourceEnum;
 import com.bcs.core.taishin.circle.PNP.code.PnpStatusEnum;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailReport;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailReportParam;
-import com.bcs.core.taishin.circle.PNP.db.service.PNPMaintainAccountModelService;
 import com.bcs.core.taishin.circle.PNP.db.service.PnpReportService;
+import com.bcs.core.taishin.circle.PNP.scheduler.PnpSMSMsgService;
 import com.bcs.core.utils.DataUtils;
 import com.bcs.core.web.security.CurrentUser;
 import com.bcs.core.web.security.CustomUser;
 import com.bcs.core.web.ui.page.enums.BcsPageEnum;
-import com.bcs.web.ui.service.PNPMaintainUIService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.HashMap;
@@ -35,7 +36,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 
 /**
  * Bcs pnp report controller.
@@ -46,25 +46,36 @@ import java.util.Map;
 @Controller
 @RequestMapping("/bcs/pnpEmployee")
 public class BCSPnpReportController {
-    private PNPMaintainUIService pnpMaintainUiService;
-    private PNPMaintainAccountModelService pnpMaintainAccountModelService;
-    private PnpReportService pnpReportService;
+    private final PnpReportService pnpReportService;
+    private final PnpSMSMsgService pnpSMSMsgService;
 
     /**
      * Instantiates a new Bcs pnp report controller.
-     *
-     * @param pnpMaintainUiService           the pnp maintain ui service
-     * @param pnpMaintainAccountModelService the pnp maintain account model service
      */
     @Autowired
-    public BCSPnpReportController(PNPMaintainUIService pnpMaintainUiService,
-                                  PNPMaintainAccountModelService pnpMaintainAccountModelService,
-                                  PnpReportService pnpReportService) {
-        this.pnpMaintainUiService = pnpMaintainUiService;
-        this.pnpMaintainAccountModelService = pnpMaintainAccountModelService;
+    public BCSPnpReportController(final PnpReportService pnpReportService, PnpSMSMsgService pnpSMSMsgService) {
         this.pnpReportService = pnpReportService;
+        this.pnpSMSMsgService = pnpSMSMsgService;
     }
 
+    @WebServiceLog
+    @PostMapping(value = "/resend/sms", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> reSendSms(@CurrentUser final CustomUser customUser,
+                                       HttpServletRequest request,
+                                       @RequestParam(required = false) String detailId,
+                                       @RequestParam(required = false) String ftpSourceName) {
+        request.getParameter("detailId");
+        log.info("DetailId : {}, ftpSourceName : {}", detailId, ftpSourceName);
+        if (detailId == null || StringUtils.isBlank(ftpSourceName)) {
+            return new ResponseEntity<>("Detail Id Or FtpSource Is Blank", HttpStatus.BAD_REQUEST);
+        }
+        PnpFtpSourceEnum ftpSourceEnum = PnpFtpSourceEnum.valueOf(ftpSourceName);
+        long id = Long.parseLong(detailId);
+        boolean isSuccess = pnpSMSMsgService.resendSms(id, ftpSourceEnum);
+        log.info("isSuccess : {}", isSuccess);
+        return new ResponseEntity<>(isSuccess, HttpStatus.OK);
+    }
 
     /**
      * Pnp detail report page string.
@@ -79,15 +90,16 @@ public class BCSPnpReportController {
     }
 
     @WebServiceLog
-    @PostMapping("/getPNPDetailReport")
+    @PostMapping(value = "/getPNPDetailReport", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public ResponseEntity<?> getPnpDetailReport(@CurrentUser CustomUser customUser, @RequestBody PnpDetailReportParam param) {
+    public ResponseEntity<?> getPnpDetailReport(@CurrentUser final CustomUser customUser,
+                                                @RequestBody final PnpDetailReportParam param) {
         try {
             param.setEmployeeId(customUser.getAccount().toUpperCase());
-            List<PnpDetailReport> result = pnpReportService.getPnpDetailReportList(param);
+            final List<PnpDetailReport> result = pnpReportService.getPnpDetailReportList(param);
             log.info(DataUtils.toPrettyJsonUseJackson(result));
             return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Exception", e);
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -96,65 +108,63 @@ public class BCSPnpReportController {
     /**
      * Gets pnp detail report total pages.
      *
-     * @param customUser   the custom user
-     * @param startDate    the start date
-     * @param endDate      the end date
-     * @param account      the account
-     * @param pccCode      the pcc code
-     * @param sourceSystem the source system
-     * @param phoneNumber  the phone number
+     * @param customUser the custom user
      * @return the pnp detail report total pages
      */
     @WebServiceLog
-    @GetMapping(value = "/getPNPDetailReportTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "/getPNPDetailReportTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public ResponseEntity<?> getPnpDetailReportTotalPages(@CurrentUser CustomUser customUser,
-                                                          @RequestParam(value = "startDate", required = false) String startDate,
-                                                          @RequestParam(value = "endDate", required = false) String endDate,
-                                                          @RequestParam(value = "account", required = false) String account,
-                                                          @RequestParam(value = "pccCode", required = false) String pccCode,
-                                                          @RequestParam(value = "sourceSystem", required = false) String sourceSystem,
-                                                          @RequestParam(value = "phoneNumber", required = false) String phoneNumber) {
+    public ResponseEntity<?> getPnpDetailReportTotalPages(@CurrentUser final CustomUser customUser,
+                                                          @RequestBody final PnpDetailReportParam param) {
 
         try {
-            String empId = customUser.getAccount().toUpperCase();
-            int count = pnpMaintainUiService.getPNPDetailReportTotalPages(startDate, endDate, account, pccCode, sourceSystem, empId, phoneNumber);
-            return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count + "\"}", HttpStatus.OK);
-        } catch (Exception e) {
+            param.setEmployeeId(customUser.getAccount().toUpperCase());
+            final List<PnpDetailReport> result = pnpReportService.getPnpDetailReportList(param);
+            return new ResponseEntity<>(result.size(), HttpStatus.OK);
+        } catch (final Exception e) {
             log.error("Exception", e);
-            return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-
     @WebServiceLog(action = "Download")
-    @PostMapping("/exportPNPDetailReportExcel")
+    @GetMapping("/exportPNPDetailReportExcel")
     @ResponseBody
-    public void exportPnpDetailReportExcel(HttpServletResponse response, @CurrentUser CustomUser customUser, @RequestBody PnpDetailReportParam pnpDetailReportParam) {
+    public void exportPnpDetailReportExcel(final HttpServletResponse response, @CurrentUser final CustomUser customUser,
+                                           @RequestParam(required = false) final String startDate, @RequestParam(required = false) final String endDate,
+                                           @RequestParam(required = false) final boolean isPageable, @RequestParam(required = false) final Integer page,
+                                           @RequestParam(required = false) final String account, @RequestParam(required = false) final String pccCode,
+                                           @RequestParam(required = false) final String sourceSystem, @RequestParam(required = false) final String employeeId,
+                                           @RequestParam(required = false) final String phone) {
         try {
-            pnpDetailReportParam.setEmployeeId(customUser.getAccount().toUpperCase());
-            List<PnpDetailReport> reportList = pnpReportService.getPnpDetailReportList(pnpDetailReportParam);
-            ExportExcelBuilder builder = ExportExcelBuilder.createWorkBook().setSheetName("TestSheet1");
+            final PnpDetailReportParam pnpDetailReportParam = new PnpDetailReportParam(
+                    DataUtils.convStrToDate(startDate, "yyyy-MM-dd"), DataUtils.convStrToDate(endDate, "yyyy-MM-dd"),
+                    isPageable, page, account, pccCode, sourceSystem, employeeId, phone
+            );
 
-            List<Map<Integer, String>> allMapList = new LinkedList<>();
+            pnpDetailReportParam.setEmployeeId(customUser.getAccount().toUpperCase());
+            final List<PnpDetailReport> reportList = pnpReportService.getPnpDetailReportList(pnpDetailReportParam);
+            final ExportExcelBuilder builder = ExportExcelBuilder.createWorkBook().setSheetName("TestSheet1");
+
+            final List<Map<Integer, String>> allMapList = new LinkedList<>();
             allMapList.add(getHeaderMap(29));
             reportList.forEach(r -> allMapList.add(getBodyMap(r, 29)));
             allMapList.forEach(rowDate -> builder.createRow(allMapList.indexOf(rowDate)).setRowValue(rowDate));
 
-            builder.setAllColumnAutoWidth()
-                    .setOutputPath(CoreConfigReader.getString("file.path"))
-                    .setOutputFileName(String.format("PNPDetailReport_%s.xlsx", DataUtils.formatDateToString(new Date(), "yyyy-MM-dd-HHmmss")));
-
-            ExportService exportService = new ExportService();
+            builder.setAllColumnAutoWidth().setOutputPath(CoreConfigReader.getString("file.path"))
+                    .setOutputFileName(String.format("PNPDetailReport_%s.xlsx",
+                            DataUtils.formatDateToString(new Date(), "yyyy-MM-dd-HHmmss")));
+            log.info("Builder: {}", DataUtils.toPrettyJsonUseJackson(builder));
+            final ExportService exportService = new ExportService();
             exportService.exportExcel(response, builder);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Exception", e);
         }
 
     }
 
     private Map<Integer, String> getBodyMap(final PnpDetailReport r, final int columnSize) {
-        Map<Integer, String> row = new LinkedHashMap<>(columnSize);
+        final Map<Integer, String> row = new LinkedHashMap<>(columnSize);
         row.put(0, r.getId());
         row.put(1, r.getSourceSystem());
         row.put(2, r.getProcessFlow());
@@ -170,7 +180,7 @@ public class BCSPnpReportController {
         row.put(12, r.getSegmentId());
         row.put(13, r.getProgramId());
         row.put(14, r.getPid());
-        row.put(15, r.getPhone());
+        row.put(15, DataUtils.maskString(r.getPhone(), '*', 2, 2));
         row.put(16, r.getUid());
         row.put(17, r.getScheduleTime());
         row.put(18, r.getBcTime());
@@ -188,7 +198,7 @@ public class BCSPnpReportController {
     }
 
     private Map<Integer, String> getHeaderMap(final int columnSize) {
-        Map<Integer, String> row = new LinkedHashMap<>(columnSize);
+        final Map<Integer, String> row = new LinkedHashMap<>(columnSize);
         row.put(0, "序號");
         row.put(1, "前方來源系統");
         row.put(2, "通路流");
@@ -231,12 +241,12 @@ public class BCSPnpReportController {
     @GetMapping("/getPnpStatusEnum")
     public ResponseEntity<?> getPnpStatusEnum() {
         try {
-            Map<String, String> map = new HashMap<>(PnpStatusEnum.values().length);
-            for (PnpStatusEnum e : PnpStatusEnum.values()) {
+            final Map<String, String> map = new HashMap<>(PnpStatusEnum.values().length);
+            for (final PnpStatusEnum e : PnpStatusEnum.values()) {
                 map.put(e.value, e.chinese);
             }
             return new ResponseEntity<>(map, HttpStatus.OK);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Exception", e);
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

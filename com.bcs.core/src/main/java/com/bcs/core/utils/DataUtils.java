@@ -1,16 +1,20 @@
 package com.bcs.core.utils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Map;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.gson.GsonBuilder;
+
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
 
 /**
  * 工具類別
@@ -33,7 +37,6 @@ public class DataUtils {
     public static String toNormalJson(Object obj) {
         return new GsonBuilder().serializeNulls().create().toJson(obj);
     }
-
 
     /**
      * To Pretty Json user Jackson
@@ -169,11 +172,12 @@ public class DataUtils {
 
     /**
      * isFuture
+     *
      * @param compareDate compareDate
      * @return isFuture
      */
-    public static boolean isFuture(Date compareDate){
-        if (compareDate == null){
+    public static boolean isFuture(Date compareDate) {
+        if (compareDate == null) {
             return false;
         }
         return new Date().before(compareDate);
@@ -181,13 +185,84 @@ public class DataUtils {
 
     /**
      * isPast
+     *
      * @param compareDate compareDate
      * @return isPast
      */
-    public static boolean isPast(Date compareDate){
-        if (compareDate == null){
+    public static boolean isPast(Date compareDate) {
+        if (compareDate == null) {
             return false;
         }
         return new Date().after(compareDate);
+    }
+
+    /**
+     * Get Page Row Start And Row End;
+     *
+     * @param page    page number
+     * @param pageRow one page row number
+     * @return int[rowStart, rowEnd]
+     */
+    public static int[] pageRowCalculate(final Integer page, final Integer pageRow) {
+        int rowStart;
+        int rowEnd;
+        int index = page == null || page == 0 ? 0 : page - 1;
+        rowStart = index * pageRow + 1;
+        rowEnd = rowStart + pageRow;
+        return new int[] { rowStart, rowEnd };
+    }
+
+    /**
+     * 設定為時分秒23:59:59:999
+     */
+    public static Date truncEndDate(Date srcDate) {
+        return customDateTime(srcDate, 23, 59, 59, 999);
+    }
+
+    /**
+     * 設定為時分秒00:00:00:000
+     */
+    public static Date truncDate(Date srcDate) {
+        return customDateTime(srcDate, 0, 0, 0, 0);
+    }
+
+    public static Date customDateTime(Date srcDate, int h, int m, int s, int x) {
+        Calendar cal = Calendar.getInstance();
+        Date rtnDate = null;
+        if (srcDate != null) {
+            cal.setTime(srcDate);
+            cal.set(Calendar.HOUR_OF_DAY, h);
+            cal.set(Calendar.MINUTE, m);
+            cal.set(Calendar.SECOND, s);
+            cal.set(Calendar.MILLISECOND, x);
+            rtnDate = cal.getTime();
+        }
+        return rtnDate;
+    }
+
+    /**
+     * Mask String
+     *
+     * @param sourceString sourceString
+     * @param replaceChar  replaceChar
+     * @param startIndex   startIndex
+     * @param lastIndex    lastIndex
+     * @apiNote ("0900123456", "*", 2, 3) => 09*****456
+     * @return after mask string
+     */
+    public static String maskString(String sourceString, char replaceChar, int startIndex, int lastIndex) {
+        if (StringUtils.isBlank(sourceString)) {
+            return "";
+        }
+        startIndex = Math.max(startIndex, 0);
+        lastIndex = Math.max(lastIndex, 0);
+        char[] strArray = sourceString.toCharArray();
+        startIndex = Math.min(startIndex, strArray.length);
+        lastIndex = lastIndex > strArray.length ? 0 : lastIndex;
+        for (int i = startIndex; i < strArray.length - lastIndex; i++) {
+            strArray[i] = replaceChar;
+        }
+
+        return String.valueOf(strArray);
     }
 }

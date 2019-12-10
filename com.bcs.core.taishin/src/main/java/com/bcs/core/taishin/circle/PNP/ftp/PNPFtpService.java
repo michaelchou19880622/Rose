@@ -2,6 +2,7 @@ package com.bcs.core.taishin.circle.PNP.ftp;
 
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.resource.CoreConfigReader;
+import com.bcs.core.taishin.circle.PNP.code.PnpFtpSourceEnum;
 import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
 import com.bcs.core.taishin.circle.PNP.scheduler.LoadFtpPnpDataTask;
 import com.jcraft.jsch.ChannelSftp;
@@ -38,7 +39,7 @@ public class PNPFtpService {
     /**
      * 所有FTP設定對照表
      */
-    private Map<String, PNPFtpSetting> ftpSettings = new HashMap<>();
+    private Map<Integer, PNPFtpSetting> ftpSettings = new HashMap<>();
 
 
     public PNPFtpService() {
@@ -49,14 +50,14 @@ public class PNPFtpService {
      * 取得所有FTP相關設定
      */
     private void initFtpSettings() {
-        for (PNPFTPType type : PNPFTPType.values()) {
+        for (PnpFtpSourceEnum type : PnpFtpSourceEnum.values()) {
             PNPFtpSetting pnpFtpSetting = PNPFtpSetting.build(type);
 
             /* 如果不是開發環境則進行資源密碼系統取得帳號密碼 */
             if (!CoreConfigReader.isPNPFtpTypeDevelop()) {
                 pnpFtpSetting = useTrendPwMgmt(pnpFtpSetting);
             }
-            ftpSettings.put(type.getSource(), pnpFtpSetting);
+            ftpSettings.put(type.id, pnpFtpSetting);
         }
         logger.info("initFtpSettings...OK");
     }
@@ -102,8 +103,8 @@ public class PNPFtpService {
      * @param source source
      * @return Setting
      */
-    public PNPFtpSetting getFtpSettings(String source) {
-        return ftpSettings.get(source);
+    public PNPFtpSetting getFtpSettings(PnpFtpSourceEnum source) {
+        return ftpSettings.get(source.id);
     }
 
 
@@ -537,7 +538,6 @@ public class PNPFtpService {
     /**
      * 從FTP伺服器上下載指定數量檔案(下載檔案順序採檔案建立日期，先進先出) 根據類型指向不同FTP
      *
-     * @param source    來源
      * @param directory 要下載檔案所在路徑
      * @param extension 要下載檔案副檔名
      * @param setting   各來源各自連線資訊
@@ -545,7 +545,7 @@ public class PNPFtpService {
      * @see LoadFtpPnpDataTask#parseDataFlow
      * @see LoadFtpPnpDataTask#transFileToSMSFlow
      */
-    public Map<String, byte[]> downloadMultipleFileByType(String source, String directory, String extension, PNPFtpSetting setting) {
+    public Map<String, byte[]> downloadMultipleFileByType(String directory, String extension, PNPFtpSetting setting) {
         logger.info(String.format("Protocol           : %s", setting.getProtocol().equalsIgnoreCase("sftp")));
         logger.info(String.format("IsPNPFtpTypeDevelop: %s", CoreConfigReader.isPNPFtpTypeDevelop()));
 

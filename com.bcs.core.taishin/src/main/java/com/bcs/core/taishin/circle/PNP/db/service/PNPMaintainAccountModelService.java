@@ -2,6 +2,9 @@ package com.bcs.core.taishin.circle.PNP.db.service;
 
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.resource.CoreConfigReader;
+import com.bcs.core.taishin.circle.PNP.code.PnpFtpSourceEnum;
+import com.bcs.core.taishin.circle.PNP.code.PnpProcessFlowEnum;
+import com.bcs.core.taishin.circle.PNP.code.PnpStatusEnum;
 import com.bcs.core.taishin.circle.db.service.OracleService;
 import com.bcs.core.utils.DataUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -87,12 +90,12 @@ public class PNPMaintainAccountModelService {
                 String sourceChinese = englishSourceToChinese(source);
                 value = String.format("%s_%s", stage, sourceChinese);
                 break;
-            case 20:
             case 21:
             case 22:
-                /* 20 BC發送狀態 */
-                /* 21 PNP發送狀態*/
-                /* 22 SMS發送狀態*/
+            case 23:
+                /* 21 BC發送狀態 */
+                /* 22 PNP發送狀態*/
+                /* 23 SMS發送狀態*/
                 value = englishStatusToChinese(value);
                 break;
             default:
@@ -299,7 +302,7 @@ public class PNPMaintainAccountModelService {
     }
 
     @Cacheable
-    private Map<Integer, String> getHeaderMap(int maxColumn) {
+    private Map<Integer, String> getHeaderMap(final int maxColumn) {
         Map<Integer, String> columnDataMap = new LinkedHashMap<>(maxColumn);
         columnDataMap.put(0, "序號");
         columnDataMap.put(1, "前方來源系統");
@@ -332,64 +335,12 @@ public class PNPMaintainAccountModelService {
     }
 
     @Cacheable
-    private String englishStatusToChinese(String status) {
-        switch (status) {
-
-            case "DRAFT":
-                return "正在存進資料庫";
-            case "WAIT":
-                return "等待進入處理程序";
-            case "SCHEDULED":
-                return "等待預約發送";
-            case "DELAY":
-                return "等待預約發送";
-            case "BC_PROCESS":
-                return "進行BC發送處理中";
-            case "BC_SENDING":
-                return "BC發送中";
-            case "BC_COMPLETE":
-                return "BC處理程序完成";
-            case "BC_FAIL":
-                return "BC發送失敗";
-            case "BC_FAIL_PNP_PROCESS":
-                return "轉發PNP";
-            case "BC_FAIL_SMS_PROCESS":
-                return "轉發SMS";
-            case "USER_BLOCK_SMS_PROCESS":
-                return "用戶封鎖，轉發SMS";
-            case "PNP_SENDING":
-                return "PNP發送中";
-            case "CHECK_DELIVERY":
-                return "已發送，等待回應";
-            case "PNP_COMPLETE":
-                return "PNP處理程序完成";
-            case "PNP_FAIL_SMS_PROCESS":
-                return "轉發SMS";
-            case "SMS_SENDING":
-                return "SMS發送中";
-            case "SMS_CHECK_DELIVERY":
-                return "SMS已發送，等待回應";
-            case "SMS_COMPLETE":
-                return "SMS處理程序完成";
-            case "SMS_FAIL":
-                return "SMS發送失敗";
-
-
-            case "PROCESS":
-                return "發送處理進行中";
-            case "FINISH":
-                return "發送處理完成";
-            case "SENDING":
-                return "發送中";
-            case "DELETE":
-                return "已刪除";
-            case "COMPLETE":
-                return "處理程序完成";
-
-
-            default:
-                return status;
+    private String englishStatusToChinese(final String status) {
+        PnpStatusEnum statusEnum = PnpStatusEnum.findEnumByName(status);
+        if (statusEnum == null) {
+            return status;
         }
+        return statusEnum.chinese;
     }
 
     /**
@@ -399,20 +350,12 @@ public class PNPMaintainAccountModelService {
      * @return Source Chinese Name
      */
     @Cacheable
-    private String englishSourceToChinese(String sourceCode) {
-        log.info("sourceCode: " + sourceCode);
-        switch (sourceCode) {
-            case "1":
-                return "三竹";
-            case "2":
-                return "互動";
-            case "3":
-                return "明宣";
-            case "4":
-                return "UNICA";
-            default:
-                return sourceCode;
+    private String englishSourceToChinese(final String sourceCode) {
+        PnpFtpSourceEnum ftpSourceEnum = PnpFtpSourceEnum.findEnumByCode(sourceCode);
+        if (ftpSourceEnum == null) {
+            return sourceCode;
         }
+        return ftpSourceEnum.chinese;
     }
 
 
@@ -423,20 +366,12 @@ public class PNPMaintainAccountModelService {
      * @return Source Chinese Name
      */
     @Cacheable
-    private String englishProcFlowToChinese(String procFlowCode) {
-        log.info("procFlowCode: " + procFlowCode);
-        switch (procFlowCode) {
-            case "0":
-                return "SMS";
-            case "1":
-                return "BC";
-            case "2":
-                return "BC->PNP";
-            case "3":
-                return "BC->PNP->SMS";
-            default:
-                return procFlowCode;
+    private String englishProcFlowToChinese(final String procFlowCode) {
+        PnpProcessFlowEnum processFlowEnum = PnpProcessFlowEnum.findEnumByName(procFlowCode);
+        if (processFlowEnum == null) {
+            return procFlowCode;
         }
+        return processFlowEnum.uiText;
     }
 
 }

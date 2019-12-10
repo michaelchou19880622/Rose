@@ -1,10 +1,34 @@
 package com.bcs.core.taishin.circle.PNP.scheduler;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PreDestroy;
+
 import com.bcs.core.db.service.LineUserService;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.spring.ApplicationContextProvider;
-import com.bcs.core.taishin.circle.PNP.db.entity.AbstractPnpMainEntity;
+import com.bcs.core.taishin.circle.PNP.code.PnpFtpSourceEnum;
+import com.bcs.core.taishin.circle.PNP.code.PnpProcessFlowEnum;
+import com.bcs.core.taishin.circle.PNP.code.PnpSendTypeEnum;
+import com.bcs.core.taishin.circle.PNP.code.PnpStatusEnum;
 import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailEvery8d;
@@ -24,8 +48,6 @@ import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainEvery8dRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainMingRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainMitakeRepository;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpMainUnicaRepository;
-import com.bcs.core.taishin.circle.PNP.db.repository.PnpRepositoryCustom;
-import com.bcs.core.taishin.circle.PNP.ftp.PNPFTPType;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpService;
 import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpSetting;
 import com.bcs.core.taishin.circle.db.entity.CircleEntityManagerControl;
@@ -34,7 +56,7 @@ import com.bcs.core.utils.ErrorRecord;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
-import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -44,25 +66,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.util.ListUtils;
 
-import javax.annotation.PreDestroy;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 批次讀取前方來源系統(FTP)中訊息
@@ -92,11 +96,6 @@ public class LoadFtpPnpDataTask {
      * PNP FTP 服務
      */
     private PNPFtpService pnpFtpService;
-
-    /**
-     * PNP 訊息本體-UNICA格式
-     */
-    private PnpRepositoryCustom pnpRepositoryCustom;
 
     /**
      * PNP 訊息表頭-UNICA格式
@@ -147,7 +146,6 @@ public class LoadFtpPnpDataTask {
 
     @Autowired
     public LoadFtpPnpDataTask(PNPFtpService pnpFtpService,
-                              PnpRepositoryCustom pnpRepositoryCustom,
                               PnpMainUnicaRepository pnpMainUnicaRepository,
                               PnpDetailUnicaRepository pnpDetailUnicaRepository,
                               PnpMainEvery8dRepository pnpMainEvery8dRepository,
@@ -158,7 +156,6 @@ public class LoadFtpPnpDataTask {
                               PnpDetailMitakeRepository pnpDetailMitakeRepository,
                               PNPMaintainAccountModelRepository pnpMaintainAccountModelRepository) {
         this.pnpFtpService = pnpFtpService;
-        this.pnpRepositoryCustom = pnpRepositoryCustom;
         this.pnpMainUnicaRepository = pnpMainUnicaRepository;
         this.pnpDetailUnicaRepository = pnpDetailUnicaRepository;
         this.pnpMainEvery8dRepository = pnpMainEvery8dRepository;
@@ -173,8 +170,8 @@ public class LoadFtpPnpDataTask {
     static {
         /* FIXME Alan: 測試資料? */
         String ftpInfo = CoreConfigReader.getString(CONFIG_STR.SYSTEM_PNP_FTP_INFO);
+        log.info("Static FtpInfo : {}", DataUtils.toPrettyJsonUseJackson(ftpInfo));
 
-        /* FIXME Alan: JSON? */
         if (StringUtils.isNotBlank(ftpInfo)) {
             try {
                 List<Map<String, Object>> ftpInfoList = new ObjectMapper().readValue(ftpInfo, new TypeReference<List<Map<String, Object>>>() {
@@ -203,37 +200,34 @@ public class LoadFtpPnpDataTask {
         }
 
         /* 進行批次排程 */
-        scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
+        scheduledFuture = scheduler.scheduleAtFixedRate(() -> {
 
-                log.info("ftpProcessHandler SOURCE_MITAKE....");
-                try {
-                    ftpProcessHandler(AbstractPnpMainEntity.SOURCE_MITAKE);
-                } catch (Exception e) {
-                    log.error("Exception", e);
-                }
+            log.info("ftpProcessHandler SOURCE_MITAKE....");
+            try {
+                ftpProcessHandler(PnpFtpSourceEnum.MITAKE);
+            } catch (Exception e) {
+                log.error("", e);
+            }
 
-                log.info("ftpProcessHandler SOURCE_MING....");
-                try {
-                    ftpProcessHandler(AbstractPnpMainEntity.SOURCE_MING);
-                } catch (Exception e) {
-                    log.error("Exception", e);
-                }
+            log.info("ftpProcessHandler SOURCE_MING....");
+            try {
+                ftpProcessHandler(PnpFtpSourceEnum.MING);
+            } catch (Exception e) {
+                log.error("", e);
+            }
 
-                log.info("ftpProcessHandler SOURCE_EVERY8D....");
-                try {
-                    ftpProcessHandler(AbstractPnpMainEntity.SOURCE_EVERY8D);
-                } catch (Exception e) {
-                    log.error("Exception", e);
-                }
+            log.info("ftpProcessHandler SOURCE_EVERY8D....");
+            try {
+                ftpProcessHandler(PnpFtpSourceEnum.EVERY8D);
+            } catch (Exception e) {
+                log.error("", e);
+            }
 
-                log.info("ftpProcessHandler SOURCE_UNICA....");
-                try {
-                    ftpProcessHandler(AbstractPnpMainEntity.SOURCE_UNICA);
-                } catch (Exception e) {
-                    log.error("Exception", e);
-                }
+            log.info("ftpProcessHandler SOURCE_UNICA....");
+            try {
+                ftpProcessHandler(PnpFtpSourceEnum.UNICA);
+            } catch (Exception e) {
+                log.error("", e);
             }
         }, 0, time, TimeUnit.valueOf(unit));
     }
@@ -244,8 +238,9 @@ public class LoadFtpPnpDataTask {
      * @param source 來源("1":三竹 "2":互動 "3":明宣 "4":Unica)
      * @see this#startCircle()
      */
-    private void ftpProcessHandler(String source) {
-        log.info(PNPFTPType.getNameByCode(source).toUpperCase() + " => StartCircle!!");
+//    private void ftpProcessHandler(String source) {
+    private void ftpProcessHandler(PnpFtpSourceEnum source) {
+        log.info(source.english + " => StartCircle!!");
         int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true, false);
 
         switch (bigSwitch) {
@@ -273,14 +268,14 @@ public class LoadFtpPnpDataTask {
      *
      * @see this#ftpProcessHandler
      */
-    private void parseDataFlow(String source) {
+    private void parseDataFlow(PnpFtpSourceEnum source) {
 
         // 跟據來源不同取各自連線資訊
         PNPFtpSetting pnpFtpSetting = pnpFtpService.getFtpSettings(source);
         log.info("FTP Setting:\n" + DataUtils.toPrettyJsonUseJackson(pnpFtpSetting));
         try {
             /* 至FTP取得資料 */
-            Map<String, byte[]> returnDataMap = pnpFtpService.downloadMultipleFileByType(source, pnpFtpSetting.getPath(), "TXT", pnpFtpSetting);
+            Map<String, byte[]> returnDataMap = pnpFtpService.downloadMultipleFileByType(pnpFtpSetting.getPath(), "TXT", pnpFtpSetting);
             pnpFtpSetting.clearFileNames();
             for (String fileName : returnDataMap.keySet()) {
                 pnpFtpSetting.addFileNames(fileName);
@@ -344,18 +339,18 @@ public class LoadFtpPnpDataTask {
      * @param source source
      * @param mains  mains
      */
-    private void saveDraftToDatabaseBySource(String source, List<Object> mains) {
+    private void saveDraftToDatabaseBySource(PnpFtpSourceEnum source, List<Object> mains) {
         switch (source) {
-            case AbstractPnpMainEntity.SOURCE_MITAKE:
+            case MITAKE:
                 processMitakeData(mains);
                 break;
-            case AbstractPnpMainEntity.SOURCE_MING:
+            case MING:
                 processMingData(mains);
                 break;
-            case AbstractPnpMainEntity.SOURCE_EVERY8D:
+            case EVERY8D:
                 processEvery8dData(mains);
                 break;
-            case AbstractPnpMainEntity.SOURCE_UNICA:
+            case UNICA:
                 processUnicaData(mains);
                 break;
             default:
@@ -378,13 +373,14 @@ public class LoadFtpPnpDataTask {
     /**
      * 執行將檔案轉移到SMS FTP流程
      **/
-    private void transFileToSMSFlow(String source) {
+//    private void transFileToSMSFlow(String source) {
+    private void transFileToSMSFlow(PnpFtpSourceEnum source) {
 
         log.info("start transfer File To SMS path");
         PNPFtpSetting pnpFtpSetting = pnpFtpService.getFtpSettings(source);
         try {
             // 1. ftp get file
-            Map<String, byte[]> returnDataMap = pnpFtpService.downloadMultipleFileByType(source, pnpFtpSetting.getPath(), "txt", pnpFtpSetting);
+            Map<String, byte[]> returnDataMap = pnpFtpService.downloadMultipleFileByType(pnpFtpSetting.getPath(), "txt", pnpFtpSetting);
             pnpFtpSetting.clearFileNames();
             for (String fileName : returnDataMap.keySet()) {
                 pnpFtpSetting.addFileNames(fileName);
@@ -689,16 +685,16 @@ public class LoadFtpPnpDataTask {
      * @throws Exception Exception
      * @see this#parseDataFlow
      */
-    private List<Object> parseFtpFile(String source, String origFileName, List<String> fileContents) throws Exception {
-        log.info("Source: " + source);
+    private List<Object> parseFtpFile(PnpFtpSourceEnum source, String origFileName, List<String> fileContents) throws Exception {
+        log.info("Source: " + source.english);
         switch (source) {
-            case AbstractPnpMainEntity.SOURCE_MITAKE:
+            case MITAKE:
                 return parseMitakeFiles(origFileName, fileContents);
-            case AbstractPnpMainEntity.SOURCE_MING:
+            case MING:
                 return parseMingFiles(origFileName, fileContents);
-            case AbstractPnpMainEntity.SOURCE_EVERY8D:
+            case EVERY8D:
                 return parseEvery8dFiles(origFileName, fileContents);
-            case AbstractPnpMainEntity.SOURCE_UNICA:
+            case UNICA:
                 return parseUnicaFiles(origFileName, fileContents);
             default:
                 return Collections.emptyList();
@@ -729,7 +725,7 @@ public class LoadFtpPnpDataTask {
             return Collections.emptyList();
         }
         String content1 = contentSp[2];
-        PNPMaintainAccountModel accountModel = validateWhiteListContent(AbstractPnpMainEntity.SOURCE_MING, origFileName, content1);
+        PNPMaintainAccountModel accountModel = validateWhiteListContent(PnpFtpSourceEnum.MING, origFileName, content1);
         log.info("accountModel1:" + accountModel);
         if (null == accountModel) {
             log.error("parseMingFiles fileContents validate is failed");
@@ -737,23 +733,23 @@ public class LoadFtpPnpDataTask {
         }
         List<Object> mains = new ArrayList<>();
         for (String content : fileContents) {
-            PnpMainMing pnpMainMing = new PnpMainMing();
-            pnpMainMing.setOrigFileName(origFileName);
-            pnpMainMing.setSource(AbstractPnpMainEntity.SOURCE_MING);
-            pnpMainMing.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
-            pnpMainMing.setProcFlow(accountModel.getPathway());
-            pnpMainMing.setProcStage(getDefaultStage(accountModel.getPathway()));
-            pnpMainMing.setPnpMaintainAccountId(accountModel.getId());
+            PnpMainMing pnpMain = new PnpMainMing();
+            pnpMain.setOrigFileName(origFileName);
+            pnpMain.setSource(PnpFtpSourceEnum.MING.code);
+            pnpMain.setStatus(PnpStatusEnum.FTP_DETAIL_SAVE.value);
+            pnpMain.setProcFlow(accountModel.getPathway());
+            pnpMain.setProcStage(PnpProcessFlowEnum.findEnumByName(accountModel.getPathway()).value);
+            pnpMain.setPnpMaintainAccountId(accountModel.getId());
 
             String[] detailData = content.split(MING_TAG, 9);
             String orderTime = detailData[3];
-            pnpMainMing.setSendType(getSendType(orderTime, "yyyy-MM-dd HH:mm:ss"));
-            if (AbstractPnpMainEntity.SEND_TYPE_DELAY.equals(pnpMainMing.getSendType())
-                    || AbstractPnpMainEntity.SEND_TYPE_SCHEDULE_TIME_EXPIRED.equals(pnpMainMing.getSendType())) {
-                pnpMainMing.setScheduleTime(orderTime);
+            pnpMain.setSendType(getSendType(orderTime, "yyyy-MM-dd HH:mm:ss").value);
+            if (PnpSendTypeEnum.DELAY.value.equals(pnpMain.getSendType())
+                    || PnpSendTypeEnum.SCHEDULE_TIME_EXPIRED.value.equals(pnpMain.getSendType())) {
+                pnpMain.setScheduleTime(orderTime);
             }
-            pnpMainMing.setPnpDetails(parsePnpDetailMing(content, accountModel.getTemplate(), pnpMainMing.getScheduleTime()));
-            mains.add(pnpMainMing);
+            pnpMain.setPnpDetails(parsePnpDetailMing(content, accountModel.getTemplate(), pnpMain.getScheduleTime()));
+            mains.add(pnpMain);
         }
         return mains;
     }
@@ -780,7 +776,7 @@ public class LoadFtpPnpDataTask {
             return Collections.emptyList();
         }
         String content = contentSp[3];
-        PNPMaintainAccountModel accountModel = validateWhiteListContent(AbstractPnpMainEntity.SOURCE_MITAKE, origFileName, content);
+        PNPMaintainAccountModel accountModel = validateWhiteListContent(PnpFtpSourceEnum.MITAKE, origFileName, content);
         if (null == accountModel) {
             log.error("File Contents validate is failed");
             return Collections.emptyList();
@@ -795,30 +791,30 @@ public class LoadFtpPnpDataTask {
         String orderTime = splitHeaderData[3];
         String validityTime = splitHeaderData[4];
         String msgType = splitHeaderData[5];
-        PnpMainMitake pnpMainMitake = new PnpMainMitake();
-        pnpMainMitake.setOrigFileName(origFileName);
-        pnpMainMitake.setSource(AbstractPnpMainEntity.SOURCE_MITAKE);
-        pnpMainMitake.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
-        pnpMainMitake.setProcFlow(accountModel.getPathway());
-        pnpMainMitake.setProcStage(getDefaultStage(accountModel.getPathway()));
-        pnpMainMitake.setPnpMaintainAccountId(accountModel.getId());
-        pnpMainMitake.setSendType(getSendType(orderTime, "yyyyMMddHHmmss"));
+        PnpMainMitake pnpMain = new PnpMainMitake();
+        pnpMain.setOrigFileName(origFileName);
+        pnpMain.setSource(PnpFtpSourceEnum.MITAKE.code);
+        pnpMain.setStatus(PnpStatusEnum.FTP_DETAIL_SAVE.value);
+        pnpMain.setProcFlow(accountModel.getPathway());
+        pnpMain.setProcStage(PnpProcessFlowEnum.findEnumByName(accountModel.getPathway()).value);
+        pnpMain.setPnpMaintainAccountId(accountModel.getId());
+        pnpMain.setSendType(getSendType(orderTime, "yyyyMMddHHmmss").value);
         // 原生欄位
-        pnpMainMitake.setGroupIDSource(groupID);
-        pnpMainMitake.setUsername(username);
-        pnpMainMitake.setUserPassword(userPassword);
-        pnpMainMitake.setOrderTime(orderTime);
-        pnpMainMitake.setValidityTime(validityTime);
-        pnpMainMitake.setMsgType(msgType);
+        pnpMain.setGroupIDSource(groupID);
+        pnpMain.setUsername(username);
+        pnpMain.setUserPassword(userPassword);
+        pnpMain.setOrderTime(orderTime);
+        pnpMain.setValidityTime(validityTime);
+        pnpMain.setMsgType(msgType);
 
-        if (AbstractPnpMainEntity.SEND_TYPE_DELAY.equals(pnpMainMitake.getSendType())
-                || AbstractPnpMainEntity.SEND_TYPE_SCHEDULE_TIME_EXPIRED.equals(pnpMainMitake.getSendType())) {
-            pnpMainMitake.setScheduleTime(orderTime);
+        if (PnpSendTypeEnum.DELAY.value.equals(pnpMain.getSendType())
+                || PnpSendTypeEnum.SCHEDULE_TIME_EXPIRED.value.equals(pnpMain.getSendType())) {
+            pnpMain.setScheduleTime(orderTime);
         }
 
-        pnpMainMitake.setPnpDetails(parsePnpDetailMitake(fileContents, accountModel.getTemplate(), pnpMainMitake.getScheduleTime()));
+        pnpMain.setPnpDetails(parsePnpDetailMitake(fileContents, accountModel.getTemplate(), pnpMain.getScheduleTime()));
         List<Object> mains = new ArrayList<>();
-        mains.add(pnpMainMitake);
+        mains.add(pnpMain);
         return mains;
     }
 
@@ -844,7 +840,7 @@ public class LoadFtpPnpDataTask {
             return Collections.emptyList();
         }
         String content = contentSp[3];
-        PNPMaintainAccountModel accountModel = validateWhiteListContent(AbstractPnpMainEntity.SOURCE_EVERY8D, origFileName, content);
+        PNPMaintainAccountModel accountModel = validateWhiteListContent(PnpFtpSourceEnum.EVERY8D, origFileName, content);
         if (null == accountModel) {
             log.error("File Contents validate is failed");
             return Collections.emptyList();
@@ -862,31 +858,31 @@ public class LoadFtpPnpDataTask {
         String msgType = splitHeaderData[5];
         /* 簡訊平台保留欄位，請勿填入資料 */
         String batchId = splitHeaderData[6];
-        PnpMainEvery8d pnpMainEvery8d = new PnpMainEvery8d();
-        pnpMainEvery8d.setOrigFileName(origFileName);
-        pnpMainEvery8d.setSource(AbstractPnpMainEntity.SOURCE_EVERY8D);
-        pnpMainEvery8d.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
-        pnpMainEvery8d.setProcFlow(accountModel.getPathway());
-        pnpMainEvery8d.setProcStage(getDefaultStage(accountModel.getPathway()));
-        pnpMainEvery8d.setPnpMaintainAccountId(accountModel.getId());
-        pnpMainEvery8d.setSendType(getSendType(orderTime, "yyyyMMddHHmmss"));
+        PnpMainEvery8d pnpMain = new PnpMainEvery8d();
+        pnpMain.setOrigFileName(origFileName);
+        pnpMain.setSource(PnpFtpSourceEnum.EVERY8D.code);
+        pnpMain.setStatus(PnpStatusEnum.FTP_DETAIL_SAVE.value);
+        pnpMain.setProcFlow(accountModel.getPathway());
+        pnpMain.setProcStage(PnpProcessFlowEnum.findEnumByName(accountModel.getPathway()).value);
+        pnpMain.setPnpMaintainAccountId(accountModel.getId());
+        pnpMain.setSendType(getSendType(orderTime, "yyyyMMddHHmmss").value);
         // 原生欄位
-        pnpMainEvery8d.setSubject(subject);
-        pnpMainEvery8d.setUserID(userId);
-        pnpMainEvery8d.setPassword(password);
-        pnpMainEvery8d.setOrderTime(orderTime);
-        pnpMainEvery8d.setExprieTime(expireTime);
-        pnpMainEvery8d.setMsgType(msgType);
-        pnpMainEvery8d.setBatchID(batchId);
+        pnpMain.setSubject(subject);
+        pnpMain.setUserID(userId);
+        pnpMain.setPassword(password);
+        pnpMain.setOrderTime(orderTime);
+        pnpMain.setExprieTime(expireTime);
+        pnpMain.setMsgType(msgType);
+        pnpMain.setBatchID(batchId);
 
-        if (AbstractPnpMainEntity.SEND_TYPE_DELAY.equals(pnpMainEvery8d.getSendType())
-                || AbstractPnpMainEntity.SEND_TYPE_SCHEDULE_TIME_EXPIRED.equals(pnpMainEvery8d.getSendType())) {
-            pnpMainEvery8d.setScheduleTime(orderTime);
+        if (PnpSendTypeEnum.DELAY.value.equals(pnpMain.getSendType())
+                || PnpSendTypeEnum.SCHEDULE_TIME_EXPIRED.value.equals(pnpMain.getSendType())) {
+            pnpMain.setScheduleTime(orderTime);
         }
 
-        pnpMainEvery8d.setPnpDetails(parsePnpDetailEvery8d(fileContents, accountModel.getTemplate(), pnpMainEvery8d.getScheduleTime()));
+        pnpMain.setPnpDetails(parsePnpDetailEvery8d(fileContents, accountModel.getTemplate(), pnpMain.getScheduleTime()));
         List<Object> mains = new ArrayList<>();
-        mains.add(pnpMainEvery8d);
+        mains.add(pnpMain);
         return mains;
     }
 
@@ -913,7 +909,7 @@ public class LoadFtpPnpDataTask {
             return Collections.emptyList();
         }
         String content1 = contentSp[3];
-        PNPMaintainAccountModel accountModel = validateWhiteListContent(AbstractPnpMainEntity.SOURCE_UNICA, origFileName, content1);
+        PNPMaintainAccountModel accountModel = validateWhiteListContent(PnpFtpSourceEnum.UNICA, origFileName, content1);
         if (null == accountModel) {
             log.error("File Contents validate is failed");
             return Collections.emptyList();
@@ -931,58 +927,37 @@ public class LoadFtpPnpDataTask {
         String msgType = splitHeaderData[5];
         // 簡訊平台保留欄位，請勿填入資料
         String batchId = splitHeaderData[6];
-        PnpMainUnica pnpMainUnica = new PnpMainUnica();
-        pnpMainUnica.setOrigFileName(origFileName);
-        pnpMainUnica.setSource(AbstractPnpMainEntity.SOURCE_UNICA);
-        pnpMainUnica.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
-        pnpMainUnica.setProcFlow(accountModel.getPathway());
-        pnpMainUnica.setProcStage(getDefaultStage(accountModel.getPathway()));
-        pnpMainUnica.setPnpMaintainAccountId(accountModel.getId());
+        PnpMainUnica pnpMain = new PnpMainUnica();
+        pnpMain.setOrigFileName(origFileName);
+        pnpMain.setSource(PnpFtpSourceEnum.UNICA.code);
+        pnpMain.setStatus(PnpStatusEnum.FTP_DETAIL_SAVE.value);
+        pnpMain.setProcFlow(accountModel.getPathway());
+        pnpMain.setProcStage(PnpProcessFlowEnum.findEnumByName(accountModel.getPathway()).value);
+        pnpMain.setPnpMaintainAccountId(accountModel.getId());
 
-        pnpMainUnica.setSendType(getSendType(orderTime, "yyyyMMddHHmmss"));
+        pnpMain.setSendType(getSendType(orderTime, "yyyyMMddHHmmss").value);
         // 原生欄位
-        pnpMainUnica.setSubject(subject);
-        pnpMainUnica.setUserID(userId);
-        pnpMainUnica.setPassword(password);
-        pnpMainUnica.setOrderTime(orderTime);
-        pnpMainUnica.setExprieTime(expireTime);
-        pnpMainUnica.setMsgType(msgType);
-        pnpMainUnica.setBatchID(batchId);
+        pnpMain.setSubject(subject);
+        pnpMain.setUserID(userId);
+        pnpMain.setPassword(password);
+        pnpMain.setOrderTime(orderTime);
+        pnpMain.setExprieTime(expireTime);
+        pnpMain.setMsgType(msgType);
+        pnpMain.setBatchID(batchId);
 
-        if (AbstractPnpMainEntity.SEND_TYPE_DELAY.equals(pnpMainUnica.getSendType())
-                || AbstractPnpMainEntity.SEND_TYPE_SCHEDULE_TIME_EXPIRED.equals(pnpMainUnica.getSendType())) {
-            pnpMainUnica.setScheduleTime(orderTime);
+        if (PnpSendTypeEnum.DELAY.value.equals(pnpMain.getSendType())
+                || PnpSendTypeEnum.SCHEDULE_TIME_EXPIRED.value.equals(pnpMain.getSendType())) {
+            pnpMain.setScheduleTime(orderTime);
         }
 
-        pnpMainUnica.setPnpDetails(parsePnpDetailUnica(fileContents, accountModel.getTemplate(), pnpMainUnica.getScheduleTime()));
+        pnpMain.setPnpDetails(parsePnpDetailUnica(fileContents, accountModel.getTemplate(), pnpMain.getScheduleTime()));
         List<Object> mains = new ArrayList<>();
-        mains.add(pnpMainUnica);
+        mains.add(pnpMain);
         return mains;
 
     }
 
     /*================================================================================*/
-
-    /**
-     * Return Default Process Flow
-     *
-     * @param processFlow BC, BC_SMS, BC_PNP_SMS
-     * @return Default Process Flow
-     * @see this#parseMingFiles
-     * @see this#parseMitakeFiles
-     * @see this#parseEvery8dFiles
-     * @see this#parseUnicaFiles
-     */
-    private String getDefaultStage(String processFlow) {
-        switch (processFlow) {
-            case AbstractPnpMainEntity.PROC_FLOW_BC:
-            case AbstractPnpMainEntity.PROC_FLOW_BC_SMS:
-            case AbstractPnpMainEntity.PROC_FLOW_BC_PNP_SMS:
-            default:
-                return "BC";
-        }
-    }
-
     /**
      * 判斷預約時間決定發送排程
      *
@@ -993,19 +968,19 @@ public class LoadFtpPnpDataTask {
      * @see this#parseMingFiles
      * @see this#parseUnicaFiles
      */
-    private String getSendType(String orderTime, String format) {
+    private PnpSendTypeEnum getSendType(String orderTime, String format) {
         if (StringUtils.isBlank(orderTime)) {
             /* 沒有預約時間則立即發送 */
-            return AbstractPnpMainEntity.SEND_TYPE_IMMEDIATE;
+            return PnpSendTypeEnum.IMMEDIATE;
         }
 
         Date scheduleTime = DataUtils.convStrToDate(orderTime, format);
         if (DataUtils.isPast(scheduleTime)) {
             /* 排程時間小於現在時間則視為立即發送 */
-            return AbstractPnpMainEntity.SEND_TYPE_SCHEDULE_TIME_EXPIRED;
+            return PnpSendTypeEnum.SCHEDULE_TIME_EXPIRED;
         } else {
             /* 排程時間大於現在時間則加入排程 */
-            return AbstractPnpMainEntity.SEND_TYPE_DELAY;
+            return PnpSendTypeEnum.DELAY;
         }
     }
 
@@ -1027,20 +1002,20 @@ public class LoadFtpPnpDataTask {
         pnpMainMitake = pnpMainMitakeRepository.save(pnpMainMitake);
         List<PnpDetailMitake> details = new ArrayList<>();
         for (Object detail : originalDetails) {
-            PnpDetailMitake pnpDetailMitake = (PnpDetailMitake) detail;
-            pnpDetailMitake.setPnpMainId(pnpMainMitake.getPnpMainId());
-            pnpDetailMitake.setProcFlow(pnpMainMitake.getProcFlow());
-            pnpDetailMitake.setProcStage(pnpMainMitake.getProcStage());
-            pnpDetailMitake.setSource(AbstractPnpMainEntity.SOURCE_MITAKE);
-            pnpDetailMitake.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
-            details.add(pnpDetailMitake);
+            PnpDetailMitake pnpDetail = (PnpDetailMitake) detail;
+            pnpDetail.setPnpMainId(pnpMainMitake.getPnpMainId());
+            pnpDetail.setProcFlow(pnpMainMitake.getProcFlow());
+            pnpDetail.setProcStage(pnpMainMitake.getProcStage());
+            pnpDetail.setSource(PnpFtpSourceEnum.MITAKE.code);
+            pnpDetail.setStatus(PnpStatusEnum.FTP_DETAIL_SAVE.value);
+            details.add(pnpDetail);
         }
         if (CollectionUtils.isNotEmpty(details)) {
             List<List<PnpDetailMitake>> detailsPartitionList = Lists.partition(details, CircleEntityManagerControl.batchSize);
             for (List<PnpDetailMitake> detailList : detailsPartitionList) {
                 pnpDetailMitakeRepository.save(detailList);
             }
-            log.info("Update Status : " + AbstractPnpMainEntity.SOURCE_MING);
+            log.info("Update Status : " + PnpStatusEnum.FTP_DETAIL_SAVE.value);
         }
     }
 
@@ -1060,20 +1035,20 @@ public class LoadFtpPnpDataTask {
         pnpMainUnica = pnpMainUnicaRepository.save(pnpMainUnica);
         List<PnpDetailUnica> details = new ArrayList<>();
         for (Object detail : originalDetails) {
-            PnpDetailUnica pnpDetailUnica = (PnpDetailUnica) detail;
-            pnpDetailUnica.setPnpMainId(pnpMainUnica.getPnpMainId());
-            pnpDetailUnica.setProcFlow(pnpMainUnica.getProcFlow());
-            pnpDetailUnica.setProcStage(pnpMainUnica.getProcStage());
-            pnpDetailUnica.setSource(AbstractPnpMainEntity.SOURCE_UNICA);
-            pnpDetailUnica.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
-            details.add(pnpDetailUnica);
+            PnpDetailUnica pnpDetail = (PnpDetailUnica) detail;
+            pnpDetail.setPnpMainId(pnpMainUnica.getPnpMainId());
+            pnpDetail.setProcFlow(pnpMainUnica.getProcFlow());
+            pnpDetail.setProcStage(pnpMainUnica.getProcStage());
+            pnpDetail.setSource(PnpFtpSourceEnum.UNICA.code);
+            pnpDetail.setStatus(PnpStatusEnum.FTP_DETAIL_SAVE.value);
+            details.add(pnpDetail);
         }
         if (!details.isEmpty()) {
             List<List<PnpDetailUnica>> detailsPartitionList = Lists.partition(details, CircleEntityManagerControl.batchSize);
             for (List<PnpDetailUnica> detailList : detailsPartitionList) {
                 pnpDetailUnicaRepository.save(detailList);
             }
-            log.info("Update Status : " + AbstractPnpMainEntity.SOURCE_MING);
+            log.info("Update Status : " + PnpStatusEnum.FTP_DETAIL_SAVE.value);
         }
     }
 
@@ -1093,20 +1068,20 @@ public class LoadFtpPnpDataTask {
         pnpMainEvery8d = pnpMainEvery8dRepository.save(pnpMainEvery8d);
         List<PnpDetailEvery8d> details = new ArrayList<>();
         for (Object detail : originalDetails) {
-            PnpDetailEvery8d pnpDetailEvery8d = (PnpDetailEvery8d) detail;
-            pnpDetailEvery8d.setPnpMainId(pnpMainEvery8d.getPnpMainId());
-            pnpDetailEvery8d.setProcFlow(pnpMainEvery8d.getProcFlow());
-            pnpDetailEvery8d.setProcStage(pnpMainEvery8d.getProcStage());
-            pnpDetailEvery8d.setSource(AbstractPnpMainEntity.SOURCE_EVERY8D);
-            pnpDetailEvery8d.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
-            details.add(pnpDetailEvery8d);
+            PnpDetailEvery8d pnpDetail = (PnpDetailEvery8d) detail;
+            pnpDetail.setPnpMainId(pnpMainEvery8d.getPnpMainId());
+            pnpDetail.setProcFlow(pnpMainEvery8d.getProcFlow());
+            pnpDetail.setProcStage(pnpMainEvery8d.getProcStage());
+            pnpDetail.setSource(PnpFtpSourceEnum.EVERY8D.code);
+            pnpDetail.setStatus(PnpStatusEnum.FTP_DETAIL_SAVE.value);
+            details.add(pnpDetail);
         }
         if (!details.isEmpty()) {
             List<List<PnpDetailEvery8d>> detailsPartitionList = Lists.partition(details, CircleEntityManagerControl.batchSize);
             for (List<PnpDetailEvery8d> detailList : detailsPartitionList) {
                 pnpDetailEvery8dRepository.save(detailList);
             }
-            log.info("Update Status : " + AbstractPnpMainEntity.SOURCE_MING);
+            log.info("Update Status : " + PnpStatusEnum.FTP_DETAIL_SAVE.value);
         }
     }
 
@@ -1131,17 +1106,18 @@ public class LoadFtpPnpDataTask {
             pnpDetail.setPnpMainId(pnpMainMing.getPnpMainId());
             pnpDetail.setProcFlow(pnpMainMing.getProcFlow());
             pnpDetail.setProcStage(pnpMainMing.getProcStage());
-            pnpDetail.setSource(AbstractPnpMainEntity.SOURCE_MING);
-            pnpDetail.setStatus(AbstractPnpMainEntity.DATA_CONVERTER_STATUS_DRAFT);
+            pnpDetail.setSource(PnpFtpSourceEnum.MING.code);
+            pnpDetail.setStatus(PnpStatusEnum.FTP_DETAIL_SAVE.value);
             log.info(DataUtils.toPrettyJsonUseJackson(pnpDetail));
             details.add(pnpDetail);
         }
+
         if (!details.isEmpty()) {
             List<List<PnpDetailMing>> detailsPartitionList = Lists.partition(details, CircleEntityManagerControl.batchSize);
             for (List<PnpDetailMing> detailList : detailsPartitionList) {
                 pnpDetailMingRepository.save(detailList);
             }
-            log.info("Update Status : " + AbstractPnpMainEntity.SOURCE_MING);
+            log.info("Update Status : " + PnpStatusEnum.FTP_DETAIL_SAVE.value);
         }
     }
 
@@ -1158,7 +1134,7 @@ public class LoadFtpPnpDataTask {
     private void updateMitakeMainStatus(Object sourceMain) {
         PnpMainMitake pnpMainMitake = (PnpMainMitake) sourceMain;
         Long mainId = pnpMainMitake.getPnpMainId();
-        String status = AbstractPnpMainEntity.DATA_CONVERTER_STATUS_WAIT;
+        String status = PnpStatusEnum.FTP_MAIN_SAVE.value;
         Date now = Calendar.getInstance().getTime();
         pnpMainMitakeRepository.updatePnpMainMitakeStatus(status, now, mainId);
         pnpDetailMitakeRepository.updateStatusByMainId(status, now, mainId);
@@ -1174,7 +1150,7 @@ public class LoadFtpPnpDataTask {
     private void updateEvery8dMainStatus(Object sourceMain) {
         PnpMainEvery8d pnpMainEvery8d = (PnpMainEvery8d) sourceMain;
         Long mainId = pnpMainEvery8d.getPnpMainId();
-        String status = AbstractPnpMainEntity.DATA_CONVERTER_STATUS_WAIT;
+        String status = PnpStatusEnum.FTP_MAIN_SAVE.value;
         Date now = Calendar.getInstance().getTime();
         pnpMainEvery8dRepository.updatePnpMainEvery8dStatus(status, now, mainId);
         pnpDetailEvery8dRepository.updateStatusByMainId(status, now, mainId);
@@ -1190,7 +1166,7 @@ public class LoadFtpPnpDataTask {
     private void updateUnicaMainStatus(Object sourceMain) {
         PnpMainUnica pnpMainUnica = (PnpMainUnica) sourceMain;
         Long mainId = pnpMainUnica.getPnpMainId();
-        String status = AbstractPnpMainEntity.DATA_CONVERTER_STATUS_WAIT;
+        String status = PnpStatusEnum.FTP_MAIN_SAVE.value;
         Date now = Calendar.getInstance().getTime();
         pnpMainUnicaRepository.updatePnpMainUnicaStatus(status, now, mainId);
         pnpDetailUnicaRepository.updateStatusByMainId(status, now, mainId);
@@ -1206,7 +1182,7 @@ public class LoadFtpPnpDataTask {
     private void updateMingMainStatus(Object sourceMain) {
         PnpMainMing pnpMainMing = (PnpMainMing) sourceMain;
         Long mainId = pnpMainMing.getPnpMainId();
-        String status = AbstractPnpMainEntity.DATA_CONVERTER_STATUS_WAIT;
+        String status = PnpStatusEnum.FTP_MAIN_SAVE.value;
         Date now = Calendar.getInstance().getTime();
         int i = pnpMainMingRepository.updatePnpMainMingStatus(status, now, mainId);
         log.info("Return Int :" + i);
@@ -1224,13 +1200,13 @@ public class LoadFtpPnpDataTask {
      * @param fileName 檔名
      * @return 是否相符
      */
-    private boolean validateWhiteListHeader(String source, String fileName) {
+    private boolean validateWhiteListHeader(PnpFtpSourceEnum source, String fileName) {
         if (!whiteListValidate) {
             log.info("====== Ignore Valid Account Pccode ======");
             return true;
         }
 
-        log.info(String.format("Source: %s, FileName: %s", source, fileName));
+        log.info(String.format("Source: %s, FileName: %s", source.english, fileName));
 
         /*
          * 0: String accountClass
@@ -1286,8 +1262,8 @@ public class LoadFtpPnpDataTask {
      * @param content  內容
      * @return PNPMaintainAccountModel
      */
-    private PNPMaintainAccountModel validateWhiteListContent(String source, String fileName, String content) {
-        log.info(String.format("Source : %s, fileName : %s, content : %s", source, fileName, content));
+    private PNPMaintainAccountModel validateWhiteListContent(PnpFtpSourceEnum source, String fileName, String content) {
+        log.info(String.format("Source : %s, fileName : %s, content : %s", source.english, fileName, content));
 
         if (!whiteListValidate) {
             log.info("======跳過白名單Content檢核======");
@@ -1402,7 +1378,7 @@ public class LoadFtpPnpDataTask {
     }
 
 
-    private void uploadFileToSms(String source, InputStream targetStream, String fileName) {
+    private void uploadFileToSms(PnpFtpSourceEnum source, InputStream targetStream, String fileName) {
         log.info("start uploadFileToSMS ");
 
         PNPFtpSetting setting = pnpFtpService.getFtpSettings(source);
@@ -1425,11 +1401,11 @@ public class LoadFtpPnpDataTask {
     public void destroy() {
         if (scheduledFuture != null) {
             scheduledFuture.cancel(true);
-            log.info(" LoadFtbPnpDataTask cancel....");
+            log.info("Cancel....");
         }
 
         if (scheduler != null && !scheduler.isShutdown()) {
-            log.info(" LoadFtbPnpDataTask shutdown....");
+            log.info("Shutdown....");
             scheduler.shutdown();
         }
 

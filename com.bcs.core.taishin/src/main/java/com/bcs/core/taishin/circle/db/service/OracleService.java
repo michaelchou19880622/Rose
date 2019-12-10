@@ -102,8 +102,8 @@ public class OracleService {
     }
 
     public String getAvailableEmpIdsByEmpId(String empId) {
-        logger.info("[getAvailableEmpIdsByEmpId] EMP_ID=" + empId);
-        if (StringUtils.isBlank(empId)) {
+        boolean oracleUseDepartmentCheck = CoreConfigReader.getBoolean(CONFIG_STR.ORACLE_USE_DEPARTMENT_CHECK, true);
+        if (!oracleUseDepartmentCheck || StringUtils.isBlank(empId)) {
             return "";
         }
 

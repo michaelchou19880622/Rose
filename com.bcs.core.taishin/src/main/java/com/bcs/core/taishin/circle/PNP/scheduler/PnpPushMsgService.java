@@ -5,10 +5,10 @@ import com.bcs.core.db.service.LineUserService;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.circle.PNP.akka.PnpAkkaService;
+import com.bcs.core.taishin.circle.PNP.code.PnpFtpSourceEnum;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpRepositoryCustom;
-import com.bcs.core.taishin.circle.PNP.ftp.PNPFTPType;
 import com.bcs.core.utils.DataUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -88,16 +88,16 @@ public class PnpPushMsgService {
      */
     private void sendingMain() {
         String procApName = pnpAkkaService.getProcessApName();
-        for (PNPFTPType type : PNPFTPType.values()) {
+        for (PnpFtpSourceEnum type : PnpFtpSourceEnum.values()) {
             log.info(String.format("BC Push ProcApName %s, Type: %s", procApName, type));
             try {
                 Set<Long> allMainIds = new HashSet<>();
                 List<? super PnpDetail> details = pnpRepositoryCustom.updateStatusByStageBc(type, procApName, allMainIds);
                 if (details.isEmpty()) {
-                    log.info("details not data type:" + type.toString());
+                    log.info("details not data type:" + type);
                     continue;
                 }
-                log.info("details has data type:" + type.toString());
+                log.info("details has data type:" + type);
 
                 List<? super PnpDetail> details2 = findDetailUid(details);
                 Long[] mainIds = allMainIds.toArray(new Long[0]);
@@ -110,7 +110,6 @@ public class PnpPushMsgService {
 
             } catch (Exception e) {
                 log.error("Exception", e);
-                log.error(" pnpMain type :" + type + " sendingMain error:" + e.getMessage());
             }
         }
     }
@@ -236,11 +235,10 @@ public class PnpPushMsgService {
     public void destroy() {
         if (scheduledFuture != null) {
             scheduledFuture.cancel(true);
-            log.info(" PnpPushMsgService cancel....");
+            log.info("Cancel....");
         }
-
         if (scheduler != null && !scheduler.isShutdown()) {
-            log.info(" PnpPushMsgService shutdown....");
+            log.info("Shutdown....");
             scheduler.shutdown();
         }
     }

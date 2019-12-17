@@ -64,18 +64,18 @@
             </li>
 
 
-<!--            <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY')">-->
-<!--                <a href="" style="cursor: pointer;"><span>LINE POINTS發送</span></a>-->
-<!--                <ul class="MdNonDisp subMenu" style="display:none">-->
-<!--                    <li th:classappend="${currentPage == 'PageLPC'} ? 'ExSelected'">-->
-<!--                        <a th:href="@{/bcs/edit/linePointCreatePage}"><span>建立發送專案</span></a>-->
-<!--                    </li>-->
+            <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY')">
+                <a href="" style="cursor: pointer;"><span>LINE POINTS發送</span></a>
+                <ul class="MdNonDisp subMenu" style="display:none">
+                    <li th:classappend="${currentPage == 'PageLPC'} ? 'ExSelected'">
+                        <a th:href="@{/bcs/edit/linePointCreatePage}"><span>建立發送專案</span></a>
+                    </li>
 
-<!--                    <li th:classappend="${currentPage == 'PageLPL'} ? 'ExSelected'">-->
-<!--                        <a th:href="@{/bcs/edit/linePointListPage}"><span>發送專案列表</span></a>-->
-<!--                    </li>-->
-<!--                </ul>-->
-<!--            </li>-->
+                    <li th:classappend="${currentPage == 'PageLPL'} ? 'ExSelected'">
+                        <a th:href="@{/bcs/edit/linePointListPage}"><span>發送專案列表</span></a>
+                    </li>
+                </ul>
+            </li>
 
 
             <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_MARKET', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_REPORT', 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY')">
@@ -84,9 +84,9 @@
                     <li th:classappend="${currentPage == 'PageLPStatisticsReport'} ? 'ExSelected'">
                         <a th:href="@{/bcs/edit/linePointStatisticsReportPage}"><span>統計報表</span></a>
                     </li>
-                    <!--     <li th:classappend="${currentPage == 'PageLPStatisticsReportDetail'} ? 'ExSelected'">
-                                <a th:href="@{/bcs/edit/linePointStatisticsReportDetailPage}"><span>統計明細報表</span></a>
-                            </li>-->
+<!--                    <li th:classappend="${currentPage == 'PageLPStatisticsReportDetail'} ? 'ExSelected'">-->
+<!--                        <a th:href="@{/bcs/edit/linePointStatisticsReportDetailPage}"><span>統計明細報表</span></a>-->
+<!--                    </li>-->
                 </ul>
             </li>
 

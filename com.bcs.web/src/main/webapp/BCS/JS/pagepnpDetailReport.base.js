@@ -183,14 +183,14 @@ $(function() {
           list.find('.pnpContent').html(obj.message);
           list.find('.customerCellPhoneNumber').html(obj.phone);
           var bcStatus = '';
-          if (obj.bcHttpStatusCode !== null) {
+          if (obj.bcHttpStatusCode !== null && obj.bcHttpStatusCode.trim() !== '') {
             bcStatus = obj.bcStatus + ' [' + obj.bcHttpStatusCode + ']';
           } else {
             bcStatus = obj.bcStatus;
           }
           list.find('.bcStatusCode').html(bcStatus);
           var pnpStatus = '';
-          if (obj.pnpHttpStatusCode !== null) {
+          if (obj.pnpHttpStatusCode !== null && obj.pnpHttpStatusCode.trim() !== '') {
             pnpStatus = obj.pnpStatus + ' [' + obj.pnpHttpStatusCode + ']';
           } else {
             pnpStatus = obj.pnpStatus;

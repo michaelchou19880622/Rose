@@ -5,10 +5,10 @@ import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.circle.PNP.akka.PnpAkkaService;
 import com.bcs.core.taishin.circle.PNP.code.PnpFtpSourceEnum;
 import com.bcs.core.taishin.circle.PNP.code.PnpStageEnum;
+import com.bcs.core.taishin.circle.PNP.code.PnpStatusEnum;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.PNP.db.repository.PnpRepositoryCustom;
-import com.bcs.core.taishin.circle.PNP.ftp.PNPFTPType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -55,67 +56,72 @@ public class PnpPNPMsgService {
      * @see com.bcs.web.init.controller.InitController#init()
      */
     public void startCircle() {
-
-        for (PNPFTPType type : PNPFTPType.values()) {
-            log.info("PNPFTPType : " + type);
-        }
-
         String unit = CoreConfigReader.getString(CONFIG_STR.PNP_SCHEDULE_UNIT, true, false);
         int time = CoreConfigReader.getInteger(CONFIG_STR.PNP_SCHEDULE_TIME, true, false);
         if (time == -1) {
             log.error("TimeUnit error :" + time + unit);
             return;
         }
-        scheduledFuture = scheduler.scheduleAtFixedRate(() -> {
-            // 排程工作
-            log.info("StartCircle....");
+        scheduledFuture = scheduler.scheduleAtFixedRate(this::pnpSendProcess, 0, time, TimeUnit.valueOf(unit));
+    }
 
-            /* pnp.big switch = 0(停止排程) 1(停止排程，並轉發SMS) 其他(正常運行) */
-            int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true, false);
-            /* 大流程關閉時不做 */
-            if (1 == bigSwitch || 0 == bigSwitch) {
-                return;
-            }
-            sendingPnpMain();
-        }, 0, time, TimeUnit.valueOf(unit));
-
+    private void pnpSendProcess() {
+        log.info("StartCircle....");
+        /* pnp.big switch = 0(停止排程) 1(停止排程，並轉發SMS) 其他(正常運行) */
+        int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true, false);
+        if (0 == bigSwitch || 1 == bigSwitch) {
+            return;
+        }
+        sendingPnpMain();
     }
 
     /**
-     * 根據PNPFTPType 依序發送PNP
+     * 發現BC各種失敗狀態並發送PNP
      */
     public void sendingPnpMain() {
         String procApName = pnpAkkaService.getProcessApName();
-        for (PnpFtpSourceEnum type : PnpFtpSourceEnum.values()) {
-            log.info(String.format("PNP Push ProcApName %s, Type: %s", procApName, type.english.toUpperCase()));
-            PnpMain pnpMain;
-            try {
-                /* Update 待發送資料 Status(Sending) & Executor name(hostname)*/
-                List<? super PnpDetail> details = pnpRepositoryCustom.updateStatus(type, procApName, PnpStageEnum.PNP);
-                if (CollectionUtils.isEmpty(details)) {
-                    log.info("Detail is Empty:  " + type.english.toUpperCase());
-                    continue;
-                }
-                log.info(String.format("PNP FTP Type: %s, Detail Size: %d", type.english, details.size()));
-                log.info("details has data type:" + type.english);
-                PnpDetail oneDetail = (PnpDetail) details.get(0);
-                //組裝資料
-                pnpMain = pnpRepositoryCustom.findMainByMainId(type, oneDetail.getPnpMainId());
-                if (null == pnpMain) {
-                    log.info("pnpMain type :" + type.english + "sendingMain not data");
-                    continue;
-                }
-                log.info("Sending handle Main:" + pnpMain.getOrigFileName() + " type:" + type.english);
-                pnpMain.setProcStage(PnpStageEnum.PNP.value);
-                pnpMain.setPnpDetails(details);
-                log.info("Tell Akka Send PNP!!");
-                pnpAkkaService.tell(pnpMain);
+        PnpStatusEnum[] statusEnumArray = {
+                PnpStatusEnum.BC_SENT_FAIL_PNP_PROCESS,
+                PnpStatusEnum.BC_UID_NOT_FOUND_PNP_PROCESS,
+                PnpStatusEnum.BC_USER_IN_BLACK_LIST_PNP_PROCESS
+        };
+        Arrays.stream(PnpFtpSourceEnum.values()).forEach(
+                type -> Arrays.stream(statusEnumArray).forEach(
+                        bcStatus -> sendMain(procApName, type, bcStatus)
+                )
+        );
 
-            } catch (Exception e) {
-                log.error("", e);
-                log.error("pnpMain type :" + type.english + " sendingMain error:" + e.getMessage());
+    }
+
+    private void sendMain(String procApName, PnpFtpSourceEnum type, PnpStatusEnum bcStatus) {
+        log.info(String.format("PNP Push ProcApName %s, Type: %s", procApName, type.english.toUpperCase()));
+        PnpMain pnpMain;
+        try {
+            /* 取得BC失敗物件轉發PNP資料 */
+            List<? super PnpDetail> details = pnpRepositoryCustom.updateStatus(type, procApName, PnpStageEnum.PNP, bcStatus);
+
+            if (CollectionUtils.isEmpty(details)) {
+                log.info("Detail is Empty:  " + type.english.toUpperCase());
+                return;
             }
+            log.info(String.format("PNP FTP Type: %s, Detail Size: %d", type.english, details.size()));
+            log.info("details has data type:" + type.english);
+            PnpDetail oneDetail = (PnpDetail) details.get(0);
+            /* 組合Main、Detail */
+            pnpMain = pnpRepositoryCustom.findMainByMainId(type, oneDetail.getPnpMainId());
+            if (null == pnpMain) {
+                log.info("pnpMain type :" + type.english + "sendingMain not data");
+                return;
+            }
+            log.info("Sending handle Main: {}, type: {}", pnpMain.getOrigFileName(), type.english);
+            pnpMain.setProcStage(PnpStageEnum.PNP.value);
+            pnpMain.setPnpDetails(details);
+            log.info("Tell Akka Send PNP!!");
+            pnpAkkaService.tell(pnpMain);
 
+        } catch (Exception e) {
+            log.error("", e);
+            log.error("pnpMain type :" + type.english + " sendingMain error:" + e.getMessage());
         }
     }
 

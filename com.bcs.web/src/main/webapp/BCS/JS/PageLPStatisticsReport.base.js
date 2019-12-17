@@ -3,7 +3,7 @@ $(function() {
 	// input data
 	var modifyUserInput = "";
 	var titleInput = "";
-	
+
 	// result data
 	var hasData = false;
 	var oringinalTr = {};
@@ -19,7 +19,7 @@ $(function() {
 		 dateFormat : 'yy-mm-dd',
 		 changeMonth: true
 	});
-	
+
 	var dataValidate = function(){
 		startDate = $('#startDate').val();
 		endDate = $('#endDate').val();
@@ -41,7 +41,7 @@ $(function() {
 		}
 		return true;
 	}
-	
+
 	// ---- Functions ----
     // do Split Page
 	$('.btn.prev').click(function(){
@@ -58,39 +58,39 @@ $(function() {
 			$('#pageAndTotalPages').text(page + '/' + totalPages);
 		}
 	});
-	
+
 	// do Search
 	$('.btn_add.search').click(function(){
 		if(dataValidate()) {
 			// block
 			$('.LyMain').block($.BCS.blockMsgRead);
-			
+
 			// get time data
 			startDate = $('#startDate').val();
 			endDate = $('#endDate').val();
-			
+
 			// refresh to new list
 			$('.resultTr').remove();
 			getDataList();
 		}
 	});
-	
+
 	// do Download
 	setExportButtonSource = function(){
 		console.info('hasData:', hasData);
 		if(hasData) {
 			var modifyUserInput = $('#modifyUserInput').val();
 			var titleInput = $('#titleInput').val();
-			var getUrl = bcs.bcsContextPath + '/edit/getLPStatisticsReportExcel?startDate=' + startDate + '&endDate=' + endDate + 
+			var getUrl = bcs.bcsContextPath + '/edit/getLPStatisticsReportExcel?startDate=' + startDate + '&endDate=' + endDate +
 			'&modifyUser=' + modifyUserInput + '&title=' + titleInput;
 			console.info('getUrl', getUrl);
-			
+
 			$('.btn_add.exportToExcel').attr('href', getUrl);
 		} else {
 			$('.btn_add.exportToExcel').attr('href', '#');
 		}
 	}
-	
+
 	// ---- Initialize Page ----
     // get Data List
 	var getDataList = function(){
@@ -101,16 +101,16 @@ $(function() {
 			firstFatch = false;
 			//setTotal();
 		}
-		
+
 		var modifyUserInput = $('#modifyUserInput').val();
 		var titleInput = $('#titleInput').val();
-		var getUrl = bcs.bcsContextPath + '/edit/getLPStatisticsReport?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page + 
+		var getUrl = bcs.bcsContextPath + '/edit/getLPStatisticsReport?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page +
 			'&modifyUser=' + modifyUserInput + '&title=' + titleInput;
 		console.info('getUrl', getUrl);
-		
+
         $.ajax({
 			type : 'GET',
-			url : getUrl,
+			url : encodeURI(getUrl),
             contentType: 'application/json',
         }).success(function(response) {
             console.info("response:", response);
@@ -128,32 +128,32 @@ $(function() {
 			$('#pageAndTotalPages').text(page + '/' + totalPages);
 			linepointMainResponse = response;
 			pageList();
-         
+
 		    setExportButtonSource();
-		        
+
             // Append to Table
-           
-            
+
+
         }).fail(function(response) {
             console.info(response);
             $.FailResponse(response);
         }).done(function() {
         	$('.LyMain').unblock();
-        });		
+        });
 	};
-    
+
 	// get Total Count
 //	var setTotal = function(){
 //		// block
 //		$('.LyMain').block($.BCS.blockMsgRead);
-//		
+//
 //		// get URL
 //		var modifyUserInput = $('#modifyUserInput').val();
 //		var titleInput = $('#titleInput').val();
-//		var getUrl = bcs.bcsContextPath + '/edit/getLPStatisticsReportTotalPages?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page + 
+//		var getUrl = bcs.bcsContextPath + '/edit/getLPStatisticsReportTotalPages?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page +
 //		'&modifyUser=' + modifyUserInput + '&title=' + titleInput;
 //		console.info('getUrl', getUrl);
-//		
+//
 //		// get data
 //		$.ajax({
 //			type : 'GET',
@@ -195,29 +195,29 @@ $(function() {
 		        resultTr.find('.successfulCount').html(o.successfulCount);
 		        resultTr.find('.failedCount').html(o.failedCount);
 		        resultTr.find('.successfulAmount').html(o.successfulAmount);
-		        resultTr.find('#toDetail').attr('href', bcs.bcsContextPath + '/edit/linePointStatisticsReportDetailPage?linePointMainId=' + o.id +'&startDate=' + startDate 
+		        resultTr.find('#toDetail').attr('href', bcs.bcsContextPath + '/edit/linePointStatisticsReportDetailPage?linePointMainId=' + o.id +'&startDate=' + startDate
 		        																										+ '&endDate=' + endDate + '&successfulAmount='+o.successfulAmount );
-		        
+
 		        $('.resultTable').append(resultTr);
-        	} 
+        	}
 		});
-		
+
 	};
-	
-	
+
+
 	// initialize Page
 	var initPage = function(){
 		// clone & remove
 	    originalTr = $('.resultTr').clone(true);
 	    $('.resultTr').remove();
 	    originalTable = $('.resultTable').clone(true);
-	    
+
 	    // initialize time picker
 		startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
 		endDate = moment(new Date()).format('YYYY-MM-DD');
 		$('#startDate').val(startDate);
 		$('#endDate').val(endDate);
 	};
-	
+
     initPage();
 });

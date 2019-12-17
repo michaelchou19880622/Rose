@@ -200,66 +200,42 @@ public class LoadFtpPnpDataTask {
         }
 
         /* 進行批次排程 */
-        scheduledFuture = scheduler.scheduleAtFixedRate(() -> {
-
-            log.info("ftpProcessHandler SOURCE_MITAKE....");
-            try {
-                ftpProcessHandler(PnpFtpSourceEnum.MITAKE);
-            } catch (Exception e) {
-                log.error("", e);
-            }
-
-            log.info("ftpProcessHandler SOURCE_MING....");
-            try {
-                ftpProcessHandler(PnpFtpSourceEnum.MING);
-            } catch (Exception e) {
-                log.error("", e);
-            }
-
-            log.info("ftpProcessHandler SOURCE_EVERY8D....");
-            try {
-                ftpProcessHandler(PnpFtpSourceEnum.EVERY8D);
-            } catch (Exception e) {
-                log.error("", e);
-            }
-
-            log.info("ftpProcessHandler SOURCE_UNICA....");
-            try {
-                ftpProcessHandler(PnpFtpSourceEnum.UNICA);
-            } catch (Exception e) {
-                log.error("", e);
-            }
-        }, 0, time, TimeUnit.valueOf(unit));
+        scheduledFuture = scheduler.scheduleAtFixedRate(this::ftpProcessHandler, 0, time, TimeUnit.valueOf(unit));
     }
 
     /**
      * 執行FTP取資料流程
      *
-     * @param source 來源("1":三竹 "2":互動 "3":明宣 "4":Unica)
      * @see this#startCircle()
      */
 //    private void ftpProcessHandler(String source) {
-    private void ftpProcessHandler(PnpFtpSourceEnum source) {
-        log.info(source.english + " => StartCircle!!");
-        int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true, false);
+    private void ftpProcessHandler() {
+        for (PnpFtpSourceEnum source : PnpFtpSourceEnum.values()) {
+            try {
+                log.info(source.english + " => StartCircle!!");
+                int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true, false);
 
-        switch (bigSwitch) {
-            case 0:
-                log.info(bigSwitch + ": Stop Process!!");
-                break;
-            case 1:
-                /* 停止排程並轉發SMS */
-                log.info(bigSwitch + ": Start put file to SMS FTP path process !!");
-                // 1.1 將檔案rename(加L)放到SMS指定路徑
-                // 因為路徑可用UI換，所以每次都要重拿連線資訊
-                transFileToSMSFlow(source);
-                log.info(bigSwitch + ": Transfer File To SMS Flow Complete!");
-                break;
-            default:
-                /* 解析資料存到DB */
-                log.info(bigSwitch + ": Parse Data Flow To Database!!");
-                parseDataFlow(source);
-                break;
+                switch (bigSwitch) {
+                    case 0:
+                        log.info(bigSwitch + ": Stop Process!!");
+                        break;
+                    case 1:
+                        /* 停止排程並轉發SMS */
+                        log.info(bigSwitch + ": Start put file to SMS FTP path process !!");
+                        // 1.1 將檔案rename(加L)放到SMS指定路徑
+                        // 因為路徑可用UI換，所以每次都要重拿連線資訊
+                        transFileToSMSFlow(source);
+                        log.info(bigSwitch + ": Transfer File To SMS Flow Complete!");
+                        break;
+                    default:
+                        /* 解析資料存到DB */
+                        log.info(bigSwitch + ": Parse Data Flow To Database!!");
+                        parseDataFlow(source);
+                        break;
+                }
+            } catch (Exception e) {
+                log.error("", e);
+            }
         }
     }
 
@@ -478,7 +454,8 @@ public class LoadFtpPnpDataTask {
      * @throws Exception Exception
      * @see this#parseMingFiles
      */
-    private List<? super PnpDetail> parsePnpDetailMing(String fileContent, String flexTemplateId, String scheduleTime) throws Exception {
+    private List<? super PnpDetail> parsePnpDetailMing(String fileContent, String flexTemplateId, String
+            scheduleTime) throws Exception {
         log.info("flexTemplateId : " + flexTemplateId);
         List<? super PnpDetail> details = new ArrayList<>();
         /* 明宣沒有header所以從0開始 */
@@ -530,7 +507,8 @@ public class LoadFtpPnpDataTask {
      * @return Mitake物件清單
      * @throws Exception Exception
      */
-    private List<? super PnpDetail> parsePnpDetailMitake(List<String> fileContents, String flexTemplateId, String scheduleTime) throws Exception {
+    private List<? super PnpDetail> parsePnpDetailMitake(List<String> fileContents, String
+            flexTemplateId, String scheduleTime) throws Exception {
         List<? super PnpDetail> details = new ArrayList<>();
         /* Mitake有header所以從1開始 */
         for (int i = 1; i < fileContents.size(); i++) {
@@ -572,7 +550,8 @@ public class LoadFtpPnpDataTask {
      * @return Every8d物件清單
      * @throws Exception Exception
      */
-    private List<? super PnpDetail> parsePnpDetailEvery8d(List<String> fileContents, String flexTemplateId, String scheduleTime) throws Exception {
+    private List<? super PnpDetail> parsePnpDetailEvery8d(List<String> fileContents, String
+            flexTemplateId, String scheduleTime) throws Exception {
         List<? super PnpDetail> details = new ArrayList<>();
         /* Every8D有header所以從1開始 */
         for (int i = 1; i < fileContents.size(); i++) {
@@ -628,7 +607,8 @@ public class LoadFtpPnpDataTask {
      * @return Unica物件清單
      * @throws Exception Exception
      */
-    private List<? super PnpDetail> parsePnpDetailUnica(List<String> fileContents, String flexTemplateId, String scheduleTime) throws Exception {
+    private List<? super PnpDetail> parsePnpDetailUnica(List<String> fileContents, String flexTemplateId, String
+            scheduleTime) throws Exception {
         List<? super PnpDetail> details = new ArrayList<>();
         /* Unica有header所以從1開始 */
         for (int i = 1; i < fileContents.size(); i++) {
@@ -685,7 +665,8 @@ public class LoadFtpPnpDataTask {
      * @throws Exception Exception
      * @see this#parseDataFlow
      */
-    private List<Object> parseFtpFile(PnpFtpSourceEnum source, String origFileName, List<String> fileContents) throws Exception {
+    private List<Object> parseFtpFile(PnpFtpSourceEnum source, String origFileName, List<String> fileContents) throws
+            Exception {
         log.info("Source: " + source.english);
         switch (source) {
             case MITAKE:
@@ -958,6 +939,7 @@ public class LoadFtpPnpDataTask {
     }
 
     /*================================================================================*/
+
     /**
      * 判斷預約時間決定發送排程
      *
@@ -1262,7 +1244,8 @@ public class LoadFtpPnpDataTask {
      * @param content  內容
      * @return PNPMaintainAccountModel
      */
-    private PNPMaintainAccountModel validateWhiteListContent(PnpFtpSourceEnum source, String fileName, String content) {
+    private PNPMaintainAccountModel validateWhiteListContent(PnpFtpSourceEnum source, String fileName, String
+            content) {
         log.info(String.format("Source : %s, fileName : %s, content : %s", source.english, fileName, content));
 
         if (!whiteListValidate) {

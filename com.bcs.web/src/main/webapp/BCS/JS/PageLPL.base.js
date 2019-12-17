@@ -1,14 +1,14 @@
 $(function() {
     var originalTr = {};
     var startDate = null, endDate = null;
-    
+
 	$('.datepicker').datepicker({
 		 maxDate : 0,
 		 dateFormat : 'yy-mm-dd',
 		 changeMonth: true
 	});
-	
-	
+
+
 	var dataValidate = function(){
 		startDate = $('#startDate').val();
 		endDate = $('#endDate').val();
@@ -30,32 +30,32 @@ $(function() {
 		}
 		return true;
 	}
-	
+
 	// Initialize Page
 	var initPage = function(){
 		// clone & remove
 	    originalTr = $('.templateTr').clone(true);
 	    $('.templateTr').remove();
-	    
+
 		// initialize date-picker
 		startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
 		endDate = moment(new Date()).format('YYYY-MM-DD');
 		$('#startDate').val(startDate);
 		$('#endDate').val(endDate);
 	};
-	
+
     var loadDataFunc = function(){
 		// block
 		$('.LyMain').block($.BCS.blockMsgRead);
-		
+
 		// get all list data
 		getListData();
     };
-	
+
     // get list data
 	var getListData = function(){
 		$('.templateTr').remove();
-		
+
         $.ajax({
             type: "GET",
             url: bcs.bcsContextPath + '/edit/findAllBcsLinePointMain?startDate=' + startDate + '&endDate=' + endDate
@@ -64,9 +64,9 @@ $(function() {
             $.each(response, function(i, o) {
                 var templateTr = originalTr.clone(true); //增加一行
                 console.info("templateTr:", templateTr);
-                
+
                 templateTr.find('#titleLink').html(o.title);
-                templateTr.find('#titleLink').attr('href', bcs.bcsContextPath + '/edit/linePointCreatePage?linePointMainId=' + 
+                templateTr.find('#titleLink').attr('href', bcs.bcsContextPath + '/edit/linePointCreatePage?linePointMainId=' +
                 		o.id + '&sendGroupId=' + o.linePointSendGroupId + '&msgId=' + o.appendMessageId +'&actionType=Edit');
 		        if (o.modifyTime) {
 		              templateTr.find('.modifyTime').html(moment(o.modifyTime).format('YYYY-MM-DD'));
@@ -93,14 +93,14 @@ $(function() {
 		        }
 		        templateTr.find('.successfulCount').html(o.successfulCount);
 		        templateTr.find('.successfulAmount').html(o.successfulAmount);
-		        
+
 		        // get date data
 		        var currentTime = moment(new Date()).add(-120, 'seconds');
 		        var sendTimingTime = moment(o.sendTimingTime).format('YYYY-MM-DD HH:mm:ss');
 		        console.info('currentTime:', currentTime);
 		        console.info('sendStartTime:', sendTimingTime);
 		        console.info('isAfter:', currentTime.isAfter(sendTimingTime));
-		        
+
 		        // set status
 		        var statusCh = '';
 		        if(o.sendTimingType == 'IMMEDIATE'){
@@ -122,7 +122,7 @@ $(function() {
 		        		}
 		        	}
 		        }
-		        
+
 		        templateTr.find('.status').html(statusCh);
 
 		        // set button
@@ -142,7 +142,7 @@ $(function() {
 		        	templateTr.find('.btn_copy').attr('linePointId', o.id);
                     templateTr.find('.btn_copy').click(btn_sendFunc);
 		        }
-		        
+
 		        if(bcs.user.role == 'ROLE_LINE_SEND'){
 		        	templateTr.find('.btn_copy').attr("disabled",true);
 		        	templateTr.find('.btn_copy').hide();
@@ -170,24 +170,24 @@ $(function() {
 		        		templateTr.find('.btn_detele').remove();
 		        	}
 		        }
-		        
+
 //                if (bcs.user.admin) {
 //                } else {
 //                    templateTr.find('.btn_copy').remove();
 //                }
-//                
+//
                 // Append to Table
                 $('.templateTable').append(templateTr);
             });
-            
+
         }).fail(function(response) {
             console.info(response);
             $.FailResponse(response);
         }).done(function() {
         	$('.LyMain').unblock();
-        });		
+        });
 	};
-    
+
     // other Functions
     // to Create Page
     $('.btn_add').click(function() {
@@ -205,15 +205,15 @@ $(function() {
         	return;
         }
         console.info('btn_sendFunc linePointMainId:' + linePointMainId);
-        
+
         $.ajax({
             type: 'get',
             url: bcs.bcsContextPath + '/edit/getSumCaveatLinePoint?linePointMainId='+ linePointMainId ,
 		}).success(function(response){
 			console.info('caveatLinePoint and count : ' , response);
 			caveatLinePointAndCount = response;
-			
-			
+
+
 			var count = caveatLinePointAndCount.split('@');
             // warning while actionText = Send
             console.info('actionText:', actionText);
@@ -225,11 +225,11 @@ $(function() {
                 	return;
                 }
             }
-            
+
             // send
             $.ajax({
                 type: "POST",
-                url: bcs.bcsContextPath + '/edit/pressSendLinePointMain?linePointMainId=' + linePointMainId 
+                url: bcs.bcsContextPath + '/edit/pressSendLinePointMain?linePointMainId=' + linePointMainId
             }).success(function(response) {
                 console.info(response);
                 alert("執行成功");
@@ -239,22 +239,22 @@ $(function() {
                 $.FailResponse(response);
             }).done(function() {
             });
-			
-			
-			
-			
-			
-			
-			
+
+
+
+
+
+
+
 		}).fail(function(response){
 			console.info(response);
 			$.FailResponse(response);
 			return;
 		}).done(function(){
 		});
-        	
+
     };
-    
+
     var btn_detele =  function() {
     	var linePointMainId = $(this).attr('linePointId');
         if(!linePointMainId){
@@ -265,10 +265,10 @@ $(function() {
         if (!r) {
         	return;
         }
-        
+
         $.ajax({
             type: "POST",
-            url: bcs.bcsContextPath + '/edit/deleteLinePointMain?linePointMainId=' + linePointMainId 
+            url: bcs.bcsContextPath + '/edit/deleteLinePointMain?linePointMainId=' + linePointMainId
         }).success(function(response) {
             console.info(response);
             alert("刪除成功");
@@ -278,31 +278,33 @@ $(function() {
             $.FailResponse(response);
         }).done(function() {
         });
-        
+
     }
-    
+
 	// [查詢] Button
 	$('.query').click(function(){
 		if(dataValidate()) {
 			// block
 			$('.LyMain').block($.BCS.blockMsgRead);
-			
+
 			// get time data
 			$('.dataTemplate').remove();
 			startDate = $('#startDate').val();
 			endDate = $('#endDate').val();
-			
+
 			getListData();
 		}
 	});
-	
+
 	// main()
 	// initialize Page & load Data
     initPage();
     loadDataFunc();
-    
+
     function sleep (time) {
-    	 return new Promise((resolve) => setTimeout(resolve, time));
+    	 return new Promise(function(resolve) {
+    	    setTimeout(resolve, time);
+    	 });
     }
 
 });

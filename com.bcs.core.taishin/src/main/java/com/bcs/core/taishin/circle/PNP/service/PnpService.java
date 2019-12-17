@@ -253,7 +253,8 @@ public class PnpService {
         /* PNP */
         status.add(PnpStatusEnum.PNP_SENDING.value);
         status.add(PnpStatusEnum.PNP_SENT_CHECK_DELIVERY.value);
-        status.add(PnpStatusEnum.PNP_SENT_FAIL_SMS_PROCESS.value);
+        status.add(PnpStatusEnum.PNP_SENT_EXPIRED_FAIL_SMS_PROCESS.value);
+        status.add(PnpStatusEnum.PNP_SENT_TO_LINE_FAIL_SMS_PROCESS.value);
 
         /* SMS */
         status.add(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
@@ -424,34 +425,57 @@ public class PnpService {
         log.info("pushLineMessage pnpMain.getProcessFlow():" + pnpMain.getProcFlow());
 
         for (PnpDetail detail : details) {
-            PnpProcessFlowEnum processFlow = PnpProcessFlowEnum.findEnumByName(pnpMain.getProcFlow());
+            PnpProcessFlowEnum processFlow = PnpProcessFlowEnum.findEnumByCode(pnpMain.getProcFlow());
             String nextStage;
 
+            if (processFlow == null) {
+                log.info("process flow is null, to bc!!");
+                processFlow = PnpProcessFlowEnum.BC;
+            }
             /* User In Block List */
-            if (userInBlockList(detail.getUid(), detail.getPhone())) {
-                nextStage = "BC_USER_IN_BLOCK_LIST_TO_SMS";
+            if (userInBlackList(detail.getUid(), detail.getPhone())) {
+                switch (processFlow) {
+                    case BC_SMS:
+                    case BC_PNP_SMS:
+                        nextStage = "BC_USER_IN_BLACK_LIST_TO_SMS";
+                        break;
+                    case BC:
+                    default:
+                        nextStage = "BC_USER_IN_BLACK_LIST";
+                        break;
+                }
                 gotoNext(nextStage, detail, sendRef, selfActorRef, "");
                 continue;
             }
 
             /* User Block Channel */
             if (LineUser.STATUS_BLOCK.equals(detail.getBindStatus())) {
-                nextStage = PnpProcessFlowEnum.BC.equals(processFlow) ? "BC_USER_BLOCK_CHANNEL"
-                        : "BC_USER_BLOCK_CHANNEL_TO_SMS";
+                switch (processFlow) {
+                    case BC_SMS:
+                    case BC_PNP_SMS:
+                        nextStage = "BC_USER_BLOCK_CHANNEL_TO_SMS";
+                        break;
+                    case BC:
+                    default:
+                        nextStage = "BC_USER_BLOCK_CHANNEL";
+                        break;
+                }
                 gotoNext(nextStage, detail, sendRef, selfActorRef, "");
                 continue;
             }
             /* User Uid Not Found */
             if (StringUtils.isBlank(detail.getUid())) {
                 switch (processFlow) {
-                    case BC:
-                        nextStage = "BC_UID_NOT_FOUND";
                     case BC_SMS:
                         nextStage = "BC_UID_NOT_FOUND_TO_SMS";
+                        break;
                     case BC_PNP_SMS:
                         nextStage = "BC_UID_NOT_FOUND_TO_PNP";
+                        break;
+                    case BC:
                     default:
                         nextStage = "BC_UID_NOT_FOUND";
+                        break;
                 }
 
                 gotoNext(nextStage, detail, sendRef, selfActorRef, "");
@@ -464,14 +488,16 @@ public class PnpService {
 
             if (!isSuccess) {
                 switch (processFlow) {
-                    case BC:
-                        nextStage = "BC_FAIL";
                     case BC_SMS:
                         nextStage = "BC_FAIL_TO_SMS";
+                        break;
                     case BC_PNP_SMS:
                         nextStage = "BC_FAIL_TO_PNP";
+                        break;
+                    case BC:
                     default:
                         nextStage = "BC_FAIL";
+                        break;
                 }
                 gotoNext(nextStage, detail, sendRef, selfActorRef, httpStatusCode);
                 continue;
@@ -482,7 +508,8 @@ public class PnpService {
         }
     }
 
-    public boolean userInBlockList(final String uid, final String phone) {
+    public boolean userInBlackList(final String uid, final String phone) {
+        log.info("UID: {}, Phone: {}", uid, phone);
         if (StringUtils.isNotBlank(uid)) {
             List<PnpSendBlock> pnpSendBlockList = pnpSendBlockService.findByUid(uid);
             if (CollectionUtils.isNotEmpty(pnpSendBlockList)) {
@@ -495,93 +522,115 @@ public class PnpService {
 
     public void gotoNext(String nextStage, PnpDetail detail, ActorRef sendRef, ActorRef selfActorRef,
                          String httpStatusCode) {
+        log.info("Next Stage :{}, {}", nextStage, httpStatusCode);
+        PnpDetail d = route(nextStage, detail, httpStatusCode);
+        log.info("detail: {}", DataUtils.toPrettyJsonUseJackson(d));
+        if (sendRef != null) {
+            sendRef.tell(detail, selfActorRef);
+        } else {
+            pnpAkkaService.tell(detail);
+        }
+    }
+    public PnpDetail route(String nextStage, PnpDetail detail, String httpStatusCode) {
         switch (nextStage) {
-            case "BC_USER_IN_BLOCK":
+            case "BC_USER_IN_BLACK_LIST":
+                log.info("BC_USER_IN_BLACK_LIST");
                 detail.setProcStage(PnpStageEnum.BC.value);
-                detail.setStatus(PnpStatusEnum.BC_USER_IN_BLOCK_LIST.value);
-                detail.setBcStatus(PnpStatusEnum.BC_USER_IN_BLOCK_LIST.value);
+                detail.setStatus(PnpStatusEnum.BC_USER_IN_BLACK_LIST.value);
+                detail.setBcStatus(PnpStatusEnum.BC_USER_IN_BLACK_LIST.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
-                break;
-            case "BC_USER_IN_BLOCK_TO_SMS":
+                return detail;
+            case "BC_USER_IN_BLACK_LIST_TO_SMS":
+                log.info("BC_USER_IN_BLACK_LIST_TO_SMS");
                 detail.setProcStage(PnpStageEnum.BC.value);
                 detail.setStatus(PnpStatusEnum.PROCESS.value);
-                detail.setBcStatus(PnpStatusEnum.BC_USER_IN_BLOCK_LIST_SMS_PROCESS.value);
+                detail.setBcStatus(PnpStatusEnum.BC_USER_IN_BLACK_LIST_SMS_PROCESS.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
-                break;
+                return detail;
             case "BC_USER_BLOCK_CHANNEL":
+                log.info("BC_USER_BLOCK_CHANNEL");
                 detail.setProcStage(PnpStageEnum.BC.value);
                 detail.setStatus(PnpStatusEnum.BC_USER_BLOCKED.value);
                 detail.setBcStatus(PnpStatusEnum.BC_USER_BLOCKED.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
-                break;
+                return detail;
             case "BC_USER_BLOCK_CHANNEL_TO_SMS":
+                log.info("BC_USER_BLOCK_CHANNEL_TO_SMS");
                 detail.setProcStage(PnpStageEnum.SMS.value);
                 detail.setStatus(PnpStatusEnum.PROCESS.value);
                 detail.setBcStatus(PnpStatusEnum.BC_USER_BLOCKED_SMS_PROCESS.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
-                break;
+                return detail;
             case "BC_UID_NOT_FOUND":
-                detail.setProcStage(PnpStageEnum.PNP.value);
-                detail.setStatus(PnpStatusEnum.BC_SENT_FAIL.value);
-                detail.setBcStatus(PnpStatusEnum.BC_SENT_FAIL.value);
+                log.info("BC_UID_NOT_FOUND");
+                detail.setProcStage(PnpStageEnum.BC.value);
+                detail.setStatus(PnpStatusEnum.BC_UID_NOT_FOUND.value);
+                detail.setBcStatus(PnpStatusEnum.BC_UID_NOT_FOUND.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
-                break;
-            case "BC_UID_NOT_FOUND_PNP":
+                return detail;
+            case "BC_UID_NOT_FOUND_TO_PNP":
+                log.info("BC_UID_NOT_FOUND_TO_PNP");
                 detail.setProcStage(PnpStageEnum.PNP.value);
                 detail.setStatus(PnpStatusEnum.PROCESS.value);
-                detail.setBcStatus(PnpStatusEnum.BC_SENT_FAIL_PNP_PROCESS.value);
+                detail.setBcStatus(PnpStatusEnum.BC_UID_NOT_FOUND_PNP_PROCESS.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
-                break;
-            case "BC_UID_NOT_FOUND_SMS":
+                return detail;
+            case "BC_UID_NOT_FOUND_TO_SMS":
+                log.info("BC_UID_NOT_FOUND_TO_SMS");
                 detail.setProcStage(PnpStageEnum.SMS.value);
                 detail.setStatus(PnpStatusEnum.PROCESS.value);
-                detail.setBcStatus(PnpStatusEnum.BC_SENT_FAIL_SMS_PROCESS.value);
+                detail.setBcStatus(PnpStatusEnum.BC_UID_NOT_FOUND_SMS_PROCESS.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
-                break;
+                return detail;
             case "BC_FAIL":
+                log.info("BC_FAIL");
                 detail.setProcStage(PnpStageEnum.BC.value);
                 detail.setStatus(PnpStatusEnum.BC_SENT_FAIL.value);
                 detail.setBcStatus(PnpStatusEnum.BC_SENT_FAIL.value);
                 detail.setLinePushTime(new Date());
                 detail.setBcHttpStatusCode(httpStatusCode);
-                break;
+                return detail;
             case "BC_FAIL_TO_PNP":
+                log.info("BC_FAIL_TO_PNP");
                 detail.setProcStage(PnpStageEnum.PNP.value);
                 detail.setStatus(PnpStatusEnum.PROCESS.value);
                 detail.setBcStatus(PnpStatusEnum.BC_SENT_FAIL_PNP_PROCESS.value);
                 detail.setLinePushTime(new Date());
                 detail.setBcHttpStatusCode(httpStatusCode);
-                break;
+                return detail;
             case "BC_FAIL_TO_SMS":
+                log.info("BC_FAIL_TO_SMS");
                 detail.setProcStage(PnpStageEnum.SMS.value);
                 detail.setStatus(PnpStatusEnum.PROCESS.value);
                 detail.setBcStatus(PnpStatusEnum.BC_SENT_FAIL_SMS_PROCESS.value);
                 detail.setLinePushTime(new Date());
                 detail.setBcHttpStatusCode(httpStatusCode);
-                break;
+                return detail;
             case "BC_SUCCESS":
+                log.info("BC_SUCCESS");
                 detail.setProcStage(PnpStageEnum.BC.value);
                 detail.setStatus(PnpStatusEnum.BC_SENT_COMPLETE.value);
                 detail.setBcStatus(PnpStatusEnum.BC_SENT_COMPLETE.value);
                 detail.setLinePushTime(new Date());
                 detail.setBcHttpStatusCode(httpStatusCode);
-                break;
+                return detail;
             case "PNP_USER_IN_BLOCK_LIST_TO_SMS":
+                log.info("PNP_USER_IN_BLOCK_LIST_TO_SMS");
                 detail.setProcStage(PnpStageEnum.SMS.value);
                 detail.setStatus(PnpStatusEnum.PROCESS.value);
-                detail.setPnpStatus(PnpStatusEnum.PNP_USER_IN_BLOCK_LIST_SMS_PROCESS.value);
-                break;
-            case "PNP_FAIL_TO_SMS":
-                log.info("PNP Send Message Fail!! ==> SMS!!");
+                detail.setPnpStatus(PnpStatusEnum.PNP_USER_IN_BLACK_LIST_SMS_PROCESS.value);
+                return detail;
+            case "PNP_FAIL":
+                log.info("PNP_FAIL");
                 detail.setProcStage(PnpStageEnum.SMS.value);
                 detail.setStatus(PnpStatusEnum.PROCESS.value);
-                detail.setPnpStatus(PnpStatusEnum.PNP_SENT_FAIL_SMS_PROCESS.value);
+                detail.setPnpStatus(PnpStatusEnum.PNP_SENT_TO_LINE_FAIL_SMS_PROCESS.value);
                 detail.setPnpTime(new Date());
-                break;
+                return detail;
             case "PNP_SUCCESS":
+                log.info("PNP_SUCCESS");
                 Date pnpSendTime = new Date();
                 detail.setPnpTime(pnpSendTime);
-                log.info("PNP Send Message Success!!");
                 int expiredUnit = CoreConfigReader.getInteger(CONFIG_STR.PNP_DELIVERY_EXPIRED_TIME_UNIT, true, false);
                 int expired = CoreConfigReader.getInteger(CONFIG_STR.PNP_DELIVERY_EXPIRED_TIME, true, false);
                 log.info(String.format("expired: %s, expiredUnit: %s", expired, expiredUnit));
@@ -609,17 +658,14 @@ public class PnpService {
                         detail.setPnpDeliveryTime(pnpDetail.getPnpDeliveryTime());
                     }
                 }
-                break;
+                return detail;
             default:
+                log.info("this is default switch");
                 break;
-        }
-        if (sendRef != null) {
-            sendRef.tell(detail, selfActorRef);
-        } else {
-            pnpAkkaService.tell(detail);
-        }
-    }
 
+        }
+        return detail;
+    }
     /**
      * PNP 訊息推播 Use REST Template Send PNP Message To Line
      *
@@ -645,7 +691,7 @@ public class PnpService {
             for (PnpDetail detail : details) {
                 String nextStage;
                 /* User In Block List */
-                if (userInBlockList(detail.getUid(), detail.getPhone())) {
+                if (userInBlackList(detail.getUid(), detail.getPhone())) {
                     nextStage = "PNP_USER_IN_BLOCK_LIST_TO_SMS";
                     gotoNext(nextStage, detail, sendRef, selfActorRef, "");
                     continue;
@@ -745,7 +791,6 @@ public class PnpService {
             log.info("RestfulUtil.getStatusCode: " + restfulUtil.getStatusCode());
             sendSuccessFlag = "200".equals(restfulUtil.getStatusCode());
         } catch (HttpClientErrorException he) {
-            sendSuccessFlag = false;
             log.error("HttpClientErrorException error : " + he.getMessage());
             JSONObject errorMessage = new JSONObject(he.getResponseBodyAsString());
 
@@ -762,7 +807,6 @@ public class PnpService {
             }
 
         } catch (Exception e) {
-            sendSuccessFlag = false;
             log.info("Send fail PnpDetailId:" + detail.getPnpDetailId());
             log.error("Send fail Exception:" + e.getMessage());
             sendSuccessFlag = false;

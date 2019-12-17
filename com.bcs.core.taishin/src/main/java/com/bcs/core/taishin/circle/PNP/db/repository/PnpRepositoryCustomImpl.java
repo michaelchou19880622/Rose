@@ -47,11 +47,11 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
      */
     @Override
     @Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
-    public List<? super PnpDetail> updateStatus(PnpFtpSourceEnum type, String processApName, PnpStageEnum stage) {
-        log.debug(" begin PNP updateStatus:" + processApName + " type:" + type);
+    public List<? super PnpDetail> updateStatus(PnpFtpSourceEnum type, String processApName, PnpStageEnum stage, PnpStatusEnum bcStatus) {
+        log.info("begin PNP updateStatus: {}, type: {}", processApName, type);
         try {
             /* Stage = PNP */
-            List<BigInteger> detailIds = findAndUpdateProcessForUpdate(type.detailTable, stage.value);
+            List<BigInteger> detailIds = findAndUpdateProcessForUpdate(type.detailTable, stage, bcStatus);
             if (!detailIds.isEmpty()) {
                 log.info("Update Detail Status: [PROCESS] to [PNP][SENDING]");
                 List<List<BigInteger>> batchDetailIds = Lists.partition(detailIds, CircleEntityManagerControl.batchSize);
@@ -65,7 +65,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
             } else {
                 log.info("stage:" + stage + " PNP updateStatus:" + processApName + " type:" + type + " detailIds isEmpty");
             }
-            log.debug(" end PNP updateStatus:" + processApName + " type:" + type);
+            log.debug("end PNP updateStatus:" + processApName + " type:" + type);
         } catch (Exception e) {
             log.error("Exception", e);
             throw e;
@@ -80,7 +80,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
      * @see PnpRepositoryCustomImpl#updateStatus
      */
     @SuppressWarnings("unchecked")
-    private List<BigInteger> findAndUpdateProcessForUpdate(String detailTable, String stage) {
+    private List<BigInteger> findAndUpdateProcessForUpdate(String detailTable, PnpStageEnum stage, PnpStatusEnum bcStatus) {
         String sqlString = "select d.PNP_DETAIL_ID from " + detailTable + " d " +
                 " where d.STATUS = :status " +
                 "  and d.PROC_STAGE = :stage " +
@@ -105,9 +105,9 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 "   order by a.CREAT_TIME" +
                 " ) ";
         return (List<BigInteger>) entityManager.createNativeQuery(sqlString)
-                .setParameter("stage", stage)
+                .setParameter("stage", stage.value)
                 .setParameter("status", PnpStatusEnum.PROCESS.value)
-                .setParameter("bc_status", PnpStatusEnum.BC_SENT_FAIL_PNP_PROCESS.value)
+                .setParameter("bc_status", bcStatus.value)
                 .setParameter("newStatus", PnpStatusEnum.SENDING.value)
                 .setParameter("pnp_Status", PnpStatusEnum.PNP_SENDING.value)
                 .setParameter("modifyTime", new Date())

@@ -1,99 +1,78 @@
 package com.bcs.core.taishin.circle.PNP.db.repository;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
+import com.bcs.core.utils.DataUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.hibernate.query.Query;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.bcs.core.db.entity.Campaign;
-import com.bcs.core.db.persistence.EntityRepository;
-import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
-
+@Slf4j
 @Repository
-public class PNPMaintainAccountModelCustomImpl implements PNPMaintainAccountModelCustom{	
-	
-	/** Logger */
-	private static Logger logger = Logger.getLogger(PNPMaintainAccountModelCustomImpl.class);
-	
-	@PersistenceContext
-	private EntityManager entityManager;
-	
-	@SuppressWarnings("unchecked")
-	public List<PNPMaintainAccountModel> queryUseConditions(String divisionName, String departmentName, String groupName, 
-			String pccCode, String account, String employeeId, String accountType, Boolean status) {
-		Date  now = Calendar.getInstance().getTime();
-		StringBuffer sqlString = new StringBuffer();
-		
-		//sqlString.append("select * from BCS_PNP_MAINTAIN_ACCOUNT where ");
-		// Original (All Blank = All Show)
-		sqlString.append("select * from BCS_PNP_MAINTAIN_ACCOUNT where 1=1 ");
-		
-		if(StringUtils.isNotBlank(divisionName)){
-			sqlString.append("AND DIVISION_NAME = :divisionName ");
-		}
-		if(StringUtils.isNotBlank(departmentName)){
-			sqlString.append("AND DEPARTMENT_NAME = :departmentName ");
-		}
-		if(StringUtils.isNotBlank(groupName)){
-			sqlString.append("AND GROUP_NAME = :groupName ");
-		}
-		if(StringUtils.isNotBlank(pccCode)){
-			sqlString.append("AND PCC_CODE = :pccCode ");
-		}
-		if(StringUtils.isNotBlank(account)){
-			sqlString.append("AND ACCOUNT = :account ");
-		}
-		if(StringUtils.isNotBlank(employeeId)){
-			sqlString.append("AND EMPLOYEE_ID = :employeeId ");
-		}
-		if(StringUtils.isNotBlank(accountType)){
-			sqlString.append("AND ACCOUNT_TYPE = :accountType ");
-		}
-		if(status != null){
-			sqlString.append("AND STATUS = :status ");
-		}
-		logger.info("sqlString11:"+sqlString.toString());
-		
-		Query query = (Query) entityManager.createNativeQuery(sqlString.toString(),PNPMaintainAccountModel.class);
-		if(StringUtils.isNotBlank(divisionName)){
-			((javax.persistence.Query) query).setParameter("divisionName", divisionName);
-		}
-		if(StringUtils.isNotBlank(departmentName)){
-			((javax.persistence.Query) query).setParameter("departmentName", departmentName);
-		}
-		if(StringUtils.isNotBlank(groupName)){
-			((javax.persistence.Query) query).setParameter("groupName", groupName);
-		}
-		if(StringUtils.isNotBlank(pccCode)){
-			((javax.persistence.Query) query).setParameter("pccCode", pccCode);
-		}
-		if(StringUtils.isNotBlank(account)){
-			((javax.persistence.Query) query).setParameter("account", account);
-		}
-		if(StringUtils.isNotBlank(employeeId)){
-			((javax.persistence.Query) query).setParameter("employeeId", employeeId);
-		}
-		if(StringUtils.isNotBlank(accountType)){
-			((javax.persistence.Query) query).setParameter("accountType", accountType);
-		}
-		if(status != null){
-			((javax.persistence.Query) query).setParameter("status", status);
-		}
-		List<PNPMaintainAccountModel> ResultList = ((javax.persistence.Query) query).getResultList();
-		
-		return ResultList;
-	}
+public class PNPMaintainAccountModelCustomImpl implements PNPMaintainAccountModelCustom {
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<PNPMaintainAccountModel> queryUseConditions(String divisionName, String departmentName, String groupName,
+                                                            String pccCode, String account, String employeeId, String accountType, Boolean status) {
+        StringBuilder sb = new StringBuilder();
+
+        // Original (All Blank = All Show)
+        sb.append("SELECT * FROM BCS_PNP_MAINTAIN_ACCOUNT WHERE 1=1");
+
+        if (StringUtils.isNotBlank(divisionName)) {
+            sb.append(" AND DIVISION_NAME='");
+            sb.append(divisionName);
+            sb.append("'");
+        }
+        if (StringUtils.isNotBlank(departmentName)) {
+            sb.append(" AND DEPARTMENT_NAME='");
+            sb.append(departmentName);
+            sb.append("'");
+        }
+        if (StringUtils.isNotBlank(groupName)) {
+            sb.append(" AND GROUP_NAME='");
+            sb.append(groupName);
+            sb.append("'");
+        }
+        if (StringUtils.isNotBlank(pccCode)) {
+            sb.append(" AND PCC_CODE='");
+            sb.append(pccCode);
+            sb.append("'");
+        }
+        if (StringUtils.isNotBlank(account)) {
+            sb.append(" AND ACCOUNT='");
+            sb.append(account);
+            sb.append("'");
+        }
+        if (StringUtils.isNotBlank(employeeId)) {
+            sb.append(" AND EMPLOYEE_ID='");
+            sb.append(employeeId);
+            sb.append("'");
+        }
+        if (StringUtils.isNotBlank(accountType) && ObjectUtils.notEqual("All", accountType)) {
+            sb.append(" AND ACCOUNT_TYPE='");
+            sb.append(accountType);
+            sb.append("'");
+        }
+        if (status != null) {
+            sb.append(" AND STATUS='");
+            sb.append(status);
+            sb.append("'");
+        }
+        log.info("sqlString11:" + sb.toString());
+        Query query = entityManager.createNativeQuery(sb.toString(), PNPMaintainAccountModel.class);
+        List<PNPMaintainAccountModel> resultList = query.getResultList();
+        log.info("Result List : " + DataUtils.toPrettyJsonUseJackson(resultList));
+        return resultList;
+    }
 
 }

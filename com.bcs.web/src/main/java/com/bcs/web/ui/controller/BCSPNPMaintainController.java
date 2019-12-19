@@ -24,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -68,30 +69,34 @@ public class BCSPNPMaintainController extends BCSBaseController {
 
     @WebServiceLog
     @GetMapping(value = "/pnpAdmin/pnpNormalAccountListPage")
-    public String pnpNormalAccountListPage() {
+    public String pnpNormalAccountListPage(Model model) {
         log.info("pnpNormalAccountListPage");
+        model.addAttribute("t", "Normal");
         return BcsPageEnum.PNPNormalAccountListPage.toString();
     }
 
     @WebServiceLog
     @GetMapping(value = "/pnpAdmin/pnpNormalAccountCreatePage")
-    public String pnpNormalAccountCreatePage() {
+    public String pnpNormalAccountCreatePage(Model model) {
         log.info("pnpNormalAccountCreatePage");
+        model.addAttribute("t", "Normal");
         return BcsPageEnum.PNPNormalAccountCreatePage.toString();
     }
 
     @WebServiceLog
     @GetMapping(value = "/pnpAdmin/pnpUnicaAccountListPage")
-    public String pnpUnicaAccountListPage() {
+    public String pnpUnicaAccountListPage(Model model) {
         log.info("pnpUnicaAccountListPage");
-        return BcsPageEnum.PNPUnicaAccountListPage.toString();
+        model.addAttribute("t", "Unica");
+        return BcsPageEnum.PNPNormalAccountListPage.toString();
     }
 
     @WebServiceLog
     @GetMapping(value = "/pnpAdmin/pnpUnicaAccountCreatePage")
-    public String pnpUnicaAccountCreatePage() {
+    public String pnpUnicaAccountCreatePage(Model model) {
         log.info("pnpUnicaAccountCreatePage");
-        return BcsPageEnum.PNPUnicaAccountCreatePage.toString();
+        model.addAttribute("t", "Unica");
+        return BcsPageEnum.PNPNormalAccountCreatePage.toString();
     }
 
     /**
@@ -222,7 +227,7 @@ public class BCSPNPMaintainController extends BCSBaseController {
         }
     }
 
-    private Map<String, Object> getResponseMap(Map<String, String> configMap) {
+    private Map<String, Object> getResponseMap(final Map<String, String> configMap) {
         Map<String, Object> response = new HashMap<>(18);
         response.put("isEnableHeaderCustomBackground", getOrDefault(configMap, ".flex.ui.header.custom.background.enable", false));
         response.put("isEnableHeaderCustomTextSize", getOrDefault(configMap, ".flex.ui.header.custom.text.size.enable", true));
@@ -243,16 +248,16 @@ public class BCSPNPMaintainController extends BCSBaseController {
         return response;
     }
 
-    private Map<String, Object> getFooterMap(Map<String, String> configMap) {
+    private Map<String, Object> getFooterMap(final Map<String, String> configMap) {
         Map<String, Object> footerMap = new HashMap<>(2);
         footerMap.put("linkText", getOrDefault(configMap, ".flex.ui.footer.link.text", "收到此訊息的原因是？"));
         footerMap.put("linkUrl", getOrDefault(configMap, ".flex.ui.footer.link.url", "https://tsbk.tw/LINEPNP/"));
         return footerMap;
     }
 
-    private Map<String, Object> getHeroMap(Map<String, String> configMap) {
+    private Map<String, Object> getHeroMap(final Map<String, String> configMap) {
         Map<String, Object> heroMap = new HashMap<>(7);
-        heroMap.put("background", getOrDefault(configMap, ".flex.ui.hero.default.background", "#FFDDAA"));
+        heroMap.put("background", getOrDefault(configMap, ".flex.ui.hero.default.background", "#FFDDDD"));
         heroMap.put("textSize", getOrDefault(configMap, ".flex.ui.hero.default.text.size", "md"));
         heroMap.put("textColor", getOrDefault(configMap, ".flex.ui.hero.default.text.color", "#000000"));
         heroMap.put("textWeight", getOrDefault(configMap, ".flex.ui.hero.default.text.weight", "regular"));
@@ -262,21 +267,21 @@ public class BCSPNPMaintainController extends BCSBaseController {
         return heroMap;
     }
 
-    private Map<String, Object> getBodyMap(Map<String, String> configMap) {
+    private Map<String, Object> getBodyMap(final Map<String, String> configMap) {
         Map<String, Object> bodyMap = new HashMap<>(3);
         bodyMap.put("background", getOrDefault(configMap, "", "#FFFFFF"));
         return bodyMap;
     }
 
-    private Map<String, Object> getButtonMap(Map<String, String> configMap) {
+    private Map<String, Object> getButtonMap(final Map<String, String> configMap) {
         Map<String, Object> buttonMap = new HashMap<>(3);
-        buttonMap.put("buttonColor", getOrDefault(configMap, ".flex.ui.body.default.button.color", "#FFA500"));
+        buttonMap.put("buttonColor", getOrDefault(configMap, ".flex.ui.body.default.button.color", "#D80C18"));
         buttonMap.put("buttonStyle", getOrDefault(configMap, ".flex.ui.body.default.button.style", "primary"));
         buttonMap.put("buttonText", getOrDefault(configMap, ".flex.ui.body.default.button.text", "Button!!"));
         return buttonMap;
     }
 
-    private Map<String, Object> getDescMap(Map<String, String> configMap) {
+    private Map<String, Object> getDescMap(final Map<String, String> configMap) {
         Map<String, Object> descriptionMap = new HashMap<>(6);
         descriptionMap.put("textSize", getOrDefault(configMap, ".flex.ui.hero.default.desc.text.size", "xs"));
         descriptionMap.put("textColor", getOrDefault(configMap, ".flex.ui.hero.default.desc.text.color", "#0000FF"));
@@ -288,9 +293,9 @@ public class BCSPNPMaintainController extends BCSBaseController {
         return descriptionMap;
     }
 
-    private Map<String, Object> getHeaderMap(Map<String, String> configMap) {
+    private Map<String, Object> getHeaderMap(final Map<String, String> configMap) {
         Map<String, Object> headerMap = new HashMap<>(7);
-        headerMap.put("background", getOrDefault(configMap, ".flex.ui.header.default.background", "#FFA500"));
+        headerMap.put("background", getOrDefault(configMap, ".flex.ui.header.default.background", "#D80C18"));
         headerMap.put("textSize", getOrDefault(configMap, ".flex.ui.header.default.text.size", "md"));
         headerMap.put("textColor", getOrDefault(configMap, ".flex.ui.header.default.text.color", "#000000"));
         headerMap.put("textWeight", getOrDefault(configMap, ".flex.ui.header.default.text.weight", "regular"));
@@ -330,7 +335,7 @@ public class BCSPNPMaintainController extends BCSBaseController {
                 if (data.containsKey("maintainAccount") && data.get("maintainAccount") != null) {
                     PNPMaintainAccountModel pnpMaintainAccountModel = new Gson().fromJson((String) data.get("maintainAccount"), PNPMaintainAccountModel.class);
                     log.info(DataUtils.toPrettyJsonUseJackson(pnpMaintainAccountModel));
-                    pnpMaintainAccountModel.setTemplate(pnpFlexTemplate.getId() == null ? "Default" : pnpFlexTemplate.getId().toString());
+                    pnpMaintainAccountModel.setTemplate(pnpFlexTemplate.getId() == null ? "0" : pnpFlexTemplate.getId().toString());
                     validMaintainAccountModel(pnpMaintainAccountModel);
                     log.info("pnpMaintainAccountModel:{}", DataUtils.toPrettyJsonUseJackson(pnpMaintainAccountModel));
                     saveMaintainAccountModel(customUser, pnpMaintainAccountModel);
@@ -378,16 +383,13 @@ public class BCSPNPMaintainController extends BCSBaseController {
     @ResponseBody
     public ResponseEntity<?> deletePNPMaintainAccount(@CurrentUser CustomUser customUser, @RequestParam Long id) {
         try {
-
             if (!customUser.isAdmin() && !AdminUser.RoleCode.ROLE_PNP_ADMIN.toString().equals(customUser.getRole())) {
                 throw new BcsNoticeException("您無權限刪除");
             }
-
             PNPMaintainAccountModel pnpMaintainAccountModel = pnpMaintainUIService.findOne(id);
             if (pnpMaintainAccountModel == null) {
                 throw new BcsNoticeException("刪除搜查錯誤");
             }
-
             pnpMaintainUIService.delete(pnpMaintainAccountModel);
             return new ResponseEntity<>("刪除成功", HttpStatus.OK);
         } catch (BcsNoticeException be) {
@@ -408,8 +410,6 @@ public class BCSPNPMaintainController extends BCSBaseController {
             if (pnpMaintainAccountModel == null) {
                 throw new BcsNoticeException("刪除搜查錯誤");
             }
-            //TODO Return pnpMaintainAccountModel And Flex Template Data Json
-            //TODO toJson
             return new ResponseEntity<>(pnpMaintainAccountModel, HttpStatus.OK);
         } catch (BcsNoticeException be) {
             log.error(ErrorRecord.recordError(be));
@@ -439,7 +439,7 @@ public class BCSPNPMaintainController extends BCSBaseController {
                     divisionName, departmentName, groupName, pccCode, account, employeeId, accountType, status);
             return new ResponseEntity<>(list, HttpStatus.OK);
         } catch (Exception e) {
-            log.error(ErrorRecord.recordError(e));
+            log.error("", e);
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

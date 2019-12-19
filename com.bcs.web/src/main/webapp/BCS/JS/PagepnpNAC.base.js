@@ -2,6 +2,19 @@
  * PNP Maintain Account Config And PNP Flex Template Config Page
  */
 $(function () {
+
+    var t = document.getElementById('t').value;
+    console.log(t);
+
+    var source = {
+        type : t === 'Normal' ? 'Normal' : 'Unica',
+        pageTitle : t === 'Normal' ? '編輯一般帳號' : '編輯Unica帳號',
+        listPageUrl : t === 'Normal' ? 'pnpNormalAccountListPage' : 'pnpUnicaAccountListPage',
+        createPageUrl : t === 'Normal' ? 'pnpNormalAccountCreatePage' : 'pnpUnicaAccountCreatePage'
+    }
+    console.log(source);
+
+
     var pnpMaintainAccountModelId = null;
     var originalPathWay = '';
     var originalPnpContent = '';
@@ -17,7 +30,7 @@ $(function () {
 
         if (pnpMaintainAccountModelId !== null && pnpMaintainAccountModelId !== '') {
             $('.LyMain').block($.BCS.blockMsgRead);
-            $('.CHTtl').html('編輯一般帳號');
+            $('#pageTitle').html(source.pageTitle);
             document.getElementById('popupEditPage').value = 'Edit';
             $.ajax({
                 type: 'POST',
@@ -56,6 +69,7 @@ $(function () {
             });
         } else {
             console.log('Id is Null!! To Create Mode!!');
+            $('#pageTitle').html(source.pageTitle);
             loadPopupConfig();
         }
     };
@@ -585,7 +599,7 @@ $(function () {
         } else {
             return;
         }
-        window.location.replace(bcs.bcsContextPath + '/pnpAdmin/pnpNormalAccountListPage');
+        window.location.replace(bcs.bcsContextPath + '/pnpAdmin/' + source.listPageUrl);
     });
 
     $('#popupEditPage').click(function () {
@@ -625,7 +639,7 @@ $(function () {
             maintainAccountData.departmentName = $('#departmentName').val();
             maintainAccountData.groupName = $('#groupName').val();
             maintainAccountData.pccCode = $('#PccCode').val();
-            maintainAccountData.accountType = 'Normal';
+            maintainAccountData.accountType = source.type;
             maintainAccountData.accountClass = $('.accountClass')[0].checked ? 'O' : 'M';
             maintainAccountData.status = $('.status')[0].checked;
             maintainAccountData.template = document.getElementById('quickViewTemplate').textContent;
@@ -653,7 +667,8 @@ $(function () {
             }).success(function (response) {
                 console.info(response);
                 alert('儲存成功');
-                window.location.replace('pnpNormalAccountListPage');
+                //FIXME 文字不同處
+                window.location.replace(source.listPageUrl);
             }).fail(function (response) {
                 console.info(response);
                 var text = response.responseText;
@@ -706,6 +721,7 @@ $(function () {
     });
 
     $('#saveBtn').click(function (event) {
+//        validButton();
         saveBeforeTemplateJson = generateTemplateJson();
         console.log(JSON.stringify(saveBeforeTemplateJson));
         document.getElementById('quickViewPathWay').textContent = saveBeforeTemplateJson.pathwayName;
@@ -714,6 +730,22 @@ $(function () {
         $('#dialog-modal').dialog("close");
     });
 
+//    var validButton = function(){
+//        var btnGroup = document.getElementById('btnGroup');
+//        var btnCount = btnGroup.childElementCount;
+//        console.log('Button Count : ' + btnCount);
+//        if (btnCount > 0) {
+//            for (var row = 0; row < btnCount; row++) {
+//                var name = btnGroup.children[row].children[0].children[0].children[0].value;
+//                var url = btnGroup.children[row].children[1].children[0].children[0].value
+//                var color = btnGroup.children[row].children[2].children[0].value
+//                console.log('Name: ' + name + ',Url: ' + url + ',Color: ' + color);
+//                if (name.trim() === '' || url.trim() === '' || color === '') {
+//                    btnGroup.removeChild(btnGroup.children[row]);
+//                }
+//            }
+//        }
+//    }
 
     //---------------------Text Button Press--------------------------
     var triggerBtnPressed = function (btnElementId, btnStyleName, previewElementId, styleName, styleValue) {

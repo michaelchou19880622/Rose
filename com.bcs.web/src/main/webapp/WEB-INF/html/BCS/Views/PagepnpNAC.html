@@ -264,7 +264,7 @@
             <header class="ContentHead">
                 <input name="cancel" class="btn_cancel" type="button" value="返回"
                        style="float: right; cursor: pointer;">
-                <h3 class="CHTtl">建立一般帳號</h3>
+                <h3 id="pageTitle" class="CHTtl">建立一般帳號</h3>
             </header>
             <div class="mainFrame" id="mainFrame">
                 <table border="1">
@@ -539,6 +539,7 @@
             </div>
         </div>
     </div>
+    <input hidden id="t" th:value="${t}" />
     <code>
         <pre id="console" style="display: inline-block; background: #aea;"></pre>
     </code>

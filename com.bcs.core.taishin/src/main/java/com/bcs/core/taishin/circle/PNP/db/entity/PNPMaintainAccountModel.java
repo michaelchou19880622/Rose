@@ -16,7 +16,7 @@ import java.util.Date;
 /**
  * 白名單維護帳號
  *
- * @author ???
+ * @author Alan
  */
 @Setter
 @Getter
@@ -110,11 +110,8 @@ public class PNPMaintainAccountModel extends AbstractBcsEntity {
     private String pathway;
 
     /**
-     * 樣板ID
-     * Deprecated Desc:
-     * 201909 改用單一樣板該欄位棄用，改用flexMainTitle, flexButtonName, flexButtonUrl設定樣板內容
+     * Flex樣板ID
      */
-    @Deprecated
     @Column(name = "TEMPLATE", columnDefinition = "nvarchar(50)")
     private String template;
 

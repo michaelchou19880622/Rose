@@ -120,7 +120,10 @@ public class BCSPnpReportController {
         try {
             param.setEmployeeId(customUser.getAccount().toUpperCase());
             final List<PnpDetailReport> result = pnpReportService.getPnpDetailReportList(param);
-            return new ResponseEntity<>(result.size(), HttpStatus.OK);
+            int totalCount = result.size();
+            int onePageCount = 10;
+            int totalPage = DataUtils.calTotalPage(totalCount, onePageCount);
+            return new ResponseEntity<>(totalPage, HttpStatus.OK);
         } catch (final Exception e) {
             log.error("Exception", e);
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

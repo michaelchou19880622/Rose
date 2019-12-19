@@ -265,4 +265,8 @@ public class DataUtils {
 
         return String.valueOf(strArray);
     }
+
+    public static int calTotalPage(int totalCount, int onePageCount){
+        return totalCount / onePageCount + (totalCount % onePageCount == 0 ? 0 : 1);
+    }
 }

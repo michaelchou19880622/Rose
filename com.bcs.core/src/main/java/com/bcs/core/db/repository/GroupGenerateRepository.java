@@ -251,7 +251,7 @@ public class GroupGenerateRepository{
 
 			sqlString += " WHERE s.REFERENCE_ID = ?" + params + " ";
 
-			sqlString += " AND k.status != 'BLOCK' and u.status != 'SYSADD' and (k.STATUS = 'BINDED' OR k.STATUS = 'UNBIND') ";
+			sqlString += " AND k.status != 'BLOCK' and k.status != 'SYSADD' and (k.STATUS = 'BINDED' OR k.STATUS = 'UNBIND') ";
 
 
 			if(sendGroupDetails.size() > 1){

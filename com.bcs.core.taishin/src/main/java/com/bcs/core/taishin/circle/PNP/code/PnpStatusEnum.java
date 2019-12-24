@@ -36,6 +36,9 @@ public enum PnpStatusEnum {
     BC_USER_BLOCKED_PNP_PROCESS("USER_BLOCK_PNP_PROCESS", "使用者關閉接收通知，轉發PNP"),
     BC_USER_BLOCKED_SMS_PROCESS("USER_BLOCK_SMS_PROCESS", "使用者關閉接收通知，轉發SMS"),
 
+    USER_IS_SYSTEM_ADD_IGNORE("USER_IS_SYSTEM_ADD_IGNORE", "此為系統自動建立帳號，禁止發送BC"),
+    USER_IS_SYSTEM_ADD_IGNORE_PNP("USER_IS_SYSTEM_ADD_IGNORE_PNP", "此為系統自動建立帳號，轉發PNP"),
+    USER_IS_SYSTEM_ADD_IGNORE_SMS("USER_IS_SYSTEM_ADD_IGNORE_SMS", "此為系統自動建立帳號，轉發SMS"),
     /* ========================================PNP================================================*/
 
     PNP_SENDING("PNP_SENDING", "發送中"),

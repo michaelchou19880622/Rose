@@ -448,6 +448,22 @@ public class PnpService {
                 continue;
             }
 
+            if (LineUser.STATUS_SYS_ADD.equals(detail.getBindStatus())) {
+                switch (processFlow) {
+                    case BC_SMS:
+                        nextStage = "USER_IS_SYSTEM_ADD_IGNORE_TO_SMS";
+                        break;
+                    case BC_PNP_SMS:
+                        nextStage = "USER_IS_SYSTEM_ADD_IGNORE_TO_PNP";
+                        break;
+                    case BC:
+                    default:
+                        nextStage = "USER_IS_SYSTEM_ADD_IGNORE";
+                        break;
+                }
+                gotoNext(nextStage, detail, sendRef, selfActorRef, "");
+                continue;
+            }
             /* User Block Channel */
             if (LineUser.STATUS_BLOCK.equals(detail.getBindStatus())) {
                 switch (processFlow) {
@@ -481,6 +497,7 @@ public class PnpService {
                 gotoNext(nextStage, detail, sendRef, selfActorRef, "");
                 continue;
             }
+
             /* 發送訊息 */
             final Object[] pushResult = pnpPushMessage(url, headers, detail, detail.getUid());
             final boolean isSuccess = (boolean) pushResult[0];
@@ -533,6 +550,27 @@ public class PnpService {
     }
     public PnpDetail route(String nextStage, PnpDetail detail, String httpStatusCode) {
         switch (nextStage) {
+            case "USER_IS_SYSTEM_ADD_IGNORE":
+                log.info("USER_IS_SYSTEM_ADD_IGNORE");
+                detail.setProcStage(PnpStageEnum.BC.value);
+                detail.setStatus(PnpStatusEnum.USER_IS_SYSTEM_ADD_IGNORE.value);
+                detail.setBcStatus(PnpStatusEnum.USER_IS_SYSTEM_ADD_IGNORE.value);
+                detail.setBcHttpStatusCode(httpStatusCode);
+                return detail;
+            case "USER_IS_SYSTEM_ADD_IGNORE_TO_PNP":
+                log.info("USER_IS_SYSTEM_ADD_IGNORE_PNP");
+                detail.setProcStage(PnpStageEnum.PNP.value);
+                detail.setStatus(PnpStatusEnum.PROCESS.value);
+                detail.setBcStatus(PnpStatusEnum.USER_IS_SYSTEM_ADD_IGNORE_PNP.value);
+                detail.setBcHttpStatusCode(httpStatusCode);
+                return detail;
+            case "USER_IS_SYSTEM_ADD_IGNORE_TO_SMS":
+                log.info("USER_IS_SYSTEM_ADD_IGNORE_SMS");
+                detail.setProcStage(PnpStageEnum.SMS.value);
+                detail.setStatus(PnpStatusEnum.PROCESS.value);
+                detail.setBcStatus(PnpStatusEnum.USER_IS_SYSTEM_ADD_IGNORE_SMS.value);
+                detail.setBcHttpStatusCode(httpStatusCode);
+                return detail;
             case "BC_USER_IN_BLACK_LIST":
                 log.info("BC_USER_IN_BLACK_LIST");
                 detail.setProcStage(PnpStageEnum.BC.value);

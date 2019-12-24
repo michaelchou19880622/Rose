@@ -210,7 +210,7 @@ public class GroupGenerateRepository{
 			SendGroupDetail detail = sendGroupDetails.get(0);
 			sqlString += " WHERE f.KEY_DATA = ?" + params + " and f.VALUE " + detail.getQueryOp() + " ?" + (params+1) + " ";
 
-			sqlString += " AND u.status != 'BLOCK' and (u.STATUS = 'BINDED' OR u.STATUS = 'UNBIND') ";
+			sqlString += " AND u.status != 'BLOCK' and u.status != 'SYSADD' and (u.STATUS = 'BINDED' OR u.STATUS = 'UNBIND') ";
 
 			if(sendGroupDetails.size() > 1){
 				for(int i = 1; i < sendGroupDetails.size(); i++){
@@ -251,7 +251,7 @@ public class GroupGenerateRepository{
 
 			sqlString += " WHERE s.REFERENCE_ID = ?" + params + " ";
 
-			sqlString += " AND k.status != 'BLOCK' and (k.STATUS = 'BINDED' OR k.STATUS = 'UNBIND') ";
+			sqlString += " AND k.status != 'BLOCK' and u.status != 'SYSADD' and (k.STATUS = 'BINDED' OR k.STATUS = 'UNBIND') ";
 
 
 			if(sendGroupDetails.size() > 1){

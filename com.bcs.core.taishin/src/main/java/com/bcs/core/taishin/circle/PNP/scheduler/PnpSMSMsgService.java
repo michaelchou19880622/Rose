@@ -217,7 +217,8 @@ public class PnpSMSMsgService {
                 PnpStatusEnum.BC_SENT_FAIL_SMS_PROCESS,
                 PnpStatusEnum.BC_UID_NOT_FOUND_SMS_PROCESS,
                 PnpStatusEnum.BC_USER_BLOCKED_SMS_PROCESS,
-                PnpStatusEnum.BC_USER_IN_BLACK_LIST_SMS_PROCESS
+                PnpStatusEnum.BC_USER_IN_BLACK_LIST_SMS_PROCESS,
+                PnpStatusEnum.USER_IS_SYSTEM_ADD_IGNORE_SMS
         };
         for (PnpStatusEnum status : statusArray) {
             mitakeProcess(status);

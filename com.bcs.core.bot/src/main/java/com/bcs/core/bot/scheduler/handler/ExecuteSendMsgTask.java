@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.bcs.core.utils.DataUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -62,6 +63,7 @@ public class ExecuteSendMsgTask {
 				if(groupId > 0){
 					try{
 						List<String> mids =  groupGenerateService.findMIDBySendGroupDetailGroupId(groupId);
+						logger.info("mids:"+DataUtils.toPrettyJsonUseJackson(mids));
 						if(mids != null && mids.size() >0){
 							logger.debug("executeSendMsg mids ============ :" + mids.size());
 							/**
@@ -109,7 +111,7 @@ public class ExecuteSendMsgTask {
 				// 預設群祖
 				else{
 					Long totalCount = sendGroupService.countDefaultGroupSize(groupId);
-					logger.debug("countDefaultGroupSize:" + totalCount);
+					logger.info("countDefaultGroupSize:" + totalCount);
 
 					/**
 					 * Copy From MsgMain to MsgSendMain
@@ -118,7 +120,7 @@ public class ExecuteSendMsgTask {
 
 					List<MsgDetail> details = msgDetailService.findByMsgIdAndMsgParentType(msgSendMain.getMsgSendId(), MsgSendMain.THIS_PARENT_TYPE);
 
-					logger.debug("findByMsgIdAndMsgParentType");
+					logger.info("findByMsgIdAndMsgParentType");
 
 					/**
 					 * Send To Test Group for Check Send
@@ -136,6 +138,7 @@ public class ExecuteSendMsgTask {
 					int page = 0;
 					while(true){
 						List<String> list = sendGroupService.queryDefaultGroup(groupId, page, pageSize);
+						logger.info("mids:" + DataUtils.toPrettyJsonUseJackson(list));
 						if(list != null && list.size() > 0){
 							logger.debug("queryDefaultGroup:" + list.size());
 							// Handle : Sending

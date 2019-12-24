@@ -35,6 +35,7 @@ public class LineUser extends AbstractBcsEntity {
     public static final String STATUS_BLOCK = "BLOCK";
     public static final String STATUS_UNBIND = "UNBIND";
     public static final String STATUS_UNFRIEND = "UNFRIEND";
+    public static final String STATUS_SYS_ADD = "SYSADD";
 
     @Id
     @Column(name = "MID", columnDefinition = "nvarchar(50)")

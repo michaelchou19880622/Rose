@@ -83,7 +83,8 @@ public class PnpPNPMsgService {
         PnpStatusEnum[] statusEnumArray = {
                 PnpStatusEnum.BC_SENT_FAIL_PNP_PROCESS,
                 PnpStatusEnum.BC_UID_NOT_FOUND_PNP_PROCESS,
-                PnpStatusEnum.BC_USER_IN_BLACK_LIST_PNP_PROCESS
+                PnpStatusEnum.BC_USER_IN_BLACK_LIST_PNP_PROCESS,
+                PnpStatusEnum.USER_IS_SYSTEM_ADD_IGNORE_PNP
         };
         Arrays.stream(PnpFtpSourceEnum.values()).forEach(
                 type -> Arrays.stream(statusEnumArray).forEach(

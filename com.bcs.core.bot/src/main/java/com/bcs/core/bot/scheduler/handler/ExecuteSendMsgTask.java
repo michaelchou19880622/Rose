@@ -25,6 +25,7 @@ import com.bcs.core.db.service.SendGroupService;
 import com.bcs.core.enums.API_TYPE;
 import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.spring.ApplicationContextProvider;
+
 import com.bcs.core.utils.ErrorRecord;
 
 public class ExecuteSendMsgTask {
@@ -40,7 +41,13 @@ public class ExecuteSendMsgTask {
 		MsgMainService msgMainService = ApplicationContextProvider.getApplicationContext().getBean(MsgMainService.class);
 		MsgSendMainService msgSendMainService = ApplicationContextProvider.getApplicationContext().getBean(MsgSendMainService.class);
 		MsgDetailService msgDetailService = ApplicationContextProvider.getApplicationContext().getBean(MsgDetailService.class);
-
+		
+		int LinepointMain = sendGroupService.findLinePointMaincount(msgId);
+		if(LinepointMain != 0) {
+			logger.info(" [ linepoint 專案訊息 ]");
+			return;
+		}
+		
 		MsgMain msgMain = msgMainService.findOne(msgId);
 		logger.info("executeSendMsg : msgMain = " + msgMain);
 		

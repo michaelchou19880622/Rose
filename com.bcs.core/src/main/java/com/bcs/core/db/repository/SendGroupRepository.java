@@ -17,4 +17,8 @@ public interface SendGroupRepository extends EntityRepository<SendGroup, Long>{
 	@Transactional(readOnly = true, timeout = 30)
 	@Query("select x.groupTitle from SendGroup x where x.groupId = ?1")
 	public String findGroupTitleByGroupId(Long groupId);
+	
+	@Transactional(readOnly = true, timeout = 30)
+	@Query(value = "select count(*) from BCS_LINE_POINT_MAIN where APPEND_MESSAGE_ID = ?1", nativeQuery = true)
+	public int findLinePointMaincount(Long msgId);
 }

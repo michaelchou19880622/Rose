@@ -5,7 +5,7 @@ $(function(){
 	//--------- Initialize --------- 
 	//假如重整 就把已經填好的值放回去
 	if($.urlParam("title")){
-		$('#title').val($.urlParam("title"));
+		$('#title').val(decodeURI($.urlParam("title")));
 	}
 	if($.urlParam("pccCode")){
 		$('#pccCode').val($.urlParam("pccCode"));
@@ -294,6 +294,11 @@ $(function(){
         			if(cols[2] > maxPts){
         				maxPts = cols[2];
         			}
+        			if(cols[2] % 1 != 0){
+        				alert('名單格式有問題，請檢查');
+        				windowReplace();
+             			return;
+        			}
         		}else{
         			pts.push(0);
         		}
@@ -311,8 +316,8 @@ $(function(){
 			$.FailResponse(response);
 			return;
 		}).done(function(){
-			 //重系統參數抓警告點數上限
-			 if(maxPts > caveatLinePoint){
+			 //從系統參數抓警告點數上限
+			 if(parseInt(maxPts)> parseInt(caveatLinePoint) ){
 		    		var r = confirm('您的名單中有單筆超過'+caveatLinePoint+'點的發送需求');
 		    		if (r) {
 		    		} else {
@@ -417,11 +422,11 @@ $(function(){
     	if(doCheckFollowage == 'true'){
     		totalCount  = TrimmedCount;
     		totalAmount = TrimmedTotalAmount;
-    		fileInformation.innerHTML = '本次共發送' + TrimmedCount + '筆，合計發送點數為' + TrimmedTotalAmount +'點';
+    		fileInformation.innerHTML = '本次共發送' + TrimmedCount + '筆，合計' + TrimmedTotalAmount +'點LINE POINTS';
     	}else{
     		totalCount  = TrimmedCount+outCount;
     		totalAmount = TrimmedTotalAmount+outTotalAmount;
-    		fileInformation.innerHTML = '本次共發送' + totalCount + '筆，合計發送點數為' + totalAmount +'點';
+    		fileInformation.innerHTML = '本次共發送' + totalCount + '筆，合計' + totalAmount +'點LINE POINTS';
     	}
     }
     //修改aaaaaaa
@@ -430,11 +435,11 @@ $(function(){
     	if(doCheckFollowage == 'true'){
     		totalCount  = TrimmedCount;
     		totalAmount = TrimmedTotalAmount;
-	   		fileInformation.innerHTML = '本次共發送' + TrimmedCount + '筆，合計發送點數為' + TrimmedTotalAmount +'點';
+	   		fileInformation.innerHTML = '本次共發送' + TrimmedCount + '筆，合計' + TrimmedTotalAmount +'點LINE POINTS';
 	   	}else{
 	   		totalCount  = TrimmedCount+outCount;
     		totalAmount = TrimmedTotalAmount+outTotalAmount;
-	   		fileInformation.innerHTML = '本次共發送' + totalCount + '筆，合計發送點數為' + totalAmount +'點';
+	   		fileInformation.innerHTML = '本次共發送' + totalCount + '筆，合計' + totalAmount +'點LINE POINTS';
 	   	}
     });
     function errorHandler(evt) {
@@ -726,6 +731,22 @@ $(function(){
 				$('.LyMain').unblock();
 				return;
 			}
+			var sendingMsgTime ;
+			var datepickerVal = $('#delaySelect .datepicker').val();
+			var selectHour = $('#delaySelect .selectHour').val();
+			console.info('selectHour', selectHour);
+			var selectMinuteOne = $('#delaySelect .selectMinuteOne').val();
+			console.info('selectMinuteOne', selectMinuteOne);
+			var selectMinuteTwo = $('#delaySelect .selectMinuteTwo').val();
+			console.info('selectMinuteTwo', selectMinuteTwo);
+			sendingMsgTime = datepickerVal + " " + selectHour + ":" + selectMinuteOne + selectMinuteTwo + ":00";
+			console.info('sendingMsgTime', sendingMsgTime);
+			var today=new Date();
+			if(today > new Date(sendingMsgTime)){
+				alert('預約發送時間必須大於現在');
+				return;
+			}
+			
 		}
 		
 		var sendAmountType = $('.sendAmountType:checked').val();
@@ -1246,7 +1267,7 @@ $(function(){
                 
                 var fileInformation = document.getElementById("fileInformation");
 
-                fileInformation.innerHTML = '本次共發送' + o.totalCount + '筆，合計發送點數為' + o.totalAmount +'點';
+                fileInformation.innerHTML = '本次共發送' + o.totalCount + '筆，合計' + o.totalAmount +'點LINE POINTS';
                 totalCount = o.totalCount;
                 totalAmount = o.totalAmount;
                 var doAppendMessage = o.doAppendMessage;

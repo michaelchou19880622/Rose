@@ -23,20 +23,20 @@ public class GroupGenerateRepository{
 
 	/** Logger */
 	private static Logger logger = Logger.getLogger(GroupGenerateRepository.class);
-	
+
     @PersistenceContext
     private EntityManager entityManager;
-    
+
     @Autowired
     private SendGroupDetailRepository sendGroupDetailRepository;
-    
+
 	public static List<String> validQueryOp = Arrays.asList(new String[] { ">", ">=", "<", "<=", "=" });
-    
+
     @PostConstruct
     public void init() {
-    	
+
     }
-    
+
 	public BigInteger findMIDCountBySendGroupDetail(List<SendGroupDetail> sendGroupDetails) throws Exception {
 		Query query = buildFindQuery(sendGroupDetails, "COUNT(DISTINCT MID)");
 		Object result = query.getSingleResult();
@@ -52,14 +52,14 @@ public class GroupGenerateRepository{
 			return BigInteger.ZERO;
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public List<String> findMIDBySendGroupDetailGroupId(Long groupId) throws Exception {
 		List<SendGroupDetail> sendGroupDetails = sendGroupDetailRepository.findBySendGroupGroupId(groupId);
 		Query query = buildFindQuery(sendGroupDetails, "DISTINCT MID");
 		return query.getResultList();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public String checkMIDBySendGroupDetailGroupId(Long groupId, String mid) throws Exception {
 		List<SendGroupDetail> sendGroupDetails = sendGroupDetailRepository.findBySendGroupGroupId(groupId);
@@ -75,30 +75,30 @@ public class GroupGenerateRepository{
 
 	@SuppressWarnings("unchecked")
 	public List<String> findMIDBySendGroupDetail(List<SendGroupDetail> sendGroupDetails) throws Exception {
-		
+
 		Query query = buildFindQuery(sendGroupDetails, "DISTINCT MID");
 		return query.getResultList();
 	}
-	
+
 	private Query buildFindQuery(List<SendGroupDetail> sendGroupDetails, String selectColumns) throws Exception {
 		return this.buildFindQuery(sendGroupDetails, selectColumns, null);
 	}
-	
+
 	/**
 	 * 建立用來查詢 IK0105 的 Query
-	 * 
+	 *
 	 * @param defaultSqlString
 	 * @param sendGroupDetails
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	private Query buildFindQuery(List<SendGroupDetail> sendGroupDetails, String selectColumns, String mid) throws Exception {
 		Validate.notEmpty(sendGroupDetails);
 		Validate.notEmpty(selectColumns);
-		
+
 		List<SendGroupDetail> sendGroupSetting = new ArrayList<SendGroupDetail>();
 		List<SendGroupDetail> uploadMidSetting = new ArrayList<SendGroupDetail>();
-		
+
 		// 分離 Upload Mid Detail Setting
 		for(SendGroupDetail detail : sendGroupDetails){
 			if("UploadMid".equals(detail.getQueryField())){
@@ -108,25 +108,25 @@ public class GroupGenerateRepository{
 				sendGroupSetting.add(detail);
 			}
 		}
-		
+
 		sendGroupDetails = sendGroupSetting;
-		
+
 		//  驗證 queryOp，避免SQL攻擊(SQL injection)
 		checkSendGroupDetail(sendGroupDetails);
 
 		String sqlString = "SELECT "
 						+ selectColumns
 				+ " FROM ";
-		
+
 		if(sendGroupDetails != null && sendGroupDetails.size() > 0){
 			sqlString += generateMidFieldSettingFrom(sendGroupDetails, 1);
 		}
-		
+
 		// Setting Upload Mid SQL
 		if (uploadMidSetting != null && uploadMidSetting.size() > 0) {
 			if (sendGroupDetails != null && sendGroupDetails.size() > 0) {
 				sqlString += ", " + generateUploadMidSettingFrom(uploadMidSetting, sendGroupDetails.size() * 2 + 1);
-			} 
+			}
 			else {
 
 				selectColumns = selectColumns.replace("MID", "SETMID");
@@ -156,16 +156,16 @@ public class GroupGenerateRepository{
 				}
 			}
 		}
-		
+
 		logger.info(sqlString);
-		
+
 		if(StringUtils.isBlank(sqlString)){
 			throw new Exception("SQL Error : Blank");
 		}
-		
+
 		Query query = entityManager.createNativeQuery(sqlString);
 		query.setHint("javax.persistence.query.timeout", 300000);
-		
+
 		for (int i = 0; i < sendGroupDetails.size(); i++) {
 			query.setParameter(2*i + 1, sendGroupDetails.get(i).getQueryField());
 			query.setParameter(2*i + 2, sendGroupDetails.get(i).getQueryValue());
@@ -187,30 +187,30 @@ public class GroupGenerateRepository{
 			query.setParameter(sendGroupDetails.size()*2 + uploadMidSetting.size() + 1, mid);
 			logger.info("setParameter:" + (sendGroupDetails.size()*2 + uploadMidSetting.size() + 1) + ", " + mid);
 		}
-		
+
 		return query;
 	}
-	
+
 	private String generateMidFieldSettingFrom(List<SendGroupDetail> sendGroupDetails, int params){
 
 		if(sendGroupDetails != null && sendGroupDetails.size() > 0){
-			String sqlString = 
+			String sqlString =
 					"( "
 					+ " SELECT f.MID as MID"
 					+ " FROM BCS_USER_FIELD_SET f ";
-			
+
 			sqlString += " INNER JOIN BCS_LINE_USER u ON u.MID = f.MID ";
-			
+
 			if(sendGroupDetails.size() > 1){
 				for(int i = 1; i < sendGroupDetails.size(); i++){
 					sqlString += " INNER JOIN BCS_USER_FIELD_SET f" + i + " ON f.MID = f" + i + ".MID ";
 				}
 			}
-			
+
 			SendGroupDetail detail = sendGroupDetails.get(0);
 			sqlString += " WHERE f.KEY_DATA = ?" + params + " and f.VALUE " + detail.getQueryOp() + " ?" + (params+1) + " ";
-			
-			sqlString += " AND (u.STATUS = 'BINDED' OR u.STATUS = 'UNBIND') ";
+
+			sqlString += " AND u.status != 'BLOCK' and (u.STATUS = 'BINDED' OR u.STATUS = 'UNBIND') ";
 
 			if(sendGroupDetails.size() > 1){
 				for(int i = 1; i < sendGroupDetails.size(); i++){
@@ -218,15 +218,15 @@ public class GroupGenerateRepository{
 					sqlString += " AND f" + i + ".KEY_DATA = ?" + (2*i+params) + " and f" + i + ".VALUE " + detail.getQueryOp() + " ?" + (2*i+params+1) + " ";
 				}
 			}
-			
+
 			sqlString+= " ) AS FIELD_SET ";
-			
+
 			return sqlString;
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * 產生 Upload Mid Setting From SQL
 	 * @param sendGroupDetails
@@ -236,47 +236,47 @@ public class GroupGenerateRepository{
 	private String generateUploadMidSettingFrom(List<SendGroupDetail> sendGroupDetails, int params){
 
 		if(sendGroupDetails != null && sendGroupDetails.size() > 0){
-			String sqlString = 
+			String sqlString =
 					"( "
 					+ " SELECT s.MID as SETMID"
 					+ " FROM BCS_USER_EVENT_SET s ";
-			
+
 			sqlString += " INNER JOIN BCS_LINE_USER k ON k.MID = s.MID ";
-			
+
 			if(sendGroupDetails.size() > 1){
 				for(int i = 1; i < sendGroupDetails.size(); i++){
 					sqlString += " INNER JOIN BCS_USER_EVENT_SET s" + i + " ON s.MID = s" + i + ".MID ";
 				}
 			}
-			
-			sqlString += " WHERE s.REFERENCE_ID = ?" + params + " ";
-			
-			sqlString += " AND (k.STATUS = 'BINDED' OR k.STATUS = 'UNBIND') ";
 
-			
+			sqlString += " WHERE s.REFERENCE_ID = ?" + params + " ";
+
+			sqlString += " AND k.status != 'BLOCK' and (k.STATUS = 'BINDED' OR k.STATUS = 'UNBIND') ";
+
+
 			if(sendGroupDetails.size() > 1){
 				for(int i = 1; i < sendGroupDetails.size(); i++){
 					sqlString += " OR s" + i + ".REFERENCE_ID = ?" + (i+params) + " ";
 				}
 			}
-			
+
 			sqlString+= " ) AS EVENT_SET ";
-			
+
 			return sqlString;
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * 驗證 queryField、queryOp，避免SQL攻擊(SQL injection)
-	 * 
+	 *
 	 * @param sendGroupDetails
 	 */
 	private void checkSendGroupDetail(List<SendGroupDetail> sendGroupDetails) {
 		for (SendGroupDetail sendGroupDetail : sendGroupDetails) {
 			String queryOp = sendGroupDetail.getQueryOp();
-			
+
 			if (!validQueryOp.contains(queryOp)) {
 				throw new IllegalArgumentException(
 						"queryOp is illegal! queryOp : " + queryOp);

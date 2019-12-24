@@ -155,7 +155,7 @@ public class LinePointPushMessageActor extends UntypedActor {
 				
 				if(detail.getStatus().equals(LinePointDetail.STATUS_SUCCESS)) {
 					Long msgId = linePointMain.getAppendMessageId();
-					if(StringUtils.isNotEmpty(msgId.toString())) {
+					if(msgId != null) {
 						Logger.info("LinePoint發送成功 開始發訊息給會員");
 						MsgMain msgMain = msgMainService.findOne(msgId);
 						Logger.info("executeSendMsg : msgMain = " + msgMain);

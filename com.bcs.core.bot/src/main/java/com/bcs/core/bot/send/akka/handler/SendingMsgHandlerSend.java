@@ -51,34 +51,34 @@ public class SendingMsgHandlerSend extends UntypedActor {
 
 		if (message instanceof AsyncSendingModel) {
 			AsyncSendingModel msgs = (AsyncSendingModel) message;
-			logger.debug("AsyncSendingModel onReceive:" + msgs);
+			logger.info("AsyncSendingModel onReceive:" + msgs);
 
 			if(msgs.getMids() != null){
-				
-				
+
+
 				Long msgSendId = msgs.getUpdateMsgId();
 				MsgSendMain msgSendMain = null;
 				if(msgSendId != null){
 					msgSendMain = ApplicationContextProvider.getApplicationContext().getBean(MsgSendMainService.class).findOne(msgSendId);
 				}
-				
-				logger.debug("Size:" + msgs.getMids().size());
+
+				logger.info("Size:" + msgs.getMids().size());
 				List<String[]> successMid = new ArrayList<String[]>();
-				
+
 				List<MsgGenerator> msgGenerators = msgs.getMsgGenerators();
-				
+
 				SendToBotModel sendToBotModel = new SendToBotModel();
 
 				sendToBotModel.setChannelId(msgs.getChannelId());
 				sendToBotModel.setSendType(SEND_TYPE.PUSH_MSG);
-								
+
 				for(String mid : msgs.getMids()){
 					try {
-						
+
 						Map<String, String> replaceParam = null;
-						
+
 						if(msgSendMain != null){
-							
+
 							if(StringUtils.isNotBlank(msgSendMain.getSerialId())){
 								replaceParam = serialSettingService.getSerialSettingReplaceParam(msgSendMain.getSerialId(), mid);
 								if(replaceParam == null){
@@ -89,16 +89,16 @@ public class SendingMsgHandlerSend extends UntypedActor {
 
 						List<Message> messageList = new ArrayList<Message>();
 						for(MsgGenerator msgGenerator : msgGenerators){
-							messageList.add(msgGenerator.getMessageBot(mid, replaceParam));	
+							messageList.add(msgGenerator.getMessageBot(mid, replaceParam));
 						}
-						
+
 						String recordStatus = "";
 						PushMessage pushMessage = new PushMessage(mid, messageList);
 						sendToBotModel.setPushMessage(pushMessage);
-						
+
 						String channelName = inprogressMids.get(mid) != null ? CONFIG_STR.InManualReplyButNotSendMsg.toString() : CONFIG_STR.AutoReply.toString();
 						sendToBotModel.setChannelName(channelName);
-						
+
 						Response<BotApiResponse> response = LineAccessApiService.sendToLine(sendToBotModel);
 
 						recordStatus = this.checkStatus(response, recordStatus, mid, msgs.getUpdateMsgId());
@@ -111,7 +111,7 @@ public class SendingMsgHandlerSend extends UntypedActor {
 					} catch (Exception e) {
 						logger.error(ErrorRecord.recordError(e));
 						logger.error("MID:" + mid);
-						
+
 						List<String> errorMid = new ArrayList<String>();
 						errorMid.add(mid);
 						AsyncSendingModelError error = new AsyncSendingModelError(msgs.getMsgGenerators(), msgs.getChannelId(), errorMid, msgs.getApiType(), e.getMessage(), msgs.getUpdateMsgId(), new Date());
@@ -137,24 +137,24 @@ public class SendingMsgHandlerSend extends UntypedActor {
 				if(msgSendId != null){
 					msgSendMain = ApplicationContextProvider.getApplicationContext().getBean(MsgSendMainService.class).findOne(msgSendId);
 				}
-				
+
 				logger.debug("Size:" + msgs.getMids().size());
-				
+
 				List<MsgGenerator> msgGenerators = msgs.getMsgGenerators();
-				
+
 				SendToBotModel sendToBotModel = new SendToBotModel();
 
 				sendToBotModel.setChannelId(CONFIG_STR.Default.toString());
 				sendToBotModel.setSendType(SEND_TYPE.PUSH_MSG);
-				
+
 				List<String[]> successMid = new ArrayList<String[]>();
 				for(String mid : msgs.getMids()){
 					try {
-						
+
 						Map<String, String> replaceParam = null;
-						
+
 						if(msgSendMain != null){
-							
+
 							if(StringUtils.isNotBlank(msgSendMain.getSerialId())){
 								replaceParam = serialSettingService.getSerialSettingReplaceParam(msgSendMain.getSerialId(), mid);
 								if(replaceParam == null){
@@ -162,21 +162,21 @@ public class SendingMsgHandlerSend extends UntypedActor {
 								}
 							}
 						}
-						
+
 						List<Message> messageList = new ArrayList<Message>();
 						for(MsgGenerator msgGenerator : msgGenerators){
-							messageList.add(msgGenerator.getMessageBot(mid, replaceParam));	
+							messageList.add(msgGenerator.getMessageBot(mid, replaceParam));
 						}
-						
+
 						String recordStatus = "";
 						PushMessage pushMessage = new PushMessage(mid, messageList);
 						sendToBotModel.setPushMessage(pushMessage);
-						
+
 						String channelName = inprogressMids.get(mid) != null ? CONFIG_STR.InManualReplyButNotSendMsg.toString() : CONFIG_STR.AutoReply.toString();
 						sendToBotModel.setChannelName(channelName);
-							
+
 						Response<BotApiResponse> response= LineAccessApiService.sendToLine(sendToBotModel);
-						
+
 						recordStatus = this.checkStatus(response, recordStatus, mid, msgs.getUpdateMsgId());
 
 						if(response.code() != 200){
@@ -187,7 +187,7 @@ public class SendingMsgHandlerSend extends UntypedActor {
 					} catch (Exception e) {
 						logger.error(ErrorRecord.recordError(e));
 						logger.error("MID:" + mid);
-					
+
 						getSender().tell(msgs, getSelf());
 					}
 				}
@@ -201,40 +201,40 @@ public class SendingMsgHandlerSend extends UntypedActor {
 		}
 		else if(message instanceof AsyncEsnSendingModel) {
 		    AsyncEsnSendingModel msgs = (AsyncEsnSendingModel)message;
-		    
+
 		    if(msgs.getEsnDetails() != null) {
-		        
+
 		        SendToBotModel sendToBotModel = new SendToBotModel();
 
                 sendToBotModel.setChannelId(CONFIG_STR.Default.toString());
                 sendToBotModel.setSendType(SEND_TYPE.PUSH_MSG);
 
                 Date now = new Date();
-                
+
                 List<Long> successDetailIds = new ArrayList<>();
-                
+
 		        for(ContentEsnDetail esnDetail : msgs.getEsnDetails()) {
 
 		            try {
 		                List<Message> messageList = new ArrayList<>(msgs.getMessageList());
 		                TextMessage esnMessage = new TextMessage(esnDetail.getEsn());
 		                messageList.add(esnMessage);
-		                
+
 		                String recordStatus = "";
                         PushMessage pushMessage = new PushMessage(esnDetail.getUid(), messageList);
                         sendToBotModel.setPushMessage(pushMessage);
-                        
+
                         String channelName = inprogressMids.get(esnDetail.getUid()) != null ? CONFIG_STR.InManualReplyButNotSendMsg.toString() : CONFIG_STR.AutoReply.toString();
 						sendToBotModel.setChannelName(channelName);
-                            
+
                         Response<BotApiResponse> response = LineAccessApiService.sendToLine(sendToBotModel);
-		                
+
                         recordStatus = this.checkStatus(response, recordStatus, esnDetail.getUid(), esnDetail.getEsnDetailId());
-                        
+
                         if(response.code() != 200){
                             throw new Exception("Send ESN Msg PostLineResponse Status:" + response.code());
                         }
-                        
+
                         successDetailIds.add(esnDetail.getEsnDetailId());
 		            }catch (Exception e) {
 		                logger.error(ErrorRecord.recordError(e));
@@ -242,10 +242,10 @@ public class SendingMsgHandlerSend extends UntypedActor {
 		                List<ContentEsnDetail> errorDetail = new ArrayList<>();
 		                errorDetail.add(esnDetail);
 		                AsyncEsnSendingModelError error = new AsyncEsnSendingModelError(msgs.getChannelId(), msgs.getMessageList(), errorDetail, msgs.getApiType(), now);
-		                
+
 		                getSender().tell(error, getSelf());
 		            }
-		            
+
 		            if(successDetailIds != null && successDetailIds.size() > 0) {
 		                AsyncEsnSendingModelSuccess success = new AsyncEsnSendingModelSuccess(successDetailIds, now);
 		                getSender().tell(success, getSelf());
@@ -255,47 +255,47 @@ public class SendingMsgHandlerSend extends UntypedActor {
 		}
 		else if(message instanceof AsyncEsnSendingModelError) {
 		    AsyncEsnSendingModelError msgs = (AsyncEsnSendingModelError)message;
-		    
+
 		    if(msgs.getEsnDetails() != null) {
-                
+
                 SendToBotModel sendToBotModel = new SendToBotModel();
 
                 sendToBotModel.setChannelId(CONFIG_STR.Default.toString());
                 sendToBotModel.setSendType(SEND_TYPE.PUSH_MSG);
 
                 Date now = new Date();
-                
+
                 List<Long> successDetailIds = new ArrayList<>();
-                
+
                 for(ContentEsnDetail esnDetail : msgs.getEsnDetails()) {
 
                     try {
                         List<Message> messageList = new ArrayList<>(msgs.getMessageList());
                         TextMessage esnMessage = new TextMessage(esnDetail.getEsn());
                         messageList.add(esnMessage);
-                        
+
                         String recordStatus = "";
                         PushMessage pushMessage = new PushMessage(esnDetail.getUid(), messageList);
                         sendToBotModel.setPushMessage(pushMessage);
-                        
+
                         String channelName = inprogressMids.get(esnDetail.getUid()) != null ? CONFIG_STR.InManualReplyButNotSendMsg.toString() : CONFIG_STR.AutoReply.toString();
 						sendToBotModel.setChannelName(channelName);
-                            
+
                         Response<BotApiResponse> response = LineAccessApiService.sendToLine(sendToBotModel);
-                        
+
                         recordStatus = this.checkStatus(response, recordStatus, esnDetail.getUid(), esnDetail.getEsnDetailId());
-                        
+
                         if(response.code() != 200){
                             throw new Exception("Send ESN Msg PostLineResponse Status:" + response.code());
                         }
-                        
+
                         successDetailIds.add(esnDetail.getEsnDetailId());
                     }catch (Exception e) {
                         logger.error(ErrorRecord.recordError(e));
 
                         getSender().tell(msgs, getSelf());
                     }
-                    
+
                     if(successDetailIds != null && successDetailIds.size() > 0) {
                         AsyncEsnSendingModelSuccess success = new AsyncEsnSendingModelSuccess(successDetailIds, now);
                         getSender().tell(success, getSelf());
@@ -304,12 +304,12 @@ public class SendingMsgHandlerSend extends UntypedActor {
             }
 		}
 	}
-	
+
 	private String checkStatus(Response<BotApiResponse> response, String recordStatus, String mid, Long msgId) throws Exception{
 
 		logger.debug("status:" + response.code());
 		recordStatus += response.code() + "-";
-		
+
 		if(response.code() != 200){
 			List<Object> content = new ArrayList<Object>();
 			content.add(mid);
@@ -321,7 +321,7 @@ public class SendingMsgHandlerSend extends UntypedActor {
 			}
 			SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_LineApi, LOG_TARGET_ACTION_TYPE.ACTION_SendToLineApiStatus, content, mid);
 		}
-		
+
 		return recordStatus;
 	}
 }

@@ -94,7 +94,7 @@ public class LineUserService {
             Date time = new Date();
             lineUser = new LineUser();
             lineUser.setMid(mid);
-            lineUser.setStatus(LineUser.STATUS_UNBIND);
+            lineUser.setStatus(LineUser.STATUS_SYS_ADD);
             lineUser.setIsBinded(LineUser.STATUS_UNBIND);
             lineUser.setModifyTime(time);
             lineUser.setCreateTime(time);

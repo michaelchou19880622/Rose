@@ -206,12 +206,14 @@ $(function() {
         	return;
         }
         console.info('btn_sendFunc linePointMainId:' + linePointMainId);
-        
-        if(currentTime.isAfter(sendTimingTime)){
-        	alert('已超過預約發送時間');
-        	return;
+        alert(currentTime.isAfter(sendTimingTime));
+        if(sendTimingTime){
+        	if(currentTime.isAfter(sendTimingTime)){
+        		alert('已超過預約發送時間');
+        		return;
+            }
         }
-        
+
 
         $.ajax({
             type: 'get',

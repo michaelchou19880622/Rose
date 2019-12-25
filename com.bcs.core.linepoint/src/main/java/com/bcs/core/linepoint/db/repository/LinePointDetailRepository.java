@@ -37,7 +37,7 @@ public interface LinePointDetailRepository extends EntityRepository<LinePointDet
     public List<LinePointDetail> deleteByLinePointMainId(Long linePointMainId);
     
     @Transactional(timeout = 30)
-    @Query(value = "select count(0) from BCS_LINE_POINT_DETAIL where LINE_POINT_MAIN_ID = ?1 and amount > ?2 " ,nativeQuery = true)
+    @Query(value = "select count(0) from BCS_LINE_POINT_DETAIL where LINE_POINT_MAIN_ID = ?1 and amount >= ?2 " ,nativeQuery = true)
     public String getCountLinePointDetailAmountMoreCaveatLinePoint(Long linePointMainId , String caveatLinePoint);
     
     @Transactional(timeout = 30)

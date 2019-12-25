@@ -331,7 +331,7 @@ $(function(){
 			return;
 		}).done(function(){
 			 //從系統參數抓警告點數上限
-			 if(parseInt(maxPts)> parseInt(caveatLinePoint) ){
+			 if(parseInt(maxPts)>= parseInt(caveatLinePoint) ){
 		    		var r = confirm('您的名單中有單筆超過'+caveatLinePoint+'點的發送需求');
 		    		if (r) {
 		    		} else {

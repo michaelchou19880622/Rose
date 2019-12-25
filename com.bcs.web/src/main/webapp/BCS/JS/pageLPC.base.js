@@ -270,6 +270,19 @@ $(function(){
         for (var i = 0; i < rows.length; i++) {
         	var cols = rows[i].split(/,/);
         	console.info('cols:', cols);
+        	if(cols.length >= 3){
+        		alert("名單格式有問題，請檢查");
+        		return;
+        	}
+        	
+    		var uidFormat = /^U[a-z0-9]{32}$/;
+    		if(!uidFormat.test(cols[0])){
+    			alert('名單格式有問題，請檢查');
+    			$('.LyMain').unblock();
+    			return;
+    		}
+        	
+        	
         	uids.push(cols[0]);
         	custIds.push(cols[1]);
         	
@@ -294,10 +307,11 @@ $(function(){
         			if(cols[2] > maxPts){
         				maxPts = cols[2];
         			}
-        			if(cols[2] % 1 != 0){
+        			var amoutFormat = /^[0-9]*$/;
+        			if(!amoutFormat.test(cols[2])){
         				alert('名單格式有問題，請檢查');
-        				windowReplace();
-             			return;
+        				$('.LyMain').unblock();
+        				return;
         			}
         		}else{
         			pts.push(0);
@@ -429,7 +443,7 @@ $(function(){
     		fileInformation.innerHTML = '本次共發送' + totalCount + '筆，合計' + totalAmount +'點LINE POINTS';
     	}
     }
-    //修改aaaaaaa
+    //選擇是否加入會員
     $('[name="doCheckFollowage"]').click(function(){
     	var doCheckFollowage = $('[name="doCheckFollowage"]:checked').val();
     	if(doCheckFollowage == 'true'){
@@ -694,7 +708,7 @@ $(function(){
 			return;
 		}else{
 			if(pccCode.indexOf('-') == -1){
-				var pccCodeFormat = /^[0-9]{9,11}$/;
+				var pccCodeFormat = /^[a-zA-Z0-9]{9,11}$/;
 				if(!pccCodeFormat.test(pccCode)){
 					alert('掛帳PCC格式有誤');
 					$('.LyMain').unblock();
@@ -702,7 +716,7 @@ $(function(){
 				}
 			}else{
 				pccCode = pccCode.replace("-","");
-				var pccCodeFormat = /^[0-9]{9,10}$/;
+				var pccCodeFormat = /^[a-zA-Z0-9]{9,10}$/;
 				if(!pccCodeFormat.test(pccCode)){
 					alert('掛帳PCC格式有誤');
 					$('.LyMain').unblock();
@@ -1564,6 +1578,8 @@ $(function(){
     	
     	
     }
+    
+    
 });
 
 

@@ -1,7 +1,6 @@
 $(function() {
     var originalTr = {};
     var startDate = null, endDate = null;
-
 	$('.datepicker').datepicker({
 		 maxDate : 0,
 		 dateFormat : 'yy-mm-dd',
@@ -95,7 +94,7 @@ $(function() {
 		        templateTr.find('.successfulAmount').html(o.successfulAmount);
 
 		        // get date data
-		        var currentTime = moment(new Date()).add(-120, 'seconds');
+		        var currentTime = moment(new Date()).add(120, 'seconds');
 		        var sendTimingTime = moment(o.sendTimingTime).format('YYYY-MM-DD HH:mm:ss');
 		        console.info('currentTime:', currentTime);
 		        console.info('sendStartTime:', sendTimingTime);
@@ -124,11 +123,10 @@ $(function() {
 		        }
 
 		        templateTr.find('.status').html(statusCh);
-
 		        // set button
 		        if(o.sendStartTime){
 		        	templateTr.find('.btn_copy').val('已發送');
-		        }else if(currentTime.isAfter(sendTimingTime)){
+		        }else if(currentTime.isAfter(o.sendTimingTime)){
 		        	templateTr.find('.btn_copy').val('過期');
 		        	templateTr.find('.btn_detele').remove();
 		        }else{
@@ -140,6 +138,7 @@ $(function() {
 		        	templateTr.find('.btn_copy').attr('totalCount',o.totalCount);
 			        templateTr.find('.btn_copy').attr('totalAmount',o.totalAmount);
 		        	templateTr.find('.btn_copy').attr('linePointId', o.id);
+		        	templateTr.find('.btn_copy').attr('sendTimingTime', o.sendTimingTime);
                     templateTr.find('.btn_copy').click(btn_sendFunc);
 		        }
 
@@ -196,15 +195,23 @@ $(function() {
 
     // do Send
     var btn_sendFunc = function() {
+    	var currentTime = moment(new Date()).add(120, 'seconds');
         var linePointMainId = $(this).attr('linePointId');
         var totalCount		= $(this).attr('totalCount');
         var totalAmount 	= $(this).attr('totalAmount');
-        var actionText = $(this).attr('value');
+        var actionText 		= $(this).attr('value');
+        var sendTimingTime  = $(this).attr('sendTimingTime');
         var caveatLinePointAndCount = '';
         if(!linePointMainId){
         	return;
         }
         console.info('btn_sendFunc linePointMainId:' + linePointMainId);
+        
+        if(currentTime.isAfter(sendTimingTime)){
+        	alert('已超過預約發送時間');
+        	return;
+        }
+        
 
         $.ajax({
             type: 'get',
@@ -212,7 +219,7 @@ $(function() {
 		}).success(function(response){
 			console.info('caveatLinePoint and count : ' , response);
 			caveatLinePointAndCount = response;
-
+			
 
 			var count = caveatLinePointAndCount.split('@');
             // warning while actionText = Send

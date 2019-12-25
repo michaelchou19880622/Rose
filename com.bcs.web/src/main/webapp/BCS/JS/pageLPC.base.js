@@ -270,7 +270,8 @@ $(function(){
         for (var i = 0; i < rows.length; i++) {
         	var cols = rows[i].split(/,/);
         	console.info('cols:', cols);
-        	if(cols.length >= 3){
+        	
+        	if(cols.length > 3){
         		alert("名單格式有問題，請檢查");
         		return;
         	}
@@ -351,7 +352,7 @@ $(function(){
 			//return;
         }
         $('.sendAmountType').attr('disabled', true);
-        $('#amount').attr('disabled', true);
+        //$('#amount').attr('disabled', true);
         // no need to check follow-age
         //改成是否檢核加入的uid
 //        if($('.doCheckFollowage')[1].checked){
@@ -758,6 +759,7 @@ $(function(){
 			var today=new Date();
 			if(today > new Date(sendingMsgTime)){
 				alert('預約發送時間必須大於現在');
+				$('.LyMain').unblock();
 				return;
 			}
 			

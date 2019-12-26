@@ -5,7 +5,7 @@ $(function(){
 	//--------- Initialize --------- 
 	//假如重整 就把已經填好的值放回去
 	if($.urlParam("title")){
-		$('#title').val($.urlParam("title"));
+		$('#title').val(decodeURI($.urlParam("title")));
 	}
 	if($.urlParam("pccCode")){
 		$('#pccCode').val($.urlParam("pccCode"));
@@ -270,6 +270,20 @@ $(function(){
         for (var i = 0; i < rows.length; i++) {
         	var cols = rows[i].split(/,/);
         	console.info('cols:', cols);
+        	
+        	if(cols.length > 3){
+        		alert("名單格式有問題，請檢查");
+        		return;
+        	}
+        	
+    		var uidFormat = /^U[a-z0-9]{32}$/;
+    		if(!uidFormat.test(cols[0])){
+    			alert('名單格式有問題，請檢查');
+    			$('.LyMain').unblock();
+    			return;
+    		}
+        	
+        	
         	uids.push(cols[0]);
         	custIds.push(cols[1]);
         	
@@ -294,6 +308,12 @@ $(function(){
         			if(cols[2] > maxPts){
         				maxPts = cols[2];
         			}
+        			var amoutFormat = /^[0-9]*$/;
+        			if(!amoutFormat.test(cols[2])){
+        				alert('名單格式有問題，請檢查');
+        				$('.LyMain').unblock();
+        				return;
+        			}
         		}else{
         			pts.push(0);
         		}
@@ -311,8 +331,8 @@ $(function(){
 			$.FailResponse(response);
 			return;
 		}).done(function(){
-			 //重系統參數抓警告點數上限
-			 if(maxPts > caveatLinePoint){
+			 //從系統參數抓警告點數上限
+			 if(parseInt(maxPts)>= parseInt(caveatLinePoint) ){
 		    		var r = confirm('您的名單中有單筆超過'+caveatLinePoint+'點的發送需求');
 		    		if (r) {
 		    		} else {
@@ -332,7 +352,7 @@ $(function(){
 			//return;
         }
         $('.sendAmountType').attr('disabled', true);
-        $('#amount').attr('disabled', true);
+        //$('#amount').attr('disabled', true);
         // no need to check follow-age
         //改成是否檢核加入的uid
 //        if($('.doCheckFollowage')[1].checked){
@@ -417,24 +437,24 @@ $(function(){
     	if(doCheckFollowage == 'true'){
     		totalCount  = TrimmedCount;
     		totalAmount = TrimmedTotalAmount;
-    		fileInformation.innerHTML = '本次共發送' + TrimmedCount + '筆，合計發送點數為' + TrimmedTotalAmount +'點';
+    		fileInformation.innerHTML = '本次共發送' + TrimmedCount + '筆，合計' + TrimmedTotalAmount +'點LINE POINTS';
     	}else{
     		totalCount  = TrimmedCount+outCount;
     		totalAmount = TrimmedTotalAmount+outTotalAmount;
-    		fileInformation.innerHTML = '本次共發送' + totalCount + '筆，合計發送點數為' + totalAmount +'點';
+    		fileInformation.innerHTML = '本次共發送' + totalCount + '筆，合計' + totalAmount +'點LINE POINTS';
     	}
     }
-    //修改aaaaaaa
+    //選擇是否加入會員
     $('[name="doCheckFollowage"]').click(function(){
     	var doCheckFollowage = $('[name="doCheckFollowage"]:checked').val();
     	if(doCheckFollowage == 'true'){
     		totalCount  = TrimmedCount;
     		totalAmount = TrimmedTotalAmount;
-	   		fileInformation.innerHTML = '本次共發送' + TrimmedCount + '筆，合計發送點數為' + TrimmedTotalAmount +'點';
+	   		fileInformation.innerHTML = '本次共發送' + TrimmedCount + '筆，合計' + TrimmedTotalAmount +'點LINE POINTS';
 	   	}else{
 	   		totalCount  = TrimmedCount+outCount;
     		totalAmount = TrimmedTotalAmount+outTotalAmount;
-	   		fileInformation.innerHTML = '本次共發送' + totalCount + '筆，合計發送點數為' + totalAmount +'點';
+	   		fileInformation.innerHTML = '本次共發送' + totalCount + '筆，合計' + totalAmount +'點LINE POINTS';
 	   	}
     });
     function errorHandler(evt) {
@@ -689,7 +709,7 @@ $(function(){
 			return;
 		}else{
 			if(pccCode.indexOf('-') == -1){
-				var pccCodeFormat = /^[0-9]{9,11}$/;
+				var pccCodeFormat = /^[a-zA-Z0-9]{9,11}$/;
 				if(!pccCodeFormat.test(pccCode)){
 					alert('掛帳PCC格式有誤');
 					$('.LyMain').unblock();
@@ -697,7 +717,7 @@ $(function(){
 				}
 			}else{
 				pccCode = pccCode.replace("-","");
-				var pccCodeFormat = /^[0-9]{9,10}$/;
+				var pccCodeFormat = /^[a-zA-Z0-9]{9,10}$/;
 				if(!pccCodeFormat.test(pccCode)){
 					alert('掛帳PCC格式有誤');
 					$('.LyMain').unblock();
@@ -726,6 +746,23 @@ $(function(){
 				$('.LyMain').unblock();
 				return;
 			}
+			var sendingMsgTime ;
+			var datepickerVal = $('#delaySelect .datepicker').val();
+			var selectHour = $('#delaySelect .selectHour').val();
+			console.info('selectHour', selectHour);
+			var selectMinuteOne = $('#delaySelect .selectMinuteOne').val();
+			console.info('selectMinuteOne', selectMinuteOne);
+			var selectMinuteTwo = $('#delaySelect .selectMinuteTwo').val();
+			console.info('selectMinuteTwo', selectMinuteTwo);
+			sendingMsgTime = datepickerVal + " " + selectHour + ":" + selectMinuteOne + selectMinuteTwo + ":00";
+			console.info('sendingMsgTime', sendingMsgTime);
+			var today=new Date();
+			if(today > new Date(sendingMsgTime)){
+				alert('預約發送時間必須大於現在');
+				$('.LyMain').unblock();
+				return;
+			}
+			
 		}
 		
 		var sendAmountType = $('.sendAmountType:checked').val();
@@ -1246,7 +1283,7 @@ $(function(){
                 
                 var fileInformation = document.getElementById("fileInformation");
 
-                fileInformation.innerHTML = '本次共發送' + o.totalCount + '筆，合計發送點數為' + o.totalAmount +'點';
+                fileInformation.innerHTML = '本次共發送' + o.totalCount + '筆，合計' + o.totalAmount +'點LINE POINTS';
                 totalCount = o.totalCount;
                 totalAmount = o.totalAmount;
                 var doAppendMessage = o.doAppendMessage;
@@ -1543,6 +1580,8 @@ $(function(){
     	
     	
     }
+    
+    
 });
 
 

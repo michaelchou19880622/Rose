@@ -36,6 +36,10 @@ public class SendGroupService {
 		return sendGroupRepository.findAll();
 	}
 	
+	public int findLinePointMaincount(Long msgId) {
+		return sendGroupRepository.findLinePointMaincount(msgId);
+	}
+	
 	/**
 	 * Create DefaultGroup
 	 * @return Map<Long, SendGroup>

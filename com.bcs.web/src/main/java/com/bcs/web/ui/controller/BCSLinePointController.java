@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +21,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -33,12 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.utils.ObjectUtil;
-import com.bcs.core.db.entity.MsgDetail;
-import com.bcs.core.db.entity.MsgMain;
-import com.bcs.core.db.service.ContentRichMsgService;
-import com.bcs.core.db.service.ContentTemplateMsgService;
 import com.bcs.core.db.service.LineUserService;
-import com.bcs.core.db.service.MsgMainService;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.resource.CoreConfigReader;
@@ -49,17 +42,13 @@ import com.bcs.core.web.security.CustomUser;
 import com.bcs.core.web.ui.controller.BCSBaseController;
 import com.bcs.core.web.ui.page.enums.BcsPageEnum;
 import com.bcs.web.aop.ControllerLog;
-import com.bcs.web.ui.model.SendMsgDetailModel;
-import com.bcs.web.ui.model.SendMsgModel;
 import com.bcs.web.ui.service.LinePointUIService;
-import com.bcs.web.ui.service.LoadFileUIService;
 import com.bcs.web.ui.service.SendGroupUIService;
 import com.bcs.web.ui.service.SendMsgUIService;
 import com.bcs.core.linepoint.api.model.LinePointPushModel;
 import com.bcs.core.linepoint.akka.service.LinePointPushAkkaService;
 import com.bcs.core.linepoint.db.entity.LinePointDetail;
 import com.bcs.core.linepoint.db.entity.LinePointMain;
-import com.bcs.core.linepoint.db.entity.LinePointScheduledDetail;
 import com.bcs.core.linepoint.db.service.ExportToExcelForLinePointPushApiEffects;
 import com.bcs.core.linepoint.db.service.LinePointDetailService;
 import com.bcs.core.linepoint.utils.service.ExcelUtilService;
@@ -88,21 +77,21 @@ public class BCSLinePointController extends BCSBaseController {
 	@Autowired
 	private LineUserService lineUserService;
 
-	
+
 	@ControllerLog(description = "建立 Line Point 活動")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/linePointCreatePage")
 	public String linePointCreatePage(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser) {
 		logger.info("linePointCreatePage");
 		return BcsPageEnum.LinePointCreatePage.toString();
 	}
-	
+
 	@ControllerLog(description = "Line Point 活動列表")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/linePointListPage")
 	public String linePointListPage(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser) {
 		logger.info("linePointListPage");
 		return BcsPageEnum.LinePointListPage.toString();
 	}
-	
+
 	@ControllerLog(description = "getCaveatLinePoint")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getCaveatLinePoint")
 	public ResponseEntity<?> getCaveatLinePoint(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser) {
@@ -110,9 +99,9 @@ public class BCSLinePointController extends BCSBaseController {
 		String CaveatLinePoint = CoreConfigReader.getString(CONFIG_STR.CAVEAT_LINEPOINT_POINT, true);
 		return  new ResponseEntity<>(CaveatLinePoint, HttpStatus.OK);
 	}
-	
+
 	// ---- Data Creation ----
-	
+
 	@ControllerLog(description = "createLinePointMain")
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/createLinePointMain", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -124,30 +113,30 @@ public class BCSLinePointController extends BCSBaseController {
 			if (linePointMain == null) {
 				throw new BcsNoticeException("LinePointMain is Null");
 			}
-			
+
 			// get Oracle Account Information
 			String empId = customUser.getAccount().toUpperCase();
 			logger.info("empId:" + empId);
 			if(StringUtils.isBlank(empId)) {
 				throw new BcsNoticeException("empId is Null");
 			}
-			
-			TaishinEmployee taishinEmployee = null; 
+
+			TaishinEmployee taishinEmployee = null;
 			try {
-				taishinEmployee = oracleService.findByEmployeeId(empId);		
+				taishinEmployee = oracleService.findByEmployeeId(empId);
 			}catch(Exception e){
-				throw new BcsNoticeException("The Employee Id Is Not Correct!"); 
+				throw new BcsNoticeException("The Employee Id Is Not Correct!");
 			}
 			if(taishinEmployee == null || StringUtils.isBlank(taishinEmployee.getDivisionName())){
 				throw new BcsNoticeException("The Employee Id Is Not Correct!");
 			}
-			
+
 			// get Department Full Name
-			String departmentFullName = taishinEmployee.getDivisionName() + " " + 
+			String departmentFullName = taishinEmployee.getDivisionName() + " " +
 				taishinEmployee.getDepartmentName() + " " + taishinEmployee.getGroupName();
 			logger.info("departmentFullName:" + departmentFullName);
-//			
-			
+//
+
 //			String departmentFullName = "XTREME LINEBC TAISHIN";
 			linePointMain.setDepartmentFullName(departmentFullName);
 			linePointMain.setModifyUser(customUser.getAccount());
@@ -155,7 +144,7 @@ public class BCSLinePointController extends BCSBaseController {
 			LinePointMain result = linePointUIService.saveLinePointMain(linePointMain);
 			logger.info("linePointMain : " + result);
 			return new ResponseEntity<>(result, HttpStatus.OK);
-				
+
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
 			if (e instanceof BcsNoticeException) {
@@ -178,24 +167,24 @@ public class BCSLinePointController extends BCSBaseController {
 
 				throw new Exception("linePointDetail is Null");
 			}
-			
+
 			Long linePointMainId =  linePointDetail.get(0).getLinePointMainId();
 			logger.info("delete linePointDetail from linePointMainId :" + linePointMainId);
 			linePointDetailService.deleteFromLinePointMainId(linePointMainId);
 			logger.info("linePointDetail : " + linePointDetail);
 			List<LinePointDetail> result = linePointUIService.saveLinePointDetailListFromUI(linePointDetail, customUser.getAccount());
-			return new ResponseEntity<>(result, HttpStatus.OK);				
+			return new ResponseEntity<>(result, HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
-			if (e instanceof BcsNoticeException) 
+			if (e instanceof BcsNoticeException)
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			else 
+			else
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	// ---- Data Search ----
-	
+
 	@ControllerLog(description = "findOneMainByMainId")
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/findOneLinePointMainByMainId")
 	@ResponseBody
@@ -206,21 +195,21 @@ public class BCSLinePointController extends BCSBaseController {
 			if (linePointMainId != null) {
 				LinePointMain result = linePointUIService.linePointMainFindOne(linePointMainId);
 				return new ResponseEntity<>(result, HttpStatus.OK);
-			}else 
+			}else
 				throw new Exception("LinePointMain is Null");
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
-			if (e instanceof BcsNoticeException) 
+			if (e instanceof BcsNoticeException)
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			else 
+			else
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	@ControllerLog(description = "findAllLinePointDetailByMainId")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/findAllLinePointDetailByMainId")
 	@ResponseBody
-	public ResponseEntity<?> findAllLinePointDetailByMainId(HttpServletRequest request, HttpServletResponse response, 
+	public ResponseEntity<?> findAllLinePointDetailByMainId(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
 		try{
 			try {
@@ -241,20 +230,20 @@ public class BCSLinePointController extends BCSBaseController {
 			}
 		}
 	}
-	
+
 	@ControllerLog(description = "findAllBcsLinePointMain")
 	@RequestMapping(method = {RequestMethod.GET}, value = {"/edit/findAllBcsLinePointMain"})
 	@ResponseBody
-	public ResponseEntity<?> findAllBcsLinePointMain(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, 
-			@RequestParam(value = "startDate", required = false) String startDateStr, 
+	public ResponseEntity<?> findAllBcsLinePointMain(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
+			@RequestParam(value = "startDate", required = false) String startDateStr,
 			@RequestParam(value = "endDate", required = false) String endDateStr) throws IOException {
 	    try {
 	    	logger.info("[findAllBcsLinePointMain]");
 
 	    	// null translation
-		    if (StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) startDateStr = "1911-01-01"; 
-		    if (StringUtils.isBlank(endDateStr) || endDateStr.equals("null")) endDateStr = "3099-01-01"; 
-		    
+		    if (StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) startDateStr = "1911-01-01";
+		    if (StringUtils.isBlank(endDateStr) || endDateStr.equals("null")) endDateStr = "3099-01-01";
+
 	    	// parse date data
 	    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		    Date startDate = null, endDate = null;
@@ -263,7 +252,7 @@ public class BCSLinePointController extends BCSBaseController {
 	    	endDate = DateUtils.addDays(endDate, 1);
 	    	logger.info("startDate:" + startDate);
 		    logger.info("endDate:" + endDate);
-		    
+
 		    //List<LinePointMain> result = new ArrayList<LinePointMain>();
 		    List<LinePointMain> list = this.linePointUIService.linePointMainFindBcsAndDate(startDate, endDate);
 		    for(LinePointMain linePointMain : list) {
@@ -272,7 +261,7 @@ public class BCSLinePointController extends BCSBaseController {
 		    list = this.linePointUIService.linePointMainFindBcsAndDate(startDate, endDate);
 		    //logger.info("list:" + list);
 		    List<LinePointMain> result = competence(list , customUser);
-		    
+
 //		    result.addAll(list);
 		    logger.info("result:" + ObjectUtil.objectToJsonStr(result));
 			return new ResponseEntity(result, HttpStatus.OK);
@@ -281,28 +270,28 @@ public class BCSLinePointController extends BCSBaseController {
 	    	return new ResponseEntity(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
 	    }
 	}
-	
+
 	@ControllerLog(description = "findAllLinePointMain")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/findAllLinePointMain")
 	@ResponseBody
 	public ResponseEntity<?> getAllLinePointMainList(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser) throws IOException {
 		logger.info("[findAllLinePointMain]");
 		List<LinePointMain> result = new ArrayList<LinePointMain>();
-		List<LinePointMain> list = linePointUIService.linePointMainFindAll();		
+		List<LinePointMain> list = linePointUIService.linePointMainFindAll();
 		result.addAll(list);
 		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
-	
+
 
 	// ---- Front End Data Upload ----
 	@Transactional(timeout = 300000)
 	@ControllerLog(description="Check Active UIds")
     @RequestMapping(method = RequestMethod.POST, value = "/edit/checkActiveUids", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<?> checkActiveUids(HttpServletRequest request, HttpServletResponse response, 
+    public ResponseEntity<?> checkActiveUids(HttpServletRequest request, HttpServletResponse response,
     		@CurrentUser CustomUser customUser, @RequestBody List<String> uids) throws IOException {
-        try { 
+        try {
     		logger.info("[checkActiveUids]");
     		List<Integer> removeIndexs = new ArrayList();
     		//改寫 這邊  這邊csv太大筆   會掛掉
@@ -324,53 +313,53 @@ public class BCSLinePointController extends BCSBaseController {
 			}
         }
     }
-	
+
 	@ControllerLog(description="CSV to EXCEL")
     @RequestMapping(method = RequestMethod.POST, value = "/edit/csvToExcel")
     @ResponseBody
-    public ResponseEntity<?> csvToExcel(HttpServletRequest request, HttpServletResponse response, 
+    public ResponseEntity<?> csvToExcel(HttpServletRequest request, HttpServletResponse response,
     		@CurrentUser CustomUser customUser, @RequestPart MultipartFile filePart) throws IOException {
         try {
         	logger.info("---------csvToExcel----------");
     		// file path
             String filePath = CoreConfigReader.getString("file.path");
-            
+
             // file name
     		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
     		Date date = new Date();
             String fileName = "LinePointSendGroupCsvToXlsx_" + sdf.format(date) + ".xlsx";
-            
+
         	// convert to excel file
             File folder = new File(filePath);
             if(!folder.exists()){
                 folder.mkdirs();
             }
             InputStream isXlsx = excelUtilService.csvToXlsx(filePart.getInputStream(), filePath, fileName);
-            
+
             // uploadMidSendGroup
 			if(isXlsx != null){
 				String modifyUser = customUser.getAccount();
 				logger.info("modifyUser:" + modifyUser);
-				
+
 				Map<String, Object> result = sendGroupUIService.uploadMidSendGroup(isXlsx, modifyUser, new Date(), fileName);
 				logger.info("result :" + result);
 				return new ResponseEntity<>(result, HttpStatus.OK);
 			}else{
 				throw new Exception("Upload isXlsx Null");
-			}            
+			}
         } catch (Exception e) {
         	logger.info("uploadMidSendGroup Exception : " +  e.getMessage().toString());
 			if (e.getMessage().contains("RetrySaveUserEventSet"))
 			{
-				Map<String, Object> result = sendGroupUIService.RetrySaveUserEventSet();
+				Map<String, Object> result = sendGroupUIService.retrySaveUserEventSet();
 				logger.info("uploadMidSendGroupResult1:" + result);
-				
+
 				return new ResponseEntity<>(result, HttpStatus.OK);
 			}
 			else if (e.getMessage().contains("TimeOut")) {
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.SERVICE_UNAVAILABLE);
 			}
-			
+
 			logger.error(ErrorRecord.recordError(e));
 
 			if(e instanceof BcsNoticeException){
@@ -381,13 +370,13 @@ public class BCSLinePointController extends BCSBaseController {
 			}
         }
     }
-	
+
 	// ---- Front End Action ----
-	
+
 	@ControllerLog(description = "pressSendLinePointMain")
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/pressSendLinePointMain")
 	@ResponseBody
-	public ResponseEntity<?> pressSendLinePointMain(HttpServletRequest request, HttpServletResponse response, 
+	public ResponseEntity<?> pressSendLinePointMain(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
 		try{
 			// get linePointMain
@@ -396,7 +385,7 @@ public class BCSLinePointController extends BCSBaseController {
 			if(linePointMain.getSendStartTime() != null) {
 				throw new BcsNoticeException("此專案已發送");
 			}
-			
+
 			if("ROLE_ADMIN".equals(customUser.getRole()) || "ROLE_LINE_VERIFY".equals(customUser.getRole())) {
 				if( (!"ROLE_ADMIN".equals(customUser.getRole())) && customUser.getAccount().equals(linePointMain.getModifyUser())) {
 					throw new BcsNoticeException("不可發送自己創專案的line Point");
@@ -404,12 +393,12 @@ public class BCSLinePointController extends BCSBaseController {
 			}else {
 				throw new BcsNoticeException("沒有權限可以發送line Point");
 			}
-			
-			
+
+
 			// switch allowToSend
 			linePointMain.setAllowToSend(!linePointMain.getAllowToSend());
 			linePointUIService.saveLinePointMain(linePointMain);
-			
+
 			// immediate
 			if(LinePointMain.SEND_TIMING_TYPE_IMMEDIATE.equals(linePointMain.getSendTimingType())) {
 				try {
@@ -417,27 +406,27 @@ public class BCSLinePointController extends BCSBaseController {
 					Long msgId = linePointMain.getAppendMessageId();
 					logger.info("msgId:" + msgId);
 					sendMsgUIService.createExecuteSendMsgRunnable(msgId);
-					
+
 					// save send start time
 					//linePointMain.setModifyUser(customUser.getAccount());
 					linePointMain.setSendStartTime(new Date());
-					linePointMain.setStatus(LinePointMain.STATUS_COMPLETE);					
+					linePointMain.setStatus(LinePointMain.STATUS_COMPLETE);
 					//linePointMain.setModifyTime(new Date());
 					linePointMain.setSendUser(customUser.getAccount());
 					linePointUIService.saveLinePointMain(linePointMain);
-					
+
 					// get Details
 					List<LinePointDetail> linePointDetails = linePointUIService.findByLinePointMainId(linePointMainId);
 					logger.info("linePointDetails:"+linePointDetails);
-					
+
 					JSONArray detailIds = new JSONArray();
 					for(LinePointDetail linePointDetail: linePointDetails) {
 						if(!"FAIL".equals(linePointDetail.getStatus())) {
 							detailIds.put(linePointDetail.getDetailId());
 						}
-						
+
 					}
-					
+
 					// combine LinePointPushModel
 					LinePointPushModel linePointPushModel = new LinePointPushModel();
 					linePointPushModel.setEventId(linePointMainId);
@@ -445,9 +434,9 @@ public class BCSLinePointController extends BCSBaseController {
 					linePointPushModel.setSource(LinePointMain.SEND_TYPE_BCS);
 					linePointPushModel.setSendTimeType(LinePointMain.SEND_TIMING_TYPE_IMMEDIATE);
 					linePointPushModel.setTriggerTime(new Date());
-					
+
 					linePointPushAkkaService.tell(linePointPushModel);
-					
+
 				}catch(Exception e) {
 					throw new BcsNoticeException(e.getMessage());
 				}
@@ -462,18 +451,18 @@ public class BCSLinePointController extends BCSBaseController {
 			}
 		}
 	}
-	
+
 	@ControllerLog(description = "deleteLinePointMain")
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/deleteLinePointMain")
 	@ResponseBody
-	public ResponseEntity<?> deleteLinePointMain(HttpServletRequest request, HttpServletResponse response, 
+	public ResponseEntity<?> deleteLinePointMain(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
 			logger.info("[deleteLinePointMain]");
 			logger.info("linePointMainId : " + linePointMainId);
-			
+
 		try{
 			LinePointMain linePointMain = linePointUIService.linePointMainFindOne(linePointMainId);
-			
+
 			if("ROLE_LINE_SEND".equals(customUser.getRole()) || "ROLE_LINE_VERIFY".equals(customUser.getRole())) {
 				if(!customUser.getAccount().equals(linePointMain.getModifyUser())) {
 					throw new BcsNoticeException("沒有權限可以刪除此line Point專案");
@@ -481,11 +470,11 @@ public class BCSLinePointController extends BCSBaseController {
 			}else if(!"ROLE_ADMIN".equals(customUser.getRole())){
 				throw new BcsNoticeException("沒有權限可以刪除此line Point專案");
 			}
-			
+
 			List<LinePointMain> result = linePointUIService.deleteByLinePointMainId(linePointMainId);
 			logger.info("delete LinePointMain : " + result );
 			return new ResponseEntity<>("", HttpStatus.OK);
-			
+
 			}catch(Exception e){
 				logger.error(ErrorRecord.recordError(e));
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
@@ -494,28 +483,28 @@ public class BCSLinePointController extends BCSBaseController {
 	@ControllerLog(description = "getSumCaveatLinePoint")
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getSumCaveatLinePoint")
 	@ResponseBody
-	public ResponseEntity<?> getSumCaveatLinePoint(HttpServletRequest request, HttpServletResponse response, 
+	public ResponseEntity<?> getSumCaveatLinePoint(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
-		
+
 		logger.info("getSumCaveatLinePoint");
 		logger.info("linePointMainId : " + linePointMainId);
-		
+
 		String caveatLinePoint = CoreConfigReader.getString(CONFIG_STR.CAVEAT_LINEPOINT_POINT, true);
-		
+
 		try{
 			String number = linePointDetailService.getCountLinePointDetailAmountMoreCaveatLinePoint(linePointMainId,caveatLinePoint);
-			
+
 			return new ResponseEntity<>(caveatLinePoint+"@"+number, HttpStatus.OK);
-			
+
 		}catch(Exception e){
 			logger.error(ErrorRecord.recordError(e));
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
 		}
 	}
-	
+
 	 public List<LinePointMain> competence(List<LinePointMain> list , CustomUser customUser) throws Exception{
 	    	List<LinePointMain> result = new ArrayList();
-	    	
+
 	    	//取得權限
 			String role = customUser.getRole();
 			String empId = customUser.getAccount();
@@ -527,18 +516,18 @@ public class BCSLinePointController extends BCSBaseController {
 					serviceName = details.get(0).getServiceName();
 				}
 				main.setSendType(serviceName);
-				
+
 				if("ROLE_ADMIN".equals(role) || "ROLE_REPORT".equals(role)) {
 					result.add(main);
 				}else if("ROLE_LINE_SEND".equals(role) || "ROLE_LINE_VERIFY".equals(role)){
-					
+
 					TaishinEmployee employee = oracleService.findByEmployeeId(empId);
 //					TaishinEmployee employee = new TaishinEmployee();
-					
+
 //					employee.setDivisionName("XTREME");
 //					employee.setDepartmentName("LINEBC");
-						
-					
+
+
 					String Department = main.getDepartmentFullName();
 					String[] Departmentname = Department.split(" ");
 					//Departmentname[0]; 處  DIVISION_NAME
@@ -558,12 +547,12 @@ public class BCSLinePointController extends BCSBaseController {
 						if(Departmentname[0].equals(employee.getDivisionName())) {
 							result.add(main);
 						}
-					}	
+					}
 				}
 			}
 	    	return result;
 	    }
-	
+
 //	@ControllerLog(description = "Get Manual Line Point Main")
 //	@RequestMapping(method = RequestMethod.GET, value = "/edit/getManualLinePointMainList")
 //	@ResponseBody
@@ -576,7 +565,7 @@ public class BCSLinePointController extends BCSBaseController {
 //		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
 //		return new ResponseEntity<>(result, HttpStatus.OK);
 //	}
-	
+
 //	@ControllerLog(description = "Get Auto Line Point Main")
 //	@RequestMapping(method = RequestMethod.GET, value = "/edit/getAutoLinePointMainList")
 //	@ResponseBody
@@ -589,7 +578,7 @@ public class BCSLinePointController extends BCSBaseController {
 //		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
 //		return new ResponseEntity<>(result, HttpStatus.OK);
 //	}
-	
+
 	//----
 //	@ControllerLog(description = "Get All Line Point Main")
 ////	@RequestMapping(method = RequestMethod.GET, value = "/edit/getAllLinePointMainListSearch/{searchText}")
@@ -622,7 +611,7 @@ public class BCSLinePointController extends BCSBaseController {
 //		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
 //		return new ResponseEntity<>(result, HttpStatus.OK);
 //	}
-//	
+//
 //	@ControllerLog(description = "Get Auto Line Point Main")
 //	@RequestMapping(method = RequestMethod.GET, value = "/edit/getAutoLinePointMainListSearch/{searchText}")
 //	@ResponseBody
@@ -648,7 +637,7 @@ public class BCSLinePointController extends BCSBaseController {
 //		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
 //		return new ResponseEntity<>(result, HttpStatus.OK);
 //	}
-//	
+//
 //	@ControllerLog(description = "Get Undone Auto Line Point Main")
 //	@RequestMapping(method = RequestMethod.GET, value = "/edit/getUndoneAutoLinePointMainList")
 //	@ResponseBody
@@ -660,7 +649,7 @@ public class BCSLinePointController extends BCSBaseController {
 //		result.addAll(list);
 //		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
 //		return new ResponseEntity<>(result, HttpStatus.OK);
-//	}	
+//	}
 //	@ControllerLog(description = "Get Success Line Point Detail")
 //	@RequestMapping(method = RequestMethod.GET, value = "/edit/getSuccessLinePointDetailList/{linePointMainId}")
 //	@ResponseBody
@@ -668,7 +657,7 @@ public class BCSLinePointController extends BCSBaseController {
 //			@CurrentUser CustomUser customUser, @PathVariable String linePointMainId) throws IOException {
 //		logger.info("getSuccessLinePointDetailList");
 //		Long mainId = Long.parseLong(linePointMainId);
-//		
+//
 //		List<LinePointDetail> result = new ArrayList();
 //		List<LinePointDetail> list = linePointUIService.findSuccess(mainId);
 //		result.addAll(list);
@@ -682,13 +671,13 @@ public class BCSLinePointController extends BCSBaseController {
 //			@CurrentUser CustomUser customUser, @PathVariable String linePointMainId) throws IOException {
 //		logger.info("getFailLinePointDetailList");
 //		Long mainId = Long.parseLong(linePointMainId);
-//		
+//
 //		List<LinePointDetail> result = new ArrayList();
 //		List<LinePointDetail> list = linePointUIService.findFail(mainId);
 //		result.addAll(list);
 //		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
 //		return new ResponseEntity<>(result, HttpStatus.OK);
-//	}	
+//	}
 //	@ControllerLog(description = "Get Success Line Point Detail")
 //	@RequestMapping(method = RequestMethod.GET, value = "/edit/getLinePointScheduledDetailList/{mainId}")
 //	@ResponseBody
@@ -702,7 +691,7 @@ public class BCSLinePointController extends BCSBaseController {
 //		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
 //		return new ResponseEntity<>(result, HttpStatus.OK);
 //	}
-	
+
 //	@ControllerLog(description="deleteLinePointMain")
 //	@RequestMapping(method = RequestMethod.DELETE, value = "/edit/deleteLinePointMain")
 //	@ResponseBody

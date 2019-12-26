@@ -4,13 +4,13 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
+import com.bcs.core.utils.DataUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,349 +29,273 @@ import com.bcs.core.log.util.SystemLogUtil;
 import com.bcs.core.upload.ImportDataFromExcel;
 import com.bcs.core.upload.ImportDataFromText;
 
+/**
+ * @author ???
+ */
+@Slf4j
 @Service
 public class SendGroupUIService {
-	/** Logger */
-	private static Logger logger = Logger.getLogger(SendGroupUIService.class);
-	
-	@Autowired
-	private SendGroupService sendGroupService;
-	@Autowired
-	private SendGroupDetailRepository sendGroupDetailRepository;
-	@Autowired
-	private ImportDataFromExcel importMidFromExcel;
-	@Autowired
-	private ImportDataFromText importMidFromText;
-	@Autowired
-	private LineUserService lineUserService;
-	@Autowired
-	private UserEventSetService userEventSetService; 
-	
-	private static int TRANSACTION_TIMEOUT_RETRY_MAX_TIMES = 3;
-	
-	private List<String> existMids = new ArrayList<String>();
-	private String referenceId;
-	private String fileName;
-	private Date modifyTime;
-	private String modifyUser;
-	private int curSaveIndex = 0;
-	private int TransactionTimeoutRetry = 0;
-	private List<String> list;
-	
-	/**
-	 * 新增或修改發送群組
-	 * 
-	 * @param sendGroup
-	 * @param adminUserAccount
-	 * @return
-	 * @throws BcsNoticeException 
-	 */
-	@Transactional(rollbackFor=Exception.class, timeout = 30)
-	public SendGroup saveFromUI(SendGroup sendGroup, String adminUserAccount) throws BcsNoticeException{
-		logger.info("saveFromUI:" + sendGroup);
 
-		Long groupId = sendGroup.getGroupId();
-		if(groupId != null && groupId < 0){
-			throw new BcsNoticeException("預設群組無法修改");
-		}
-		
-		String action = (groupId == null ? "Create" : "Edit");
-		
-		// Set Modify Admin User
-		sendGroup.setModifyUser(adminUserAccount);
-		sendGroup.setModifyTime(new Date());
-		
-		List<SendGroupDetail> list = sendGroup.getSendGroupDetail();
-		sendGroup.setSendGroupDetail(new ArrayList<SendGroupDetail>());
-		
-		// Save Send Group
-		sendGroupService.save(sendGroup);
-		
-		if(list != null){
-			for(SendGroupDetail detail : list){
-				detail.setSendGroup(sendGroup);
-				sendGroup.getSendGroupDetail().add(detail);
-			}
-		}
-		sendGroupService.save(sendGroup);
-		sendGroup = sendGroupService.findOne(sendGroup.getGroupId());
-		createSystemLog(action, sendGroup, sendGroup.getModifyUser(), sendGroup.getModifyTime(), sendGroup.getGroupId().toString());
-		return sendGroup;
-	}
-	
-	/**
-	 * 刪除發送群組
-	 * 
-	 * @param groupId
-	 * @param adminUserAccount
-	 * @throws BcsNoticeException 
-	 */
-	@Transactional(rollbackFor=Exception.class, timeout = 30)
-	public void deleteFromUI(Long groupId, String adminUserAccount) throws BcsNoticeException {
-		logger.info("deleteFromUI:" + groupId);
-		if(groupId < 0){
-			throw new BcsNoticeException("預設群組無法刪除");
-		}
-		String groupTitle = sendGroupService.findGroupTitleByGroupId(groupId);
-		sendGroupService.delete(groupId);
-		createSystemLog("Delete", groupTitle, adminUserAccount, new Date(), groupId.toString());
-	}
-	
-	/**
-	 * 新增系統日誌
-	 * 
-	 * @param action
-	 * @param content
-	 * @param modifyUser
-	 * @param modifyTime
-	 */
-	private void createSystemLog(String action, Object content, String modifyUser, Date modifyTime, String referenceId) {
-		SystemLogUtil.saveLogDebug("SendGroup", action, modifyUser, content, referenceId);
-	}
- 
-	@Transactional(rollbackFor=Exception.class, timeout = 300000)
-	public Map<String, Object> uploadMidSendGroup(MultipartFile filePart, String modifyUser, Date modifyTime) throws Exception{
-		long startTime = System.currentTimeMillis();
-		long endTime = 0;
-		
-		logger.info("filePart.getSize():" + filePart.getSize());
-		
-		fileName = filePart.getOriginalFilename();
-		logger.info("getOriginalFilename:" + fileName);
-		
-		String contentType = filePart.getContentType();
-		logger.info("getContentType:" + contentType);
-		
-		this.modifyTime = modifyTime;
-		this.modifyUser = modifyUser;
-		
+    @Autowired
+    private SendGroupService sendGroupService;
+    @Autowired
+    private SendGroupDetailRepository sendGroupDetailRepository;
+    @Autowired
+    private ImportDataFromExcel importMidFromExcel;
+    @Autowired
+    private ImportDataFromText importMidFromText;
+    @Autowired
+    private LineUserService lineUserService;
+    @Autowired
+    private UserEventSetService userEventSetService;
 
-		Set<String> mids = null;
-		if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType)){
-			mids = importMidFromExcel.importData(filePart.getInputStream());	
-		}
-		else if("text/plain".equals(contentType)){
-			mids = importMidFromText.importData(filePart.getInputStream());	
-		}
-		
-		if(mids != null && mids.size() > 0){
-			list = new ArrayList<String>(mids);
-			logger.info("list.size():" + list.size());
-			
-			try {
-				List<String> check = new ArrayList<String>();
-				
-				//TODO:目前existMid會有可能放到重覆的uid，之後要改不然會儲存到重覆的。
-				//解決方案 : 可以把List<String> check 改成 HashSet<String>
-				for (int i = 1; i <= list.size(); i++) {
-					check.add(list.get(i - 1));
+    private static final int TRANSACTION_TIMEOUT_RETRY_MAX_TIMES = 3;
+    private static final String EXCEL1 = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    private static final String EXCEL2 = "application/vnd.ms-excel";
+    private static final String PLAIN_TEXT = "text/plain";
 
-					if (i % 1000 == 0) {
-						List<String> midResult = lineUserService.findMidByMidInAndActive(check);
-						if (midResult != null && midResult.size() > 0) {
-							existMids.addAll(midResult);
-						}
-						check.clear();
-					}
-				}
-				if (check.size() > 0) {
-					List<String> midResult = lineUserService.findMidByMidInAndActive(check);
-					if (midResult != null && midResult.size() > 0) {
-						existMids.addAll(midResult);
-					}
-				}
+    private List<String> existMids = new ArrayList<>();
+    private String referenceId;
+    private String fileName;
+    private Date modifyTime;
+    private String modifyUser;
+    private int curSaveIndex = 0;
+    private int transactionTimeoutRetry = 0;
 
-				endTime = System.currentTimeMillis();
+    /**
+     * 新增或修改發送群組
+     *
+     * @param sendGroup
+     * @param adminUserAccount
+     * @return
+     * @throws BcsNoticeException
+     */
+    @Transactional(rollbackFor = Exception.class, timeout = 30)
+    public SendGroup saveFromUI(SendGroup sendGroup, String adminUserAccount) throws BcsNoticeException {
+        log.info("saveFromUI:" + sendGroup);
 
-				logger.info("Fill existMids - START TIME : " + startTime);
-				logger.info("Fill existMids - END TIME : " + endTime);
-				logger.info("Fill existMids - ELAPSED : " + (endTime - startTime));
+        Long groupId = sendGroup.getGroupId();
+        if (groupId != null && groupId < 0) {
+            throw new BcsNoticeException("預設群組無法修改");
+        }
 
-			} catch (Exception e) {
+        String action = (groupId == null ? "Create" : "Edit");
 
-				endTime = System.currentTimeMillis();
-				logger.info("findMidByMidInAndActive exception :" + e.getMessage());
+        // Set Modify Admin User
+        sendGroup.setModifyUser(adminUserAccount);
+        sendGroup.setModifyTime(new Date());
 
-				logger.info("Fill existMids - START TIME : " + startTime);
-				logger.info("Fill existMids - END TIME : " + endTime);
-				logger.info("Fill existMids - ELAPSED : " + (endTime - startTime));
-			}
-				
-			if (existMids != null && existMids.size() > 0) {
+        List<SendGroupDetail> list = sendGroup.getSendGroupDetail();
+        sendGroup.setSendGroupDetail(new ArrayList<>());
 
-				referenceId = UUID.randomUUID().toString().toLowerCase();
-				
-				/* 
-				 * 增加Try-Catch，判斷Exception是否為Transaction Timeout Exception?
-				 * 如是，則判斷是否已達Retry上限次數? 是的話拋出Execption{TimeOut}，否則拋Execption{RetrySaveUserEventSet}。
-				*/
-				try {
-					curSaveIndex = 0;
+        // Save Send Group
+        sendGroupService.save(sendGroup);
 
-					for (int i = 0; i < existMids.size(); i++) {
-						String mid = existMids.get(i);
+        if (list != null) {
+            for (SendGroupDetail detail : list) {
+                detail.setSendGroup(sendGroup);
+                sendGroup.getSendGroupDetail().add(detail);
+            }
+        }
+        sendGroupService.save(sendGroup);
+        sendGroup = sendGroupService.findOne(sendGroup.getGroupId());
+        createSystemLog(action, sendGroup, sendGroup.getModifyUser(), sendGroup.getModifyTime(), sendGroup.getGroupId().toString());
+        return sendGroup;
+    }
 
-						UserEventSet userEventSet = new UserEventSet();
-						userEventSet.setTarget(EVENT_TARGET_ACTION_TYPE.EVENT_SEND_GROUP.toString());
-						userEventSet.setAction(EVENT_TARGET_ACTION_TYPE.ACTION_UPLOAD_MID.toString());
-						userEventSet.setReferenceId(referenceId);
-						userEventSet.setMid(mid);
-						userEventSet.setContent(fileName);
-						userEventSet.setSetTime(modifyTime);
-						userEventSet.setModifyUser(modifyUser);
+    /**
+     * 刪除發送群組
+     *
+     * @param groupId
+     * @param adminUserAccount
+     * @throws BcsNoticeException
+     */
+    @Transactional(rollbackFor = Exception.class, timeout = 30)
+    public void deleteFromUI(Long groupId, String adminUserAccount) throws BcsNoticeException {
+        log.info("deleteFromUI:" + groupId);
+        if (groupId < 0) {
+            throw new BcsNoticeException("預設群組無法刪除");
+        }
+        String groupTitle = sendGroupService.findGroupTitleByGroupId(groupId);
+        sendGroupService.delete(groupId);
+        createSystemLog("Delete", groupTitle, adminUserAccount, new Date(), groupId.toString());
+    }
 
-						logger.info("userEventSet1:" + userEventSet);
+    /**
+     * 新增系統日誌
+     *
+     * @param action
+     * @param content
+     * @param modifyUser
+     * @param modifyTime
+     */
+    private void createSystemLog(String action, Object content, String modifyUser, Date modifyTime, String referenceId) {
+        SystemLogUtil.saveLogDebug("SendGroup", action, modifyUser, content, referenceId);
+    }
 
-						userEventSetService.save(userEventSet);
-					}
+    @Transactional(rollbackFor = Exception.class, timeout = 300000)
+    public Map<String, Object> uploadMidSendGroup(MultipartFile filePart, String modifyUser, Date modifyTime) throws Exception {
+        this.modifyTime = modifyTime;
+        this.modifyUser = modifyUser;
+        this.fileName = filePart.getOriginalFilename();
+        String contentType = filePart.getContentType();
+        log.info("File Name: {}, Size: {}, ContentType: {}", new Object[]{fileName, filePart.getSize(), contentType});
 
-					endTime = System.currentTimeMillis();
 
-					logger.info("Save [UserEventSet] - START TIME : " + startTime);
-					logger.info("Save [UserEventSet] - END TIME : " + endTime);
-					logger.info("Save [UserEventSet] - ELAPSED : " + (endTime - startTime));
+        Set<String> midSet = null;
+        if (EXCEL1.equals(contentType) || EXCEL2.equals(contentType)) {
+            midSet = importMidFromExcel.importData(filePart.getInputStream());
+        } else if (PLAIN_TEXT.equals(contentType)) {
+            midSet = importMidFromText.importData(filePart.getInputStream());
+        }
 
-				}catch(Exception e) {
-					endTime = System.currentTimeMillis();
+        log.info("Mids: " + DataUtils.toPrettyJsonUseJackson(midSet));
 
-					logger.info("Save [UserEventSet] - START TIME : " + startTime);
-					logger.info("Save [UserEventSet] - END TIME : " + endTime);
-					logger.info("Save [UserEventSet] - ELAPSED : " + (endTime - startTime));
-					
-					if (e.getMessage().contains("transaction timeout expired")) {
-						TransactionTimeoutRetry += 1;
-						logger.info("Save [UserEventSet] retry : " + TransactionTimeoutRetry);
+        if (midSet == null) {
+            throw new BcsNoticeException("上傳格式錯誤");
+        }
 
-						if (TransactionTimeoutRetry > TRANSACTION_TIMEOUT_RETRY_MAX_TIMES) {
-							throw new Exception("TimeOut");
-						} else {
-							throw new Exception("RetrySaveUserEventSet");
-						}
-					}
-				}
-				
-				Map<String, Object> result = new HashMap<String, Object>();
-		
-				result.put("referenceId", referenceId);
-				result.put("count", existMids.size());
-				logger.info("result:"+result);
-				
-				existMids.clear();
-				return result;
-			}
-			else{
-				throw new BcsNoticeException("上傳沒有UID");
-			}
-		}
-		else if(mids == null){
-			throw new BcsNoticeException("上傳格式錯誤");
-		}
-		else{
-			throw new BcsNoticeException("上傳沒有UID");
-		}
-	}
-	
-	public Map<String, Object> RetrySaveUserEventSet()
-	{
-		try {
-			return RetrySaveUserEventSet(existMids, referenceId, fileName, modifyTime, modifyUser, curSaveIndex);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return null;
-	}
+        if (midSet.isEmpty()) {
+            throw new BcsNoticeException("上傳沒有UID");
+        }
 
-	/* Retry to save UserEventSet */
-	@Transactional(rollbackFor = Exception.class, timeout = -1)
-	public Map<String, Object> RetrySaveUserEventSet(List<String> existMids, String referenceId, String fileName, Date modifyTime, String modifyUser, int curSaveIndex) throws Exception {
-		long retryStartTime = System.currentTimeMillis();
-		long retryEndTime = 0;
-		
-		this.existMids = existMids;
-		this.referenceId = referenceId;
-		this.fileName = fileName;
-		this.modifyTime = modifyTime;
-		this.modifyUser = modifyUser;
-		this.curSaveIndex = curSaveIndex;
-		
+        List<String> list = new ArrayList<>(midSet);
+        log.info("list.size():" + list.size());
 
-		try {
-			for (int i = this.curSaveIndex; i < existMids.size(); i++) {
-				String mid = existMids.get(i);
+        try {
+            List<String> checkList = new ArrayList<>();
 
-				UserEventSet userEventSet = new UserEventSet();
+            int i = 1;
+            for (String mid : list) {
+                checkList.add(mid);
 
-				userEventSet.setTarget(EVENT_TARGET_ACTION_TYPE.EVENT_SEND_GROUP.toString());
-				userEventSet.setAction(EVENT_TARGET_ACTION_TYPE.ACTION_UPLOAD_MID.toString());
+                /* 每一千筆處理一次 */
+                if (i % 1000 == 0) {
+                    existMids.addAll(lineUserService.findMidByMidInAndActive(checkList));
+                    checkList.clear();
+                }
+                i++;
+            }
+            /* 處理未滿一千的 */
+            if (!checkList.isEmpty()) {
+                existMids.addAll(lineUserService.findMidByMidInAndActive(checkList));
+            }
+        } catch (Exception e) {
+            log.info("Exception", e);
+        }
 
-				userEventSet.setReferenceId(referenceId);
+        if (existMids == null || existMids.isEmpty()) {
+            throw new BcsNoticeException("上傳沒有UID");
+        }
 
-				userEventSet.setMid(mid);
-				userEventSet.setContent(fileName);
+        referenceId = UUID.randomUUID().toString().toLowerCase();
 
-				userEventSet.setSetTime(modifyTime);
-				userEventSet.setModifyUser(modifyUser);
+        try {
+            curSaveIndex = 0;
+            for (String mid : existMids) {
+                UserEventSet userEventSet = new UserEventSet();
+                userEventSet.setTarget(EVENT_TARGET_ACTION_TYPE.EVENT_SEND_GROUP.toString());
+                userEventSet.setAction(EVENT_TARGET_ACTION_TYPE.ACTION_UPLOAD_MID.toString());
+                userEventSet.setReferenceId(referenceId);
+                userEventSet.setMid(mid);
+                userEventSet.setContent(fileName);
+                userEventSet.setSetTime(modifyTime);
+                userEventSet.setModifyUser(modifyUser);
+                log.info("userEventSet1:" + userEventSet);
+                userEventSetService.save(userEventSet);
+            }
+        } catch (Exception e) {
+            if (e.getMessage().contains("transaction timeout expired")) {
+                transactionTimeoutRetry += 1;
+                log.info("Save [UserEventSet] retry : " + transactionTimeoutRetry);
+                String cause = transactionTimeoutRetry > TRANSACTION_TIMEOUT_RETRY_MAX_TIMES ? "TimeOut" : "RetrySaveUserEventSet";
+                throw new Exception(cause);
+            }
+        }
 
-				logger.info("userEventSet1:" + userEventSet);
+        Map<String, Object> result = new HashMap<>(2);
+        result.put("referenceId", referenceId);
+        result.put("count", existMids.size());
+        log.info("result:" + result);
 
-				userEventSetService.save(userEventSet);
-			}
+        existMids.clear();
+        return result;
+    }
 
-			retryEndTime = System.currentTimeMillis();
+    public Map<String, Object> retrySaveUserEventSet() {
+        try {
+            return retrySaveUserEventSet(existMids, referenceId, fileName, modifyTime, modifyUser, curSaveIndex);
+        } catch (Exception e) {
+            log.error("Exception", e);
+        }
 
-			logger.info("Save [UserEventSet] - START TIME : " + retryStartTime);
-			logger.info("Save [UserEventSet] - END TIME : " + retryEndTime);
-			logger.info("Save [UserEventSet] - ELAPSED : " + (retryEndTime - retryStartTime));
-			
-			Map<String, Object> result = new HashMap<String, Object>();
-			
-			result.put("referenceId", referenceId);
-			result.put("count", existMids.size());
-			logger.info("result:"+result);
-			return result;
+        return null;
+    }
 
-		} catch (Exception e) {
-			retryEndTime = System.currentTimeMillis();
+    /**
+     * Retry to save UserEventSet
+     */
+    @Transactional(rollbackFor = Exception.class, timeout = -1)
+    public Map<String, Object> retrySaveUserEventSet(List<String> existMids, String referenceId, String fileName, Date modifyTime, String modifyUser, int curSaveIndex) throws Exception {
+        this.existMids = existMids;
+        this.referenceId = referenceId;
+        this.fileName = fileName;
+        this.modifyTime = modifyTime;
+        this.modifyUser = modifyUser;
+        this.curSaveIndex = curSaveIndex;
 
-			logger.info("Save [UserEventSet] - START TIME : " + retryStartTime);
-			logger.info("Save [UserEventSet] - END TIME : " + retryEndTime);
-			logger.info("Save [UserEventSet] - ELAPSED : " + (retryEndTime - retryStartTime));
-			
-			// 增加retry機制，紀錄當前寫入UserEventSet table 的index， 如果 timeout，則重新從index繼續寫入UserEventSet table
-			if (e.getMessage().contains("transaction timeout expired")) {
-				TransactionTimeoutRetry += 1;
-				logger.info("Save [UserEventSet] retry : " + TransactionTimeoutRetry);
+        try {
+            for (int i = this.curSaveIndex; i < existMids.size(); i++) {
+                String mid = existMids.get(i);
+                UserEventSet userEventSet = new UserEventSet();
+                userEventSet.setTarget(EVENT_TARGET_ACTION_TYPE.EVENT_SEND_GROUP.toString());
+                userEventSet.setAction(EVENT_TARGET_ACTION_TYPE.ACTION_UPLOAD_MID.toString());
+                userEventSet.setReferenceId(referenceId);
+                userEventSet.setMid(mid);
+                userEventSet.setContent(fileName);
+                userEventSet.setSetTime(modifyTime);
+                userEventSet.setModifyUser(modifyUser);
+                log.info("userEventSet1:" + userEventSet);
+                userEventSetService.save(userEventSet);
+            }
 
-				if (TransactionTimeoutRetry > TRANSACTION_TIMEOUT_RETRY_MAX_TIMES) {
-					throw new Exception("TimeOut");
-				} else {
-					throw new Exception("RetrySaveUserEventSet");
-				}
-			}
-			throw new BcsNoticeException("資料量過大導致超時，重試異常");
-		}
-	}
-	
-	@Transactional(rollbackFor=Exception.class ,timeout = 300000)
-	public Map<String, Object> uploadMidSendGroup(InputStream inputStream, String modifyUser, Date modifyTime, String fileName) throws Exception{
-		long startTime = System.currentTimeMillis();
-		long endTime = 0;
-		
-		Set<String> mids = null;
-		mids = importMidFromExcel.importData(inputStream);	
-		
-		if(mids != null && mids.size() > 0){
-			List<String> list = new ArrayList<String>(mids);
-			logger.info("list:" + list);
-			List<String> existMids = new ArrayList<String>();
-			
+            Map<String, Object> result = new HashMap<>(2);
+            result.put("referenceId", referenceId);
+            result.put("count", existMids.size());
+            log.info("result:" + result);
+            return result;
+
+        } catch (Exception e) {
+            if (e.getMessage().contains("transaction timeout expired")) {
+                transactionTimeoutRetry += 1;
+                log.info("Save [UserEventSet] retry : " + transactionTimeoutRetry);
+                String cause = transactionTimeoutRetry > TRANSACTION_TIMEOUT_RETRY_MAX_TIMES ? "TimeOut" : "RetrySaveUserEventSet";
+                throw new Exception(cause);
+            }
+            throw new BcsNoticeException("資料量過大導致超時，重試異常");
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class, timeout = 300000)
+    public Map<String, Object> uploadMidSendGroup(InputStream inputStream, String modifyUser, Date modifyTime, String fileName) throws Exception {
+        Set<String> mids = null;
+        mids = importMidFromExcel.importData(inputStream);
+        if (mids == null) {
+            throw new BcsNoticeException("上傳格式錯誤");
+        }
+        if (mids.isEmpty()) {
+            throw new BcsNoticeException("上傳沒有UID");
+        }
+
+        List<String> list = new ArrayList<>(mids);
+        log.info("list:" + list);
+//        List<String> existMids = new ArrayList<>();
 //			// Check MID Exist by Part
 //			List<String> check = new ArrayList<String>();
 //			for(int i = 1; i <= list.size(); i++){
-//				logger.info(" UID " + i + " : " +list.get(i-1));
+//				log.info(" UID " + i + " : " +list.get(i-1));
 //				check.add(list.get(i-1));
-//				
+//
 //				if(i % 1000 == 0){
 //					List<String> midResult = lineUserService.findMidByMidInAndActive(check);
 //					if(midResult != null && midResult.size() > 0){
@@ -386,78 +310,45 @@ public class SendGroupUIService {
 //					existMids.addAll(midResult);
 //				}
 //			}
+        if (list.isEmpty()) {
+            throw new BcsNoticeException("上傳沒有UID");
+        }
+        log.debug("list:" + list);
 
-			if(list != null && list.size() > 0){
-				logger.debug("list:" + list);
-				
-				String referenceId = UUID.randomUUID().toString().toLowerCase();
-				
-				/* 
-				 * 增加Try-Catch，判斷Exception是否為Transaction Timeout Exception?
-				 * 如是，則判斷是否已達Retry上限次數? 是的話拋出Execption{TimeOut}，否則拋Execption{RetrySaveUserEventSet}。
-				*/
-				try {
-					curSaveIndex = 0;
+        referenceId = UUID.randomUUID().toString().toLowerCase();
 
-					for (int i = 0; i < list.size(); i++) {
-						String mid = list.get(i);
+        try {
+            curSaveIndex = 0;
+            for (String mid : list) {
+                UserEventSet userEventSet = new UserEventSet();
+                userEventSet.setTarget(EVENT_TARGET_ACTION_TYPE.EVENT_SEND_GROUP.toString());
+                userEventSet.setAction(EVENT_TARGET_ACTION_TYPE.ACTION_UPLOAD_MID.toString());
+                userEventSet.setReferenceId(referenceId);
+                userEventSet.setMid(mid);
+                userEventSet.setContent(fileName);
+                userEventSet.setSetTime(modifyTime);
+                userEventSet.setModifyUser(modifyUser);
 
-						UserEventSet userEventSet = new UserEventSet();
-						userEventSet.setTarget(EVENT_TARGET_ACTION_TYPE.EVENT_SEND_GROUP.toString());
-						userEventSet.setAction(EVENT_TARGET_ACTION_TYPE.ACTION_UPLOAD_MID.toString());
-						userEventSet.setReferenceId(referenceId);
-						userEventSet.setMid(mid);
-						userEventSet.setContent(fileName);
-						userEventSet.setSetTime(modifyTime);
-						userEventSet.setModifyUser(modifyUser);
+                log.info("userEventSet1:" + userEventSet);
 
-						logger.info("userEventSet1:" + userEventSet);
+                userEventSetService.save(userEventSet);
+            }
+        } catch (Exception e) {
+            if (e.getMessage().contains("transaction timeout expired")) {
+                transactionTimeoutRetry += 1;
+                log.info("Save [UserEventSet] retry : " + transactionTimeoutRetry);
+                String cause = transactionTimeoutRetry > TRANSACTION_TIMEOUT_RETRY_MAX_TIMES ? "TimeOut" : "RetrySaveUserEventSet";
+                throw new Exception(cause);
+            }
+        }
 
-						userEventSetService.save(userEventSet);
-					}
+        log.info("count : " + list.size());
 
-					endTime = System.currentTimeMillis();
+        Map<String, Object> result = new HashMap<>(2);
+        result.put("referenceId", referenceId);
+        result.put("count", list.size());
 
-					logger.info("Save [UserEventSet] - START TIME : " + startTime);
-					logger.info("Save [UserEventSet] - END TIME : " + endTime);
-					logger.info("Save [UserEventSet] - ELAPSED : " + (endTime - startTime));
+        return result;
+    }
 
-				}catch(Exception e) {
-					endTime = System.currentTimeMillis();
-
-					logger.info("Save [UserEventSet] - START TIME : " + startTime);
-					logger.info("Save [UserEventSet] - END TIME : " + endTime);
-					logger.info("Save [UserEventSet] - ELAPSED : " + (endTime - startTime));
-					
-					if (e.getMessage().contains("transaction timeout expired")) {
-						TransactionTimeoutRetry += 1;
-						logger.info("Save [UserEventSet] retry : " + TransactionTimeoutRetry);
-
-						if (TransactionTimeoutRetry > TRANSACTION_TIMEOUT_RETRY_MAX_TIMES) {
-							throw new Exception("TimeOut");
-						} else {
-							throw new Exception("RetrySaveUserEventSet");
-						}
-					}
-				}
-
-				Map<String, Object> result = new HashMap<String, Object>();
-				logger.info("count : " + list.size());
-				result.put("referenceId", referenceId);
-				result.put("count", list.size());
-				
-				return result;
-			}
-			else{
-				throw new BcsNoticeException("上傳沒有UID");
-			}
-		}
-		else if(mids == null){
-			throw new BcsNoticeException("上傳格式錯誤");
-		}
-		else{
-			throw new BcsNoticeException("上傳沒有UID");
-		}
-	}
-	
 }

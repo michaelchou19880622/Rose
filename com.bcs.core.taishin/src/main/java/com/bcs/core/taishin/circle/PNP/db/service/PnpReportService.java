@@ -285,13 +285,21 @@ public class PnpReportService {
         final String employeeId = pnpDetailReportParam.getEmployeeId().trim();
         final Date startDate = pnpDetailReportParam.getStartDate();
         final Date endDate = pnpDetailReportParam.getEndDate();
+        final boolean isCreateTime = pnpDetailReportParam.getDateType().equals(PnpDetailReportParam.CREATE_TIME);
+        final boolean isOrderTime = pnpDetailReportParam.getDateType().equals(PnpDetailReportParam.ORDER_TIME);
 
         /* 依照篩選條件過濾 */
-        if (startDate != null) {
+        if (startDate != null && isCreateTime) {
             sb.append(String.format(" AND R1.CREATE_TIME >= '%s'", DataUtils.convDateToStr(DataUtils.truncDate(startDate), "yyyy-MM-dd HH:mm:ss")));
         }
-        if (endDate != null) {
+        if (endDate != null && isCreateTime) {
             sb.append(String.format(" AND R1.CREATE_TIME <= '%s'", DataUtils.convDateToStr(DataUtils.truncEndDate(endDate), "yyyy-MM-dd HH:mm:ss")));
+        }
+        if (startDate != null && isOrderTime) {
+            sb.append(String.format(" AND R1.SCHEDULE_TIME >= '%s'", DataUtils.convDateToStr(DataUtils.truncDate(startDate), "yyyy-MM-dd HH:mm:ss")));
+        }
+        if (endDate != null && isOrderTime) {
+            sb.append(String.format(" AND R1.SCHEDULE_TIME <= '%s'", DataUtils.convDateToStr(DataUtils.truncEndDate(endDate), "yyyy-MM-dd HH:mm:ss")));
         }
         if (StringUtils.isNotBlank(account)) {
             sb.append(String.format(" AND R1.ACCOUNT = '%s'", account));
@@ -310,7 +318,12 @@ public class PnpReportService {
         sb.append(oracleService.getAvailableEmpIdsByEmpId(employeeId));
 
         /* 依照建立時間反序 */
-        sb.append(" ORDER BY R1.CREATE_TIME DESC ");
+        if (isCreateTime) {
+            sb.append(" ORDER BY R1.CREATE_TIME DESC ");
+        }
+        if (isOrderTime) {
+            sb.append(" ORDER BY R1.SCHEDULE_TIME DESC ");
+        }
 
         /* 是否分頁 */
         if (pnpDetailReportParam.isPageable()) {

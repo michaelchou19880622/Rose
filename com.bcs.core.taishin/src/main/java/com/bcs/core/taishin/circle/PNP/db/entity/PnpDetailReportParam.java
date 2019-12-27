@@ -14,6 +14,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class PnpDetailReportParam {
+    public static final String CREATE_TIME = "createTime";
+    public static final String ORDER_TIME = "orderTime";
+    
+    private String dateType = CREATE_TIME;
     private Date startDate;
     private Date endDate;
     private boolean isPageable = false;

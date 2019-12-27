@@ -1,9 +1,12 @@
 package com.bcs.core.linepoint.akka.handler;
 
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jcodec.common.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -22,8 +25,23 @@ import com.bcs.core.linepoint.db.entity.LinePointMain;
 import com.bcs.core.linepoint.db.repository.LinePointMainRepository;
 import com.bcs.core.linepoint.db.service.LinePointDetailService;
 import com.bcs.core.linepoint.db.service.LinePointMainService;
+import com.bcs.core.api.msg.MsgGenerator;
+import com.bcs.core.api.msg.MsgGeneratorFactory;
+import com.bcs.core.bot.scheduler.handler.ExecuteSendMsgTask;
+import com.bcs.core.bot.send.service.SendingMsgService;
+import com.bcs.core.db.entity.MsgDetail;
+import com.bcs.core.db.entity.MsgMain;
+import com.bcs.core.db.entity.MsgSendMain;
+import com.bcs.core.db.entity.PushMessageRecord;
+import com.bcs.core.db.entity.SendGroup;
+import com.bcs.core.db.service.MsgDetailService;
+import com.bcs.core.db.service.MsgMainService;
+import com.bcs.core.db.service.MsgSendMainService;
+import com.bcs.core.db.service.SendGroupService;
+import com.bcs.core.enums.API_TYPE;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.enums.LINE_HEADER;
+import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.spring.ApplicationContextProvider;
 import com.bcs.core.utils.RestfulUtil;
@@ -32,14 +50,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import akka.actor.UntypedActor;
 
 public class LinePointPushMessageActor extends UntypedActor {
-
+	
 	@Override
 	public void onReceive(Object object) throws Exception {
 		if(object instanceof LinePointPushModel) {
 			// get bean
 			LinePointDetailService linePointDetailService = ApplicationContextProvider.getApplicationContext().getBean(LinePointDetailService.class);
 			LinePointMainService linePointMainService = ApplicationContextProvider.getApplicationContext().getBean(LinePointMainService.class);
-			
+			MsgMainService msgMainService = ApplicationContextProvider.getApplicationContext().getBean(MsgMainService.class);
+			MsgSendMainService msgSendMainService = ApplicationContextProvider.getApplicationContext().getBean(MsgSendMainService.class);
+			MsgDetailService msgDetailService = ApplicationContextProvider.getApplicationContext().getBean(MsgDetailService.class);
 			// get push data
 			LinePointPushModel pushApiModel = (LinePointPushModel) object;
 			JSONArray detailIds = pushApiModel.getDetailIds();
@@ -123,6 +143,8 @@ public class LinePointPushMessageActor extends UntypedActor {
 					linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
 				}
 				
+				
+				
 				detail.setOrderKey(orderKey);
 				detail.setApplicationTime(applicationTime);
 				detail.setSendTime(new Date());
@@ -130,6 +152,25 @@ public class LinePointPushMessageActor extends UntypedActor {
 				Logger.info("detail1: " + detail.toString());
 				linePointDetailService.save(detail);
 				linePointMainService.save(linePointMain);
+				
+				if(detail.getStatus().equals(LinePointDetail.STATUS_SUCCESS)) {
+					Long msgId = linePointMain.getAppendMessageId();
+					if(msgId != null) {
+						Logger.info("LinePoint發送成功 開始發訊息給會員");
+						MsgMain msgMain = msgMainService.findOne(msgId);
+						Logger.info("executeSendMsg : msgMain = " + msgMain);
+						List<String> mids = new ArrayList<String>();
+						mids.add(detail.getUid());
+						
+						if(msgMain != null){
+							MsgSendMain msgSendMain = msgSendMainService.copyFromMsgMain(msgId, new Long(mids.size()), "LPSG;"+linePointMain.getTitle());
+							List<MsgDetail> details = msgDetailService.findByMsgIdAndMsgParentType(msgSendMain.getMsgSendId(), MsgSendMain.THIS_PARENT_TYPE);
+							ExecuteSendMsgTask runTask = new ExecuteSendMsgTask();
+							runTask.sendMsgToMids(mids, details, msgSendMain.getMsgSendId());
+							Logger.info(" LinePoint訊息發出 ");
+						}
+					}
+				}
 			}
 		}
 	}
@@ -143,4 +184,5 @@ public class LinePointPushMessageActor extends UntypedActor {
 	  }
 	  return hexString.toString();
 	}
+	
 }

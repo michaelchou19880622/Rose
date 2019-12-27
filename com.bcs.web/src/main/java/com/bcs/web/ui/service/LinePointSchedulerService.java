@@ -107,7 +107,10 @@ public class LinePointSchedulerService {
 				
 				JSONArray detailIds = new JSONArray();
 				for(LinePointDetail linePointDetail: linePointDetails) {
-					detailIds.put(linePointDetail.getDetailId());
+					if(!"FAIL".equals(linePointDetail.getStatus())) {
+						detailIds.put(linePointDetail.getDetailId());
+					}
+					
 				}
 				
 				// combine LinePointPushModel

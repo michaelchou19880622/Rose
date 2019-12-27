@@ -138,10 +138,10 @@ public class BCSPnpReportController {
                                            @RequestParam(required = false) final boolean isPageable, @RequestParam(required = false) final Integer page,
                                            @RequestParam(required = false) final String account, @RequestParam(required = false) final String pccCode,
                                            @RequestParam(required = false) final String sourceSystem, @RequestParam(required = false) final String employeeId,
-                                           @RequestParam(required = false) final String phone) {
+                                           @RequestParam(required = false) final String phone, @RequestParam(required = false) final String dateType) {
         try {
             final PnpDetailReportParam pnpDetailReportParam = new PnpDetailReportParam(
-                    DataUtils.convStrToDate(startDate, "yyyy-MM-dd"), DataUtils.convStrToDate(endDate, "yyyy-MM-dd"),
+                    dateType, DataUtils.convStrToDate(startDate, "yyyy-MM-dd"), DataUtils.convStrToDate(endDate, "yyyy-MM-dd"),
                     isPageable, page, account, pccCode, sourceSystem, employeeId, phone
             );
 

@@ -26,8 +26,8 @@ public interface LinePointDetailRepository extends EntityRepository<LinePointDet
     
     @Transactional(timeout = 300)
     @Query(value = "select x from LinePointDetail x where  x.linePointMainId = ?1 "
-    			 + "and x.sendTime >= ?2 "
-    			 + "and x.sendTime <= ?3 order by x.sendTime desc")
+    			 + "and ( (x.sendTime >= ?2 "
+    			 + "and x.sendTime <= ?3 ) or x.sendTime is null )order by x.sendTime desc")
     public List<LinePointDetail> findByLinePointMainIdAndSendDate(Long linePointMainId,Date startDate ,Date endDate);
     
     @Transactional(timeout = 30)
@@ -37,7 +37,7 @@ public interface LinePointDetailRepository extends EntityRepository<LinePointDet
     public List<LinePointDetail> deleteByLinePointMainId(Long linePointMainId);
     
     @Transactional(timeout = 30)
-    @Query(value = "select count(0) from BCS_LINE_POINT_DETAIL where LINE_POINT_MAIN_ID = ?1 and amount > ?2 " ,nativeQuery = true)
+    @Query(value = "select count(0) from BCS_LINE_POINT_DETAIL where LINE_POINT_MAIN_ID = ?1 and amount >= ?2 " ,nativeQuery = true)
     public String getCountLinePointDetailAmountMoreCaveatLinePoint(Long linePointMainId , String caveatLinePoint);
     
     @Transactional(timeout = 30)

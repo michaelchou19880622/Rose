@@ -15,7 +15,9 @@ $(function() {
   var hasData = false;
   var firstFetch = true;
   var startDate = null,
-    endDate = null;
+      endDate = null;
+  var isCreateTime = true,
+      isOrderTime = false;
   var page = 1,
     totalPages = 0;
   var pnpStatusMap = {};
@@ -75,9 +77,56 @@ $(function() {
   });
 
   $('#exportBtn').click(function() {
-    setExportButtonSource();
+//    setExportButtonSource();
+    if (hasData) {
+        var getUrl =
+        bcs.bcsContextPath +
+        '/pnpEmployee/exportPNPDetailReportExcel' +
+        '?startDate=' +
+        startDate +
+        '&endDate=' +
+        endDate +
+        '&isPageable=false' +
+        '&page=' +
+        page +
+        '&account=' +
+        document.getElementById('accountInput').value +
+        '&pccCode=' +
+        document.getElementById('pccCodeInput').value +
+        '&sourceSystem=' +
+        document.getElementById('sourceSystemInput').value +
+        '&phone=' +
+        document.getElementById('phoneNumber').value +
+        '&dateType=' +
+        isCreateTime ? 'createTime' : 'orderTime'
+        ;
+        console.info('getUrl', getUrl);
+        window.location(getUrl);
+    }
+
   });
 
+  $('#isCreateTimeBtn').click(function(){
+    if (isOrderTime) {
+        var createTimeBtn = document.getElementById('isCreateTimeBtn');
+        createTimeBtn.className = 'btn2 btn-style-pressed'
+        var orderTimeBtn = document.getElementById('isOrderTimeBtn');
+        orderTimeBtn.className = 'btn2 btn-style'
+        isCreateTime = true;
+        isOrderTime = false;
+    }
+  })
+
+  $('#isOrderTimeBtn').click(function(){
+    if (isCreateTime) {
+        var createTimeBtn = document.getElementById('isCreateTimeBtn');
+        createTimeBtn.className = 'btn2 btn-style'
+        var orderTimeBtn = document.getElementById('isOrderTimeBtn');
+        orderTimeBtn.className = 'btn2 btn-style-pressed'
+        isCreateTime = false;
+        isOrderTime = true;
+    }
+  })
   //-------------------Event----------------------
 
   var dataValidate = function() {
@@ -127,7 +176,10 @@ $(function() {
         '&sourceSystem=' +
         document.getElementById('sourceSystemInput').value +
         '&phone=' +
-        document.getElementById('phoneNumber').value;
+        document.getElementById('phoneNumber').value +
+        '&dateType=' +
+        isCreateTime ? 'createTime' : 'orderTime'
+        ;
       console.info('getUrl', getUrl);
 
       $('.btn_add.exportToExcel').attr('href', getUrl);
@@ -156,6 +208,7 @@ $(function() {
       url: getUrl,
       contentType: 'application/json',
       data: JSON.stringify({
+        dateType : isCreateTime ? 'createTime' : 'orderTime',
         startDate: startDate,
         endDate: endDate,
         isPageable: true,
@@ -228,7 +281,7 @@ $(function() {
         hasData = i > 0;
         console.log('Has data : ' + hasData);
 
-        setExportButtonSource();
+//        setExportButtonSource();
       })
       .fail(function(response) {
         console.info(response);
@@ -299,6 +352,7 @@ $(function() {
       url: getUrl,
       contentType: 'application/json',
       data: JSON.stringify({
+        dateType: isCreateTime ? 'createTime' : 'orderTime',
         startDate: startDate,
         endDate: endDate,
         isPageable: false,

@@ -1,258 +1,323 @@
 <!DOCTYPE html>
-<html
-  xmlns="http://www.w3.org/1999/xhtml"
-  xmlns:th="http://www.thymeleaf.org"
-  xmlns:sec="http://www.springframework.org/security/tags"
-  th:with="strList = ${ {'/BCS/JS/pagepnpDetailReport.base.js'} }"
->
-  <head
-    th:replace="/BCS/Views/Common/Head :: head ('PNP Detail Report Page', ${strList})"
-  >
-  </head>
-  <style type="text/css">
-    .table-warp {
-      overflow: auto;
-      width: 100%;
-      height: 500px;
-      /* 固定高度 */
-    }
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.springframework.org/security/tags" th:with="strList = ${ {'/BCS/JS/pagepnpDetailReport.base.js'} }">
 
-    .table-responsive {
-      display: block;
-      width: 100%;
-      /* overflow-x: hidden; */
-      border: none;
-      word-wrap: break-word;
-    }
+<head th:replace="/BCS/Views/Common/Head :: head ('PNP Detail Report Page', ${strList})">
+</head>
+<style type="text/css">
+.table-warp {
+    overflow: auto;
+    width: 100%;
+    height: 500px;
+    /* 固定高度 */
+}
 
-    table {
-      table-layout: fixed;
-      width: 200px;
-      /* 固定寬度 */
-    }
+.table-responsive {
+    display: block;
+    width: 100%;
+    /* overflow-x: hidden; */
+    border: none;
+    word-wrap: break-word;
+}
 
-    thead tr th {
-      position: sticky;
-      top: 0;
-      /* 列首永遠固定於上 */
-    }
+table {
+    table-layout: fixed;
+    width: 200px;
+    /* 固定寬度 */
+}
 
-    .base_td {
-      min-height: 1rem;
-    }
+thead tr th {
+    position: sticky;
+    top: 0;
+    /* 列首永遠固定於上 */
+}
 
-    .td1 {
-      max-width: 1rem;
-      min-width: 1rem;
-    }
+.base_td {
+    min-height: 1rem;
+}
 
-    .td3 {
-      max-width: 3rem;
-      min-width: 3rem;
-    }
+.td1 {
+    max-width: 1rem;
+    min-width: 1rem;
+}
 
-    .td5 {
-      max-width: 5rem;
-      min-width: 5rem;
-    }
+.td3 {
+    max-width: 3rem;
+    min-width: 3rem;
+}
 
-    .td7 {
-      max-width: 7rem;
-      min-width: 7rem;
-    }
+.td5 {
+    max-width: 5rem;
+    min-width: 5rem;
+}
 
-    .td10 {
-      max-width: 10rem;
-      min-width: 10rem;
-    }
+.td7 {
+    max-width: 7rem;
+    min-width: 7rem;
+}
 
-    .td20 {
-      max-width: 20rem;
-      min-width: 20rem;
-    }
-    .td30 {
-      max-width: 30rem;
-      min-width: 30rem;
-    }
+.td10 {
+    max-width: 10rem;
+    min-width: 10rem;
+}
 
-    .odd-row {
-      background: #e7eaf0;
-    }
-  </style>
-  <body>
-    <header th:replace="/BCS/Views/Common/Header :: header"></header>
-    <div class="LyContents">
-      <div
-        th:replace="/BCS/Views/Common/Menu :: menu ('PagepnpDetailReport')"
-      ></div>
-      <!-- Right Content -->
-      <div class="LyMain" role="main">
-        <form>
-          <section>
-            <!-- Title -->
-            <header class="ContentHead">
-              <h3 class="CHTtl">PNP明細報表</h3>
-            </header>
-            <!-- Input Boxes -->
-            <div>
-              <span>前方來源系統</span>
-              <input
-                type="text"
-                id="sourceSystemInput"
-                name="sourceSystemInput"
-                value=""
-                maxlength="50"
-                required="required"
-              />
-              <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PccCode</span>
-              <input
-                type="text"
-                id="pccCodeInput"
-                name="pccCodeInput"
-                value=""
-                maxlength="50"
-                required="required"
-              />
-              <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 發送帳號</span>
-              <input
-                type="text"
-                id="accountInput"
-                name="accountInput"
-                value=""
-                maxlength="50"
-                required="required"
-              />
-              <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 電話號碼</span>
-              <input
-                type="text"
-                id="phoneNumber"
-                name="phoneNumber"
-                value=""
-                maxlength="10"
-                required="required"
-              />
-              <br />
-              <span>建立日期：</span>
-              <div class="option date">
-                <input
-                  type="text"
-                  class="datepicker"
-                  id="startDate"
-                  placeholder="YYYY-MM-DD"
-                />
-              </div>
-              <span>~</span>
-              <div class="option date">
-                <input
-                  type="text"
-                  class="datepicker"
-                  id="endDate"
-                  placeholder="YYYY-MM-DD"
-                />
-              </div>
-              <br />
-            </div>
-            <div class="CHBtnSet">
-              <div class="CHLeft">
-                <ul>
-                  <li class="CHLeftBtn">
-                    <input
-                      id="backBtn"
-                      class="btn prev"
-                      type="button"
-                      value="<"
-                      style="cursor: pointer;"
-                    />
-                    <span id="pageAndTotalPages">1/0</span>
-                    <input
-                      id="nextBtn"
-                      class="btn next"
-                      type="button"
-                      value=">"
-                      style="cursor: pointer;"
-                    />
-                  </li>
-                </ul>
-              </div>
-              <div class="CHRight">
-                <input
-                  id="searchBtn"
-                  class="btn_add search"
-                  type="button"
-                  value="Search"
-                  style="cursor: pointer;"
-                />
-                <a
-                  id="exportBtn"
-                  class="btn_add exportToExcel"
-                  style="cursor: pointer; padding: 7px 12px; text-decoration: none"
-                  >匯出 EXCEL</a
-                >
-              </div>
-            </div>
-            <div class="mainFrame">
-              <div class="table-warp">
-                <table
-                  border="1"
-                  id="resultTable"
-                  class="table-responsive resultTable"
-                >
-                  <thead>
-                    <tr>
-                      <th class="td1">#</th>
-                      <th class="td5">前方<br />來源<br />系統</th>
-                      <th class="td3">通路流</th>
-                      <th class="td3">發送<br />通路</th>
-                      <th class="td10">發送帳號</th>
-                      <th class="td5">掛帳PccCode</th>
-                      <th class="td20">訊息內文</th>
-                      <th class="td7">客戶手機號碼</th>
-                      <th class="td10">預約時間</th>
-                      <th class="td10">BC狀態<br />BC發送時間</th>
-                      <th class="td10">PNP狀態<br />PNP發送時間</th>
-                      <th class="td10">SMS狀態<br />SMS發送時間</th>
-                      <th class="td5">動作</th>
-                    </tr>
-                  </thead>
-                  <tbody class="resultTbody">
-                    <!-- ============================ -->
-                    <tr class="resultList">
-                      <td rowspan="2" class="td1 no"></td>
-                      <td rowspan="2" class="td5 sourceSystem"></td>
-                      <td rowspan="2" class="td3 pathway"></td>
-                      <td rowspan="2" class="td3 proc_stage"></td>
-                      <td rowspan="2" class="td10 account"></td>
-                      <td rowspan="2" class="td5 accountPccCode"></td>
-                      <td rowspan="2" class="td20 pnpContent"></td>
-                      <td rowspan="2" class="td7 customerCellPhoneNumber"></td>
-                      <td rowspan="2" class="td10 schedule_time"></td>
-                      <td rowspan="1" class="td10 bcStatusCode"></td>
-                      <td rowspan="1" class="td10 pnpStatusCode"></td>
-                      <td rowspan="1" class="td10 smsStatusCode"></td>
-                      <td rowspan="2" class="td5 odd-row">
-                        <button
-                          class="resendBtn"
-                          sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_PNP_ADMIN','ROLE_MARKET','ROLE_PNP_SEND_LINE_SEND','ROLE_PNP_SEND_LINE_VERIFY')"
-                        >
-                          再次發送SMS
-                        </button>
-                      </td>
-                    </tr>
-                    <tr class="resultList2">
-                      <td class="bc_time"></td>
-                      <td class="pnp_time"></td>
-                      <td class="sms_time"></td>
-                    </tr>
-                    <!-- ============================ -->
-                  </tbody>
-                </table>
-              </div>
-              <p>轉發SMS_1 : Line-PNP手機號碼比對失敗或關閉接收通知</p>
-              <p>轉發SMS_2 : Line-PNP發送失敗或過期</p>
-            </div>
-          </section>
-        </form>
-      </div>
+.td20 {
+    max-width: 20rem;
+    min-width: 20rem;
+}
+
+.td30 {
+    max-width: 30rem;
+    min-width: 30rem;
+}
+
+.odd-row {
+    background: #e7eaf0;
+}
+
+.searchArea {
+    padding: 10px;
+}
+
+.searchArea-section {
+    box-sizing: border-box;
+    display: inline-block;
+    padding: 5px;
+}
+
+.searchArea .paramGroup label {
+    display: inline-block;
+    min-width: 6rem;
+    text-align: right;
+    margin: 5px;
+}
+
+.searchArea .paramGroup input {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px #ddd solid;
+    font-size: 1rem;
+    width: 100px;
+}
+
+.searchArea .paramGroup button {
+    display: inline-block;
+}
+
+.btn {
+    border: none;
+    border-radius: 5px;
+    /* height: 50px; */
+    padding: 10px;
+    font-size: 14px;
+    min-width: 8rem;
+}
+
+
+.btn2 {
+    border: none;
+    border-radius: 5px;
+    /* height: 50px; */
+    padding: 10px;
+    font-size: 14px;
+}
+
+.btn-warn {
+    color: #fff;
+    background: #f55;
+}
+
+.btn-warn:hover {
+    position: relative;
+    background: #c00;
+}
+
+.btn-pri {
+    color: #fff;
+    background: #07f;
+}
+
+.btn-pri:hover {
+    position: relative;
+    background: #05c;
+}
+
+.btn-pri:active {
+    position: relative;
+    left: 1px;
+    top: 2px;
+}
+
+.btn-create {
+    color: #fff;
+    background: #3d9970;
+}
+
+.btn-create:hover {
+    position: relative;
+    background: #2c8859;
+}
+
+.btn-create:active {
+    position: relative;
+    left: 1px;
+    top: 2px;
+}
+
+.btn-style {
+    color: #000;
+    background: #aaa;
+}
+
+.btn_style:disabled {
+    color: #ddd;
+    background: #bbb;
+}
+
+.btn-style-pressed {
+    color: #FFF;
+    background: #07F;
+}
+</style>
+
+<body>
+<header th:replace="/BCS/Views/Common/Header :: header"></header>
+<div class="LyContents">
+    <div th:replace="/BCS/Views/Common/Menu :: menu ('PagepnpDetailReport')"></div>
+    <!-- Right Content -->
+    <div class="LyMain" role="main">
+<!--        <form>-->
+            <section>
+                <!-- Title -->
+                <header class="ContentHead">
+                    <h3 class="CHTtl">PNP明細報表</h3>
+                </header>
+                <!-- Input Boxes -->
+                <!--                <div>-->
+                <!--                    <span>建立日期：</span>-->
+                <!--                    <div class="option date">-->
+                <!--                        <input type="text" class="datepicker" id="startDate" placeholder="YYYY-MM-DD"/>-->
+                <!--                    </div>-->
+                <!--                    <span>~</span>-->
+                <!--                    <div class="option date">-->
+                <!--                        <input type="text" class="datepicker" id="endDate" placeholder="YYYY-MM-DD"/>-->
+                <!--                    </div>-->
+                <!--                    <br/>-->
+                <!--                </div>-->
+                <!-- ***************************************************** -->
+                <div class="searchArea">
+                    <div class="searchArea-section">
+                        <div class="paramGroup">
+                            <label class="param-label">發送帳號</label>
+                            <input type="text" id="accountInput" name="accountInput" value="" maxlength="30" />
+                        </div>
+                        <div class="paramGroup">
+                            <label class="param-label">前方來源系統</label>
+                            <input type="text" id="sourceSystemInput" name="sourceSystemInput" value="" maxlength="20" />
+                        </div>
+                    </div>
+                    <div class="searchArea-section">
+                        <div class="paramGroup">
+                            <label class="param-label">PCC-CODE</label>
+                            <input type="text" id="pccCodeInput" name="pccCodeInput" value="" maxlength="20" />
+                        </div>
+                        <div class="paramGroup">
+                            <label class="param-label">電話號碼</label>
+                            <input type="text" id="phoneNumber" name="phoneNumber" value="" maxlength="10" />
+                        </div>
+                    </div>
+                    <div class="searchArea-section">
+                        <div class="paramGroup">
+                            <label class="param-label"></label>
+                        </div>
+                        <div class="paramGroup">
+                            <label class="param-label">日期</label>
+                            <button class="btn2 btn-style-pressed" id="isCreateTimeBtn">建立時間</button>
+                            <button class="btn2 btn-style" id="isOrderTimeBtn">預約時間</button>
+                            <input type="text" class="datepicker" id="startDate" placeholder="YYYY-MM-DD" maxlength="10"/> ➤
+                            <input type="text" class="datepicker" id="endDate" placeholder="YYYY-MM-DD" maxlength="10"/>
+                        </div>
+                        <div class="paramGroup">
+                            <label class="param-label"></label>
+                            <button id="searchBtn" class="btn btn-pri">
+                                Search
+                            </button>
+                            <button id="exportBtn" class="btn btn-pri">
+                                匯出Excel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- ***************************************************** -->
+                <div class="CHBtnSet">
+                    <div class="CHLeft">
+                        <ul>
+                            <li class="CHLeftBtn">
+                                <input id="backBtn" class="btn prev" type="button" value="<" style="cursor: pointer;" />
+                                <span id="pageAndTotalPages">1/0</span>
+                                <input id="nextBtn" class="btn next" type="button" value=">" style="cursor: pointer;" />
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="CHRight">
+<!--                        <input id="searchBtn" class="btn_add search" type="button" value="Search" style="cursor: pointer;" />-->
+<!--                        <a id="exportBtn" class="btn_add exportToExcel" style="cursor: pointer; padding: 7px 12px; text-decoration: none">匯出 EXCEL</a>-->
+                    </div>
+                </div>
+                <div class="mainFrame">
+                    <div class="table-warp">
+                        <table border="1" id="resultTable" class="table-responsive resultTable">
+                            <thead>
+                            <tr>
+                                <th class="td1">#</th>
+                                <th class="td5">前方<br />來源<br />系統</th>
+                                <th class="td3">通路流</th>
+                                <th class="td3">發送<br />通路</th>
+                                <th class="td10">發送帳號</th>
+                                <th class="td5">掛帳PccCode</th>
+                                <th class="td20">訊息內文</th>
+                                <th class="td7">客戶手機號碼</th>
+                                <th class="td10">預約時間</th>
+                                <th class="td10">BC狀態<br />BC發送時間</th>
+                                <th class="td10">PNP狀態<br />PNP發送時間</th>
+                                <th class="td10">SMS狀態<br />SMS發送時間</th>
+                                <th class="td5">動作</th>
+                            </tr>
+                            </thead>
+                            <tbody class="resultTbody">
+                            <!-- ============================ -->
+                            <tr class="resultList">
+                                <td rowspan="2" class="td1 no"></td>
+                                <td rowspan="2" class="td5 sourceSystem"></td>
+                                <td rowspan="2" class="td3 pathway"></td>
+                                <td rowspan="2" class="td3 proc_stage"></td>
+                                <td rowspan="2" class="td10 account"></td>
+                                <td rowspan="2" class="td5 accountPccCode"></td>
+                                <td rowspan="2" class="td20 pnpContent"></td>
+                                <td rowspan="2" class="td7 customerCellPhoneNumber"></td>
+                                <td rowspan="2" class="td10 schedule_time"></td>
+                                <td rowspan="1" class="td10 bcStatusCode"></td>
+                                <td rowspan="1" class="td10 pnpStatusCode"></td>
+                                <td rowspan="1" class="td10 smsStatusCode"></td>
+                                <td rowspan="2" class="td5 odd-row">
+                                    <button class="resendBtn" sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_PNP_ADMIN','ROLE_MARKET','ROLE_PNP_SEND_LINE_SEND','ROLE_PNP_SEND_LINE_VERIFY')">
+                                        再次發送SMS
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="resultList2">
+                                <td class="bc_time"></td>
+                                <td class="pnp_time"></td>
+                                <td class="sms_time"></td>
+                            </tr>
+                            <!-- ============================ -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+<!--        </form>-->
     </div>
-  </body>
+</div>
+</body>
+
 </html>

@@ -17,6 +17,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestClientResponseException;
 
 import com.bcs.core.linepoint.api.model.LinePointPushModel;
 import com.bcs.core.linepoint.api.model.LinePointResponseModel;
@@ -44,12 +46,15 @@ import com.bcs.core.enums.LINE_HEADER;
 import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.spring.ApplicationContextProvider;
+import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.utils.RestfulUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import akka.actor.UntypedActor;
 
 public class LinePointPushMessageActor extends UntypedActor {
+	
+	final static int TARGET_INDEX_OF_SLEEP = 20;
 	
 	@Override
 	public void onReceive(Object object) throws Exception {
@@ -79,11 +84,11 @@ public class LinePointPushMessageActor extends UntypedActor {
 		    String clientId = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_API_CLIENT_ID.toString(), true); // 10052
 		    requestBody.put("clientId", clientId);
 			
-			
 			for(Integer i = 0; i < detailIds.length(); i++) {
 				// detailId
 				String detailIdStr = "" + detailIds.get(i);
 				Long detailId = Long.parseLong(detailIdStr);
+				Logger.info("detailId = " + detailId);
 				
 				// initialize detail
 				LinePointDetail detail = linePointDetailService.findOne(detailId);
@@ -137,13 +142,27 @@ public class LinePointPushMessageActor extends UntypedActor {
 					linePointMain.setSuccessfulAmount(linePointMain.getSuccessfulAmount() + Amount);
 					linePointMain.setSuccessfulCount(linePointMain.getSuccessfulCount() + 1);
 				} catch (HttpClientErrorException e) {
+					Logger.info("HttpClientErrorException : " + e.getResponseBodyAsString());
+					
 					detail.setMessage(e.getResponseBodyAsString());
 					detail.setStatus(LinePointDetail.STATUS_FAIL);
 					
 					linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
+				} catch (HttpServerErrorException e) {
+					Logger.info("HttpServerErrorException : " + e.getResponseBodyAsString());
+					
+					detail.setMessage(e.getResponseBodyAsString());
+					detail.setStatus(LinePointDetail.STATUS_FAIL);
+					
+					linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
+				} catch (Exception e) {
+					Logger.info("Exception : " + e.getMessage());
+					
+					detail.setMessage(e.getMessage());
+					detail.setStatus(LinePointDetail.STATUS_FAIL);
+					
+					linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
 				}
-				
-				
 				
 				detail.setOrderKey(orderKey);
 				detail.setApplicationTime(applicationTime);
@@ -170,6 +189,13 @@ public class LinePointPushMessageActor extends UntypedActor {
 							Logger.info(" LinePoint訊息發出 ");
 						}
 					}
+				}
+				
+				if (i % TARGET_INDEX_OF_SLEEP == 0) {
+					Logger.info(String.format("%d/%d", ((i % TARGET_INDEX_OF_SLEEP == 0) ? TARGET_INDEX_OF_SLEEP : (i % TARGET_INDEX_OF_SLEEP)), TARGET_INDEX_OF_SLEEP));
+					Logger.info("Try to sleep 5000 milliseconds...");
+
+					Thread.sleep(5000);
 				}
 			}
 		}

@@ -54,7 +54,7 @@ import akka.actor.UntypedActor;
 
 public class LinePointPushMessageActor extends UntypedActor {
 	
-	final static int TARGET_INDEX_OF_SLEEP = 20;
+//	final static int TARGET_INDEX_OF_SLEEP = 10;
 	
 	@Override
 	public void onReceive(Object object) throws Exception {
@@ -190,13 +190,15 @@ public class LinePointPushMessageActor extends UntypedActor {
 						}
 					}
 				}
-				
-				if (i % TARGET_INDEX_OF_SLEEP == 0) {
-					Logger.info(String.format("%d/%d", ((i % TARGET_INDEX_OF_SLEEP == 0) ? TARGET_INDEX_OF_SLEEP : (i % TARGET_INDEX_OF_SLEEP)), TARGET_INDEX_OF_SLEEP));
-					Logger.info("Try to sleep 5000 milliseconds...");
 
-					Thread.sleep(5000);
-				}
+				Thread.sleep(500);
+				
+//				if (i % TARGET_INDEX_OF_SLEEP == 0) {
+//					Logger.info(String.format("%d/%d", ((i % TARGET_INDEX_OF_SLEEP == 0) ? TARGET_INDEX_OF_SLEEP : (i % TARGET_INDEX_OF_SLEEP)), TARGET_INDEX_OF_SLEEP));
+//					Logger.info("Try to sleep 5000 milliseconds...");
+//
+//					Thread.sleep(5000);
+//				}
 			}
 		}
 	}

@@ -206,7 +206,7 @@ $(function() {
         	return;
         }
         console.info('btn_sendFunc linePointMainId:' + linePointMainId);
-        alert(currentTime.isAfter(sendTimingTime));
+//        alert(currentTime.isAfter(sendTimingTime));
         if(sendTimingTime){
         	if(currentTime.isAfter(sendTimingTime)){
         		alert('已超過預約發送時間');

@@ -15,6 +15,7 @@ import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 
 import com.bcs.core.json.AbstractBcsEntity;
+import lombok.EqualsAndHashCode;
 
 @SqlResultSetMapping(name = "MsgSendMainDetails", entities = {
 		@EntityResult(entityClass = MsgSendMain.class),
@@ -33,6 +34,7 @@ indexes = {
 	       @Index(name = "INDEX_0", columnList = "MSG_ID"),
 	       @Index(name = "INDEX_1", columnList = "STATUS"),
 	})
+@EqualsAndHashCode(callSuper = false)
 public class MsgSendMain extends AbstractBcsEntity {
 	private static final long serialVersionUID = 1L;
 	public static final String THIS_PARENT_TYPE = "BCS_MSG_SEND_MAIN";
@@ -45,12 +47,12 @@ public class MsgSendMain extends AbstractBcsEntity {
 	public static final String MESSAGE_STATUS_PROCESS = "PROCESS";
 	public static final String MESSAGE_STATUS_FAIL = "FAIL";
 	public static final String MESSAGE_STATUS_DELETE = "DELETE";
-	
+
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name = "MSG_SEND_ID")
 	private Long msgSendId;
-	
+
 	@Column(name = "MSG_ID")
 	private Long msgId;
 
@@ -74,10 +76,10 @@ public class MsgSendMain extends AbstractBcsEntity {
 
 	@Column(name = "STATUS_NOTICE", columnDefinition="nvarchar(200)")
 	private String statusNotice;
-	
+
 	@Column(name = "SEND_TOTAL_COUNT")
 	private Long sendTotalCount;
-	
+
 	@Column(name = "SEND_COUNT")
 	private Long sendCount;
 
@@ -201,5 +203,5 @@ public class MsgSendMain extends AbstractBcsEntity {
 	public void setSerialId(String serialId) {
 		this.serialId = serialId;
 	}
-	
+
 }

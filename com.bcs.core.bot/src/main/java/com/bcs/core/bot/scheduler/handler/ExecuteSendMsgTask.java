@@ -1,13 +1,5 @@
 package com.bcs.core.bot.scheduler.handler;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import com.bcs.core.utils.DataUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-
 import com.bcs.core.api.msg.MsgGenerator;
 import com.bcs.core.api.msg.MsgGeneratorFactory;
 import com.bcs.core.bot.scheduler.service.SchedulerService;
@@ -26,227 +18,203 @@ import com.bcs.core.db.service.SendGroupService;
 import com.bcs.core.enums.API_TYPE;
 import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.spring.ApplicationContextProvider;
-
+import com.bcs.core.utils.DataUtils;
 import com.bcs.core.utils.ErrorRecord;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+/**
+ * @author ???
+ */
+@Slf4j
 public class ExecuteSendMsgTask {
 
-	/** Logger */
-	private static Logger logger = Logger.getLogger(ExecuteSendMsgTask.class);
+    public void executeSendMsg(Long msgId) throws Exception {
+        log.info("executeSendMsg msgId ============ :" + msgId);
 
-	public void executeSendMsg(Long msgId) throws Exception{
-		logger.info("executeSendMsg msgId ============ :" + msgId);
+        GroupGenerateService groupGenerateService = ApplicationContextProvider.getApplicationContext().getBean(GroupGenerateService.class);
+        SendGroupService sendGroupService = ApplicationContextProvider.getApplicationContext().getBean(SendGroupService.class);
+        MsgMainService msgMainService = ApplicationContextProvider.getApplicationContext().getBean(MsgMainService.class);
+        MsgSendMainService msgSendMainService = ApplicationContextProvider.getApplicationContext().getBean(MsgSendMainService.class);
+        MsgDetailService msgDetailService = ApplicationContextProvider.getApplicationContext().getBean(MsgDetailService.class);
 
-		GroupGenerateService groupGenerateService = ApplicationContextProvider.getApplicationContext().getBean(GroupGenerateService.class);
-		SendGroupService sendGroupService = ApplicationContextProvider.getApplicationContext().getBean(SendGroupService.class);
-		MsgMainService msgMainService = ApplicationContextProvider.getApplicationContext().getBean(MsgMainService.class);
-		MsgSendMainService msgSendMainService = ApplicationContextProvider.getApplicationContext().getBean(MsgSendMainService.class);
-		MsgDetailService msgDetailService = ApplicationContextProvider.getApplicationContext().getBean(MsgDetailService.class);
-		
-		int LinepointMain = sendGroupService.findLinePointMaincount(msgId);
-		if(LinepointMain != 0) {
-			logger.info(" [ linepoint 專案訊息 ]");
-			return;
-		}
-		
-		MsgMain msgMain = msgMainService.findOne(msgId);
-		logger.info("executeSendMsg : msgMain = " + msgMain);
+        int linePointMain = sendGroupService.findLinePointMaincount(msgId);
+        if (linePointMain != 0) {
+            log.info("This is Line Point 專案訊息");
+            return;
+        }
 
-		if(msgMain != null){
-			String groupTitle = "---";
-			try{
-				// Validate GroupId
-				SendGroup sendGroup = sendGroupService.findOne(msgMain.getGroupId());
-				if (sendGroup == null) {
-					throw new BcsNoticeException("群組設定錯誤");
-				} else {
-					groupTitle = sendGroup.getGroupTitle();
-				}
+        MsgMain msgMain = msgMainService.findOne(msgId);
+        log.info("executeSendMsg : msgMain = " + msgMain);
 
-				// Validate Send Target Count
+        if (msgMain == null) {
+            log.error("Schdeuler MsgId:" + msgId + " Missing");
+            SchedulerService schedulerService = ApplicationContextProvider.getApplicationContext().getBean(SchedulerService.class);
+            boolean status = schedulerService.deleteMsgSendSchedule(msgId);
+            log.error("Schdeuler deleteMsgSendSchedule:" + msgId + " - status - " + status);
+            return;
+        }
 
-				Long groupId = sendGroup.getGroupId();
-				// 行銷人員設定 群組
-				if(groupId > 0){
-					try{
-						List<String> mids =  groupGenerateService.findMIDBySendGroupDetailGroupId(groupId);
-						logger.info("mids:"+DataUtils.toPrettyJsonUseJackson(mids));
-						if(mids != null && mids.size() >0){
-							logger.debug("executeSendMsg mids ============ :" + mids.size());
-							/**
-							 * Copy From MsgMain to MsgSendMain
-							 */
-							MsgSendMain msgSendMain = msgSendMainService.copyFromMsgMain(msgId, new Long(mids.size()), groupTitle);
+        String groupTitle = "---";
+        try {
+            SendGroup sendGroup = sendGroupService.findOne(msgMain.getGroupId());
+            if (sendGroup == null) {
+                throw new BcsNoticeException("查無該群組");
+            }
+            groupTitle = sendGroup.getGroupTitle();
 
-							List<MsgDetail> details = msgDetailService.findByMsgIdAndMsgParentType(msgSendMain.getMsgSendId(), MsgSendMain.THIS_PARENT_TYPE);
+            Long groupId = sendGroup.getGroupId();
+            if (groupId > 0) {
+                marketSetting(msgId, groupGenerateService, msgSendMainService, msgDetailService, groupTitle, groupId);
+            } else {
+                defaultSetting(msgId, sendGroupService, msgSendMainService, msgDetailService, groupTitle, groupId);
+            }
 
-							/**
-							 * Send To Test Group for Check Send
-							 */
-							this.sendToAdminGroup(msgSendMain, details);
+            switch (msgMain.getSendType()) {
+                case MsgMain.SENDING_MSG_TYPE_DELAY:
+                case MsgMain.SENDING_MSG_TYPE_IMMEDIATE:
+                    msgMain.setStatus(MsgMain.MESSAGE_STATUS_COMPLETE);
+                    msgMainService.save(msgMain);
+                    break;
+                default:
+            }
+        } catch (Exception e) {
+            log.error(ErrorRecord.recordError(e));
 
-							// Reset Message
-							details = msgDetailService.findByMsgIdAndMsgParentType(msgSendMain.getMsgSendId(), MsgSendMain.THIS_PARENT_TYPE);
+            if (MsgMain.SENDING_MSG_TYPE_DELAY.equals(msgMain.getSendType())) {
+                msgMain.setStatus(MsgMain.MESSAGE_STATUS_FAIL);
+                msgMain.setStatusNotice(e.getMessage());
+                msgMain.setModifyTime(new Date());
+                msgMainService.save(msgMain);
 
-							int pageSize = SendGroupService.pageSize;
+                msgSendMainService.copyFromMsgMain(msgId, -1L, groupTitle, MsgMain.MESSAGE_STATUS_FAIL);
 
-							List<String> sendMids = new ArrayList<String>();
-							for(String mid : mids){
-								sendMids.add(mid);
+                SchedulerService schedulerService = ApplicationContextProvider.getApplicationContext().getBean(SchedulerService.class);
+                boolean status = schedulerService.deleteMsgSendSchedule(msgId);
+                log.error("Schdeuler deleteMsgSendSchedule:" + msgId + " - status - " + status);
+            } else if (MsgMain.SENDING_MSG_TYPE_SCHEDULE.equals(msgMain.getSendType())) {
+                msgSendMainService.copyFromMsgMain(msgId, -1L, groupTitle, MsgMain.MESSAGE_STATUS_FAIL, e.getMessage());
+            }
+            throw e;
+        }
+    }
 
-								if(sendMids.size() % pageSize == 0){
+    /**
+     * 預設群組
+     */
+    private void defaultSetting(Long msgId, SendGroupService sendGroupService, MsgSendMainService msgSendMainService, MsgDetailService msgDetailService, String groupTitle, Long groupId) throws Exception {
+        log.info("DefaultSetting Start!!");
+        Long totalCount = sendGroupService.countDefaultGroupSize(groupId);
+        log.info("countDefaultGroupSize:" + totalCount);
 
-									// Handle : Sending
-									sendMsgToMids(sendMids, details, msgSendMain.getMsgSendId());
-									sendMids = new ArrayList<String>();
-								}
-							}
+        MsgSendMain msgSendMain = msgSendMainService.copyFromMsgMain(msgId, totalCount, groupTitle);
 
-							if(sendMids.size() > 0){
-								// Handle : Sending Else
-								sendMsgToMids(sendMids, details, msgSendMain.getMsgSendId());
-							}
-						}
-						else{
-							throw new BcsNoticeException("群組設定錯誤:查不到發送目標");
-						}
-					}
-					catch(Exception e){
-						throw e;
-					}
-				}
-				// 預設群祖
-				else{
-					Long totalCount = sendGroupService.countDefaultGroupSize(groupId);
-					logger.info("countDefaultGroupSize:" + totalCount);
+        List<MsgDetail> details = msgDetailService.findByMsgIdAndMsgParentType(msgSendMain.getMsgSendId(), MsgSendMain.THIS_PARENT_TYPE);
 
-					/**
-					 * Copy From MsgMain to MsgSendMain
-					 */
-					MsgSendMain msgSendMain = msgSendMainService.copyFromMsgMain(msgId, totalCount, groupTitle);
+        log.info("findByMsgIdAndMsgParentType");
 
-					List<MsgDetail> details = msgDetailService.findByMsgIdAndMsgParentType(msgSendMain.getMsgSendId(), MsgSendMain.THIS_PARENT_TYPE);
+        this.sendToAdminGroup(msgSendMain, details);
 
-					logger.info("findByMsgIdAndMsgParentType");
+        // Reset Message
+        details = msgDetailService.findByMsgIdAndMsgParentType(msgSendMain.getMsgSendId(), MsgSendMain.THIS_PARENT_TYPE);
 
-					/**
-					 * Send To Test Group for Check Send
-					 */
-					this.sendToAdminGroup(msgSendMain, details);
+        int pageSize = SendGroupService.pageSize;
+        if (totalCount > 80 * 5000) {
+            pageSize = 5000;
+        }
 
-					// Reset Message
-					details = msgDetailService.findByMsgIdAndMsgParentType(msgSendMain.getMsgSendId(), MsgSendMain.THIS_PARENT_TYPE);
+        int page = 0;
+        while (true) {
+            List<String> list = sendGroupService.queryDefaultGroup(groupId, page, pageSize);
+            log.info("midList:" + DataUtils.toPrettyJsonUseJackson(list));
+            if (list == null || list.isEmpty()) {
+                break;
+            }
+            log.debug("queryDefaultGroup:" + list.size());
+            sendMsgToMids(list, details, msgSendMain.getMsgSendId());
 
-					int pageSize = SendGroupService.pageSize;
-					if(totalCount > 80*5000){
-						pageSize = 5000;
-					}
+            page++;
+            if (page % 80 == 0) {
+                Thread.sleep(3 * 60 * 1000L);
+            }
+        }
+    }
 
-					int page = 0;
-					while(true){
-						List<String> list = sendGroupService.queryDefaultGroup(groupId, page, pageSize);
-						logger.info("mids:" + DataUtils.toPrettyJsonUseJackson(list));
-						if(list != null && list.size() > 0){
-							logger.debug("queryDefaultGroup:" + list.size());
-							// Handle : Sending
-							sendMsgToMids(list, details, msgSendMain.getMsgSendId());
-						}
-						else{
-							break;
-						}
-						page++;
-						if(page % 80 == 0){
-							// delay 3 minutes
-							Thread.sleep(3*60*1000);
-						}
-					}
-				}
+    /**
+     * 行銷人員設定 群組
+     */
+    private void marketSetting(Long msgId, GroupGenerateService groupGenerateService, MsgSendMainService msgSendMainService, MsgDetailService msgDetailService, String groupTitle, Long groupId) throws Exception {
+        log.info("MarketSetting Start!!");
+        List<String> midList = groupGenerateService.findMIDBySendGroupDetailGroupId(groupId);
+        log.info("midList:" + DataUtils.toPrettyJsonUseJackson(midList));
+        if (midList == null || midList.isEmpty()) {
+            throw new BcsNoticeException("群組設定錯誤:查不到發送目標");
+        }
+        log.debug("executeSendMsg midList ============ :" + midList.size());
+        MsgSendMain msgSendMain = msgSendMainService.copyFromMsgMain(msgId, (long) midList.size(), groupTitle);
 
-				// Update DELAY Status
-				if(MsgMain.SENDING_MSG_TYPE_DELAY.equals(msgMain.getSendType())){
-					msgMain.setStatus(MsgMain.MESSAGE_STATUS_COMPLETE);
-					msgMainService.save(msgMain);
-				}
-				// Update IMMEDIATE Status
-				else  if(MsgMain.SENDING_MSG_TYPE_IMMEDIATE.equals(msgMain.getSendType())){
-					msgMain.setStatus(MsgMain.MESSAGE_STATUS_COMPLETE);
-					msgMainService.save(msgMain);
-				}
-			}
-			catch(Exception e){
-				logger.error(ErrorRecord.recordError(e));
+        List<MsgDetail> details = msgDetailService.findByMsgIdAndMsgParentType(msgSendMain.getMsgSendId(), MsgSendMain.THIS_PARENT_TYPE);
 
-				if(MsgMain.SENDING_MSG_TYPE_DELAY.equals(msgMain.getSendType())){
-					msgMain.setStatus(MsgMain.MESSAGE_STATUS_FAIL);
-					msgMain.setStatusNotice(e.getMessage());
-					msgMain.setModifyTime(new Date());
-					msgMainService.save(msgMain);
+        this.sendToAdminGroup(msgSendMain, details);
 
-					msgSendMainService.copyFromMsgMain(msgId, -1L, groupTitle, MsgMain.MESSAGE_STATUS_FAIL);
+        // Reset Message
+        details = msgDetailService.findByMsgIdAndMsgParentType(msgSendMain.getMsgSendId(), MsgSendMain.THIS_PARENT_TYPE);
 
-					// Remove Scheduler
-					SchedulerService schedulerService = ApplicationContextProvider.getApplicationContext().getBean(SchedulerService.class);
-					boolean status = schedulerService.deleteMsgSendSchedule(msgId);
-					logger.error("Schdeuler deleteMsgSendSchedule:" + msgId + " - status - " + status);
-				}
-				else if(MsgMain.SENDING_MSG_TYPE_SCHEDULE.equals(msgMain.getSendType())){
+        int pageSize = SendGroupService.pageSize;
 
-					msgSendMainService.copyFromMsgMain(msgId, -1L, groupTitle, MsgMain.MESSAGE_STATUS_FAIL, e.getMessage());
-				}
+        List<String> sendMidList = new ArrayList<>();
+        for (String mid : midList) {
+            sendMidList.add(mid);
 
-				throw e;
-			}
-		}
-		else{
-			logger.error("Schdeuler MsgId:" + msgId + " Missing");
-			// Remove Scheduler
-			SchedulerService schedulerService = ApplicationContextProvider.getApplicationContext().getBean(SchedulerService.class);
-			boolean status = schedulerService.deleteMsgSendSchedule(msgId);
-			logger.error("Schdeuler deleteMsgSendSchedule:" + msgId + " - status - " + status);
-		}
-	}
+            if (sendMidList.size() % pageSize == 0) {
+                sendMsgToMids(sendMidList, details, msgSendMain.getMsgSendId());
+                sendMidList = new ArrayList<>();
+            }
+        }
 
-	/**
-	 *  Send To Test Group for Check Send
-	 * @param msgSendMain
-	 * @param details
-	 */
-	private void sendToAdminGroup(MsgSendMain msgSendMain, List<MsgDetail> details){
+        if (!sendMidList.isEmpty()) {
+            sendMsgToMids(sendMidList, details, msgSendMain.getMsgSendId());
+        }
+    }
 
-		try{
-			AdminUserService adminUserService = ApplicationContextProvider.getApplicationContext().getBean(AdminUserService.class);
+    /**
+     * Send To Test Group for Check Send
+     */
+    private void sendToAdminGroup(MsgSendMain msgSendMain, List<MsgDetail> details) {
+        log.info("SendToAdminGroup Start!!");
+        try {
+            AdminUserService adminUserService = ApplicationContextProvider.getApplicationContext().getBean(AdminUserService.class);
 
-			List<AdminUser> list = adminUserService.findByMidNotNull();
-			List<String> midsTest = new ArrayList<String>();
-			if(list != null && list.size() > 0){
-				for(AdminUser adminUser : list){
-					if(StringUtils.isNotBlank(adminUser.getMid())){
-						midsTest.add(adminUser.getMid());
-					}
-				}
-			}
+            List<AdminUser> list = adminUserService.findByMidNotNull();
+            List<String> midsTest = new ArrayList<>();
+            if (list != null && !list.isEmpty()) {
+                for (AdminUser adminUser : list) {
+                    if (StringUtils.isNotBlank(adminUser.getMid())) {
+                        midsTest.add(adminUser.getMid());
+                    }
+                }
+            }
 
-			MsgDetail detail = new MsgDetail();
-			detail.setText("***此為發送訊息後通知管理群***");
-			detail.setMsgType(MsgGenerator.MSG_TYPE_TEXT);
+            MsgDetail detail = new MsgDetail();
+            detail.setText("***此為發送訊息後通知管理群***");
+            detail.setMsgType(MsgGenerator.MSG_TYPE_TEXT);
 
-			details.add(0, detail);
+            details.add(0, detail);
 
-			sendMsgToMids(midsTest, details, msgSendMain.getMsgSendId());
-		}
-		catch(Exception e){ }
-	}
+            sendMsgToMids(midsTest, details, msgSendMain.getMsgSendId());
+        } catch (Exception e) {
+            log.error("Exception", e);
+        }
+    }
 
-	public void sendMsgToMids(List<String> mids, List<MsgDetail>details, Long updateMsgId) throws Exception{
-
-		SendingMsgService sendingMegService = ApplicationContextProvider.getApplicationContext().getBean(SendingMsgService.class);
-
-		List<MsgGenerator> msgGenerators = MsgGeneratorFactory.validateMessages(details);
-
-		logger.info("sendMsgToMids:Mids:" + mids.size());
-
-
-
-		sendingMegService.sendToLineAsync(msgGenerators, details, mids, API_TYPE.BOT, updateMsgId);
-	}
+    public void sendMsgToMids(List<String> mids, List<MsgDetail> details, Long updateMsgId) throws Exception {
+        SendingMsgService sendingMegService = ApplicationContextProvider.getApplicationContext().getBean(SendingMsgService.class);
+        List<MsgGenerator> msgGenerators = MsgGeneratorFactory.validateMessages(details);
+        log.info("sendMsgToMids:Mids:" + mids.size());
+        sendingMegService.sendToLineAsync(msgGenerators, details, mids, API_TYPE.BOT, updateMsgId);
+    }
 }

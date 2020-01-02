@@ -144,21 +144,21 @@ public class LinePointPushMessageActor extends UntypedActor {
 				} catch (HttpClientErrorException e) {
 					Logger.info("HttpClientErrorException : " + e.getResponseBodyAsString());
 					
-					detail.setMessage(e.getResponseBodyAsString());
+					detail.setMessage(e.getResponseBodyAsString().substring(0, 200)); // substring(0, 200) is only temporarily modified to fit field size of database.
 					detail.setStatus(LinePointDetail.STATUS_FAIL);
 					
 					linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
 				} catch (HttpServerErrorException e) {
 					Logger.info("HttpServerErrorException : " + e.getResponseBodyAsString());
 					
-					detail.setMessage(e.getResponseBodyAsString());
+					detail.setMessage(e.getStatusText().substring(0, 200)); // substring(0, 200) is only temporarily modified to fit field size of database.
 					detail.setStatus(LinePointDetail.STATUS_FAIL);
 					
 					linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
 				} catch (Exception e) {
 					Logger.info("Exception : " + e.getMessage());
 					
-					detail.setMessage(e.getMessage());
+					detail.setMessage(e.getMessage().substring(0, 200)); // substring(0, 200) is only temporarily modified to fit field size of database.
 					detail.setStatus(LinePointDetail.STATUS_FAIL);
 					
 					linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);

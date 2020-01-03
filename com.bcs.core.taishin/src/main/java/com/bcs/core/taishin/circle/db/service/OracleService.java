@@ -5,11 +5,11 @@ import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.circle.db.entity.TaishinEmployee;
 import com.bcs.core.taishin.circle.db.repository.TaishinEmployeeRepository;
+import com.bcs.core.utils.DataUtils;
 import com.bcs.core.utils.ErrorRecord;
-import com.google.gson.GsonBuilder;
 import com.tsib.RunBat;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,12 +26,9 @@ import java.util.List;
  *
  * @author ???
  */
+@Slf4j
 @Service
 public class OracleService {
-    /**
-     * Logger
-     */
-    private static Logger logger = Logger.getLogger(OracleService.class);
 
     private static final String KEY_SERVER = "server";
     private static final String KEY_UID = "uid";
@@ -57,7 +54,7 @@ public class OracleService {
      * @throws BcsNoticeException BcsNoticeException
      */
     public TaishinEmployee findByEmployeeId(String empId) throws Exception {
-        logger.info("[findByEmployeeId] EMP_ID=" + empId);
+        log.info("[findByEmployeeId] EMP_ID=" + empId);
         if (empId == null || empId.trim().isEmpty()) {
             throw new BcsNoticeException("The Employee ID is blank!");
         }
@@ -80,10 +77,10 @@ public class OracleService {
                     employee.setEasyName(trim(rs.getString(7)));
                     employee.setGroupName(extractGroupName(employee));
                 }
-                logger.info("Taishin Employee: " + new GsonBuilder().serializeNulls().setPrettyPrinting().create().toJson(employee));
+                log.info("TaiShin Employee: " + DataUtils.toPrettyJsonUseJackson(employee));
             } catch (Exception e) {
                 //TODO 只有Not Found 才適用該錯誤訊息，其餘錯誤需另外編寫錯誤原因
-                logger.error("Exception", e);
+                log.error("Exception", e);
                 throw new BcsNoticeException("查無此員工編號!!");
             }
         }
@@ -123,18 +120,18 @@ public class OracleService {
                     while (rs2.next()) {
                         empIdList.add(trim(rs2.getString(1)));
                     }
-                    logger.info("Employee Id List: " + empIdList);
+                    log.info("Employee Id List: " + empIdList);
                 }
             }
 
             /* Result */
             // Merge to IN('', '') String
             String returnSql = String.format(" AND EMPLOYEE_ID IN ('%s') ", StringUtils.join(empIdList, "', '"));
-            logger.info("returnSQL:" + returnSql);
+            log.info("returnSQL:" + returnSql);
 
             return returnSql;
         } catch (Exception e) {
-            logger.info("[getAvailableEmpIdsByEmpId] error:" + e);
+            log.info("[getAvailableEmpIdsByEmpId] error:" + e);
             return null;
         }
     }
@@ -147,27 +144,37 @@ public class OracleService {
         );
 
         if (StringUtils.isNotBlank(emp.getGroupName())) {
-            // 組權限
-            sb.append(String.format(" WHERE TRIM(CARD_DIV) = '%s' AND TRIM(CARD_DEPT) = '%s' AND DEPT_EASY_NM LIKE ",
-                    emp.getDivisionName(), emp.getDepartmentName())
-            );
-            sb.append("'%");
-            sb.append(emp.getGroupName());
-            sb.append("%'");
+            sb.append(getGroupAuthSql(emp));
         } else if (StringUtils.isNotBlank(emp.getDepartmentName())) {
-            // 部權限
-            sb.append(String.format(" WHERE TRIM(CARD_DIV) = '%s' AND TRIM(CARD_DEPT) = '%s' ",
-                    emp.getDivisionName(), emp.getDepartmentName())
-            );
+            sb.append(getDepartmentAuthSql(emp));
         } else {
-            // 處權限
-            sb.append(String.format(" WHERE TRIM(CARD_DIV) = '%s' ",
-                    emp.getDivisionName())
-            );
+            sb.append(getDivisionAuthSql(emp));
         }
 
-        logger.info("sqlString2:" + sb.toString());
+        log.info("sqlString2:" + sb.toString());
         return sb.toString();
+    }
+
+    /**
+     * 處權限
+     */
+    private String getDivisionAuthSql(TaishinEmployee emp) {
+        return String.format(" WHERE TRIM(CARD_DIV) = '%s' ", emp.getDivisionName());
+    }
+
+    /**
+     * 部權限
+     */
+    private String getDepartmentAuthSql(TaishinEmployee emp) {
+        return String.format(" WHERE TRIM(CARD_DIV) = '%s' AND TRIM(CARD_DEPT) = '%s' ", emp.getDivisionName(), emp.getDepartmentName());
+    }
+
+    /**
+     * 組權限
+     */
+    private String getGroupAuthSql(TaishinEmployee emp) {
+        return String.format(" WHERE TRIM(CARD_DIV) = '%s' AND TRIM(CARD_DEPT) = '%s' AND DEPT_EASY_NM LIKE ", emp.getDivisionName(), emp.getDepartmentName()) +
+                "'%" + emp.getGroupName() + "%'";
     }
 
     /**
@@ -181,10 +188,10 @@ public class OracleService {
      * @throws SQLException           SQLException
      */
     private Connection getOracleConnection(String user, String password, String oracleDatabaseSourceUrl) throws ClassNotFoundException, SQLException {
-        logger.info("Get Connection...");
+        log.info("Get Connection...");
         Class.forName("oracle.jdbc.driver.OracleDriver");
         Connection connection = DriverManager.getConnection(oracleDatabaseSourceUrl, user, password);
-        logger.info("Get Connected!!");
+        log.info("Get Connected!!");
         return connection;
     }
 
@@ -202,7 +209,7 @@ public class OracleService {
         } else {
             getLocalConnectSetting(connectArray);
         }
-        logger.info("Connection Setting Array: " + Arrays.toString(connectArray));
+        log.info("Connection Setting Array: " + Arrays.toString(connectArray));
 
         return connectArray;
     }
@@ -213,7 +220,7 @@ public class OracleService {
     private String[] getConnectSettingArray2() {
         String[] connectArray = new String[]{"", "", "", "", "", ""};
         getLdapConnectSetting(connectArray);
-        logger.info("Connection Setting Array: " + Arrays.toString(connectArray));
+        log.info("Connection Setting Array: " + Arrays.toString(connectArray));
         return connectArray;
     }
 
@@ -243,31 +250,32 @@ public class OracleService {
                 CoreConfigReader.getInteger("oracleApGroup"),
                 CoreConfigReader.getString("oracleSearchBase"));
 
-        logger.info("Connection:" + connection);
+        log.info("Connection:" + connection);
 
         String[] connectionArray = connection.split(";");
-        logger.info("Connection Array: " + Arrays.toString(connectionArray));
+        log.info("Connection Array: " + Arrays.toString(connectionArray));
         for (String keyValue : connectionArray) {
-            if (StringUtils.isNotBlank(keyValue)) {
-                String[] keyValueArray = keyValue.split("=");
-                logger.info("KeyValue Array: " + Arrays.toString(keyValueArray));
-                if (keyValueArray.length == 2) {
-                    switch (keyValueArray[0]) {
-                        case KEY_SERVER:
-                            connectArray[0] = keyValueArray[1].trim().toUpperCase();
-                            break;
-                        case KEY_UID:
-                            connectArray[1] = keyValueArray[1].trim().toUpperCase();
-                            break;
-                        case KEY_PWD:
-                            connectArray[2] = keyValueArray[1].trim().toUpperCase();
-                            break;
-                        case KEY_DATABASE:
-                            connectArray[3] = keyValueArray[1].trim().toUpperCase();
-                            break;
-                        default:
-                            break;
-                    }
+            if (StringUtils.isBlank(keyValue)) {
+                continue;
+            }
+            String[] keyValueArray = keyValue.split("=");
+            log.info("KeyValue Array: " + Arrays.toString(keyValueArray));
+            if (keyValueArray.length == 2) {
+                switch (keyValueArray[0]) {
+                    case KEY_SERVER:
+                        connectArray[0] = keyValueArray[1].trim().toUpperCase();
+                        break;
+                    case KEY_UID:
+                        connectArray[1] = keyValueArray[1].trim().toUpperCase();
+                        break;
+                    case KEY_PWD:
+                        connectArray[2] = keyValueArray[1].trim().toUpperCase();
+                        break;
+                    case KEY_DATABASE:
+                        connectArray[3] = keyValueArray[1].trim().toUpperCase();
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -282,7 +290,7 @@ public class OracleService {
     private String extractGroupName(TaishinEmployee emp) {
         String easyName = emp.getEasyName().replaceAll(emp.getDivisionName(), "")
                 .replaceAll(emp.getDepartmentName(), "");
-        logger.info("extractGroupName:" + easyName);
+        log.info("extractGroupName:" + easyName);
         return easyName;
     }
 
@@ -304,13 +312,13 @@ public class OracleService {
             ap1.searchBase = searchBase;
             return ap1.GetRunBat(apName, apGroup);
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
         return "";
     }
 
 
-    private String getFindByEmployeeIdSQL(String empId, String ORACLE_SCHEMA_HR) {
+    private String getFindByEmployeeIdSQL(String empId, String oracleSchemaHr) {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format(
                 " select " +
@@ -326,8 +334,8 @@ public class OracleService {
                         " left outer join %s.hr_dept_sw " +
                         " on (hr_emp_sw.dept_ser_no_act = hr_dept_sw.dept_serial_no) " +
                         " where " +
-                        " trim(emp_id) = '%s'", ORACLE_SCHEMA_HR, ORACLE_SCHEMA_HR, empId));
-        logger.info("sqlString:" + sb.toString());
+                        " trim(emp_id) = '%s'", oracleSchemaHr, oracleSchemaHr, empId));
+        log.info("sqlString:" + sb.toString());
         return sb.toString();
     }
 

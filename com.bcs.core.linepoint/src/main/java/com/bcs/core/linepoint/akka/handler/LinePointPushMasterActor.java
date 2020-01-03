@@ -11,59 +11,58 @@ import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 
 public class LinePointPushMasterActor extends UntypedActor {
-	private final ActorRef pushMessageRouterActor;
-	//private final ActorRef pushApiRouterActor;
-//	private final ActorRef pushMessageRecordRouterActor;
-//	private final ActorRef ftpTaskRouterActor;
-	
-	public LinePointPushMasterActor(){
-	    pushMessageRouterActor = new AkkaRouterFactory<LinePointPushMessageActor>(getContext(), LinePointPushMessageActor.class, true).routerActor;
-	    //pushApiRouterActor = new AkkaRouterFactory<LinePointPushApiActor>(getContext(), LinePointPushApiActor.class, true).routerActor;
-	    //pushMessageRecordRouterActor = new AkkaRouterFactory<LinePointPushMessageRecordActor>(getContext(), LinePointPushMessageRecordActor.class, true).routerActor;
-	    //ftpTaskRouterActor = new AkkaRouterFactory<LinePointFtpTaskActor>(getContext(), LinePointFtpTaskActor.class, true).routerActor;
-	}
+    private final ActorRef pushMessageRouterActor;
+//    private final ActorRef pushApiRouterActor;
+//    private final ActorRef pushMessageRecordRouterActor;
+//    private final ActorRef ftpTaskRouterActor;
 
-	@Override
-	public void onReceive(Object object) throws Exception {
-		if(object instanceof LinePointPushModel) {
-			LinePointPushModel pushApiModel = (LinePointPushModel) object;
-			Integer buffer = 100;
-			JSONArray detailIds = pushApiModel.getDetailIds();
-			Integer arrayLength = detailIds.length();
-			Integer pointer = 0;
-			
-			while(pointer < arrayLength) {
-				JSONArray partitionDetailIds = new JSONArray();
+    public LinePointPushMasterActor() {
+        pushMessageRouterActor = new AkkaRouterFactory<LinePointPushMessageActor>(getContext(), LinePointPushMessageActor.class, true).routerActor;
+//        pushApiRouterActor = new AkkaRouterFactory<LinePointPushApiActor>(getContext(), LinePointPushApiActor.class, true).routerActor;
+//        pushMessageRecordRouterActor = new AkkaRouterFactory<LinePointPushMessageRecordActor>(getContext(), LinePointPushMessageRecordActor.class, true).routerActor;
+//        ftpTaskRouterActor = new AkkaRouterFactory<LinePointFtpTaskActor>(getContext(), LinePointFtpTaskActor.class, true).routerActor;
+    }
 
-				for(Integer counter = 0; (counter < buffer) && (pointer < arrayLength); counter++, pointer++) {
-					partitionDetailIds.put(detailIds.get(pointer));
-				}
-				
-				LinePointPushModel pushApiModel_clone = (LinePointPushModel) pushApiModel.clone();
-				pushApiModel_clone.setDetailIds(partitionDetailIds);
-				
-				pushMessageRouterActor.tell(pushApiModel_clone, this.getSelf());
-			}
-			
-		}
-//		else if (object instanceof LinePointDetail) {
-//			LinePointDetail linePointDetail = (LinePointDetail) object;
-//			pushApiRouterActor.tell(linePointDetail, this.getSelf());
-//		}
-//		else if(object instanceof FtpTaskModel) {
-//			FtpTaskModel ftpTaskModel = (FtpTaskModel) object;
-//			
-//			if(ftpTaskModel.getFileHead().getMessageSendType().equals(LinePointPushModel.SEND_TYPE_IMMEDIATE)) {	// 立即發送
-//				ftpTaskRouterActor.tell(object, this.getSelf());
-//			} else if(ftpTaskModel.getFileHead().getMessageSendType().equals(LinePointPushModel.SEND_TYPE_DELAY)) {	// 延遲發送
-//				if(ftpTaskModel.getIsScheduled() != null && ftpTaskModel.getIsScheduled())
-//					ftpTaskRouterActor.tell(object, this.getSelf());
-//				else {
-//					ApplicationContextProvider.getApplicationContext().getBean(LinePointPushMessageTaskService.class).startTaskFromFtp(ftpTaskModel);
-//				}
-//			}
-//		} else if(object instanceof LinePointPushMessageRecord) {
-//			pushMessageRecordRouterActor.tell(object, this.getSelf());
-//		}
-	}
+    @Override
+    public void onReceive(Object object) throws Exception {
+        if (object instanceof LinePointPushModel) {
+            LinePointPushModel pushApiModel = (LinePointPushModel) object;
+            int buffer = 100;
+            JSONArray detailIds = pushApiModel.getDetailIds();
+            int arrayLength = detailIds.length();
+            int pointer = 0;
+
+            while (pointer < arrayLength) {
+                JSONArray partitionDetailIds = new JSONArray();
+
+                for (int counter = 0; (counter < buffer) && (pointer < arrayLength); counter++, pointer++) {
+                    partitionDetailIds.put(detailIds.get(pointer));
+                }
+
+                LinePointPushModel pushApiModelClone = (LinePointPushModel) pushApiModel.clone();
+                pushApiModelClone.setDetailIds(partitionDetailIds);
+
+                pushMessageRouterActor.tell(pushApiModelClone, this.getSelf());
+            }
+
+        }
+//        else if (object instanceof LinePointDetail) {
+//            LinePointDetail linePointDetail = (LinePointDetail) object;
+//            pushApiRouterActor.tell(linePointDetail, this.getSelf());
+//        } else if (object instanceof FtpTaskModel) {
+//            FtpTaskModel ftpTaskModel = (FtpTaskModel) object;
+//
+//            if (ftpTaskModel.getFileHead().getMessageSendType().equals(LinePointPushModel.SEND_TYPE_IMMEDIATE)) {    // 立即發送
+//                ftpTaskRouterActor.tell(object, this.getSelf());
+//            } else if (ftpTaskModel.getFileHead().getMessageSendType().equals(LinePointPushModel.SEND_TYPE_DELAY)) {    // 延遲發送
+//                if (ftpTaskModel.getIsScheduled() != null && ftpTaskModel.getIsScheduled())
+//                    ftpTaskRouterActor.tell(object, this.getSelf());
+//                else {
+//                    ApplicationContextProvider.getApplicationContext().getBean(LinePointPushMessageTaskService.class).startTaskFromFtp(ftpTaskModel);
+//                }
+//            }
+//        } else if (object instanceof LinePointPushMessageRecord) {
+//            pushMessageRecordRouterActor.tell(object, this.getSelf());
+//        }
+    }
 }

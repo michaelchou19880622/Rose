@@ -101,7 +101,7 @@ $(function() {
         isCreateTime ? 'createTime' : 'orderTime'
         ;
         console.info('getUrl', getUrl);
-        window.location(getUrl);
+        window.location.href=getUrl;
     }
 
   });

@@ -8,25 +8,27 @@ import com.bcs.core.taishin.circle.db.entity.BillingNoticeMain;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeContentTemplateMsgRepository;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeDetailRepository;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeMainRepository;
-import com.bcs.core.taishin.circle.db.repository.BillingNoticeRepositoryCustom;
 import com.bcs.core.taishin.circle.ftp.FtpService;
 import com.bcs.core.taishin.circle.ftp.FtpSetting;
 import com.bcs.core.utils.DataUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -36,14 +38,10 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 public class BillingNoticeFtpService {
 
-    /**
-     * Logger
-     */
-    private static Logger logger = Logger.getLogger(BillingNoticeFtpService.class);
-    private BillingNoticeRepositoryCustom billingNoticeRepositoryCustom;
     private BillingNoticeMainRepository billingNoticeMainRepository;
     private BillingNoticeDetailRepository billingNoticeDetailRepository;
     private BillingNoticeContentTemplateMsgRepository billingNoticeContentTemplateMsgRepository;
@@ -58,12 +56,10 @@ public class BillingNoticeFtpService {
 
     @Autowired
     public BillingNoticeFtpService(
-            BillingNoticeRepositoryCustom billingNoticeRepositoryCustom,
             BillingNoticeMainRepository billingNoticeMainRepository,
             BillingNoticeDetailRepository billingNoticeDetailRepository,
             BillingNoticeContentTemplateMsgRepository billingNoticeContentTemplateMsgRepository,
             FtpService ftpService) {
-        this.billingNoticeRepositoryCustom = billingNoticeRepositoryCustom;
         this.billingNoticeMainRepository = billingNoticeMainRepository;
         this.billingNoticeDetailRepository = billingNoticeDetailRepository;
         this.billingNoticeContentTemplateMsgRepository = billingNoticeContentTemplateMsgRepository;
@@ -77,126 +73,123 @@ public class BillingNoticeFtpService {
         String unit = CoreConfigReader.getString(CONFIG_STR.BN_SCHEDULE_UNIT, true, false);
         int time = CoreConfigReader.getInteger(CONFIG_STR.BN_SCHEDULE_TIME, true, false);
         if (time == -1) {
-            logger.error(" BillingNoticeFtpService TimeUnit error :" + time + unit);
+            log.error(" BillingNoticeFtpService TimeUnit error :" + time + unit);
             return;
         }
-        scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                // 排程工作
-                logger.debug(" BillingNoticeFtpService startCircle....");
-                ftpProcessHandler();
-            }
-        }, 0, time, TimeUnit.valueOf(unit));
+        scheduledFuture = scheduler.scheduleAtFixedRate(this::ftpProcess, 0, time, TimeUnit.valueOf(unit));
     }
 
 
     /**
      * 執行流程
      */
-    private void ftpProcessHandler() {
+    private void ftpProcess() {
+        log.info(" BillingNoticeFtpService startCircle....");
         boolean bigSwitch = CoreConfigReader.getBoolean(CONFIG_STR.BN_BIGSWITCH, true, false);
         String downloadSavePath = CoreConfigReader.getString(CONFIG_STR.BN_FTP_DOWNLOAD_SAVEFILEPATH, true, false);
         String fileExtension = CoreConfigReader.getString(CONFIG_STR.BN_FTP_FILE_EXTENSION, true, false);
 
-        /* 大流程關閉時不做 */
         if (!bigSwitch) {
             return;
         }
 
         try {
-            // 1. ftp get file
             Map<String, byte[]> lReturnDataMap = new HashMap<>();
-            List<FtpSetting> ftpSettings = ftpService.getFtpSettings();
-            for (FtpSetting ftp : ftpSettings) {
-                ftp.clearFileNames();
-                Map<String, byte[]> returnDatas = ftpService.downloadMutipleFileByType(ftp.getPath(), fileExtension, ftp);
-                for (String fileName : returnDatas.keySet()) {
-                    ftp.addFileNames(fileName);
-                    logger.info(" FTP--" + ftp.getChannelId() + ":" + fileName);
-                }
-                lReturnDataMap.putAll(returnDatas);
-            }
+            List<FtpSetting> ftpSettingList = ftpService.getFtpSettings();
+            downloadFtpFile(fileExtension, lReturnDataMap, ftpSettingList);
+            saveObjToDb(parseDataToObj(downloadSavePath, lReturnDataMap, ftpSettingList));
+            removeFtpFileProcess(lReturnDataMap, ftpSettingList);
+        } catch (Exception e) {
+            log.error("Error: ", e);
+        }
+    }
 
-            // 2. parse data to object
-            List<BillingNoticeMain> mains = new ArrayList<>();
-            for (Map.Entry<String, byte[]> entry : lReturnDataMap.entrySet()) {
-                String fileName = entry.getKey();
-                String encoding = "UTF-8";
-                for (FtpSetting ftp : ftpSettings) {
-                    if (ftp.containsFileName(fileName)) {
-                        encoding = ftp.getFileEncoding();
-                        logger.debug(fileName + " containsFileName encoding:" + encoding);
-                    }
-                }
-                logger.info(fileName + " encoding:" + encoding);
-                byte[] fileData = lReturnDataMap.get(fileName);
-                logger.info(" BillingNoticeFtpService handle file:" + downloadSavePath + File.separator + fileName);
-                File targetFile = new File(downloadSavePath + File.separator + fileName);
-                FileUtils.writeByteArrayToFile(targetFile, fileData);
-                InputStream targetStream = new FileInputStream(targetFile);
+    private void downloadFtpFile(String fileExtension, Map<String, byte[]> lReturnDataMap, List<FtpSetting> ftpSettingList) {
+        for (FtpSetting ftpSetting : ftpSettingList) {
+            ftpSetting.clearFileNames();
+
+            Map<String, byte[]> returnDataMap = ftpService.downloadMutipleFileByType(ftpSetting.getPath(), fileExtension, ftpSetting);
+            returnDataMap.keySet().forEach(ftpSetting::addFileNames);
+            lReturnDataMap.putAll(returnDataMap);
+        }
+    }
+
+    private List<BillingNoticeMain> parseDataToObj(String downloadSavePath, Map<String, byte[]> lReturnDataMap, List<FtpSetting> ftpSettingList) throws IOException {
+        List<BillingNoticeMain> mainList = new ArrayList<>();
+        for (Map.Entry<String, byte[]> entry : lReturnDataMap.entrySet()) {
+            final String fileName = entry.getKey();
+            final String encoding = StandardCharsets.UTF_8.name();
+            ftpSettingList.stream().filter(ftpSetting -> ftpSetting.containsFileName(fileName)).forEach(ftpSetting ->
+                    log.info("{} containsFileName encoding: {}", fileName, ftpSetting.getFileEncoding())
+            );
+            log.info("{} encoding: {}", fileName, encoding);
+            final byte[] fileData = lReturnDataMap.get(fileName);
+            log.info("File: {}{}{}", new Object[]{downloadSavePath, File.separator, fileName});
+
+            final File targetFile = new File(downloadSavePath + File.separator + fileName);
+            FileUtils.writeByteArrayToFile(targetFile, fileData);
+            try (InputStream targetStream = new FileInputStream(targetFile)) {
                 List<String> fileContents = IOUtils.readLines(targetStream, encoding);
                 List<BillingNoticeMain> billingNoticeMains = parseFtpFile(fileName, fileContents);
-                mains.addAll(billingNoticeMains);
-
-                targetStream.close();
+                mainList.addAll(billingNoticeMains);
             }
-            // 3. save data to db = Status = DRAFT
-            for (BillingNoticeMain billingNoticeMain : mains) {
-                saveDb(billingNoticeMain);
-                updateStatus(billingNoticeMain);
-            }
-            // 4. remove file
-            if (!lReturnDataMap.isEmpty()) {
-                for (FtpSetting ftp : ftpSettings) {
-                    ftpService.deleteFileByType(ftp.getPath(), ftp.getFileNames().toArray(new String[0]), ftp);
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Error: ", e);
         }
+        return mainList;
+    }
+
+    private void saveObjToDb(List<BillingNoticeMain> mainList) {
+        for (BillingNoticeMain billingNoticeMain : mainList) {
+            saveDb(billingNoticeMain);
+            updateStatus(billingNoticeMain);
+        }
+    }
+
+    private void removeFtpFileProcess(Map<String, byte[]> lReturnDataMap, List<FtpSetting> ftpSettings) {
+        if (lReturnDataMap.isEmpty()) {
+            return;
+        }
+        ftpSettings.forEach(ftp -> ftpService.deleteFileByType(ftp.getPath(), ftp.getFileNames().toArray(new String[0]), ftp));
     }
 
 
     private Map<String, List<BillingNoticeFtpDetail>> parseDetail(List<String> fileContents) {
         List<BillingNoticeFtpDetail> details = new ArrayList<>();
         for (int i = 1; i < fileContents.size(); i++) {
-            if (StringUtils.isNotBlank(fileContents.get(i))) {
-            	logger.info( "fileContents" + fileContents);          	
-                String[] detailData = fileContents.get(i).split("\\|");
-                if (detailData.length == 4 || detailData.length == 3) {
+            if (StringUtils.isBlank(fileContents.get(i))) {
+                continue;
+            }
+            log.info("fileContents" + fileContents);
+            String[] detailData = fileContents.get(i).split("\\|");
+            switch (detailData.length) {
+                case 4:
+                case 3:
                     BillingNoticeFtpDetail detail = new BillingNoticeFtpDetail();
                     detail.setUid(detailData[0]);
                     detail.setTitle(detailData[1]);
                     detail.setText(detailData[2]);
-                    if(detailData.length == 4 ) {
-                    	detail.setTemplate(detailData[3]);
-                    }else {
-                    	detail.setTemplate("default");
-                    }
+                    detail.setTemplate(detailData.length == 4 ? detailData[3] : "default");
                     details.add(detail);
-                } else {
-                    logger.error("parseFtpFile error Data:" + Arrays.toString(detailData));
-                }
+                    break;
+                default:
+                    log.error("parseFtpFile error Data:" + Arrays.toString(detailData));
+                    break;
             }
         }
-        logger.info("details : " + details);
+        log.info("details : " + details);
         Map<String, List<BillingNoticeFtpDetail>> resultMap = new HashMap<>();
 
-        for (BillingNoticeFtpDetail deatil : details) {
-            String key = deatil.getTemplate();
+        details.forEach(detail -> {
+            String key = detail.getTemplate();
             if (resultMap.containsKey(key)) {
                 List<BillingNoticeFtpDetail> list = resultMap.get(key);
-                list.add(deatil);
-
+                list.add(detail);
             } else {
                 List<BillingNoticeFtpDetail> list = new ArrayList<>();
-                list.add(deatil);
+                list.add(detail);
                 resultMap.put(key, list);
             }
-
-        }
-        logger.info("BillingNoticeFtpDetail resultMap : " + resultMap);
+        });
+        log.info("BillingNoticeFtpDetail resultMap : " + resultMap);
         return resultMap;
     }
 
@@ -207,79 +200,94 @@ public class BillingNoticeFtpService {
      * @param fileContents fileContents
      */
     private List<BillingNoticeMain> parseFtpFile(String origFileName, List<String> fileContents) {
-        List<BillingNoticeMain> mains = new ArrayList<>();
-        logger.info("----------parseFtpFile---------");
-        logger.info("fileContents.isEmpty() : " + fileContents.isEmpty());
-        if (!fileContents.isEmpty()) {
-            String header = fileContents.get(0);
-            if (validateHeader(header)) {
-                Calendar expiryTime = Calendar.getInstance();
-                expiryTime.add(Calendar.HOUR, 3);
-                String[] splitHeaderData = header.split("\\|");
-                String originalFileType = splitHeaderData[0];
-                String sendType = splitHeaderData[1].toUpperCase();
-                String scheduleTime = splitHeaderData[2];
-
-                // TemplateTitle => Details
-                Map<String, List<BillingNoticeFtpDetail>> resultMap = parseDetail(fileContents);
-                logger.info("originalFileType : " + originalFileType);
-                logger.info("resultMap : " + resultMap);
-                for (Map.Entry<String, List<BillingNoticeFtpDetail>> entry : resultMap.entrySet()) {
-                    String key = entry.getKey();
-                    // get the Main Template
-                    BillingNoticeContentTemplateMsg template = null;
-                    List<BillingNoticeContentTemplateMsg> templates = billingNoticeContentTemplateMsgRepository.findMainOnTemplateByTitle(key);
-                    if (templates == null || templates.isEmpty()) {
-                        logger.info("Template :" + key + " not exist!  Use Default");
-                        // 拿不到範本取default
-                        List<BillingNoticeContentTemplateMsg> defaultTemplates = billingNoticeContentTemplateMsgRepository.findByTemplateTitleAndProductSwitchOn("default");
-                        if (defaultTemplates == null || defaultTemplates.isEmpty()) {
-                            logger.info("Default Template is not exist!");
-                        } else {
-                            template = defaultTemplates.get(0);
-                        }
-                    } else {
-                        // carousel button
-                        template = templates.get(0);
-                    }
-                    logger.info("template : "+ template);
-                    if (template == null) {
-                        logger.error("Template is not exist!:" + key);
-                    } else {
-                        // set Basics
-                        BillingNoticeMain billingNoticeMain = new BillingNoticeMain();
-                        billingNoticeMain.setGroupId((long) (mains.size() + 1));
-                        billingNoticeMain.setSendType(sendType);
-                        billingNoticeMain.setOrigFileName(origFileName);
-                        billingNoticeMain.setOrigFileType(originalFileType);
-                        billingNoticeMain.setStatus(BillingNoticeMain.NOTICE_STATUS_DRAFT);
-                        billingNoticeMain.setExpiryTime(expiryTime.getTime());
-                        billingNoticeMain.setTempId(template.getTemplateId());
-                        if (sendType.equals(BillingNoticeMain.SENDING_MSG_TYPE_DELAY)) {
-                            billingNoticeMain.setScheduleTime(scheduleTime);
-                        }
-                        billingNoticeMain.setTemplate(template);
-
-                        // set Details
-                        List<BillingNoticeFtpDetail> ftpDetails = resultMap.get(key);
-                        List<BillingNoticeDetail> details = new ArrayList<>();
-                        for (BillingNoticeFtpDetail ftpDetail : ftpDetails) {
-                            BillingNoticeDetail detail = new BillingNoticeDetail();
-                            detail.setMsgType(BillingNoticeDetail.MSG_TYPE_TEMPLATE);
-                            detail.setStatus(BillingNoticeMain.NOTICE_STATUS_DRAFT);
-                            detail.setUid(ftpDetail.getUid());
-                            detail.setTitle(ftpDetail.getTitle());
-                            detail.setText(ftpDetail.getText().replaceAll("\\\\n", "\n"));
-                            detail.setNoticeMainId(billingNoticeMain.getNoticeMainId());
-                            details.add(detail);
-                        }
-                        billingNoticeMain.setDetails(details);
-                        mains.add(billingNoticeMain);
-                    }
-                }
-            }
+        List<BillingNoticeMain> mainList = new ArrayList<>();
+        log.info("----------Parse Ftp File---------");
+        log.info("File Contents is Empty: {}", fileContents.isEmpty());
+        if (fileContents.isEmpty()) {
+            return Collections.emptyList();
         }
-        return mains;
+        String header = fileContents.get(0);
+        if (!validateHeader(header)) {
+            return Collections.emptyList();
+        }
+        String[] splitHeaderData = header.split("\\|");
+
+        // TemplateTitle => Details
+        Map<String, List<BillingNoticeFtpDetail>> resultMap = parseDetail(fileContents);
+        log.info("ResultMap: {}", resultMap);
+        for (Map.Entry<String, List<BillingNoticeFtpDetail>> entry : resultMap.entrySet()) {
+            BillingNoticeContentTemplateMsg template = getBillingNoticeTemplate(entry.getKey());
+            if (template == null) {
+                log.error("Template Doesn't exist!! {}", entry.getKey());
+                return Collections.emptyList();
+            }
+
+            /* Main */
+            BillingNoticeMain main = setMain(
+                    origFileName,
+                    mainList.size(),
+                    splitHeaderData[0],
+                    splitHeaderData[1],
+                    splitHeaderData[2],
+                    template
+            );
+
+            /* Detail */
+            List<BillingNoticeDetail> detailList = new ArrayList<>();
+            resultMap.get(entry.getKey()).forEach(ftpDetail -> detailList.add(setDetail(main, ftpDetail)));
+            main.setDetails(detailList);
+            mainList.add(main);
+        }
+        return mainList;
+    }
+
+    private Calendar getExpireTime() {
+        Calendar expiryTime = Calendar.getInstance();
+        expiryTime.add(Calendar.HOUR, 3);
+        return expiryTime;
+    }
+
+    private BillingNoticeContentTemplateMsg getBillingNoticeTemplate(String key) {
+        List<BillingNoticeContentTemplateMsg> templateList = billingNoticeContentTemplateMsgRepository.findMainOnTemplateByTitle(key);
+        if (templateList != null && !templateList.isEmpty()) {
+            return templateList.get(0);
+        }
+        return getDefaultTemplate();
+    }
+
+    private BillingNoticeContentTemplateMsg getDefaultTemplate() {
+        log.info("Use Default Template.");
+        List<BillingNoticeContentTemplateMsg> defaultTemplates = billingNoticeContentTemplateMsgRepository.findByTemplateTitleAndProductSwitchOn("default");
+        if (defaultTemplates != null && !defaultTemplates.isEmpty()) {
+            return defaultTemplates.get(0);
+        }
+        log.info("Default Template Doesn't exist!");
+        return null;
+    }
+
+    private BillingNoticeDetail setDetail(BillingNoticeMain main, BillingNoticeFtpDetail ftpDetail) {
+        BillingNoticeDetail detail = new BillingNoticeDetail();
+        detail.setMsgType(BillingNoticeDetail.MSG_TYPE_TEMPLATE);
+        detail.setStatus(BillingNoticeMain.NOTICE_STATUS_DRAFT);
+        detail.setUid(ftpDetail.getUid());
+        detail.setTitle(ftpDetail.getTitle());
+        detail.setText(ftpDetail.getText().replaceAll("\\\\n", "\n"));
+        detail.setNoticeMainId(main.getNoticeMainId());
+        return detail;
+    }
+
+    private BillingNoticeMain setMain(String origFileName, int mainListSize, String originalFileType, String sendType, String scheduleTime, BillingNoticeContentTemplateMsg template) {
+        BillingNoticeMain main = new BillingNoticeMain();
+        main.setGroupId((long) (mainListSize + 1));
+        main.setSendType(sendType.toUpperCase());
+        main.setOrigFileName(origFileName);
+        main.setOrigFileType(originalFileType);
+        main.setStatus(BillingNoticeMain.NOTICE_STATUS_DRAFT);
+        main.setExpiryTime(getExpireTime().getTime());
+        main.setTempId(template.getTemplateId());
+        main.setScheduleTime(BillingNoticeMain.SENDING_MSG_TYPE_DELAY.equals(sendType) ? scheduleTime : null);
+        main.setTemplate(template);
+        return main;
     }
 
     /**
@@ -289,15 +297,15 @@ public class BillingNoticeFtpService {
      */
     private void saveDb(BillingNoticeMain billingNoticeMain) {
         List<BillingNoticeDetail> originalDetails = billingNoticeMain.getDetails();
-        logger.info(" BillingNoticeFtpService BillingNoticeDetail size:" + originalDetails.size());
+        log.info("BillingNoticeFtpService BillingNoticeDetail size: {}", originalDetails.size());
         billingNoticeMain = billingNoticeMainRepository.save(billingNoticeMain);
-        List<BillingNoticeDetail> details = new ArrayList<>();
+        List<BillingNoticeDetail> detailList = new ArrayList<>();
         for (BillingNoticeDetail detail : originalDetails) {
             detail.setNoticeMainId(billingNoticeMain.getNoticeMainId());
-            details.add(detail);
+            detailList.add(detail);
         }
-        if (!details.isEmpty()) {
-            billingNoticeRepositoryCustom.batchInsertBillingNoticeDetail(details);
+        if (!detailList.isEmpty()) {
+            billingNoticeDetailRepository.save(detailList);
         }
     }
 
@@ -314,9 +322,9 @@ public class BillingNoticeFtpService {
         // 流程開關
         if (!template.isProductSwitch()) {
             status = BillingNoticeMain.NOTICE_STATUS_RETRY;
-            logger.info("Curfew NOTICE_STATUS_RETRY mainId:" + mainId);
+            log.info("Curfew NOTICE_STATUS_RETRY mainId:" + mainId);
         }
-        Date now = Calendar.getInstance().getTime();
+        Date now = new Date();
         billingNoticeMainRepository.updateBillingNoticeMainStatus(status, now, mainId);
         billingNoticeDetailRepository.updateStatusByMainId(status, now, mainId);
     }
@@ -346,7 +354,6 @@ public class BillingNoticeFtpService {
             Date date = DataUtils.convStrToDate(scheduleTime, "yyyy-MM-dd hh:mm:ss");
             return date != null;
         }
-
         return true;
     }
 
@@ -357,14 +364,12 @@ public class BillingNoticeFtpService {
     public void destroy() {
         if (scheduledFuture != null) {
             scheduledFuture.cancel(true);
-            logger.info(" BillingNoticeFtpService cancel....");
+            log.info("BillingNoticeFtpService cancel....");
         }
 
         if (scheduler != null && !scheduler.isShutdown()) {
-            logger.info(" BillingNoticeFtpService shutdown....");
+            log.info("BillingNoticeFtpService shutdown....");
             scheduler.shutdown();
         }
-
     }
-
 }

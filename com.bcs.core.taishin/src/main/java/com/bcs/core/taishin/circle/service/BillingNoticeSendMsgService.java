@@ -1,22 +1,5 @@
 package com.bcs.core.taishin.circle.service;
 
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PreDestroy;
-
-import org.apache.log4j.Logger;
-import org.quartz.SchedulerException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsg;
@@ -27,153 +10,162 @@ import com.bcs.core.taishin.circle.db.repository.BillingNoticeContentTemplateMsg
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeContentTemplateMsgRepository;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeMainRepository;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeRepositoryCustom;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.quartz.SchedulerException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.PreDestroy;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+@Slf4j
 @Service
 public class BillingNoticeSendMsgService {
 
-	/** Logger */
-	private static Logger logger = Logger.getLogger(BillingNoticeSendMsgService.class);
-	@Autowired
-	private BillingNoticeService billingNoticeService;
-	@Autowired
-	private BillingNoticeAkkaService billingNoticeAkkaService;
-	@Autowired
-	private BillingNoticeRepositoryCustom billingNoticeRepositoryCustom;
-	@Autowired
-	private BillingNoticeMainRepository billingNoticeMainRepository;
-	@Autowired
-	private BillingNoticeContentTemplateMsgRepository billingNoticeContentTemplateMsgRepository;
-	@Autowired
-	private BillingNoticeContentTemplateMsgActionRepository billingNoticeContentTemplateMsgActionRepository;
-	private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-	private ScheduledFuture<?> scheduledFuture = null;
+    private BillingNoticeService billingNoticeService;
+    private BillingNoticeAkkaService billingNoticeAkkaService;
+    private BillingNoticeRepositoryCustom billingNoticeRepositoryCustom;
+    private BillingNoticeMainRepository billingNoticeMainRepository;
+    private BillingNoticeContentTemplateMsgRepository billingNoticeContentTemplateMsgRepository;
+    private BillingNoticeContentTemplateMsgActionRepository billingNoticeContentTemplateMsgActionRepository;
+    private ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1,
+            new BasicThreadFactory.Builder()
+                    .namingPattern("Billing-Notice-Send-Scheduled-%d")
+                    .daemon(true).build()
+    );
+    private ScheduledFuture<?> scheduledFuture = null;
 
-	public BillingNoticeSendMsgService() {
-	}
+    @Autowired
+    public BillingNoticeSendMsgService(BillingNoticeService billingNoticeService,
+                                       BillingNoticeAkkaService billingNoticeAkkaService,
+                                       BillingNoticeRepositoryCustom billingNoticeRepositoryCustom,
+                                       BillingNoticeMainRepository billingNoticeMainRepository,
+                                       BillingNoticeContentTemplateMsgRepository billingNoticeContentTemplateMsgRepository,
+                                       BillingNoticeContentTemplateMsgActionRepository billingNoticeContentTemplateMsgActionRepository) {
+        this.billingNoticeService = billingNoticeService;
+        this.billingNoticeAkkaService = billingNoticeAkkaService;
+        this.billingNoticeRepositoryCustom = billingNoticeRepositoryCustom;
+        this.billingNoticeMainRepository = billingNoticeMainRepository;
+        this.billingNoticeContentTemplateMsgRepository = billingNoticeContentTemplateMsgRepository;
+        this.billingNoticeContentTemplateMsgActionRepository = billingNoticeContentTemplateMsgActionRepository;
+    }
 
-	/**
-	 * Start Schedule
-	 * 
-	 * @throws SchedulerException
-	 * @throws InterruptedException
-	 */
-	public void startCircle() throws SchedulerException, InterruptedException {
+    /**
+     * Start Schedule
+     */
+    public void startCircle() {
 
-		String unit = CoreConfigReader.getString(CONFIG_STR.BN_SCHEDULE_UNIT, true, false);
-		int time = CoreConfigReader.getInteger(CONFIG_STR.BN_SCHEDULE_TIME, true, false);
-		if (time == -1 || TimeUnit.valueOf(unit) == null) {
-			logger.error(" BillingNoticeSendMsgService TimeUnit error :" + time  + unit);
-			return;
-		}
-		scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
-			public void run() {
-				// 排程工作
-				logger.debug(" BillingNoticeSendMsgService startCircle....");
-				sendingBillingNoticeMain();
-			}
-		}, 0, time, TimeUnit.valueOf(unit));
+        String unit = CoreConfigReader.getString(CONFIG_STR.BN_SCHEDULE_UNIT, true, false);
+        int time = CoreConfigReader.getInteger(CONFIG_STR.BN_SCHEDULE_TIME, true, false);
+        if (time == -1) {
+            log.error(" BillingNoticeSendMsgService TimeUnit error :" + time + unit);
+            return;
+        }
+        scheduledFuture = scheduler.scheduleAtFixedRate(this::sendProcess, 0, time, TimeUnit.valueOf(unit));
 
-	}
-	
-	private void sendingBillingNoticeMain() {
-		boolean bigSwitch = CoreConfigReader.getBoolean(CONFIG_STR.BN_BIGSWITCH, true, false);
-		logger.info("帳務通知大開關 : " + bigSwitch);
-		if (!bigSwitch) { //大流程關閉時不做
-			return;
-		}
-		logger.info(" BillingNoticeSendMsgService startCircle.... " );
-		String procApName = null;
-		try {
-			InetAddress localAddress = InetAddress.getLocalHost();
-			if (localAddress != null) {
-				procApName = localAddress.getHostName();
-			}
+    }
 
-		} catch (Exception e) {
-			logger.error("getHostName error:" + e.getMessage());
-		}
-		try {
-			List<BillingNoticeMain> billingNoticeMains = sendingBillingNoticeMain(procApName);
-			if (billingNoticeMains.isEmpty()) {
-				logger.debug("sendingBillingNoticeMain not data");
-			}
-			for (BillingNoticeMain billingNoticeMain : billingNoticeMains) {
-				billingNoticeAkkaService.tell(billingNoticeMain);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("sendingBillingNoticeMain error:" + e.getMessage());
-		}
-		
-	}
-	
-	/**
-	 * Retry detail 找一筆後找出他的main + Main status = WAIT者找一筆
-	 * 更新BillingNoticeMain & BillingNoticeDetail status
-	 * @param limits
-	 * @param procApName
-	 * @return
-	 */
-	public List<BillingNoticeMain> sendingBillingNoticeMain( String procApName){
-		List<BillingNoticeMain> billingNoticeMains = new ArrayList<>();
-		List<String> templateIds = billingNoticeService.findProductSwitchOnTemplateId(); // find ProductSwitchOn template
-		if (templateIds == null || templateIds.isEmpty()) {
-			return billingNoticeMains;
-		}
-		Set<Long>  allMainIds = new  HashSet<Long>(); 
-		List<BillingNoticeDetail> allDetails = new ArrayList<BillingNoticeDetail>();
-		
-		// 更新狀態
-		billingNoticeRepositoryCustom.updateStatus(procApName, templateIds, allMainIds, allDetails);
-		
-		if (allMainIds.isEmpty()) {
-			return  new ArrayList<>();
-		}
-		
-		//組裝資料
-		for (Long mainId : allMainIds) {
-			BillingNoticeMain bnMain =  billingNoticeMainRepository.findOne(mainId);
-			logger.info("sendingBillingNoticeMain handle Main:" + bnMain.getOrigFileName());
-			List<BillingNoticeDetail> details = new ArrayList<>();
-			for (BillingNoticeDetail detail : allDetails) {
-				if (detail.getNoticeMainId().longValue() == mainId.longValue() ) {
-					details.add(detail);
-				}
-			}
-			bnMain.setDetails(details);
-			BillingNoticeContentTemplateMsg template = billingNoticeContentTemplateMsgRepository.findOne(bnMain.getTempId());
-			if (template != null) {
-				bnMain.setTemplate(template);
-				List<BillingNoticeContentTemplateMsgAction>  actions = billingNoticeContentTemplateMsgActionRepository.findNotDeletedTemplateId(template.getTemplateId());
-				bnMain.setTemplateActions(actions);
-				billingNoticeMains.add(bnMain);
-			}else {
-				logger.error("BillingNoticeContentTemplateMsg :" + bnMain.getTempId() + " is null");
-			}
-			
-		}
-		
-		return billingNoticeMains;
-	}
+    private void sendProcess() {
+        log.info("BillingNoticeSendMsgService startCircle.... ");
+        boolean bigSwitch = CoreConfigReader.getBoolean(CONFIG_STR.BN_BIGSWITCH, true, false);
+        log.info("帳務通知大開關: {}", bigSwitch);
+        if (!bigSwitch) {
+            return;
+        }
+        try {
+            List<BillingNoticeMain> billingNoticeMainList = sendingBillingNoticeMain(getProcApName());
+            if (billingNoticeMainList.isEmpty()) {
+                log.info("Main List is Empty!!");
+                return;
+            }
+            billingNoticeMainList.forEach(billingNoticeMain -> billingNoticeAkkaService.tell(billingNoticeMain));
+        } catch (Exception e) {
+            log.error("Exception", e);
+        }
+    }
+
+    private String getProcApName() {
+        try {
+            InetAddress localAddress = InetAddress.getLocalHost();
+            if (localAddress != null) {
+                return localAddress.getHostName();
+            }
+        } catch (Exception e) {
+            log.error("getHostName error:" + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * Retry detail 找一筆後找出他的main + Main status = WAIT者找一筆
+     * 更新BillingNoticeMain & BillingNoticeDetail status
+     */
+    public List<BillingNoticeMain> sendingBillingNoticeMain(String procApName) {
+        List<String> templateIdList = billingNoticeService.findProductSwitchOnTemplateId();
+        if (templateIdList == null || templateIdList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Set<Long> allMainIdSet = new HashSet<>();
+        List<BillingNoticeDetail> allDetails = new ArrayList<>();
+
+        // 更新狀態
+        billingNoticeRepositoryCustom.updateStatus(procApName, templateIdList, allMainIdSet, allDetails);
+
+        if (allMainIdSet.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<BillingNoticeMain> billingNoticeMainList = new ArrayList<>();
+        //組裝資料
+        for (Long mainId : allMainIdSet) {
+            BillingNoticeMain bnMain = billingNoticeMainRepository.findOne(mainId);
+            log.info("sendingBillingNoticeMain handle Main:" + bnMain.getOrigFileName());
+            List<BillingNoticeDetail> details = new ArrayList<>();
+            for (BillingNoticeDetail detail : allDetails) {
+                if (detail.getNoticeMainId().longValue() == mainId.longValue()) {
+                    details.add(detail);
+                }
+            }
+            bnMain.setDetails(details);
+            BillingNoticeContentTemplateMsg template = billingNoticeContentTemplateMsgRepository.findOne(bnMain.getTempId());
+            if (template == null) {
+                log.error("BillingNoticeContentTemplateMsg :" + bnMain.getTempId() + " is null");
+                continue;
+            }
+            bnMain.setTemplate(template);
+            List<BillingNoticeContentTemplateMsgAction> actions = billingNoticeContentTemplateMsgActionRepository.findNotDeletedTemplateId(template.getTemplateId());
+            bnMain.setTemplateActions(actions);
+            billingNoticeMainList.add(bnMain);
+        }
+        return billingNoticeMainList;
+    }
 
 
-	/**
-	 * Stop Schedule : Wait for Executing Jobs to Finish
-	 * 
-	 * @throws SchedulerException
-	 */
-	@PreDestroy
-	public void destroy() {
-		if (scheduledFuture != null) {
-			scheduledFuture.cancel(true);
-			logger.info(" BillingNoticeSendMsgService cancel....");
-		}
+    /**
+     * Stop Schedule : Wait for Executing Jobs to Finish
+     */
+    @PreDestroy
+    public void destroy() {
+        if (scheduledFuture != null) {
+            scheduledFuture.cancel(true);
+            log.info(" BillingNoticeSendMsgService cancel....");
+        }
 
-		if (scheduler != null && !scheduler.isShutdown()) {
-			logger.info(" BillingNoticeSendMsgService shutdown....");
-			scheduler.shutdown();
-		}
+        if (scheduler != null && !scheduler.isShutdown()) {
+            log.info(" BillingNoticeSendMsgService shutdown....");
+            scheduler.shutdown();
+        }
 
-	}
+    }
 
 }

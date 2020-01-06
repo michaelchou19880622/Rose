@@ -43,7 +43,7 @@ import java.util.List;
 public class LinePointPushMessageActor extends UntypedActor {
 
 //	final static int TARGET_INDEX_OF_SLEEP = 10;
-    private static final int DEFAULT_SLEEP_TIME = 50;
+    private static final int DEFAULT_SLEEP_TIME = 5_000;
 
     /**
      * @see LinePointPushMasterActor#onReceive

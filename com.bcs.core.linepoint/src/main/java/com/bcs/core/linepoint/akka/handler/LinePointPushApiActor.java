@@ -3,6 +3,7 @@ package com.bcs.core.linepoint.akka.handler;
 import java.security.MessageDigest;
 import java.util.Date;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.jcodec.common.logging.Logger;
 import org.json.JSONArray;
@@ -30,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import akka.actor.UntypedActor;
 
+@Slf4j
 public class LinePointPushApiActor extends UntypedActor {
 
 	@Override
@@ -43,11 +45,11 @@ public class LinePointPushApiActor extends UntypedActor {
 			String accessToken = CoreConfigReader.getString("LinePoint", CONFIG_STR.ChannelToken.toString(), true); // LinePoint.ChannelToken
 			headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
 			headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-			
+
 			// get push data
 			LinePointDetail linePointDetail = (LinePointDetail) object;
 			String uid = linePointDetail.getUid();
-			
+
 			// initialize request body
 			JSONObject requestBody = new JSONObject();
 			String url = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_MESSAGE_PUSH_URL.toString(), true); // https://api.line.me/pointConnect/v1/issue
@@ -55,7 +57,7 @@ public class LinePointPushApiActor extends UntypedActor {
 		    requestBody.put("clientId", clientId);
 			requestBody.put("amount", linePointDetail.getAmount());
 			requestBody.put("memberId", uid);
-			
+
 			// orderKey
 			MessageDigest salt = MessageDigest.getInstance("SHA-256");
 			String hashStr = "" + uid + (new Date()).getTime() + "334581925";
@@ -67,20 +69,20 @@ public class LinePointPushApiActor extends UntypedActor {
 		    // applicationTime
 		    Long applicationTime = System.currentTimeMillis();
 		    requestBody.put("applicationTime", applicationTime);
-		    
+
 			// HttpEntity by header and body
 			HttpEntity<String> httpEntity = new HttpEntity<String>(requestBody.toString(), headers);
 			RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
-			
+
 			// set detail
 			try {
 				JSONObject responseObject = restfulUtil.execute();
 				Logger.info("RO1:"+responseObject.toString());
-				
+
 				String Id = responseObject.getString("transactionId");
 				Long Time = responseObject.getLong("transactionTime");
 				String Type = responseObject.getString("transactionType");
-				Integer Amount = responseObject.getInt("transactionAmount");					
+				Integer Amount = responseObject.getInt("transactionAmount");
 				Integer Balance = responseObject.getInt("balance");
 
 				linePointDetail.setTranscationId(Id);
@@ -91,10 +93,11 @@ public class LinePointPushApiActor extends UntypedActor {
 				linePointDetail.setMessage("");
 				linePointDetail.setStatus(LinePointDetail.STATUS_SUCCESS);
 			} catch (HttpClientErrorException e) {
+				log.error("HttpClientErrorException", e);
 				linePointDetail.setMessage(e.getResponseBodyAsString());
 				linePointDetail.setStatus(LinePointDetail.STATUS_FAIL);
 			}
-			
+
 			linePointDetail.setUid(uid);
 			linePointDetail.setOrderKey(orderKey);
 			linePointDetail.setApplicationTime(applicationTime);

@@ -12,7 +12,9 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.crypto.Data;
 
+import com.bcs.core.utils.DataUtils;
 import org.json.JSONArray;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -422,12 +424,16 @@ public class BCSLinePointController extends BCSBaseController {
                     logger.info("linePointDetails:" + linePointDetails);
 
                     JSONArray detailIds = new JSONArray();
+                    int i = 1;
                     for (LinePointDetail linePointDetail : linePointDetails) {
+                        logger.info("Total LinePointDetail Detail " + i + ": " + DataUtils.toPrettyJsonUseJackson(linePointDetail));
+                        //FIXME 這裡會過濾掉Fail的Detail Object
                         if (!"FAIL".equals(linePointDetail.getStatus())) {
                             detailIds.put(linePointDetail.getDetailId());
                         }
-
+                        i++;
                     }
+                    logger.info("To Akka Detail List Size: " + detailIds.toList().size());
 
                     // combine LinePointPushModel
                     LinePointPushModel linePointPushModel = new LinePointPushModel();

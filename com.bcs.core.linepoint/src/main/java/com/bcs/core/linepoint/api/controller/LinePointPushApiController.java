@@ -2,9 +2,7 @@ package com.bcs.core.linepoint.api.controller;
 
 import com.bcs.core.aspect.annotation.WebServiceLog;
 import com.bcs.core.enums.CONFIG_STR;
-import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.linepoint.akka.service.LinePointPushAkkaService;
-import com.bcs.core.linepoint.api.model.LinePointPushModel;
 import com.bcs.core.linepoint.api.model.LinePointTaskModel;
 import com.bcs.core.linepoint.db.entity.LinePointDetail;
 import com.bcs.core.linepoint.db.entity.LinePointMain;
@@ -12,12 +10,8 @@ import com.bcs.core.linepoint.db.service.LinePointDetailService;
 import com.bcs.core.linepoint.db.service.LinePointMainService;
 import com.bcs.core.linepoint.scheduler.service.LinePointSimpleSchedulerService;
 import com.bcs.core.resource.CoreConfigReader;
-import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.utils.RestfulUtil;
-import com.bcs.core.web.security.CurrentUser;
-import com.bcs.core.web.security.CustomUser;
 import org.apache.log4j.Logger;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -30,15 +24,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -55,39 +46,6 @@ public class LinePointPushApiController {
     private LinePointMainService linePointMainService;
     @Autowired
     private LinePointSimpleSchedulerService linePointSimpleSchedulerService;
-
-
-    @WebServiceLog
-//	@RequestMapping(method = RequestMethod.POST, value = "/linePoint/pushLinePoint", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public ResponseEntity<?> pushLinePoint(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
-            /*@RequestBody List<String> uids,*/ @RequestParam Long eventId) throws IOException {
-        try {
-            LinePointMain linePointMain = linePointMainService.findOne(eventId);
-
-            JSONArray uids = new JSONArray();
-            JSONArray amounts = new JSONArray();
-            for (int i = 1; i <= 10; i++) {
-                uids.put("U58ffae876d497a488111d38a70b5aea0");
-                amounts.put(i);
-            }
-
-            LinePointPushModel linePointPushModel = new LinePointPushModel();
-            linePointPushModel.setEventId(eventId);
-            linePointPushModel.setSource(LinePointPushModel.SOURCE_TYPE_BCS);
-            linePointPushModel.setSendTimeType(LinePointPushModel.SEND_TIMING_TYPE_IMMEDIATE);
-            linePointPushModel.setTriggerTime(new Date());
-            linePointPushAkkaService.tell(linePointPushModel);
-            return new ResponseEntity<>("", HttpStatus.OK);
-        } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
-            if (e instanceof BcsNoticeException) {
-                return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-            } else {
-                return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
-    }
 
     @WebServiceLog
 //	@RequestMapping(method = RequestMethod.POST, value = "/linePoint/task", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -157,6 +115,7 @@ public class LinePointPushApiController {
                     throw new IllegalArgumentException("Request Amount out of boundary");
                 }
             } catch (Exception e) {
+                logger.error("Exception", e);
                 linePointDetail.setMessage(e.toString());
                 linePointDetail.setStatus(LinePointDetail.STATUS_FAIL);
                 linePointDetail.setSendTime(new Date());
@@ -181,7 +140,7 @@ public class LinePointPushApiController {
     }
 
     @WebServiceLog
-	@RequestMapping(method = RequestMethod.POST, value = "/linePoint/issue", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(method = RequestMethod.POST, value = "/linePoint/issue", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<?> pushLinePoint(HttpServletRequest request, HttpServletResponse response, @RequestBody LinePointDetail linePointDetail) {
         try {
             logger.info("-------------------- api linePoint issue --------------------");
@@ -206,7 +165,7 @@ public class LinePointPushApiController {
             // ----- set main information -----
             String title = linePointDetail.getCampName();
             String pccCode = linePointDetail.getPccCode();
-            LinePointMain linePointMain = linePointMainService.findByTitleAndPccCode(title,pccCode);
+            LinePointMain linePointMain = linePointMainService.findByTitleAndPccCode(title, pccCode);
             if (linePointMain == null) {
                 linePointMain = new LinePointMain();
                 linePointMain.setSendType(LinePointMain.SEND_TYPE_API);
@@ -218,7 +177,7 @@ public class LinePointPushApiController {
                 linePointMain.setSuccessfulCount(0L);
                 linePointMain.setFailedCount(0L);
                 linePointMain.setPccCode(pccCode);
-                
+
                 linePointMain.setSerialId("API_" + title);
                 linePointMain.setModifyUser("API");
                 //linePointMain.setSerialId("API無此參數");
@@ -290,6 +249,7 @@ public class LinePointPushApiController {
                     throw new IllegalArgumentException("Request Amount out of boundary");
                 }
             } catch (Exception e) {
+                logger.error("Exception", e);
                 linePointDetail.setMessage(e.toString());
                 linePointDetail.setStatus(LinePointDetail.STATUS_FAIL);
                 linePointDetail.setSendTime(new Date());
@@ -351,7 +311,7 @@ public class LinePointPushApiController {
             } catch (HttpClientErrorException e) {
                 logger.info("[LinePointApi] Status code: " + e.getStatusCode());
                 logger.info("[LinePointApi] Response body: " + e.getResponseBodyAsString());
-
+                logger.error("HttpClientErrorException", e);
                 linePointDetail.setMessage(e.getResponseBodyAsString());
                 linePointDetail.setStatus(LinePointDetail.STATUS_FAIL);
                 linePointDetail.setSendTime(new Date());
@@ -471,6 +431,7 @@ public class LinePointPushApiController {
                 }
 
             } catch (Exception e) {
+                logger.error("Exception", e);
                 linePointDetail.setMessage(e.toString());
                 linePointDetail.setStatus(LinePointDetail.STATUS_FAIL);
                 linePointDetail.setSendTime(new Date());
@@ -532,6 +493,7 @@ public class LinePointPushApiController {
             } catch (HttpClientErrorException e) {
                 logger.info("[LinePointApi] Status code: " + e.getStatusCode());
                 logger.info("[LinePointApi]  Response body: " + e.getResponseBodyAsString());
+                logger.error("HttpClientErrorException", e);
 
                 linePointDetail.setMessage(e.getResponseBodyAsString());
                 linePointDetail.setStatus(LinePointDetail.STATUS_FAIL);

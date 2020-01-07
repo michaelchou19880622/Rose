@@ -60,8 +60,12 @@ public class LinePointPushMessageActor extends UntypedActor {
             JSONObject requestBody = getRequestBody();
             JSONArray detailIds = pushApiModel.getDetailIds();
 
+
+            int i = 0;
             for (Object obj : detailIds) {
+                log.info("Main Process: {}", i);
                 mainProcess(url, linePointMainService, pushApiModel, linePointMain, headers, requestBody, obj);
+                i++;
             }
         }
     }
@@ -97,13 +101,15 @@ public class LinePointPushMessageActor extends UntypedActor {
     }
 
     private void sendProcess(String url, LinePointMain linePointMain, HttpHeaders headers, JSONObject requestBody, LinePointDetail detail) throws InterruptedException {
-        int retryCountLimit = 1;
+        int retryCountLimit = 3;
         boolean isDoRetry;
+        int i = 0;
+        int whileCount = 0;
         do {
-            int i = 0;
             try {
                 i++;
-                log.info("This Count is {}", i);
+                whileCount++;
+                log.info("This Try Count is {}, While Count is {}", i, whileCount);
                 RestfulUtil restfulUtil = new RestfulUtil(
                         HttpMethod.POST,
                         url,
@@ -125,21 +131,21 @@ public class LinePointPushMessageActor extends UntypedActor {
                 linePointMain.setSuccessfulCount(linePointMain.getSuccessfulCount() + 1);
                 isDoRetry = false;
             } catch (HttpClientErrorException e) {
-                log.info("HttpClientErrorException", e);
+                log.error("HttpClientErrorException", e);
                 detail.setMessage(e.getResponseBodyAsString().substring(0, 200));
                 detail.setStatus(LinePointDetail.STATUS_FAIL);
                 linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
                 sleepProcess();
                 isDoRetry = i <= retryCountLimit;
             } catch (HttpServerErrorException e) {
-                log.info("HttpServerErrorException", e);
+                log.error("HttpServerErrorException", e);
                 detail.setMessage(e.getStatusText().substring(0, 200));
                 detail.setStatus(LinePointDetail.STATUS_FAIL);
                 linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
                 sleepProcess();
                 isDoRetry = i <= retryCountLimit;
             } catch (Exception e) {
-                log.info("Exception", e);
+                log.error("Exception", e);
                 detail.setMessage(e.getMessage().substring(0, 200));
                 detail.setStatus(LinePointDetail.STATUS_FAIL);
                 linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);

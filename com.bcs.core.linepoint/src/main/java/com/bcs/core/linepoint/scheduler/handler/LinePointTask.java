@@ -53,22 +53,22 @@ public class LinePointTask implements Job {
 	//LinePointPushAkkaService linePointPushAkkaService = ApplicationContextProvider.getApplicationContext().getBean(LinePointPushAkkaService.class);
 	LinePointDetailService linePointDetailService = ApplicationContextProvider.getApplicationContext().getBean(LinePointDetailService.class);
 	LinePointApiService linePointApiService = ApplicationContextProvider.getApplicationContext().getBean(LinePointApiService.class);
-	
+
 	private static Logger logger = Logger.getLogger(LinePointTask.class);
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		try {
 			logger.info("[LinePointTask execute]");
-			
+
 			LinePointDetail linePointDetail = (LinePointDetail) context.getScheduler().getContext().get("LinePointDetail");
-			
+
 			// ---------------------------------------
 			// initialize request header
 			HttpHeaders headers = new HttpHeaders();
 			String accessToken = linePointApiService.getLinePointChannelAccessToken();
 			headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
 			headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-			
+
 			// initialize request body
 			JSONObject requestBody = new JSONObject();
 			String url = CoreConfigReader.getString(CONFIG_STR.LINE_POINT_MESSAGE_PUSH_URL.toString(), true); // https://api.line.me/pointConnect/v1/issue
@@ -77,23 +77,23 @@ public class LinePointTask implements Job {
 			requestBody.put("amount", linePointDetail.getAmount());
 			requestBody.put("memberId", linePointDetail.getUid());
 			requestBody.put("orderKey", linePointDetail.getOrderKey());
-			
+
 		    // applicationTime
 		    Long applicationTime = System.currentTimeMillis();
 		    requestBody.put("applicationTime", applicationTime);
 			linePointDetail.setApplicationTime(applicationTime);
-			
+
 			// HttpEntity by header and body
 			HttpEntity<String> httpEntity = new HttpEntity<String>(requestBody.toString(), headers);
 			RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
 			JSONObject responseObject = null;
 			try {
 				responseObject = restfulUtil.execute();
-				
+
 				String Id = responseObject.getString("transactionId");
 				Long Time = responseObject.getLong("transactionTime");
 				String Type = responseObject.getString("transactionType");
-				Integer Amount = responseObject.getInt("transactionAmount");					
+				Integer Amount = responseObject.getInt("transactionAmount");
 				Integer Balance = responseObject.getInt("balance");
 
 				linePointDetail.setTranscationId(Id);
@@ -108,7 +108,8 @@ public class LinePointTask implements Job {
 			} catch (HttpClientErrorException e) {
 				logger.info("[LinePointApi] Status code: " + e.getStatusCode());
 				logger.info("[LinePointApi]  Response body: " + e.getResponseBodyAsString());
-				
+				logger.error("HttpClientErrorException", e);
+
 				linePointDetail.setMessage(e.getResponseBodyAsString());
 				linePointDetail.setStatus(LinePointDetail.STATUS_FAIL);
 				linePointDetail.setSendTime(new Date());

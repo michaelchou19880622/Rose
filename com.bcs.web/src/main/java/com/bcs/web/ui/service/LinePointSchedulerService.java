@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PreDestroy;
 
+import com.bcs.core.utils.DataUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.quartz.SchedulerException;
@@ -38,7 +39,7 @@ public class LinePointSchedulerService {
 	private SendMsgUIService sendMsgUIService;
 	@Autowired
 	private LinePointUIService linePointUIService;
-	
+
 	private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 	private ScheduledFuture<?> scheduledFuture = null;
 
@@ -47,7 +48,7 @@ public class LinePointSchedulerService {
 
 	/**
 	 * Start Schedule
-	 * 
+	 *
 	 * @throws SchedulerException
 	 * @throws InterruptedException
 	 */
@@ -60,10 +61,10 @@ public class LinePointSchedulerService {
 			}
 		}, 0, 120, TimeUnit.SECONDS);
 	}
-	
+
 	/**
 	 * Stop Schedule : Wait for Executing Jobs to Finish
-	 * 
+	 *
 	 * @throws SchedulerException
 	 */
 	@PreDestroy
@@ -77,9 +78,9 @@ public class LinePointSchedulerService {
 			scheduler.shutdown();
 		}
 	}
-	
+
 	public void pushScheduledLinePoint() {
-		// get allowableLinePointMains			
+		// get allowableLinePointMains
 		List<LinePointMain> allowableLinePointMains = linePointMainService.findAllowableIdles();
 		logger.info("allowableLinePointMains:"+allowableLinePointMains);
 
@@ -89,30 +90,34 @@ public class LinePointSchedulerService {
 				if(linePointMain.getSendStartTime() != null) {
 					continue;
 				}
-				
+
 				// send append message
 				Long msgId = linePointMain.getAppendMessageId();
 				logger.info("msgId:" + msgId);
 				sendMsgUIService.createExecuteSendMsgRunnable(msgId);
-				
+
 				// save send start time
 				linePointMain.setSendStartTime(new Date());
 				linePointMain.setStatus(LinePointMain.STATUS_COMPLETE);
 				linePointMain.setModifyTime(new Date());
 				linePointUIService.saveLinePointMain(linePointMain);
-				
+
 				// get details
 				List<LinePointDetail> linePointDetails = linePointUIService.findByLinePointMainId(linePointMain.getId());
 				logger.info("linePointDetails:"+linePointDetails);
-				
+
 				JSONArray detailIds = new JSONArray();
+				int i = 1;
 				for(LinePointDetail linePointDetail: linePointDetails) {
+					logger.info("Total LinePointDetail Detail " + i + ": " + DataUtils.toPrettyJsonUseJackson(linePointDetail));
+					//FIXME 這裡會過濾掉Fail的Detail Object
 					if(!"FAIL".equals(linePointDetail.getStatus())) {
 						detailIds.put(linePointDetail.getDetailId());
 					}
-					
+					i++;
 				}
-				
+				logger.info("To Akka Detail List Size: " + detailIds.toList().size());
+
 				// combine LinePointPushModel
 				LinePointPushModel linePointPushModel = new LinePointPushModel();
 				linePointPushModel.setEventId(linePointMain.getId());
@@ -120,7 +125,7 @@ public class LinePointSchedulerService {
 				linePointPushModel.setSource(LinePointMain.SEND_TYPE_BCS);
 				linePointPushModel.setSendTimeType(LinePointMain.SEND_TIMING_TYPE_IMMEDIATE);
 				linePointPushModel.setTriggerTime(new Date());
-				
+
 				linePointPushAkkaService.tell(linePointPushModel);
 			}catch(Exception e) {
 				logger.error(ErrorRecord.recordError(e));

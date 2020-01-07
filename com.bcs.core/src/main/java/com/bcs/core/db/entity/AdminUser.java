@@ -1,16 +1,20 @@
 package com.bcs.core.db.entity;
 
-import java.util.Date;
+import com.bcs.core.json.AbstractBcsEntity;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.Date;
 
-import com.bcs.core.json.AbstractBcsEntity;
-import lombok.Getter;
-import lombok.Setter;
-
+/**
+ * Admin User
+ *
+ * @author ???
+ */
 @Getter
 @Setter
 @Entity

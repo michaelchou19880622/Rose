@@ -20,6 +20,7 @@ import com.bcs.core.utils.DataUtils;
 import com.bcs.core.utils.RestfulUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.http.HttpEntity;
@@ -142,21 +143,21 @@ public class LinePointPushMessageActor extends UntypedActor {
                 isDoRetry = false;
             } catch (HttpClientErrorException e) {
                 log.error("HttpClientErrorException", e);
-                detail.setMessage(e.getResponseBodyAsString().substring(0, 200));
+                detail.setMessage(StringUtils.substring(e.getResponseBodyAsString(), 0, 200));
                 detail.setStatus(LinePointDetail.STATUS_FAIL);
                 linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
                 sleepProcess();
                 isDoRetry = i <= retryCountLimit;
             } catch (HttpServerErrorException e) {
                 log.error("HttpServerErrorException", e);
-                detail.setMessage(e.getStatusText().substring(0, 200));
+                detail.setMessage(StringUtils.substring(e.getStatusText(), 0, 200));
                 detail.setStatus(LinePointDetail.STATUS_FAIL);
                 linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
                 sleepProcess();
                 isDoRetry = i <= retryCountLimit;
             } catch (Exception e) {
                 log.error("Exception", e);
-                detail.setMessage(e.getMessage().substring(0, 200));
+                detail.setMessage(StringUtils.substring(e.getMessage(), 0, 200));
                 detail.setStatus(LinePointDetail.STATUS_FAIL);
                 linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
                 sleepProcess();

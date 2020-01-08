@@ -131,7 +131,7 @@ public class LineUserService {
      * @param mid the mid
      * @return the boolean
      */
-    public Boolean checkMIDAllActive(String mid) {
+    public boolean checkMIDAllActive(String mid) {
         String result = lineUserRepository.checkMIDAllActive(mid);
         logger.info("checkMIDAllActive:" + result);
         return StringUtils.isNotBlank(result);

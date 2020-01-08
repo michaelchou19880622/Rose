@@ -103,6 +103,7 @@ public class SendingMsgHandlerSend extends UntypedActor {
 
 						recordStatus = this.checkStatus(response, recordStatus, mid, msgs.getUpdateMsgId());
 
+						//FIXME Usually status code is 400
 						if(response.code() != 200){
 							throw new Exception("PostLineResponse Status:" + response.code() );
 						}
@@ -179,6 +180,7 @@ public class SendingMsgHandlerSend extends UntypedActor {
 
 						recordStatus = this.checkStatus(response, recordStatus, mid, msgs.getUpdateMsgId());
 
+						//FIXME Usually status code is 400
 						if(response.code() != 200){
 							throw new Exception("PostLineResponse Status:" + response.code() );
 						}

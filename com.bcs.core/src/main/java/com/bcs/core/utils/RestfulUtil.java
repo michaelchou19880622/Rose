@@ -1,10 +1,12 @@
 package com.bcs.core.utils;
 
-import javax.net.ssl.*;
-import java.security.*;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
@@ -22,6 +24,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.bcs.core.enums.CONFIG_STR;
@@ -107,6 +110,12 @@ public class RestfulUtil {
 			
 			return responseBody == null ? null : new JSONObject(responseBody);
 		} catch (HttpClientErrorException e) {
+			logger.info("[RestUtil execute] Status code: " + e.getStatusCode());
+			logger.info("[RestUtil execute] Response body: " + e.getResponseBodyAsString());
+			
+			logger.error(ErrorRecord.recordError(e));
+			throw e;
+		} catch (HttpServerErrorException e) {
 			logger.info("[RestUtil execute] Status code: " + e.getStatusCode());
 			logger.info("[RestUtil execute] Response body: " + e.getResponseBodyAsString());
 			

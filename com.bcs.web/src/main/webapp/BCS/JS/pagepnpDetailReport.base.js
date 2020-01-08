@@ -79,29 +79,22 @@ $(function() {
   $('#exportBtn').click(function() {
 //    setExportButtonSource();
     if (hasData) {
+        var type = isCreateTime ? 'createTime' : 'orderTime';
         var getUrl =
         bcs.bcsContextPath +
         '/pnpEmployee/exportPNPDetailReportExcel' +
-        '?startDate=' +
-        startDate +
-        '&endDate=' +
-        endDate +
+        '?startDate=' + startDate +
+        '&endDate=' + endDate +
         '&isPageable=false' +
-        '&page=' +
-        page +
-        '&account=' +
-        document.getElementById('accountInput').value +
-        '&pccCode=' +
-        document.getElementById('pccCodeInput').value +
-        '&sourceSystem=' +
-        document.getElementById('sourceSystemInput').value +
-        '&phone=' +
-        document.getElementById('phoneNumber').value +
-        '&dateType=' +
-        isCreateTime ? 'createTime' : 'orderTime'
+        '&page=' + page +
+        '&account=' + document.getElementById('accountInput').value +
+        '&pccCode=' + document.getElementById('pccCodeInput').value +
+        '&sourceSystem=' + document.getElementById('sourceSystemInput').value +
+        '&phone=' + document.getElementById('phoneNumber').value +
+        '&dateType=' + type
         ;
-        console.info('getUrl', getUrl);
-        window.location(getUrl);
+        console.info('getUrl: ' + getUrl);
+        window.location.href = getUrl;
     }
 
   });

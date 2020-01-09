@@ -1,7 +1,9 @@
 package com.bcs.core.taishin.circle.db.entity;
 
-import java.util.Calendar;
-import java.util.Date;
+import com.bcs.core.json.AbstractBcsEntity;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,171 +11,112 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.NamedNativeQueries;
-import javax.persistence.NamedNativeQuery;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import java.util.Date;
 
-import com.bcs.core.json.AbstractBcsEntity;
-
+/**
+ * BCS_BILLING_NOTICE_DETAIL與BCS_BILLING_NOTICE_MAIN為1對多關係
+ *
+ * @author ???
+ */
+@Getter
+@Setter
+@EqualsAndHashCode(callSuper = false)
 @Entity
-
 @Table(name = "BCS_BILLING_NOTICE_DETAIL",
-indexes = {
-	       @Index(name = "INDEX_0", columnList = "NOTICE_DETAIL_ID"),
-	       @Index(name = "INDEX_1", columnList = "PARENT_TYPE"),
-	       @Index(name = "INDEX_2", columnList = "MSG_TYPE"),
-	       @Index(name = "INDEX_3", columnList = "NOTICE_MAIN_ID"),
-	       @Index(name = "INDEX_4", columnList = "TITLE"),
-	       @Index(name = "INDEX_5", columnList = "STATUS"),
-	       @Index(name = "INDEX_6", columnList = "CREAT_TIME"),
-	       @Index(name = "INDEX_7", columnList = "SEND_TIME"),
-	       @Index(name = "INDEX_8", columnList = "MODIFY_TIME"),
-	})
-//BCS_BILLING_NOTICE_DETAIL與BCS_BILLING_NOTICE_MAIN為1對多關係
+        indexes = {
+                @Index(name = "INDEX_0", columnList = "NOTICE_DETAIL_ID"),
+                @Index(name = "INDEX_1", columnList = "PARENT_TYPE"),
+                @Index(name = "INDEX_2", columnList = "MSG_TYPE"),
+                @Index(name = "INDEX_3", columnList = "NOTICE_MAIN_ID"),
+                @Index(name = "INDEX_4", columnList = "TITLE"),
+                @Index(name = "INDEX_5", columnList = "STATUS"),
+                @Index(name = "INDEX_6", columnList = "CREAT_TIME"),
+                @Index(name = "INDEX_7", columnList = "SEND_TIME"),
+                @Index(name = "INDEX_8", columnList = "MODIFY_TIME"),
+        })
 public class BillingNoticeDetail extends AbstractBcsEntity {
-	private static final long serialVersionUID = 1L;
-	public static final String MSG_TYPE_TEMPLATE = "template";
-	
-	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column(name = "NOTICE_DETAIL_ID")
-	//帳務通知明細ID
-	private Long noticeDetailId;
+    private static final long serialVersionUID = 1L;
+    public static final String MSG_TYPE_TEMPLATE = "template";
 
-	//帳務通知主檔ID
-	@Column(name = "NOTICE_MAIN_ID")
-	private Long noticeMainId;
+    /**
+     * 帳務通知明細ID
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "NOTICE_DETAIL_ID")
+    private Long noticeDetailId;
 
-	@Column(name = "PARENT_TYPE", columnDefinition="nvarchar(50)")
-	private String parentType;
+    /**
+     * 帳務通知主檔ID
+     */
+    @Column(name = "NOTICE_MAIN_ID")
+    private Long noticeMainId;
 
-	@Column(name = "MSG_TYPE", columnDefinition="nvarchar(50)")
-	private String msgType = "template";
+    /**
+     *
+     */
+    @Column(name = "PARENT_TYPE", columnDefinition = "nvarchar(50)")
+    private String parentType;
 
-	//Line uid
-	@Column(name = "UID", columnDefinition="nvarchar(50)")
-	private String uid;
-	
-	//訊息title
-	@Column(name = "TITLE", columnDefinition="nvarchar(500)")
-	private String title;
-	
-	//訊息內文
-	@Column(name = "TEXT", columnDefinition="nvarchar(1000)")
-	private String text;
+    /**
+     *
+     */
+    @Column(name = "MSG_TYPE", columnDefinition = "nvarchar(50)")
+    private String msgType = MSG_TYPE_TEMPLATE;
 
-	@Column(name = "CREAT_TIME")
-	private Date createTime;
-	
-	@Column(name = "SEND_TIME")
-	private Date sendTime;
-	
-	//明細檔狀態；select for update wait時更新此欄位，防止重複發送
-	@Column(name = "STATUS", columnDefinition="nvarchar(50)")
-	private String status;
-	
-	@Column(name = "MODIFY_TIME")
-	private Date modifyTime;
-	
-	@PrePersist
-	public void prePersist() {
-		createTime = Calendar.getInstance().getTime();
-		modifyTime = createTime;
-	}
-	
-	@PreUpdate
-	public void preUpdate() {
-		modifyTime = Calendar.getInstance().getTime();
-	}
-	
-	public Date getModifyTime() {
-		return modifyTime;
-	}
+    /**
+     * Line uid
+     */
+    @Column(name = "UID", columnDefinition = "nvarchar(50)")
+    private String uid;
 
-	public void setModifyTime(Date modifyTime) {
-		this.modifyTime = modifyTime;
-	}
+    /**
+     * 訊息title
+     */
+    @Column(name = "TITLE", columnDefinition = "nvarchar(500)")
+    private String title;
 
-	public Long getNoticeDetailId() {
-		return noticeDetailId;
-	}
+    /**
+     * 訊息內文
+     */
+    @Column(name = "TEXT", columnDefinition = "nvarchar(1000)")
+    private String text;
 
-	public void setNoticeDetailId(Long noticeDetailId) {
-		this.noticeDetailId = noticeDetailId;
-	}
+    /**
+     * 建立時間
+     */
+    @Column(name = "CREAT_TIME")
+    private Date createTime;
 
-	public Long getNoticeMainId() {
-		return noticeMainId;
-	}
+    /**
+     * 發送時間
+     */
+    @Column(name = "SEND_TIME")
+    private Date sendTime;
 
-	public void setNoticeMainId(Long noticeMainId) {
-		this.noticeMainId = noticeMainId;
-	}
+    /**
+     * 明細檔狀態；select for update wait時更新此欄位，防止重複發送
+     */
+    @Column(name = "STATUS", columnDefinition = "nvarchar(50)")
+    private String status;
 
-	public String getParentType() {
-		return parentType;
-	}
+    /**
+     * 更新時間
+     */
+    @Column(name = "MODIFY_TIME")
+    private Date modifyTime;
 
-	public void setParentType(String parentType) {
-		this.parentType = parentType;
-	}
+    @PrePersist
+    public void prePersist() {
+        createTime = new Date();
+        modifyTime = createTime;
+    }
 
-	public String getUid() {
-		return uid;
-	}
-
-	public void setUid(String uid) {
-		this.uid = uid;
-	}
-
-	public String getTitle() {
-		return title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
-	}
-
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
-	public String getMsgType() {
-		return msgType;
-	}
-
-	public void setMsgType(String msgType) {
-		this.msgType = msgType;
-	}
-
-	public String getText() {
-		return text;
-	}
-
-	public void setText(String text) {
-		this.text = text;
-	}
-
-	public Date getCreateTime() {
-		return createTime;
-	}
-
-	public void setCreateTime(Date createTime) {
-		this.createTime = createTime;
-	}
-
-	public Date getSendTime() {
-		return sendTime;
-	}
-
-	public void setSendTime(Date sendTime) {
-		this.sendTime = sendTime;
-	}
-
+    @PreUpdate
+    public void preUpdate() {
+        modifyTime = new Date();
+    }
 }

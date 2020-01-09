@@ -130,6 +130,7 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
      * 找出第一個RETRY DETAIL 的 BillingNoticeMain 並更新狀態
      */
     @SuppressWarnings("unchecked")
+    @Transactional(rollbackFor = Exception.class)
     private Long findAndUpdateFirstRetryDetailOnMain(String procApName, List<String> tempIds) {
         Date modifyTime = Calendar.getInstance().getTime();
         String sqlString = "select  Top 1 m.NOTICE_MAIN_ID from BCS_BILLING_NOTICE_DETAIL b, BCS_BILLING_NOTICE_MAIN m  "
@@ -156,6 +157,7 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
     /**
      * 找出第一個WAIT BillingNoticeMain 並更新狀態
      */
+    @Transactional(rollbackFor = Exception.class)
     private Long findAndUpdateFirstWaitMain(String procApName, List<String> tempIds) {
         Date modifyTime = Calendar.getInstance().getTime();
         // 找出第一個WAIT BillingNoticeMain 並更新
@@ -191,6 +193,7 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
      * @return
      */
     @SuppressWarnings("unchecked")
+    @Transactional(rollbackFor = Exception.class)
     public List<BigInteger> findAndUpdateDetailByMainAndStatus(Set<Long> mainIds) {
         List<String> statusList = new ArrayList<String>();
         statusList.add(BillingNoticeMain.NOTICE_STATUS_WAIT);

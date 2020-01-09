@@ -10,9 +10,9 @@ import com.bcs.core.taishin.circle.db.repository.BillingNoticeContentTemplateMsg
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeContentTemplateMsgRepository;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeMainRepository;
 import com.bcs.core.taishin.circle.db.repository.BillingNoticeRepositoryCustom;
+import com.bcs.core.utils.DataUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,13 +20,13 @@ import javax.annotation.PreDestroy;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Service
@@ -88,7 +88,12 @@ public class BillingNoticeSendMsgService {
                 log.info("Main List is Empty!!");
                 return;
             }
-            billingNoticeMainList.forEach(billingNoticeMain -> billingNoticeAkkaService.tell(billingNoticeMain));
+            AtomicInteger i = new AtomicInteger();
+            billingNoticeMainList.forEach(billingNoticeMain -> {
+                i.getAndIncrement();
+                log.info("To Akka BillingNoticeMain {}: {}", i, DataUtils.toPrettyJsonUseJackson(billingNoticeMain));
+            });
+//            billingNoticeMainList.forEach(billingNoticeMain -> billingNoticeAkkaService.tell(billingNoticeMain));
         } catch (Exception e) {
             log.error("Exception", e);
         }

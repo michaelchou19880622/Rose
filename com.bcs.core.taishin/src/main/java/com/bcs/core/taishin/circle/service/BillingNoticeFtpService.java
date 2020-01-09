@@ -73,7 +73,7 @@ public class BillingNoticeFtpService {
         String unit = CoreConfigReader.getString(CONFIG_STR.BN_SCHEDULE_UNIT, true, false);
         int time = CoreConfigReader.getInteger(CONFIG_STR.BN_SCHEDULE_TIME, true, false);
         if (time == -1) {
-            log.error(" BillingNoticeFtpService TimeUnit error :" + time + unit);
+            log.error("BillingNoticeFtpService TimeUnit error :" + time + unit);
             return;
         }
         scheduledFuture = scheduler.scheduleAtFixedRate(this::ftpProcess, 0, time, TimeUnit.valueOf(unit));
@@ -84,7 +84,7 @@ public class BillingNoticeFtpService {
      * 執行流程
      */
     private void ftpProcess() {
-        log.info(" BillingNoticeFtpService startCircle....");
+        log.info("StartCircle....");
         boolean bigSwitch = CoreConfigReader.getBoolean(CONFIG_STR.BN_BIGSWITCH, true, false);
         String downloadSavePath = CoreConfigReader.getString(CONFIG_STR.BN_FTP_DOWNLOAD_SAVEFILEPATH, true, false);
         String fileExtension = CoreConfigReader.getString(CONFIG_STR.BN_FTP_FILE_EXTENSION, true, false);
@@ -94,9 +94,8 @@ public class BillingNoticeFtpService {
         }
 
         try {
-            Map<String, byte[]> lReturnDataMap = new HashMap<>();
             List<FtpSetting> ftpSettingList = ftpService.getFtpSettings();
-            downloadFtpFile(fileExtension, lReturnDataMap, ftpSettingList);
+            Map<String, byte[]> lReturnDataMap = downloadFtpFile(fileExtension, ftpSettingList);
             saveObjToDb(parseDataToObj(downloadSavePath, lReturnDataMap, ftpSettingList));
             removeFtpFileProcess(lReturnDataMap, ftpSettingList);
         } catch (Exception e) {
@@ -104,17 +103,29 @@ public class BillingNoticeFtpService {
         }
     }
 
-    private void downloadFtpFile(String fileExtension, Map<String, byte[]> lReturnDataMap, List<FtpSetting> ftpSettingList) {
+    /**
+     * 由多個FTP下載檔案
+     *
+     * @param fileExtension  file extension
+     * @param ftpSettingList ftp setting list
+     * @return 所有下載的檔案
+     */
+    private Map<String, byte[]> downloadFtpFile(String fileExtension, List<FtpSetting> ftpSettingList) {
+        Map<String, byte[]> map = new HashMap<>();
         for (FtpSetting ftpSetting : ftpSettingList) {
+            log.info("Ftp Setting:\n{}", DataUtils.toPrettyJsonUseJackson(ftpSetting));
             ftpSetting.clearFileNames();
 
-            Map<String, byte[]> returnDataMap = ftpService.downloadMutipleFileByType(ftpSetting.getPath(), fileExtension, ftpSetting);
+            Map<String, byte[]> returnDataMap = ftpService.downloadMultipleFileByType(ftpSetting.getPath(), fileExtension, ftpSetting);
+            map.putAll(returnDataMap);
+
+            //TODO Alan:增加檔案清單卻又在進入時清除？
             returnDataMap.keySet().forEach(ftpSetting::addFileNames);
-            lReturnDataMap.putAll(returnDataMap);
         }
+        return map;
     }
 
-    private List<BillingNoticeMain> parseDataToObj(String downloadSavePath, Map<String, byte[]> lReturnDataMap, List<FtpSetting> ftpSettingList) throws IOException {
+    private List<BillingNoticeMain> parseDataToObj(final String downloadSavePath, final Map<String, byte[]> lReturnDataMap, List<FtpSetting> ftpSettingList) throws IOException {
         List<BillingNoticeMain> mainList = new ArrayList<>();
         for (Map.Entry<String, byte[]> entry : lReturnDataMap.entrySet()) {
             final String fileName = entry.getKey();
@@ -152,8 +163,14 @@ public class BillingNoticeFtpService {
     }
 
 
+    /**
+     * 轉換Array[1~*]的內容成物件
+     * @param fileContents file Contents
+     * @return map
+     */
     private Map<String, List<BillingNoticeFtpDetail>> parseDetail(List<String> fileContents) {
         List<BillingNoticeFtpDetail> details = new ArrayList<>();
+        /* Parse Content */
         for (int i = 1; i < fileContents.size(); i++) {
             if (StringUtils.isBlank(fileContents.get(i))) {
                 continue;
@@ -200,23 +217,31 @@ public class BillingNoticeFtpService {
      * @param fileContents fileContents
      */
     private List<BillingNoticeMain> parseFtpFile(String origFileName, List<String> fileContents) {
-        List<BillingNoticeMain> mainList = new ArrayList<>();
-        log.info("----------Parse Ftp File---------");
-        log.info("File Contents is Empty: {}", fileContents.isEmpty());
+        log.info("Parse Ftp File Start!!");
+
         if (fileContents.isEmpty()) {
+            log.info("File Content is Empty!!");
             return Collections.emptyList();
         }
+
+        /* Header */
         String header = fileContents.get(0);
         if (!validateHeader(header)) {
+            log.info("Header Valid Fail!!");
             return Collections.emptyList();
         }
+
         String[] splitHeaderData = header.split("\\|");
+        log.info("Header Content Array: {}", DataUtils.toPrettyJsonUseJackson(splitHeaderData));
 
         // TemplateTitle => Details
         Map<String, List<BillingNoticeFtpDetail>> resultMap = parseDetail(fileContents);
-        log.info("ResultMap: {}", resultMap);
+        log.info("File Content Map: {}", DataUtils.toPrettyJsonUseJackson(resultMap));
+
+        List<BillingNoticeMain> mainList = new ArrayList<>();
         for (Map.Entry<String, List<BillingNoticeFtpDetail>> entry : resultMap.entrySet()) {
             BillingNoticeContentTemplateMsg template = getBillingNoticeTemplate(entry.getKey());
+
             if (template == null) {
                 log.error("Template Doesn't exist!! {}", entry.getKey());
                 return Collections.emptyList();

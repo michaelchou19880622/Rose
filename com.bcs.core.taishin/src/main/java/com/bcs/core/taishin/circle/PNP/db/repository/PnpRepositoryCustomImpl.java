@@ -80,6 +80,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
      * @see PnpRepositoryCustomImpl#updateStatus
      */
     @SuppressWarnings("unchecked")
+    @Transactional(rollbackFor = Exception.class)
     private List<BigInteger> findAndUpdateProcessForUpdate(String detailTable, PnpStageEnum stage, PnpStatusEnum bcStatus) {
         String sqlString = "select d.PNP_DETAIL_ID from " + detailTable + " d " +
                 " where d.STATUS = :status " +
@@ -189,6 +190,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
      * 找出第一個status = WAIT & STAGE = BC 的PNP Main 並更新status = SENDING
      */
     @SuppressWarnings("unchecked")
+    @Transactional(rollbackFor = Exception.class)
     private Long findAndUpdateFirstWaitMainByStageBc(String procApName, String mainTable) {
         String waitMainString = "select  TOP 1 m.PNP_MAIN_ID from  " + mainTable + " m  " +
                 " where m.STATUS = :status " +

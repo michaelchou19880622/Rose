@@ -44,6 +44,7 @@ public interface BillingNoticeMainRepository extends EntityRepository<BillingNot
             " AND A.STATUS = ?1 " +
             " AND A.TEMP_ID IN (?2) " +
             " ORDER BY A.CREAT_TIME)", nativeQuery = true)
+    @Transactional(rollbackFor = Exception.class)
     List<BigInteger> findAndUpdateFirstWaitMain(String status, List<String> tempIds, String procApName, Date modifyTime, String newStatus);
 
 }

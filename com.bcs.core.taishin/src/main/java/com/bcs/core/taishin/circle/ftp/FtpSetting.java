@@ -1,151 +1,151 @@
 package com.bcs.core.taishin.circle.ftp;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
+/**
+ * @author ???
+ */
 public class FtpSetting {
 
-	private String channelId;
-	private String host;
-	private int port;
-	private int serverHostNamePort;
-	private String serverHostName;
-	private String APPCode;
-	private String RESCode;
-	public String account;
-	public String password;
-	private String path;
-	public String protocol;
-	private String fileEncoding;
+    private String channelId;
+    private String host;
+    private int port;
+    private int serverHostNamePort;
+    private String serverHostName;
+    private String APPCode;
+    private String RESCode;
+    public String account;
+    public String password;
+    private String path;
+    public String protocol;
+    private String fileEncoding;
 
-	private List<String> fileNames = new ArrayList<>();
-	
-	
-	
-	public String getProtocol() {
-		return protocol;
-	}
+    private List<String> fileNames = new ArrayList<>();
 
-	public void setProtocol(String protocol) {
-		this.protocol = protocol;
-	}
 
-	public boolean containsFileName(String file) {
-		return fileNames.contains(file);
-	}
+    public String getProtocol() {
+        return protocol;
+    }
 
-	public List<String> getFileNames() {
-		return fileNames;
-	}
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
 
-	public void addFileNames(String file) {
-		fileNames.add(file);
-	}
-	
-	public void removeFileNames(String file) {
-		if (fileNames.contains(file)) {
-			fileNames.remove(file);
-		}
-	}
+    public boolean containsFileName(String file) {
+        return fileNames.contains(file);
+    }
 
-	public void clearFileNames() {
-		fileNames.clear();
-	}
+    public List<String> getFileNames() {
+        return fileNames;
+    }
 
-	public String getChannelId() {
-		return channelId;
-	}
+    public void addFileNames(String file) {
+        fileNames.add(file);
+    }
 
-	public void setChannelId(String channelId) {
-		this.channelId = channelId;
-	}
+    public void removeFileNames(String file) {
+        fileNames.remove(file);
+    }
 
-	public String getHost() {
-		return host;
-	}
+    public void clearFileNames() {
+        fileNames.clear();
+    }
 
-	public void setHost(String host) {
-		this.host = host;
-	}
+    public String getChannelId() {
+        return channelId;
+    }
 
-	public int getPort() {
-		return port;
-	}
+    public void setChannelId(String channelId) {
+        this.channelId = channelId;
+    }
 
-	public void setPort(int port) {
-		this.port = port;
-	}
+    public String getHost() {
+        return host;
+    }
 
-	public int getServerHostNamePort() {
-		return serverHostNamePort;
-	}
+    public void setHost(String host) {
+        this.host = host;
+    }
 
-	public void setServerHostNamePort(int serverHostNamePort) {
-		this.serverHostNamePort = serverHostNamePort;
-	}
+    public int getPort() {
+        return port;
+    }
 
-	public String getServerHostName() {
-		return serverHostName;
-	}
+    public void setPort(int port) {
+        this.port = port;
+    }
 
-	public void setServerHostName(String serverHostName) {
-		this.serverHostName = serverHostName;
-	}
+    public int getServerHostNamePort() {
+        return serverHostNamePort;
+    }
 
-	public String getAPPCode() {
-		return APPCode;
-	}
+    public void setServerHostNamePort(int serverHostNamePort) {
+        this.serverHostNamePort = serverHostNamePort;
+    }
 
-	public void setAPPCode(String aPPCode) {
-		APPCode = aPPCode;
-	}
+    public String getServerHostName() {
+        return serverHostName;
+    }
 
-	public String getRESCode() {
-		return RESCode;
-	}
+    public void setServerHostName(String serverHostName) {
+        this.serverHostName = serverHostName;
+    }
 
-	public void setRESCode(String rESCode) {
-		RESCode = rESCode;
-	}
+    public String getAPPCode() {
+        return APPCode;
+    }
 
-	public String getAccount() {
-		return account;
-	}
+    public void setAPPCode(String aPPCode) {
+        APPCode = aPPCode;
+    }
 
-	public void setAccount(String account) {
-		this.account = account;
-	}
+    public String getRESCode() {
+        return RESCode;
+    }
 
-	public String getPassword() {
-		return password;
-	}
+    public void setRESCode(String rESCode) {
+        RESCode = rESCode;
+    }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    public String getAccount() {
+        return account;
+    }
 
-	public String getPath() {
-		if (StringUtils.isBlank(path)) {
-			path = "/";
-		}
-		return path;
-	}
+    public void setAccount(String account) {
+        this.account = account;
+    }
 
-	public void setPath(String path) {
-		this.path = path;
-	}
-	
-	public String getFileEncoding() {
-		if (StringUtils.isBlank(fileEncoding)) {
-			fileEncoding = "UTF-8";
-		}
-		return fileEncoding;
-	}
+    public String getPassword() {
+        return password;
+    }
 
-	public void setFileEncoding(String fileEncoding) {
-		this.fileEncoding = fileEncoding;
-	}
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getPath() {
+        if (StringUtils.isBlank(path)) {
+            path = "/";
+        }
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getFileEncoding() {
+        if (StringUtils.isBlank(fileEncoding)) {
+            fileEncoding = "UTF-8";
+        }
+        return fileEncoding;
+    }
+
+    public void setFileEncoding(String fileEncoding) {
+        this.fileEncoding = fileEncoding;
+    }
 
 }

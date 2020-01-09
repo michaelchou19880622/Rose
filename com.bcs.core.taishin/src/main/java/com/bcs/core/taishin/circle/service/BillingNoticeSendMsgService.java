@@ -110,16 +110,17 @@ public class BillingNoticeSendMsgService {
      * Retry detail 找一筆後找出他的main + Main status = WAIT者找一筆
      * 更新BillingNoticeMain & BillingNoticeDetail status
      */
+    @SuppressWarnings("unchecked")
     public List<BillingNoticeMain> sendingBillingNoticeMain(String procApName) {
         List<String> templateIdList = billingNoticeService.findProductSwitchOnTemplateId();
         if (templateIdList == null || templateIdList.isEmpty()) {
             return Collections.emptyList();
         }
-        Set<Long> allMainIdSet = new HashSet<>();
-        List<BillingNoticeDetail> allDetails = new ArrayList<>();
 
         // 更新狀態
-        billingNoticeRepositoryCustom.updateStatus(procApName, templateIdList, allMainIdSet, allDetails);
+        Object[] returnArray = billingNoticeRepositoryCustom.updateStatus(procApName, templateIdList);
+        Set<Long> allMainIdSet = (Set<Long>) returnArray[0];
+        List<BillingNoticeDetail> allDetails = (List<BillingNoticeDetail>) returnArray[1];
 
         if (allMainIdSet.isEmpty()) {
             return Collections.emptyList();

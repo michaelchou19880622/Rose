@@ -6,7 +6,6 @@ import com.bcs.core.taishin.circle.db.entity.CircleEntityManagerControl;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +15,9 @@ import javax.persistence.PersistenceContext;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -43,49 +44,71 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
 
     /**
      * 更新狀態
-     * //TODO
      */
     @Override
     @Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
-    public void updateStatus(String procApName, List<String> tempIds, Set<Long> allMainIds, List<BillingNoticeDetail> allDetails) {
-        log.debug(" BCS_BILLING_NOTICE begin updateStatus:" + procApName);
+    public Object[] updateStatus(String procApName, List<String> tempIds) {
+        log.info("Update Status: {}", procApName);
         try {
-            // 找出第一筆 WAIT BCS_BILLING_NOTICE_MAIN 並更新狀態
-            Long waitMainId = findAndUpdateFirstWaitMain(procApName, tempIds);
-            if (waitMainId != null) {
-                allMainIds.add(waitMainId);
-            } else {
-                log.debug("BCS_BILLING_NOTICE updateStatus waitMainId is null");
+            Set<Long> allMainIds = new HashSet<>();
+            /* 1. Find wait main set and update status to sending */
+            allMainIds.addAll(findWaitMainSet(procApName, tempIds));
+            /* 2. Find retry main set and update status to sending */
+            allMainIds.addAll(findRetryMainSet(procApName, tempIds));
+
+            /* Valid is empty */
+            if (allMainIds.isEmpty()) {
+                log.info("Main Id List is Empty!!");
+                return new Object[]{Collections.emptySet(), Collections.emptyList()};
             }
 
-            // 找出第一筆 RETRY BillingNoticeDetail 的 BCS_BILLING_NOTICE_MAIN 並更新狀態
-            Long retryMainId = findAndUpdateFirstRetryDetailOnMain(procApName, tempIds);
-            if (retryMainId != null) {
-                allMainIds.add(retryMainId);
-            }
-            log.debug("BCS_BILLING_NOTICE updateStatus allMainIds:" + allMainIds);
-            if (allMainIds.isEmpty()) {
-                log.debug("BCS_BILLING_NOTICE updateStatus allMainIds is empty");
-                return;
-            }
-            //  根據NOTICE_MAIN_ID 更新 BillingNoticeDetail 狀態等於WAIT or RETRY 狀態
+            /* 3. Find Detail id list by Main id list */
             List<BigInteger> detailIds = findAndUpdateDetailByMainAndStatus(allMainIds);
+
+            /* Valid is empty */
             if (detailIds.isEmpty()) {
-                log.debug("BCS_BILLING_NOTICE updateStatus BillingNoticeDetail is empty");
-                return;
+                log.debug("Detail Id List is Empty!!");
+                return new Object[]{Collections.emptySet(), Collections.emptyList()};
             }
-            List<List<BigInteger>> batchDetailIds = Lists.partition(detailIds, CircleEntityManagerControl.batchSize);
-            for (List<BigInteger> ids : batchDetailIds) {
-                List<BillingNoticeDetail> details = billingNoticeDetailRepository.findByNoticeDetailIdIn(ids);
-                if (!details.isEmpty()) {
-                    allDetails.addAll(details);
-                }
-            }
+
+            /* 4. Find Detail object list by Detail id list */
+            return new Object[]{allMainIds, findDetailByIds(detailIds)};
         } catch (Exception e) {
             log.error("Exception", e);
             throw e;
         }
+    }
 
+    private List<BillingNoticeDetail> findDetailByIds(List<BigInteger> detailIds) {
+        List<BillingNoticeDetail> detailList = new ArrayList<>();
+        List<List<BigInteger>> batchDetailIds = Lists.partition(detailIds, CircleEntityManagerControl.batchSize);
+        for (List<BigInteger> ids : batchDetailIds) {
+            List<BillingNoticeDetail> details = billingNoticeDetailRepository.findByNoticeDetailIdIn(ids);
+            if (!details.isEmpty()) {
+                detailList.addAll(details);
+            }
+        }
+        return detailList;
+    }
+
+    private Set<Long> findRetryMainSet(String procApName, List<String> tempIds) {
+        Set<Long> retrySet = new HashSet<>();
+        Long retryMainId = findAndUpdateFirstRetryDetailOnMain(procApName, tempIds);
+        if (retryMainId != null) {
+            retrySet.add(retryMainId);
+        }
+        return retrySet;
+    }
+
+    private Set<Long> findWaitMainSet(String procApName, List<String> tempIds) {
+        Set<Long> waitSet = new HashSet<>();
+        Long waitMainId = findAndUpdateFirstWaitMain(procApName, tempIds);
+        if (waitMainId != null) {
+            waitSet.add(waitMainId);
+        } else {
+            log.debug("BCS_BILLING_NOTICE updateStatus waitMainId is null");
+        }
+        return waitSet;
     }
 
 //    /**
@@ -134,26 +157,27 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
      * 找出第一個WAIT BillingNoticeMain 並更新狀態
      */
     private Long findAndUpdateFirstWaitMain(String procApName, List<String> tempIds) {
-//        Date modifyTime = Calendar.getInstance().getTime();
-//        // 找出第一個WAIT BillingNoticeMain 並更新
-//        String waitMainString = "select  TOP 1 m.NOTICE_MAIN_ID from  BCS_BILLING_NOTICE_MAIN m  "
-//                + "where m.STATUS = :status and m.TEMP_ID in (:tempIds) Order by m.CREAT_TIME "
-//                + "update BCS_BILLING_NOTICE_MAIN  set STATUS = :newStatus , PROC_AP_NAME = :procApName , MODIFY_TIME = :modifyTime "
-//                + "   where NOTICE_MAIN_ID  IN (select TOP 1 a.NOTICE_MAIN_ID from BCS_BILLING_NOTICE_MAIN a WITH(ROWLOCK) "
-//                + "		where a.STATUS = :status and a.TEMP_ID in (:tempIds) Order by a.CREAT_TIME)  ";
-//        List<BigInteger> mains = (List<BigInteger>) entityManager.createNativeQuery(waitMainString)
-//                .setParameter("status", BillingNoticeMain.NOTICE_STATUS_WAIT)
-//                .setParameter("tempIds", tempIds)
-//                .setParameter("procApName", procApName)
-//                .setParameter("modifyTime", modifyTime)
-//                .setParameter("newStatus", BillingNoticeMain.NOTICE_STATUS_SENDING).getResultList();
-        List<BigInteger> mainList = billingNoticeMainRepository.findAndUpdateFirstWaitMain(
-                BillingNoticeMain.NOTICE_STATUS_WAIT,
-                tempIds,
-                procApName,
-                new Date(),
-                BillingNoticeMain.NOTICE_STATUS_SENDING
-        );
+        Date modifyTime = Calendar.getInstance().getTime();
+        // 找出第一個WAIT BillingNoticeMain 並更新
+        String waitMainString = "select  TOP 1 m.NOTICE_MAIN_ID from  BCS_BILLING_NOTICE_MAIN m  "
+                + "where m.STATUS = :status and m.TEMP_ID in (:tempIds) Order by m.CREAT_TIME "
+                + "update BCS_BILLING_NOTICE_MAIN  set STATUS = :newStatus , PROC_AP_NAME = :procApName , MODIFY_TIME = :modifyTime "
+                + "   where NOTICE_MAIN_ID  IN (select TOP 1 a.NOTICE_MAIN_ID from BCS_BILLING_NOTICE_MAIN a WITH(ROWLOCK) "
+                + "		where a.STATUS = :status and a.TEMP_ID in (:tempIds) Order by a.CREAT_TIME)  ";
+        List<BigInteger> mainList = (List<BigInteger>) entityManager.createNativeQuery(waitMainString)
+                .setParameter("status", BillingNoticeMain.NOTICE_STATUS_WAIT)
+                .setParameter("tempIds", tempIds)
+                .setParameter("procApName", procApName)
+                .setParameter("modifyTime", modifyTime)
+                .setParameter("newStatus", BillingNoticeMain.NOTICE_STATUS_SENDING).getResultList();
+        /*TODO ALAN */
+//        List<BigInteger> mainList = billingNoticeMainRepository.findAndUpdateFirstWaitMain(
+//                BillingNoticeMain.NOTICE_STATUS_WAIT,
+//                tempIds,
+//                procApName,
+//                new Date(),
+//                BillingNoticeMain.NOTICE_STATUS_SENDING
+//        );
         if (mainList != null && !mainList.isEmpty()) {
             return mainList.get(0).longValue();
         }

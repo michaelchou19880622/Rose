@@ -135,7 +135,7 @@ public class ExecuteSendMsgTask {
                 break;
             }
             log.debug("queryDefaultGroup:" + list.size());
-            sendMsgToMids(list, details, msgSendMain.getMsgSendId());
+            sendMsgToMidList(list, details, msgSendMain.getMsgSendId());
 
             page++;
             if (page % 80 == 0) {
@@ -171,13 +171,13 @@ public class ExecuteSendMsgTask {
             sendMidList.add(mid);
 
             if (sendMidList.size() % pageSize == 0) {
-                sendMsgToMids(sendMidList, details, msgSendMain.getMsgSendId());
+                sendMsgToMidList(sendMidList, details, msgSendMain.getMsgSendId());
                 sendMidList = new ArrayList<>();
             }
         }
 
         if (!sendMidList.isEmpty()) {
-            sendMsgToMids(sendMidList, details, msgSendMain.getMsgSendId());
+            sendMsgToMidList(sendMidList, details, msgSendMain.getMsgSendId());
         }
     }
 
@@ -190,11 +190,11 @@ public class ExecuteSendMsgTask {
             AdminUserService adminUserService = ApplicationContextProvider.getApplicationContext().getBean(AdminUserService.class);
 
             List<AdminUser> list = adminUserService.findByMidNotNull();
-            List<String> midsTest = new ArrayList<>();
+            List<String> midListTest = new ArrayList<>();
             if (list != null && !list.isEmpty()) {
                 for (AdminUser adminUser : list) {
                     if (StringUtils.isNotBlank(adminUser.getMid())) {
-                        midsTest.add(adminUser.getMid());
+                        midListTest.add(adminUser.getMid());
                     }
                 }
             }
@@ -205,16 +205,16 @@ public class ExecuteSendMsgTask {
 
             details.add(0, detail);
 
-            sendMsgToMids(midsTest, details, msgSendMain.getMsgSendId());
+            sendMsgToMidList(midListTest, details, msgSendMain.getMsgSendId());
         } catch (Exception e) {
             log.error("Exception", e);
         }
     }
 
-    public void sendMsgToMids(List<String> mids, List<MsgDetail> details, Long updateMsgId) throws Exception {
+    public void sendMsgToMidList(List<String> midList, List<MsgDetail> details, Long updateMsgId) throws Exception {
         SendingMsgService sendingMegService = ApplicationContextProvider.getApplicationContext().getBean(SendingMsgService.class);
         List<MsgGenerator> msgGenerators = MsgGeneratorFactory.validateMessages(details);
-        log.info("sendMsgToMids:Mids:" + mids.size());
-        sendingMegService.sendToLineAsync(msgGenerators, details, mids, API_TYPE.BOT, updateMsgId);
+        log.info("Mid List Size:" + midList.size());
+        sendingMegService.sendToLineAsync(msgGenerators, details, midList, API_TYPE.BOT, updateMsgId);
     }
 }

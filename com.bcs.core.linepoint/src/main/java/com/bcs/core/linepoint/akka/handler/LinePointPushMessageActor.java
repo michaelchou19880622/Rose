@@ -205,7 +205,7 @@ public class LinePointPushMessageActor extends UntypedActor {
         MsgSendMain msgSendMain = msgSendMainService.copyFromMsgMain(msgId, (long) midList.size(), "LPSG;" + linePointMain.getTitle());
         List<MsgDetail> details = msgDetailService.findByMsgIdAndMsgParentType(msgSendMain.getMsgSendId(), MsgSendMain.THIS_PARENT_TYPE);
         ExecuteSendMsgTask runTask = new ExecuteSendMsgTask();
-        runTask.sendMsgToMids(midList, details, msgSendMain.getMsgSendId());
+        runTask.sendMsgToMidList(midList, details, msgSendMain.getMsgSendId());
         log.info("LinePoint訊息發出!!");
     }
 

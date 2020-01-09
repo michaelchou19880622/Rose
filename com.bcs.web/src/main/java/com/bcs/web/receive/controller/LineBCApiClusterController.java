@@ -58,8 +58,8 @@ public class LineBCApiClusterController {
                 return;
             }
 
-            List<MsgGenerator> msgGenerators = MsgGeneratorFactory.validateMessages(modelInput.getMsgDetails());
-            AsyncSendingModel model = new AsyncSendingModel(modelInput.getChannelId(), msgGenerators, modelInput.getMids(), API_TYPE.BC, modelInput.getUpdateMsgId());
+            List<MsgGenerator> msgGenerators = MsgGeneratorFactory.validateMessages(modelInput.getMsgDetailList());
+            AsyncSendingModel model = new AsyncSendingModel(modelInput.getChannelId(), msgGenerators, modelInput.getMidList(), API_TYPE.BC, modelInput.getUpdateMsgId());
 
             akkaBotService.sendingMsgs(model);
             logger.info("-------lineBCApiClusterSend Success-------");

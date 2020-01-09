@@ -93,7 +93,7 @@ public class BillingNoticeSendMsgService {
                 i.getAndIncrement();
                 log.info("To Akka BillingNoticeMain {}: {}", i, DataUtils.toPrettyJsonUseJackson(billingNoticeMain));
             });
-//            billingNoticeMainList.forEach(billingNoticeMain -> billingNoticeAkkaService.tell(billingNoticeMain));
+            billingNoticeMainList.forEach(billingNoticeMain -> billingNoticeAkkaService.tell(billingNoticeMain));
         } catch (Exception e) {
             log.error("Exception", e);
         }

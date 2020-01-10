@@ -53,7 +53,7 @@ public class SendingMsgHandlerSend extends UntypedActor {
 			AsyncSendingModel msgs = (AsyncSendingModel) message;
 			logger.info("AsyncSendingModel onReceive:" + msgs);
 
-			if(msgs.getMids() != null){
+			if(msgs.getMidList() != null){
 
 
 				Long msgSendId = msgs.getUpdateMsgId();
@@ -62,7 +62,7 @@ public class SendingMsgHandlerSend extends UntypedActor {
 					msgSendMain = ApplicationContextProvider.getApplicationContext().getBean(MsgSendMainService.class).findOne(msgSendId);
 				}
 
-				logger.info("Size:" + msgs.getMids().size());
+				logger.info("Size:" + msgs.getMidList().size());
 				List<String[]> successMid = new ArrayList<String[]>();
 
 				List<MsgGenerator> msgGenerators = msgs.getMsgGenerators();
@@ -72,7 +72,7 @@ public class SendingMsgHandlerSend extends UntypedActor {
 				sendToBotModel.setChannelId(msgs.getChannelId());
 				sendToBotModel.setSendType(SEND_TYPE.PUSH_MSG);
 
-				for(String mid : msgs.getMids()){
+				for(String mid : msgs.getMidList()){
 					try {
 
 						Map<String, String> replaceParam = null;

@@ -6,95 +6,74 @@ import java.util.List;
 import com.bcs.core.api.msg.MsgGenerator;
 import com.bcs.core.enums.API_TYPE;
 import com.bcs.core.json.AbstractBcsEntity;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
-public class AsyncSendingModel extends AbstractBcsEntity{
-	
-	private static final long serialVersionUID = 1L;
-	
-	private String ChannelId;
-	private List<MsgGenerator> msgGenerators;
-	private List<String> mids;
-	private API_TYPE apiType;
-	private Long updateMsgId;
-	
-	public AsyncSendingModel(String ChannelId, List<MsgGenerator> msgGenerators, List<String> mids, API_TYPE apiType){
-		this.ChannelId = ChannelId;
-		this.msgGenerators = msgGenerators;
-		this.mids = mids;
-		this.apiType = apiType;
-		this.updateMsgId = null;
-	}
-	
-	public AsyncSendingModel(String ChannelId, List<MsgGenerator> msgGenerators, List<String> mids, API_TYPE apiType, Long updateMsgId){
-		this.ChannelId = ChannelId;
-		this.msgGenerators = msgGenerators;
-		this.mids = mids;
-		this.apiType = apiType;
-		this.updateMsgId = updateMsgId;
-	}
-	
-	public AsyncSendingModel(String ChannelId, List<MsgGenerator> msgGenerators, String mid, API_TYPE apiType){
-		this.ChannelId = ChannelId;
-		this.msgGenerators = msgGenerators;
-		
-		List<String> mids = new ArrayList<String>();
-		mids.add(mid);
-		this.mids = mids;
-		
-		this.apiType = apiType;
-	}
-	
-	public AsyncSendingModel(String ChannelId, List<MsgGenerator> msgGenerators, String mid, API_TYPE apiType, Long updateMsgId){
-		this.ChannelId = ChannelId;
-		this.msgGenerators = msgGenerators;
-		
-		List<String> mids = new ArrayList<String>();
-		mids.add(mid);
-		this.mids = mids;
-		
-		this.apiType = apiType;
-		this.updateMsgId = updateMsgId;
-	}
-	
-	public AsyncSendingModel(String mid, String ChannelId, List<MsgGenerator> msgGenerators, API_TYPE apiType, Long updateMsgId){
-		this.ChannelId = ChannelId;
-		this.msgGenerators = msgGenerators;
-		
-		List<String> mids = new ArrayList<String>();
-		mids.add(mid);
-		this.mids = mids;
-		
-		this.apiType = apiType;
-		this.updateMsgId = updateMsgId;
-	}
-	
-	public AsyncSendingModel(List<String> mids, String ChannelId, List<MsgGenerator> msgGenerators, API_TYPE apiType, Long updateMsgId){
-		this.ChannelId = ChannelId;
-		this.msgGenerators = msgGenerators;
+/**
+ * @author ???
+ */
+@EqualsAndHashCode(callSuper = false)
+@Getter
+public class AsyncSendingModel extends AbstractBcsEntity {
 
-		this.mids = mids;
-		
-		this.apiType = apiType;
-		this.updateMsgId = updateMsgId;
-	}
+    private static final long serialVersionUID = 1L;
 
-	public String getChannelId() {
-		return ChannelId;
-	}
+    private String channelId;
+    private List<MsgGenerator> msgGenerators;
+    private List<String> midList;
+    private API_TYPE apiType;
+    private Long updateMsgId;
 
-	public List<MsgGenerator> getMsgGenerators() {
-		return msgGenerators;
-	}
+    public AsyncSendingModel(String channelId, List<MsgGenerator> msgGenerators, List<String> midList, API_TYPE apiType) {
+        this.channelId = channelId;
+        this.msgGenerators = msgGenerators;
+        this.midList = midList;
+        this.apiType = apiType;
+        this.updateMsgId = null;
+    }
 
-	public List<String> getMids() {
-		return mids;
-	}
+    public AsyncSendingModel(String channelId, List<MsgGenerator> msgGenerators, List<String> midList, API_TYPE apiType, Long updateMsgId) {
+        this.channelId = channelId;
+        this.msgGenerators = msgGenerators;
+        this.midList = midList;
+        this.apiType = apiType;
+        this.updateMsgId = updateMsgId;
+    }
 
-	public API_TYPE getApiType() {
-		return apiType;
-	}
+    public AsyncSendingModel(String channelId, List<MsgGenerator> msgGenerators, String mid, API_TYPE apiType) {
+        this.channelId = channelId;
+        this.msgGenerators = msgGenerators;
+        List<String> list = new ArrayList<>();
+        list.add(mid);
+        this.midList = list;
+        this.apiType = apiType;
+    }
 
-	public Long getUpdateMsgId() {
-		return updateMsgId;
-	}
+    public AsyncSendingModel(String channelId, List<MsgGenerator> msgGenerators, String mid, API_TYPE apiType, Long updateMsgId) {
+        this.channelId = channelId;
+        this.msgGenerators = msgGenerators;
+        List<String> list = new ArrayList<>();
+        list.add(mid);
+        this.midList = list;
+        this.apiType = apiType;
+        this.updateMsgId = updateMsgId;
+    }
+
+    public AsyncSendingModel(String mid, String channelId, List<MsgGenerator> msgGenerators, API_TYPE apiType, Long updateMsgId) {
+        this.channelId = channelId;
+        this.msgGenerators = msgGenerators;
+        List<String> list = new ArrayList<>();
+        list.add(mid);
+        this.midList = list;
+        this.apiType = apiType;
+        this.updateMsgId = updateMsgId;
+    }
+
+    public AsyncSendingModel(List<String> midList, String channelId, List<MsgGenerator> msgGenerators, API_TYPE apiType, Long updateMsgId) {
+        this.channelId = channelId;
+        this.msgGenerators = msgGenerators;
+        this.midList = midList;
+        this.apiType = apiType;
+        this.updateMsgId = updateMsgId;
+    }
 }

@@ -18,6 +18,7 @@ public interface BillingNoticeDetailRepository extends EntityRepository<BillingN
     @Transactional(readOnly = true, timeout = 30)
     List<BillingNoticeDetail> findByNoticeDetailIdAndStatus(Long noticeDetailId, String status);
 
+    @Transactional(readOnly = true)
     @Query(value = "select count(noticeDetailId) from BillingNoticeDetail b  where b.noticeMainId = ?1 and b.status in (?2) ")
     Long countByNoticeMainIdAndStatus(Long noticeMainId, List<String> status);
 

@@ -5,127 +5,130 @@ import java.util.List;
 
 import com.bcs.core.json.AbstractBcsEntity;
 
-public class SendMsgModel extends AbstractBcsEntity{
-	private static final long serialVersionUID = 1L;
+public class SendMsgModel extends AbstractBcsEntity {
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * ACTION_TYPE
-	 */
-	public enum ACTION_TYPE {
-		SaveDraft("SaveDraft"),
-		SendMsg("SendMsg"),
-		SendToMe("SendToMe"),
-		SendToTestGroup("SendToTestGroup"),
-		RedesignMsg("RedesignMsg"),
-		;
+    public enum ACTION_TYPE {
+        /**
+         * ACTION_TYPE
+         */
+        SaveDraft("SaveDraft"),
+        SendMsg("SendMsg"),
+        SendToMe("SendToMe"),
+        SendToTestGroup("SendToTestGroup"),
+        RedesignMsg("RedesignMsg"),
+        ;
 
-	    private final String str;
-	    
-	    ACTION_TYPE(String str) {
-	        this.str = str;
-	    }
-		/**
-		 * @return the str
-		 */
-		public String toString() {
-			return str;
-		}
-	}
-	/**
-	 * SaveDraft
-	 * SendMsg
-	 * SendToMe
-	 * SendToTest
-	 */
-	private String actionType;
-	
-	private Long msgId;
-	
-	/**
-	 * Target Send Group
-	 */
-	private Long sendGroupId;
-	
-	/**
-	 * Sending Msg Type
-	 * IMMEDIATE
-	 * DELAY
-	 * SCHEDULE
-	 */
-	private String sendingMsgType;
-	/**
-	 * If SENDING_MSG_TYPE == DELAY, SCHEDULE
-	 */
-	private String sendingMsgTime;
-	
-	private List<String> msgTagList = new ArrayList<>();
-	
-	private List<SendMsgDetailModel> sendMsgDetails;
+        private final String str;
 
-	private String serialId;
-	
-	public String getActionType() {
-		return actionType;
-	}
-	
-	public void setActionType(String actionType) {
-		this.actionType = actionType;
-	}
+        ACTION_TYPE(String str) {
+            this.str = str;
+        }
 
-	public Long getSendGroupId() {
-		return sendGroupId;
-	}
+        /**
+         * @return the str
+         */
+        @Override
+        public String toString() {
+            return str;
+        }
+    }
 
-	public void setSendGroupId(Long sendGroupId) {
-		this.sendGroupId = sendGroupId;
-	}
+    /**
+     * SaveDraft
+     * SendMsg
+     * SendToMe
+     * SendToTest
+     */
+    private String actionType;
 
-	public String getSendingMsgType() {
-		return sendingMsgType;
-	}
+    private Long msgId;
 
-	public void setSendingMsgType(String sendingMsgType) {
-		this.sendingMsgType = sendingMsgType;
-	}
+    /**
+     * Target Send Group
+     */
+    private Long sendGroupId;
 
-	public String getSendingMsgTime() {
-		return sendingMsgTime;
-	}
+    /**
+     * Sending Msg Type
+     * IMMEDIATE
+     * DELAY
+     * SCHEDULE
+     */
+    private String sendingMsgType;
+    /**
+     * If SENDING_MSG_TYPE == DELAY, SCHEDULE
+     */
+    private String sendingMsgTime;
 
-	public void setSendingMsgTime(String sendingMsgTime) {
-		this.sendingMsgTime = sendingMsgTime;
-	}
+    private List<String> msgTagList = new ArrayList<>();
 
-	public List<SendMsgDetailModel> getSendMsgDetails() {
-		return sendMsgDetails;
-	}
+    private List<SendMsgDetailModel> sendMsgDetails;
 
-	public void setSendMsgDetails(List<SendMsgDetailModel> sendMsgDetails) {
-		this.sendMsgDetails = sendMsgDetails;
-	}
+    private String serialId;
 
-	public Long getMsgId() {
-		return msgId;
-	}
+    public String getActionType() {
+        return actionType;
+    }
 
-	public void setMsgId(Long msgId) {
-		this.msgId = msgId;
-	}
+    public void setActionType(String actionType) {
+        this.actionType = actionType;
+    }
 
-	public List<String> getMsgTagList() {
-		return msgTagList;
-	}
+    public Long getSendGroupId() {
+        return sendGroupId;
+    }
 
-	public void setMsgTagList(List<String> msgTagList) {
-		this.msgTagList = msgTagList;
-	}
+    public void setSendGroupId(Long sendGroupId) {
+        this.sendGroupId = sendGroupId;
+    }
 
-	public String getSerialId() {
-		return serialId;
-	}
+    public String getSendingMsgType() {
+        return sendingMsgType;
+    }
 
-	public void setSerialId(String serialId) {
-		this.serialId = serialId;
-	}
-	
+    public void setSendingMsgType(String sendingMsgType) {
+        this.sendingMsgType = sendingMsgType;
+    }
+
+    public String getSendingMsgTime() {
+        return sendingMsgTime;
+    }
+
+    public void setSendingMsgTime(String sendingMsgTime) {
+        this.sendingMsgTime = sendingMsgTime;
+    }
+
+    public List<SendMsgDetailModel> getSendMsgDetails() {
+        return sendMsgDetails;
+    }
+
+    public void setSendMsgDetails(List<SendMsgDetailModel> sendMsgDetails) {
+        this.sendMsgDetails = sendMsgDetails;
+    }
+
+    public Long getMsgId() {
+        return msgId;
+    }
+
+    public void setMsgId(Long msgId) {
+        this.msgId = msgId;
+    }
+
+    public List<String> getMsgTagList() {
+        return msgTagList;
+    }
+
+    public void setMsgTagList(List<String> msgTagList) {
+        this.msgTagList = msgTagList;
+    }
+
+    public String getSerialId() {
+        return serialId;
+    }
+
+    public void setSerialId(String serialId) {
+        this.serialId = serialId;
+    }
+
 }

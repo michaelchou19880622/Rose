@@ -10,7 +10,7 @@
     <div class="LyContents">
 		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page1')"></div>
 
-        <!-- Right Content -->  
+        <!-- Right Content -->
         <div class="LyMain" role="main">
             <form id="formSendGroup">
                 <section>
@@ -41,7 +41,7 @@
                                     <td>
 	                                    <input accept="application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, text/plain"  id="upload_mid_btn" name="file" type="file" style="display:none">
                         				<input class="btn_add add_rule" style="cursor: pointer;" type="button" value="加入條件">
-                        				<input class="btn_add upload_mid" style="cursor: pointer; margin-right: 3px;" type="button" value="匯入UID">
+                        				<input class="btn_add upload_mid" style="cursor: pointer; margin-right: 3px;" type="button" value="匯入UID(EXCEL,TXT)">
                                         <table class="subTable" id="tableBody">
                                             <tr>
                                                 <th>欄位</th>
@@ -52,7 +52,7 @@
                                             <tr class="dataTemplate">
                                                 <td>
                                                     <div class="labelField" style="display: none;"></div>
-                                                    
+
                                                     <div class="option">
                                                         <div class="optionLabel">請選擇</div>
                                                         <select class="optionSelect queryField" name="queryField">
@@ -62,7 +62,7 @@
                                                 </td>
                                                 <td>
                                                     <div class="labelOp" style="display: none;"></div>
-                                                    
+
                                                     <div class="option">
                                                         <div class="optionLabel">請選擇</div>
                                                         <select class="optionSelect queryOp" name="queryOp">
@@ -71,7 +71,7 @@
                                                     </div>
                                                 </td>
                                                 <td style="text-align: left;" class='queryValueComponent'>
-                                                
+
                                                 	<!-- SelectList -->
                                                     <div class="option queryValueComponentSelectList" style="display: none;">
                                                         <div class="optionLabel">請選擇</div>
@@ -79,17 +79,17 @@
                                                             <option value="">請選擇</option>
                                                         </select>
                                                     </div>
-                                                    
+
                                                     <!-- Input -->
                                                     <div class="queryValueComponentInput" style="display: none;">
                                                     	<input class="queryValue" type="text" name="queryValue" value="" placeholder="請輸入"/>
                                                     </div>
-                                                    
+
                                                     <!-- DatePicker -->
                                                     <div class="option date queryValueComponentDatepicker" style="display: none;">
                                                     	<input class="datepicker queryValue" type="text" name="queryValue" placeholder="YYYY-MM-DD"/>
                                                     </div>
-                                                    
+
                                                     <div class="labelValue" style="display: none;"></div>
                                                 </td>
                                                 <td>

@@ -21,7 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -65,13 +64,13 @@ public class BCSSendGroupController extends BCSBaseController {
 	private GroupGenerateService groupGenerateService;
 	@Autowired
 	private ExportExcelUIService exportExcelUIService;
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSSendGroupController.class);
 
 	/**
 	 * 建立發送群組頁面
-	 * 
+	 *
 	 * @param request
 	 * @param response
 	 * @return
@@ -84,7 +83,7 @@ public class BCSSendGroupController extends BCSBaseController {
 
 	/**
 	 * 發送群組列表頁面
-	 * 
+	 *
 	 * @param request
 	 * @param response
 	 * @return
@@ -97,7 +96,7 @@ public class BCSSendGroupController extends BCSBaseController {
 
 	/**
 	 * 查詢發送群組列表
-	 * 
+	 *
 	 * @param request
 	 * @param response
 	 * @return List<SendGroup>
@@ -107,19 +106,19 @@ public class BCSSendGroupController extends BCSBaseController {
 	@RequestMapping(method = RequestMethod.GET, value = "/market/getSendGroupList")
 	@ResponseBody
 	public ResponseEntity<?> getSendGroupList(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser) throws IOException {
-		logger.info("getSendGroupList");		
+		logger.info("getSendGroupList");
 		List<SendGroup> result = sendGroupService.generateDefaultGroup();
-		
+
 		List<SendGroup> list = sendGroupService.findAll();
 		result.addAll(list);
-		
+
 		logger.debug("result:" + ObjectUtil.objectToJsonStr(result));
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
-	
+
 	/**
 	 * Get GroupId Title Map
 	 * @param request
@@ -134,7 +133,7 @@ public class BCSSendGroupController extends BCSBaseController {
 			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser) throws IOException {
-		logger.info("getSendGroupTitleList");		
+		logger.info("getSendGroupTitleList");
 		Map<Long, String> map = sendGroupService.findGroupTitleMap();
 		logger.debug("map:" + ObjectUtil.objectToJsonStr(map));
 		return new ResponseEntity<>(map, HttpStatus.OK);
@@ -142,7 +141,7 @@ public class BCSSendGroupController extends BCSBaseController {
 
 	/**
 	 * 取得發送群組
-	 * 
+	 *
 	 * @param request
 	 * @param response
 	 * @return
@@ -152,24 +151,24 @@ public class BCSSendGroupController extends BCSBaseController {
 	@RequestMapping(method = RequestMethod.GET, value = "/market/getSendGroup")
 	@ResponseBody
 	public ResponseEntity<?> getSendGroup(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser,
 			@RequestParam(required=false) String groupId
 			) throws IOException {
-		logger.info("getSendGroup");		
-		
+		logger.info("getSendGroup");
+
 		try{
 			if(StringUtils.isNotBlank(groupId)){
 				logger.info("groupId:" + groupId);
 				SendGroup sendGroup = sendGroupService.findOne(Long.parseLong(groupId));
-				
+
 				if(sendGroup != null){
 					logger.info("sendGroup1:" + sendGroup);
 					return new ResponseEntity<>(sendGroup, HttpStatus.OK);
 				}
 			}
-			
+
 			throw new Exception("Group Id Null");
 		}
 		catch(Exception e){
@@ -186,7 +185,7 @@ public class BCSSendGroupController extends BCSBaseController {
 
 	/**
 	 * 刪除發送群組
-	 * 
+	 *
 	 * @param request
 	 * @param response
 	 * @return
@@ -195,18 +194,18 @@ public class BCSSendGroupController extends BCSBaseController {
 	@ControllerLog(description="刪除發送群組")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/admin/deleteSendGroup")
 	@ResponseBody
-	public ResponseEntity<?> deleteSendGroup(			
-			HttpServletRequest request, 
+	public ResponseEntity<?> deleteSendGroup(
+			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser,
 			@RequestParam(required=false) String groupId) throws IOException {
 		logger.info("deleteSendGroup");
-	
+
 		try{
 			if(StringUtils.isNotBlank(groupId)){
 				logger.info("groupId:" + groupId);
 				sendGroupUIService.deleteFromUI(Long.parseLong(groupId), customUser.getAccount());
-				
+
 				return new ResponseEntity<>("Delete Success", HttpStatus.OK);
 			}
 			else{
@@ -227,7 +226,7 @@ public class BCSSendGroupController extends BCSBaseController {
 
 	/**
 	 * 新增或修改發送群組
-	 * 
+	 *
 	 * @param sendGroup
 	 * @param customUser
 	 * @param request
@@ -239,27 +238,27 @@ public class BCSSendGroupController extends BCSBaseController {
 	@RequestMapping(method = RequestMethod.POST, value = "/market/createSendGroup", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createSendGroup(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser,
-			@RequestBody SendGroup sendGroup			
+			@RequestBody SendGroup sendGroup
 			) throws IOException {
 		logger.info("createSendGroup");
-		
+
 		try{
 			if(sendGroup != null){
 				if(StringUtils.isBlank(sendGroup.getGroupTitle())){
 					throw new Exception("GroupTitle Null");
 				}
-				
+
 				if(StringUtils.isBlank(sendGroup.getGroupDescription())){
 					throw new Exception("GroupDescription Null");
 				}
-				
+
 				String adminUserAccount = customUser.getAccount();
-				
+
 				SendGroup result = sendGroupUIService.saveFromUI(sendGroup, adminUserAccount);
-				
+
 				return new ResponseEntity<>(result, HttpStatus.OK);
 			}else{
 				throw new Exception("SendGroup Null");
@@ -274,10 +273,10 @@ public class BCSSendGroupController extends BCSBaseController {
 			}
 		}
 	}
-	
+
 	/**
 	 * 取得群組條件各個下拉選項值
-	 * 
+	 *
 	 * @param request
 	 * @param response
 	 * @return
@@ -287,18 +286,18 @@ public class BCSSendGroupController extends BCSBaseController {
 	@RequestMapping(method = RequestMethod.GET, value = "/market/getSendGroupCondition")
 	@ResponseBody
 	public ResponseEntity<?> getSendGroupCondition(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser) throws IOException {
 		logger.info("getSendGroupCondition");
-		
+
 		try{
 			ObjectMapper objectMapper = new ObjectMapper();
 			ObjectNode sendGroupCondition = objectMapper.createObjectNode();
 			List<Object[]> sendGroupQueryList = userFieldSetService.getFieldKeyAndNameAndType();
-			
+
 			for (Object[] sendGroupQuery : sendGroupQueryList) {
-				
+
 				if(StringUtils.isBlank((String)sendGroupQuery[0])){
 					continue;
 				}
@@ -314,7 +313,7 @@ public class BCSSendGroupController extends BCSBaseController {
 				String queryFieldName = (String) sendGroupQuery[1];
 				String queryFieldFormat = (String) sendGroupQuery[2];
 				sendGroupQueryProperty
-					.putPOJO("queryFieldOp", 
+					.putPOJO("queryFieldOp",
 							(ArrayNode) objectMapper.valueToTree(GroupGenerateRepository.validQueryOp));
 				sendGroupQueryProperty.put("queryFieldId", queryFieldId);
 				sendGroupQueryProperty.put("queryFieldName", queryFieldName);
@@ -326,7 +325,7 @@ public class BCSSendGroupController extends BCSBaseController {
 				}
 				sendGroupCondition.putPOJO(queryFieldId, sendGroupQueryProperty);
 			}
-			
+
 			logger.info("sendGroupCondition1:"+sendGroupCondition);
 			return new ResponseEntity<>(sendGroupCondition, HttpStatus.OK);
 		}
@@ -339,10 +338,10 @@ public class BCSSendGroupController extends BCSBaseController {
 			}
 		}
 	}
-	
+
 	/**
 	 * 取得條件結果
-	 * 
+	 *
 	 * @param groupId
 	 * @param request
 	 * @param response
@@ -353,19 +352,19 @@ public class BCSSendGroupController extends BCSBaseController {
 	@RequestMapping(method = RequestMethod.POST, value = "/market/getSendGroupConditionResult", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> getSendGroupConditionResult(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser,
 			@RequestBody SendGroup sendGroup,
 			@RequestParam(required=false) String startDate,
 			@RequestParam(required=false) String endDate) throws IOException {
 		logger.info("getSendGroupConditionResult");
-		
+
 		try{
 			Long groupId = sendGroup.getGroupId() ;
 			if(groupId == null){
 				BigInteger result = groupGenerateService.findMIDCountBySendGroupDetail(sendGroup.getSendGroupDetail());
-				
+
 				logger.info("getSendGroupConditionResult Success");
 				return new ResponseEntity<>(result, HttpStatus.OK);
 			}
@@ -382,7 +381,7 @@ public class BCSSendGroupController extends BCSBaseController {
 					endDate = sdf.format(calendar.getTime());
 					logger.info("startDate:" + startDate);
 					logger.info("endDate:" + endDate);
-					
+
 					result= sendGroupService.countDefaultGroupSize(groupId, startDate, endDate);
 				}
 				else{
@@ -390,7 +389,7 @@ public class BCSSendGroupController extends BCSBaseController {
 				}
 				if(result != null){
 					logger.info("getSendGroupConditionResult Success");
-					
+
 					return new ResponseEntity<>(result, HttpStatus.OK);
 				}
 				else{
@@ -409,10 +408,10 @@ public class BCSSendGroupController extends BCSBaseController {
 			}
 		}
 	}
-	
+
 	/**
 	 * 取得條件結果
-	 * 
+	 *
 	 * @param groupId
 	 * @param request
 	 * @param response
@@ -423,13 +422,13 @@ public class BCSSendGroupController extends BCSBaseController {
 	@RequestMapping(method = RequestMethod.GET, value = "/market/getSendGroupQueryResult")
 	@ResponseBody
 	public ResponseEntity<?> getSendGroupQueryResult(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
-			@CurrentUser CustomUser customUser, 
+			@CurrentUser CustomUser customUser,
 			@RequestParam Long groupId
 			) throws IOException {
 		logger.info("getSendGroupQueryResult");
-		
+
 		try{
 
 			SendGroup sendGroup = sendGroupService.findOne(groupId);
@@ -443,7 +442,7 @@ public class BCSSendGroupController extends BCSBaseController {
 				try{
 					List<String> mids = groupGenerateService.findMIDBySendGroupDetailGroupId(groupId);
 					if(mids != null && mids.size() >0){
-	
+
 						return new ResponseEntity<>(mids.size(), HttpStatus.OK);
 					}
 				}
@@ -462,7 +461,7 @@ public class BCSSendGroupController extends BCSBaseController {
 					throw new Exception("SendGroup Send Error");
 				}
 			}
-			
+
 			return new ResponseEntity<>(0, HttpStatus.OK);
 		}
 		catch(Exception e){
@@ -481,7 +480,7 @@ public class BCSSendGroupController extends BCSBaseController {
 	@RequestMapping(method = RequestMethod.POST, value = "/market/uploadMidSendGroup")
 	@ResponseBody
 	public ResponseEntity<?> uploadMidSendGroup(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser,
 			@RequestPart MultipartFile filePart
@@ -490,13 +489,13 @@ public class BCSSendGroupController extends BCSBaseController {
 
 		try{
 			if(filePart != null){
-				
+
 				String modifyUser = customUser.getAccount();
 				logger.info("modifyUser:" + modifyUser);
-				
+
 				Map<String, Object> result = sendGroupUIService.uploadMidSendGroup(filePart, modifyUser, new Date());
 				logger.info("uploadMidSendGroupResult1:" + result);
-				
+
 				return new ResponseEntity<>(result, HttpStatus.OK);
 			}
 			else{
@@ -508,15 +507,15 @@ public class BCSSendGroupController extends BCSBaseController {
 			logger.info("uploadMidSendGroup Exception : " +  e.getMessage().toString());
 			if (e.getMessage().contains("RetrySaveUserEventSet"))
 			{
-				Map<String, Object> result = sendGroupUIService.RetrySaveUserEventSet();
+				Map<String, Object> result = sendGroupUIService.retrySaveUserEventSet();
 				logger.info("uploadMidSendGroupResult1:" + result);
-				
+
 				return new ResponseEntity<>(result, HttpStatus.OK);
 			}
 			else if (e.getMessage().contains("TimeOut")) {
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.SERVICE_UNAVAILABLE);
 			}
-			
+
 			logger.error(ErrorRecord.recordError(e));
 
 			if(e instanceof BcsNoticeException){
@@ -527,32 +526,32 @@ public class BCSSendGroupController extends BCSBaseController {
 			}
 		}
 	}
-	
+
 	private Map<String, SendGroup> tempSendGroupMap = new HashMap<String, SendGroup>();
-	
+
 	@ControllerLog(description="createSendGroupMidExcelTemp")
 	@RequestMapping(method = RequestMethod.POST, value = "/market/createSendGroupMidExcelTemp", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createSendGroupMidExcelTemp(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
-			@CurrentUser CustomUser customUser, 
+			@CurrentUser CustomUser customUser,
 			@RequestBody SendGroup sendGroup
 ) throws IOException {
 		logger.info("createSendGroupMidExcelTemp");
-		
+
 		try{
 			Long groupId = sendGroup.getGroupId() ;
 			if(groupId == null){
 				BigInteger count = groupGenerateService.findMIDCountBySendGroupDetail(sendGroup.getSendGroupDetail());
-				
+
 				Map<String, Object> result = new HashMap<String, Object>();
 				result.put("count", count);
-				
+
 				String tempId = UUID.randomUUID().toString().toLowerCase();
 				tempSendGroupMap.put(tempId, sendGroup);
 				result.put("tempId", tempId);
-				
+
 				logger.info("createSendGroupMidExcelTemp Success");
 				return new ResponseEntity<>(result, HttpStatus.OK);
 			}
@@ -562,12 +561,12 @@ public class BCSSendGroupController extends BCSBaseController {
 				if(count != null){
 					Map<String, Object> result = new HashMap<String, Object>();
 					result.put("count", count);
-					
+
 					logger.info("createSendGroupMidExcelTemp Success");
-					
+
 					tempSendGroupMap.put(groupId + "", sendGroup);
 					result.put("tempId", groupId + "");
-					
+
 					return new ResponseEntity<>(result, HttpStatus.OK);
 				}
 				else{
@@ -586,7 +585,7 @@ public class BCSSendGroupController extends BCSBaseController {
 			}
 		}
 	}
-	
+
 	@ControllerLog(description="exportToExcelForSendGroup")
 	@RequestMapping(method = RequestMethod.GET, value = "/market/exportToExcelForSendGroup")
 	@ResponseBody
@@ -596,14 +595,14 @@ public class BCSSendGroupController extends BCSBaseController {
 			@CurrentUser CustomUser customUser,
 			@RequestParam String tempId) throws Exception {
 		logger.info("exportToExcelForSendGroup");
-		
+
 		SendGroup sendGroup = tempSendGroupMap.get(tempId);
 
 		if(sendGroup == null){
 
 			throw new Exception("SendGroup Error");
 		}
-		
+
 		Long groupId = sendGroup.getGroupId();
 
 		// 行銷人員設定 群組
@@ -616,12 +615,12 @@ public class BCSSendGroupController extends BCSBaseController {
 					titles.add("MID");
 					List<List<String>> data = new ArrayList<List<String>>();
 					data.add(mids);
-					
+
 					String title = "SendGroup";
 					if(StringUtils.isNotBlank(sendGroup.getGroupTitle())){
 						title += ":" + sendGroup.getGroupTitle();
 					}
-					
+
 					exportExcelUIService.exportMidResultToExcel(request, response, "SendGroup", title , null, titles, data);
 				}
 			}
@@ -633,7 +632,7 @@ public class BCSSendGroupController extends BCSBaseController {
 		// 預設群祖
 		else if(groupId < 0){
 			List<String> mids = new ArrayList<String>();
-			
+
 			int page = 0;
 			while(true){
 				List<String> list = sendGroupService.queryDefaultGroup(groupId, page);
@@ -646,7 +645,7 @@ public class BCSSendGroupController extends BCSBaseController {
 				}
 				page++;
 			}
-			
+
 			if(mids != null && mids.size() >0){
 
 				List<String> titles = new ArrayList<String>();

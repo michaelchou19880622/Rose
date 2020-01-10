@@ -15,6 +15,7 @@ import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 
 import com.bcs.core.json.AbstractBcsEntity;
+import lombok.EqualsAndHashCode;
 
 @SqlResultSetMapping(name = "MsgMainDetails", entities = {
 		@EntityResult(entityClass = MsgMain.class),
@@ -33,6 +34,7 @@ indexes = {
 	       @Index(name = "INDEX_0", columnList = "SEND_TYPE"),
 	       @Index(name = "INDEX_1", columnList = "STATUS"),
 	})
+@EqualsAndHashCode(callSuper = false)
 public class MsgMain extends AbstractBcsEntity {
 	private static final long serialVersionUID = 1L;
 	public static final String THIS_PARENT_TYPE = "BCS_MSG_MAIN";
@@ -50,7 +52,7 @@ public class MsgMain extends AbstractBcsEntity {
 	public static final String SENDING_MSG_SCHEDULED_TYPE_EVERY_MONTH = "EveryMonth";
 	public static final String SENDING_MSG_SCHEDULED_TYPE_EVERY_WEEK = "EveryWeek";
 	public static final String SENDING_MSG_SCHEDULED_TYPE_EVERY_DAY = "EveryDay";
-	
+
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name = "MSG_ID")
@@ -162,5 +164,5 @@ public class MsgMain extends AbstractBcsEntity {
 	public void setSerialId(String serialId) {
 		this.serialId = serialId;
 	}
-	
+
 }

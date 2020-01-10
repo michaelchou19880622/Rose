@@ -1,33 +1,35 @@
 package com.bcs.core.taishin.circle.akka.handler;
 
-import org.apache.log4j.Logger;
-
+import akka.actor.UntypedActor;
 import com.bcs.core.spring.ApplicationContextProvider;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeDetail;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeMain;
 import com.bcs.core.taishin.circle.service.BillingNoticeService;
-
-import akka.actor.UntypedActor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 宵禁中 狀態改為retry
- * @author jessie
  *
+ * @author jessie
  */
+@Slf4j
 public class BillingNoticeCurfewActor extends UntypedActor {
-	private static Logger logger = Logger.getLogger(BillingNoticeCurfewActor.class);
-	@Override
-	public void onReceive(Object object) throws Exception {
-		if(object instanceof BillingNoticeMain) {
-			BillingNoticeService billingNoticeService = ApplicationContextProvider.getApplicationContext().getBean(BillingNoticeService.class);
-			BillingNoticeMain billingNoticeMain = (BillingNoticeMain) object;
-			// 宵禁中 狀態改為retry
-			for (BillingNoticeDetail detail : billingNoticeMain.getDetails()) {
-				detail.setStatus(BillingNoticeMain.NOTICE_STATUS_RETRY);
-				logger.info("Curfew NOTICE_STATUS_RETRY NoticeDetailId:" + detail.getNoticeDetailId());
-				billingNoticeService.save(detail);
-			}
-			return;
-		}
-	}
+    @Override
+    public void onReceive(Object object) throws Exception {
+        Thread.currentThread().setName("Actor-BN-Curfew-" + Thread.currentThread().getId());
+        log.info("Curfew Actor Receive!!");
+
+        if (object instanceof BillingNoticeMain) {
+            methodA((BillingNoticeMain) object);
+        }
+    }
+
+    private void methodA(BillingNoticeMain object) {
+        BillingNoticeService billingNoticeService = ApplicationContextProvider.getApplicationContext().getBean(BillingNoticeService.class);
+        for (BillingNoticeDetail detail : object.getDetails()) {
+            detail.setStatus(BillingNoticeMain.NOTICE_STATUS_RETRY);
+            log.info("Curfew NOTICE_STATUS_RETRY NoticeDetailId:" + detail.getNoticeDetailId());
+            billingNoticeService.save(detail);
+        }
+    }
 }

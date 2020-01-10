@@ -1,50 +1,40 @@
 package com.bcs.core.db.service;
 
-import java.math.BigInteger;
-import java.util.List;
-
+import com.bcs.core.db.entity.SendGroupDetail;
+import com.bcs.core.db.repository.GroupGenerateRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.bcs.core.akka.service.AkkaCoreService;
-import com.bcs.core.db.entity.SendGroupDetail;
-import com.bcs.core.db.repository.GroupGenerateRepository;
+import java.math.BigInteger;
+import java.util.List;
 
+@Slf4j
 @Service
 public class GroupGenerateService {
-	
-	/** Logger */
-	private static Logger logger = Logger.getLogger(GroupGenerateService.class);
-	@Autowired
-	private AkkaCoreService akkaService;
-	@Autowired
-	private GroupGenerateRepository groupGenerateRepository;
 
-	public BigInteger findMIDCountBySendGroupDetail(List<SendGroupDetail> sendGroupDetails) throws Exception {
-		logger.debug("findMIDCountBySendGroupDetail");
-		return groupGenerateRepository.findMIDCountBySendGroupDetail(sendGroupDetails);
-	}
+    @Autowired
+    private GroupGenerateRepository groupGenerateRepository;
 
-	public List<String> findMIDBySendGroupDetailGroupId(Long groupId) throws Exception{
-		logger.debug("findMIDBySendGroupDetailGroupId");
-		return groupGenerateRepository.findMIDBySendGroupDetailGroupId(groupId);
-	}
-	
-	public Boolean checkMIDBySendGroupDetailGroupId(Long groupId, String mid) throws Exception{
-		String result = groupGenerateRepository.checkMIDBySendGroupDetailGroupId(groupId, mid);
-		logger.info("checkMIDBySendGroupDetailGroupId:" + result);
-		if(StringUtils.isBlank(result)){
-			return false;
-		}
-		else{
-			return true;
-		}
-	}
+    public BigInteger findMIDCountBySendGroupDetail(List<SendGroupDetail> sendGroupDetails) throws Exception {
+        log.debug("findMIDCountBySendGroupDetail");
+        return groupGenerateRepository.findMIDCountBySendGroupDetail(sendGroupDetails);
+    }
 
-	public List<String> findMIDBySendGroupDetail(List<SendGroupDetail> sendGroupDetails) throws Exception{
-		logger.debug("findMIDBySendGroupDetail");
-		return groupGenerateRepository.findMIDBySendGroupDetail(sendGroupDetails);
-	}
+    public List<String> findMIDBySendGroupDetailGroupId(Long groupId) throws Exception {
+        log.debug("findMIDBySendGroupDetailGroupId");
+        return groupGenerateRepository.findMIDBySendGroupDetailGroupId(groupId);
+    }
+
+    public Boolean checkMIDBySendGroupDetailGroupId(Long groupId, String mid) throws Exception {
+        String result = groupGenerateRepository.checkMIDBySendGroupDetailGroupId(groupId, mid);
+        log.info("checkMIDBySendGroupDetailGroupId:" + result);
+		return !StringUtils.isBlank(result);
+    }
+
+    public List<String> findMIDBySendGroupDetail(List<SendGroupDetail> sendGroupDetails) throws Exception {
+        log.debug("findMIDBySendGroupDetail");
+        return groupGenerateRepository.findMIDBySendGroupDetail(sendGroupDetails);
+    }
 }

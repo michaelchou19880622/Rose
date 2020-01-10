@@ -18,6 +18,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * System Log Service
+ *
+ * @author Alan
+ */
 @Slf4j
 @Service
 public class SystemLogService {
@@ -27,9 +32,13 @@ public class SystemLogService {
 
     private ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1,
             new BasicThreadFactory.Builder()
-                    .namingPattern("PNP-BC-Scheduled-%d")
+                    .namingPattern("SysLog-Clean-Scheduled-%d")
                     .daemon(true).build()
     );
+
+    public SystemLogService(SystemLogRepository systemLogRepository) {
+        this.systemLogRepository = systemLogRepository;
+    }
 
     public void save(SystemLog systemLog) {
         systemLogRepository.save(systemLog);
@@ -83,8 +92,7 @@ public class SystemLogService {
 
     public void deleteLogByRange(int scheduleTime, TimeUnit unit, int deleteRangeDay) {
         scheduler.scheduleAtFixedRate(() -> {
-            Thread.currentThread().setName("System-Log-Clean-Scheduled-" + Thread.currentThread().getId());
-            log.info("Find Expired System Log!!");
+            log.info("Search Expired System Log!!");
             List<SystemLog> expiredLogList = systemLogRepository.findTop10ByModifyTimeBefore(DateUtils.addDays(new Date(), -deleteRangeDay));
             if (CollectionUtils.isNotEmpty(expiredLogList)) {
                 log.info("Start Clean!! Size:{}", expiredLogList.size());

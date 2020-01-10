@@ -27,6 +27,7 @@ import com.bcs.core.taishin.circle.PNP.ftp.PNPFtpSetting;
 import com.bcs.core.utils.DataUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -1295,7 +1296,11 @@ public class PnpSMSMsgService {
             return;
         }
         PNPFtpSetting setting = pnpFtpService.getFtpSettings(source);
-
+        if (StringUtils.isBlank(setting.getAccount())
+                || StringUtils.isBlank(setting.getPassword())) {
+            log.error("FTP account or password is blank!!");
+            return;
+        }
         log.info("Upload File Name" + fileName);
 
         try {

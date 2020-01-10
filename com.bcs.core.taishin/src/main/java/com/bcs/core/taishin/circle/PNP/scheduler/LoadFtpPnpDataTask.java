@@ -248,7 +248,12 @@ public class LoadFtpPnpDataTask {
 
         // 跟據來源不同取各自連線資訊
         PNPFtpSetting pnpFtpSetting = pnpFtpService.getFtpSettings(source);
-        log.info("FTP Setting:\n" + DataUtils.toPrettyJsonUseJackson(pnpFtpSetting));
+        //log.info("FTP Setting:\n" + DataUtils.toPrettyJsonUseJackson(pnpFtpSetting));
+        if (StringUtils.isBlank(pnpFtpSetting.getAccount())
+                || StringUtils.isBlank(pnpFtpSetting.getPassword())) {
+            log.error("FTP account or password is blank!!");
+            return;
+        }
         try {
             /* 至FTP取得資料 */
             Map<String, byte[]> returnDataMap = pnpFtpService.downloadMultipleFileByType(pnpFtpSetting.getPath(), "TXT", pnpFtpSetting);
@@ -354,6 +359,11 @@ public class LoadFtpPnpDataTask {
 
         log.info("start transfer File To SMS path");
         PNPFtpSetting pnpFtpSetting = pnpFtpService.getFtpSettings(source);
+        if (StringUtils.isBlank(pnpFtpSetting.getAccount())
+                || StringUtils.isBlank(pnpFtpSetting.getPassword())) {
+            log.error("FTP account or password is blank!!");
+            return;
+        }
         try {
             // 1. ftp get file
             Map<String, byte[]> returnDataMap = pnpFtpService.downloadMultipleFileByType(pnpFtpSetting.getPath(), "txt", pnpFtpSetting);
@@ -1365,7 +1375,11 @@ public class LoadFtpPnpDataTask {
         log.info("start uploadFileToSMS ");
 
         PNPFtpSetting setting = pnpFtpService.getFtpSettings(source);
-
+        if (StringUtils.isBlank(setting.getAccount())
+                || StringUtils.isBlank(setting.getPassword())) {
+            log.error("FTP account or password is blank!!");
+            return;
+        }
         log.info(" fileName...." + fileName);
 
         try {

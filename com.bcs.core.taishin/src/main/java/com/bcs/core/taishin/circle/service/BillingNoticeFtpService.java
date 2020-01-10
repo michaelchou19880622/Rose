@@ -96,6 +96,9 @@ public class BillingNoticeFtpService {
         try {
             List<FtpSetting> ftpSettingList = ftpService.getFtpSettings();
             Map<String, byte[]> lReturnDataMap = downloadFtpFile(fileExtension, ftpSettingList);
+            if (lReturnDataMap.isEmpty()) {
+                return;
+            }
             saveObjToDb(parseDataToObj(downloadSavePath, lReturnDataMap, ftpSettingList));
             removeFtpFileProcess(lReturnDataMap, ftpSettingList);
         } catch (Exception e) {
@@ -113,9 +116,14 @@ public class BillingNoticeFtpService {
     private Map<String, byte[]> downloadFtpFile(String fileExtension, List<FtpSetting> ftpSettingList) {
         Map<String, byte[]> map = new HashMap<>();
         for (FtpSetting ftpSetting : ftpSettingList) {
-            log.info("Ftp Setting:\n{}", DataUtils.toPrettyJsonUseJackson(ftpSetting));
+            //log.info("Ftp Setting:\n{}", DataUtils.toPrettyJsonUseJackson(ftpSetting));
             ftpSetting.clearFileNames();
 
+            if (StringUtils.isBlank(ftpSetting.getAccount())
+                    || StringUtils.isBlank(ftpSetting.getPassword())) {
+                log.error("FTP account or password is blank!!");
+                continue;
+            }
             Map<String, byte[]> returnDataMap = ftpService.downloadMultipleFileByType(ftpSetting.getPath(), fileExtension, ftpSetting);
             map.putAll(returnDataMap);
 

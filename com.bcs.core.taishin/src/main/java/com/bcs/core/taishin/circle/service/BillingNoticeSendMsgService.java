@@ -40,7 +40,7 @@ public class BillingNoticeSendMsgService {
     private BillingNoticeContentTemplateMsgActionRepository billingNoticeContentTemplateMsgActionRepository;
     private ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1,
             new BasicThreadFactory.Builder()
-                    .namingPattern("Billing-Notice-Send-Scheduled-%d")
+                    .namingPattern("BN-Send-Scheduled-%d")
                     .daemon(true).build()
     );
     private ScheduledFuture<?> scheduledFuture = null;

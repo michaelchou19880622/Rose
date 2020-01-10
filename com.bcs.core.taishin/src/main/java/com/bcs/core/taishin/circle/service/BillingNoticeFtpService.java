@@ -48,7 +48,7 @@ public class BillingNoticeFtpService {
     private FtpService ftpService;
     private ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1,
             new BasicThreadFactory.Builder()
-                    .namingPattern("Billing-Notice-FTP-Scheduled-%d")
+                    .namingPattern("BN-FTP-Scheduled-%d")
                     .daemon(true).build()
     );
 

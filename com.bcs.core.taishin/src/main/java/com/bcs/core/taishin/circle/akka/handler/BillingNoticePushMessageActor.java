@@ -21,6 +21,8 @@ public class BillingNoticePushMessageActor extends UntypedActor {
 
     @Override
     public void onReceive(Object object) {
+        Thread.currentThread().setName("Actor-BN-Push-" + Thread.currentThread().getId());
+        log.info("Push Actor Receive!!");
         try {
             BillingNoticeMain billingNoticeMain = (BillingNoticeMain) object;
             switch (billingNoticeMain.getSendType()) {

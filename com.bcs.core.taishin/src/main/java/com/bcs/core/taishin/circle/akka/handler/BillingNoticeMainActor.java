@@ -35,6 +35,8 @@ public class BillingNoticeMainActor extends UntypedActor {
 
     @Override
     public void onReceive(final Object object) {
+        Thread.currentThread().setName("Actor-BN-Main-" + Thread.currentThread().getId());
+        log.info("Main Actor Receive!!");
         try {
             if (object instanceof BillingNoticeMain) {
                 pushRoute((BillingNoticeMain) object);

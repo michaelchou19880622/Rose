@@ -20,7 +20,7 @@ import java.util.Date;
  * STAGE = BC
  * @see PnpMainActor#PnpMainActor()
  */
-@Slf4j
+@Slf4j(topic = "PnpRecorder")
 public class PnpPushMessageActor extends UntypedActor {
 
     @Override

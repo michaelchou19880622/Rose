@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Kenneth
  */
-@Slf4j
+@Slf4j(topic = "PnpRecorder")
 @Service
 public class PnpPushMsgService {
 

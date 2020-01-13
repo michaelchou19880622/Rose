@@ -33,7 +33,7 @@ import java.util.Set;
 /**
  * @author ???
  */
-@Slf4j
+@Slf4j(topic = "PnpRecorder")
 @Repository
 public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     @PersistenceContext

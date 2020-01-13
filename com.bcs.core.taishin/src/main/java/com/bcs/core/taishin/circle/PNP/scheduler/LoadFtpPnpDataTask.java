@@ -78,7 +78,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author ???
  * @see com.bcs.web.init.controller.InitController#init()
  */
-@Slf4j
+@Slf4j(topic = "PnpRecorder")
 @Service
 public class LoadFtpPnpDataTask {
 

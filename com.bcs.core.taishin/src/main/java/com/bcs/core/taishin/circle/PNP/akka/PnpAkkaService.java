@@ -18,7 +18,7 @@ import java.util.Random;
  * @author ???
  * @see com.bcs.core.taishin.circle.PNP.service.PnpService#pushLineMessage
  */
-@Slf4j
+@Slf4j(topic = "PnpRecorder")
 @Service
 public class PnpAkkaService {
     private List<ActorSystem> actorSystemList = new ArrayList<>();

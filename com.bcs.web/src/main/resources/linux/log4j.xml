@@ -14,47 +14,61 @@
     </appender>
     <!-- ALL File -->
     <appender name="Appender1" class="org.apache.log4j.RollingFileAppender">
-        <param name="File" value="/bcs/log/taishin.${yyyy-mm-dd}.log"/>
+        <param name="File" value="/opt/taishin-log/taishin.log"/>
         <param name="Append" value="true"/>
-        <param name="MaxBackupIndex" value="50"/>
-        <param name="MaxFileSize" value="100MB"/>
+        <param name="MaxBackupIndex" value="200"/>
+        <param name="MaxFileSize" value="100KB"/>
         <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss.SSS} %-5p [%-4L] %-30.30C{1} %-35M [%-27t] - %m%n}"/>
+            <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss.SSS} %-5p [%-4L] %-30.30C{1} %-35M [%-27t] - %m%n"/>
         </layout>
         <filter class="org.apache.log4j.varia.LevelRangeFilter">
             <param name="levelMin" value="INFO"/>
             <param name="levelMax" value="ERROR"/>
         </filter>
         <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
-            <param name="FileNamePattern" value="/bcs/log/taishin.${yyyy-mm-dd}.log.gz"/>
+            <!-- 上下午壓縮一次 -->
+            <param name="FileNamePattern" value="/opt/taishin-log/taishin.${yyyy-mm-dd-a}.log.gz"/>
         </rollingPolicy>
     </appender>
     <!-- ERROR File -->
     <appender name="Appender2" class="org.apache.log4j.RollingFileAppender">
-        <param name="File" value="/bcs/log/taishin.error.${yyyy-mm-dd}.log"/>
+        <param name="File" value="/opt/taishin-log/taishin.error.log"/>
         <param name="Append" value="true"/>
-        <param name="MaxBackupIndex" value="50"/>
-        <param name="MaxFileSize" value="100MB"/>
+        <param name="MaxBackupIndex" value="200"/>
+        <param name="MaxFileSize" value="100KB"/>
         <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss.SSS} %-5p [%-4L] %-30.30C{1} %-35M [%-27t] - %m%n}"/>
+            <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss.SSS} %-5p [%-4L] %-30.30C{1} %-35M [%-27t] - %m%n"/>
         </layout>
         <filter class="org.apache.log4j.varia.LevelRangeFilter">
             <param name="levelMin" value="ERROR"/>
             <param name="levelMax" value="ERROR"/>
         </filter>
+        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
+            <!-- 上下午壓縮一次 -->
+            <param name="FileNamePattern" value="/opt/taishin-log/taishin.${yyyy-mm-dd-a}.log.gz"/>
+        </rollingPolicy>
     </appender>
     <!-- PNP -->
     <appender name="PNP" class="org.apache.log4j.RollingFileAppender">
-        <param name="File" value="/bcs/log/taishin.pnp.${yyyy-mm-dd}.log"/>
+        <param name="File" value="/opt/taishin-log/taishin.pnp.log"/>
         <param name="Append" value="true"/>
-        <param name="MaxBackupIndex" value="50"/>
-        <param name="MaxFileSize" value="100MB"/>
+<!--        <param name="MaxBackupIndex" value="200"/>-->
+<!--        <param name="MaxFileSize" value="100KB"/>-->
         <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss.SSS} %-5p [%-4L] %-30.30C{1} %-35M [%-27t] - %m%n}"/>
+            <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss.SSS} %-5p [%-4L] %-30.30C{1} %-35M [%-27t] - %m%n"/>
         </layout>
+        <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <param name="levelMin" value="INFO"/>
+            <param name="levelMax" value="ERROR"/>
+        </filter>
         <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
-            <param name="FileNamePattern" value="/bcs/log/taishin.pnp.${yyyy-mm-dd}.log.gz"/>
+            <!-- 上下午壓縮一次 -->
+            <param name="FileNamePattern" value="/opt/taishin-log/taishin.pnp.${yyyy-mm-dd-HH}.log.gz"/>
         </rollingPolicy>
+        <triggeringPolicy
+                class="org.apache.log4j.rolling.SizeBasedTriggeringPolicy">
+            <param name="MaxFileSize" value="100KB" />
+        </triggeringPolicy>
     </appender>
     <!--使用Logger.getLogger("XXX")獲得此輸出器，且不會使用根輸出器-->
     <logger name="PnpRecorder" additivity="false">
@@ -65,6 +79,5 @@
         <appender-ref ref="console"/>
         <appender-ref ref="Appender1"/>
         <appender-ref ref="Appender2"/>
-        <appender-ref ref="PNP"/>
     </root>
 </log4j:configuration>

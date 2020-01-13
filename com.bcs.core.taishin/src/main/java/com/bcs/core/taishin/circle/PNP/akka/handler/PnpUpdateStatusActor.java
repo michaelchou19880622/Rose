@@ -20,7 +20,7 @@ import java.util.List;
  * @author jessie
  * @see PnpMainActor
  */
-@Slf4j
+@Slf4j(topic = "PnpRecorder")
 public class PnpUpdateStatusActor extends UntypedActor {
     private static Logger logger = Logger.getLogger(PnpUpdateStatusActor.class);
 

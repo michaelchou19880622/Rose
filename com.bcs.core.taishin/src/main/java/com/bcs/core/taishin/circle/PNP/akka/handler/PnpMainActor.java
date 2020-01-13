@@ -17,7 +17,7 @@ import java.util.List;
  * @author ???
  * @see com.bcs.core.taishin.circle.PNP.akka.PnpAkkaService
  */
-@Slf4j
+@Slf4j(topic = "PnpRecorder")
 public class PnpMainActor extends UntypedActor {
     /**
      * BC Actor

@@ -19,7 +19,7 @@ import java.util.Date;
  * STAGE = PNP
  * @see PnpMainActor#onReceive
  */
-@Slf4j
+@Slf4j(topic = "PnpRecorder")
 public class PnpMessageActor extends UntypedActor {
 
     @Override

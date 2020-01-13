@@ -119,6 +119,7 @@ public class BillingNoticeSendMsgService {
     public List<BillingNoticeMain> sendingBillingNoticeMain(String procApName) {
         List<String> templateIdList = billingNoticeService.findProductSwitchOnTemplateId();
         if (templateIdList == null || templateIdList.isEmpty()) {
+            log.info("Template Id List Is Empty!!");
             return Collections.emptyList();
         }
 
@@ -128,6 +129,7 @@ public class BillingNoticeSendMsgService {
         List<BillingNoticeDetail> allDetails = (List<BillingNoticeDetail>) returnArray[1];
 
         if (allMainIdSet.isEmpty()) {
+            log.info("Main Id Set Is Empty!!");
             return Collections.emptyList();
         }
 
@@ -135,7 +137,7 @@ public class BillingNoticeSendMsgService {
         //組裝資料
         for (Long mainId : allMainIdSet) {
             BillingNoticeMain bnMain = billingNoticeMainRepository.findOne(mainId);
-            log.info("sendingBillingNoticeMain handle Main:" + bnMain.getOrigFileName());
+            log.info("Original File Name: {}", bnMain.getOrigFileName());
             List<BillingNoticeDetail> details = new ArrayList<>();
             for (BillingNoticeDetail detail : allDetails) {
                 if (detail.getNoticeMainId().longValue() == mainId.longValue()) {

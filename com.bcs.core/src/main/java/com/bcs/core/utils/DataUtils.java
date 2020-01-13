@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.gson.GsonBuilder;
 
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 
 import lombok.experimental.UtilityClass;
@@ -50,7 +51,6 @@ public class DataUtils {
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
             return mapper.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
-            log.error("JsonProcessingException : {}", e.getMessage());
             return obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode());
         }
     }
@@ -69,7 +69,6 @@ public class DataUtils {
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
             return mapper.writeValueAsString(jsonObject);
         } catch (Exception e) {
-            log.error("JsonProcessingException : {}", e.getMessage());
             return "";
         }
     }

@@ -253,7 +253,7 @@ public class BillingNoticeService {
     }
 
     public void pushLineMessage(BillingNoticeMain billingNoticeMain, ActorRef sendRef, ActorRef selfActorRef) {
-
+        log.info("Push Line Message!!");
         String url = CoreConfigReader.getString(CONFIG_STR.LINE_MESSAGE_PUSH_URL.toString());
         String accessToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelToken.toString(), true);
         String serviceCode = CoreConfigReader.getString(CONFIG_STR.AutoReply.toString(), CONFIG_STR.ChannelServiceCode.toString(), true);
@@ -272,22 +272,25 @@ public class BillingNoticeService {
         }
 
         for (BillingNoticeDetail detail : billingNoticeMain.getDetails()) {
+            log.info("To Line Uid: {}", detail.getUid());
+
             JSONObject requestBody = new JSONObject();
             requestBody.put("to", detail.getUid());
             requestBody.put("messages", combineLineMessage(templateMsg, detail));
-
             HttpEntity<String> httpEntity = new HttpEntity<>(requestBody.toString(), headers);
 
             try {
                 RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
-                restfulUtil.execute();
+                JSONObject result = restfulUtil.execute();
+                log.info("Result: {}", result.toString());
                 detail.setStatus(BillingNoticeMain.NOTICE_STATUS_COMPLETE);
+                log.info("Execute Success!!");
             } catch (KeyManagementException | NoSuchAlgorithmException e1) {
                 log.info("NOTICE_STATUS_RETRY NoticeDetailId:" + detail.getNoticeDetailId());
-                log.error("NOTICE_STATUS_RETRY KeyManagementException | NoSuchAlgorithmException: {}", e1.getMessage());
+                log.error("NOTICE_STATUS_RETRY KeyManagementException | NoSuchAlgorithmException: ", e1);
                 detail.setStatus(BillingNoticeMain.NOTICE_STATUS_RETRY);
             } catch (HttpClientErrorException he) {
-                log.error("HttpClientErrorException: {}", he.getMessage());
+                log.error("HttpClientErrorException:", he);
                 JSONObject errorMessage = new JSONObject(he.getResponseBodyAsString());
                 if (errorMessage.has("message")) {
                     log.error("HttpClientErrorException StatusCode: {}", he.getStatusCode().toString());
@@ -296,7 +299,7 @@ public class BillingNoticeService {
                     }
                 }
             } catch (HttpServerErrorException se) {
-                log.error("HttpServerErrorException Error : {}", se.getMessage());
+                log.error("HttpServerErrorException Error :", se);
                 JSONObject errorMessage = new JSONObject(se.getResponseBodyAsString());
                 if (errorMessage.has("message")) {
                     log.error("HttpServerErrorException StatusCode: {}", se.getStatusCode().toString());
@@ -307,7 +310,7 @@ public class BillingNoticeService {
                 detail.setStatus(BillingNoticeMain.NOTICE_STATUS_RETRY);
             } catch (Exception e) {
                 log.info("NOTICE_STATUS_RETRY NoticeDetailId:" + detail.getNoticeDetailId());
-                log.error("NOTICE_STATUS_RETRY Exception:" + e.getMessage());
+                log.error("NOTICE_STATUS_RETRY Exception:", e);
                 detail.setStatus(BillingNoticeMain.NOTICE_STATUS_RETRY);
             }
 

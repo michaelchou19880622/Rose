@@ -18,6 +18,8 @@ import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailReportParam;
 import com.bcs.core.taishin.circle.db.service.OracleService;
 import com.bcs.core.utils.DataUtils;
 
+import com.bcs.core.web.security.CurrentUser;
+import com.bcs.core.web.security.CustomUser;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -50,7 +52,8 @@ public class PnpReportService {
      * @return PnpDetailReport List
      */
     @SuppressWarnings("unchecked")
-    public List<PnpDetailReport> getPnpDetailReportList(final PnpDetailReportParam pnpDetailReportParam) {
+    public List<PnpDetailReport> getPnpDetailReportList(@CurrentUser CustomUser customUser, final PnpDetailReportParam pnpDetailReportParam) {
+        pnpDetailReportParam.setRole(customUser.getRole());
         Query query = entityManager.createNativeQuery(getDetailReportSql(pnpDetailReportParam).toString(), PnpDetailReport.class);
         List<PnpDetailReport> pnpDetailReportList = query.getResultList();
         log.info(DataUtils.toPrettyJsonUseJackson(pnpDetailReportList));
@@ -315,7 +318,7 @@ public class PnpReportService {
         }
 
         /* 檢查權限 */
-        sb.append(oracleService.getAvailableEmpIdsByEmpId(employeeId));
+        sb.append(oracleService.getAvailableEmpIdsByEmpId(employeeId, pnpDetailReportParam.getRole()));
 
         /* 依照建立時間反序 */
         if (isCreateTime) {

@@ -18,16 +18,20 @@ public class BillingNoticeTask implements Job {
 
     @Override
     public void execute(JobExecutionContext context) {
-
+        log.info("Task Execute!!");
         try {
             BillingNoticeMain billingNoticeMain = (BillingNoticeMain) context.getScheduler().getContext().get("BillingNoticeMain");
             if (DataUtils.isPast(billingNoticeMain.getExpiryTime())) {
+                log.info("Update Status Fail And Email!!");
                 billingNoticeService.updateStatusFailAndEmail(billingNoticeMain);
             } else {
+                log.info("Push Line Message!!");
                 billingNoticeService.pushLineMessage(billingNoticeMain, null, null);
             }
-        } catch (SchedulerException e) {
-            log.error(e.getMessage());
+        } catch (SchedulerException se) {
+            log.error(se.getMessage());
+        } catch (Exception e) {
+            log.error("Exception", e);
         }
     }
 }

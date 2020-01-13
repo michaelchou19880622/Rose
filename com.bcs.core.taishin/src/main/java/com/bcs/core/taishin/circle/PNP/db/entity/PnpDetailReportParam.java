@@ -16,7 +16,7 @@ import lombok.Setter;
 public class PnpDetailReportParam {
     public static final String CREATE_TIME = "createTime";
     public static final String ORDER_TIME = "orderTime";
-    
+
     private String dateType = CREATE_TIME;
     private Date startDate;
     private Date endDate;
@@ -27,4 +27,5 @@ public class PnpDetailReportParam {
     private String sourceSystem;
     private String employeeId;
     private String phone;
+    private String role;
 }

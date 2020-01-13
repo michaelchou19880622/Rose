@@ -27,7 +27,7 @@
         </filter>
         <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
             <!-- 上下午壓縮一次 -->
-            <param name="FileNamePattern" value="/opt/taishin-log/taishin.${yyyy-mm-dd-a}.log.gz"/>
+            <param name="FileNamePattern" value="/opt/taishin-log/taishin.%d{yyyy-mm-dd-HH}.log.gz"/>
         </rollingPolicy>
     </appender>
     <!-- ERROR File -->
@@ -45,7 +45,7 @@
         </filter>
         <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
             <!-- 上下午壓縮一次 -->
-            <param name="FileNamePattern" value="/opt/taishin-log/taishin.${yyyy-mm-dd-a}.log.gz"/>
+            <param name="FileNamePattern" value="/opt/taishin-log/taishin.error.%d{yyyy-mm-dd-HH}.log.gz"/>
         </rollingPolicy>
     </appender>
     <!-- PNP -->
@@ -63,12 +63,8 @@
         </filter>
         <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
             <!-- 上下午壓縮一次 -->
-            <param name="FileNamePattern" value="/opt/taishin-log/taishin.pnp.${yyyy-mm-dd-HH}.log.gz"/>
+            <param name="FileNamePattern" value="/opt/taishin-log/taishin.pnp.%d{yyyy-mm-dd-HH}.log.gz"/>
         </rollingPolicy>
-        <triggeringPolicy
-                class="org.apache.log4j.rolling.SizeBasedTriggeringPolicy">
-            <param name="MaxFileSize" value="100KB" />
-        </triggeringPolicy>
     </appender>
     <!--使用Logger.getLogger("XXX")獲得此輸出器，且不會使用根輸出器-->
     <logger name="PnpRecorder" additivity="false">

@@ -131,9 +131,9 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
      */
     @SuppressWarnings("unchecked")
     @Transactional(rollbackFor = Exception.class)
-    private Long findAndUpdateFirstRetryDetailOnMain(String procApName, List<String> tempIds) {
+    public Long findAndUpdateFirstRetryDetailOnMain(String procApName, List<String> tempIds) {
         Date modifyTime = Calendar.getInstance().getTime();
-        String sqlString = "select  Top 1 m.NOTICE_MAIN_ID from BCS_BILLING_NOTICE_DETAIL b, BCS_BILLING_NOTICE_MAIN m  "
+        String sqlString = "select Top 1 m.NOTICE_MAIN_ID from BCS_BILLING_NOTICE_DETAIL b, BCS_BILLING_NOTICE_MAIN m  "
                 + "where  m.NOTICE_MAIN_ID = b.NOTICE_MAIN_ID  and b.STATUS = :status and m.TEMP_ID in (:tempIds) Order by b.CREAT_TIME "
                 + "update BCS_BILLING_NOTICE_MAIN  set STATUS = :newStatus , PROC_AP_NAME = :procApName , MODIFY_TIME = :modifyTime "
                 + " where NOTICE_MAIN_ID  IN (select TOP 1 a.NOTICE_MAIN_ID from BCS_BILLING_NOTICE_MAIN a WITH(ROWLOCK) , BCS_BILLING_NOTICE_DETAIL d "
@@ -149,7 +149,6 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
         if (mains != null && !mains.isEmpty()) {
             return mains.get(0).longValue();
         }
-
         return null;
     }
 
@@ -158,10 +157,10 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
      * 找出第一個WAIT BillingNoticeMain 並更新狀態
      */
     @Transactional(rollbackFor = Exception.class)
-    private Long findAndUpdateFirstWaitMain(String procApName, List<String> tempIds) {
+    public Long findAndUpdateFirstWaitMain(String procApName, List<String> tempIds) {
         Date modifyTime = Calendar.getInstance().getTime();
         // 找出第一個WAIT BillingNoticeMain 並更新
-        String waitMainString = "select  TOP 1 m.NOTICE_MAIN_ID from  BCS_BILLING_NOTICE_MAIN m  "
+        String waitMainString = "select TOP 1 m.NOTICE_MAIN_ID from  BCS_BILLING_NOTICE_MAIN m  "
                 + "where m.STATUS = :status and m.TEMP_ID in (:tempIds) Order by m.CREAT_TIME "
                 + "update BCS_BILLING_NOTICE_MAIN  set STATUS = :newStatus , PROC_AP_NAME = :procApName , MODIFY_TIME = :modifyTime "
                 + "   where NOTICE_MAIN_ID  IN (select TOP 1 a.NOTICE_MAIN_ID from BCS_BILLING_NOTICE_MAIN a WITH(ROWLOCK) "
@@ -187,28 +186,23 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
     }
 
     /**
-     * 查詢並更新WAIT/RERTY 明細
-     *
-     * @param mainIds
-     * @return
+     * 查詢並更新WAIT/RETRY 明細
      */
     @SuppressWarnings("unchecked")
     @Transactional(rollbackFor = Exception.class)
     public List<BigInteger> findAndUpdateDetailByMainAndStatus(Set<Long> mainIds) {
-        List<String> statusList = new ArrayList<String>();
+        List<String> statusList = new ArrayList<>();
         statusList.add(BillingNoticeMain.NOTICE_STATUS_WAIT);
         statusList.add(BillingNoticeMain.NOTICE_STATUS_RETRY);
-        Date modifyTime = Calendar.getInstance().getTime();
 
         String sqlString = "select  b.NOTICE_DETAIL_ID from BCS_BILLING_NOTICE_DETAIL b where  b.NOTICE_MAIN_ID in (:mainIds) and b.STATUS in (:status)  "
                 + "update BCS_BILLING_NOTICE_DETAIL  set STATUS = :newStatus , MODIFY_TIME = :modifyTime  where NOTICE_DETAIL_ID  IN "
                 + "	(select d.NOTICE_DETAIL_ID from BCS_BILLING_NOTICE_DETAIL d WITH(ROWLOCK) where  d.NOTICE_MAIN_ID in (:mainIds) and d.STATUS in (:status) )  ";
-        List<BigInteger> details = (List<BigInteger>) entityManager.createNativeQuery(sqlString)
-                .setParameter("status", statusList).setParameter("mainIds", mainIds)
-                .setParameter("modifyTime", modifyTime)
-                .setParameter("newStatus", BillingNoticeMain.NOTICE_STATUS_SENDING).getResultList();
 
-        return details;
+        return (List<BigInteger>) entityManager.createNativeQuery(sqlString)
+                .setParameter("status", statusList).setParameter("mainIds", mainIds)
+                .setParameter("modifyTime", new Date())
+                .setParameter("newStatus", BillingNoticeMain.NOTICE_STATUS_SENDING).getResultList();
     }
 
 }

@@ -46,10 +46,12 @@ public class BillingNoticePushMessageActor extends UntypedActor {
             immediate(billingNoticeMain);
             return;
         }
+        log.info("Delay!!");
         ApplicationContextProvider.getApplicationContext().getBean(BillingNoticeTaskService.class).startTask(billingNoticeMain, scheduleTime);
     }
 
     private void immediate(BillingNoticeMain billingNoticeMain) {
+        log.info("Immediate!!");
         ApplicationContextProvider.getApplicationContext().getBean(BillingNoticeService.class).pushLineMessage(billingNoticeMain, this.getSender(), this.getSelf());
     }
 }

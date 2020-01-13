@@ -1,5 +1,6 @@
 package com.bcs.core.taishin.circle.db.service;
 
+import com.bcs.core.db.entity.AdminUser;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.resource.CoreConfigReader;
@@ -98,7 +99,19 @@ public class OracleService {
         return employee;
     }
 
-    public String getAvailableEmpIdsByEmpId(String empId) {
+    public String getAvailableEmpIdsByEmpId(String empId, String role) {
+        if (AdminUser.RoleCode.ROLE_CUSTOMER_SERVICE.getRoleId().equals(role)) {
+            return "";
+        }
+
+        if (AdminUser.RoleCode.ROLE_ADMIN.getRoleId().equals(role)) {
+            return "";
+        }
+
+        if (AdminUser.RoleCode.ROLE_PNP_ADMIN.getRoleId().equals(role)) {
+            return "";
+        }
+
         boolean oracleUseDepartmentCheck = CoreConfigReader.getBoolean(CONFIG_STR.ORACLE_USE_DEPARTMENT_CHECK, true);
         if (!oracleUseDepartmentCheck || StringUtils.isBlank(empId)) {
             return "";
@@ -138,8 +151,8 @@ public class OracleService {
 
     private String getEmpIdList(String oracleSchemaHr, TaishinEmployee emp) {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format(" SELECT EMP_ID FROM %s.HR_EMP_SW " +
-                        " LEFT OUTER JOIN %s.HR_DEPT_SW ON (HR_EMP_SW.DEPT_SER_NO_ACT = HR_DEPT_SW.DEPT_SERIAL_NO ",
+        sb.append(String.format(" SELECT EMP_ID FROM %s.HR_EMP " +
+                        " LEFT OUTER JOIN %s.HR_DEPT ON (HR_EMP.DEPT_SER_NO_ACT = HR_DEPT.DEPT_SERIAL_NO ",
                 oracleSchemaHr, oracleSchemaHr)
         );
 
@@ -330,9 +343,9 @@ public class OracleService {
                         "     card_dept, " +
                         "     dept_easy_nm " +
                         " from " +
-                        "     %s.hr_emp_sw " +
-                        " left outer join %s.hr_dept_sw " +
-                        " on (hr_emp_sw.dept_ser_no_act = hr_dept_sw.dept_serial_no) " +
+                        "     %s.hr_emp " +
+                        " left outer join %s.hr_dept " +
+                        " on (hr_emp.dept_ser_no_act = hr_dept.dept_serial_no) " +
                         " where " +
                         " trim(emp_id) = '%s'", oracleSchemaHr, oracleSchemaHr, empId));
         log.info("sqlString:" + sb.toString());

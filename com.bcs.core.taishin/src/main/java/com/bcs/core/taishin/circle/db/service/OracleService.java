@@ -100,14 +100,17 @@ public class OracleService {
     }
 
     public String getAvailableEmpIdsByEmpId(String empId, String role) {
+        /* 1692 */
         if (AdminUser.RoleCode.ROLE_CUSTOMER_SERVICE.getRoleId().equals(role)) {
             return "";
         }
 
+        /* 2888 */
         if (AdminUser.RoleCode.ROLE_ADMIN.getRoleId().equals(role)) {
             return "";
         }
 
+        /* 2588 */
         if (AdminUser.RoleCode.ROLE_PNP_ADMIN.getRoleId().equals(role)) {
             return "";
         }

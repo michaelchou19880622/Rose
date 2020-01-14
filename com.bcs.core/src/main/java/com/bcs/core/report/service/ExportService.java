@@ -12,21 +12,19 @@ import java.io.OutputStream;
 
 @Slf4j
 public class ExportService {
-    public void exportExcel(HttpServletResponse response, ExportExcelBuilder builder){
+    public void exportExcel(HttpServletResponse response, ExportExcelBuilder builder) {
         builder.export();
         try (
                 InputStream inputStream = new FileInputStream(builder.getOutPutPath() + builder.getOutputFileName())
-        ){
+        ) {
             response.setContentType("application/download; charset=UTF-8");
             response.setHeader("Content-Disposition", "attachment; filename=" + builder.getOutputFileName());
             response.setCharacterEncoding("UTF-8");
-            OutputStream outputStream = response.getOutputStream();
-            log.info("[loadFileToResponse]");
-            IOUtils.copy(inputStream, outputStream);
+            try (OutputStream outputStream = response.getOutputStream()) {
+                log.info("[loadFileToResponse]");
+                IOUtils.copy(inputStream, outputStream);
 
-            response.flushBuffer();
-            if (outputStream != null) {
-                outputStream.close();
+                response.flushBuffer();
             }
         } catch (IOException e) {
             log.error("Exception");

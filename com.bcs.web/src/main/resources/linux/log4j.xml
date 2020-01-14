@@ -26,7 +26,6 @@
             <param name="levelMax" value="ERROR"/>
         </filter>
         <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
-            <!-- 上下午壓縮一次 -->
             <param name="FileNamePattern" value="/opt/taishin-log/taishin.%d{yyyy-mm-dd-HH}.log.gz"/>
         </rollingPolicy>
     </appender>
@@ -44,7 +43,6 @@
             <param name="levelMax" value="ERROR"/>
         </filter>
         <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
-            <!-- 上下午壓縮一次 -->
             <param name="FileNamePattern" value="/opt/taishin-log/taishin.error.%d{yyyy-mm-dd-HH}.log.gz"/>
         </rollingPolicy>
     </appender>
@@ -52,8 +50,8 @@
     <appender name="PNP" class="org.apache.log4j.RollingFileAppender">
         <param name="File" value="/opt/taishin-log/taishin.pnp.log"/>
         <param name="Append" value="true"/>
-<!--        <param name="MaxBackupIndex" value="200"/>-->
-<!--        <param name="MaxFileSize" value="100KB"/>-->
+        <param name="MaxBackupIndex" value="200"/>
+        <param name="MaxFileSize" value="100KB"/>
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss.SSS} %-5p [%-4L] %-30.30C{1} %-35M [%-27t] - %m%n"/>
         </layout>
@@ -62,7 +60,6 @@
             <param name="levelMax" value="ERROR"/>
         </filter>
         <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
-            <!-- 上下午壓縮一次 -->
             <param name="FileNamePattern" value="/opt/taishin-log/taishin.pnp.%d{yyyy-mm-dd-HH}.log.gz"/>
         </rollingPolicy>
     </appender>

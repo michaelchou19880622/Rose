@@ -27,26 +27,28 @@ public class AdminUser extends AbstractBcsEntity {
         /**
          * Role Code
          */
-        ROLE_ADMIN("ROLE_ADMIN", "管理者", "manager"),
-        ROLE_EDIT("ROLE_EDIT", "編輯人員", "editor"),
-        ROLE_MARKET("ROLE_MARKET", "行銷人員", "marketing"),
-        ROLE_PNP_ADMIN("ROLE_PNP_ADMIN", "PNP管理者", "pnp_manager"),
-        ROLE_PNP_SEND_LINE_SEND("ROLE_PNP_SEND_LINE_SEND", "PNP發送暨LINE點發送者", "pnp_send_line_send"),
-        ROLE_PNP_SEND_LINE_VERIFY("ROLE_PNP_SEND_LINE_VERIFY", "PNP發送暨LINE點審核者", "pnp_send_line_verify"),
-        ROLE_REPORT("ROLE_REPORT", "報表查詢人員", "report"),
-        ROLE_LINE_SEND("ROLE_LINE_SEND", "LINE點發送者", "line_send"),
-        ROLE_LINE_VERIFY("ROLE_LINE_VERIFY", "LINE點審核者", "line_verify"),
-        ROLE_CUSTOMER_SERVICE("ROLE_CUSTOMER_SERVICE", "客服人員", "customer_service"),
+        ROLE_ADMIN("ROLE_ADMIN", "管理者", "manager", "2888"),
+        ROLE_EDIT("ROLE_EDIT", "編輯人員", "editor", "2788"),
+        ROLE_MARKET("ROLE_MARKET", "行銷人員", "marketing", "5788"),
+        ROLE_PNP_ADMIN("ROLE_PNP_ADMIN", "PNP管理者", "pnp_manager", "2588"),
+        ROLE_PNP_SEND_LINE_SEND("ROLE_PNP_SEND_LINE_SEND", "PNP發送暨LINE點發送者", "pnp_send_line_send", "2587"),
+        ROLE_PNP_SEND_LINE_VERIFY("ROLE_PNP_SEND_LINE_VERIFY", "PNP發送暨LINE點審核者", "pnp_send_line_verify", "2586"),
+        ROLE_REPORT("ROLE_REPORT", "報表查詢人員", "report", "2688"),
+        ROLE_LINE_SEND("ROLE_LINE_SEND", "LINE點發送者", "line_send", "2787"),
+        ROLE_LINE_VERIFY("ROLE_LINE_VERIFY", "LINE點審核者", "line_verify", "2786"),
+        ROLE_CUSTOMER_SERVICE("ROLE_CUSTOMER_SERVICE", "客服人員", "customer_service", "1692"),
         ;
 
         private String roleId;
         private String roleName;
         private String roleNameEn;
+        private String code;
 
-        RoleCode(String roleId, String roleName, String roleNameEn) {
+        RoleCode(String roleId, String roleName, String roleNameEn, String code) {
             this.roleId = roleId;
             this.roleName = roleName;
             this.roleNameEn = roleNameEn;
+            this.code = code;
         }
 
         @Override

@@ -505,13 +505,13 @@ public class LinePointPushApiController {
             return new ResponseEntity<>(responseObject.toString(), HttpStatus.OK);
 
 
-        } catch (BadPaddingException be) {
-            return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"invalid token\"}", HttpStatus.UNAUTHORIZED);
+//        } catch (BadPaddingException be) {
+//            return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"invalid token\"}", HttpStatus.UNAUTHORIZED);
         } catch (IllegalArgumentException ie) {
             logger.info("e:" + ie.toString());
             return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"" + ie.getMessage() + "\"}", HttpStatus.BAD_REQUEST);
-        } catch (IllegalBlockSizeException ie) {
-            return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"invalid token\"}", HttpStatus.UNAUTHORIZED);
+//        } catch (IllegalBlockSizeException ie) {
+//            return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"invalid token\"}", HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
             logger.info("e:" + e.toString());
             return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);

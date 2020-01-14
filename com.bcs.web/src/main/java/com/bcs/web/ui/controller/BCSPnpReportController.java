@@ -96,7 +96,7 @@ public class BCSPnpReportController {
                                                 @RequestBody final PnpDetailReportParam param) {
         try {
             param.setEmployeeId(customUser.getAccount().toUpperCase());
-            final List<PnpDetailReport> result = pnpReportService.getPnpDetailReportList(param);
+            final List<PnpDetailReport> result = pnpReportService.getPnpDetailReportList(customUser, param);
             log.info(DataUtils.toPrettyJsonUseJackson(result));
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (final Exception e) {
@@ -119,7 +119,7 @@ public class BCSPnpReportController {
 
         try {
             param.setEmployeeId(customUser.getAccount().toUpperCase());
-            final List<PnpDetailReport> result = pnpReportService.getPnpDetailReportList(param);
+            final List<PnpDetailReport> result = pnpReportService.getPnpDetailReportList(customUser, param);
             int totalCount = result.size();
             int onePageCount = 10;
             int totalPage = DataUtils.calTotalPage(totalCount, onePageCount);
@@ -142,11 +142,11 @@ public class BCSPnpReportController {
         try {
             final PnpDetailReportParam pnpDetailReportParam = new PnpDetailReportParam(
                     dateType, DataUtils.convStrToDate(startDate, "yyyy-MM-dd"), DataUtils.convStrToDate(endDate, "yyyy-MM-dd"),
-                    isPageable, page, account, pccCode, sourceSystem, employeeId, phone
+                    isPageable, page, account, pccCode, sourceSystem, employeeId, phone, customUser.getRole()
             );
 
             pnpDetailReportParam.setEmployeeId(customUser.getAccount().toUpperCase());
-            final List<PnpDetailReport> reportList = pnpReportService.getPnpDetailReportList(pnpDetailReportParam);
+            final List<PnpDetailReport> reportList = pnpReportService.getPnpDetailReportList(customUser, pnpDetailReportParam);
             final ExportExcelBuilder builder = ExportExcelBuilder.createWorkBook().setSheetName("TestSheet1");
 
             final List<Map<Integer, String>> allMapList = new LinkedList<>();

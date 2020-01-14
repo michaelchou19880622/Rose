@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration
+        xmlns:log4j='http://jakarta.apache.org/log4j/' >
+    <!-- Console -->
+    <appender name="console" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss.SSS} %-5p [%-4L] %-30.30C{1} %-35M [%-27t] - %m%n}"/>
+        </layout>
+        <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <param name="levelMin" value="INFO"/>
+            <param name="levelMax" value="ERROR"/>
+        </filter>
+    </appender>
+    <!-- ALL File -->
+    <appender name="Appender1" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="/bcs/log/taishin.ap.log"/>
+        <param name="Append" value="true"/>
+        <param name="MaxBackupIndex" value="200"/>
+        <param name="MaxFileSize" value="100KB"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss.SSS} %-5p [%-4L] %-30.30C{1} %-35M [%-27t] - %m%n"/>
+        </layout>
+        <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <param name="levelMin" value="INFO"/>
+            <param name="levelMax" value="ERROR"/>
+        </filter>
+        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
+            <param name="FileNamePattern" value="/bcs/log/taishin.ap.%d{yyyy-mm-dd-HH}.log.gz"/>
+        </rollingPolicy>
+    </appender>
+    <!-- ERROR File -->
+    <appender name="Appender2" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="/bcs/log/taishin.ap.error.log"/>
+        <param name="Append" value="true"/>
+        <param name="MaxBackupIndex" value="200"/>
+        <param name="MaxFileSize" value="100KB"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss.SSS} %-5p [%-4L] %-30.30C{1} %-35M [%-27t] - %m%n"/>
+        </layout>
+        <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <param name="levelMin" value="ERROR"/>
+            <param name="levelMax" value="ERROR"/>
+        </filter>
+        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
+            <param name="FileNamePattern" value="/bcs/log/taishin.ap.error.%d{yyyy-mm-dd-HH}.log.gz"/>
+        </rollingPolicy>
+    </appender>
+    <!-- PNP -->
+    <appender name="PNP" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="/bcs/log/taishin.ap.pnp.log"/>
+        <param name="Append" value="true"/>
+        <param name="MaxBackupIndex" value="200"/>
+        <param name="MaxFileSize" value="100KB"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss.SSS} %-5p [%-4L] %-30.30C{1} %-35M [%-27t] - %m%n"/>
+        </layout>
+        <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <param name="levelMin" value="INFO"/>
+            <param name="levelMax" value="ERROR"/>
+        </filter>
+        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
+            <param name="FileNamePattern" value="/bcs/log/taishin.ap.pnp.%d{yyyy-mm-dd-HH}.log.gz"/>
+        </rollingPolicy>
+    </appender>
+    <!--使用Logger.getLogger("XXX")獲得此輸出器，且不會使用根輸出器-->
+    <logger name="PnpRecorder" additivity="false">
+        <level value="INFO"/>
+        <appender-ref ref="PNP"/>
+    </logger>
+    <root>
+        <appender-ref ref="console"/>
+        <appender-ref ref="Appender1"/>
+        <appender-ref ref="Appender2"/>
+    </root>
+</log4j:configuration>

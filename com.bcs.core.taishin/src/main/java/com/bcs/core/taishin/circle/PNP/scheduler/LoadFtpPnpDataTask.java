@@ -200,7 +200,7 @@ public class LoadFtpPnpDataTask {
         }
 
         /* 進行批次排程 */
-        scheduledFuture = scheduler.scheduleAtFixedRate(this::ftpProcessHandler, 0, time, TimeUnit.valueOf(unit));
+        scheduledFuture = scheduler.scheduleWithFixedDelay(this::ftpProcessHandler, 0, time, TimeUnit.valueOf(unit));
     }
 
     /**

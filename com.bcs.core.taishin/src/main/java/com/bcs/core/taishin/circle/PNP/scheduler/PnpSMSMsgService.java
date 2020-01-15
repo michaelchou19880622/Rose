@@ -111,10 +111,7 @@ public class PnpSMSMsgService {
             return;
         }
         /* 排程工作 */
-        scheduledFuture = scheduler.scheduleAtFixedRate(() -> {
-            log.info("StartCircle..");
-
-            /* 0: 停止排程) 1: 停止排程，並轉發SMS*/
+        scheduledFuture = scheduler.scheduleWithFixedDelay(() -> {
             int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true, false);
             if (1 == bigSwitch || 0 == bigSwitch) {
                 log.warn("PNP_BIG_SWITCH : " + bigSwitch + " PnpSMSMsgService stop transfer file to SMS FTP ..");

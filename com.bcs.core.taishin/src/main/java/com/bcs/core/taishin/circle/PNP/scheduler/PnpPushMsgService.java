@@ -68,11 +68,7 @@ public class PnpPushMsgService {
             log.error("PNPSendMsgService TimeUnit error :" + time + unit);
             return;
         }
-        scheduledFuture = scheduler.scheduleAtFixedRate(() -> {
-            Thread.currentThread().setName("PNP-BC-Scheduled-" + Thread.currentThread().getId());
-
-            log.info("PnpSendMsgService startCircle....");
-            //#.pnp.big switch = 0(停止排程) 1(停止排程，並轉發SMS) 其他(正常運行)
+        scheduledFuture = scheduler.scheduleWithFixedDelay(() -> {
             int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIGSWITCH, true, false);
             if (0 == bigSwitch || 1 == bigSwitch) {
                 log.warn("PNP_BIG_SWITCH : " + bigSwitch + "PnpPushMsgService stop sending...");

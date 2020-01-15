@@ -22,10 +22,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -130,22 +132,55 @@ public class LinePointPushMessageActor extends UntypedActor {
                 final JSONObject responseObject = restfulUtil.execute();
                 log.info("After Execute Response Object: {}", responseObject.toString());
 
-                final String id = responseObject.getString("transactionId");
-                final Long time = responseObject.getLong("transactionTime");
-                final String type = responseObject.getString("transactionType");
-                final Integer amount = responseObject.getInt("transactionAmount");
-                final Integer balance = responseObject.getInt("balance");
+                String id = "";
+                long time = 0L;
+                String type = "";
+                int amount = 0;
+                int balance = 0;
+                try {
+                    id = responseObject.getString("transactionId");
+                } catch (JSONException je) {
+                    log.error("JSONException", je);
+                }
+                try {
+                    time = responseObject.getLong("transactionTime");
+                } catch (JSONException je) {
+                    log.error("JSONException", je);
+                }
+                try {
+                    type = responseObject.getString("transactionType");
+                } catch (JSONException je) {
+                    log.error("JSONException", je);
+                }
+                try {
+                    amount = responseObject.getInt("transactionAmount");
+                } catch (JSONException je) {
+                    log.error("JSONException", je);
+                }
+                try {
+                    balance = responseObject.getInt("balance");
+                } catch (JSONException je) {
+                    log.error("JSONException", je);
+                }
 
                 setDetail(detail, id, time, type, amount, balance);
-
-                linePointMain.setSuccessfulAmount(linePointMain.getSuccessfulAmount() + amount);
-                linePointMain.setSuccessfulCount(linePointMain.getSuccessfulCount() + 1);
+                if (linePointMain.getSuccessfulAmount() != null) {
+                    linePointMain.setSuccessfulAmount(linePointMain.getSuccessfulAmount() + amount);
+                }
+                if (linePointMain.getSuccessfulCount() != null) {
+                    linePointMain.setSuccessfulCount(linePointMain.getSuccessfulCount() + 1);
+                } else {
+                    linePointMain.setSuccessfulCount(1L);
+                }
                 isDoRetry = false;
             } catch (HttpClientErrorException e) {
                 log.error("HttpClientErrorException", e);
                 detail.setMessage(StringUtils.substring(e.getResponseBodyAsString(), 0, 200));
                 detail.setStatus(LinePointDetail.STATUS_FAIL);
                 linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
+                if (HttpStatus.BAD_REQUEST.equals(e.getStatusCode())) {
+                    break;
+                }
                 sleepProcess();
                 isDoRetry = i <= retryCountLimit;
             } catch (HttpServerErrorException e) {
@@ -155,6 +190,9 @@ public class LinePointPushMessageActor extends UntypedActor {
                 linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
                 sleepProcess();
                 isDoRetry = i <= retryCountLimit;
+            } catch (NullPointerException ne) {
+                log.error("NullPointException", ne);
+                break;
             } catch (Exception e) {
                 log.error("Exception", e);
                 detail.setMessage(StringUtils.substring(e.getMessage(), 0, 200));
@@ -163,7 +201,8 @@ public class LinePointPushMessageActor extends UntypedActor {
                 sleepProcess();
                 isDoRetry = i <= retryCountLimit;
             }
-        } while (isDoRetry);
+        }
+        while (isDoRetry);
     }
 
     private void sleepProcess() throws InterruptedException {
@@ -210,17 +249,29 @@ public class LinePointPushMessageActor extends UntypedActor {
     }
 
 
-    private void setDetail(LinePointDetail detail, String id, Long time, String type, Integer amount, Integer balance) {
-        detail.setTranscationId(id);
-        detail.setTranscationTime(time);
-        detail.setTranscationType(type);
-        detail.setTransactionAmount(amount);
-        detail.setBalance(balance);
+    private void setDetail(LinePointDetail detail, String id, Long time, String type, Integer
+            amount, Integer balance) {
+        if (id != null) {
+            detail.setTranscationId(id);
+        }
+        if (time != null) {
+            detail.setTranscationTime(time);
+        }
+        if (type != null) {
+            detail.setTranscationType(type);
+        }
+        if (amount != null) {
+            detail.setTransactionAmount(amount);
+        }
+        if (balance != null) {
+            detail.setBalance(balance);
+        }
         detail.setMessage("");
         detail.setStatus(LinePointDetail.STATUS_SUCCESS);
     }
 
-    private String getOrderKey(LinePointPushModel pushApiModel, LinePointDetail detail) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    private String getOrderKey(LinePointPushModel pushApiModel, LinePointDetail detail) throws
+            NoSuchAlgorithmException, UnsupportedEncodingException {
         MessageDigest salt = MessageDigest.getInstance("SHA-256");
         String hashStr = String.format("%s%d%d", detail.getUid(), System.currentTimeMillis(), pushApiModel.getEventId());
         String hash = DigestUtils.md5Hex(hashStr);

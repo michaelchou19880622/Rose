@@ -76,7 +76,7 @@ public class BillingNoticeFtpService {
             log.error("BillingNoticeFtpService TimeUnit error :" + time + unit);
             return;
         }
-        scheduledFuture = scheduler.scheduleAtFixedRate(this::ftpProcess, 0, time, TimeUnit.valueOf(unit));
+        scheduledFuture = scheduler.scheduleWithFixedDelay(this::ftpProcess, 0, time, TimeUnit.valueOf(unit));
     }
 
 

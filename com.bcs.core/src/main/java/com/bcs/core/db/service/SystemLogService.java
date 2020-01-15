@@ -91,7 +91,7 @@ public class SystemLogService {
     }
 
     public void deleteLogByRange(int scheduleTime, TimeUnit unit, int deleteRangeDay) {
-        scheduler.scheduleAtFixedRate(() -> {
+        scheduler.scheduleWithFixedDelay(() -> {
             log.info("Search Expired System Log!!");
             List<SystemLog> expiredLogList = systemLogRepository.findTop10ByModifyTimeBefore(DateUtils.addDays(new Date(), -deleteRangeDay));
             if (CollectionUtils.isNotEmpty(expiredLogList)) {

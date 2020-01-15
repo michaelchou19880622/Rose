@@ -64,14 +64,13 @@ public class BillingNoticeSendMsgService {
      * Start Schedule
      */
     public void startCircle() {
-
         String unit = CoreConfigReader.getString(CONFIG_STR.BN_SCHEDULE_UNIT, true, false);
         int time = CoreConfigReader.getInteger(CONFIG_STR.BN_SCHEDULE_TIME, true, false);
         if (time == -1) {
             log.error(" BillingNoticeSendMsgService TimeUnit error :" + time + unit);
             return;
         }
-        scheduledFuture = scheduler.scheduleAtFixedRate(this::sendProcess, 0, time, TimeUnit.valueOf(unit));
+        scheduledFuture = scheduler.scheduleWithFixedDelay(this::sendProcess, 0, time, TimeUnit.valueOf(unit));
 
     }
 

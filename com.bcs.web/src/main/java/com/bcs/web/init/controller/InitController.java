@@ -112,8 +112,8 @@ public class InitController {
      */
     private void registerServer() {
         try {
-            log.info("init registerServer");
-            log.info("init file.encoding:" + System.getProperty("file.encoding"));
+            initLog("REGISTER SERVER!!");
+            initLog("file.encoding:" + System.getProperty("file.encoding"));
             DataSyncUtil.registerServer();
         } catch (Exception e) {
             log.error(ErrorRecord.recordError(e));
@@ -125,7 +125,7 @@ public class InitController {
      */
     private void loadScheduleFromDb() {
         try {
-            log.info("init loadScheduleFromDB");
+            initLog("LOAD SCHEDULE FROM DB");
             schedulerService.loadScheduleFromDB();
         } catch (Exception e) {
             log.error(ErrorRecord.recordError(e));
@@ -137,7 +137,7 @@ public class InitController {
      */
     private void loadInteractiveMap() {
         try {
-            log.info("init loadInteractiveMap");
+            initLog("LOAD INTERACTIVE MAP");
             interactiveService.loadInteractiveMap();
         } catch (Exception e) {
             log.error(ErrorRecord.recordError(e));
@@ -151,10 +151,10 @@ public class InitController {
         try {
             /* AP */
             if (CoreConfigReader.isBillingNoticeFtpDownload()) {
-                log.info("init Billing Notice Data Parse ");
+                initLog("BILLING NOTICE FTP DOWNLOAD!!");
                 billingNoticeFtpService.startCircle();
             } else {
-                log.info("isBillingNoticeFtpDownload: false");
+                initLog("BILLING NOTICE FTP DOWNLOAD IS CLOSE!!");
             }
         } catch (Exception e) {
             log.error(ErrorRecord.recordError(e));
@@ -168,10 +168,10 @@ public class InitController {
         try {
             /* WEB */
             if (CoreConfigReader.isBillingNoticeSendMsg()) {
-                log.info("init Billing Notice send ");
+                initLog("BILLING NOTICE PUSH MESSAGE SCHEDULE!!");
                 billingNoticeSendMsgService.startCircle();
             } else {
-                log.info("isBillingNoticeSendMsg: false");
+                initLog("BILLING NOTICE PUSH MESSAGE SCHEDULE IS CLOSE");
             }
         } catch (Exception e) {
             log.error(ErrorRecord.recordError(e));
@@ -182,14 +182,13 @@ public class InitController {
      * 6
      */
     private void loadFtpPnpDataTaskStartCircle() {
-        /* PNP FTP flow */
         try {
             /* BE-OA : .pnp.ftpDownload */
             if (CoreConfigReader.isPNPFtpDownload()) {
-                log.info("init PNP FTP flow ");
+                initLog("PNP FTP DOWNLOAD SCHEDULE!!");
                 loadFtpPnpDataTask.startCircle();
             } else {
-                log.info("isPNPFtpDownload: false");
+                initLog("PNP FTP DOWNLOAD SCHEDULE IS CLOSE!!");
             }
         } catch (Exception e) {
             log.error(ErrorRecord.recordError(e));
@@ -203,14 +202,12 @@ public class InitController {
         try {
             /* BE-OAAPI : .pnp.sendMsg */
             if (CoreConfigReader.isPNPSendMsg()) {
-                log.info("init pnpPushMsg flow ");
-                /* PNP pnpPushMsg flow */
+                initLog("PNP BC  PUSH MESSAGE SCHEDULE!!");
                 pnpPushMsgService.startCircle();
-                log.info("init PNP PHONE NUMBER PUSH flow ");
-                //PNP PHONE NUMBER PUSH flow
+                initLog("PNP PNP PUSH MESSAGE SCHEDULE!!");
                 pnpMsgService.startCircle();
             } else {
-                log.info("isPNPSendMsg: false");
+                initLog("PNP PUSH MESSAGE IS CLOSE!!");
             }
         } catch (Exception e) {
             log.error(ErrorRecord.recordError(e));
@@ -221,14 +218,13 @@ public class InitController {
      * 8
      */
     private void pnpSmsMsgServiceStartCircle() {
-        //PNP transfer file to SMS flow
         try {
             /* BE-OA : .pnp.ftpDownload */
             if (CoreConfigReader.isPNPFtpDownload()) {
-                log.info("init PNP transfer file to SMS flow ");
+                initLog("PNP SMS FTP PUSH SCHEDULE!!");
                 pnpSmsMsgService.startCircle();
             } else {
-                log.info("isPNPFtpDownload: false");
+                initLog("PNP SMS FTP PUSH SCHEDULE IS CLOSE!!");
             }
         } catch (Exception e) {
             log.error(ErrorRecord.recordError(e));
@@ -240,9 +236,9 @@ public class InitController {
      */
     private void linePointSchedulerServiceStartCircle() {
         try {
-            log.info("init LinePoint Scheduler ");
+            initLog("init LinePoint Scheduler ");
             linePointschedulerService.startCircle();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error(ErrorRecord.recordError(e));
         }
     }
@@ -252,14 +248,13 @@ public class InitController {
      */
     private void threadStart() {
         try {
-            Thread thread = new Thread(() -> {
+            new Thread(() -> {
                 catchRecordBinded.loadInitData();
                 catchRecordOpAddReceive.loadInitData();
                 catchRecordOpBlockedReceive.loadInitData();
                 catchRecordReceive.loadInitData();
                 catchHandleMsgReceiveTimeout.loadInitData();
-            });
-            thread.start();
+            }).start();
         } catch (Exception e) {
             log.error(ErrorRecord.recordError(e));
         }
@@ -290,5 +285,9 @@ public class InitController {
         } catch (Exception e) {
             log.error("", e);
         }
+    }
+
+    private void initLog(String msg){
+        log.info("[INIT] {}", msg);
     }
 }

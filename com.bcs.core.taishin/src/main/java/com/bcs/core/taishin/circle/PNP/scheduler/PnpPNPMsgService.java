@@ -62,7 +62,7 @@ public class PnpPNPMsgService {
             log.error("TimeUnit error :" + time + unit);
             return;
         }
-        scheduledFuture = scheduler.scheduleAtFixedRate(this::pnpSendProcess, 0, time, TimeUnit.valueOf(unit));
+        scheduledFuture = scheduler.scheduleWithFixedDelay(this::pnpSendProcess, 0, time, TimeUnit.valueOf(unit));
     }
 
     private void pnpSendProcess() {

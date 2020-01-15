@@ -30,7 +30,7 @@ public class InteractiveHandler {
 	private InteractiveService interactiveService;
 
 	protected LoadingCache<String, Long> linkJoin;
-	
+
 	public InteractiveHandler(){
 
 		linkJoin = CacheBuilder.newBuilder()
@@ -43,7 +43,7 @@ public class InteractiveHandler {
 					}
 				});
 	}
-	
+
 	@PreDestroy
 	public void cleanUp() {
 		logger.info("[DESTROY] InteractiveHandler cleaning up...");
@@ -53,17 +53,17 @@ public class InteractiveHandler {
 				linkJoin = null;
 			}
 		}
-		catch(Throwable e){}
-		
+		catch(Exception e){}
+
 		System.gc();
 		logger.info("[DESTROY] InteractiveHandler destroyed.");
 	}
-	
+
 	public Map<Long, List<MsgDetail>> checkJoinInteractive(String MID, String keyword) throws Exception{
 		logger.info("checkJoinInteractive");
 		Long iMsgId = linkJoin.get(MID);
 		logger.info("iMsgId = " + iMsgId);
-		
+
 		if(iMsgId > 0L){
 			logger.debug("Interactive Detail Create Step 2");
 			Map<Long, List<MsgDetail>> result = new HashMap<Long, List<MsgDetail>>();
@@ -72,27 +72,27 @@ public class InteractiveHandler {
 
 			for(MsgDetail detail : details){
 				if(MsgGeneratorExtend.MSG_TYPE_INTERACTIVE_LINK.equals(detail.getMsgType())){
-					
+
 					MsgDetail set = (MsgDetail)detail.clone();
 					set.setText(keyword);
-					
+
 					list.add(set);
 				}
 			}
-			
+
 			linkJoin.put(MID, 0L);
-			
+
 			if(list.size() > 0){
 				logger.debug("Interactive Detail Create Step 2 Success");
 				result.put(iMsgId, list);
-				
+
 				return result;
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * @param iMsgId
 	 * @return
@@ -110,7 +110,7 @@ public class InteractiveHandler {
 					list.add(detail);
 				}
 			}
-			
+
 			return list;
 		}
 		else{

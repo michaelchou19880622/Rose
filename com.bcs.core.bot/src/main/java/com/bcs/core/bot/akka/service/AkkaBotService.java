@@ -92,7 +92,7 @@ public class AkkaBotService {
                 system.shutdown();
                 system = null;
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
         }
 
         try {
@@ -104,7 +104,7 @@ public class AkkaBotService {
                 system.shutdown();
                 system = null;
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
         }
 
         System.gc();

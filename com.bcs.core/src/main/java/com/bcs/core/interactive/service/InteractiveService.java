@@ -93,12 +93,12 @@ public class InteractiveService {
 
             try {
                 // Check Data Sync
-                Boolean isReSyncData = DataSyncUtil.isReSyncData(INTERACTIVE_SYNC);
+                boolean isReSyncData = DataSyncUtil.isReSyncData(INTERACTIVE_SYNC);
                 if (isReSyncData) {
                     loadKeywordMap();
                     DataSyncUtil.syncDataFinish(INTERACTIVE_SYNC);
                 }
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 log.error(ErrorRecord.recordError(e));
             }
         }

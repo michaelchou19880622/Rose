@@ -51,10 +51,10 @@ public class BCSRichMsgController extends BCSBaseController {
 	private ContentRichMsgService contentRichMsgService;
 	@Autowired
 	private ContentFlagService contentFlagService;
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSRichMsgController.class);
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/richMsgListPage")
 	public String richMsgListPage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("richMsgListPage");
@@ -66,7 +66,7 @@ public class BCSRichMsgController extends BCSBaseController {
 		logger.info("richMsgCreatePage");
 			return BcsPageEnum.RichMsgCreatePage.toString();
 	}
-	
+
 	/**
 	 * 取得圖文訊息
 	 */
@@ -74,7 +74,7 @@ public class BCSRichMsgController extends BCSBaseController {
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getRichMsg/{richId}")
 	@ResponseBody
 	public ResponseEntity<?> getRichMsg(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser,
 			@PathVariable String richId) throws IOException {
@@ -96,7 +96,7 @@ public class BCSRichMsgController extends BCSBaseController {
 			}
 		}
 	}
-	
+
 	/**
 	 * 取得圖文訊息列表
 	 */
@@ -104,7 +104,7 @@ public class BCSRichMsgController extends BCSBaseController {
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getRichMsgList")
 	@ResponseBody
 	public ResponseEntity<?> getRichMsgList(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser) throws IOException {
 		logger.info("getRichMsgList");
@@ -125,7 +125,7 @@ public class BCSRichMsgController extends BCSBaseController {
 			}
 		}
 	}
-	
+
 	/**
 	 * 新增與更新圖文訊息
 	 */
@@ -133,21 +133,21 @@ public class BCSRichMsgController extends BCSBaseController {
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/createRichMsg", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createRichMsg(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
-			@CurrentUser CustomUser customUser,  
-			@RequestBody RichMsgModel createRichMsgModel, 
-			@RequestParam String actionType, 
+			@CurrentUser CustomUser customUser,
+			@RequestBody RichMsgModel createRichMsgModel,
+			@RequestParam String actionType,
 			@RequestParam String richId) throws IOException {
 		try {
 			if (!validateData(createRichMsgModel)) {
 				throw new BcsNoticeException("必填欄位不可為空！");
 			}
-			
+
 			String adminUserAccount = customUser.getAccount(); //取得登入者的帳號
-			
+
 			ContentRichMsg contentRichMsg = new ContentRichMsg();
-			
+
 			List<Map<String, String>> richDetailIdAndLinkIds = new ArrayList<>();
 			if (actionType.equals("Edit")) { //變更
 				contentRichMsg = contentRichMsgService.getSelectedContentRichMsg(richId);
@@ -156,18 +156,18 @@ public class BCSRichMsgController extends BCSBaseController {
 				richId = checkDuplicateUUID("1");
 				contentRichMsg.setRichId(richId);
 			}
-			
+
 			contentRichMsg.setRichType(createRichMsgModel.getRichType());
 			contentRichMsg.setRichImageId(createRichMsgModel.getRichImageId());
 			contentRichMsg.setRichTitle(createRichMsgModel.getRichTitle());
 			contentRichMsg.setModifyTime(new Date());
 			contentRichMsg.setModifyUser(adminUserAccount);
 			contentRichMsg.setStatus(ContentRichMsg.STATUS_ACTIVE);
-			
+
 			List<ContentRichMsgDetail> contentRichMsgDetails = new ArrayList<>();
 			List<ContentLink> contentLinks = new ArrayList<>();
 			Map<String, List<String>> contentFlagMap = new HashMap<>();
-			
+
 			for (int i=0, max=createRichMsgModel.getRichMsgImgUrls().size(); i<max; i++) {
 				RichMsgModel url = createRichMsgModel.getRichMsgImgUrls().get(i);
 				String richDetailId = "";
@@ -179,7 +179,7 @@ public class BCSRichMsgController extends BCSBaseController {
 					richDetailId = richDetailIdAndLinkIds.get(i).get("richDetailId");
 					linkId = richDetailIdAndLinkIds.get(i).get("linkId");
 				}
-				
+
 				ContentRichMsgDetail contentRichMsgDetail = new ContentRichMsgDetail();
 				contentRichMsgDetail.setRichDetailId(richDetailId);
 				contentRichMsgDetail.setRichId(richId);
@@ -191,16 +191,16 @@ public class BCSRichMsgController extends BCSBaseController {
 				contentRichMsgDetail.setStatus(ContentRichMsgDetail.STATUS_ACTIVE);
 
 				contentRichMsgDetail.setActionType(url.getActionType());
-				
+
 				contentRichMsgDetails.add(contentRichMsgDetail);
-				
+
 				if(RichMsgAction.ACTION_TYPE_SEND_MESSAGE.equals(url.getActionType())){
 					contentRichMsgDetail.setLinkId(url.getLinkUrl());
 				}
 				else{
 
 					contentRichMsgDetail.setLinkId(linkId);
-					
+
 					ContentLink contentLink = new ContentLink();
 					contentLink.setLinkId(linkId);
 					contentLink.setLinkTag(contentFlagService.concat(url.getLinkTagList(), 50));
@@ -208,15 +208,15 @@ public class BCSRichMsgController extends BCSBaseController {
 					contentLink.setLinkUrl(url.getLinkUrl());
 					contentLink.setModifyTime(new Date());
 					contentLink.setModifyUser(adminUserAccount);
-					
+
 					contentLinks.add(contentLink);
-					
+
 					contentFlagMap.put(contentLink.getLinkId(), url.getLinkTagList());
 				}
 			}
-			
+
 			contentRichMsgService.createRichMsg(contentRichMsg, contentRichMsgDetails, contentLinks, contentFlagMap);
-			
+
 			return new ResponseEntity<>("save success", HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
@@ -226,15 +226,15 @@ public class BCSRichMsgController extends BCSBaseController {
 			}
 			else{
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}	
+			}
 		}
 	}
-	
-	/** 
+
+	/**
 	 * 檢查必填欄位不可為空
 	 */
 	public Boolean validateData(RichMsgModel createRichMsgModel) {
-		if (StringUtils.isBlank(createRichMsgModel.getRichType()) 
+		if (StringUtils.isBlank(createRichMsgModel.getRichType())
 				|| StringUtils.isBlank(createRichMsgModel.getRichType())
 				|| StringUtils.isBlank(createRichMsgModel.getRichTitle())
 				|| StringUtils.isBlank(createRichMsgModel.getRichImageId())) {
@@ -246,34 +246,34 @@ public class BCSRichMsgController extends BCSBaseController {
 		}
 		return true;
 	}
-	
-	/** 
+
+	/**
 	 * 回傳一個沒有重覆的uuid
 	 */
 	public String checkDuplicateUUID(String queryType) {
 		String uuid = UUID.randomUUID().toString().toLowerCase();
-		Boolean duplicateUUID = contentRichMsgService.checkDuplicateUUID(queryType, uuid);
+		boolean duplicateUUID = contentRichMsgService.checkDuplicateUUID(queryType, uuid);
 		while (duplicateUUID) {
 			uuid = UUID.randomUUID().toString().toLowerCase();
 			duplicateUUID = contentRichMsgService.checkDuplicateUUID(queryType, uuid);
 		}
-		
+
 		return uuid;
 	}
-	
-	/** 
+
+	/**
 	 * 刪除圖文訊息
 	 */
 	@ControllerLog(description="刪除圖文訊息")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/admin/deleteRichMsg/{richId}")
 	@ResponseBody
-	public ResponseEntity<?> deleteRichMsg(			
-			HttpServletRequest request, 
+	public ResponseEntity<?> deleteRichMsg(
+			HttpServletRequest request,
 			HttpServletResponse response,
-			@CurrentUser CustomUser customUser,  
+			@CurrentUser CustomUser customUser,
 			@PathVariable String richId) {
 		logger.info("deleteRichMsg");
-		
+
 		try {
 			// Check Delete Right
 			boolean isAdmin = customUser.isAdmin();
@@ -291,7 +291,7 @@ public class BCSRichMsgController extends BCSBaseController {
 			}
 			else{
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}	
+			}
 		}
 	}
 }

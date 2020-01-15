@@ -19,24 +19,24 @@ import akka.actor.ActorSystem;
 public class PNPService {
 	/** Logger */
 	private static Logger logger = Logger.getLogger(PNPService.class);
-	
+
 	private List<ActorSystem> actorSystemList = new ArrayList<ActorSystem>();
 	private List<ActorRef> PNPMasterActorList = new ArrayList<ActorRef>();
-	
+
 	public PNPService() {
 		new AkkaSystemFactory<PNPMasterActor>(actorSystemList, PNPMasterActorList, PNPMasterActor.class, "actorSystemList", "PNPMasterActorList");
 	}
-	
+
 	public void tell(Object object) {
 		ActorRef actor = getRandomActor(PNPMasterActorList);
 		actor.tell(object, actor);
 	}
-	
+
 	private ActorRef getRandomActor(List<ActorRef> actors){
         int index = new Random().nextInt(actors.size());
         return actors.get(index);
 	}
-	
+
 	@PreDestroy
 	public void shutdownNow(){
 		logger.info("[DESTROY] Richart AkkaService shutdownNow cleaning up...");
@@ -45,13 +45,13 @@ public class PNPService {
 			for(ActorSystem system : actorSystemList){
 				system.stop(PNPMasterActorList.get(count));
 				count++;
-				
+
 				system.shutdown();
 				system = null;
 			}
-		} catch (Throwable e) {
+		} catch (Exception e) {
 		}
-		
+
 		System.gc();
 		logger.info("[DESTROY] Richart AkkaService shutdownNow destroyed");
 	}

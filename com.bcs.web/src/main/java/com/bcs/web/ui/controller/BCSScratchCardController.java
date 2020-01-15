@@ -44,13 +44,13 @@ import com.bcs.web.ui.model.ScratchCardModel;
 public class BCSScratchCardController {
 	@Autowired
 	private ContentGameService contentGameService;
-	
+
 	@Autowired
 	private ScratchCardDetailService scratchCardDetailService;
-	
+
 	@Autowired
 	private ContentCouponService contentCouponService;
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSScratchCardController.class);
 
@@ -60,7 +60,7 @@ public class BCSScratchCardController {
 		logger.info("scratchCardCreatePage");
 		return BcsPageEnum.ScratchCardCreatePage.toString();
 	}
-	
+
 	/**
 	 * 新增與更新刮刮卡
 	 */
@@ -69,26 +69,26 @@ public class BCSScratchCardController {
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/createGame/scratchCard", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createGame(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser,
-			@RequestBody ScratchCardModel createScratchCardModel, 
-			@RequestParam String actionType, 
+			@RequestBody ScratchCardModel createScratchCardModel,
+			@RequestParam String actionType,
 			@RequestParam String gameId) throws IOException {
 		logger.info("Create scratch card.");
 		try {
 			/*if (!validateData(createScratchCardModel)) {
 				throw new BcsNoticeException("資料不合法！");
-			}*/			
+			}*/
 			String adminUserAccount = customUser.getAccount();
-			
+
 			// Integer couponListCount = 0;
 			ContentGame contentGame = null;
 			ScratchCardDetail scratchCardDetail = null;
-			
+
 			if (actionType.equals("Edit")) { //變更
 				// List<ContentCoupon> targetCouponList;
-				
+
 				contentGame = contentGameService.findOne(gameId);
 				// contentGameService.deleteGame(gameId, adminUserAccount);
 				scratchCardDetail = scratchCardDetailService.getPreScratchCardDetailId(gameId);
@@ -98,13 +98,13 @@ public class BCSScratchCardController {
 				gameId = checkDuplicateUUID("1");
 				contentGame = new ContentGame();
 				scratchCardDetail = new ScratchCardDetail();
-				
-				contentGame.setGameId(gameId);				
+
+				contentGame.setGameId(gameId);
 				scratchCardDetail.setScratchCardDetailId(checkDuplicateUUID("3"));
-				
+
 				logger.info(">> Generate game id: " + gameId);
 			}
-			
+
 			contentGame.setGameName(createScratchCardModel.getGameName());
 			contentGame.setGameContent(createScratchCardModel.getGameContent());
 			contentGame.setModifyUser(adminUserAccount);
@@ -113,22 +113,22 @@ public class BCSScratchCardController {
 			contentGame.setGameType(createScratchCardModel.getGameType());
 			contentGame.setHeaderImageId(createScratchCardModel.getHeaderImageId());
 			contentGame.setFooterImageId(createScratchCardModel.getFooterImageId());
-			
+
 			String savedGameId = contentGameService.createGame(contentGame).getGameId();
-			
+
 			scratchCardDetail.setGameId(savedGameId);
 			scratchCardDetail.setScratchCardBGImageId(createScratchCardModel.getScratchCardBGImageId());
 			scratchCardDetail.setScratchCardFrontImageId(createScratchCardModel.getScratchCardFrontImageId());
 			scratchCardDetail.setScratchCardStartButtonImageId(createScratchCardModel.getScratchCardStartButtonImageId());
-			
+
 			/* 設定此遊戲中所有優惠券的 EVENT_REFERENCE 跟 EVENT_REFERENCE_ID */
 			List<Object> couponList = createScratchCardModel.getCouponList();
 			for(Object coupon : couponList) {
 				contentCouponService.setCouponEvent(coupon, savedGameId, "ScratchCard");
 			}
-			
+
 			scratchCardDetailService.createScratchCardDetail(scratchCardDetail);
-			
+
 			return new ResponseEntity<>("save success", HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
@@ -140,7 +140,7 @@ public class BCSScratchCardController {
 			}
 		}
 	}
-	
+
 	/**
 	 * 取得刮刮卡
 	 */
@@ -149,12 +149,12 @@ public class BCSScratchCardController {
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getGame/scratchCard/{gameId}")
 	@ResponseBody
 	public ResponseEntity<?> getScratchCard(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser,
 			@PathVariable String gameId) throws IOException {
 		logger.info("getScratchCard");
-				
+
 		try{
 			GameModel result = scratchCardDetailService.getScratchCard(gameId);
 
@@ -162,12 +162,12 @@ public class BCSScratchCardController {
 		}
 		catch(Exception e){
 			logger.error(ErrorRecord.recordError(e));
-			
+
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
-	/** 
+
+	/**
 	 * 檢查必填欄位不可為空
 	 */
 	public Boolean validateData(ScratchCardModel createScratchCardModel) {
@@ -183,10 +183,10 @@ public class BCSScratchCardController {
 		if(createScratchCardModel.getScratchCardFrontImageId().isEmpty()){
 			return false;
 		}
-		
+
 		List<PrizeModel> prizes = createScratchCardModel.getPrizes();
 		PrizeModel prizeModel;
-		
+
 		for(int i = 0; i < prizes.size(); i++){
 			prizeModel = prizes.get(i);
 			if(prizeModel.getPrizeName().isEmpty()){
@@ -208,32 +208,32 @@ public class BCSScratchCardController {
 				return false;
 			}
 		}
-		
+
 		BigDecimal totalProbability = new BigDecimal("0");
-		
+
 		for(int i = 0; i < prizes.size(); i++){
 			prizeModel = prizes.get(i);
 			totalProbability = totalProbability.add(new BigDecimal(prizeModel.getPrizeProbability()));
 		}
-		
+
 		if(totalProbability.compareTo(new BigDecimal("100.00")) != 0){
 			return false;
 		}
-		
+
 		return true;
 	}
-	
-	/** 
+
+	/**
 	 * 回傳一個沒有重覆的uuid
 	 */
 	public String checkDuplicateUUID(String queryType) {
 		String uuid = UUID.randomUUID().toString().toLowerCase();
-		Boolean duplicateUUID = scratchCardDetailService.checkDuplicateUUID(queryType, uuid);
+		boolean duplicateUUID = scratchCardDetailService.checkDuplicateUUID(queryType, uuid);
 		while (duplicateUUID) {
 			uuid = UUID.randomUUID().toString().toLowerCase();
 			duplicateUUID = scratchCardDetailService.checkDuplicateUUID(queryType, uuid);
 		}
-		
+
 		return uuid;
 	}
 }

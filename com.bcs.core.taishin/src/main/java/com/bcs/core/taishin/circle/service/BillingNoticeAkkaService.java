@@ -46,7 +46,7 @@ public class BillingNoticeAkkaService {
 
                 system.shutdown();
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
         }
         log.info("[DESTROY] BillingNotice AkkaService shutdownNow destroyed");
     }

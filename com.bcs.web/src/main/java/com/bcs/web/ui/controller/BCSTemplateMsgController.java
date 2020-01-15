@@ -43,22 +43,22 @@ import com.bcs.web.ui.model.TemplateActionModel;
 public class BCSTemplateMsgController {
 	@Autowired
 	private ContentTemplateMsgService contentTemplateMsgService;
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSTemplateMsgController.class);
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/templateMsgCreatePage")
 	public String templateMsgCreatePage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("templateMsgCreatePage");
 		return BcsPageEnum.TemplateMsgCreatePage.toString();
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/templateMsgListPage")
 	public String templateMsgListPage(HttpServletRequest request, HttpServletResponse response) {
 		logger.info("templateMsgListPage");
 		return BcsPageEnum.TemplateMsgListPage.toString();
 	}
-	
+
 	/**
 	 * 新增與更新樣板訊息
 	 */
@@ -66,19 +66,19 @@ public class BCSTemplateMsgController {
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/createTemplateMsg", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createTemplateMsg(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser,
-			@RequestBody List<TemplateMsgModel> createTemplateMsgModels, 
-			@RequestParam String actionType, 
-			@RequestParam String templateId) throws IOException {		
+			@RequestBody List<TemplateMsgModel> createTemplateMsgModels,
+			@RequestParam String actionType,
+			@RequestParam String templateId) throws IOException {
 		try {
 			if (!validateData(createTemplateMsgModels)) {
 				throw new BcsNoticeException("必填欄位不可為空！");
 			}
-			
+
 			String adminUserAccount = customUser.getAccount(); //取得登入者的帳號
-			
+
 			//初始化
 			//儲存用的List
 			List<ContentTemplateMsg> contentTemplateMsgs = new ArrayList<>();
@@ -87,13 +87,13 @@ public class BCSTemplateMsgController {
 			//先前的IdList
 			List<String> templateIds = new ArrayList<>();
 			List<Map<String, String>> actionIdAndLinkIds;
-			
+
 			ContentTemplateMsg contentTemplateMsg;//儲存格式
 			ContentLink contentLink;//儲存格式
 			ContentTemplateMsgAction contentTemplateMsgAction;//儲存格式
 			String templateParentId = "";
 			String linkId = "";
-			
+
 			if (actionType.equals("Edit")) { //變更
 				templateIds = contentTemplateMsgService.getPreTemplateIds(templateId);
 			} else { //新增與複制
@@ -101,23 +101,23 @@ public class BCSTemplateMsgController {
 					templateIds.add(checkDuplicateUUID("1"));
 				}
 			}
-			
+
 			//取出每個templateMsg的資料
 			TemplateMsgModel createTemplateMsgModel;
 			TemplateActionModel templateActionModel;
 			Map<String, String> map;
 			templateParentId = templateIds.get(0);
-			
+
 			for(int i=0; i<createTemplateMsgModels.size(); i++){
 				createTemplateMsgModel = createTemplateMsgModels.get(i);
-				
+
 				if (i+1 > templateIds.size()) { //新增樣板
 					templateIds.add(checkDuplicateUUID("1"));
 				}
-				
+
 				//tempalte的資料
 				contentTemplateMsg = new ContentTemplateMsg();
-				
+
 				contentTemplateMsg.setTemplateId(templateIds.get(i));
 				if(!createTemplateMsgModel.getAltText().isEmpty()){
 					contentTemplateMsg.setAltText(createTemplateMsgModel.getAltText());
@@ -136,7 +136,7 @@ public class BCSTemplateMsgController {
 				if(i>0){
 					contentTemplateMsg.setTemplateParentId(templateParentId);
 				}
-				
+
 				if(!createTemplateMsgModel.getTemplateType().equals(ContentTemplateMsg.TEMPLATE_TYPE_CONFIRM)){
 					if(!createTemplateMsgModel.getTemplateImageId().isEmpty()){
 						contentTemplateMsg.setTemplateImageId(createTemplateMsgModel.getTemplateImageId());
@@ -145,9 +145,9 @@ public class BCSTemplateMsgController {
 						contentTemplateMsg.setTemplateTitle(createTemplateMsgModel.getTemplateTitle());
 					}
 				}
-				
+
 				contentTemplateMsgs.add(contentTemplateMsg);
-				
+
 				//取出template的action
 				List<TemplateActionModel> templateActions = createTemplateMsgModel.getTemplateActions();
 				if (actionType.equals("Edit")) { //變更
@@ -161,17 +161,17 @@ public class BCSTemplateMsgController {
 					map.put("linkId", null);
 					actionIdAndLinkIds.add(map);
 				}
-				
-				for(int j=0; j<templateActions.size(); j++){				
+
+				for(int j=0; j<templateActions.size(); j++){
 					templateActionModel = templateActions.get(j);
-					
+
 					if(j+1>actionIdAndLinkIds.size()){
 						map = new LinkedHashMap<>();
 						map.put("actionId", checkDuplicateUUID("2"));
 						map.put("linkId", null);
 						actionIdAndLinkIds.add(map);
 					}
-					
+
 					linkId = actionIdAndLinkIds.get(j).get("linkId");
 					//action資料
 					contentTemplateMsgAction = new ContentTemplateMsgAction();
@@ -181,7 +181,7 @@ public class BCSTemplateMsgController {
 					contentTemplateMsgAction.setActionType(templateActionModel.getActionType());
 					contentTemplateMsgAction.setActionLabel(templateActionModel.getActionLabel());
 					contentTemplateMsgAction.setStatus(ContentTemplateMsgAction.STATUS_ACTIVE);
-					
+
 					switch(templateActionModel.getActionType()){
 						case ContentTemplateMsgAction.ACTION_TYPE_URI:
 							contentLink = new ContentLink();
@@ -204,13 +204,13 @@ public class BCSTemplateMsgController {
 							contentTemplateMsgAction.setActionData(templateActionModel.getActionData());
 							break;
 					}
-					
+
 					contentTemplateMsgActions.add(contentTemplateMsgAction);
 				}
 			}
-			
+
 			contentTemplateMsgService.createTemplateMsg(contentTemplateMsgs, contentTemplateMsgActions, contentLinks);
-			
+
 			return new ResponseEntity<>("save success", HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
@@ -219,10 +219,10 @@ public class BCSTemplateMsgController {
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
 			}else{
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}	
+			}
 		}
 	}
-	
+
 	/**
 	 * 取得樣板訊息
 	 */
@@ -230,7 +230,7 @@ public class BCSTemplateMsgController {
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getTemplateMsg/{templateId}")
 	@ResponseBody
 	public ResponseEntity<?> getTemplateMsg(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser,
 			@PathVariable String templateId) throws IOException {
@@ -243,11 +243,11 @@ public class BCSTemplateMsgController {
 		}
 		catch(Exception e){
 			logger.error(ErrorRecord.recordError(e));
-			
+
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	/**
 	 * 取得樣板訊息列表
 	 */
@@ -255,7 +255,7 @@ public class BCSTemplateMsgController {
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getTemplateMsgList")
 	@ResponseBody
 	public ResponseEntity<?> getRichMsgList(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser) throws IOException {
 		logger.info("getTemplateMsgList");
@@ -267,45 +267,45 @@ public class BCSTemplateMsgController {
 		}
 		catch(Exception e){
 			logger.error(ErrorRecord.recordError(e));
-			
+
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
-	/** 
+
+	/**
 	 * 檢查必填欄位不可為空
 	 */
 	public Boolean validateData(List<TemplateMsgModel> createTemplateMsgModels) {
 		TemplateMsgModel createTemplateMsgModel;
 		TemplateActionModel templateActionModel;
-		Boolean imageIsEmpty = createTemplateMsgModels.get(0).getTemplateImageId().isEmpty();
-		Boolean titleIsEmpty = createTemplateMsgModels.get(0).getTemplateTitle().isEmpty();
+		boolean imageIsEmpty = createTemplateMsgModels.get(0).getTemplateImageId().isEmpty();
+		boolean titleIsEmpty = createTemplateMsgModels.get(0).getTemplateTitle().isEmpty();
 		String actionType;
-		
+
 		for(int i=0; i<createTemplateMsgModels.size(); i++){
 			createTemplateMsgModel = createTemplateMsgModels.get(i);
-			
+
 			if(createTemplateMsgModel.getTemplateImageId().isEmpty() ^ imageIsEmpty){
 				return false;
 			}
-			
+
 			if(createTemplateMsgModel.getTemplateTitle().isEmpty() ^ titleIsEmpty){
 				return false;
 			}
-			
+
 			if(createTemplateMsgModel.getAltText().isEmpty() && i==0){
 				return false;
 			}
-			
+
 			List<TemplateActionModel> templateActions = createTemplateMsgModel.getTemplateActions();
 			for(int j=0; j<templateActions.size(); j++){
 				templateActionModel = templateActions.get(j);
 				actionType = templateActionModel.getActionType();
-				
+
 				if(templateActionModel.getActionLabel().isEmpty()){
 					return false;
 				}
-				
+
 				switch(actionType){
 					case "uri" :
 						if(templateActionModel.getActionText().isEmpty()){
@@ -327,34 +327,34 @@ public class BCSTemplateMsgController {
 		}
 		return true;
 	}
-	
-	/** 
+
+	/**
 	 * 回傳一個沒有重覆的uuid
 	 */
 	public String checkDuplicateUUID(String queryType) {
 		String uuid = UUID.randomUUID().toString().toLowerCase();
-		Boolean duplicateUUID = contentTemplateMsgService.checkDuplicateUUID(queryType, uuid);
+		boolean duplicateUUID = contentTemplateMsgService.checkDuplicateUUID(queryType, uuid);
 		while (duplicateUUID) {
 			uuid = UUID.randomUUID().toString().toLowerCase();
 			duplicateUUID = contentTemplateMsgService.checkDuplicateUUID(queryType, uuid);
 		}
-		
+
 		return uuid;
 	}
-	
-	/** 
+
+	/**
 	 * 刪除樣板訊息
 	 */
 	@ControllerLog(description="刪除樣板訊息")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/admin/deleteTemplateMsg/{templateId}")
 	@ResponseBody
 	public ResponseEntity<?> deleteTemplateMsg(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
-			@CurrentUser CustomUser customUser,  
+			@CurrentUser CustomUser customUser,
 			@PathVariable String templateId) {
 		logger.info("deleteTemplateMsg");
-		
+
 		try {
 			// Check Delete Right
 			boolean isAdmin = customUser.isAdmin();
@@ -372,7 +372,7 @@ public class BCSTemplateMsgController {
 			}
 			else{
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}	
+			}
 		}
 	}
 }

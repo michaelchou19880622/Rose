@@ -37,25 +37,25 @@ public class ContentGameUIService {
     @Transactional(rollbackFor=Exception.class)
 	public ResponseEntity<?> createGameDo(HttpServletRequest request, HttpServletResponse response,
 			CustomUser customUser,
-			TurntableModel createTurntableModel, String actionType, String gameId) throws Exception {	
+			TurntableModel createTurntableModel, String actionType, String gameId) throws Exception {
 		if (!validateData(createTurntableModel)) {
 			throw new BcsNoticeException("資料不合法！");
 		}
-		
+
 		String adminUserAccount = customUser.getAccount();
 		String turntableDetailId = "";
-		
+
 		List<PrizeModel> prizes = new ArrayList<>();
 		List<String> prePrizeIds = new ArrayList<>();
 		PrizeModel prizeModel;
-		
+
 		ContentGame contentGame = new ContentGame();
 		TurntableDetail turntableDetail = new TurntableDetail();
 		ContentPrize contentPrize;
 		MsgDetail msgDetail;
 		List<ContentPrize> contentPrizes = new ArrayList<>();
 		List<MsgDetail> msgDetails = new ArrayList<>();
-		
+
 		if (actionType.equals("Edit")) { //變更
 			gameId = contentGameService.getPreGameId(gameId);
 			turntableDetailId = turntableDetailService.getPreTurntableDetailId(gameId);
@@ -63,7 +63,7 @@ public class ContentGameUIService {
 			//gameId = checkDuplicateUUID("1");
 			turntableDetailId = checkDuplicateUUID("3");
 		}
-		
+
 		contentGame.setGameId(gameId);
 		contentGame.setGameName(createTurntableModel.getGameName());
 		contentGame.setGameContent(createTurntableModel.getGameContent());
@@ -79,16 +79,16 @@ public class ContentGameUIService {
 //		contentGame.setShareSmallImageId(createTurntableModel.getShareSmallImageId());
 //		contentGame.setGameProcess(createTurntableModel.getGameProcess());
 //		contentGame.setGameLimitCount(createTurntableModel.getGameLimitCount());
-		
+
 		turntableDetail.setTurntableDetailId(turntableDetailId);
 		turntableDetail.setGameId(gameId);
 		turntableDetail.setTurntableBGImageId(createTurntableModel.getTurntableBGImageId());
 		turntableDetail.setTurntableImageId(createTurntableModel.getTurntableImageId());
 		turntableDetail.setPointerImageId(createTurntableModel.getPointerImageId());
-		
-		
+
+
 		prizes = createTurntableModel.getPrizes();
-		
+
 		if (actionType.equals("Edit")) { //變更
 			prePrizeIds = contentGameService.getPrePrizeIds(gameId);
 		} else { //新增與複制
@@ -96,14 +96,14 @@ public class ContentGameUIService {
 				prePrizeIds.add(checkDuplicateUUID("2"));
 			}
 		}
-					
+
 		for(int i = 0; i < prizes.size(); i++){
 			prizeModel = prizes.get(i);
-			
+
 			if (i+1 > prePrizeIds.size()) { //新增獎品
 				prePrizeIds.add(checkDuplicateUUID("2"));
 			}
-			
+
 			contentPrize = new ContentPrize();
 			contentPrize.setPrizeId(prePrizeIds.get(i));
 			contentPrize.setGameId(gameId);
@@ -119,18 +119,18 @@ public class ContentGameUIService {
 			msgDetail = new MsgDetail();
 			msgDetail.setMsgType("TEXT");
 			msgDetail.setText(prizeModel.getMessage());
-			
+
 			contentPrizes.add(contentPrize);
 			msgDetails.add(msgDetail);
 		}
-		
+
 		contentGameService.createGame(contentGame, contentPrizes, msgDetails);
 		turntableDetailService.createTurntableDetail(turntableDetail);
-		
+
 		return new ResponseEntity<>("save success", HttpStatus.OK);
 	}
-	
-	/** 
+
+	/**
 	 * 檢查必填欄位不可為空
 	 */
 	public Boolean validateData(TurntableModel createTurntableModel) {
@@ -152,10 +152,10 @@ public class ContentGameUIService {
 		if(createTurntableModel.getShareMsg().isEmpty()){
 			return false;
 		}
-		
+
 		List<PrizeModel> prizes = createTurntableModel.getPrizes();
 		PrizeModel prizeModel;
-		
+
 		for(int i = 0; i < prizes.size(); i++){
 			prizeModel = prizes.get(i);
 			if(prizeModel.getPrizeName().isEmpty()){
@@ -174,32 +174,32 @@ public class ContentGameUIService {
 				return false;
 			}
 		}
-		
+
 		BigDecimal totalProbability = new BigDecimal("0");
-		
+
 		for(int i = 0; i < prizes.size(); i++){
 			prizeModel = prizes.get(i);
 			totalProbability = totalProbability.add(new BigDecimal(prizeModel.getPrizeProbability()));
 		}
-		
+
 		if(totalProbability.compareTo(new BigDecimal("100.00")) != 0){
 			return false;
 		}
-		
+
 		return true;
 	}
-	
-	/** 
+
+	/**
 	 * 回傳一個沒有重覆的uuid
 	 */
 	public String checkDuplicateUUID(String queryType) {
 		String uuid = UUID.randomUUID().toString().toLowerCase();
-		Boolean duplicateUUID = turntableDetailService.checkDuplicateUUID(queryType, uuid);
+		boolean duplicateUUID = turntableDetailService.checkDuplicateUUID(queryType, uuid);
 		while (duplicateUUID) {
 			uuid = UUID.randomUUID().toString().toLowerCase();
 			duplicateUUID = turntableDetailService.checkDuplicateUUID(queryType, uuid);
 		}
-		
+
 		return uuid;
 	}
 }

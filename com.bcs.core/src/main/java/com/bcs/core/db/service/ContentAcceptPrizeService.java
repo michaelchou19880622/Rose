@@ -24,33 +24,33 @@ public class ContentAcceptPrizeService {
 
 	@Autowired
 	private PrizeListRepository prizeListRepository;
-	
+
     @Autowired
     private LineUserService lineUserService;
-    
+
     @Autowired
     UserFieldSetService userFieldSetService;
-	
+
 	/**
 	 * 新增樣板訊息
      */
     @Transactional(rollbackFor=Exception.class)
-	public void saveAcceptPrize(ContentAcceptedPrize contentAcceptPrize){    	
+	public void saveAcceptPrize(ContentAcceptedPrize contentAcceptPrize){
     	contenAcceptPrizeRepository.save(contentAcceptPrize);
-    	
+
     	PrizeList prize = prizeListRepository.findOne(contentAcceptPrize.getPrizeListId());
 		prize.setStatus(PrizeList.PRIZE_STATUS_WINNED);
 		prizeListRepository.save(prize);
 	}
-    
+
     @Transactional(rollbackFor=Exception.class)
-    public void acceptPrize(String gameId, Integer prizeListId, String MID, String userName, String address, Integer numOfChildren, List<String> preferredProducts){       
-        
+    public void acceptPrize(String gameId, Integer prizeListId, String MID, String userName, String address, Integer numOfChildren, List<String> preferredProducts){
+
         ContentAcceptedPrize contentAcceptPrize = new ContentAcceptedPrize();
         String acceptPrizeId = "";
-        
+
         acceptPrizeId = checkDuplicateUUID("1");
-        
+
         contentAcceptPrize.setAcceptedPrizeId(acceptPrizeId);
         contentAcceptPrize.setGameId(gameId);
         contentAcceptPrize.setPrizeListId(prizeListId);
@@ -63,9 +63,9 @@ public class ContentAcceptPrizeService {
             contentAcceptPrize.setUserPhoneNumber(user.getMobile());
             contentAcceptPrize.setUserEMail(user.getEmail());
         }
-        
+
         saveAcceptPrize(contentAcceptPrize);
-        
+
         List<UserFieldSet> userFieldSetList = new ArrayList<UserFieldSet>();
         if (CollectionUtils.isNotEmpty(preferredProducts)) {
             for (String preferredProduct : preferredProducts) {
@@ -79,7 +79,7 @@ public class ContentAcceptPrizeService {
                 userFieldSetList.add(userFieldSet);
             }
         }
-        
+
         UserFieldSet nameFieldSet = new UserFieldSet();
         nameFieldSet.setKeyData("Name");
         nameFieldSet.setName("姓名");
@@ -88,7 +88,7 @@ public class ContentAcceptPrizeService {
         nameFieldSet.setValue(userName);
         nameFieldSet.setMid(MID);
         userFieldSetList.add(nameFieldSet);
-        
+
         UserFieldSet addressFieldSet = new UserFieldSet();
         addressFieldSet.setKeyData("Address");
         addressFieldSet.setName("地址");
@@ -97,7 +97,7 @@ public class ContentAcceptPrizeService {
         addressFieldSet.setValue(address);
         addressFieldSet.setMid(MID);
         userFieldSetList.add(addressFieldSet);
-        
+
         if (numOfChildren != null) {
             UserFieldSet numOfChildrenFieldSet = new UserFieldSet();
             numOfChildrenFieldSet.setKeyData("NumOfChildren");
@@ -108,18 +108,18 @@ public class ContentAcceptPrizeService {
             numOfChildrenFieldSet.setMid(MID);
             userFieldSetList.add(numOfChildrenFieldSet);
         }
-        
+
         userFieldSetService.save(userFieldSetList);
     }
-    
+
     public List<ContentAcceptedPrize> findByGameIdAndMid(String gameId, String mid){
         return contenAcceptPrizeRepository.findByGameIdAndMid(gameId, mid);
     }
-    
+
     public List<ContentAcceptedPrize> findByGameId(String gameId){
         return contenAcceptPrizeRepository.findByGameId(gameId);
     }
-    
+
     /**
 	 *  檢查有無重覆使用到UUID
      */
@@ -128,21 +128,21 @@ public class ContentAcceptPrizeService {
     		ContentAcceptedPrize contentAcceptPrize = contenAcceptPrizeRepository.findOne(uuid);
     		if (contentAcceptPrize == null) return false;
     	}
-    	
+
 		return true;
     }
-    
-    /** 
+
+    /**
      * 回傳一個沒有重覆的uuid
      */
     public String checkDuplicateUUID(String queryType) {
         String uuid = UUID.randomUUID().toString().toLowerCase();
-        Boolean duplicateUUID = checkDuplicateUUID(queryType, uuid);
+        boolean duplicateUUID = checkDuplicateUUID(queryType, uuid);
         while (duplicateUUID) {
             uuid = UUID.randomUUID().toString().toLowerCase();
             duplicateUUID = checkDuplicateUUID(queryType, uuid);
         }
-        
+
         return uuid;
     }
 }

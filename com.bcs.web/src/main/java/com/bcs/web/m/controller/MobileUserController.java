@@ -38,7 +38,7 @@ public class MobileUserController {
 	private RichartValidateService pagValidateService;
 	@Autowired
 	private MobileGameController mobileGameController;
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(MobileUserController.class);
 
@@ -61,7 +61,7 @@ public class MobileUserController {
 			MID = (String) request.getSession().getAttribute("MID");
 		}
 		else{
-			Boolean validate = false;
+			boolean validate = false;
 			logger.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 			logger.info("@@@@@@@@BCS_PAGE_TYPE.TYPE_REWARD_CARD_LIST_PAGE:"+BCS_PAGE_TYPE.TYPE_REWARD_CARD_LIST_PAGE);
 			logger.info("@@@@@@@@@@@@@@@@@toPage:"+toPage);
@@ -81,10 +81,10 @@ public class MobileUserController {
 				response.sendRedirect(linkUrl);
 				return;
 			}
-			
+
 			request.getSession().setAttribute("MID", MID);
 		}
-		
+
 //		if(BCS_PAGE_TYPE.TYPE_CHANGE_SHOP_PAGE.toString().equals(toPage)){
 //			response.sendRedirect(UriHelper.getChangeShopUri());
 //			return;
@@ -150,28 +150,28 @@ public class MobileUserController {
 
 	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/index")
-	public String indexPage(HttpServletRequest request, 
+	public String indexPage(HttpServletRequest request,
 			HttpServletResponse response,
 			Model model){
 		logger.info("indexPage");
 
 		model.addAttribute("linkDefault", UriHelper.bcsMPage);
-		
+
 		return MobilePageEnum.Page404.toString();
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/redirect")
-	public String redirectPage(HttpServletRequest request, 
+	public String redirectPage(HttpServletRequest request,
 			HttpServletResponse response,
 			Model model){
 		String redirect = request.getParameter("redirect");
 		logger.info("redirectPage:" + redirect);
 
 		model.addAttribute("linkDefault", redirect);
-		
+
 		return MobilePageEnum.PageRedirect.toString();
 	}
-	
+
 //	@RequestMapping(method = RequestMethod.GET, value = "/index")
 //	public String indexPage(HttpServletRequest request, HttpServletResponse response,
 //			Model model){
@@ -180,9 +180,9 @@ public class MobileUserController {
 //		try{
 //			String sessionMID = (String) request.getSession().getAttribute("MID");
 //			logger.info("sessionMID:" + sessionMID);
-//	
+//
 //			if(StringUtils.isNotBlank(sessionMID)){
-//	
+//
 //				// Validate MID is Binding
 //				boolean isBinding = userValidateService.isBinding(sessionMID);
 //				if(isBinding){
@@ -204,7 +204,7 @@ public class MobileUserController {
 //			return MobilePageEnum.UserReadTermsOfBusinessPage.toString();
 //		}
 //	}
-	
+
 //	@RequestMapping(method = RequestMethod.GET, value = "/index")
 //	public String indexPage(HttpServletRequest request, HttpServletResponse response){
 //		logger.info("indexPage");
@@ -212,9 +212,9 @@ public class MobileUserController {
 //		try{
 //			String sessionMID = (String) request.getSession().getAttribute("MID");
 //			logger.info("sessionMID:" + sessionMID);
-//	
+//
 //			if(StringUtils.isNotBlank(sessionMID)){
-//	
+//
 //				// Validate MID is Binding
 //				boolean isBinding = userValidateService.isBinding(sessionMID);
 //				if(isBinding){
@@ -251,20 +251,20 @@ public class MobileUserController {
 
 //	@RequestMapping(method = RequestMethod.GET, value = "/userBindingPage")
 //	public String userBindingPage(
-//			@RequestParam(value = "readTermsOfBusiness", required = false, defaultValue = "false") boolean readTermsOfBusiness, 
-//			HttpServletRequest request, 
+//			@RequestParam(value = "readTermsOfBusiness", required = false, defaultValue = "false") boolean readTermsOfBusiness,
+//			HttpServletRequest request,
 //			HttpServletResponse response,
 //			Model model) {
 //		logger.info("userBindingPage");
 //
 //		try{
 //			String sessionMID = (String) request.getSession().getAttribute("MID");
-//	
+//
 //			// Validate MID is Binding
 //			boolean isBinding = userValidateService.isBinding(sessionMID);
-//			
+//
 //			if(StringUtils.isNotBlank(sessionMID) && !isBinding){
-//	
+//
 //				// 若尚未在閱讀條款頁面勾選 "我已閱讀..."，就轉向閱讀條款頁面
 //				if (!readTermsOfBusiness) {
 //					mobilePageService.visitPageLog(sessionMID, MobilePageEnum.UserReadTermsOfBusinessPage.getName(), "userBindingPage");
@@ -275,7 +275,7 @@ public class MobileUserController {
 //				}
 //			}
 //			else if(StringUtils.isNotBlank(sessionMID) && isBinding){
-//				
+//
 //				mobilePageService.visitPageLog(sessionMID, MobilePageEnum.TurntableIndexPage.getName(), "userBindingPage");
 //				return mobileGameController.turntableIndexPage(request, response, model);
 //			}
@@ -297,7 +297,7 @@ public class MobileUserController {
 //
 //		// Validate MID is Binding
 //		boolean isBinding = userValidateService.isBinding(sessionMID);
-//		
+//
 //		if(StringUtils.isNotBlank(sessionMID) && !isBinding){
 //
 //			try{
@@ -320,9 +320,9 @@ public class MobileUserController {
 //				if(StringUtils.isBlank(Gender)){
 //					throw new Exception("User Gender Null");
 //				}
-//				
+//
 //				String Birthday = BirthdayYear + BirthdayMonth;
-//					
+//
 //				pagValidateService.bindedLineUser(sessionMID, PhoneNum, Birthday, Gender);
 //				response.sendRedirect(UriHelper.getIndexUri());
 //				return;
@@ -347,17 +347,17 @@ public class MobileUserController {
 //	@RequestMapping(method = RequestMethod.GET, value = "/userDoBindingFailPage")
 //	public String userDoBindingFailPage(HttpServletRequest request, HttpServletResponse response){
 //		logger.info("userDoBindingFailPage");
-//		
+//
 //		String sessionMID = (String) request.getSession().getAttribute("MID");
 //
 //		mobilePageService.visitPageLog(sessionMID, MobilePageEnum.UserDoBindingFailPage.getName(), "userDoBindingFailPage");
 //		return MobilePageEnum.UserDoBindingFailPage.toString();
 //	}
-//	
+//
 //	@RequestMapping(method = RequestMethod.GET, value = "/doBinding")
 //	public String doBindingGet(HttpServletRequest request, HttpServletResponse response){
 //		logger.info("doBindingGet");
-//		
+//
 //		return indexPage(request, response);
 //	}
 
@@ -367,20 +367,20 @@ public class MobileUserController {
 //
 //		try{
 //			String sessionMID = (String) request.getSession().getAttribute("MID");
-//	
+//
 //			// Validate MID is Binding
 //			boolean isBinding = userValidateService.isBinding(sessionMID);
-//			
+//
 //			if(StringUtils.isNotBlank(sessionMID) && isBinding){
 //				// Birthday Record
 //				String Birthday = (String) request.getSession().getAttribute("Birthday");
 //				if(StringUtils.isNotBlank(Birthday)){
 //					request.getSession().setAttribute("GetCardSuccess", true);
-//	
+//
 //					mobilePageService.visitPageLog(sessionMID, MobilePageEnum.UserCardPage.getName(), "QuickPass");
 //					return MobilePageEnum.UserCardPage.toString();
 //				}
-//	
+//
 //				mobilePageService.visitPageLog(sessionMID, MobilePageEnum.UserGetCardPage.getName(), "userGetCardPage");
 //				return MobilePageEnum.UserGetCardPage.toString();
 //			}
@@ -419,7 +419,7 @@ public class MobileUserController {
 //				if(StringUtils.isBlank(BirthdayDay)){
 //					throw new Exception("User Birthday Day Null");
 //				}
-//				
+//
 //				LineUser lineUser = lineUserService.findByMid(sessionMID);
 //				if(lineUser == null || StringUtils.isBlank(lineUser.getUserId())){
 //					throw new Exception("User Not Binded");
@@ -434,11 +434,11 @@ public class MobileUserController {
 //					if(validateResult.get("result").intValue() == 1){
 //						// Birthday Record
 //						request.getSession().setAttribute("Birthday", Birthday);
-//						
+//
 //						lineUserService.saveLog(lineUser, sessionMID, LOG_TARGET_ACTION_TYPE.ACTION_GetCard, sessionMID);
 //
 //						request.getSession().setAttribute("GetCardSuccess", true);
-//						
+//
 //						response.sendRedirect(UriHelper.getUserCardPageUri());
 //						return;
 //					}
@@ -457,7 +457,7 @@ public class MobileUserController {
 //			catch(Exception e){
 //				logger.error(ErrorRecord.recordError(e));
 //			}
-//			
+//
 //			response.sendRedirect(UriHelper.getUserGetCardFailPageUri());
 //			return;
 //		}
@@ -484,7 +484,7 @@ public class MobileUserController {
 //			return MobilePageEnum.UserNotBindedPage.toString();
 //		}
 //	}
-	
+
 //	@RequestMapping(method = RequestMethod.GET, value = "/userGetCardFailPage")
 //	public String userGetCardFailPage(HttpServletRequest request, HttpServletResponse response){
 //		logger.info("userGetCardFailPage");
@@ -502,7 +502,7 @@ public class MobileUserController {
 //			return MobilePageEnum.UserNotBindedPage.toString();
 //		}
 //	}
-	
+
 //	@RequestMapping(method = RequestMethod.GET, value = "/doGetCard")
 //	public String doGetCardGet(HttpServletRequest request, HttpServletResponse response){
 //		logger.info("doGetCardGet");
@@ -518,18 +518,18 @@ public class MobileUserController {
 //
 //		// Validate MID is Binding
 //		boolean isBinding = userValidateService.isBinding(sessionMID);
-//		
+//
 //		if(StringUtils.isNotBlank(sessionMID) && isBinding){
 //			boolean GetCardSuccess = (boolean) request.getSession().getAttribute("GetCardSuccess");
 //
 //			if(GetCardSuccess){
 //				String inputStr = userValidateService.getMyId(sessionMID);
-//	
+//
 //				BarcodeGenerator.generateBarcode128(inputStr, response.getOutputStream());
 //				return ;
 //			}
 //		}
-//		
+//
 //		throw new Exception("User Error");
 //	}
 
@@ -542,18 +542,18 @@ public class MobileUserController {
 //
 //		// Validate MID is Binding
 //		boolean isBinding = userValidateService.isBinding(sessionMID);
-//		
+//
 //		if(StringUtils.isNotBlank(sessionMID) && isBinding){
 //			boolean GetCardSuccess = (boolean) request.getSession().getAttribute("GetCardSuccess");
 //
 //			if(GetCardSuccess){
 //				String inputStr = userValidateService.getMyId(sessionMID);
 //				String result= inputStr.substring(inputStr.length() -4, inputStr.length());
-//	
+//
 //				return new ResponseEntity<>(result, HttpStatus.OK);
 //			}
 //		}
-//		
+//
 //		throw new Exception("User Error");
 //	}
 }

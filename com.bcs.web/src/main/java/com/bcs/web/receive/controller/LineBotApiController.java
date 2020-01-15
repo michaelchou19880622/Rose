@@ -71,7 +71,7 @@ public class LineBotApiController {
             response.setStatus(200);
             SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_LineBotApi, LOG_TARGET_ACTION_TYPE.ACTION_Receive, start, 200, receivingMsg, "200");
             return;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error(ErrorRecord.recordError(e));
         }
         logger.info("-------lineBotApiReceiving Fail-------");

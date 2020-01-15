@@ -51,23 +51,23 @@ public class LineUserUIService {
 
         Map<String, List<String>> dataMap = null;
         if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType)){
-            dataMap = importDataFromExcel.importDataKeyValueList(filePart.getInputStream());    
+            dataMap = importDataFromExcel.importDataKeyValueList(filePart.getInputStream());
         }
         else if("text/plain".equals(contentType)){
-            dataMap = importDataFromText.importDataKeyValueList(filePart.getInputStream()); 
+            dataMap = importDataFromText.importDataKeyValueList(filePart.getInputStream());
         }
-        
+
         int count = 0;
         if(dataMap != null && dataMap.size() > 0){
-            
-            String[] keyRows = {"name", "description", "type", "format"}; 
-            
+
+            String[] keyRows = {"name", "description", "type", "format"};
+
             List<String> nameList = dataMap.get(keyRows[0]);
             List<String> descriptionList = dataMap.get(keyRows[1]);
             List<String> typeList = dataMap.get(keyRows[2]);
             List<String> formatList = dataMap.get(keyRows[3]);
-            
-            for (String key : dataMap.keySet()) { 
+
+            for (String key : dataMap.keySet()) {
                 try {
                     boolean isSkip = false;
                     for (String keyRow : keyRows) {
@@ -78,31 +78,31 @@ public class LineUserUIService {
                     if (isSkip) {
                         continue;
                     }
-                    
-                    
+
+
                     List<String> valueList = dataMap.get(key);
-                    
+
                     String mid = valueList.get(0);
-                    
+
                     LineUser user = new LineUser();
                     user.setMid(mid);
                     user.setStatus(LineUser.STATUS_BINDED);
                     user.setCreateTime(new Date());
                     user.setModifyTime(new Date());
                     user.setSoureType(MsgBotReceive.SOURCE_TYPE_USER);
-                    
+
                     for (int i = 1; i < valueList.size(); i++) {
                         if (valueList.size() <= i) {
                             break;
                         }
-                        
+
                         String name = nameList.get(i);
                         String description = descriptionList.get(i);
                         String type = typeList.get(i);
                         String format = formatList.size() > i ? formatList.get(i) : null;
                         String value = valueList.get(i);
-                        
-                        
+
+
                         if ("MID".equals(name)) {
                             user.setMid(value);
                         } else if ("Name".equals(name)) {
@@ -123,7 +123,7 @@ public class LineUserUIService {
                             userFieldSetService.save(ufs);
                         }
                     }
-                    
+
                     lineUserService.save(user);
                     count++;
                     logger.info("count=" + count);
@@ -132,11 +132,11 @@ public class LineUserUIService {
                     logger.error("key=" + key);
                 }
             }
-            
+
 
             Map<String, Object> result = new HashMap<String, Object>();
             result.put("count", count);
-            
+
             return result;
         }
         else if(dataMap == null){
@@ -146,12 +146,12 @@ public class LineUserUIService {
             throw new BcsNoticeException("沒有上傳資料");
         }
     }
-	
-	
+
+
 	public enum USERFIELD {
-        CUSTID("CUSTID","身分證字號","String"), 
-        PHONE("PHONE","手機號碼","String"), 
-        GENDER("GENDER","性別","String"), 
+        CUSTID("CUSTID","身分證字號","String"),
+        PHONE("PHONE","手機號碼","String"),
+        GENDER("GENDER","性別","String"),
         BIRTH("BIRTH","生日","Date"),
 		ADDRESS("ADDRESS","通訊地址","String"),
 		CITYDISTRICT("CITYDISTRICT","縣市行政區","String"),
@@ -165,11 +165,11 @@ public class LineUserUIService {
 		BINDINGTIME("BINDINGTIME","綁定時間","Date"),
 		SENDINGTIME("SENDINGTIME","資料更新時間","Date"),
 		STATUS("STATUS","綁定狀態","String");
-		
+
         private String colum_en;
         private String colum_ch;
         private String type;
-        
+
         // 构造方法
         private USERFIELD(String colum_en,String colum_ch,String type) {
             this.colum_en = colum_en;
@@ -209,9 +209,9 @@ public class LineUserUIService {
 		public void setType(String type) {
 			this.type = type;
 		}
-        
+
     }
-	
+
     public int uploadLineUserListCSVData(MultipartFile filePart, String modifyUser, Date modifyTime) throws Exception{
         String fileName = filePart.getOriginalFilename();
         logger.info("getOriginalFilename:" + fileName);
@@ -221,70 +221,70 @@ public class LineUserUIService {
 
         List<Map<String, String>> lineUserList = null;
         if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType)){
-        	lineUserList = importDataFromExcel.importCSVDataKeyValueList(filePart.getInputStream());    
+        	lineUserList = importDataFromExcel.importCSVDataKeyValueList(filePart.getInputStream());
         }
         else if("text/plain".equals(contentType)){
-        	lineUserList = importDataFromText.importCSVDataKeyValueList(filePart.getInputStream()); 
+        	lineUserList = importDataFromText.importCSVDataKeyValueList(filePart.getInputStream());
         }
-        
+
         if(CollectionUtils.isEmpty(lineUserList)){
             throw new BcsNoticeException("上傳格式錯誤");
         }
-        
+
         final List<Map<String, String>> lineUserListFinal = lineUserList;
-        
+
 		Thread thread = new Thread(new Runnable() {
 			public void run() {
 				updateLineUserAndUserFieldSet(lineUserListFinal);
 			}
 		});
-		
+
 		thread.start();
-        
+
 		return lineUserListFinal.size();
 
     }
-    
+
     private void updateLineUserAndUserFieldSet(List<Map<String, String>> lineUserList){
 		Date time = new Date();
 
-        if(lineUserList != null && lineUserList.size() > 0){        
-            for (Map<String,String> lineUser : lineUserList) { 
+        if(lineUserList != null && lineUserList.size() > 0){
+            for (Map<String,String> lineUser : lineUserList) {
                 try {
                 	logger.info("lineUser: "+lineUser);
                 	String UID = lineUser.get(USERFIELD.UID.getColum_en());
                 	List<UserFieldSet> existedUserFieldSets = userFieldSetService.findByMid(UID);
-                	                	
+
                 	LineUser user = lineUserService.findByMid(UID);
-                	
+
                 	if(user==null){
-                       user = new LineUser(); 
+                       user = new LineUser();
                     }
 
                   //針對 lineUser 欄位,csv 有資料就覆蓋,沒有就新增
-                  user.setMid((lineUser.get(USERFIELD.UID.toString()) != null)?lineUser.get(USERFIELD.UID.toString()):user.getMid()); 
-                  user.setStatus((lineUser.get(USERFIELD.STATUS.toString()) != null && user.getStatus() != LineUser.STATUS_BLOCK )?lineUser.get(USERFIELD.STATUS.toString()):user.getStatus());   
+                  user.setMid((lineUser.get(USERFIELD.UID.toString()) != null)?lineUser.get(USERFIELD.UID.toString()):user.getMid());
+                  user.setStatus((lineUser.get(USERFIELD.STATUS.toString()) != null && user.getStatus() != LineUser.STATUS_BLOCK )?lineUser.get(USERFIELD.STATUS.toString()):user.getStatus());
                   user.setIsBinded((lineUser.get(USERFIELD.STATUS.toString()) != null )?lineUser.get(USERFIELD.STATUS.toString()):user.getStatus());
                   user.setSoureType(MsgBotReceive.SOURCE_TYPE_USER);
 
-                  user.setAddress((lineUser.get(USERFIELD.ADDRESS.toString()) != null )?lineUser.get(USERFIELD.ADDRESS.toString()):user.getAddress()); 
-                  user.setBirthday((lineUser.get(USERFIELD.BIRTHDAY.toString()) != null )?lineUser.get(USERFIELD.BIRTHDAY.toString()):user.getBirthday()); 
-                  user.setCityDistrict((lineUser.get(USERFIELD.CITYDISTRICT.toString()) != null )?lineUser.get(USERFIELD.CITYDISTRICT.toString()):user.getCityDistrict());  
-                  user.setCustId((lineUser.get(USERFIELD.CUSTID.toString()) != null )?lineUser.get(USERFIELD.CUSTID.toString()):user.getCustId()); 
-                  user.setGender((lineUser.get(USERFIELD.GENDER.toString()) != null )?lineUser.get(USERFIELD.GENDER.toString()):user.getGender()); 
-                  user.setHasInv((lineUser.get(USERFIELD.HASINV.toString()) != null )?lineUser.get(USERFIELD.HASINV.toString()):user.getHasInv()); 
-                  user.setPhone((lineUser.get(USERFIELD.PHONE.toString()) != null )?lineUser.get(USERFIELD.PHONE.toString()):user.getPhone()); 
-                                   
-                  user.setCreateTime((user.getCreateTime()==null )?time:user.getCreateTime()); 
+                  user.setAddress((lineUser.get(USERFIELD.ADDRESS.toString()) != null )?lineUser.get(USERFIELD.ADDRESS.toString()):user.getAddress());
+                  user.setBirthday((lineUser.get(USERFIELD.BIRTHDAY.toString()) != null )?lineUser.get(USERFIELD.BIRTHDAY.toString()):user.getBirthday());
+                  user.setCityDistrict((lineUser.get(USERFIELD.CITYDISTRICT.toString()) != null )?lineUser.get(USERFIELD.CITYDISTRICT.toString()):user.getCityDistrict());
+                  user.setCustId((lineUser.get(USERFIELD.CUSTID.toString()) != null )?lineUser.get(USERFIELD.CUSTID.toString()):user.getCustId());
+                  user.setGender((lineUser.get(USERFIELD.GENDER.toString()) != null )?lineUser.get(USERFIELD.GENDER.toString()):user.getGender());
+                  user.setHasInv((lineUser.get(USERFIELD.HASINV.toString()) != null )?lineUser.get(USERFIELD.HASINV.toString()):user.getHasInv());
+                  user.setPhone((lineUser.get(USERFIELD.PHONE.toString()) != null )?lineUser.get(USERFIELD.PHONE.toString()):user.getPhone());
+
+                  user.setCreateTime((user.getCreateTime()==null )?time:user.getCreateTime());
                   user.setModifyTime(time);
-                  
+
                   lineUserService.save(user);
-                	
+
                 	for (Map.Entry<String, String> lineUserColum : lineUser.entrySet()) {
-                			Boolean isExsited = false; 
+                			boolean isExsited = false;
 	                    	USERFIELD userField  =USERFIELD.getByColum(lineUserColum.getKey());//尋找是否有ENUM可以處理的欄位
-	                    	UserFieldSet userFieldSet = new UserFieldSet();	
-	                    	
+	                    	UserFieldSet userFieldSet = new UserFieldSet();
+
 	                    	if(userField!=null && !existedUserFieldSets.isEmpty()){//是否有現存的資料存在
 	                    		for(UserFieldSet existedUserFieldSet :existedUserFieldSets){//如果有重複的KEYDATA就覆蓋更新
 	                        		if(existedUserFieldSet.getKeyData().equals(userField.getColum_en())){
@@ -305,7 +305,7 @@ public class LineUserUIService {
 	                    		userFieldSet.setSetTime(time);//時間
 	                    		userFieldSetService.save(userFieldSet);
 	                    	}
-                	}                	
+                	}
                 } catch (Exception e) {
                     logger.error(ErrorRecord.recordError(e));
                 }

@@ -20,10 +20,10 @@ import com.google.common.cache.LoadingCache;
 
 @Service
 public class ContentLinkService {
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(ContentLinkService.class);
-	
+
 	@Autowired
 	private ContentLinkRepository contentLinkRepository;
 
@@ -41,7 +41,7 @@ public class ContentLinkService {
 					}
 				});
 	}
-	
+
 	@PreDestroy
 	public void cleanUp() {
 		logger.info("[DESTROY] ContentLinkService cleaning up...");
@@ -51,34 +51,34 @@ public class ContentLinkService {
 				dataCache = null;
 			}
 		}
-		catch(Throwable e){}
-		
+		catch(Exception e){}
+
 		System.gc();
 		logger.info("[DESTROY] ContentLinkService destroyed.");
 	}
-	
+
 	private boolean notNull(ContentLink result){
 		if(result != null && StringUtils.isNotBlank(result.getLinkId()) && !"-".equals(result.getLinkId())){
 			return true;
 		}
 		return false;
 	}
-    
+
     /**
   	 * 取得所有連結清單
        */
   	public List<Object[]> getAllContentLinkUrl(){
 		return contentLinkRepository.findAllLinkUrl();
     }
-  	
+
   	public List<Object[]> findAllLinkUrlByFlag(String flag){
   		return contentLinkRepository.findAllLinkUrlByFlag(flag);
   	}
-  	
+
   	public List<Object[]> findAllLinkUrlByLikeFlag(String flag){
   		return contentLinkRepository.findAllLinkUrlByLikeFlag(flag);
   	}
-  	
+
   	public List<Object[]> findAllLinkUrlByLikeTitle(String title){
   		return contentLinkRepository.findAllLinkUrlByLikeTitle(title);
   	}
@@ -94,11 +94,11 @@ public class ContentLinkService {
   	public List<ContentLink> findByLinkUrl(String linkUrl){
 		return contentLinkRepository.findByLinkUrl(linkUrl);
   	}
-  	
+
   	public List<ContentLink> findByLinkIdIn(List<String> linkIds){
   		return contentLinkRepository.findByLinkIdIn(linkIds);
   	}
-	
+
 	public void save(ContentLink contentLink){
 		contentLinkRepository.save(contentLink);
 
@@ -106,13 +106,13 @@ public class ContentLinkService {
 			dataCache.put(contentLink.getLinkId(), contentLink);
 		}
 	}
-	
+
 	public void save(List<ContentLink> contentLinks){
 		for(ContentLink contentLink : contentLinks){
 			this.save(contentLink);
 		}
 	}
-	
+
 	public ContentLink findOne(String linkId){
 		try {
 			ContentLink result = dataCache.get(linkId);
@@ -120,38 +120,38 @@ public class ContentLinkService {
 				return result;
 			}
 		} catch (Exception e) {}
-		
+
 		ContentLink result = contentLinkRepository.findOne(linkId);
 		if(result != null){
 			dataCache.put(linkId, result);
 		}
 		return result;
 	}
-	
+
 	public List<Object[]> countClickCountByLinkUrlAndTime(String linkUrl, String start, String end){
 		return contentLinkRepository.countClickCountByLinkUrlAndTime(linkUrl, start, end);
 	}
-	
+
 	public List<Object[]> countClickCountByLinkUrl(String linkUrl){
 		return contentLinkRepository.countClickCountByLinkUrl(linkUrl);
 	}
-	
+
 	public List<Object[]> countClickCountByLinkUrl(String linkUrl, String start){
 		return contentLinkRepository.countClickCountByLinkUrl(linkUrl, start);
 	}
-	
+
 	public List<Object[]> countClickCountByLinkIdAndTime(String linkUrl, String start, String end){
 		return contentLinkRepository.countClickCountByLinkIdAndTime(linkUrl, start, end);
 	}
-	
+
 	public List<Object[]> countClickCountByLinkId(String LinkId){
 		return contentLinkRepository.countClickCountByLinkId(LinkId);
 	}
-	
+
 	public List<Object[]> countClickCountByLinkId(String LinkId, String start){
 		return contentLinkRepository.countClickCountByLinkId(LinkId, start);
 	}
-	
+
 	public List<String> findClickMidByLinkUrlAndTime(String linkUrl, String start, String end){
 		return contentLinkRepository.findClickMidByLinkUrlAndTime(linkUrl, start, end);
 	}

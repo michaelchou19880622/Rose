@@ -36,42 +36,42 @@ public class TurntableDetailService {
 	public static final String TURNTABLE_SYNC = "TURNTABLE_SYNC";
 	/* @Autowired
 	private ContentGameRepository contentGameRepository; */
-	
+
 	@Autowired
 	private ContentPrizeRepository contentPrizeRepository;
-	
+
 	@Autowired
 	private TurntableDetailRepository turntableDetailRepository;
-	
+
 	@PersistenceContext
     EntityManager entityManager;
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(TurntableDetailService.class);
-	
+
 	protected LoadingCache<String, GameModel> dataCache;
 
 	private Timer flushTimer = new Timer();
-	
+
 	private class CustomTask extends TimerTask{
-		
+
 		@Override
 		public void run() {
 
 			try{
 				// Check Data Sync
-				Boolean isReSyncData = DataSyncUtil.isReSyncData(TURNTABLE_SYNC);
+				boolean isReSyncData = DataSyncUtil.isReSyncData(TURNTABLE_SYNC);
 				if(isReSyncData){
 					dataCache.invalidateAll();
 					DataSyncUtil.syncDataFinish(TURNTABLE_SYNC);
 				}
 			}
-			catch(Throwable e){
+			catch(Exception e){
 				logger.error(ErrorRecord.recordError(e));
 			}
 		}
 	}
-	
+
 	public TurntableDetailService(){
 
 		flushTimer.schedule(new CustomTask(), 120000, 30000);
@@ -86,46 +86,46 @@ public class TurntableDetailService {
 					}
 				});
 	}
-	
+
 	/**
 	 * 取得之前的TurntableDetailId
      */
 	public String getPreTurntableDetailId(String gameId) {
 		String preTurntableDetailId;
-		
+
 		TurntableDetail turntableDetail = turntableDetailRepository.findOneByGameId(gameId);
-		
+
 		preTurntableDetailId = turntableDetail.getTurntableDetailId();
-		
+
     	return preTurntableDetailId;
     }
-	
+
 	/**
 	 * refresh
      */
-	public void refresh(String gameId){    	
+	public void refresh(String gameId){
     	dataCache.refresh(gameId);
 		DataSyncUtil.settingReSync(TURNTABLE_SYNC);
 	}
-	
+
 	/**
 	 * 新增TurntableDetail
      */
     @Transactional(rollbackFor=Exception.class)
-	public void createTurntableDetail(TurntableDetail turntableDetail){    	
+	public void createTurntableDetail(TurntableDetail turntableDetail){
     	turntableDetailRepository.save(turntableDetail);
-    	
+
     	//dataCache.refresh(turntableDetail.getGameId());
 		DataSyncUtil.settingReSync(TURNTABLE_SYNC);
 	}
-	
+
 	private boolean notNull(GameModel result){
 		if(result != null && result.getGameId() != null){
 			return true;
 		}
 		return false;
 	}
-	
+
     /**
 	 * 取得遊戲
      */
@@ -137,10 +137,10 @@ public class TurntableDetailService {
 				return result;
 			}
 		} catch (Exception e) {}
-		
+
 		int gameSize = 12;
-		
-    	String queryString = 
+
+    	String queryString =
     			"SELECT BCS_CONTENT_GAME.GAME_ID, "
     				+ "BCS_CONTENT_GAME.GAME_NAME,"
     				+ "BCS_CONTENT_GAME.GAME_CONTENT,"
@@ -154,7 +154,7 @@ public class TurntableDetailService {
     				+ "BCS_CONTENT_GAME.GAME_PROCESS,"
     				+ "BCS_CONTENT_GAME.GAME_LIMIT_COUNT,"
     				+ "BCS_CONTENT_GAME.SHARE_SMALL_IMAGE_ID,"
-    				
+
     				+ "BCS_CONTENT_PRIZE.PRIZE_NAME,"
     				+ "BCS_CONTENT_PRIZE.PRIZE_IMAGE_ID,"
     				+ "BCS_CONTENT_PRIZE.PRIZE_CONTENT,"
@@ -162,7 +162,7 @@ public class TurntableDetailService {
     				+ "BCS_CONTENT_PRIZE.PRIZE_PROBABILITY, "
     				+ "BCS_CONTENT_PRIZE.PRIZE_ID, "
     				+ "BCS_CONTENT_PRIZE.IS_CONSOLATION_PRIZE, "
-    				
+
     				+ "BCS_MSG_DETAIL.TEXT "
     			+ "FROM BCS_CONTENT_GAME "
     				+ "LEFT JOIN BCS_CONTENT_PRIZE ON BCS_CONTENT_GAME.GAME_ID = BCS_CONTENT_PRIZE.GAME_ID "
@@ -170,17 +170,17 @@ public class TurntableDetailService {
     				+ "LEFT JOIN BCS_MSG_DETAIL ON BCS_MSG_DETAIL.MSG_DETAIL_ID = BCS_CONTENT_PRIZE.MSG_DETAIL_ID "
     			+ "WHERE BCS_CONTENT_GAME.GAME_ID = ?1 AND BCS_CONTENT_GAME.STATUS <> 'DELETE' AND BCS_CONTENT_PRIZE.STATUS <> 'DELETE' "
     			+ "ORDER BY BCS_CONTENT_PRIZE.PRIZE_LETTER";
-    	
+
     	Query query = entityManager.createNativeQuery(queryString).setParameter(1, gameId);
 		List<Object[]> list = query.getResultList();
 
 		GameModel gameModel = new GameModel();
 		List<PrizeModel> prizeModels = new ArrayList<>();
 		Object[] o;
-		
+
 		for(int i = 0; i<list.size(); i++){
 			o = list.get(i);
-			
+
 			if(i == 0){
 				gameModel.setGameId(o[0].toString());
 				gameModel.setGameName(o[1].toString());
@@ -207,27 +207,27 @@ public class TurntableDetailService {
 			prizeModel.setPrizeId(o[gameSize+6].toString());
 			prizeModel.setIsConsolationPrize(Boolean.parseBoolean(o[gameSize+7].toString()));
 			prizeModel.setMessageText(o[gameSize+8].toString());
-				
+
 			prizeModels.add(prizeModel);
 		}
-		
+
 		gameModel.setPrizes(prizeModels);
-		
+
     	logger.debug(gameModel);
 		if(notNull(gameModel)){
 			dataCache.put(gameId.toString(), gameModel);
 		}
-		
+
 		return gameModel;
     }
-    
+
     public String toString(Object o){
     	if(o != null){
     		return o.toString();
     	}
     	return "";
     }
-    
+
 	/**
 	 *  檢查有無重覆使用到UUID
      */
@@ -242,7 +242,7 @@ public class TurntableDetailService {
     		TurntableDetail turntableDetail = turntableDetailRepository.findOne(uuid);
     		if (turntableDetail == null) return false;
     	}
-    	
+
 		return true;
     }
 }

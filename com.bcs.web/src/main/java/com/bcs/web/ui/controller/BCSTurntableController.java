@@ -40,7 +40,7 @@ public class BCSTurntableController {
 	private TurntableDetailService turntableDetailService;
 	@Autowired
 	private ContentGameUIService contentGameUIService;
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSTurntableController.class);
 
@@ -50,7 +50,7 @@ public class BCSTurntableController {
 		logger.info("turntableCreatePage");
 		return BcsPageEnum.TurntableCreatePage.toString();
 	}
-	
+
 	/**
 	 * 新增與更新轉盤遊戲
 	 */
@@ -59,7 +59,7 @@ public class BCSTurntableController {
 	@ResponseBody
 	public ResponseEntity<?> createGame(HttpServletRequest request, HttpServletResponse response,
 			@CurrentUser CustomUser customUser,
-			@RequestBody TurntableModel createTurntableModel, @RequestParam String actionType, @RequestParam String gameId) throws IOException {		
+			@RequestBody TurntableModel createTurntableModel, @RequestParam String actionType, @RequestParam String gameId) throws IOException {
 		try {
 			return contentGameUIService.createGameDo(request, response, customUser, createTurntableModel, actionType, gameId);
 		} catch (Exception e) {
@@ -69,10 +69,10 @@ public class BCSTurntableController {
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
 			}else{
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}	
+			}
 		}
 	}
-	
+
 	/**
 	 * 取得轉盤遊戲
 	 */
@@ -82,7 +82,7 @@ public class BCSTurntableController {
 	public ResponseEntity<?> getTurntable(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable Long gameId) throws IOException {
 		logger.info("getTurntable");
-				
+
 		try{
 			GameModel result = turntableDetailService.getTurntable(gameId);
 
@@ -90,22 +90,22 @@ public class BCSTurntableController {
 		}
 		catch(Exception e){
 			logger.error(ErrorRecord.recordError(e));
-			
+
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
-	/** 
+
+	/**
 	 * 回傳一個沒有重覆的uuid
 	 */
 	public String checkDuplicateUUID(String queryType) {
 		String uuid = UUID.randomUUID().toString().toLowerCase();
-		Boolean duplicateUUID = turntableDetailService.checkDuplicateUUID(queryType, uuid);
+		boolean duplicateUUID = turntableDetailService.checkDuplicateUUID(queryType, uuid);
 		while (duplicateUUID) {
 			uuid = UUID.randomUUID().toString().toLowerCase();
 			duplicateUUID = turntableDetailService.checkDuplicateUUID(queryType, uuid);
 		}
-		
+
 		return uuid;
 	}
 }

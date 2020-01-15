@@ -17,10 +17,10 @@ import com.google.common.cache.LoadingCache;
 
 @Service
 public class ContentStickerService {
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(ContentStickerService.class);
-	
+
 	@Autowired
 	private ContentStickerRepository contentStickerRepository;
 
@@ -38,7 +38,7 @@ public class ContentStickerService {
 					}
 				});
 	}
-	
+
 	@PreDestroy
 	public void cleanUp() {
 		logger.info("[DESTROY] ContentStickerService cleaning up...");
@@ -48,8 +48,8 @@ public class ContentStickerService {
 				dataCache = null;
 			}
 		}
-		catch(Throwable e){}
-		
+		catch(Exception e){}
+
 		System.gc();
 		logger.info("[DESTROY] ContentStickerService destroyed.");
 	}
@@ -61,14 +61,14 @@ public class ContentStickerService {
 			dataCache.put(contentSticker.getStickerStkid(), contentSticker);
 		}
 	}
-	
+
 	private boolean notNull(ContentSticker result){
 		if(result != null && StringUtils.isNotBlank(result.getStickerStkid()) && !"-".equals(result.getStickerStkid())){
 			return true;
 		}
 		return false;
 	}
-	
+
 	public ContentSticker findOne(String stickerStkid){
 		try {
 			ContentSticker result = dataCache.get(stickerStkid);
@@ -76,7 +76,7 @@ public class ContentStickerService {
 				return result;
 			}
 		} catch (Exception e) {}
-		
+
 		ContentSticker result = contentStickerRepository.findOne(stickerStkid);
 		if(result != null){
 			dataCache.put(stickerStkid, result);

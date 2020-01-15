@@ -79,7 +79,7 @@ public class CircleAkkaBotService {
                 system.shutdown();
                 system = null;
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
         }
 
         try {
@@ -91,7 +91,7 @@ public class CircleAkkaBotService {
                 system.shutdown();
                 system = null;
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
         }
 
         try {
@@ -103,7 +103,7 @@ public class CircleAkkaBotService {
                 system.shutdown();
                 system = null;
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
         }
 
         System.gc();

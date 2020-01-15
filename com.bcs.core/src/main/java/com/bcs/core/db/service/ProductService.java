@@ -28,19 +28,19 @@ import com.google.common.cache.LoadingCache;
 @Service
 public class ProductService {
 	public static final String PRODUCT_SYNC = "PRODUCT_SYNC";
-	
+
 	@Autowired
 	private ProductRepository productRepository;
 
     protected LoadingCache<String, Map<String, Product>> dataCache;
-    
+
     /** Logger */
     private static Logger logger = Logger.getLogger(ProductService.class);
 
 	private Timer flushTimer = new Timer();
-	
+
 	private class CustomTask extends TimerTask{
-		
+
 		@Override
 		public void run() {
 
@@ -52,12 +52,12 @@ public class ProductService {
 					DataSyncUtil.syncDataFinish(PRODUCT_SYNC);
 				}
 			}
-			catch(Throwable e){
+			catch(Exception e){
 				logger.error(ErrorRecord.recordError(e));
 			}
 		}
 	}
-    
+
     public ProductService(){
 
 		flushTimer.schedule(new CustomTask(), 120000, 30000);
@@ -72,7 +72,7 @@ public class ProductService {
                     }
                 });
     }
-    
+
     @PreDestroy
     public void cleanUp() {
         logger.info("[DESTROY] ProductService cleaning up...");
@@ -82,22 +82,22 @@ public class ProductService {
                 dataCache = null;
             }
         }
-        catch(Throwable e){}
-        
+        catch(Exception e){}
+
         System.gc();
         logger.info("[DESTROY] ProductService destroyed.");
     }
-    
+
     private boolean notNull(Product result){
-        if(result != null 
-                && StringUtils.isNotBlank(result.getProductName()) 
+        if(result != null
+                && StringUtils.isNotBlank(result.getProductName())
                 && !"-".equals(result.getProductName())
                 && StringUtils.isNotBlank(result.getGroupId())){
             return true;
         }
         return false;
     }
-    
+
     public Product findByProductNameAndGroupId(String productName, String groupId) {
         try {
             Product result = dataCache.get(groupId).get(productName);
@@ -105,27 +105,27 @@ public class ProductService {
                 return result;
             }
         } catch (Exception e) {}
-        
+
         Product result = null;
-        
+
         loadProductsInCache(groupId);
         Map<String, Product> products = dataCache.getIfPresent(groupId);
         if (products != null && products.size() > 0) {
             result = products.get(productName);
         }
-        
+
         return result;
     }
-    
+
     public List<Product> findByGroupId(String groupId) {
         try {
             Map<String, Product> productMap = dataCache.get(groupId);
             if(productMap != null && productMap.size() > 0){
-                
+
                 return new ArrayList<Product>(productMap.values());
             }
         } catch (Exception e) {}
-        
+
         List<Product> result = productRepository.findByGroupId(groupId);
         if(result != null){
             for (Product product : result) {
@@ -134,7 +134,7 @@ public class ProductService {
         }
         return result;
     }
-    
+
 
     public void save(Product product) {
         if (product != null) {
@@ -144,7 +144,7 @@ public class ProductService {
                 removeFromCache(oldProductInDb);
             }
         }
-        
+
         productRepository.save(product);
 
         if(product != null){
@@ -152,67 +152,67 @@ public class ProductService {
     		DataSyncUtil.settingReSync(PRODUCT_SYNC);
         }
     }
-    
+
     @Transactional(rollbackFor=Exception.class, timeout = 30)
     public void delete(Long productId) throws BcsNoticeException{
         logger.debug("delete:" + productId);
-        
+
         Product product = productRepository.findOne(productId);
-        
+
         productRepository.delete(product);
         removeFromCache(product);
 		DataSyncUtil.settingReSync(PRODUCT_SYNC);
     }
-    
+
     public String findProductNameByProductId(Long productId) throws BcsNoticeException{
         return productRepository.findProductNameByProductId(productId);
     }
-    
-    public Product findOne(Long productId){        
+
+    public Product findOne(Long productId){
         Product result = productRepository.findOne(productId);
         if(result != null){
             putInCache(result);
         }
         return result;
     }
-    
+
     private Map<String, Product> putInCache(Product product) {
         Map<String, Product> result = null;
-        
+
         if (notNull(product)) {
             String groupId = product.getGroupId();
             String productName = product.getProductName();
-            
+
             result = dataCache.getIfPresent(groupId);
             if (result == null) {
                 loadProductsInCache(groupId);
             }
             result.put(productName, product);
         }
-        
+
         return result;
     }
-    
+
     private Map<String, Product> removeFromCache(Product product) {
         Map<String, Product> result = null;
-        
+
         if (notNull(product)) {
             String groupId = product.getGroupId();
             String productName = product.getProductName();
-            
+
             result = dataCache.getIfPresent(groupId);
             if (result != null) {
                 result.remove(productName);
             }
         }
-        
+
         return result;
     }
-    
+
     @Transactional(rollbackFor=Exception.class, timeout = 30)
     public void deleteByGroupId(String groupId) throws BcsNoticeException{
         logger.debug("delete:" + groupId);
-        
+
         productRepository.deleteByGroupId(groupId);
         dataCache.invalidate(groupId);
 		DataSyncUtil.settingReSync(PRODUCT_SYNC);

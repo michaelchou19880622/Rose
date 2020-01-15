@@ -24,7 +24,7 @@ public class ErrorRecord {
 				SystemLogUtil.saveLogError("SYSTEM", "RecordError", output, e.getMessage());
 			}
 			return output;
-		} catch (Throwable e2) {
+		} catch (Exception e2) {
 			return e2.fillInStackTrace().toString();
 		}
 	}

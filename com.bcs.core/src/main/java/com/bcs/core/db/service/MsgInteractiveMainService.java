@@ -33,7 +33,7 @@ import com.google.common.cache.LoadingCache;
 @Service
 public class MsgInteractiveMainService {
 	public static final String INTERACTIVE_MAIN_SYNC = "INTERACTIVE_MAIN_SYNC";
-	
+
 	private static final String INIT_FLAG = "INIT_FLAG";
 	/** Logger */
 	private static Logger logger = Logger.getLogger(MsgInteractiveMainService.class);
@@ -43,11 +43,11 @@ public class MsgInteractiveMainService {
 	private MsgDetailRepository msgDetailRepository;
 
 	protected LoadingCache<Long, MsgInteractiveMain> dataCache;
-	
+
 	private ConcurrentMap<Long, AtomicLong> increaseMap = new ConcurrentHashMap<Long, AtomicLong>();
 
 	private Timer flushTimer = new Timer();
-	
+
     @PersistenceContext
     EntityManager entityManager;
 
@@ -62,10 +62,10 @@ public class MsgInteractiveMainService {
 						return new MsgInteractiveMain();
 					}
 				});
-		
+
 		flushTimer.schedule(new CustomTask(), 120000, 30000);
 	}
-	
+
 	@PreDestroy
 	public void cleanUp() {
 		logger.info("[DESTROY] MsgInteractiveMainService cleaning up...");
@@ -75,21 +75,21 @@ public class MsgInteractiveMainService {
 				dataCache = null;
 			}
 		}
-		catch(Throwable e){}
-		
+		catch(Exception e){}
+
 		flushTimer.cancel();
-		
+
 		System.gc();
 		logger.info("[DESTROY] MsgInteractiveMainService destroyed.");
 	}
-	
+
 	private boolean notNull(MsgInteractiveMain result){
 		if(result != null && result.getiMsgId() != null){
 			return true;
 		}
 		return false;
 	}
-    
+
 	public MsgInteractiveMain findOne(Long iMsgId){
 		logger.info("iMsgId = " + iMsgId);
 		try {
@@ -109,11 +109,11 @@ public class MsgInteractiveMainService {
 		}
 		return result;
 	}
-    
+
 	public List<MsgInteractiveMain> findByInteractiveTypeAndInteractiveStatus(String interactiveType, String interactiveStatus){
 		return msgInteractiveMainRepository.findByInteractiveTypeAndInteractiveStatus(interactiveType, interactiveStatus);
 	}
-    
+
 	public void save(MsgInteractiveMain msgInteractiveMain){
 		msgInteractiveMainRepository.save(msgInteractiveMain);
 
@@ -124,13 +124,13 @@ public class MsgInteractiveMainService {
 	}
 
 	private class CustomTask extends TimerTask{
-		
+
 		@Override
 		public void run() {
 
 			try{
 				flushIncrease();
-				
+
 				// Check Data Sync
 				Boolean isReSyncData = DataSyncUtil.isReSyncData(INTERACTIVE_MAIN_SYNC);
 				if(isReSyncData){
@@ -138,12 +138,12 @@ public class MsgInteractiveMainService {
 					DataSyncUtil.syncDataFinish(INTERACTIVE_MAIN_SYNC);
 				}
 			}
-			catch(Throwable e){
+			catch(Exception e){
 				logger.error(ErrorRecord.recordError(e));
 			}
 		}
 	}
-	
+
 	public void increaseSendCountByMsgInteractiveId(Long iMsgId){
 		synchronized (INIT_FLAG) {
 			if(increaseMap.get(iMsgId) == null){
@@ -154,7 +154,7 @@ public class MsgInteractiveMainService {
 			}
 		}
 	}
-	
+
 	public void flushIncrease(){
 		synchronized (INIT_FLAG) {
 			logger.debug("MsgInteractiveMainService flushTimer execute");
@@ -172,55 +172,55 @@ public class MsgInteractiveMainService {
 	private void increaseSendCountByMsgInteractiveId(Long msgSendId, Long increase ){
 		msgInteractiveMainRepository.increaseSendCountByMsgInteractiveId(msgSendId, increase);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public Map<MsgInteractiveMain, List<MsgDetail>> queryGetMsgInteractiveMainDetailByMsgId(Long iMsgId){
 		Query query = entityManager.createNamedQuery("queryGetMsgInteractiveMainDetailByMsgId").setParameter(1, iMsgId);
 		query.setHint("javax.persistence.query.timeout", 30000);
 		List<Object[]> list = query.getResultList();
-		
+
 		Map<MsgInteractiveMain, List<MsgDetail>> map = parseListToMap(list);
     	logger.debug(map);
-		
+
 		return map;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public Map<MsgInteractiveMain, List<MsgDetail>> queryGetMsgInteractiveMainDetailByType(String type){
 		Query query = entityManager.createNamedQuery("queryGetMsgInteractiveMainDetailByType").setParameter(1, type);
 		query.setHint("javax.persistence.query.timeout", 30000);
 		List<Object[]> list = query.getResultList();
-		
+
 		Map<MsgInteractiveMain, List<MsgDetail>> map = parseListToMap(list);
     	logger.debug(map);
-		
+
 		return map;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public Map<MsgInteractiveMain, List<MsgDetail>> queryGetMsgInteractiveMainDetailByTypeAndStatus(String type, String status){
 		Query query = entityManager.createNamedQuery("queryGetMsgInteractiveMainDetailByTypeAndStatus").setParameter(1, type).setParameter(2, status);
 		query.setHint("javax.persistence.query.timeout", 30000);
 		List<Object[]> list = query.getResultList();
-		
+
 		Map<MsgInteractiveMain, List<MsgDetail>> map = parseListToMap(list);
     	logger.debug(map);
-		
+
 		return map;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public Map<MsgInteractiveMain, List<MsgDetail>> queryGetMsgInteractiveMainDetailAll(){
 		Query query = entityManager.createNamedQuery("queryGetMsgInteractiveMainDetailAll");
 		query.setHint("javax.persistence.query.timeout", 30000);
 		List<Object[]> list = query.getResultList();
-		
+
 		Map<MsgInteractiveMain, List<MsgDetail>> map = parseListToMap(list);
     	logger.debug(map);
-		
+
 		return map;
 	}
-	
+
 	private Map<MsgInteractiveMain, List<MsgDetail>> parseListToMap(List<Object[]> list){
 
 		Map<MsgInteractiveMain, List<MsgDetail>> map = new LinkedHashMap<MsgInteractiveMain, List<MsgDetail>>();
@@ -240,10 +240,10 @@ public class MsgInteractiveMainService {
 	    		details.add((MsgDetail) o[1]);
 	    	}
 	    }
-	    
+
 	    return map;
 	}
-	
+
 	public List<String> findIMsgIdByKeyword(String keyword){
 	    return msgInteractiveMainRepository.findIMsgIdByKeyword(keyword);
 	}

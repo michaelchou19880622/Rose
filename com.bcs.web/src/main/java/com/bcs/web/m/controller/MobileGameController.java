@@ -60,7 +60,7 @@ import com.google.common.cache.LoadingCache;
 @Controller
 @RequestMapping("/m")
 public class MobileGameController {
-	
+
 	@Autowired
 	private MobileUserController mobileUserController;
 	@Autowired
@@ -116,8 +116,8 @@ public class MobileGameController {
 
 	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/scratchCardIndexPage")
-	public String scratchCardIndexPage(HttpServletRequest request, HttpServletResponse response, 
-			@RequestParam(value = "gameId", required = true) String gameId, 
+	public String scratchCardIndexPage(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(value = "gameId", required = true) String gameId,
 			@RequestParam(value = "UID", required=false) String UID, Model model) {
 
 		logger.info("scratchCardIndexPage");
@@ -132,7 +132,7 @@ public class MobileGameController {
 			String scratchedOffCouponId = contentGameService.getScratchedOffCouponId(gameId, UID);
 			if (scratchedOffCouponId != null) {
 				logger.info("【刮刮卡首頁】該使用者已玩過刮刮卡！");
-				
+
 				return mobileCouponService.couponContentPage(scratchedOffCouponId.toString(), model, request, response,
 						MobilePageEnum.UserCouponContentPage, false, false);
 			} else {
@@ -153,31 +153,31 @@ public class MobileGameController {
 	/*
 	 * @RequestMapping(method = RequestMethod.GET, value =
 	 * "/Game/turntable/{gameId}")
-	 * 
+	 *
 	 * @ResponseBody public ResponseEntity<?> getTurntable(HttpServletRequest
 	 * request, HttpServletResponse response,
-	 * 
+	 *
 	 * @PathVariable Long gameId) throws IOException { logger.info("getTurntable");
-	 * 
+	 *
 	 * try { GameModel result = turntableDetailService.getTurntable(gameId); Integer
 	 * prizeListId = -1;
-	 * 
+	 *
 	 * if (request.getSession().getAttribute("obtainedPrize_" + gameId) == null) {
 	 * prizeListId = contentPrizeService.getRandomPrize(gameId);
 	 * request.getSession().setAttribute("obtainedPrize_" + gameId, prizeListId);
 	 * request.getSession().setMaxInactiveInterval(1800); } else { prizeListId =
 	 * (Integer) request.getSession().getAttribute("obtainedPrize_" + gameId); }
-	 * 
+	 *
 	 * String obtainedPrizeId =
 	 * contentPrizeService.getPrizeByPrizeListId(prizeListId).getPrizeId();
-	 * 
+	 *
 	 * for (PrizeModel prizeModel : result.getPrizes()) { if
 	 * (prizeModel.getPrizeId().equals(obtainedPrizeId)) {
 	 * prizeModel.setPrizeQuantity(-1); } }
-	 * 
+	 *
 	 * return new ResponseEntity<>(result, HttpStatus.OK); } catch (Exception e) {
 	 * logger.error(ErrorRecord.recordError(e));
-	 * 
+	 *
 	 * return new ResponseEntity<>(e.getMessage(),
 	 * HttpStatus.INTERNAL_SERVER_ERROR); } }
 	 */
@@ -194,7 +194,7 @@ public class MobileGameController {
 
 		try {
 			GameModel result = scratchCardDetailService.getScratchCard(gameId);
-			
+
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
@@ -202,7 +202,7 @@ public class MobileGameController {
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	/**
 	 * 抽一張優惠券
 	 */
@@ -215,18 +215,18 @@ public class MobileGameController {
 
 		try {
 			String sessionMID = (String) request.getSession().getAttribute("MID"); // 取得使用者的 LINE UID
-			
+
 			if(StringUtils.isBlank(sessionMID)){
 				return new ResponseEntity<>("MID Error", HttpStatus.INTERNAL_SERVER_ERROR);
 			} else {
 				String drewCouponId = contentPrizeService.getRandomPrize(gameId, sessionMID); // 抽一個優惠券，並回傳抽到的優惠券 id
 				ContentCoupon contentCoupon = null;
 				CouponModel drewCoupon = new CouponModel();
-				
+
 				/* 如果有抽到優惠券，將優惠券內容塞至 drewCouponContent 中 */
 				if (drewCouponId != null) {
 					contentCoupon = contentCouponService.findOne(drewCouponId);
-	
+
 					drewCoupon.setCouponId(drewCouponId);
 					drewCoupon.setCouponTitle(contentCoupon.getCouponTitle());
 					drewCoupon.setCouponImageId(contentCoupon.getCouponImageId());
@@ -236,7 +236,7 @@ public class MobileGameController {
 				} else {
 					drewCoupon = null;
 				}
-	
+
 				return new ResponseEntity<>(drewCoupon, HttpStatus.OK);
 			}
 		} catch (Exception e) {
@@ -246,7 +246,7 @@ public class MobileGameController {
 			}else{
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 			}
-			
+
 		}
 	}
 
@@ -282,7 +282,7 @@ public class MobileGameController {
 			String startTracingUrl = "";
 
 			String ChannelID = CoreConfigReader.getString(CONFIG_STR.Default.toString(),CONFIG_STR.ChannelID.toString(),true);
-			
+
 			startTracingUrl = CoreConfigReader.getString(CONFIG_STR.LINE_OAUTH_URL_V2_1);
 			startTracingUrl = startTracingUrl.replace("{ChannelID}", ChannelID);
 			startTracingUrl = startTracingUrl.replace("{RedirectUrl}", URLEncoder.encode(UriHelper.getScratchCardValidateUri(), "UTF-8"));
@@ -319,7 +319,7 @@ public class MobileGameController {
 
 			String errorDescription = request.getParameter("error_description");
 			logger.info("validateTracing error description:" + errorDescription);
-			
+
 			if (StringUtils.isBlank(state)) {
 				throw new Exception("Scratch Card Id Error:" + state);
 			}
@@ -327,7 +327,7 @@ public class MobileGameController {
 			/* 設定向 LINE 取得 access token 的 request headers */
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-			
+
 			HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = null;
 			String proxyUrl = CoreConfigReader.getString(CONFIG_STR.TAISHIN_PROXY_URL.toString(), true);    // Proxy Server 的位置
 
@@ -341,42 +341,42 @@ public class MobileGameController {
 			map.add("grant_type", "authorization_code");
 			map.add("code", code);
 			map.add("redirect_uri", UriHelper.getScratchCardValidateUri());
-			
+
 			String ChannelID = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelID.toString(), true);
 		    String ChannelSecret = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelSecret.toString(), true);
-		    
+
 			map.add("client_id", ChannelID);
 			map.add("client_secret", ChannelSecret);
-			
+
 			HttpEntity<MultiValueMap<String, String>> accessTokenEntity = new HttpEntity<MultiValueMap<String, String>>(map, headers);
 
 			/* 以 Post 方式送出 request (如果有需要用 Proxy，便將上面設定好的 clientHttpRequestFactory 加進來) */
 			RestTemplate restTemplate = (clientHttpRequestFactory == null) ? new RestTemplate() : new RestTemplate(clientHttpRequestFactory);
 			ResponseEntity<String> accessTokenResponse = restTemplate.postForEntity(CoreConfigReader.getString(CONFIG_STR.LINE_OAUTH_URL_ACCESSTOKEN_V2_1), accessTokenEntity, String.class);
-			
+
 			String responseBody = accessTokenResponse.getBody(); // Response 的結果
 			logger.info("responseBody:"+responseBody);
-			
+
 			JSONObject responseObj = new JSONObject(responseBody);
 			String ID_Token = responseObj.get("id_token").toString(); // 將 id_token 從 response body 中拿出來
-			
+
 			String[] parsedJWT = ID_Token.split("[.]");	// 將 id_token 以逗點為基準切成 header、payload、signature 三個部分
-			
+
 			String header = parsedJWT[0], payload = parsedJWT[1], signature = parsedJWT[2];
 			Base64.Decoder base64Decoder = Base64.getDecoder();
-			
+
 			/* 驗證接收到的 ID Token 是否為合法的 JWT */
-			if(validateJWT(ChannelSecret, header, payload, signature, ChannelID, null)) {			
+			if(validateJWT(ChannelSecret, header, payload, signature, ChannelID, null)) {
 				JSONObject payloadObject = new JSONObject(new String(base64Decoder.decode(payload), "UTF-8"));	// 將 payload 用 base64 解碼後轉為 UTF-8 字串，再轉換成 JSON 物件
-				
+
 				String UID = payloadObject.get("sub").toString();	// 從解析出來的 JSON 物件中取得使用者的 UID
-				
+
 				session.setAttribute("UID", UID); // 將 UID 存入 session，以便後續的刮刮卡流程使用
-				
+
 				response.sendRedirect(contentGameService.tranferURI("BcsPage:ScratchCardPage:" + state, UID));
 			} else {
 				throw new Exception("Illegal JWT !");
-			}			
+			}
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
 			String linkUrl = UriHelper.bcsMPage;
@@ -390,10 +390,10 @@ public class MobileGameController {
 	public ResponseEntity<?> getAnnouncementUrl(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		String accouncementUrl = CoreConfigReader.getString(CONFIG_STR.RICHART_ANNOUNCEMENT_URL.toString(), true);
-		
+
 		return new ResponseEntity<>(accouncementUrl, HttpStatus.OK);
 	}
-	
+
 	/*
 	 * 驗證 JWT 是否合法
 	 */
@@ -404,41 +404,41 @@ public class MobileGameController {
 			String message = header + "." + payload;
 			Base64.Encoder base64UrlEncoder = Base64.getUrlEncoder();
 			Base64.Decoder base64Decoder = Base64.getDecoder();
-			Mac sha256_HMAC = Mac.getInstance("HmacSHA256");			
+			Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
 			SecretKeySpec secret_key = new SecretKeySpec(secret.getBytes(), "HmacSHA256");
-			
+
 			sha256_HMAC.init(secret_key);
-			
+
 			String generated_signature = base64UrlEncoder.encodeToString(sha256_HMAC.doFinal(message.getBytes()));
-			
+
 			if(rem > 0) {
 				for(Integer i = 0; i < (4 - rem); i++)
 					signature += "=";
 			}
-			
+
 			JSONObject payloadObject = new JSONObject(new String(base64Decoder.decode(payload), "UTF-8"));
-			
+
 			/* 檢查是否為合法的 issuer */
 			if(!payloadObject.get("iss").toString().equals("https://access.line.me"))
 				return false;
-			
+
 			/* 檢查是否為合法的 audience */
 			if(!payloadObject.get("aud").toString().equals(channelId))
 				return false;
-			
+
 			/* 檢查此 JWT 是否在有效期內 */
 			Date expireTime = new Date(Long.valueOf(payloadObject.get("exp").toString()) * 1000);
 			Date now = new Date();
-			
+
 			if(now.after(expireTime))
 				return false;
-			
+
 			/* 如果有 nonce 的話，檢查 nonce 是否合法 */
 			if(payloadObject.has("nonce")) {
 				if(!payloadObject.get("nonce").toString().equals(nonce))
 					return false;
 			}
-			
+
 			/* 檢查 signature 是否合法 */
 			return generated_signature.equals(signature);
 		} catch (Exception e) {
@@ -447,13 +447,13 @@ public class MobileGameController {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * 回傳一個沒有重覆的uuid
 	 */
 	public String checkDuplicateUUID(String queryType) {
 		String uuid = UUID.randomUUID().toString().toLowerCase();
-		Boolean duplicateUUID = winnerListService.checkDuplicateUUID(queryType, uuid);
+		boolean duplicateUUID = winnerListService.checkDuplicateUUID(queryType, uuid);
 		while (duplicateUUID) {
 			uuid = UUID.randomUUID().toString().toLowerCase();
 			duplicateUUID = winnerListService.checkDuplicateUUID(queryType, uuid);

@@ -26,19 +26,19 @@ import com.google.common.cache.LoadingCache;
 @Service
 public class CampaignService {
 	public static final String CAMPAIGN_SYNC = "CAMPAIGN_SYNC";
-	
+
 	@Autowired
-	private CampaignRepository campaignRepository;    
+	private CampaignRepository campaignRepository;
 
     protected LoadingCache<String, Campaign> dataCache;
-    
+
     /** Logger */
     private static Logger logger = Logger.getLogger(CampaignService.class);
 
 	private Timer flushTimer = new Timer();
-	
+
 	private class CustomTask extends TimerTask{
-		
+
 		@Override
 		public void run() {
 
@@ -50,12 +50,12 @@ public class CampaignService {
 					DataSyncUtil.syncDataFinish(CAMPAIGN_SYNC);
 				}
 			}
-			catch(Throwable e){
+			catch(Exception e){
 				logger.error(ErrorRecord.recordError(e));
 			}
 		}
 	}
-    
+
     public CampaignService(){
 
 		flushTimer.schedule(new CustomTask(), 120000, 30000);
@@ -70,7 +70,7 @@ public class CampaignService {
                     }
                 });
     }
-    
+
     @PreDestroy
     public void cleanUp() {
         logger.info("[DESTROY] CampaignService cleaning up...");
@@ -80,19 +80,19 @@ public class CampaignService {
                 dataCache = null;
             }
         }
-        catch(Throwable e){}
-        
+        catch(Exception e){}
+
         System.gc();
         logger.info("[DESTROY] CampaignService destroyed.");
     }
-    
+
     private boolean notNull(Campaign result){
         if(result != null && StringUtils.isNotBlank(result.getCampaignId())){
             return true;
         }
         return false;
     }
-    
+
     public Campaign findByName(String name) {
         Campaign result = campaignRepository.findByCampaignName(name);
         if(result != null){
@@ -100,7 +100,7 @@ public class CampaignService {
         }
         return result;
     }
-    
+
 
     public List<Campaign> findAll() {
         return campaignRepository.findAll();
@@ -122,18 +122,18 @@ public class CampaignService {
 			DataSyncUtil.settingReSync(CAMPAIGN_SYNC);
         }
     }
-    
+
     @Transactional(rollbackFor=Exception.class, timeout = 30)
     public void delete(String campaignId) throws BcsNoticeException{
         logger.debug("delete:" + campaignId);
-        
+
         Campaign campaign = campaignRepository.findOne(campaignId);
-        
+
         campaignRepository.delete(campaign);
         dataCache.invalidate(campaignId);
 		DataSyncUtil.settingReSync(CAMPAIGN_SYNC);
     }
-    
+
     public String findCampaignNameByCampaignId(String campaignId) throws BcsNoticeException{
         try {
             Campaign result = dataCache.get(campaignId);
@@ -141,10 +141,10 @@ public class CampaignService {
                 return result.getCampaignName();
             }
         } catch (Exception e) {}
-        
+
         return campaignRepository.findCampaignNameByCampaignId(campaignId);
     }
-    
+
     public Campaign findOne(String campaignId){
         try {
             Campaign result = dataCache.get(campaignId);
@@ -152,17 +152,17 @@ public class CampaignService {
                 return result;
             }
         } catch (Exception e) {}
-        
+
         Campaign result = campaignRepository.findOne(campaignId);
         if(result != null){
             dataCache.put(result.getCampaignId(), result);
         }
         return result;
     }
-    
+
     public String generateCampaignId() {
         String campaignId = UUID.randomUUID().toString().toLowerCase();
-        
+
         while (campaignRepository.findOne(campaignId) != null) {
             campaignId = UUID.randomUUID().toString().toLowerCase();
         }

@@ -52,7 +52,7 @@ public class ContentCouponService {
 					dataCache.invalidateAll();
 					DataSyncUtil.syncDataFinish(COUPON_SYNC);
 				}
-			} catch (Throwable e) {
+			} catch (Exception e) {
 				logger.error(ErrorRecord.recordError(e));
 			}
 		}
@@ -79,7 +79,7 @@ public class ContentCouponService {
 				dataCache.invalidateAll();
 				dataCache = null;
 			}
-		} catch (Throwable e) {
+		} catch (Exception e) {
 		}
 
 		System.gc();
@@ -182,7 +182,7 @@ public class ContentCouponService {
 
 	public void save(ContentCoupon contentCoupon) {
 		String couponId = null;
-		
+
 		if(contentCoupon.getCouponId() == null){
 			couponId = this.checkDuplicateUUID();
 			contentCoupon.setCouponId(couponId);
@@ -213,18 +213,18 @@ public class ContentCouponService {
 		if (result != null) {
 			dataCache.put(couponId, result);
 		}
-	}	
-	
+	}
+
 	public List<ContentCoupon> findAllByCouponGroupId (String couponGroupId){
 		return contentCouponRepository.findAllByCouponGroupId(couponGroupId);
 	}
-	
+
 	public Boolean checkIsNotGetSamePointCoupon (String couponGroupId){
 		ContentCoupon contentCoupon = contentCouponRepository.findByCouponGroupId(couponGroupId);
 		return (contentCoupon == null)?false:true;
 	}
-	
-	/** 
+
+	/**
 	 * 回傳一個沒有重覆的uuid
 	 */
 	public String checkDuplicateUUID() {
@@ -236,7 +236,7 @@ public class ContentCouponService {
 		}
 		return uuid;
 	}
-	
+
 	private Boolean checkExsistUUID (String couponId){
 		ContentCoupon contentCoupon = contentCouponRepository.findOne(couponId);
 		return (contentCoupon == null)?false:true;

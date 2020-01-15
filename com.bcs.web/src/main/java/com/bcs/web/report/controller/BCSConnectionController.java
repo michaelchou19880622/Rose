@@ -38,25 +38,25 @@ import com.bcs.core.web.ui.page.enums.BcsPageEnum;
 public class BCSConnectionController extends BCSBaseController {
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSConnectionController.class);
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/connectionTestPage")
 	public String connectionTestPage(@CurrentUser CustomUser customUser, HttpServletRequest request, HttpServletResponse response) {
 		logger.info("connectionTestPage");
-		
+
 		return BcsPageEnum.ConnectionTestPage.toString();
 	}
-	
+
 	@RequestMapping(method = RequestMethod.POST, value = "/admin/sendRequest", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> sendRequest(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) throws KeyManagementException {
 		logger.info("sendRequest");
-		
+
 		ResponseEntity<String> result = null;
 		try {
 			JSONObject requestObject = new JSONObject(requestBody);
 			String targetUrl = requestObject.getString("targetUrl");
 			String requestMethod = requestObject.getString("requestMethod");
-			Boolean useProxy = requestObject.getBoolean("useProxy");
-			
+			boolean useProxy = requestObject.getBoolean("useProxy");
+
 			HttpMethod method = null;
 			HttpEntity<String> httpEntity = null;
 			HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = null;
@@ -70,27 +70,27 @@ public class BCSConnectionController extends BCSBaseController {
 			            public void checkServerTrusted( X509Certificate[] certs, String authType ){}
 			        }
 				};
-			
+
 			/* ---------- Always trust any certificate ---------- */
 			SSLContext sslContext = SSLContext.getInstance("SSL");
-			
+
 			sslContext.init( null, UNQUESTIONING_TRUST_MANAGER, null );
 			SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
-			
+
 			httpClientBuilder.setSSLSocketFactory(csf);
-			
+
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
-			
+
 			if(useProxy) {
 				String proxyHost = requestObject.getString("proxyHost");
 				Integer proxyPort = requestObject.getInt("proxyPort");
-				
+
 				clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(httpClientBuilder.setProxy(new HttpHost(proxyHost, proxyPort, "http")).build());
 			} else {
 				clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(httpClientBuilder.build());
 			}
-			
+
 			if(requestMethod.equals("get")) {
 				method = HttpMethod.GET;
 				httpEntity = new HttpEntity<String>(headers);
@@ -98,11 +98,11 @@ public class BCSConnectionController extends BCSBaseController {
 				method = HttpMethod.POST;
 				httpEntity = new HttpEntity<String>(requestObject.getString("body"), headers);
 			}
-			
+
 			RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
-			
+
 			result = restTemplate.exchange(targetUrl, method, httpEntity, String.class);
-			
+
 			return new ResponseEntity<>(result.getBody(), result.getStatusCode());
 		} catch(Exception e) {
 			return new ResponseEntity<>(e.getMessage(), (result != null) ? result.getStatusCode() : HttpStatus.BAD_REQUEST);

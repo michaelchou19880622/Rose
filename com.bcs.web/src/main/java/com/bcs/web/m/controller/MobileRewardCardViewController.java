@@ -97,7 +97,7 @@ public class MobileRewardCardViewController {
 	private ContentRewardCardUIService contentRewardCardUIService;
 	@Autowired
 	private ActionUserCouponService actionUserCouponService;
-	
+
 	protected LoadingCache<String, ContentRewardCardModel> dataCache;
 
 	/** Logger */
@@ -116,7 +116,7 @@ public class MobileRewardCardViewController {
 
 	/**
 	 * 單張集點卡頁面
-	 * 
+	 *
 	 * @param referenceId
 	 * @param model
 	 * @param request
@@ -139,7 +139,7 @@ public class MobileRewardCardViewController {
 
 	/**
 	 * 預覽集點卡頁面
-	 * 
+	 *
 	 * @param referenceId
 	 * @param model
 	 * @param request
@@ -174,7 +174,7 @@ public class MobileRewardCardViewController {
 
 //	/**
 //	 * 取得集點卡
-//	 * 
+//	 *
 //	 * @param referenceId
 //	 * @param model
 //	 * @param request
@@ -234,7 +234,7 @@ public class MobileRewardCardViewController {
 
 	/**
 	 * 設定預覽集點卡
-	 * 
+	 *
 	 * @param contentCoupon
 	 * @param customUser
 	 * @param request
@@ -324,7 +324,7 @@ public class MobileRewardCardViewController {
 
 	/**
 	 * Generate RewardCard Page
-	 * 
+	 *
 	 * @param referenceId
 	 * @param model
 	 * @param request
@@ -340,17 +340,17 @@ public class MobileRewardCardViewController {
 		HttpSession session = request.getSession();
 		String sessionMID = (String) session.getAttribute("MID");
 		String rewardCardId = referenceId;
-		
+
 		String errorMessage="";
-	
+
 		ActionUserRewardCard actionUserRewardCardForGet = actionUserRewardCardUIService.findByMidAndRewardCardIdAndActionType(sessionMID, rewardCardId);
-		
+
 		// 驗證 mid
 		if (StringUtils.isBlank(sessionMID)) {
 			return mobileUserController.indexPage(request, response, model);
 		}
 
-		
+
 		ContentRewardCard contentRewardCard = contentRewardCardService.findOne(rewardCardId);
 		if (contentRewardCard == null) {
 			return mobileUserController.indexPage(request, response, model);
@@ -364,50 +364,50 @@ public class MobileRewardCardViewController {
 			model.addAttribute("noCard", "集點卡錯誤:找不到集點卡");
 			return this.userRewardCardIndexPage(request, response, model);
 		}
-		
+
 		//使用區間
 		Date rewardCardStartUsingTime = contentRewardCard.getRewardCardStartUsingTime();
 		Date rewardCardEndUsingTime = contentRewardCard.getRewardCardEndUsingTime();
-		
+
 		//領用區間
 		Date rewardCardStartGetTime = contentRewardCard.getRewardCardStartGetTime();
 		Date rewardCardEndGetTime = contentRewardCard.getRewardCardEndGetTime();
-		
+
 		//現在時間
 		Date now = new Date();
-		
+
 		// 集點卡是否在領用期間
-		Boolean isInGetTime =(now.compareTo(rewardCardStartGetTime) >= 0 && now.compareTo(rewardCardEndGetTime) < 0);
+		boolean isInGetTime =(now.compareTo(rewardCardStartGetTime) >= 0 && now.compareTo(rewardCardEndGetTime) < 0);
 		if(!isInGetTime){
 			errorMessage = "getTimeError";
 			return this.msgPage(model, sessionMID, contentRewardCard, errorMessage);
 		}
-		
+
 		// 集點卡是否在使用期間
 		boolean isUseTime = CoreConfigReader.getBoolean(CONFIG_STR.SYSTEM_REWARDCARD_USE_TIME);
 		boolean inUsingTime = false;
 		// Get Setting From ActionUserRewardCard
 		if (isUseTime) {
-			
-			if (actionUserRewardCardForGet.getId() != null) 
+
+			if (actionUserRewardCardForGet.getId() != null)
 				inUsingTime = actionUserRewardCardUIService.isInUsingTime(actionUserRewardCardForGet);
-			else 
+			else
 				inUsingTime = actionUserRewardCardUIService.isInUsingTime(contentRewardCard);
 		} else {
 			inUsingTime = actionUserRewardCardUIService.isInUsingTime(contentRewardCard);
 		}
-		
+
 		if (!inUsingTime) {
 			errorMessage = "useTimeError";
 			return this.msgPage(model, sessionMID, contentRewardCard, errorMessage);
 		}
-		
+
 		// 若尚未領用，則驗證領用期間、領用次數限制
 		synchronized (ActionUserRewardCardUIService.GET_REWARD_CARD_FLAG) {
 			if (!actionUserRewardCardUIService.isGetRewardCard(sessionMID, rewardCardId)) {
-				if((contentRewardCard.getRewardCardFlag()!=null && 
+				if((contentRewardCard.getRewardCardFlag()!=null &&
 						contentRewardCard.getRewardCardFlag().equals(ContentRewardCard.REWARD_CARD_FLAG_PRIVATE))){
-					if(!canGetRewardCard)	
+					if(!canGetRewardCard)
 						errorMessage = "rewardCardError";
 				}
 
@@ -438,7 +438,7 @@ public class MobileRewardCardViewController {
 		model.addAttribute("inUsingTime", inUsingTime);
 		model.addAttribute("havePoint", havePoint);
 		model.addAttribute("preview", false);
-		
+
 		Map<String, ContentCoupon> contentCoupons = mobileRewardCardService.getCouponListFromDB(sessionMID, rewardCardId, havePoint);
 		model.addAttribute("contentCoupons",contentCoupons.values());
 		if(!contentRewardCard.getRewardCardBackGround().matches("stamp_con stamp_con_bg_color_[0-9]+")) {
@@ -453,7 +453,7 @@ public class MobileRewardCardViewController {
 
 	/**
 	 * return UserRewardCardMsgPage
-	 * 
+	 *
 	 * @param model
 	 * @param sessionMID
 	 * @param contentRewardCard
@@ -511,7 +511,7 @@ public class MobileRewardCardViewController {
 
 	/**
 	 * 新增領取(GET)集點卡記錄
-	 * 
+	 *
 	 * @param actionUserRewardCard
 	 * @param request
 	 * @param response
@@ -572,7 +572,7 @@ public class MobileRewardCardViewController {
 
 	/**
 	 * Get My RewardCard List From Api
-	 * 
+	 *
 	 * @param request
 	 * @param response
 	 * @return
@@ -734,48 +734,48 @@ public class MobileRewardCardViewController {
 			return;
 		}
 	}
-	
+
 	/**
 	 * 新增領取(GET)優惠劵記錄
-	 * 
+	 *
 	 * @param actionUserCoupon
 	 * @param request
 	 * @param response
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	@WebServiceLog
 	@RequestMapping(method = RequestMethod.POST, value = "/RewardCard/createActionUserCouponForGetApi", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createActionUserCouponForGetApi(
-			@RequestBody ActionUserCoupon actionUserCoupon, 
-			HttpServletRequest request, 
+			@RequestBody ActionUserCoupon actionUserCoupon,
+			HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		try {
 			String sessionMID = (String) request.getSession().getAttribute("MID");
 			logger.info("createActionUserCouponForGetApi:" + actionUserCoupon);
-			Boolean canGetCoupon = true;
+			boolean canGetCoupon = true;
 			String couponId = actionUserCoupon.getCouponId();
-			
+
 			ActionUserCoupon actionUserCouponForGet = actionUserCouponService.findByMidAndCouponIdAndActionType(sessionMID, couponId, ActionUserCoupon.ACTION_TYPE_GET);
-			
+
 			if(actionUserCouponForGet != null ){
 				return new ResponseEntity<>(couponId, HttpStatus.OK);
 			}
-			
+
 			ContentCoupon contentCoupon = contentCouponService.findOne(couponId);
 			ActionUserRewardCard actionUserRewardCard = actionUserRewardCardUIService.findByMidAndRewardCardIdAndActionType(sessionMID, contentCoupon.getEventReferenceId());
 			int havePoint = actionUserRewardCardPointDetailService.sumActionUserRewardCardGetPoint(actionUserRewardCard.getId());
 			if(contentCoupon.getRequirePoint() <= havePoint){//判斷是否可以領取此張優惠券
 				String couponGroupId =contentCoupon.getCouponGroupId();
-				Boolean isSameCouponGroupIdIsGet = actionUserCouponUIService.findSameGroupIdActionUserCouponIsGet(sessionMID,couponGroupId);
+				boolean isSameCouponGroupIdIsGet = actionUserCouponUIService.findSameGroupIdActionUserCouponIsGet(sessionMID,couponGroupId);
 				//是否有領過同點數優惠券
 				if(isSameCouponGroupIdIsGet)
 					canGetCoupon=  false;
 			}else{
 				canGetCoupon=  false;
 			}
-			
+
 			if(canGetCoupon){
 				Date startUsingDate = contentCoupon.getCouponStartUsingTime();
 				Date endUsingDate = contentCoupon.getCouponEndUsingTime();
@@ -787,18 +787,18 @@ public class MobileRewardCardViewController {
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
 			if(e instanceof BcsNoticeException){
-				return new ResponseEntity<>("優惠券已被領取完畢", HttpStatus.NOT_IMPLEMENTED); 
+				return new ResponseEntity<>("優惠券已被領取完畢", HttpStatus.NOT_IMPLEMENTED);
 			}else{
-				return new ResponseEntity<>("不能領取優惠券", HttpStatus.NOT_IMPLEMENTED); 
+				return new ResponseEntity<>("不能領取優惠券", HttpStatus.NOT_IMPLEMENTED);
 			}
 		}
-		
-		
+
+
 	}
 
 	/**
 	 * Get RewardCard List From DB
-	 * 
+	 *
 	 * @param sessionMID
 	 * @param contentRewardCards
 	 */
@@ -822,7 +822,7 @@ public class MobileRewardCardViewController {
 				// 驗證領用
 				boolean inGetTime = false;
 				// 驗證領用期間、領用次數限制
-				Boolean isInGetTime =actionUserRewardCardUIService.isInGetTime(contentRewardCard);
+				boolean isInGetTime =actionUserRewardCardUIService.isInGetTime(contentRewardCard);
 				String errorMessage =(isInGetTime==true)?"":"getTimeError";
 
 				if (StringUtils.isNotBlank(errorMessage)) {
@@ -834,8 +834,8 @@ public class MobileRewardCardViewController {
 				// 預時消失
 				boolean isUseTime = CoreConfigReader.getBoolean(CONFIG_STR.SYSTEM_REWARDCARD_USE_TIME);
 				boolean inUsingTime = false;
-				
-								
+
+
 				// Get Setting From ActionUserRewardCard
 				if (isGotRewardCard == true) {
 					if (isUseTime) {
@@ -851,7 +851,7 @@ public class MobileRewardCardViewController {
 				} else {
 					inUsingTime = actionUserRewardCardUIService.isInUsingTime(contentRewardCard);
 				}
-				
+
 				if (!inUsingTime && !inGetTime) {
 					okRewardCard = false;
 					continue;
@@ -933,7 +933,7 @@ public class MobileRewardCardViewController {
 
 		String ChannelID = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelID.toString(), true);
 		String ChannelSecret = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelSecret.toString(), true);
-		
+
 		ObjectNode result = lineWebLoginApiService.callRetrievingAPI(ChannelID, ChannelSecret, code,
 				UriHelper.getRewardCardValidateUri());
 

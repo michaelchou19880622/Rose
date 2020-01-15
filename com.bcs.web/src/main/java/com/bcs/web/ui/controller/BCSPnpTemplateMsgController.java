@@ -52,13 +52,13 @@ import com.bcs.web.ui.service.LoadFileUIService;
 public class BCSPnpTemplateMsgController {
 	@Autowired
 	private PnpContentTemplateMsgService contentTemplateMsgService;
-	
+
 	@Autowired
 	private SystemConfigService systemConfigService;
-	
+
 	//@Autowired
 	//private ExportToExcelForBillingNoticePushBNApiEffects exportToExcelForBillingNoticePushBNApiEffects;
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSPnpTemplateMsgController.class);
 
@@ -75,7 +75,7 @@ public class BCSPnpTemplateMsgController {
 		logger.info("pnpListPage");
 		return BcsPageEnum.PnpListPage.toString();
 	}
-	
+
 	/**
 	 * 新增與更新樣板訊息
 	 */
@@ -84,21 +84,21 @@ public class BCSPnpTemplateMsgController {
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/createPnp", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> createTemplateMsg(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser,
 			@RequestBody List<PnpTemplateMsgModel> createTemplateMsgModels, //PnpTemplateMsgModel不確定
-			@RequestParam String actionType, 
+			@RequestParam String actionType,
 			@RequestParam String templateId) throws IOException {
 		logger.info("createTemplateMsgModels:" + createTemplateMsgModels);
 		try {
-				
+
 			if (!validateData(createTemplateMsgModels)) {
 				throw new BcsNoticeException("必填欄位不可為空！");
 			}
-			
+
 			String adminUserAccount = customUser.getAccount(); //取得登入者的帳號
-			
+
 			//初始化
 			//儲存用的List
 			List<PnpContentTemplateMsg> contentTemplateMsgs = new ArrayList<>();
@@ -107,14 +107,14 @@ public class BCSPnpTemplateMsgController {
 			//先前的IdList
 			List<String> templateIds = new ArrayList<>();
 			List<Map<String, String>> actionIdAndLinkIds;
-			
+
 			PnpContentTemplateMsg contentTemplateMsg; //儲存格式
 			PnpContentLink contentLink; //儲存格式
 			PnpContentTemplateMsgAction contentTemplateMsgAction; //儲存格式
 			String templateParentId = "";
 			String linkId = "";
-			
-			
+
+
 			// set old template with same Title's productSwitch to off
 			boolean productSwitch = createTemplateMsgModels.get(0).getTemplateSwitch();
 			String templateTitle = createTemplateMsgModels.get(0).getTemplateTitle();
@@ -122,7 +122,7 @@ public class BCSPnpTemplateMsgController {
 				logger.info("ProdutionSwith is On, other's will set to off!");
 				contentTemplateMsgService.setPreTitleTemplateToOff(templateTitle, adminUserAccount);
 			}
-			
+
 			// Edit
 			if (actionType.equals("Edit")) {
 				// set old template with same Title to deleted
@@ -137,35 +137,35 @@ public class BCSPnpTemplateMsgController {
 					templateIds.add(checkDuplicateUUID("1"));
 				}
 			}
-			
+
 			//取出每個templateMsg的資料
 			PnpTemplateMsgModel createTemplateMsgModel;
 			TemplateActionModel templateActionModel;
 			Map<String, String> map;
 			templateParentId = templateIds.get(0);
-			
-			
+
+
 			// for every pages
 			for(int i = 0; i < createTemplateMsgModels.size(); i++){
 				createTemplateMsgModel = createTemplateMsgModels.get(i);
-				
+
 				System.out.println("model " + i + ": " + createTemplateMsgModel.toString());
-				
+
 				// 新增樣板
-				if (i + 1 > templateIds.size()) { 
+				if (i + 1 > templateIds.size()) {
 					templateIds.add(checkDuplicateUUID("1"));
 				}
-				
+
 				// ------------- adding ----------------------
-				
+
 				//template的資料
 				contentTemplateMsg = new PnpContentTemplateMsg();
-				
+
 				// i	TEMPLATE_ID
 				contentTemplateMsg.setTemplateId(templateIds.get(i));
-				// 0	PRODUCT_SWITCH 
+				// 0	PRODUCT_SWITCH
 				contentTemplateMsg.setProductSwitch(createTemplateMsgModel.getTemplateSwitch());
-				
+
 				//
 				// 1	ALT_TEXT
 				if(!createTemplateMsgModel.getAltText().isEmpty()){
@@ -173,40 +173,40 @@ public class BCSPnpTemplateMsgController {
 				}
 				// 2 TEMPLATE_TYPE
 				contentTemplateMsg.setTemplateType(createTemplateMsgModel.getTemplateType());
-				
+
 				// 5 CURFEW_START_TIME + 6 CURFEW_END_TIME
 				//logger.info("Curfew Time: " + createTemplateMsgModel.getCurfewStartTime().toString() + ", " + createTemplateMsgModel.getCurfewEndTime().toString());
 				contentTemplateMsg.setCurfewStartTime(createTemplateMsgModel.getCurfewStartTime());
 				contentTemplateMsg.setCurfewEndTime(createTemplateMsgModel.getCurfewEndTime());
 				//logger.info("Curfew Time: " + contentTemplateMsg.getCurfewStartTime().toString() + ", " + contentTemplateMsg.getCurfewEndTime().toString());
-				
+
 				contentTemplateMsg.setTemplateLevel(createTemplateMsgModel.getTemplateLevel());
-				
+
 				contentTemplateMsg.setModifyUser(adminUserAccount);
 				contentTemplateMsg.setModifyTime(new Date());
 				contentTemplateMsg.setStatus(PnpContentTemplateMsg.STATUS_ACTIVE);
 				contentTemplateMsg.setTemplateLetter(createTemplateMsgModel.getTemplateLetter());
-				
+
 				if(i > 0){
 					contentTemplateMsg.setTemplateParentId(templateParentId);
 				}
-				
+
 				if(!createTemplateMsgModel.getTemplateImageId().isEmpty()){
 					contentTemplateMsg.setTemplateImageId(createTemplateMsgModel.getTemplateImageId());
 				}
 				if(!createTemplateMsgModel.getTemplateTitle().isEmpty()){
 					contentTemplateMsg.setTemplateTitle(createTemplateMsgModel.getTemplateTitle());
 				}
-				
+
 				contentTemplateMsgs.add(contentTemplateMsg);
-				
-				
+
+
 				// 取出template的action
 				List<TemplateActionModel> templateActions = createTemplateMsgModel.getTemplateActions();
 				if (actionType.equals("Edit")) { //變更
 					contentTemplateMsgService.getPreActionIdAndLinkId(templateIds.get(i)); //取得原先圖文訊息的DetailId與LinkId
 				}
-				
+
 				//新增與複製
 				actionIdAndLinkIds = new ArrayList<>();
 				for(int k=0; k<templateActions.size(); k++){
@@ -215,17 +215,17 @@ public class BCSPnpTemplateMsgController {
 					map.put("linkId", null);
 					actionIdAndLinkIds.add(map);
 				}
-				
-				for(int j=0; j<templateActions.size(); j++){				
+
+				for(int j=0; j<templateActions.size(); j++){
 					templateActionModel = templateActions.get(j);
-					
+
 					if(j+1>actionIdAndLinkIds.size()){
 						map = new LinkedHashMap<>();
 						map.put("actionId", checkDuplicateUUID("2"));
 						map.put("linkId", null);
 						actionIdAndLinkIds.add(map);
 					}
-					
+
 					linkId = actionIdAndLinkIds.get(j).get("linkId");
 					//action資料
 					contentTemplateMsgAction = new PnpContentTemplateMsgAction();
@@ -235,7 +235,7 @@ public class BCSPnpTemplateMsgController {
 					contentTemplateMsgAction.setActionType(templateActionModel.getActionType());
 					contentTemplateMsgAction.setActionLabel(templateActionModel.getActionLabel());
 					contentTemplateMsgAction.setStatus(PnpContentTemplateMsgAction.STATUS_ACTIVE);
-					
+
 					switch(templateActionModel.getActionType()){
 						case PnpContentTemplateMsgAction.ACTION_TYPE_URI:
 							contentLink = new PnpContentLink();
@@ -258,16 +258,16 @@ public class BCSPnpTemplateMsgController {
 							contentTemplateMsgAction.setActionData(templateActionModel.getActionData());
 							break;
 					}
-					
+
 					contentTemplateMsgActions.add(contentTemplateMsgAction);
 				}
 			}
-			
+
 			//
 			System.out.println("final: "+contentTemplateMsgs.toString());
-			
+
 			contentTemplateMsgService.createTemplateMsg(contentTemplateMsgs, contentTemplateMsgActions, contentLinks);
-			
+
 			return new ResponseEntity<>("save success", HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
@@ -276,10 +276,10 @@ public class BCSPnpTemplateMsgController {
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
 			}else{
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}	
+			}
 		}
 	}
-	
+
 	/**
 	 * 取得樣板訊息
 	 */
@@ -288,7 +288,7 @@ public class BCSPnpTemplateMsgController {
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getPnp/{templateId}")
 	@ResponseBody
 	public ResponseEntity<?> getTemplateMsg(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser,
 			@PathVariable String templateId) throws IOException {
@@ -301,11 +301,11 @@ public class BCSPnpTemplateMsgController {
 		}
 		catch(Exception e){
 			logger.error(ErrorRecord.recordError(e));
-			
+
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	/**
 	 * 取得樣板訊息列表
 	 */
@@ -314,7 +314,7 @@ public class BCSPnpTemplateMsgController {
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getPnpAllList")
 	@ResponseBody
 	public ResponseEntity<?> getAllMsgList(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser) throws IOException {
 		logger.info("getPnpAllList");
@@ -326,11 +326,11 @@ public class BCSPnpTemplateMsgController {
 		}
 		catch(Exception e){
 			logger.error(ErrorRecord.recordError(e));
-			
+
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	/**
 	 * 取得ProductionOn樣板訊息列表
 	 */
@@ -339,7 +339,7 @@ public class BCSPnpTemplateMsgController {
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getPnpOnList")
 	@ResponseBody
 	public ResponseEntity<?> getOnMsgList(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser) throws IOException {
 		logger.info("getPnpOnList");
@@ -351,11 +351,11 @@ public class BCSPnpTemplateMsgController {
 		}
 		catch(Exception e){
 			logger.error(ErrorRecord.recordError(e));
-			
+
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	/**
 	 * 取得ProductionOff樣板訊息列表
 	 */
@@ -364,7 +364,7 @@ public class BCSPnpTemplateMsgController {
 	@RequestMapping(method = RequestMethod.GET, value = "/edit/getPnpOffList")
 	@ResponseBody
 	public ResponseEntity<?> getOffMsgList(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser) throws IOException {
 		logger.info("getPnpOffList");
@@ -376,12 +376,12 @@ public class BCSPnpTemplateMsgController {
 		}
 		catch(Exception e){
 			logger.error(ErrorRecord.recordError(e));
-			
+
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
-	
+
+
 	///**
 	 //* 取得帳務通知成效Total
 	 //*/
@@ -389,16 +389,16 @@ public class BCSPnpTemplateMsgController {
 	//@RequestMapping(method = RequestMethod.GET, value = "/edit/getBNEffectsTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	//@ResponseBody
 	//public ResponseEntity<?> getBNEffectsTotalPages(
-			//HttpServletRequest request, 
+			//HttpServletRequest request,
 			//HttpServletResponse response,
 			//@CurrentUser CustomUser customUser,
-			//@RequestParam(value = "startDate", required=false) String startDate, 
+			//@RequestParam(value = "startDate", required=false) String startDate,
 			//@RequestParam(value = "endDate", required=false) String endDate) throws IOException {
 		//logger.info("getBNEffectsTotalPages");
 
 		//if(startDate == null) startDate = "1911-01-01";
 		//if(endDate == null) endDate = "3099-01-01";
-		
+
 		//try{
 			//String count = contentTemplateMsgService.getBNEffectsTotalPages(startDate, endDate);
 			//return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count + "\"}", HttpStatus.OK);
@@ -408,7 +408,7 @@ public class BCSPnpTemplateMsgController {
 			//return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
 		//}
 	//}
-	
+
 	///**
 	 //* 取得帳務通知成效清單
 	 //*/
@@ -416,27 +416,27 @@ public class BCSPnpTemplateMsgController {
 	//@RequestMapping(method = RequestMethod.GET, value = "/edit/getBNEffectsList")
 	//@ResponseBody
 	//public ResponseEntity<?> getBNEffectsList(
-			//HttpServletRequest request, 
+			//HttpServletRequest request,
 			//HttpServletResponse response,
 			//@CurrentUser CustomUser customUser,
-			//@RequestParam(value = "startDate", required=false) String startDate, 
+			//@RequestParam(value = "startDate", required=false) String startDate,
 			//@RequestParam(value = "endDate", required=false) String endDate,
 			//@RequestParam(value = "page", required=false) Integer page) throws IOException {
 		//logger.info("page1:" + page);
 		//if(startDate == null) startDate = "1911-01-01";
 		//if(endDate == null) endDate = "3099-01-01";
-		
+
 		//try{
 			//Map<String, List<String>> result = contentTemplateMsgService.getBNEffects(startDate, endDate, page);
 			//return new ResponseEntity<>(result, HttpStatus.OK);
 		//}
 		//catch(Exception e){
 			//logger.error(ErrorRecord.recordError(e));
-			
+
 			//return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		//}
 	//}
-	
+
 	///**
 	 //* 取得帳務通知明細成效清單
 	 //*/
@@ -444,19 +444,19 @@ public class BCSPnpTemplateMsgController {
 	//@RequestMapping(method = RequestMethod.GET, value = "/edit/getBNEffectsDetailTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	//@ResponseBody
 	//public ResponseEntity<?> getBNEffectsDetailTotalPages(
-			//HttpServletRequest request, 
+			//HttpServletRequest request,
 			//HttpServletResponse response,
 			//@CurrentUser CustomUser customUser,
-			//@RequestParam  String date, 
+			//@RequestParam  String date,
 			//@RequestParam  String title,
-			//@RequestParam  String sendType) throws IOException {		
+			//@RequestParam  String sendType) throws IOException {
 		//try{
 			//String count = contentTemplateMsgService.getBNEffectsDetailTotalPages(date, title, sendType);
 			//return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count + "\"}", HttpStatus.OK);
 		//}
 		//catch(Exception e){
 			//logger.error(ErrorRecord.recordError(e));
-			
+
 			//return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
 		//}
 	//}
@@ -468,60 +468,60 @@ public class BCSPnpTemplateMsgController {
 	//@RequestMapping(method = RequestMethod.GET, value = "/edit/getBNEffectsDetailList")
 	//@ResponseBody
 	//public ResponseEntity<?> getBNEffectsDetailList(
-			//HttpServletRequest request, 
+			//HttpServletRequest request,
 			//HttpServletResponse response,
 			//@CurrentUser CustomUser customUser,
-			//@RequestParam  String date, 
+			//@RequestParam  String date,
 			//@RequestParam  String title,
 			//@RequestParam  String sendType,
 			//@RequestParam(value = "page", required=false) Integer page) throws IOException {
 		//logger.info("page1: " + page);
-		
+
 		//try{
 			//Map<String, List<String>> result = contentTemplateMsgService.getBNEffectsDetail(date, title, sendType, page);
 			//return new ResponseEntity<>(result, HttpStatus.OK);
 		//}
 		//catch(Exception e){
 			//logger.error(ErrorRecord.recordError(e));
-			
+
 			//return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		//}
 	//}
-	
-	/** 
+
+	/**
 	 * 檢查必填欄位不可為空/get
 	 */
 	public Boolean validateData(List<PnpTemplateMsgModel> createTemplateMsgModels) {
 		PnpTemplateMsgModel createTemplateMsgModel;
 		TemplateActionModel templateActionModel;
-		Boolean imageIsEmpty = createTemplateMsgModels.get(0).getTemplateImageId().isEmpty();
-		Boolean titleIsEmpty = createTemplateMsgModels.get(0).getTemplateTitle().isEmpty();
+		boolean imageIsEmpty = createTemplateMsgModels.get(0).getTemplateImageId().isEmpty();
+		boolean titleIsEmpty = createTemplateMsgModels.get(0).getTemplateTitle().isEmpty();
 		String actionType;
-		
+
 		for(int i=0; i<createTemplateMsgModels.size(); i++){
 			createTemplateMsgModel = createTemplateMsgModels.get(i);
-			
+
 			if(createTemplateMsgModel.getTemplateImageId().isEmpty() ^ imageIsEmpty){
 				return false;
 			}
-			
+
 			if(createTemplateMsgModel.getTemplateTitle().isEmpty() ^ titleIsEmpty){
 				return false;
 			}
-			
+
 			if(createTemplateMsgModel.getAltText().isEmpty() && i==0){
 				return false;
 			}
-			
+
 			List<TemplateActionModel> templateActions = createTemplateMsgModel.getTemplateActions();
 			for(int j=0; j<templateActions.size(); j++){
 				templateActionModel = templateActions.get(j);
 				actionType = templateActionModel.getActionType();
-				
+
 				if(templateActionModel.getActionLabel().isEmpty()){
 					return false;
 				}
-				
+
 				switch(actionType){
 					case "uri" :
 						if(templateActionModel.getActionText().isEmpty()){
@@ -543,22 +543,22 @@ public class BCSPnpTemplateMsgController {
 		}
 		return true;
 	}
-	
-	/** 
+
+	/**
 	 * 回傳一個沒有重覆的uuid
 	 */
 	public String checkDuplicateUUID(String queryType) {
 		String uuid = UUID.randomUUID().toString().toLowerCase();
-		Boolean duplicateUUID = contentTemplateMsgService.checkDuplicateUUID(queryType, uuid);
+		boolean duplicateUUID = contentTemplateMsgService.checkDuplicateUUID(queryType, uuid);
 		while (duplicateUUID) {
 			uuid = UUID.randomUUID().toString().toLowerCase();
 			duplicateUUID = contentTemplateMsgService.checkDuplicateUUID(queryType, uuid);
 		}
-		
+
 		return uuid;
 	}
-	
-	/** 
+
+	/**
 	 * 刪除樣板訊息
 	 */
 	@WebServiceLog
@@ -566,12 +566,12 @@ public class BCSPnpTemplateMsgController {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/admin/deletePnp/{templateId}")
 	@ResponseBody
 	public ResponseEntity<?> deleteTemplateMsg(
-			HttpServletRequest request, 
+			HttpServletRequest request,
 			HttpServletResponse response,
-			@CurrentUser CustomUser customUser,  
+			@CurrentUser CustomUser customUser,
 			@PathVariable String templateId) {
 		logger.info("deletePnp");
-		
+
 		try {
 			// Check Delete Right
 			boolean isAdmin = customUser.isAdmin();
@@ -589,11 +589,11 @@ public class BCSPnpTemplateMsgController {
 			}
 			else{
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}	
+			}
 		}
 	}
 
-	/** 
+	/**
 	 * 取得BigSwitch
 	 */
 	@ControllerLog(description="取得大開關")
@@ -615,8 +615,8 @@ public class BCSPnpTemplateMsgController {
 			return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
-	/** 
+
+	/**
 	 * 設置BigSwitch
 	 */
 	@ControllerLog(description="設置大開關")
@@ -635,7 +635,7 @@ public class BCSPnpTemplateMsgController {
 			systemConfig.setValue(OnOff);
 			systemConfig.setModifyTime(Calendar.getInstance().getTime());
 			systemConfigService.save(systemConfig);
-			
+
 			logger.info("bigSwitch:" + systemConfig.getValue());
 			return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + systemConfig.getValue() + "\"}", HttpStatus.OK);
 		} catch(Exception e) {
@@ -643,7 +643,7 @@ public class BCSPnpTemplateMsgController {
 			return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	/**
      * 匯出 Push API 成效報表
      */
@@ -651,15 +651,15 @@ public class BCSPnpTemplateMsgController {
     //@RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForBNPushApiEffects")
     //@ResponseBody
     //public void exportToExcelForBNPushApiEffects(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, @RequestParam String startDate, @RequestParam String endDate) {
-      
+
 		//// file path
         //String filePath = CoreConfigReader.getString("file.path");
-        
+
         //// file name
 		//SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
 		//Date date = new Date();
         //String fileName = "BNPushApiEffects_" + sdf.format(date) + ".xlsx";
-        
+
         //try {
             //File folder = new File(filePath);
             //if(!folder.exists()){
@@ -676,24 +676,24 @@ public class BCSPnpTemplateMsgController {
 			//e.printStackTrace();
 		//}
     //}
-	
+
 	///**
      //* 匯出 Push API 成效報表
      //*/
 	//@ControllerLog(description="匯出 BN Push API 成效報表")
     //@RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForBNPushApiEffectsDetail")
     //@ResponseBody
-    //public void exportToExcelForBNPushApiEffectsDetail(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, 
+    //public void exportToExcelForBNPushApiEffectsDetail(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
     		//@RequestParam String date, @RequestParam String title, @RequestParam String sendType) {
-      
+
 		//// file path
         ////String filePath = "C:\\bcs\\";
         //String filePath = CoreConfigReader.getString("file.path");
-        
+
         //// file name
 		//SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
         //String fileName = "BNPushApiEffects_" + sdf.format(new Date()) + ".xlsx";
-        
+
         //try {
             //File folder = new File(filePath);
             //if(!folder.exists()){

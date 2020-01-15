@@ -39,19 +39,19 @@ public class BillingNoticeContentTemplateMsgService {
 	private BillingNoticeContentTemplateMsgActionRepository contentTemplateMsgActionRepository;
 	@Autowired
 	private BillingNoticeContentLinkService contentLinkService;
-	
+
 	@PersistenceContext
     EntityManager entityManager;
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BillingNoticeContentTemplateMsgService.class);
-	
+
 	protected LoadingCache<String, Map<String, List<String>>> dataCache;
 
 	private Timer flushTimer = new Timer();
-	
+
 	private class CustomTask extends TimerTask{
-		
+
 		@Override
 		public void run() {
 
@@ -63,7 +63,7 @@ public class BillingNoticeContentTemplateMsgService {
 					DataSyncUtil.syncDataFinish(TEMPLATE_SYNC);
 				}
 			}
-			catch(Throwable e){
+			catch(Exception e){
 				logger.error(ErrorRecord.recordError(e));
 			}
 		}
@@ -83,7 +83,7 @@ public class BillingNoticeContentTemplateMsgService {
 					}
 				});
 	}
-    
+
 	public void getPreTemplateIds(String templateId, String account) throws Exception  {
 		try {
 			List<BillingNoticeContentTemplateMsg> contentTemplateMsgs = contentTemplateMsgRepository.findByParentTemplateId(templateId);
@@ -100,12 +100,12 @@ public class BillingNoticeContentTemplateMsgService {
 		    	contentTemplateMsg.setModifyTime(new Date());
 				contentTemplateMsgRepository.save(contentTemplateMsg);
 			}
-			
+
 		} catch (Exception e) {
 			logger.info(e.getMessage());
-		}		
+		}
     }
-	
+
 	// set Other Same Title Template's Production Switch To Off
 	public void setPreTitleTemplateToOff(String templateTitle, String account) throws Exception {
 		try {
@@ -117,17 +117,17 @@ public class BillingNoticeContentTemplateMsgService {
 		    	contentTemplateMsg.setModifyTime(new Date());
 				contentTemplateMsgRepository.save(contentTemplateMsg);
 			}
-			
+
 		} catch (Exception e) {
 			logger.info(e.getMessage());
-		}		
+		}
     }
-	
+
 
 	public BillingNoticeContentTemplateMsg getSelectedContentTemplateMsg(String templateId) {
     	return contentTemplateMsgRepository.findOne(templateId);
     }
-	
+
 	/**
 	 * 取得樣板訊息更新前的actionId與LinkId
      */
@@ -135,11 +135,11 @@ public class BillingNoticeContentTemplateMsgService {
 	public List<Map<String, String>> getPreActionIdAndLinkId(String templateId) {
 		List<Map<String, String>> list = new ArrayList<>();
 		List<BillingNoticeContentTemplateMsgAction> contentTemplateMsgActions = contentTemplateMsgActionRepository.findNotDeletedTemplateId(templateId);
-		
+
 		for (BillingNoticeContentTemplateMsgAction contentTemplateMsgAction : contentTemplateMsgActions) {
 			Map<String, String> map = new LinkedHashMap<>();
 			String linkId = contentTemplateMsgAction.getLinkId();
-			
+
 			map.put("actionId", contentTemplateMsgAction.getTemplateIdAction());
 			map.put("linkId", linkId);
 			list.add(map);
@@ -147,10 +147,10 @@ public class BillingNoticeContentTemplateMsgService {
 			contentTemplateMsgAction.setStatus(BillingNoticeContentTemplateMsgAction.STATUS_DELETE);
 			contentTemplateMsgActionRepository.save(contentTemplateMsgAction);
 		}
-		
+
     	return list;
     }
-	
+
     /**
 	 * 取得樣板訊息
      */
@@ -162,10 +162,10 @@ public class BillingNoticeContentTemplateMsgService {
 				return result;
 			}
 		} catch (Exception e) {}
-		
-    	String queryString = 
+
+    	String queryString =
     			"SELECT BCS_BN_CONTENT_TEMPLATE.TEMPLATE_ID, "
-    					+ "BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH, " 
+    					+ "BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH, "
         				+ "BCS_BN_CONTENT_TEMPLATE.ALT_TEXT,"
         				+ "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TYPE,"
         				+ "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_IMAGE_ID,"
@@ -177,18 +177,18 @@ public class BillingNoticeContentTemplateMsgService {
         				+ "BCS_BN_CONTENT_TEMPLATE_ACTION.ACTION_LABEL,"
         				+ "BCS_BN_CONTENT_TEMPLATE_ACTION.ACTION_DATA,"
         				+ "BCS_BN_CONTENT_TEMPLATE_ACTION.ACTION_TEXT,"
-        				+ "BCS_BN_CONTENT_LINK.LINK_URL, "    				
-        				+ "BCS_BN_CONTENT_LINK.LINK_ID "    				
+        				+ "BCS_BN_CONTENT_LINK.LINK_URL, "
+        				+ "BCS_BN_CONTENT_LINK.LINK_ID "
         			+ "FROM BCS_BN_CONTENT_TEMPLATE "
         				+ "LEFT JOIN BCS_BN_CONTENT_TEMPLATE_ACTION ON BCS_BN_CONTENT_TEMPLATE.TEMPLATE_ID = BCS_BN_CONTENT_TEMPLATE_ACTION.TEMPLATE_ID "
         				+ "LEFT JOIN BCS_BN_CONTENT_LINK ON BCS_BN_CONTENT_TEMPLATE_ACTION.LINK_ID = BCS_BN_CONTENT_LINK.LINK_ID "
         			+ "WHERE (BCS_BN_CONTENT_TEMPLATE.TEMPLATE_ID = ?1 OR BCS_BN_CONTENT_TEMPLATE.TEMPLATE_PARENT_ID = ?1) AND BCS_BN_CONTENT_TEMPLATE.STATUS <> 'DELETE' AND BCS_BN_CONTENT_TEMPLATE_ACTION.STATUS <> 'DELETE' "
         			+ "ORDER BY BCS_BN_CONTENT_TEMPLATE.TEMPLATE_LETTER, BCS_BN_CONTENT_TEMPLATE_ACTION.ACTION_LETTER";
-    	
+
     	Query query = entityManager.createNativeQuery(queryString).setParameter(1, templateId);
 		List<Object[]> list = query.getResultList();
 		logger.info("list:"+list);
-		
+
 		Map<String, List<String>> map = new LinkedHashMap<>();
 		for (Object[] o : list) {
 			for (int i=0, max=o.length; i<max; i++) {
@@ -210,34 +210,34 @@ public class BillingNoticeContentTemplateMsgService {
 						break;
 					}
 				}
-				
+
 				List<String> dataList = map.get(o[0]);
-				
+
 				if (o[i] == null) {
 					dataList.add(null);
 					//logger.info("i=" + i  + ", null");
 				} else {
 					dataList.add(o[i].toString());
 					//logger.info("i=" + i  + ", " + o[i].toString());
-				}		
+				}
 			}
 		}
-		
+
     	//logger.info("map:"+map);
 		if(map != null){
 			dataCache.put(templateId, map);
 		}
 		return map;
     }
-    
+
     /**
 	 * 取得樣板訊息所有清單
      */
     @SuppressWarnings("unchecked")
     public  Map<String, List<String>> getAllContentTemplateMsg(){
-    	String queryString = 
+    	String queryString =
     			"SELECT BCS_BN_CONTENT_TEMPLATE.TEMPLATE_ID, "
-    					+ "BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH, "  			
+    					+ "BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH, "
     					+ "BCS_BN_CONTENT_TEMPLATE.ALT_TEXT, "
     					+ "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TYPE, "
     					+ "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_IMAGE_ID, "
@@ -250,10 +250,10 @@ public class BillingNoticeContentTemplateMsgService {
 	    			+ "LEFT JOIN BCS_ADMIN_USER ON BCS_BN_CONTENT_TEMPLATE.MODIFY_USER = BCS_ADMIN_USER.ACCOUNT "
 	    		+ "WHERE BCS_BN_CONTENT_TEMPLATE.STATUS = 'ACTIVE' AND BCS_BN_CONTENT_TEMPLATE.TEMPLATE_LEVEL <> 'COLUMN'"
     			+ "ORDER BY BCS_BN_CONTENT_TEMPLATE.MODIFY_TIME DESC";
-    	
+
     	Query query = entityManager.createNativeQuery(queryString);
 		List<Object[]> list = query.getResultList();
-    	
+
     	Map<String, List<String>> map = new LinkedHashMap<>();
 		for (Object[] o : list) {
 			for (int i=0, max=o.length; i<max; i++) {
@@ -261,7 +261,7 @@ public class BillingNoticeContentTemplateMsgService {
 					map.put(o[0].toString(), new ArrayList<String>());
 					continue;
 				}
-				
+
 				List<String> dataList = map.get(o[0]);
 				if (o[i] == null) {
 					dataList.add("");
@@ -272,20 +272,20 @@ public class BillingNoticeContentTemplateMsgService {
 				}
 			}
 		}
-		
+
     	logger.debug(map);
-    	
+
 		return map;
     }
-    
+
     /**
 	 * 取得ProductOn樣板訊息所有清單
      */
     @SuppressWarnings("unchecked")
     public  Map<String, List<String>> getProductOnContentTemplateMsg(){
-    	String queryString = 
+    	String queryString =
     			"SELECT BCS_BN_CONTENT_TEMPLATE.TEMPLATE_ID, "
-    					+ "BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH, "  			
+    					+ "BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH, "
     					+ "BCS_BN_CONTENT_TEMPLATE.ALT_TEXT, "
     					+ "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TYPE, "
     					+ "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_IMAGE_ID, "
@@ -298,10 +298,10 @@ public class BillingNoticeContentTemplateMsgService {
 	    			+ "LEFT JOIN BCS_ADMIN_USER ON BCS_BN_CONTENT_TEMPLATE.MODIFY_USER = BCS_ADMIN_USER.ACCOUNT "
 	    		+ "WHERE BCS_BN_CONTENT_TEMPLATE.STATUS = 'ACTIVE' AND BCS_BN_CONTENT_TEMPLATE.TEMPLATE_LEVEL <> 'COLUMN' AND BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH = 'True'"
     			+ "ORDER BY BCS_BN_CONTENT_TEMPLATE.MODIFY_TIME DESC";
-    	
+
     	Query query = entityManager.createNativeQuery(queryString);
 		List<Object[]> list = query.getResultList();
-    	
+
     	Map<String, List<String>> map = new LinkedHashMap<>();
 		for (Object[] o : list) {
 			for (int i=0, max=o.length; i<max; i++) {
@@ -309,7 +309,7 @@ public class BillingNoticeContentTemplateMsgService {
 					map.put(o[0].toString(), new ArrayList<String>());
 					continue;
 				}
-				
+
 				List<String> dataList = map.get(o[0]);
 				if (o[i] == null) {
 					dataList.add("");
@@ -320,20 +320,20 @@ public class BillingNoticeContentTemplateMsgService {
 				}
 			}
 		}
-		
+
     	logger.debug(map);
-    	
+
 		return map;
     }
-    
+
     /**
 	 * 取得ProductOff樣板訊息所有清單
      */
     @SuppressWarnings("unchecked")
     public  Map<String, List<String>> getProductOffContentTemplateMsg(){
-    	String queryString = 
+    	String queryString =
     			"SELECT BCS_BN_CONTENT_TEMPLATE.TEMPLATE_ID, "
-    					+ "BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH, "  			
+    					+ "BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH, "
     					+ "BCS_BN_CONTENT_TEMPLATE.ALT_TEXT, "
     					+ "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TYPE, "
     					+ "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_IMAGE_ID, "
@@ -346,10 +346,10 @@ public class BillingNoticeContentTemplateMsgService {
 	    			+ "LEFT JOIN BCS_ADMIN_USER ON BCS_BN_CONTENT_TEMPLATE.MODIFY_USER = BCS_ADMIN_USER.ACCOUNT "
 	    		+ "WHERE BCS_BN_CONTENT_TEMPLATE.STATUS = 'ACTIVE' AND BCS_BN_CONTENT_TEMPLATE.TEMPLATE_LEVEL <> 'COLUMN' AND BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH = 'False'"
     			+ "ORDER BY BCS_BN_CONTENT_TEMPLATE.MODIFY_TIME DESC";
-    	
+
     	Query query = entityManager.createNativeQuery(queryString);
 		List<Object[]> list = query.getResultList();
-    	
+
     	Map<String, List<String>> map = new LinkedHashMap<>();
 		for (Object[] o : list) {
 			for (int i=0, max=o.length; i<max; i++) {
@@ -357,7 +357,7 @@ public class BillingNoticeContentTemplateMsgService {
 					map.put(o[0].toString(), new ArrayList<String>());
 					continue;
 				}
-				
+
 				List<String> dataList = map.get(o[0]);
 				if (o[i] == null) {
 					dataList.add("");
@@ -368,18 +368,18 @@ public class BillingNoticeContentTemplateMsgService {
 				}
 			}
 		}
-		
+
     	logger.debug(map);
-    	
+
 		return map;
     }
-    
+
     /**
 	 * 取得帳務通知成效清單
      */
     @SuppressWarnings("unchecked")
     public String getBNEffectsTotalPages(String startDate, String endDate){
-    	String queryString = 
+    	String queryString =
 //		"select count(*) from "
 //		+"(SELECT D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') AS 'Day', M.SEND_TYPE "
 //		+"FROM BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M  "
@@ -421,33 +421,33 @@ public class BillingNoticeContentTemplateMsgService {
 		+") as result ";
 
     	logger.info("str1: " + queryString);
-    	
+
     	Query query = entityManager.createNativeQuery(queryString);
 		List<Object[]> list = query.getResultList();
 		String listStr = list.toString();
     	logger.info("List1:" + list.toString());
-		
+
 		// Total = Empty set,  []  => 0
-		if(listStr.length() <= 2) return "0"; 
-		
+		if(listStr.length() <= 2) return "0";
+
 		// Total < 10
 		char c1 = listStr.charAt(listStr.length() - 2); // 個位數
 		if(listStr.length() == 3) return (c1=='0') ? "0" : "1"; // [0] => 0 , [1] => 1
-		
+
 		// Total >= 10
 		if(c1 == '0') return listStr.substring(1, listStr.length() - 2); // [430] => 43
 		char c10 = listStr.charAt(listStr.length() - 3); // 十位數
     	return listStr.substring(1, listStr.length() - 3) + (++c10); // [431] => 44
     }
- 
+
 //    public static String getString(String listStr) {
 //		// Total = Empty set. []  => 0
-//		if(listStr.length() <= 2) return "0"; 
-//		
+//		if(listStr.length() <= 2) return "0";
+//
 //		// Total < 10
 //		char c1 = listStr.charAt(listStr.length() - 2); // 個位數
 //		if(listStr.length() == 3) return (c1=='0') ? "0" : "1"; // [0] => 0 , [x] => 1
-//		
+//
 //		// Total >= 10
 //		if(c1 == '0') return listStr.substring(1, listStr.length() - 2); // [430] => 43
 //		char c10 = listStr.charAt(listStr.length() - 3); // 十位數
@@ -457,7 +457,7 @@ public class BillingNoticeContentTemplateMsgService {
 //		String listStr = "[431]";
 //    	System.out.println( getString(listStr));
 //    }
-    
+
     /**
 	 * 取得帳務通知成效清單
      */
@@ -472,8 +472,8 @@ public class BillingNoticeContentTemplateMsgService {
     		rowStart = page * 10 + 1;
     		rowEnd = rowStart + 10; // 10 as Size
     	}
-    	
-    	String queryString = 
+
+    	String queryString =
 //		"SELECT D.TITLE AS 'Title', "
 //		+"FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') AS 'Day', "
 //		+"M.SEND_TYPE AS 'Type', "
@@ -485,7 +485,7 @@ public class BillingNoticeContentTemplateMsgService {
 //		+"AND (case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end) <= '" + endDate + "' "
 //		+"GROUP BY D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd'), M.SEND_TYPE "
 //		+"ORDER BY 'Title', 'Day', 'Type'; ";
-    			
+
 //		"select * from "
 //		+"(SELECT D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') AS 'Day', M.SEND_TYPE,  "
 //		+"SUM(case when D.STATUS = 'COMPLETE' then 1 else 0 end) AS 'Complete',  "
@@ -534,15 +534,15 @@ public class BillingNoticeContentTemplateMsgService {
     			+		   " BNM.SEND_TYPE"
 		+") as result "
 		+"where RowNum >= ?1 and RowNum < ?2 ";
-    	
-    	
+
+
 
     	logger.info("str1: " + queryString);
-    	
+
     	Query query = entityManager.createNativeQuery(queryString).setParameter(1, rowStart).setParameter(2, rowEnd);
 		List<Object[]> list = query.getResultList();
     	logger.info("List1: " + list.toString());
-    		
+
     	Map<String, List<String>> map = new LinkedHashMap<>();
     	Integer count = 0;
 		for (Object[] o : list) {
@@ -561,13 +561,13 @@ public class BillingNoticeContentTemplateMsgService {
 			}
 		}
     	logger.info("map1: " + map.toString());
-    	
+
 		return map;
     }
-    
+
     @SuppressWarnings("unchecked")
     public String getBNEffectsDetailTotalPages(String date, String templateName, String sendType){
-    	String queryString = 
+    	String queryString =
 //		"select count(*) from "
 //		+"(SELECT D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') AS 'Day', M.SEND_TYPE "
 //		+"FROM BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M  "
@@ -576,8 +576,8 @@ public class BillingNoticeContentTemplateMsgService {
 //		+"AND FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') <= '" + endDate + "' "
 //		+"GROUP BY D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd'), M.SEND_TYPE) as result; ";
 
-    			
-		"select count(*) from ( "	
+
+		"select count(*) from ( "
 		//+"SELECT D.TITLE, D.CREAT_TIME, D.MODIFY_TIME, D.SEND_TIME, D.STATUS, D.UID, "
 		+"SELECT D.CREAT_TIME, T.TEMPLATE_TYPE, D.TITLE, D.TEXT, D.STATUS, D.UID, "
         +"DENSE_RANK() OVER ( ORDER BY D.MODIFY_TIME desc, D.NOTICE_DETAIL_ID) AS RowNum "
@@ -591,19 +591,19 @@ public class BillingNoticeContentTemplateMsgService {
 		//+"AND (D.STATUS = 'FAIL' or D.STATUS = 'COMPLETE') "
 		+") as result ";
     	logger.info("str1: " + queryString);
-    	
+
     	Query query = entityManager.createNativeQuery(queryString);
 		List<Object[]> list = query.getResultList();
 		String listStr = list.toString();
     	logger.info("List1:" + list.toString());
-		
+
 		// Total = Empty set,  []  => 0
-		if(listStr.length() <= 2) return "0"; 
-		
+		if(listStr.length() <= 2) return "0";
+
 		// Total < 10
 		char c1 = listStr.charAt(listStr.length() - 2); // 個位數
 		if(listStr.length() == 3) return (c1=='0') ? "0" : "1"; // [0] => 0 , [1] => 1
-		
+
 		// Total >= 10
 		if(c1 == '0') return listStr.substring(1, listStr.length() - 2); // [430] => 43
 		char c10 = listStr.charAt(listStr.length() - 3); // 十位數
@@ -623,10 +623,10 @@ public class BillingNoticeContentTemplateMsgService {
     		rowStart = page * 10 + 1;
     		rowEnd = rowStart + 10; // 10 as Size
     	}
-    	
+
     	logger.info("getBNEffectsDetail:");
-    	String queryString = 
-		"select * from ( "    			
+    	String queryString =
+		"select * from ( "
 		//+"SELECT D.TITLE, D.CREAT_TIME, D.MODIFY_TIME, D.SEND_TIME, D.STATUS, D.UID, "
 		+"SELECT D.CREAT_TIME, T.TEMPLATE_TYPE, D.TITLE, D.TEXT, D.STATUS, D.UID, "
         +"DENSE_RANK() OVER ( ORDER BY D.MODIFY_TIME desc, D.NOTICE_DETAIL_ID) AS RowNum "
@@ -640,13 +640,13 @@ public class BillingNoticeContentTemplateMsgService {
 		//+"AND (D.STATUS = 'FAIL' or D.STATUS = 'COMPLETE') "
 		+") as result "
 		+"where RowNum >= ?1 and RowNum < ?2 ";
-		
+
     	logger.info("str1: " + queryString);
-    	
+
     	Query query = entityManager.createNativeQuery(queryString).setParameter(1, rowStart).setParameter(2, rowEnd);
 		List<Object[]> list = query.getResultList();
     	logger.info("List1: " + list.toString());
-    		
+
     	Map<String, List<String>> map = new LinkedHashMap<>();
     	Integer count = 0;
 		for (Object[] o : list) {
@@ -665,10 +665,10 @@ public class BillingNoticeContentTemplateMsgService {
 			}
 		}
     	logger.info("map1: " + map.toString());
-    	
+
 		return map;
     }
-    
+
     /**
 	 *  檢查有無重覆使用到UUID
      */
@@ -683,31 +683,31 @@ public class BillingNoticeContentTemplateMsgService {
     		BillingNoticeContentLink contentLink = contentLinkService.findOne(uuid);
     		if (contentLink == null) return false;
     	}
-    	
+
 		return true;
     }
-    
+
     /**
 	 * 新增樣板訊息
      */
     @Transactional(rollbackFor=Exception.class)
-	public void createTemplateMsg(List<BillingNoticeContentTemplateMsg> contentTemplateMsgs, List<BillingNoticeContentTemplateMsgAction> contentTemplateMsgActions, List<BillingNoticeContentLink> contentLinks){    	
+	public void createTemplateMsg(List<BillingNoticeContentTemplateMsg> contentTemplateMsgs, List<BillingNoticeContentTemplateMsgAction> contentTemplateMsgActions, List<BillingNoticeContentLink> contentLinks){
     	for(BillingNoticeContentTemplateMsg contentTemplateMsg : contentTemplateMsgs){
     		contentTemplateMsgRepository.save(contentTemplateMsg);
     	}
-    	
+
     	for(BillingNoticeContentTemplateMsgAction contentTemplateMsgAction : contentTemplateMsgActions){
     		contentTemplateMsgActionRepository.save(contentTemplateMsgAction);
     	}
 
     	contentLinkService.save(contentLinks);
-    	
+
     	for(BillingNoticeContentTemplateMsg contentTemplateMsg : contentTemplateMsgs){
     		dataCache.refresh(contentTemplateMsg.getTemplateId());
 			DataSyncUtil.settingReSync(TEMPLATE_SYNC);
     	}
 	}
-    
+
     /**
 	 * 刪除圖文訊息
      */
@@ -715,7 +715,7 @@ public class BillingNoticeContentTemplateMsgService {
 	public void deleteTemplateMsg(String templateId, String account){
 		// 只改變狀態
     	List<BillingNoticeContentTemplateMsg> contentTemplateMsgs = contentTemplateMsgRepository.findByTemplateId(templateId);
-    	
+
     	for(BillingNoticeContentTemplateMsg contentTemplateMsg : contentTemplateMsgs){
     		logger.info("Delete:" + contentTemplateMsg.getTemplateId());
     		contentTemplateMsg.setStatus(BillingNoticeContentTemplateMsg.STATUS_DELETE);

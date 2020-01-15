@@ -46,45 +46,45 @@ import com.bcs.core.utils.ObjectUtil;
 public class UserStatusUpdateController {
 	@Autowired
 	private RichartValidateService richartValidateService;
-	
+
 	@Autowired
 	private AdminUserService adminUserService;
-	
+
 	@Autowired
     private PasswordEncoder passwordEncoder;
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(UserStatusUpdateController.class);
 
 	@WebServiceLog
-	@RequestMapping(method = RequestMethod.POST, value = "/userStatusUpdate/{ChannelId}", 
+	@RequestMapping(method = RequestMethod.POST, value = "/userStatusUpdate/{ChannelId}",
 			consumes = MediaType.APPLICATION_JSON_VALUE + "; charset=UTF-8")
 	public ResponseEntity<?> userStatusUpdate(@RequestBody String updateModel, @PathVariable String ChannelId, HttpServletRequest request, HttpServletResponse response) {
 		logger.debug("-------userStatusUpdate-------");
 		Date start = new Date();
 		logger.debug("updateModel:" + updateModel);
-		
+
 		String error = "";
-		
+
 		try{
-			
+
 			UpdateStatusModel model = ObjectUtil.jsonStrToObject(updateModel, UpdateStatusModel.class);
 			logger.info("-------userStatusUpdate model-------:" + model);
-			
+
 			if(LineIdUtil.isLineUID(model.getUid())){
 				// Validate
 			}
 			else{
 				throw new Exception("UidError");
 			}
-			
+
 			if(LineUser.STATUS_BINDED.equals(model.getStatus()) || LineUser.STATUS_UNBIND.equals(model.getStatus())){
 				// Validate
 			}
 			else{
 				throw new Exception("StatusError");
 			}
-			
+
 			richartValidateService.bindedLineUser(model);
 
 			logger.debug("-------userStatusUpdate Success-------");
@@ -92,7 +92,7 @@ public class UserStatusUpdateController {
 			SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_BcsApi, LOG_TARGET_ACTION_TYPE.ACTION_BcsApi_UpdateStatus, start, 200, updateModel, "200");
 			return new ResponseEntity<>(createResult(200, "Success"), HttpStatus.OK);
 		}
-		catch(Throwable e){
+		catch(Exception e){
 			error = e.getMessage();
 			logger.error(ErrorRecord.recordError(e));
 		}
@@ -109,34 +109,34 @@ public class UserStatusUpdateController {
 			if(request.getHeader(HttpHeaders.AUTHORIZATION) == null) {
 				return new ResponseEntity<>("{\"error\": \"true\", \"msg\": \"missing headers\"}", HttpStatus.BAD_REQUEST);
 			}
-			
+
 			String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-			
+
 			if(authorization.split("Basic ").length != 2) {
 				return new ResponseEntity<>("{\"error\": \"true\", \"msg\": \"invalid authorization format\"}", HttpStatus.UNAUTHORIZED);
 			}
-			
+
 			String token = authorization.split("Basic ")[1];
 			String secret = CoreConfigReader.getString(CONFIG_STR.AES_SECRET_KEY, true);
 			String iv = CoreConfigReader.getString(CONFIG_STR.AES_INITIALIZATION_VECTOR, true);
 			String originalToken = CoreConfigReader.getString(CONFIG_STR.API_ORIGINAL_TOKEN, true);
-			
+
 			if(!CryptUtil.Decrypt(CryptUtil.AES, token, secret, iv).equals(originalToken)) {
 				return new ResponseEntity<>("{\"error\": \"true\", \"msg\": \"invalid token\"}", HttpStatus.UNAUTHORIZED);
 			}
-			
+
 			JSONObject requestBody = new JSONObject(requestBodyString);
-			
+
 			String account = requestBody.getString("account");
 			String username = requestBody.getString("username");
 			String password = requestBody.getString("password");
-			
+
 			if(StringUtils.isEmpty(account) || StringUtils.isEmpty(username) || StringUtils.isEmpty(password))
 				return new ResponseEntity<String>("{\"error\": \"true\", \"msg\": \"Parameters cannot be empty.\"}", HttpStatus.OK);
-			
+
 			if(adminUserService.findOne(account) == null) {
 				AdminUser adminUser = new AdminUser();
-				
+
 				adminUser.setAccount(account);
 				adminUser.setUserName(username);
 				adminUser.setRole("ROLE_ADMIN");
@@ -147,9 +147,9 @@ public class UserStatusUpdateController {
 				adminUser.setCanSave(true);
 				adminUser.setMid(null);
 				adminUser.setPassword(passwordEncoder.encode(password));
-				
+
 				adminUserService.save(adminUser);
-				
+
 				return new ResponseEntity<String>("{\"error\": \"false\", \"msg\": null}", HttpStatus.OK);
 			} else {
 				return new ResponseEntity<String>("{\"error\": \"true\", \"msg\": \"Account '" + account + "' is already exist.\"}", HttpStatus.OK);
@@ -159,17 +159,17 @@ public class UserStatusUpdateController {
 				return new ResponseEntity<>("{\"error\": \"true\", \"msg\": \"invalid token\"}", HttpStatus.UNAUTHORIZED);
 			else if(e instanceof JSONException)
 				return new ResponseEntity<String>("{\"error\": \"true\", \"msg\": \"Invalid request body.\"}", HttpStatus.BAD_REQUEST);
-			
+
 			return new ResponseEntity<>("{\"error\": \"true\", \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	private Map<String, Object> createResult(Integer status, String msg){
 		Map<String, Object> result = new HashMap<String, Object>();
-		
+
 		result.put("status", status);
 		result.put("msg", msg);
-		
+
 		return result;
 	}
 }

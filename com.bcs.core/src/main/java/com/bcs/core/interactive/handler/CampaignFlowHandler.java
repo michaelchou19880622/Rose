@@ -54,9 +54,9 @@ public class CampaignFlowHandler {
     private CampaignFlowService campaignFlowService;
     @Autowired
     private MsgInteractiveMainService msgInteractiveMainService;
-	
+
 	protected LoadingCache<String, CampaignFlowData> camapaignFlowDataCache;
-	
+
 	public CampaignFlowHandler(){
 
 		camapaignFlowDataCache = CacheBuilder.newBuilder()
@@ -69,7 +69,7 @@ public class CampaignFlowHandler {
 					}
 				});
 	}
-	
+
 	@PreDestroy
 	public void cleanUp() {
 		logger.info("[DESTROY] InteractiveHandler cleaning up...");
@@ -79,12 +79,12 @@ public class CampaignFlowHandler {
 				camapaignFlowDataCache = null;
 			}
 		}
-		catch(Throwable e){}
-		
+		catch(Exception e){}
+
 		System.gc();
 		logger.info("[DESTROY] InteractiveHandler destroyed.");
 	}
-		
+
 	/**
 	 * @param iMsgId
 	 * @return
@@ -96,27 +96,27 @@ public class CampaignFlowHandler {
 			List<MsgDetail> list = new ArrayList<MsgDetail>();
 			for(MsgDetail detail : details){
 				if(MsgGeneratorExtend.MSG_TYPE_INTERACTIVE_LINK.equals(detail.getMsgType())){
-					
+
 				}
 				else{
 					list.add(detail);
 				}
 			}
-			
+
 			return list;
 		}
 		else{
 			return details;
 		}
 	}
-	
+
 	public List<MsgDetail> startFlow(String MID, MsgInteractiveMain main) throws Exception {
 	    List<MsgDetail> result = new ArrayList<MsgDetail>();
 
         MsgInteractiveCampaign iMsgCamapaign = msgInteractiveCampaignService.findByiMsgId(main.getiMsgId());
-        
+
         List<MsgDetail> details = msgDetailService.findByMsgIdAndEventType(main.getiMsgId(), MsgGeneratorExtend.EVENT_TYPE_UPLOAD_INVOICE);
-        
+
         if (CollectionUtils.isNotEmpty(details) && iMsgCamapaign != null) {
             result.addAll(details);
 
@@ -125,17 +125,17 @@ public class CampaignFlowHandler {
             data.setStep(1);
             data.setErrorCount(0);
             data.setLastModifiedTime(new Date());
-            
+
             data.setErrorLimit(iMsgCamapaign.getErrorLimit());
             data.setTimeout(iMsgCamapaign.getTimeout());
-            
+
             camapaignFlowDataCache.put(MID, data);
             saveToDB(data, MID);
         }
-            
-        return result; 
+
+        return result;
 	}
-	
+
 	public CampaignFlowData getFromDB(String MID){
 
 	    CampaignFlow campaignFlow = campaignFlowService.findOne(MID);
@@ -144,24 +144,24 @@ public class CampaignFlowHandler {
 	    }
 	    else{
 	        MsgInteractiveCampaign iMsgCamapaign = msgInteractiveCampaignService.findByiMsgId(campaignFlow.getiMsgId());
-	        
+
 	        CampaignFlowData data = new CampaignFlowData();
 	    	MsgInteractiveMain main = msgInteractiveMainService.findOne(campaignFlow.getiMsgId());
             data.setMsgInteractiveMain(main);
             data.setStep(campaignFlow.getStep());
             data.setErrorCount(campaignFlow.getErrorCount());
             data.setLastModifiedTime(campaignFlow.getLastModifiedTime());
-            
+
             data.setErrorLimit(iMsgCamapaign.getErrorLimit());
             data.setTimeout(iMsgCamapaign.getTimeout());
             data.setInvNum(campaignFlow.getInvNum());
             data.setInvTerm(campaignFlow.getInvTerm());
             data.setRandomNumber(campaignFlow.getRandomNumber());
-            
+
             return data;
 	    }
 	}
-	
+
 	public CampaignFlow saveToDB(CampaignFlowData data, String MID){
 
 	    CampaignFlow campaignFlow = campaignFlowService.findOne(MID);
@@ -174,35 +174,35 @@ public class CampaignFlowHandler {
     	campaignFlow.setStep(data.getStep());
     	campaignFlow.setErrorCount(data.getErrorCount());
     	campaignFlow.setLastModifiedTime(data.getLastModifiedTime());
-        
+
     	campaignFlow.setErrorLimit(data.getErrorLimit());
     	campaignFlow.setTimeout(data.getTimeout());
     	campaignFlow.setInvNum(data.getInvNum());
         campaignFlow.setInvTerm(data.getInvTerm());
         campaignFlow.setRandomNumber(data.getRandomNumber());
-        
+
         return campaignFlowService.save(campaignFlow);
 	}
-	
+
 	public CampaignFlowData handle(String MID, Object msg) throws Exception {
 	    CampaignFlowData data = camapaignFlowDataCache.get(MID);
-	    
+
 	    // 分散式處理
 	    data = getFromDB(MID);
-	    
+
 	    if (data == null || data.getStep() == null) {
 	        return null;
 	    }
-	    
-	    
+
+
 	    if (isTimeout(data)) {
 	        cancelFlow(MID);
-            
+
             return null;
 	    }
-	    
+
 	    MsgInteractiveMain main = data.getMsgInteractiveMain();
-	    
+
 	    List<MsgDetail> result = new ArrayList<MsgDetail>();
 	    data.setCurrentResponse(result);
 
@@ -218,7 +218,7 @@ public class CampaignFlowHandler {
                 Matcher matcher = pattern.matcher(text);
                 if (matcher.matches()) {
                     List<MsgDetail> details = msgDetailService.findByMsgIdAndEventType(main.getiMsgId(), MsgGeneratorExtend.EVENT_TYPE_TYPE_IN_INVTERN);
-                    
+
                     if (CollectionUtils.isNotEmpty(details)) {
                         result.addAll(details);
                         data.setInvNum(text);
@@ -226,20 +226,20 @@ public class CampaignFlowHandler {
                     }
                 } else {
                     List<MsgDetail> details = msgDetailService.findByMsgIdAndEventType(main.getiMsgId(), MsgGeneratorExtend.EVENT_TYPE_UPLOAD_INVOICE_FAIL);
-                    
+
                     if (CollectionUtils.isNotEmpty(details)) {
                         result.addAll(details);
-                        data.setStep(1);   
+                        data.setStep(1);
                     }
                     data.addErrorCount();
                 }
-                
+
             } else if (msg instanceof ContentResource) {
                 ContentResource resource = (ContentResource) msg;
                 MsgInteractiveMain iMsgMain = data.getMsgInteractiveMain();
                 MsgInteractiveCampaign iMsgCamapaign = msgInteractiveCampaignService.findByiMsgId(iMsgMain.getiMsgId());
-                
-                Map<String, Object> validateResult = 
+
+                Map<String, Object> validateResult =
                         invoiceEventService.validateInvoice(MID, resource, iMsgCamapaign.getCampaignId());
 
                 if (validateResult != null) {
@@ -254,7 +254,7 @@ public class CampaignFlowHandler {
                 Matcher matcher = pattern.matcher(text);
                 if (matcher.matches()) {
                     List<MsgDetail> details = msgDetailService.findByMsgIdAndEventType(main.getiMsgId(), MsgGeneratorExtend.EVENT_TYPE_TYPE_IN_RANDON_NUM);
-                    
+
                     if (CollectionUtils.isNotEmpty(details)) {
                         result.addAll(details);
                         data.setInvTerm(text);
@@ -262,7 +262,7 @@ public class CampaignFlowHandler {
                     }
                 } else {
                     List<MsgDetail> details = msgDetailService.findByMsgIdAndEventType(main.getiMsgId(), MsgGeneratorExtend.EVENT_TYPE_TYPE_IN_INVTERN_FAIL);
-                    
+
                     if (CollectionUtils.isNotEmpty(details)) {
                         result.addAll(details);
                         data.addErrorCount();
@@ -277,51 +277,51 @@ public class CampaignFlowHandler {
             Matcher matcher = pattern.matcher(text);
             if (matcher.matches()) {
                 data.setRandomNumber(text);
-                
+
                 MsgInteractiveMain iMsgMain = data.getMsgInteractiveMain();
                 MsgInteractiveCampaign iMsgCamapaign = msgInteractiveCampaignService.findByiMsgId(iMsgMain.getiMsgId());
-                
+
                 Map<String, Object> validateResult = invoiceEventService.validateInvoice(MID, data.getInvNum(), data.getInvTerm(), data.getRandomNumber(), iMsgCamapaign.getCampaignId());
                 logger.info(ObjectUtil.objectToJsonStr(validateResult));
-                
+
                 handleInvoiceResult(validateResult, data, result);
             } else {
                 List<MsgDetail> details = msgDetailService.findByMsgIdAndEventType(main.getiMsgId(), MsgGeneratorExtend.EVENT_TYPE_TYPE_IN_RANDON_NUM_FAIL);
-                
+
                 if (CollectionUtils.isNotEmpty(details)) {
                     result.addAll(details);
                     data.addErrorCount();
                 }
             }
         }
-	    
+
 	    if (data.getErrorLimit() != 0 && data.getErrorCount() == data.getErrorLimit()) {
 	        result = new ArrayList<MsgDetail>();
 	        data.setCurrentResponse(result);
-	        
+
 	        List<MsgDetail> details = msgDetailService.findByMsgIdAndEventType(main.getiMsgId(), MsgGeneratorExtend.EVENT_TYPE_TOO_MUCH_ERROR);
-            
+
             if (CollectionUtils.isNotEmpty(details)) {
                 result.addAll(details);
             }
 	        cancelFlow(MID);
-	        
+
 	        return data;
 	    }
-	    
+
 	    if (CollectionUtils.isEmpty(data.getCurrentResponse())) {
 	        cancelFlow(MID);
-	        
+
 	        return null;
 	    }
-        
+
 	    data.setLastModifiedTime(new Date());
-	    
+
 	    // 分散式處理
 	    saveToDB(data, MID);
 	    return data;
 	}
-	
+
 	public void cancelFlow(String MID) {
 	    camapaignFlowDataCache.invalidate(MID);
 	    try {
@@ -330,27 +330,27 @@ public class CampaignFlowHandler {
 			logger.error(ErrorRecord.recordError(e));
 		}
 	}
-    
+
     private void handleInvoiceResult(Map<String, Object> validateResult, CampaignFlowData data, List<MsgDetail> result) throws Exception {
 
         MsgInteractiveMain main = data.getMsgInteractiveMain();
-        
+
         Invoice invoice = (Invoice) validateResult.get("invoice");
 
         /* 無法辦識或發生例外 */
-        Boolean isDecodeFail = (null == invoice || 
+        Boolean isDecodeFail = (null == invoice ||
                 InvoiceStatus.DECODE_FAIL.equals(invoice.getStatus()));
-        
+
         if (isDecodeFail) {
-            
+
             List<MsgDetail> details = msgDetailService.findByMsgIdAndEventType(main.getiMsgId(), MsgGeneratorExtend.EVENT_TYPE_DECODE_FAIL);
-            
+
             if (CollectionUtils.isNotEmpty(details)) {
                 result.addAll(details);
             }
             data.addErrorCount();
             data.setStep(1);
-            
+
         } else {
             /* 發票是否尚未同步至發票平台 */
             boolean isInvoiceNotFound = InvoiceStatus.NOT_FOUND.equals(invoice.getStatus());
@@ -362,36 +362,36 @@ public class CampaignFlowHandler {
             boolean isValid = InvoiceStatus.VALID.equals(invoice.getStatus());
             /* 發票是否已參加過活動 */
             boolean isExisted = InvoiceStatus.EXISTED.equals(invoice.getStatus());
-            
-            
+
+
             if (isValid) {
                 List<MsgDetail> details = msgDetailService.findByMsgIdAndEventType(main.getiMsgId(), MsgGeneratorExtend.EVENT_TYPE_UPLOAD_INVOICE_SUCCESS);
-                
+
                 if (CollectionUtils.isNotEmpty(details)) {
                     result.addAll(details);
                 }
                 data.setStep(4);
-                
+
             } else if (isInvoiceNotFound) {
                 List<MsgDetail> details = msgDetailService.findByMsgIdAndEventType(main.getiMsgId(), MsgGeneratorExtend.EVENT_TYPE_NOT_FOUND);
-                
+
                 if (CollectionUtils.isNotEmpty(details)) {
                     result.addAll(details);
                 }
                 data.setStep(4);
-                
+
             } else if (isTimeNotInInternal) {
                 List<MsgDetail> details = msgDetailService.findByMsgIdAndEventType(main.getiMsgId(), MsgGeneratorExtend.EVENT_TYPE_NOT_IN_INTERNAL);
-                
+
                 if (CollectionUtils.isNotEmpty(details)) {
                     result.addAll(details);
                 }
                 data.addErrorCount();
                 data.setStep(1);
-                
+
             } else if (isLessPayment) {
                 List<MsgDetail> details = msgDetailService.findByMsgIdAndEventType(main.getiMsgId(), MsgGeneratorExtend.EVENT_TYPE_LESS_PAYMENT);
-                
+
                 if (CollectionUtils.isNotEmpty(details)) {
                     result.addAll(details);
                 }
@@ -399,7 +399,7 @@ public class CampaignFlowHandler {
                 data.setStep(1);
             } else if (isExisted) {
                 List<MsgDetail> details = msgDetailService.findByMsgIdAndEventType(main.getiMsgId(), MsgGeneratorExtend.EVENT_TYPE_INVOICE_IS_USED);
-                
+
                 if (CollectionUtils.isNotEmpty(details)) {
                     result.addAll(details);
                 }
@@ -408,13 +408,13 @@ public class CampaignFlowHandler {
             }
         }
     }
-    
+
     private boolean isTimeout(CampaignFlowData data) {
         if (data != null && data.getTimeout() != null && data.getLastModifiedTime() != null) {
             Date last = data.getLastModifiedTime();
             Date now = new Date();
             Integer timeoutSec = data.getTimeout();
-            
+
             return ((now.getTime() - last.getTime()) > timeoutSec * 1000 );
         }
         return false;

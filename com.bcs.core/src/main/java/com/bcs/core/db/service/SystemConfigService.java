@@ -46,7 +46,7 @@ public class SystemConfigService {
                     data.invalidateAll();
                     DataSyncUtil.syncDataFinish(CONFIG_SYNC);
                 }
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 logger.error(ErrorRecord.recordError(e));
             }
         }
@@ -84,7 +84,7 @@ public class SystemConfigService {
                 data.put(configId, systemConfig.getValue());
                 return systemConfig.getValue();
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
         }// Skip
 
         return null;
@@ -127,7 +127,7 @@ public class SystemConfigService {
                 data.put(configId, systemConfig.getValue());
                 return systemConfig;
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.info("findSystemConfig Error:" + e.getMessage());
         }// Skip
 

@@ -45,7 +45,7 @@ public class MobileVIPNightTracingController extends BCSBaseController {
     private ShareCampaignService shareCampaignService;
     @Autowired
     private LineUserService lineUserService;
-    
+
     /** Logger */
     private static Logger logger = Logger.getLogger(MobileVIPNightTracingController.class);
 
@@ -74,43 +74,43 @@ public class MobileVIPNightTracingController extends BCSBaseController {
             if (StringUtils.isBlank(state) || !"20181020".equals(state)) {
                 throw new Exception("TracingId Error:" + state);
             }
-            
+
             String campaignId = CoreConfigReader.getString(CONFIG_STR.VIP_NIGHT_MGM_ID, true);
 
             if(StringUtils.isNotBlank(campaignId)) {
-                
+
                 ShareCampaign shareCampaign = shareCampaignService.findOne(campaignId);
-                
+
                 // 活動是否存在
                 if(shareCampaign != null && ShareCampaign.STATUS_ACTIVE.equals(shareCampaign.getStatus())) {
 
                     // 活動是否過期
                     Date now = new Date();
                     if(now.after(shareCampaign.getStartTime()) && now.before(shareCampaign.getEndTime())) {
-                        
+
                         // 取得UID、好友狀態
                         Map<String, String> resultMap = LineLoginUtil.callRetrievingAPI(code, UriHelper.getVIPNightAuth(), state);
                         String uid = resultMap.get("UID");
-                        Boolean friendFlag = Boolean.valueOf(resultMap.get("friendFlag"));
-                        
+                        boolean friendFlag = Boolean.valueOf(resultMap.get("friendFlag"));
+
                         if(StringUtils.isNotBlank(uid)) {
                             lineUserService.findByMidAndCreateUnbind(uid);
                         }
-                        
+
                         if(friendFlag){ // 好友
                             sendVIPMsg(campaignId, uid);
                         }
 
                         response.sendRedirect(CoreConfigReader.getString(CONFIG_STR.ADD_LINE_FRIEND_LINK, true));
-                        return; 
+                        return;
                     }
-                } 
+                }
             }
 
             String linkUrl = UriHelper.bcsMPage;
             response.sendRedirect(linkUrl);
             return;
-            
+
         } catch (Exception e) {
             logger.error(ErrorRecord.recordError(e));
             String linkUrl = UriHelper.bcsMPage;
@@ -118,26 +118,26 @@ public class MobileVIPNightTracingController extends BCSBaseController {
             return;
         }
     }
-    
+
     private void sendVIPMsg(final String campaignId, final String uid) {
 
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
                 List<Message> messages = new ArrayList<>();
-                
+
                 String msg = CoreConfigReader.getString(CONFIG_STR.VIP_NIGHT_MGM_MSG, true);
                 if(StringUtils.isNotBlank(msg)) {
                     TextMessage vipMgmMsg = new TextMessage(msg.replace("\\n", "\r\n") + "\n" + UriHelper.getMgmTracingUrl() + campaignId);
                     messages.add(vipMgmMsg);
                 }
-                
+
                 MsgApiSendRecordModel msgApiSendRecordModel = new MsgApiSendRecordModel();
-                
+
                 MsgApiSendRecord msgApiSendRecord = new MsgApiSendRecord();
-                
+
                 Date now = new Date();
-                
+
                 msgApiSendRecord.setSendApiId(UUID.randomUUID().toString());
                 msgApiSendRecord.setMid(uid);
                 msgApiSendRecord.setMsgSource(campaignId);
@@ -146,16 +146,16 @@ public class MobileVIPNightTracingController extends BCSBaseController {
                 msgApiSendRecord.setSendBody(messages);
                 msgApiSendRecord.setSendTime(now);
                 msgApiSendRecord.setSendType(MsgMain.SENDING_MSG_TYPE_IMMEDIATE);
-                
+
                 msgApiSendRecordModel.setMessage(messages);
                 msgApiSendRecordModel.setMsgApiSendRecord(msgApiSendRecord);
-                
+
                 try {
-                    sendingMsgService.sendApiMessage(msgApiSendRecordModel, CONFIG_STR.Default.toString(), API_TYPE.BOT.toString(), 0); 
+                    sendingMsgService.sendApiMessage(msgApiSendRecordModel, CONFIG_STR.Default.toString(), API_TYPE.BOT.toString(), 0);
                 }catch(Exception e) {}
             }
         });
-        
+
         t.start();
     }
 }

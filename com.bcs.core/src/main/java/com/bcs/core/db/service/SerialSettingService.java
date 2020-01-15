@@ -32,7 +32,7 @@ import com.google.common.cache.LoadingCache;
 @Service
 public class SerialSettingService {
 	public static final String SERIAL_SYNC = "SERIAL_SYNC";
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(SerialSettingService.class);
 
@@ -44,9 +44,9 @@ public class SerialSettingService {
 	protected LoadingCache<String, SerialSetting> dataCache;
 
 	private Timer flushTimer = new Timer();
-	
+
 	private class CustomTask extends TimerTask{
-		
+
 		@Override
 		public void run() {
 
@@ -58,7 +58,7 @@ public class SerialSettingService {
 					DataSyncUtil.syncDataFinish(SERIAL_SYNC);
 				}
 			}
-			catch(Throwable e){
+			catch(Exception e){
 				logger.error(ErrorRecord.recordError(e));
 			}
 		}
@@ -78,7 +78,7 @@ public class SerialSettingService {
 					}
 				});
 	}
-	
+
 	@PreDestroy
 	public void cleanUp() {
 		logger.info("[DESTROY] SerialSettingService cleaning up...");
@@ -88,19 +88,19 @@ public class SerialSettingService {
 				dataCache = null;
 			}
 		}
-		catch(Throwable e){}
-		
+		catch(Exception e){}
+
 		System.gc();
 		logger.info("[DESTROY] SerialSettingService destroyed.");
 	}
-	
+
 	private boolean notNull(SerialSetting result){
 		if(result != null && StringUtils.isNotBlank(result.getSerialId()) && !"-".equals(result.getSerialId())){
 			return true;
 		}
 		return false;
 	}
-	
+
 	public List<SerialSetting> findByLevel(String serialLevel){
 		return serialSettingRepository.findByLevel(serialLevel);
 	}
@@ -112,59 +112,59 @@ public class SerialSettingService {
 				return result;
 			}
 		} catch (Exception e) {}
-		
+
 		SerialSetting result = serialSettingRepository.findOne(serialId);
 		if(result != null){
 			dataCache.put(serialId, result);
 		}
 		return result;
 	}
-	
+
 	public void save(SerialSetting serialSetting) {
 		serialSettingRepository.save(serialSetting);
-		
+
 		if(serialSetting != null){
 			dataCache.put(serialSetting.getSerialId(), serialSetting);
 			DataSyncUtil.settingReSync(SERIAL_SYNC);
 		}
 	}
-	
+
 	public Map<String, String> getSerialSettingReplaceParam(String SerialId, String mid){
 
 		String target = EVENT_TARGET_ACTION_TYPE.EVENT_SERIAL_SETTING.toString();
 		String action = EVENT_TARGET_ACTION_TYPE.ACTION_UPLOAD_MID_SERIAL.toString();
-		
+
 		if(StringUtils.isNotBlank(SerialId)){
 			SerialSetting serialSetting = findOne(SerialId);
 			if(serialSetting != null){
 				String replaceTarget = serialSetting.getSerialTarget();
-	
+
 				Pageable pageable = new PageRequest(0, 1);
 				Page<UserEventSet> userEventSetPage = userEventSetService.findByMidAndTargetAndActionAndReferenceId(mid, target, action, SerialId, pageable);
-	
+
 				if(userEventSetPage != null){
 					List<UserEventSet> list = userEventSetPage.getContent();
 					if(list != null && list.size() > 0){
 						Map<String, String> result = new HashMap<String, String>();
-						
+
 						result.put(replaceTarget, list.get(0).getContent());
-						
+
 						return result;
 					}
 				}
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	@Transactional(rollbackFor=Exception.class, timeout = 30)
 	public void delete(String serialId) throws BcsNoticeException{
 		logger.debug("delete:" + serialId);
 		if(StringUtils.isNotBlank(serialId)){
-		
+
 			SerialSetting serialSetting = findOne(serialId);
-			
+
 			if(serialSetting != null){
 				serialSettingRepository.delete(serialSetting);
 				dataCache.put(serialId, new SerialSetting());

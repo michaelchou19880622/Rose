@@ -15,12 +15,12 @@ import com.google.common.cache.LoadingCache;
 
 @Service
 public class HttpSessionService {
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(HttpSessionService.class);
 
 	protected LoadingCache<String, HttpSession> dataCache; // No Need Sync
-	
+
 	public HttpSessionService(){
 		dataCache = CacheBuilder.newBuilder()
 				.concurrencyLevel(1)
@@ -32,7 +32,7 @@ public class HttpSessionService {
 					}
 				});
 	}
-	
+
 	@PreDestroy
 	public void cleanUp() {
 		logger.info("[DESTROY] HttpSessionService cleaning up...");
@@ -42,16 +42,16 @@ public class HttpSessionService {
 				dataCache = null;
 			}
 		}
-		catch(Throwable e){}
-		
+		catch(Exception e){}
+
 		System.gc();
 		logger.info("[DESTROY] HttpSessionService destroyed.");
 	}
-	
+
 	public void setSession(String sessionId, HttpSession httpSession){
 		dataCache.put(sessionId, httpSession);
 	}
-	
+
 	public HttpSession getSession(String sessionId){
 		try {
 			return dataCache.get(sessionId);

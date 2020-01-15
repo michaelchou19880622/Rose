@@ -41,7 +41,7 @@ public class CircleEntityManagerControl {
 			try {
 				ApplicationContextProvider.getApplicationContext().getBean(CircleEntityManagerControl.class)
 						.persistFlush();
-			} catch (Throwable e) {
+			} catch (Exception e) {
 				logger.error(ErrorRecord.recordError(e));
 			}
 			isRun.set(false);
@@ -56,7 +56,7 @@ public class CircleEntityManagerControl {
 				try {
 					ApplicationContextProvider.getApplicationContext().getBean(CircleEntityManagerControl.class)
 							.persistFlush();
-				} catch (Throwable e) {
+				} catch (Exception e) {
 					logger.error(ErrorRecord.recordError(e));
 				}
 				isRun.set(false);
@@ -102,7 +102,7 @@ public class CircleEntityManagerControl {
 					entityManager.clear();
 				}
 			}
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
 		}
 
@@ -110,7 +110,7 @@ public class CircleEntityManagerControl {
 		logger.debug("CircleEntityManagerControl persistFlush end");
 	}
 
-	
+
 	@Transactional(rollbackFor = Exception.class, timeout = 3000)
 	public void merge(List<Object> list) {
 

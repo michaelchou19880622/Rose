@@ -23,17 +23,17 @@ import com.google.common.cache.LoadingCache;
 @Service
 public class ShareCampaignService {
     public static final String SHARE_CAMPAIGN_SYNC = "SHARE_CAMPAIGN_SYNC";
-    
+
     /** Logger */
     private static Logger logger = Logger.getLogger(ShareCampaignService.class);
-    
+
 	@Autowired
 	private ShareCampaignRepository ShareCampaignRepository;
-	
+
 	protected LoadingCache<String, ShareCampaign> dataCache;
-	
+
 	private Timer flushTimer = new Timer();
-	
+
 	private class CustomTask extends TimerTask {
 
         @Override
@@ -46,14 +46,14 @@ public class ShareCampaignService {
                     dataCache.invalidateAll();
                     DataSyncUtil.syncDataFinish(SHARE_CAMPAIGN_SYNC);
                 }
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 logger.error(ErrorRecord.recordError(e));
             }
         }
     }
-	
+
 	public ShareCampaignService() {
-	    
+
 	    flushTimer.schedule(new CustomTask(), 120000, 30000);
 
         dataCache = CacheBuilder.newBuilder().concurrencyLevel(1).expireAfterAccess(30, TimeUnit.MINUTES)
@@ -64,7 +64,7 @@ public class ShareCampaignService {
                     }
                 });
 	}
-	
+
 	@PreDestroy
     public void cleanUp() {
         logger.info("[DESTROY] ShareCampaignService cleaning up...");
@@ -73,20 +73,20 @@ public class ShareCampaignService {
                 dataCache.invalidateAll();
                 dataCache = null;
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
         }
 
         System.gc();
         logger.info("[DESTROY] ShareCampaignService destroyed.");
     }
-	
+
 	private boolean notNull(ShareCampaign result) {
         if (result != null && result.getCampaignId() != null) {
             return true;
         }
         return false;
     }
-	
+
 	public ShareCampaign findOne(String campaignId) {
 	    try {
 	        ShareCampaign result = dataCache.get(campaignId);
@@ -102,23 +102,23 @@ public class ShareCampaignService {
         }
         return result;
 	}
-	
+
 	public void save(ShareCampaign shareCampaign) {
 	    ShareCampaignRepository.save(shareCampaign);
-	    
+
 	    if (shareCampaign != null) {
             dataCache.put(shareCampaign.getCampaignId(), shareCampaign);
             DataSyncUtil.settingReSync(SHARE_CAMPAIGN_SYNC);
         }
 	}
-	
+
 	public List<ShareCampaign> findByStatus(String status){
         return ShareCampaignRepository.findByStatus(status);
 	}
 
 	public String generateCampaignId() {
         String campaignId = UUID.randomUUID().toString().toLowerCase();
-        
+
         while (ShareCampaignRepository.findOne(campaignId) != null) {
             campaignId = UUID.randomUUID().toString().toLowerCase();
         }

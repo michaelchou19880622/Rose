@@ -38,7 +38,7 @@ import com.google.common.cache.LoadingCache;
 @Service
 public class ContentRichMsgService {
 	public static final String RICHMSG_SYNC = "RICHMSG_SYNC";
-	
+
 	@Autowired
 	private ContentRichMsgRepository contentRichMsgRepository;
 	@Autowired
@@ -49,10 +49,10 @@ public class ContentRichMsgService {
 	private ContentResourceRepository contentResourceRepository;
 	@Autowired
 	private ContentFlagService contentFlagService;
-	
+
 	@PersistenceContext
     EntityManager entityManager;
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(ContentRichMsgService.class);
 
@@ -61,7 +61,7 @@ public class ContentRichMsgService {
 	private Timer flushTimer = new Timer();
 
 	private class CustomTask extends TimerTask{
-		
+
 		@Override
 		public void run() {
 
@@ -73,12 +73,12 @@ public class ContentRichMsgService {
 					DataSyncUtil.syncDataFinish(RICHMSG_SYNC);
 				}
 			}
-			catch(Throwable e){
+			catch(Exception e){
 				logger.error(ErrorRecord.recordError(e));
 			}
 		}
 	}
-	
+
 	public ContentRichMsgService(){
 
 		flushTimer.schedule(new CustomTask(), 120000, 30000);
@@ -93,7 +93,7 @@ public class ContentRichMsgService {
 					}
 				});
 	}
-	
+
 	@PreDestroy
 	public void cleanUp() {
 		logger.info("[DESTROY] ContentRichMsgService cleaning up...");
@@ -103,16 +103,16 @@ public class ContentRichMsgService {
 				dataCache = null;
 			}
 		}
-		catch(Throwable e){}
-		
+		catch(Exception e){}
+
 		System.gc();
 		logger.info("[DESTROY] ContentRichMsgService destroyed.");
 	}
-    
+
 	public ContentRichMsg getSelectedContentRichMsg(String richId) {
     	return contentRichMsgRepository.findOne(richId);
     }
-	
+
 	/**
 	 * 取得圖文訊息更新前的DetailId與LinkId
      */
@@ -123,7 +123,7 @@ public class ContentRichMsgService {
 		for (ContentRichMsgDetail contentRichMsgDetail : contentRichMsgDetails) {
 			Map<String, String> map = new LinkedHashMap<>();
 			String linkId = contentRichMsgDetail.getLinkId();
-			
+
 			map.put("richDetailId", contentRichMsgDetail.getRichDetailId());
 			map.put("linkId", linkId);
 			list.add(map);
@@ -131,10 +131,10 @@ public class ContentRichMsgService {
 			contentRichMsgDetail.setStatus(ContentRichMsgDetail.STATUS_DELETE);
 			contentRichMsgDetailRepository.save(contentRichMsgDetail);
 		}
-		
+
     	return list;
     }
-	
+
 	/**
 	 * 取得圖文訊息
      */
@@ -146,8 +146,8 @@ public class ContentRichMsgService {
 				return result;
 			}
 		} catch (Exception e) {}
-		
-    	String queryString = 
+
+    	String queryString =
     			"SELECT BCS_CONTENT_RICH.RICH_ID, "
     				+ "BCS_CONTENT_RICH.RICH_TYPE, "
     				+ "BCS_CONTENT_RICH.RICH_TITLE, "
@@ -170,11 +170,11 @@ public class ContentRichMsgService {
 	    			+ "LEFT JOIN BCS_CONTENT_RESOURCE ON BCS_CONTENT_RICH.RICH_IMAGE_ID = BCS_CONTENT_RESOURCE.RESOURCE_ID "
     			+ "WHERE BCS_CONTENT_RICH.RICH_ID = ?1 AND (BCS_CONTENT_RICH_DETAIL.STATUS <> 'DELETE' OR BCS_CONTENT_RICH_DETAIL.STATUS IS NULL) "
     			+ "ORDER BY BCS_CONTENT_RICH_DETAIL.RICH_DETAIL_LETTER";
-    	
+
     	Query query = entityManager.createNativeQuery(queryString).setParameter(1, richId);
 		query.setHint("javax.persistence.query.timeout", 30000);
 		List<Object[]> list = query.getResultList();
-    	
+
 		Map<String, List<String>> map = new LinkedHashMap<>();
 		for (Object[] o : list) {
 			for (int i=0, max=o.length; i<max; i++) {
@@ -205,7 +205,7 @@ public class ContentRichMsgService {
 						break;
 					}
 				}
-				
+
 				List<String> dataList = map.get(o[0]);
 				if (o[i] == null) {
 					dataList.add(null);
@@ -214,21 +214,21 @@ public class ContentRichMsgService {
 				}
 			}
 		}
-		
+
     	logger.debug(map);
 		if(map != null){
 			dataCache.put(richId, map);
 		}
 		return map;
     }
-	
+
     /**
 	 * 取得圖文訊息所有清單
      */
     @SuppressWarnings("unchecked")
 	public Map<String, List<String>> getAllContentRichMsg(){
-    	
-    	String queryString = 
+
+    	String queryString =
     			"SELECT BCS_CONTENT_RICH.RICH_ID, "
     					+ "BCS_CONTENT_RICH.RICH_TITLE, "
     					+ "BCS_CONTENT_LINK.LINK_URL, "
@@ -245,11 +245,11 @@ public class ContentRichMsgService {
 	    			+ "LEFT JOIN BCS_CONTENT_LINK ON BCS_CONTENT_RICH_DETAIL.LINK_ID = BCS_CONTENT_LINK.LINK_ID "
 	    		+ "WHERE BCS_CONTENT_RICH.STATUS <> 'DELETE' AND (BCS_CONTENT_RICH_DETAIL.STATUS <> 'DELETE' OR BCS_CONTENT_RICH_DETAIL.STATUS IS NULL)"
     			+ "ORDER BY BCS_CONTENT_RICH.MODIFY_TIME DESC, BCS_CONTENT_RICH_DETAIL.RICH_DETAIL_LETTER";
-    	
+
     	Query query = entityManager.createNativeQuery(queryString);
 		query.setHint("javax.persistence.query.timeout", 30000);
 		List<Object[]> list = query.getResultList();
-		
+
 		Map<String, List<String>> map = new LinkedHashMap<>();
 		for (Object[] o : list) {
 			for (int i=0, max=o.length; i<max; i++) {
@@ -273,7 +273,7 @@ public class ContentRichMsgService {
 						else{
 							dataList.set(5, dataList.get(5) + ",null");
 						}
-						
+
 						// ACTION_TYPE
 						String last = dataList.get(7);
 						if(StringUtils.isBlank(last)){
@@ -290,7 +290,7 @@ public class ContentRichMsgService {
 						break;
 					}
 				}
-				
+
 				List<String> dataList = map.get(o[0]);
 				if (o[i] == null) {
 					dataList.add(null);
@@ -299,12 +299,12 @@ public class ContentRichMsgService {
 				}
 			}
 		}
-		
+
     	logger.debug(map);
-    	
+
 		return map;
 	}
-    
+
     /**
 	 *  檢查有無重覆使用到UUID
      */
@@ -319,18 +319,18 @@ public class ContentRichMsgService {
     		ContentLink contentLink = contentLinkService.findOne(uuid);
     		if (contentLink == null) return false;
     	}
-    	
+
 		return true;
     }
-    
+
     /**
 	 * 新增圖文訊息
      */
     @Transactional(rollbackFor=Exception.class, timeout = 30)
 	public void createRichMsg(
-			ContentRichMsg contentRichMsg,  
-			List<ContentRichMsgDetail> contentRichMsgDetails, 
-			List<ContentLink> contentLinks, 
+			ContentRichMsg contentRichMsg,
+			List<ContentRichMsgDetail> contentRichMsgDetails,
+			List<ContentLink> contentLinks,
 			Map<String, List<String>> contentFlagMap){
 		contentRichMsgRepository.save(contentRichMsg);
     	contentRichMsgDetailRepository.save(contentRichMsgDetails);
@@ -339,15 +339,15 @@ public class ContentRichMsgService {
     	// Save ContentFlag
     	for (Map.Entry<String, List<String>> entry : contentFlagMap.entrySet()) {
     		contentFlagService.save(
-    				entry.getKey(), 
-    				ContentFlag.CONTENT_TYPE_LINK, 
+    				entry.getKey(),
+    				ContentFlag.CONTENT_TYPE_LINK,
     				entry.getValue());
 		}
-    	
+
 		dataCache.refresh(contentRichMsg.getRichId());
 		DataSyncUtil.settingReSync(RICHMSG_SYNC);
 	}
-    
+
     /**
 	 * 刪除圖文訊息
      */
@@ -358,7 +358,7 @@ public class ContentRichMsgService {
 		contentRichMsg.setStatus(ContentRichMsg.STATUS_DELETE);
 		contentRichMsg.setModifyUser(account);
 		contentRichMsg.setModifyTime(new Date());
-		
+
 		contentRichMsgRepository.save(contentRichMsg);
 
 		dataCache.refresh(contentRichMsg.getRichId());

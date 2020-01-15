@@ -76,27 +76,27 @@ public class LiveChatProcessService {
 						userLiveChat.setCategory(category);
 
 						userLiveChatService.save(userLiveChat);
-						
+
 						liveChatApiService.resetChatFlow(userLiveChat.getUID());
-						
+
 						messageList.add(messageProcessService.generateNotInOfficeHourMessage());
 					}
 					break;
 
 				case UserLiveChat.WAITING:// 等待中
 					text = LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.USER_HAS_ALREADY_CHOOSE_CATEGORY.toString());
-					
+
 					sender = switchIconService.generateSenderModel(CONFIG_STR.AutoReply.toString());
 					messageList.add(new TextMessage(text, sender));
-					
+
 					break;
 
 				case UserLiveChat.IN_PROGRESS:// 已轉接客服
 					text = LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.USER_IS_ALREADY_IN_PROGRESS.toString());
-					
+
 					sender = switchIconService.generateSenderModel(CONFIG_STR.AutoReply.toString());
 					messageList.add(new TextMessage(text, sender));
-					
+
 					break;
 				}
 			} else {
@@ -105,7 +105,7 @@ public class LiveChatProcessService {
 				sender = switchIconService.generateSenderModel(CONFIG_STR.AutoReply.toString());
 				messageList.add(new TextMessage(text, sender));
 			}
-			
+
 			messageProcessService.replyMessage(channelId, replyToken, messageList, CONFIG_STR.AutoReply.toString());
 		} catch (Exception e) {
 			String error = ErrorRecord.recordError(e, false);
@@ -115,7 +115,7 @@ public class LiveChatProcessService {
 
 	public void sendChooseCategoryMsg(String channelId, String UID, String replyToken, boolean isLeaveMessage) {
 		try {
-			Boolean isInprogress = false;
+			boolean isInprogress = false;
 			Message message = null;
 			List<Message> sendMsgList = new ArrayList<Message>();
 			Sender sender;
@@ -128,17 +128,17 @@ public class LiveChatProcessService {
 				case UserLiveChat.WAITING:
 					sender = switchIconService.generateSenderModel(CONFIG_STR.AutoReply.toString());
 					message = new TextMessage(LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.USER_IS_ALREADY_WAITING.toString()), sender);
-					
+
 					break;
 				case UserLiveChat.IN_PROGRESS:
 					isInprogress = true;
 					sender = switchIconService.generateSenderModel(CONFIG_STR.ManualReply.toString());
 					message = new TextMessage(LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.USER_IS_ALREADY_IN_PROGRESS.toString()), sender);
-					
+
 					break;
 				default:
 					message = messageProcessService.generateChooseCategoryMsg(isLeaveMessage);
-					
+
 					break;
 				}
 			} else {
@@ -173,26 +173,26 @@ public class LiveChatProcessService {
 			case "ManualReply":
 				liveChatProcessService.sendChooseCategoryMsg(channelId, UID, replyToken, false);
 				break;
-	
+
 			case "AutoReply":
 				text = LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.GIVEUP_SWITCH.toString());
 				textList = new ArrayList<String>();
-	
+
 				textList.add(text);
-	
+
 				this.giveUpSwitch(UID);
-	
+
 				messageProcessService.replyTextMessage(channelId, CONFIG_STR.AutoReply.toString(), textList, replyToken);
 				break;
-	
+
 			case "LeaveMessage":
 				UserLiveChat userLiveChat = userLiveChatService.findByUIDAndStatus(UID, UserLiveChat.BEGINNING);
-				
+
 				if(userLiveChat.getCategory() != null)
 					liveChatProcessService.leaveMessage(channelId, replyToken, userLiveChat.getCategory(), UID);
 				else
 					liveChatProcessService.sendChooseCategoryMsg(channelId, UID, replyToken, true);
-				
+
 				break;
 		}
 	}
@@ -207,12 +207,12 @@ public class LiveChatProcessService {
 			this.giveUpWaiting(UID);
 
 			List<Message> messageList = new ArrayList<Message>();
-			
+
 			Sender sender = switchIconService.generateSenderModel(CONFIG_STR.AutoReply.toString());
-			
+
 			messageList.add(new TextMessage(LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.LEAVE_MESSAGE_INTRO.toString()), sender));
 			messageList.add(new TextMessage(LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.LEAVE_MESSAGE_START.toString()), sender));
-			
+
 			messageProcessService.pushMessage(UID, messageList, CONFIG_STR.AutoReply.toString());
 			break;
 		case "giveUp":
@@ -222,59 +222,59 @@ public class LiveChatProcessService {
 			break;
 		}
 	}
-	
+
 	public void handleLeaveMessageAction(String leaveMessageAction, String channelId, String UID, String replyToken) throws Exception {
 		List<String> textList = null;
 		UserLiveChat userLiveChat = userLiveChatService.findLeaveMsgUserByUIDAndState(UID, UserLiveChat.CONFIRM);
-		
+
 		if(userLiveChat != null) {
 			String text = null;
 			textList = new ArrayList<String>();
-			
+
 			switch(leaveMessageAction) {
 				case "confirm":
 					LiveChatStartResponse result = liveChatApiService.leaveMessage(UID, userLiveChat);
-					
+
 					text = LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.LEAVE_MESSAGE_COMPLETE.toString());
-					
+
 					textList.add(text);
-					
+
 					userLiveChat.setChatId(result.getChatId());
 					userLiveChat.setHash(result.getHash());
 					userLiveChat.setLeaveMsgState(UserLiveChat.COMPLETE);
 					userLiveChat.setModifyTime(new Date());
-					
+
 					if(userLiveChat.getCategory() == null)
 						userLiveChat.setCategory(UserLiveChat.CATEGORY_GENERAL);
-					
+
 					userLiveChatService.save(userLiveChat);
-					
+
 					liveChatApiService.resetChatFlow(userLiveChat.getUID());
-					
+
 					break;
 				case "reset":
 					text = LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.LEAVE_MESSAGE_RESET.toString());
-					
+
 					textList.add(text);
 					textList.add(LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.LEAVE_MESSAGE_START.toString()));
-					
+
 					userLiveChat.setLeaveMsgState(UserLiveChat.LEAVE_MESSAGE);
 					userLiveChat.setMesssage(null);
 					userLiveChat.setModifyTime(new Date());
-					
+
 					userLiveChatService.save(userLiveChat);
 					break;
 			}
-			
+
 			messageProcessService.replyTextMessage(channelId, CONFIG_STR.AutoReply.toString(), textList, replyToken);
 		} else {
 			throw new LiveChatException("[LiveChatProcessService] User do not have permission to leave messages.");
 		}
 	}
-	
+
 	public void leaveMessage(String channelId, String replyToken, String category, String UID) throws Exception {
 		userLiveChatService.updateLeaveMessageState(UID, UserLiveChat.CONFIRM);	// 清理使用者未完成的留言，以免造成狀態混亂
-		
+
 		String text = LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.LEAVE_MESSAGE_INTRO.toString());
 		List<String> textList = new ArrayList<String>();
 
@@ -294,7 +294,7 @@ public class LiveChatProcessService {
 		userLiveChat.setModifyTime(new Date());
 
 		userLiveChatService.save(userLiveChat);
-		
+
 		List<Message> messageList = new ArrayList<Message>();
 
 		messageList.add(messageProcessService.generateConfirmMessage(message));
@@ -345,10 +345,10 @@ public class LiveChatProcessService {
 
 	private void setDiscardStatus(UserLiveChat userLiveChat) throws Exception {
 		liveChatApiService.resetChatFlow(userLiveChat.getUID()); // 通知碩網大腦，要 reset 錯誤回答的次數
-		
+
 		userLiveChat.setStatus(UserLiveChat.DISCARD);
 		userLiveChat.setModifyTime(new Date());
-			
+
 		userLiveChatService.save(userLiveChat);
 	}
 
@@ -358,18 +358,18 @@ public class LiveChatProcessService {
 		switch (type) {
 			case "Switch":
 				userLiveChat = userLiveChatService.findByUIDAndStatus(UID, UserLiveChat.BEGINNING);
-	
+
 				userLiveChat.setLeaveMsgState(UserLiveChat.LEAVE_MESSAGE);
 				userLiveChat.setCategory(category);
-	
+
 				userLiveChatService.save(userLiveChat);
 				break;
-				
+
 			case "Waiting":
 				userLiveChat = userLiveChatService.findByUIDAndStatus(UID, UserLiveChat.WAITING);
-	
+
 				userLiveChat.setLeaveMsgState(UserLiveChat.LEAVE_MESSAGE);
-	
+
 				userLiveChatService.save(userLiveChat);
 				break;
 		}

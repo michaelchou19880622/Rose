@@ -18,25 +18,25 @@ import com.bcs.core.utils.ErrorRecord;
 
 @Service
 public class AkkaCoreService {
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(AkkaCoreService.class);
 
 	private List<ActorSystem> systemRecordHandler = new ArrayList<ActorSystem>();
 	private List<ActorRef> recordHandlerWork = new ArrayList<ActorRef>();
-	
+
 	private AkkaCoreService(){
-		
+
 		new AkkaSystemFactory<RecordHandlerMaster>(systemRecordHandler, recordHandlerWork, RecordHandlerMaster.class, "systemRecordHandler", "RecordHandlerMaster");
 	}
-	
+
 	private ActorRef randomMaster(List<ActorRef> masters){
 		logger.debug("randomMaster Size:" + masters.size());
 
         int index = new Random().nextInt(masters.size());
         return masters.get(index);
 	}
-	
+
 	public void recordMsgs(Object record){
 		try{
 			ActorRef master = randomMaster(recordHandlerWork);
@@ -55,13 +55,13 @@ public class AkkaCoreService {
 			for(ActorSystem system : systemRecordHandler){
 				system.stop(recordHandlerWork.get(count));
 				count++;
-				
+
 				system.shutdown();
 				system = null;
 			}
 		}
-		catch(Throwable e){}
-		
+		catch(Exception e){}
+
 		System.gc();
 		logger.info("[DESTROY] AkkaCoreService shutdownNow destroyed");
 	}

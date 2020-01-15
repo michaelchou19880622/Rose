@@ -63,7 +63,7 @@ public class BCSResourceController extends BCSBaseController {
 	private AkkaCoreService akkaCoreService;
 	@Autowired
 	private SendingMsgService sendingMsgService;
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSResourceController.class);
 
@@ -133,7 +133,7 @@ public class BCSResourceController extends BCSBaseController {
 				isDiffSize = true;
 			}
 			catch(Exception e){} //Skip
-			
+
 			if(ContentResource.RESOURCE_TYPE_IMAGE.equals(resourcePreview)){
 				ContentResource resource = contentResourceService.findOne(resourceId);
 				if(resource != null){
@@ -142,7 +142,7 @@ public class BCSResourceController extends BCSBaseController {
 				}
 			}
 			else if(isDiffSize){
-				// Return different Size Image 
+				// Return different Size Image
 				ContentResource resource = contentResourceService.findOne(resourcePreview);
 				if(resource != null){
 					FileUtil.getFile(response, resource, false);
@@ -190,7 +190,7 @@ public class BCSResourceController extends BCSBaseController {
 			MID = (String) request.getSession().getAttribute("MID");
 		}
 		else{
-			Boolean validate = false;
+			boolean validate = false;
 
 			if(StringUtils.isNotBlank(serialId)){
 				validate = UrlUtil.validateHash(MID, serialId, time, hash);
@@ -213,21 +213,21 @@ public class BCSResourceController extends BCSBaseController {
 			}
 			request.getSession().setAttribute("MID", MID);
 		}
-		
+
 		if(StringUtils.isNotBlank(MID)){
 			// Send Event
 			if(StringUtils.isNotBlank(event)){
 				sendingMsgService.sendEventMessage(MID, event);
 			}
-			
+
 			if(StringUtils.isNotBlank(type)){
-				
+
 				String linkUrl = UriHelper.getIndexToPageUri(MID, type, linkId);
 
 				this.saveLog(MID, linkUrl + "--" + type, linkId);
-				
+
 				// getLink ClickLinkModel
-				akkaCoreService.recordMsgs(new ClickLinkModel(linkId, new Date())); 
+				akkaCoreService.recordMsgs(new ClickLinkModel(linkId, new Date()));
 				response.sendRedirect(linkUrl);
 				return;
 			}
@@ -236,32 +236,32 @@ public class BCSResourceController extends BCSBaseController {
 				if(contentLink != null){
 					String linkUrl = contentLink.getLinkUrl();
 					if(StringUtils.isNotBlank(linkUrl)){
-						
+
 						linkUrl = UriHelper.parseBcsPage(linkUrl, MID);
 
 						linkUrl = UrlUtil.encodeAndReplace(linkUrl, replace);
-	
+
                         String encryptedMID = CryptUtil.Encrypt("AES", MID, CoreConfigReader.getString(CONFIG_STR.AES_SECRET_KEY, true), CoreConfigReader.getString(CONFIG_STR.AES_INITIALIZATION_VECTOR, true));
                         String encodeMID = URLEncoder.encode(encryptedMID, "UTF-8");
-                        
+
                         linkUrl = UrlUtil.encodeAndHash(linkUrl, encodeMID, code);
 
 						linkUrl = UrlUtil.replaceSerialSetting(linkUrl, MID, serialId);
-						
+
 						this.saveLog(MID, linkUrl + "--" + contentLink, contentLink.getLinkId());
-						
+
 						// getLink ClickLinkModel
-						akkaCoreService.recordMsgs(new ClickLinkModel(linkId, new Date())); 
+						akkaCoreService.recordMsgs(new ClickLinkModel(linkId, new Date()));
 
 						logger.debug("getLink linkUrl:" + linkUrl);
-						
+
 						linkUrl = UriHelper.getRedirectUri(URLEncoder.encode(linkUrl, "UTF-8"));
 						response.sendRedirect(linkUrl);
 						return;
 					}
 				}
 			}
-	
+
 			// Redirect to mobile Default Page
 			String linkUrl = UriHelper.getGoIndexUri();
 			response.sendRedirect(linkUrl);
@@ -274,13 +274,13 @@ public class BCSResourceController extends BCSBaseController {
 			return;
 		}
 	}
-	
+
 	private void saveLog(String MID, String contentLink, String referenceId){
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		Date now = new Date();
-		
-		// ClickLink Log  
+
+		// ClickLink Log
 		UserTraceLog msgs = new UserTraceLog();
 		msgs.setTarget(LOG_TARGET_ACTION_TYPE.TARGET_ContentLink);
 		msgs.setAction(LOG_TARGET_ACTION_TYPE.ACTION_ClickLink);
@@ -288,7 +288,7 @@ public class BCSResourceController extends BCSBaseController {
 		msgs.setModifyUser(MID);
 		msgs.setLevel(UserTraceLog.USER_TRACE_LOG_LEVEL_TRACE);
 		msgs.setModifyDay(sdf.format(now));
-		
+
 		msgs.setContent(contentLink);
 		msgs.setReferenceId(referenceId);
 		ApplicationContextProvider.getApplicationContext().getBean(UserTraceLogService.class).bulkPersist(msgs);
@@ -298,8 +298,8 @@ public class BCSResourceController extends BCSBaseController {
 	@RequestMapping(method = RequestMethod.POST, value = "/edit/createResource")
 	@ResponseBody
 	public ResponseEntity<?> createResource(@RequestPart MultipartFile filePart,
-			@CurrentUser CustomUser customUser,  
-			HttpServletRequest request, 
+			@CurrentUser CustomUser customUser,
+			HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 		logger.info("createResource");
 
@@ -307,16 +307,16 @@ public class BCSResourceController extends BCSBaseController {
 			if(filePart != null){
 				String resourceType = request.getParameter("resourceType");
 				logger.debug("resourceType:" + resourceType);
-				
+
 				logger.debug("getOriginalFilename:" + filePart.getOriginalFilename());
 				logger.debug("getContentType:" + filePart.getContentType());
 				logger.debug("getSize:" + filePart.getSize());
-				
+
 				String modifyUser = customUser.getAccount();
 				logger.debug("modifyUser:" + modifyUser);
-				
+
 				ContentResource resource = contentResourceService.uploadFile(filePart, resourceType, modifyUser);
-				
+
 				return new ResponseEntity<>(resource, HttpStatus.OK);
 			}
 			else{

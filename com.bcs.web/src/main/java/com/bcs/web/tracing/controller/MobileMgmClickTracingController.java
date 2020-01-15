@@ -47,7 +47,7 @@ public class MobileMgmClickTracingController extends BCSBaseController {
     private ShareCampaignService shareCampaignService;
     @Autowired
     private LineUserService lineUserService;
-    
+
     /** Logger */
     private static Logger logger = Logger.getLogger(MobileMgmClickTracingController.class);
 
@@ -58,9 +58,9 @@ public class MobileMgmClickTracingController extends BCSBaseController {
         logger.info("startMgmClickTracing:" + tracingIdStr);
 
         try {
-            
+
             LineLoginUtil.addLineoauthLinkInModel(model, UriHelper.getMgmClickOauth(), tracingIdStr);
-            
+
             return MobilePageEnum.MgmTracingStartPage.toString();
 
         } catch (Exception e) {
@@ -93,7 +93,7 @@ public class MobileMgmClickTracingController extends BCSBaseController {
             if (StringUtils.isBlank(state)) {
                 throw new Exception("TracingId Error:" + state);
             }
-            
+
             ShareUserRecord ownerRecord = shareUserRecordService.findOne(state);
 
             if (ownerRecord == null) {
@@ -105,17 +105,17 @@ public class MobileMgmClickTracingController extends BCSBaseController {
 //                String linkUrl = UriHelper.getMgmClickTracingUrl() + state;
 //                response.sendRedirect(linkUrl);
 //                return;
-//            } 
+//            }
 
             String campaignId = ownerRecord.getCampaignId();
             ShareCampaign shareCampaign = shareCampaignService.findOne(campaignId);
-            
+
             // 活動是否存在
             if(shareCampaign == null || !ShareCampaign.STATUS_ACTIVE.equals(shareCampaign.getStatus())) {
                 response.sendRedirect(UriHelper.getMgmRedirectPage(null, "查無此活動"));
                 return;
             }
-            
+
             // 活動是否過期
             Date now = new Date();
             if(!now.after(shareCampaign.getStartTime()) || !now.before(shareCampaign.getEndTime())) {
@@ -124,22 +124,22 @@ public class MobileMgmClickTracingController extends BCSBaseController {
 //            	response.sendRedirect(UriHelper.getGoMgmPage(campaignId));
 //            	return;
             }
-            
+
             // 取得UID、好友狀態
             Map<String, String> resultMap = LineLoginUtil.callRetrievingAPI(code, UriHelper.getMgmClickOauth(), state);
             String uid = resultMap.get("UID");
-            Boolean friendFlag = Boolean.valueOf(resultMap.get("friendFlag"));
+            boolean friendFlag = Boolean.valueOf(resultMap.get("friendFlag"));
 
             if(StringUtils.isNotBlank(uid)) {
                 lineUserService.findByMidAndCreateUnbind(uid);
             }
-            
+
         	ShareCampaignClickTracing clickTracing = shareCampaignClickTracingService.findByUidAndShareUserRecordId(uid, ownerRecord.getShareUserRecordId());
- 	
+
         	if(friendFlag){ // 好友
-        	    
+
         	    if(clickTracing == null && !ownerRecord.getUid().equals(uid)) { //未點過、非本人
-        	        
+
         	        clickTracing = new ShareCampaignClickTracing();
         	        clickTracing.setUid(uid);
         	        clickTracing.setShareUserRecordId(ownerRecord.getShareUserRecordId());
@@ -148,10 +148,10 @@ public class MobileMgmClickTracingController extends BCSBaseController {
         	    }
 
                 HttpSession session = request.getSession();
-        	    
+
                 session.setAttribute("MID", uid);
                 session.setAttribute("campaignId", campaignId);
-                
+
                 response.sendRedirect(UriHelper.getMgmPage());
                 return;
             }
@@ -159,7 +159,7 @@ public class MobileMgmClickTracingController extends BCSBaseController {
                 response.sendRedirect(CoreConfigReader.getString(CONFIG_STR.ADD_LINE_FRIEND_LINK, true));
                 return;
             }
-        	
+
 
         } catch (Exception e) {
             logger.error(ErrorRecord.recordError(e));
@@ -175,9 +175,9 @@ public class MobileMgmClickTracingController extends BCSBaseController {
         logger.info("startMgmTracing:" + tracingIdStr);
 
         try {
-            
+
             LineLoginUtil.addLineoauthLinkInModel(model, UriHelper.getMgmOauth(), tracingIdStr);
-            
+
             return MobilePageEnum.MgmTracingStartPage.toString();
 
         } catch (Exception e) {
@@ -216,12 +216,12 @@ public class MobileMgmClickTracingController extends BCSBaseController {
 //                String linkUrl = UriHelper.getMgmTracingUrl() + state;
 //                response.sendRedirect(linkUrl);
 //                return;
-//            } 
+//            }
 
             // 取得UID、好友狀態
             Map<String, String> resultMap = LineLoginUtil.callRetrievingAPI(code, UriHelper.getMgmOauth(), state);
             String uid = resultMap.get("UID");
-            Boolean friendFlag = Boolean.valueOf(resultMap.get("friendFlag"));
+            boolean friendFlag = Boolean.valueOf(resultMap.get("friendFlag"));
 
             if(StringUtils.isNotBlank(uid)) {
                 lineUserService.findByMidAndCreateUnbind(uid);
@@ -230,10 +230,10 @@ public class MobileMgmClickTracingController extends BCSBaseController {
             if(friendFlag){ // 好友
 
                 HttpSession session = request.getSession();
-                
+
                 session.setAttribute("MID", uid);
                 session.setAttribute("campaignId", state);
-                
+
                 response.sendRedirect(UriHelper.getMgmPage());
                 return;
             }

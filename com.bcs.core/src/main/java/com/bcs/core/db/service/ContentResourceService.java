@@ -36,15 +36,15 @@ import com.google.common.cache.LoadingCache;
 @Service
 public class ContentResourceService {
 	public static final String RESOURCE_SYNC = "RESOURCE_SYNC";
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(ContentResourceService.class);
-	
+
 	@Autowired
 	private ContentResourceRepository contentResourceRepository;
 
 	protected LoadingCache<String, ContentResource> dataCache; // No Need Sync
-	
+
 	private Timer flushTimer = new Timer();
 
 	private class CustomTask extends TimerTask{
@@ -59,28 +59,28 @@ public class ContentResourceService {
 					DataSyncUtil.syncDataFinish(RESOURCE_SYNC);
 				}
 			}
-			catch(Throwable e){
+			catch(Exception e){
 				logger.error(ErrorRecord.recordError(e));
 			}
 		}
 	}
-	
+
 	private void syncResourceFile(){
 		List<ContentResource> list = contentResourceRepository.findAll();
 		for(ContentResource contentResource : list){
 			try{
 				FileUtil.loadFromDB(contentResource);
 			}
-			catch(Throwable e){
+			catch(Exception e){
 				logger.error(ErrorRecord.recordError(e));
 			}
 		}
 	}
 
 	public ContentResourceService(){
-		
+
 		flushTimer.schedule(new CustomTask(), 120000, 30000);
-		
+
 		dataCache = CacheBuilder.newBuilder()
 				.concurrencyLevel(1)
 				.expireAfterAccess(30, TimeUnit.MINUTES)
@@ -91,7 +91,7 @@ public class ContentResourceService {
 					}
 				});
 	}
-	
+
 	@PreDestroy
 	public void cleanUp() {
 		logger.info("[DESTROY] ContentResourceService cleaning up...");
@@ -101,12 +101,12 @@ public class ContentResourceService {
 				dataCache = null;
 			}
 		}
-		catch(Throwable e){}
-		
+		catch(Exception e){}
+
 		System.gc();
 		logger.info("[DESTROY] ContentResourceService destroyed.");
 	}
-	
+
 	public ContentResource uploadFile(MultipartFile filePart, String resourceType, String modifyUser) throws Exception {
 		ContentResource resource = FileUtil.uploadFile(filePart, null, resourceType, modifyUser);
 		contentResourceRepository.save(resource);
@@ -115,10 +115,10 @@ public class ContentResourceService {
 			dataCache.put(resource.getResourceId(), resource);
 		}
 		DataSyncUtil.settingReSync(RESOURCE_SYNC);
-		
+
 		return resource;
 	}
-	
+
 	public ContentResource uploadFile(InputStream inputStream, String resourceTitle, Long resourceSize, String contentType, String resourceType, String modifyUser) throws Exception {
 		ContentResource resource = FileUtil.uploadFile(inputStream, resourceTitle, resourceSize, contentType, resourceType, modifyUser);
 		contentResourceRepository.save(resource);
@@ -126,17 +126,17 @@ public class ContentResourceService {
 		if(resource != null){
 			dataCache.put(resource.getResourceId(), resource);
 		}
-		
+
 		return resource;
 	}
-	
+
 	private boolean notNull(ContentResource result){
 		if(result != null && StringUtils.isNotBlank(result.getResourceId()) && !"-".equals(result.getResourceId())){
 			return true;
 		}
 		return false;
 	}
-	
+
 	public ContentResource findOne(String resourceId){
 		try {
 			ContentResource result = dataCache.get(resourceId);
@@ -144,37 +144,37 @@ public class ContentResourceService {
 				return result;
 			}
 		} catch (Exception e) {}
-		
+
 		ContentResource result = contentResourceRepository.findOne(resourceId);
 		if(result != null){
 			dataCache.put(resourceId, result);
 		}
 		return result;
 	}
-	
+
 	public ContentResource createQRImg(String modifyUser, String rewardCardPointId) throws Exception {
 	    logger.info("createQRImg:" + rewardCardPointId);
 	    OutputStream out = null;
-	    
+
 	    String errorMsg = "";
 	    boolean isBcsNoticeException = false;
 	    try {
-	        
+
     	    String filePath = CoreConfigReader.getString(CONFIG_STR.FilePath) + System.getProperty("file.separator") + ContentResource.RESOURCE_TYPE_QRIMAGE;
             File folder = new File(filePath);
             if(!folder.exists()){
                 folder.mkdirs();
             }
             String resourceId = generateResourceId();
-            
+
             File outputFile = new File(filePath + System.getProperty("file.separator") + resourceId);
             out = new FileOutputStream(outputFile);
             QrcodeGenerator.generateQrcode(UriHelper.getRewardCardGetPointUri(rewardCardPointId), out);
 
             File inputFile = new File(filePath + System.getProperty("file.separator") + resourceId);
-            
+
             ContentResource resource = new ContentResource();
-            
+
             resource.setResourceId(resourceId);
             resource.setResourceTitle(rewardCardPointId + ".png");
             resource.setResourceSize(inputFile.length());
@@ -186,12 +186,12 @@ public class ContentResourceService {
             resource.setResourceHeight(400L);
             resource.setResourceWidth(400L);
             resource.setUseFlag(false);
-            
+
             contentResourceRepository.save(resource);
             if(resource != null){
                 dataCache.put(resource.getResourceId(), resource);
             }
-            
+
             return resource;
 	    }catch(Exception e) {
 	        logger.error(ErrorRecord.recordError(e));
@@ -212,10 +212,10 @@ public class ContentResourceService {
             throw new Exception(errorMsg);
         }
 	}
-	
+
     public String generateResourceId() {
         String resourceId = UUID.randomUUID().toString().toLowerCase();
-        
+
         while (contentResourceRepository.findOne(resourceId) != null) {
             resourceId = UUID.randomUUID().toString().toLowerCase();
         }

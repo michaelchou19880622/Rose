@@ -37,7 +37,7 @@ public class DataSyncUtil {
 
             try {
                 registerServer();
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 logger.error(ErrorRecord.recordError(e));
             }
         }
@@ -55,7 +55,7 @@ public class DataSyncUtil {
             if (StringUtils.isBlank(targetIp) || targetIp.equals(thisIp)) {
                 return true;
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error(ErrorRecord.recordError(e));
         }
         return false;
@@ -71,7 +71,7 @@ public class DataSyncUtil {
             ip += systemId;
             logger.debug("thisServerIp:" + ip);
             return ip;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error(ErrorRecord.recordError(e));
         }
 
@@ -110,7 +110,7 @@ public class DataSyncUtil {
 
             ApplicationContextProvider.getApplicationContext().getBean(SystemConfigService.class).save(config);
             logger.debug("syncDataFinish:" + ip + "." + input);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error(ErrorRecord.recordError(e));
         }
     }
@@ -130,7 +130,7 @@ public class DataSyncUtil {
 
             ApplicationContextProvider.getApplicationContext().getBean(SystemConfigService.class).save(config);
             logger.debug("registerServer:" + ip);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error(ErrorRecord.recordError(e));
         }
 
@@ -147,7 +147,7 @@ public class DataSyncUtil {
 
             ApplicationContextProvider.getApplicationContext().getBean(SystemConfigService.class).save(config);
             logger.debug("registerServer:" + ip);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error(ErrorRecord.recordError(e));
         }
     }
@@ -178,7 +178,7 @@ public class DataSyncUtil {
                     }
                 }
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error(ErrorRecord.recordError(e));
         }
 
@@ -204,7 +204,7 @@ public class DataSyncUtil {
                     logger.debug("settingReSync:" + ip + "." + input);
                 }
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error(ErrorRecord.recordError(e));
         }
     }
@@ -239,7 +239,7 @@ public class DataSyncUtil {
                     }
                 }
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error(ErrorRecord.recordError(e));
         }
 

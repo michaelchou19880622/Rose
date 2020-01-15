@@ -14,7 +14,7 @@
     </appender>
     <!-- ALL File -->
     <appender name="Appender1" class="org.apache.log4j.RollingFileAppender">
-        <param name="File" value="/bcs/log/taishin.be.log"/>
+        <param name="File" value="/bcs/log/rose/taishin.be.log"/>
         <param name="Append" value="true"/>
         <param name="MaxBackupIndex" value="9999"/>
         <param name="MaxFileSize" value="400MB"/>
@@ -26,12 +26,12 @@
             <param name="levelMax" value="ERROR"/>
         </filter>
         <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
-            <param name="FileNamePattern" value="/bcs/log/taishin.be.%d{yyyy-mm-dd-HH}.log.gz"/>
+            <param name="FileNamePattern" value="/bcs/log/rose/taishin.be.%d{yyyy-mm-dd-HH}.log.gz"/>
         </rollingPolicy>
     </appender>
     <!-- ERROR File -->
     <appender name="Appender2" class="org.apache.log4j.RollingFileAppender">
-        <param name="File" value="/bcs/log/taishin.be.error.log"/>
+        <param name="File" value="/bcs/log/rose/taishin.be.error.log"/>
         <param name="Append" value="true"/>
         <param name="MaxBackupIndex" value="9999"/>
         <param name="MaxFileSize" value="400MB"/>
@@ -43,12 +43,12 @@
             <param name="levelMax" value="ERROR"/>
         </filter>
         <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
-            <param name="FileNamePattern" value="/bcs/log/taishin.be.error.%d{yyyy-mm-dd-HH}.log.gz"/>
+            <param name="FileNamePattern" value="/bcs/log/rose/taishin.be.error.%d{yyyy-mm-dd-HH}.log.gz"/>
         </rollingPolicy>
     </appender>
     <!-- PNP -->
     <appender name="PNP" class="org.apache.log4j.RollingFileAppender">
-        <param name="File" value="/bcs/log/taishin.be.pnp.log"/>
+        <param name="File" value="/bcs/log/rose/taishin.be.pnp.log"/>
         <param name="Append" value="true"/>
         <param name="MaxBackupIndex" value="9999"/>
         <param name="MaxFileSize" value="400MB"/>
@@ -60,7 +60,7 @@
             <param name="levelMax" value="ERROR"/>
         </filter>
         <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
-            <param name="FileNamePattern" value="/bcs/log/taishin.be.pnp.%d{yyyy-mm-dd-HH}.log.gz"/>
+            <param name="FileNamePattern" value="/bcs/log/rose/taishin.be.pnp.%d{yyyy-mm-dd-HH}.log.gz"/>
         </rollingPolicy>
     </appender>
     <!--使用Logger.getLogger("XXX")獲得此輸出器，且不會使用根輸出器-->

@@ -10,14 +10,14 @@ import com.bcs.core.utils.ErrorRecord;
 public class SendMessageJob extends QuartzJobBean {
 	/** Logger */
 	private static Logger logger = Logger.getLogger(SendMessageJob.class);
-	
+
 	private Long msgId;
 	private ExecuteSendMsgTask sendMsgTask;
 
 	public void setSendMsgTask(ExecuteSendMsgTask sendMsgTask) {
 		this.sendMsgTask = sendMsgTask;
 	}
-	
+
 	public void setMsgId(Long msgId) {
 		this.msgId = msgId;
 	}
@@ -27,7 +27,7 @@ public class SendMessageJob extends QuartzJobBean {
 			throws JobExecutionException {
 		try {
 			sendMsgTask.executeSendMsg(msgId);
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
 		}
 	}

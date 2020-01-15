@@ -31,26 +31,26 @@ import com.bcs.core.utils.ObjectUtil;
 @RequestMapping("/api")
 public class AdUserSyncController {
 	@Autowired
-	private RichartAdService richartAdService; 
-	
+	private RichartAdService richartAdService;
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(AdUserSyncController.class);
 
 	@WebServiceLog
-	@RequestMapping(method = RequestMethod.POST, value = "/adUserSync/{ChannelId}", 
+	@RequestMapping(method = RequestMethod.POST, value = "/adUserSync/{ChannelId}",
 			consumes = MediaType.APPLICATION_JSON_VALUE + "; charset=UTF-8")
 	public ResponseEntity<?> adUserSync(@RequestBody String syncModel, @PathVariable String ChannelId, HttpServletRequest request, HttpServletResponse response) {
 		logger.info("-------adUserSync-------");
 		Date start = new Date();
 		logger.info("syncModel:" + syncModel);
-		
+
 		String error = "";
-		
+
 		try{
-			
+
 			AdUserSyncModel model = ObjectUtil.jsonStrToObject(syncModel, AdUserSyncModel.class);
 			logger.info("-------adUserSync model-------:" + model);
-			
+
 			richartAdService.syncAdUser(model);
 
 			logger.info("-------adUserSync Success-------");
@@ -58,7 +58,7 @@ public class AdUserSyncController {
 			SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_RichartApi, LOG_TARGET_ACTION_TYPE.ACTION_RichartApi_AdUserSync, start, 200, syncModel, "200");
 			return new ResponseEntity<>(createResult(200, "Success"), HttpStatus.OK);
 		}
-		catch(Throwable e){
+		catch(Exception e){
 			error = e.getMessage();
 			logger.info(ErrorRecord.recordError(e));
 		}
@@ -67,13 +67,13 @@ public class AdUserSyncController {
 		SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_RichartApi, LOG_TARGET_ACTION_TYPE.ACTION_RichartApi_AdUserSync, start, 500, syncModel, "500");
 		return new ResponseEntity<>(createResult(500, error), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
-	
+
 	private Map<String, Object> createResult(Integer status, String msg){
 		Map<String, Object> result = new HashMap<String, Object>();
-		
+
 		result.put("status", status);
 		result.put("msg", msg);
-		
+
 		return result;
 	}
 }

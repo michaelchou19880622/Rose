@@ -18,22 +18,22 @@ import com.bcs.core.utils.ErrorRecord;
 @Repository
 public class EntityManagerControl {
 	private static final String INIT_FLAG = "INIT_FLAG";
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(EntityManagerControl.class);
-	
+
 	@PersistenceContext
 	private EntityManager entityManager;
-	
+
 	// 注意！此數值必須和 spring-base.xml 的 hibernate.jdbc.batch_size 值相同
 	private int batchSize = 50;
-	
-	private static AtomicBoolean isRun = new AtomicBoolean(false);  
-	
+
+	private static AtomicBoolean isRun = new AtomicBoolean(false);
+
 	private ConcurrentLinkedQueue<Object> queueAdd = new ConcurrentLinkedQueue<Object>();
-	
+
 	public EntityManagerControl(){
-		
+
 	}
 
 	public void fluchAll(){
@@ -41,7 +41,7 @@ public class EntityManagerControl {
 			try{
 				ApplicationContextProvider.getApplicationContext().getBean(EntityManagerControl.class).persistFlush();
 			}
-			catch(Throwable e){
+			catch(Exception e){
 				logger.error(ErrorRecord.recordError(e));
 			}
 			isRun.set(false);
@@ -56,7 +56,7 @@ public class EntityManagerControl {
 				try{
 						ApplicationContextProvider.getApplicationContext().getBean(EntityManagerControl.class).persistFlush();
 				}
-				catch(Throwable e){
+				catch(Exception e){
 					logger.error(ErrorRecord.recordError(e));
 				}
 				isRun.set(false);
@@ -75,7 +75,7 @@ public class EntityManagerControl {
 
 				int i = 0;
 				while(!queueAdd.isEmpty()){
-		
+
 					try{
 						Object obj = queueAdd.poll();
 						if(obj != null){
@@ -87,7 +87,7 @@ public class EntityManagerControl {
 						logger.error(ErrorRecord.recordError(e, false));
 						break;
 					}
-					
+
 					i++;
 
 					if(i % batchSize == 0){
@@ -97,17 +97,17 @@ public class EntityManagerControl {
 						}
 					}
 				}
-		
+
 				if(isPersistAdd){
 					entityManager.flush();
 					entityManager.clear();
 				}
 			}
 		}
-		catch(Throwable e){
+		catch(Exception e){
 			logger.error(ErrorRecord.recordError(e));
 		}
-		
+
 		isRun.set(false);
 		logger.debug("EntityManagerControl persistFlush end");
 	}
@@ -118,8 +118,8 @@ public class EntityManagerControl {
 		if (CollectionUtils.isEmpty(list)) {
 			return;
 		}
-		
-		int i = 0; 
+
+		int i = 0;
 		for(Object obj : list){
 			entityManager.persist(obj);
 			i++;

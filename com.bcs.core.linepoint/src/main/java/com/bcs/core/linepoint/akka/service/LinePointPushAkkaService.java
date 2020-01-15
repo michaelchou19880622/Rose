@@ -46,7 +46,7 @@ public class LinePointPushAkkaService {
 
                 system.shutdown();
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
         }
         log.info("[DESTROY] Line Point Push AkkaService shutdownNow destroyed");
     }

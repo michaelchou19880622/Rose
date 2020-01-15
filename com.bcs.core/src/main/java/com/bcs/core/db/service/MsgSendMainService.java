@@ -43,47 +43,47 @@ public class MsgSendMainService {
 	private MsgDetailRepository msgDetailRepository;
 
 	private Timer flushTimer = new Timer();
-	
+
 	private ConcurrentMap<Long, AtomicLong> increaseMap = new ConcurrentHashMap<Long, AtomicLong>();
 
     @PersistenceContext
     EntityManager entityManager;
-    
+
     public MsgSendMainService(){
 
 		flushTimer.schedule(new CustomTask(), 120000, 30000);
     }
 
 	private class CustomTask extends TimerTask{
-		
+
 		@Override
 		public void run() {
 
 			try{
 				flushIncrease();
 			}
-			catch(Throwable e){
+			catch(Exception e){
 				logger.error(ErrorRecord.recordError(e));
 			}
 		}
 	}
-	
+
 	@PreDestroy
 	public void preDestroy(){
 		flushTimer.cancel();
 		logger.info("[DESTROY] MsgSendMainService flushTimer destroyed");
 	}
-	
+
 	public MsgSendMain findOne(Long msgSendId){
 		return msgSendMainRepository.findOne(msgSendId);
 	}
-    
+
 	public void delete(Long msgSendId){
 		MsgSendMain main = msgSendMainRepository.findOne(msgSendId);
 		main.setStatus(MsgSendMain.MESSAGE_STATUS_DELETE);
 		this.save(main);
 	}
-    
+
 	public void save(MsgSendMain msgSendMain){
 		msgSendMainRepository.save(msgSendMain);
 	}
@@ -98,7 +98,7 @@ public class MsgSendMainService {
 			}
 		}
 	}
-	
+
 	private void increaseSendCountByMsgSendIdAndCheck(Long msgSendId, Long increase ){
 		msgSendMainRepository.increaseSendCountByMsgSendIdAndCheck(msgSendId, increase);
 	}
@@ -152,11 +152,11 @@ public class MsgSendMainService {
 	@Transactional(rollbackFor=Exception.class, timeout = 30)
 	public MsgSendMain copyFromMsgMain(Long msgId, Long sendTotalCount, String groupTitle, String status, String statusNotice){
 		logger.debug("copyFromMsgMain:" + msgId);
-		
+
 		MsgMain msgMain = msgMainRepository.findOne(msgId);
-		
+
 		MsgSendMain msgSendMain = new MsgSendMain();
-		
+
 		msgSendMain.setMsgId(msgId);
 		msgSendMain.setGroupId(msgMain.getGroupId());
 		msgSendMain.setSerialId(msgMain.getSerialId());
@@ -175,11 +175,11 @@ public class MsgSendMainService {
 		msgSendMain.setSendTotalCount(sendTotalCount);
 		msgSendMain.setMsgTag(msgMain.getMsgTag());
 		msgSendMain.setScheduleTime(msgMain.getScheduleTime());
-		
+
 		save(msgSendMain);
-		
+
 		List<MsgDetail> mainDetails = msgDetailRepository.findByMsgIdAndMsgParentType(msgId, MsgMain.THIS_PARENT_TYPE);
-		
+
 		for(MsgDetail mainDetail : mainDetails){
 			MsgDetail detail = new MsgDetail();
 
@@ -188,49 +188,49 @@ public class MsgSendMainService {
 			detail.setText(mainDetail.getText());
 			detail.setMsgParentType(MsgSendMain.THIS_PARENT_TYPE);
 			detail.setReferenceId(mainDetail.getReferenceId());
-			
+
 			msgDetailRepository.save(detail);
 		}
-		
+
 		return msgSendMain;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public Map<MsgSendMain, List<MsgDetail>> queryGetMsgSendMainDetailByMsgId(Long msgId){
 		Query query = entityManager.createNamedQuery("queryGetMsgSendMainDetailByMsgId").setParameter(1, msgId);
 		query.setHint("javax.persistence.query.timeout", 30000);
 		List<Object[]> list = query.getResultList();
-		
+
 		Map<MsgSendMain, List<MsgDetail>> map = parseListToMap(list);
     	logger.debug(map);
-		
+
 		return map;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public Map<MsgSendMain, List<MsgDetail>> queryGetMsgSendMainDetailByStatus(String Status){
 		Query query = entityManager.createNamedQuery("queryGetMsgSendMainDetailByStatus").setParameter(1, Status);
 		query.setHint("javax.persistence.query.timeout", 30000);
 		List<Object[]> list = query.getResultList();
-		
+
 		Map<MsgSendMain, List<MsgDetail>> map = parseListToMap(list);
     	logger.debug(map);
-		
+
 		return map;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public Map<MsgSendMain, List<MsgDetail>> queryGetMsgSendMainDetailAll(){
 		Query query = entityManager.createNamedQuery("queryGetMsgSendMainDetailAll");
 		query.setHint("javax.persistence.query.timeout", 30000);
 		List<Object[]> list = query.getResultList();
-		
+
 		Map<MsgSendMain, List<MsgDetail>> map = parseListToMap(list);
     	logger.debug(map);
-		
+
 		return map;
 	}
-	
+
 	private Map<MsgSendMain, List<MsgDetail>> parseListToMap(List<Object[]> list){
 
 		Map<MsgSendMain, List<MsgDetail>> map = new LinkedHashMap<MsgSendMain, List<MsgDetail>>();
@@ -250,7 +250,7 @@ public class MsgSendMainService {
 	    		details.add((MsgDetail) o[1]);
 	    	}
 	    }
-	    
+
 	    return map;
 	}
 }

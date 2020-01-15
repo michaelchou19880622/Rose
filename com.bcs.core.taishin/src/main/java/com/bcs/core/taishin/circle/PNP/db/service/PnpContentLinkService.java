@@ -20,10 +20,10 @@ import com.google.common.cache.LoadingCache;
 
 @Service
 public class PnpContentLinkService {
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(PnpContentLinkService.class);
-	
+
 	@Autowired
 	private PnpContentLinkRepository contentLinkRepository;
 
@@ -41,7 +41,7 @@ public class PnpContentLinkService {
 					}
 				});
 	}
-	
+
 	@PreDestroy
 	public void cleanUp() {
 		logger.info("[DESTROY] ContentLinkService cleaning up...");
@@ -51,34 +51,34 @@ public class PnpContentLinkService {
 				dataCache = null;
 			}
 		}
-		catch(Throwable e){}
-		
+		catch(Exception e){}
+
 		System.gc();
 		logger.info("[DESTROY] ContentLinkService destroyed.");
 	}
-	
+
 	private boolean notNull(PnpContentLink result){
 		if(result != null && StringUtils.isNotBlank(result.getLinkId()) && !"-".equals(result.getLinkId())){
 			return true;
 		}
 		return false;
 	}
-    
+
     /**
   	 * 取得所有連結清單
        */
   	public List<Object[]> getAllContentLinkUrl(){
 		return contentLinkRepository.findAllLinkUrl();
     }
-  	
+
   	public List<Object[]> findAllLinkUrlByFlag(String flag){
   		return contentLinkRepository.findAllLinkUrlByFlag(flag);
   	}
-  	
+
   	public List<Object[]> findAllLinkUrlByLikeFlag(String flag){
   		return contentLinkRepository.findAllLinkUrlByLikeFlag(flag);
   	}
-  	
+
   	public List<Object[]> findAllLinkUrlByLikeTitle(String title){
   		return contentLinkRepository.findAllLinkUrlByLikeTitle(title);
   	}
@@ -94,11 +94,11 @@ public class PnpContentLinkService {
   	public List<PnpContentLink> findByLinkUrl(String linkUrl){
 		return contentLinkRepository.findByLinkUrl(linkUrl);
   	}
-  	
+
   	public List<PnpContentLink> findByLinkIdIn(List<String> linkIds){
   		return contentLinkRepository.findByLinkIdIn(linkIds);
   	}
-	
+
 	public void save(PnpContentLink contentLink){
 		contentLinkRepository.save(contentLink);
 
@@ -106,13 +106,13 @@ public class PnpContentLinkService {
 			dataCache.put(contentLink.getLinkId(), contentLink);
 		}
 	}
-	
+
 	public void save(List<PnpContentLink> contentLinks){
 		for(PnpContentLink contentLink : contentLinks){
 			this.save(contentLink);
 		}
 	}
-	
+
 	public PnpContentLink findOne(String linkId){
 		try {
 			PnpContentLink result = dataCache.get(linkId);
@@ -120,38 +120,38 @@ public class PnpContentLinkService {
 				return result;
 			}
 		} catch (Exception e) {}
-		
+
 		PnpContentLink result = contentLinkRepository.findOne(linkId);
 		if(result != null){
 			dataCache.put(linkId, result);
 		}
 		return result;
 	}
-	
+
 	public List<Object[]> countClickCountByLinkUrlAndTime(String linkUrl, String start, String end){
 		return contentLinkRepository.countClickCountByLinkUrlAndTime(linkUrl, start, end);
 	}
-	
+
 	public List<Object[]> countClickCountByLinkUrl(String linkUrl){
 		return contentLinkRepository.countClickCountByLinkUrl(linkUrl);
 	}
-	
+
 	public List<Object[]> countClickCountByLinkUrl(String linkUrl, String start){
 		return contentLinkRepository.countClickCountByLinkUrl(linkUrl, start);
 	}
-	
+
 	public List<Object[]> countClickCountByLinkIdAndTime(String linkUrl, String start, String end){
 		return contentLinkRepository.countClickCountByLinkIdAndTime(linkUrl, start, end);
 	}
-	
+
 	public List<Object[]> countClickCountByLinkId(String LinkId){
 		return contentLinkRepository.countClickCountByLinkId(LinkId);
 	}
-	
+
 	public List<Object[]> countClickCountByLinkId(String LinkId, String start){
 		return contentLinkRepository.countClickCountByLinkId(LinkId, start);
 	}
-	
+
 	public List<String> findClickMidByLinkUrlAndTime(String linkUrl, String start, String end){
 		return contentLinkRepository.findClickMidByLinkUrlAndTime(linkUrl, start, end);
 	}

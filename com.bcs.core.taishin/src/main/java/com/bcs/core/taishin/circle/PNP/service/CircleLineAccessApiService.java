@@ -20,13 +20,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.linecorp.bot.client.LineMessagingService;
 import com.linecorp.bot.client.LineMessagingServiceBuilder;
 import com.linecorp.bot.model.response.BotApiResponse;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.ResponseBody;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.log4j.Logger;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import retrofit2.Response;
@@ -38,99 +39,83 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 public class CircleLineAccessApiService {
     public static final String LINE_API_SYNC = "LINE_API_SYNC";
+    private static Map<String, List<LineMessagingService>> lineMessagingServiceMap = new HashMap<>();
 
-    private Timer flushTimer = new Timer();
+    private ScheduledExecutorService flushTimer = new ScheduledThreadPoolExecutor(1,
+            new BasicThreadFactory.Builder()
+                    .namingPattern("Flush-Scheduled-%d")
+                    .daemon(true).build()
+    );
 
-    private Timer checkTokenTimer = new Timer();
-
-    private class CustomTask extends TimerTask {
-
-        @Override
-        public void run() {
-
-            try {
-                // Check Data Sync
-                Boolean isReSyncData = DataSyncUtil.isReSyncData(LINE_API_SYNC);
-                if (isReSyncData) {
-                    lineMessagingServiceMap.clear();
-                    HttpClientUtil.clearData();
-                    DataSyncUtil.syncDataFinish(LINE_API_SYNC);
-                }
-            } catch (Throwable e) {
-                logger.error(ErrorRecord.recordError(e));
-            }
-        }
-    }
+    private ScheduledExecutorService checkTokenTimer = new ScheduledThreadPoolExecutor(1,
+            new BasicThreadFactory.Builder()
+                    .namingPattern("Check-Token-Scheduled-%d")
+                    .daemon(true).build()
+    );
 
     public CircleLineAccessApiService() {
-
-        flushTimer.schedule(new CustomTask(), 120000, 30000);
-        checkTokenTimer.schedule(new CustomTaskCheckToken(), 150_000, 43_200_000);
+        flushTimer.scheduleWithFixedDelay(this::flushProcess, 120, 30, TimeUnit.SECONDS);
+        checkTokenTimer.scheduleWithFixedDelay(this::checkTokenProcess, 150, 43_200, TimeUnit.SECONDS);
     }
 
-    private class CustomTaskCheckToken extends TimerTask {
+    private void checkTokenProcess() {
+        try {
+            List<Object[]> channels = ApplicationContextProvider.getApplicationContext().getBean(SystemConfigService.class).findLikeConfigId("%.ChannelId");
+            if (channels != null && !channels.isEmpty()) {
+                for (Object[] channel : channels) {
+                    String configId = (String) channel[0];
+                    log.info("callVerifyAPIAndIssueToken configId:" + configId);
 
-        @Override
-        public void run() {
-
-            try {
-                List<Object[]> channels = ApplicationContextProvider.getApplicationContext().getBean(SystemConfigService.class).findLikeConfigId("%.ChannelId");
-                if (channels != null && channels.size() > 0) {
-                    for (Object[] channel : channels) {
-                        String configId = (String) channel[0];
-                        logger.info("callVerifyAPIAndIssueToken configId:" + configId);
-
-                        if (StringUtils.isNotBlank(configId) && configId.indexOf(".") > 0) {
-                            String[] split = configId.split("\\.");
-                            if (split != null && split.length == 2) {
-                                String channelId = split[0];
-                                ObjectNode node = CircleLineAccessApiService.callVerifyAPIAndIssueToken(channelId, true);
-                                logger.info("callVerifyAPIAndIssueToken:" + channelId + ", isReIssue: " + node.get("isReIssue"));
-                                logger.info("callVerifyAPIAndIssueToken:" + ObjectUtil.objectToJsonStr(node));
-                            }
+                    if (StringUtils.isNotBlank(configId) && configId.indexOf(".") > 0) {
+                        String[] split = configId.split("\\.");
+                        if (split.length == 2) {
+                            String channelId = split[0];
+                            ObjectNode node = CircleLineAccessApiService.callVerifyAPIAndIssueToken(channelId, true);
+                            log.info("callVerifyAPIAndIssueToken:" + channelId + ", isReIssue: " + node.get("isReIssue"));
+                            log.info("callVerifyAPIAndIssueToken:" + ObjectUtil.objectToJsonStr(node));
                         }
                     }
                 }
-            } catch (Throwable e) {
-                logger.error(ErrorRecord.recordError(e));
             }
+        } catch (Exception e) {
+            log.error(ErrorRecord.recordError(e));
         }
     }
 
-    @PreDestroy
-    public void cleanUp() {
-        logger.info("[DESTROY] LineAccessApiService cleaning up...");
-
-        flushTimer.cancel();
-        checkTokenTimer.cancel();
-        logger.info("[DESTROY] LineAccessApiService destroyed.");
+    private void flushProcess() {
+        try {
+            if (DataSyncUtil.isReSyncData(LINE_API_SYNC)) {
+                lineMessagingServiceMap.clear();
+                HttpClientUtil.clearData();
+                DataSyncUtil.syncDataFinish(LINE_API_SYNC);
+            }
+        } catch (Exception e) {
+            log.error(ErrorRecord.recordError(e));
+        }
     }
 
-    /**
-     * Logger
-     */
-    private static Logger logger = Logger.getLogger(CircleLineAccessApiService.class);
 
-    private static Map<String, List<LineMessagingService>> lineMessagingServiceMap = new HashMap<String, List<LineMessagingService>>();
 
-    private static LineMessagingService getService(String ChannelId) {
-        List<LineMessagingService> lineMessagingServices = lineMessagingServiceMap.get(ChannelId);
-        if (lineMessagingServices == null || lineMessagingServices.size() == 0) {
+    private static LineMessagingService getService(String channelId) {
+        List<LineMessagingService> lineMessagingServices = lineMessagingServiceMap.get(channelId);
+        if (lineMessagingServices == null || lineMessagingServices.isEmpty()) {
 
-            String channelToken = CoreConfigReader.getString(ChannelId, CONFIG_STR.ChannelToken.toString(), true);
+            String channelToken = CoreConfigReader.getString(channelId, CONFIG_STR.ChannelToken.toString(), true);
 
             if (lineMessagingServices == null) {
-                lineMessagingServices = new ArrayList<LineMessagingService>();
-                lineMessagingServiceMap.put(ChannelId, lineMessagingServices);
+                lineMessagingServices = new ArrayList<>();
+                lineMessagingServiceMap.put(channelId, lineMessagingServices);
             }
 
-            if (lineMessagingServices.size() == 0) {
+            if (lineMessagingServices.isEmpty()) {
                 for (int i = 0; i < 300; i++) {
 
                     LineMessagingServiceBuilder builder = LineMessagingServiceBuilder.create(channelToken);
@@ -146,7 +131,7 @@ public class CircleLineAccessApiService {
                             lineMessagingService = bcs.build(builder, true, proxyUrl);
                         }
                     } catch (Exception e) {
-                        logger.error(ErrorRecord.recordError(e));
+                        log.error(ErrorRecord.recordError(e));
                     }
                     lineMessagingServices.add(lineMessagingService);
                 }
@@ -157,7 +142,7 @@ public class CircleLineAccessApiService {
     }
 
     private static LineMessagingService randomOne(List<LineMessagingService> lineMessagingServices) {
-        logger.debug("randomOne Size:" + lineMessagingServices.size());
+        log.debug("randomOne Size:" + lineMessagingServices.size());
 
         int index = new Random().nextInt(lineMessagingServices.size());
         return lineMessagingServices.get(index);
@@ -173,7 +158,7 @@ public class CircleLineAccessApiService {
     }
 
     public static Response<BotApiResponse> sendToLine(SendToBotModel sendToBotModel) throws Exception {
-        logger.debug("sendToLine:" + sendToBotModel);
+        log.debug("sendToLine:" + sendToBotModel);
 
         if (SEND_TYPE.REPLY_MSG.equals(sendToBotModel.getSendType())) {
 
@@ -186,7 +171,7 @@ public class CircleLineAccessApiService {
                 Response<BotApiResponse> response = getService(sendToBotModel.getChannelId())
                         .replyMessage(sendToBotModel.getReplyMessage())
                         .execute();
-                logger.debug(response.code());
+                log.debug("{}", response.code());
 
                 status = response.code();
 
@@ -199,7 +184,7 @@ public class CircleLineAccessApiService {
                 return response;
             } catch (Exception e) {
                 String error = ErrorRecord.recordError(e, false);
-                logger.error(error);
+                log.error(error);
                 SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_LineApi, LOG_TARGET_ACTION_TYPE.ACTION_SendToLineApi, error, e.getMessage());
                 SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_LineApi, LOG_TARGET_ACTION_TYPE.ACTION_SendToLineApi_Error, start, status, postMsg, status + "");
                 throw e;
@@ -215,7 +200,7 @@ public class CircleLineAccessApiService {
                 Response<BotApiResponse> response = getService(sendToBotModel.getChannelId())
                         .pushMessage(sendToBotModel.getPushMessage())
                         .execute();
-                logger.debug(response.code());
+                log.debug("{}", response.code());
 
                 status = response.code();
 
@@ -228,7 +213,7 @@ public class CircleLineAccessApiService {
                 return response;
             } catch (Exception e) {
                 String error = ErrorRecord.recordError(e, false);
-                logger.error(error);
+                log.error(error);
                 SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_LineApi, LOG_TARGET_ACTION_TYPE.ACTION_SendToLineApi, error, e.getMessage());
                 SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_LineApi, LOG_TARGET_ACTION_TYPE.ACTION_SendToLineApi_Error, start, status, postMsg, status + "");
                 throw e;
@@ -239,7 +224,7 @@ public class CircleLineAccessApiService {
     }
 
     public static Response<ResponseBody> getImageFromLine(String channelId, String msgId) throws Exception {
-        logger.debug("getImageFromLine:" + msgId);
+        log.debug("getImageFromLine:" + msgId);
 
         Date start = new Date();
         int status = 0;
@@ -249,7 +234,7 @@ public class CircleLineAccessApiService {
             Response<ResponseBody> response = getService(channelId)
                     .getMessageContent(msgId)
                     .execute();
-            logger.debug(response.code());
+            log.debug("{}", response.code());
 
             status = response.code();
 
@@ -262,7 +247,7 @@ public class CircleLineAccessApiService {
             return response;
         } catch (Exception e) {
             String error = ErrorRecord.recordError(e, false);
-            logger.error(error);
+            log.error(error);
             SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_LineApi, LOG_TARGET_ACTION_TYPE.ACTION_GetFromLineApi, error, e.getMessage());
             SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_LineApi, LOG_TARGET_ACTION_TYPE.ACTION_GetFromLineApi_Error, start, status, msgId, status + "");
             throw e;
@@ -270,17 +255,17 @@ public class CircleLineAccessApiService {
     }
 
     public static ObjectNode callVerifyAPIAndIssueToken(String channelId, boolean reIssue) throws Exception {
-        String access_token = CoreConfigReader.getString(channelId, CONFIG_STR.ChannelToken.toString(), true);
+        String accessToken = CoreConfigReader.getString(channelId, CONFIG_STR.ChannelToken.toString(), true);
 
         LineTokenApiService lineTokenApiService = ApplicationContextProvider.getApplicationContext().getBean(LineTokenApiService.class);
-        ObjectNode callVerifyResult = lineTokenApiService.callVerifyAPI(access_token);
-        logger.info("callVerifyResult:" + callVerifyResult);
+        ObjectNode callVerifyResult = lineTokenApiService.callVerifyAPI(accessToken);
+        log.info("callVerifyResult:" + callVerifyResult);
 
-        JsonNode expires_in = callVerifyResult.get("expires_in");
+        JsonNode expiresIn = callVerifyResult.get("expires_in");
 
         boolean isReIssue = false;
-        if (expires_in != null) {
-            Integer sec = expires_in.asInt();
+        if (expiresIn != null) {
+            int sec = expiresIn.asInt();
             sec = sec / 60;
             sec = sec / 60;
 
@@ -303,18 +288,18 @@ public class CircleLineAccessApiService {
     }
 
     public static boolean callRefreshingAPI(String channelId) throws Exception {
-        String client_id = CoreConfigReader.getString(channelId, CONFIG_STR.ChannelID.toString(), true);
-        String client_secret = CoreConfigReader.getString(channelId, CONFIG_STR.ChannelSecret.toString(), true);
+        String clientId = CoreConfigReader.getString(channelId, CONFIG_STR.ChannelID.toString(), true);
+        String clientSecret = CoreConfigReader.getString(channelId, CONFIG_STR.ChannelSecret.toString(), true);
 
         LineTokenApiService lineTokenApiService = ApplicationContextProvider.getApplicationContext().getBean(LineTokenApiService.class);
         SystemConfigService systemConfigService = ApplicationContextProvider.getApplicationContext().getBean(SystemConfigService.class);
-        ObjectNode callRefreshingResult = lineTokenApiService.callRefreshingAPI(client_id, client_secret);
-        logger.info("callRefreshingResult:" + callRefreshingResult);
+        ObjectNode callRefreshingResult = lineTokenApiService.callRefreshingAPI(clientId, clientSecret);
+        log.info("callRefreshingResult:" + callRefreshingResult);
 
-        JsonNode access_token = callRefreshingResult.get("access_token");
+        JsonNode accessToken = callRefreshingResult.get("access_token");
 
-        if (access_token != null) {
-            String token = access_token.asText();
+        if (accessToken != null) {
+            String token = accessToken.asText();
 
             SystemConfig config = systemConfigService.findSystemConfig(channelId + "." + CONFIG_STR.ChannelToken.toString());
             config.setValue(token);
@@ -328,7 +313,7 @@ public class CircleLineAccessApiService {
     }
 
     public static Integer sendPnpToLine(SendToBotModel sendToBotModel, List<String> deliveryTags) throws Exception {
-        logger.debug("sendPnpToLine:" + sendToBotModel);
+        log.debug("sendPnpToLine:" + sendToBotModel);
 
         if (SEND_TYPE.PUSH_MSG.equals(sendToBotModel.getSendType())) {
 
@@ -342,15 +327,15 @@ public class CircleLineAccessApiService {
 
                 // init Request
                 HttpPost requestPost = new HttpPost(CoreConfigReader.getString(CONFIG_STR.LINE_PNP_PUSH_VERIFIED));
-                logger.info("URI : " + requestPost.getURI());
+                log.info("URI : " + requestPost.getURI());
                 requestPost.setEntity(entity);
 
-                String access_token = CoreConfigReader.getString(sendToBotModel.getChannelId(), CONFIG_STR.ChannelToken.toString(), true);
-                requestPost.addHeader("Authorization", "Bearer " + access_token);
-                logger.debug("Authorization : Bearer " + access_token);
+                String accessToken = CoreConfigReader.getString(sendToBotModel.getChannelId(), CONFIG_STR.ChannelToken.toString(), true);
+                requestPost.addHeader("Authorization", "Bearer " + accessToken);
+                log.debug("Authorization : Bearer " + accessToken);
 
                 if (deliveryTags != null && deliveryTags.size() > 0) {
-                    StringBuffer sb = new StringBuffer();
+                    StringBuilder sb = new StringBuilder();
 
                     for (int i = 0; i < deliveryTags.size(); i++) {
                         sb.append(deliveryTags.get(i));
@@ -364,14 +349,14 @@ public class CircleLineAccessApiService {
                     String deliveryTag = String.format("%1$-" + 64 + "s", sb.toString());
 
                     requestPost.addHeader("X-Line-Delivery-Tag", deliveryTag);
-                    logger.debug("X-Line-Delivery-Tag : " + deliveryTag);
+                    log.debug("X-Line-Delivery-Tag : " + deliveryTag);
                 }
 
                 // execute Call
                 HttpResponse clientResponse = httpClient.execute(requestPost);
 
                 status = clientResponse.getStatusLine().getStatusCode();
-                logger.info("clientResponse StatusCode : " + status);
+                log.info("clientResponse StatusCode : " + status);
 
                 if (401 == status) {
                     callVerifyAPIAndIssueToken(sendToBotModel.getChannelId(), true);
@@ -382,7 +367,7 @@ public class CircleLineAccessApiService {
                 return status;
             } catch (Exception e) {
                 String error = ErrorRecord.recordError(e, false);
-                logger.error(error);
+                log.error(error);
                 SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_LineApi, LOG_TARGET_ACTION_TYPE.ACTION_SendPnpToLineApi, error, e.getMessage());
                 SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_LineApi, LOG_TARGET_ACTION_TYPE.ACTION_SendPnpToLineApi_Error, start, status, postMsg, status + "");
                 throw e;
@@ -390,5 +375,14 @@ public class CircleLineAccessApiService {
         }
 
         return null;
+    }
+
+    @PreDestroy
+    public void cleanUp() {
+        log.info("[DESTROY] LineAccessApiService cleaning up...");
+
+        flushTimer.shutdown();
+        checkTokenTimer.shutdown();
+        log.info("[DESTROY] LineAccessApiService destroyed.");
     }
 }

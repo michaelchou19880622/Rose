@@ -1,22 +1,5 @@
 package com.bcs.core.interactive.service;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ExecutionException;
-
-import javax.annotation.PreDestroy;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.bcs.core.db.entity.LineUser;
 import com.bcs.core.db.entity.MsgDetail;
 import com.bcs.core.db.entity.MsgInteractiveDetail;
@@ -31,596 +14,608 @@ import com.bcs.core.interactive.model.CampaignFlowData;
 import com.bcs.core.utils.DataSyncUtil;
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.utils.TimeRangeUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.PreDestroy;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ExecutionException;
+
+@Slf4j
 @Service
 public class InteractiveService {
-	public static final String INTERACTIVE_SYNC = "INTERACTIVE_SYNC";
-	private static final String INIT_FLAG = "INIT_FLAG";
+    public static final String INTERACTIVE_SYNC = "INTERACTIVE_SYNC";
+    private static final String INIT_FLAG = "INIT_FLAG";
 
-	/** Logger */
-	private static Logger logger = Logger.getLogger(InteractiveService.class);
-	
-	@Autowired
-	private MsgInteractiveMainService msgInteractiveMainService;
-	@Autowired
-	private MsgInteractiveDetailService msgInteractiveDetailService;
-	@Autowired
-	private MsgDetailService msgDetailService;
-	@Autowired
-	private InteractiveHandler interactiveHandler;
+    @Autowired
+    private MsgInteractiveMainService msgInteractiveMainService;
+    @Autowired
+    private MsgInteractiveDetailService msgInteractiveDetailService;
+    @Autowired
+    private MsgDetailService msgDetailService;
+    @Autowired
+    private InteractiveHandler interactiveHandler;
     @Autowired
     private InteractiveOtherRoleHandler interactiveOtherRoleHandler;
     @Autowired
     private CampaignFlowHandler campaignFlowHandler;
 
-	List<Long> indexSetting = new ArrayList<Long>();
-	/**
-	 * 歡迎回應
-	 */
-	List<Long>welcomeMap = new ArrayList<Long>();
-	/**
-	 * 歡迎回應
-	 */
-	Map<String, List<Long>>eventWelcomeMap = new HashMap<String, List<Long>>();
-	/**
-	 * 自動回應
-	 */
-	Map<String, List<Long>>autokeywordMap = new HashMap<String, List<Long>>();
-	/**
-	 * Index : 
-	 * key : userStatus
-	 * value : Map
-	 * 					key : keyword
-	 * 					value : List of MsgInteractiveMain iMsgId
-	 */
-	Map<Long, Map<String, Map<String, List<Long>>>> keywordMap = new HashMap<Long, Map<String, Map<String, List<Long>>>>();
+    List<Long> indexSetting = new ArrayList<Long>();
+    /**
+     * 歡迎回應
+     */
+    List<Long> welcomeMap = new ArrayList<Long>();
+    /**
+     * 歡迎回應
+     */
+    Map<String, List<Long>> eventWelcomeMap = new HashMap<String, List<Long>>();
+    /**
+     * 自動回應
+     */
+    Map<String, List<Long>> autokeywordMap = new HashMap<String, List<Long>>();
+    /**
+     * Index :
+     * key : userStatus
+     * value : Map
+     * key : keyword
+     * value : List of MsgInteractiveMain iMsgId
+     */
+    Map<Long, Map<String, Map<String, List<Long>>>> keywordMap = new HashMap<Long, Map<String, Map<String, List<Long>>>>();
 
-	/**
-	 * key : userStatus
-	 * value : Map
-	 * 					key : keyword
-	 * 					value : List of MsgInteractiveMain iMsgId
-	 */
-	Map<String, Map<String, List<Long>>> blackKeywordMap = new HashMap<String, Map<String, List<Long>>>();
-	
-	/**
-	 * Interactive Cache
-	 */
-	Map<Long, List<MsgDetail>> interactiveDetails = new HashMap<Long, List<MsgDetail>>();
+    /**
+     * key : userStatus
+     * value : Map
+     * key : keyword
+     * value : List of MsgInteractiveMain iMsgId
+     */
+    Map<String, Map<String, List<Long>>> blackKeywordMap = new HashMap<String, Map<String, List<Long>>>();
 
-	private Timer flushTimer = new Timer();
-	
-	private class CustomTask extends TimerTask{
-		
-		@Override
-		public void run() {
+    /**
+     * Interactive Cache
+     */
+    Map<Long, List<MsgDetail>> interactiveDetails = new HashMap<Long, List<MsgDetail>>();
 
-			try{
-				// Check Data Sync
-				Boolean isReSyncData = DataSyncUtil.isReSyncData(INTERACTIVE_SYNC);
-				if(isReSyncData){
-					loadKeywordMap();
-					DataSyncUtil.syncDataFinish(INTERACTIVE_SYNC);
-				}
-			}
-			catch(Throwable e){
-				logger.error(ErrorRecord.recordError(e));
-			}
-		}
-	}
-	
-	public InteractiveService(){
+    private Timer flushTimer = new Timer();
 
-		flushTimer.schedule(new CustomTask(), 120000, 30000);
-		
-		indexSetting = this.indexSetting();
-	}
-	
-	@PreDestroy
-	public void cleanUp() {
-		logger.info("[DESTROY] InteractiveService cleaning up...");
-		indexSetting.clear();
-		indexSetting = null;
+    private class CustomTask extends TimerTask {
 
-		welcomeMap.clear();
-		welcomeMap = null;
+        @Override
+        public void run() {
 
-		eventWelcomeMap.clear();
-		eventWelcomeMap = null;
+            try {
+                // Check Data Sync
+                Boolean isReSyncData = DataSyncUtil.isReSyncData(INTERACTIVE_SYNC);
+                if (isReSyncData) {
+                    loadKeywordMap();
+                    DataSyncUtil.syncDataFinish(INTERACTIVE_SYNC);
+                }
+            } catch (Throwable e) {
+                log.error(ErrorRecord.recordError(e));
+            }
+        }
+    }
 
-		autokeywordMap.clear();
-		autokeywordMap = null;
+    public InteractiveService() {
 
-		keywordMap.clear();
-		keywordMap = null;
+        flushTimer.schedule(new CustomTask(), 120000, 30000);
 
-		blackKeywordMap.clear();
-		blackKeywordMap = null;
+        indexSetting = this.indexSetting();
+    }
 
-		interactiveDetails.clear();
-		interactiveDetails = null;
-		
-		System.gc();
-		logger.info("[DESTROY] InteractiveService destroyed.");
-	}
-	
-	public void loadInteractiveMap(){
-		loadKeywordMap();
-		DataSyncUtil.settingReSync(INTERACTIVE_SYNC);
-	}
-	
-	/**
-	 * Load Keyword Map
-	 */
-	public void loadKeywordMap(){
-		synchronized (INIT_FLAG) {
-			autokeywordMap.clear();
-			welcomeMap.clear();
-			eventWelcomeMap.clear();
-			keywordMap.clear();
-			blackKeywordMap.clear();
-			
-			// Interactive Cache
-			interactiveDetails.clear();
-			
-			List<MsgInteractiveMain> blackKeywordList = msgInteractiveMainService.findByInteractiveTypeAndInteractiveStatus(MsgInteractiveMain.INTERACTIVE_TYPE_BLACK_KEYWORD, MsgInteractiveMain.INTERACTIVE_STATUS_ACTIVE);
-			settingInteractiveMap(blackKeywordList, true);
-			
-			List<MsgInteractiveMain> keywordList = msgInteractiveMainService.findByInteractiveTypeAndInteractiveStatus(MsgInteractiveMain.INTERACTIVE_TYPE_KEYWORD, MsgInteractiveMain.INTERACTIVE_STATUS_ACTIVE);
-			settingInteractiveMap(keywordList);
-			logger.info("keywordList = " + keywordList);
+    @PreDestroy
+    public void cleanUp() {
+        log.info("[DESTROY] InteractiveService cleaning up...");
+        indexSetting.clear();
+        indexSetting = null;
+
+        welcomeMap.clear();
+        welcomeMap = null;
+
+        eventWelcomeMap.clear();
+        eventWelcomeMap = null;
+
+        autokeywordMap.clear();
+        autokeywordMap = null;
+
+        keywordMap.clear();
+        keywordMap = null;
+
+        blackKeywordMap.clear();
+        blackKeywordMap = null;
+
+        interactiveDetails.clear();
+        interactiveDetails = null;
+
+        System.gc();
+        log.info("[DESTROY] InteractiveService destroyed.");
+    }
+
+    public void loadInteractiveMap() {
+        loadKeywordMap();
+        DataSyncUtil.settingReSync(INTERACTIVE_SYNC);
+    }
+
+    /**
+     * Load Keyword Map
+     */
+    public void loadKeywordMap() {
+        synchronized (INIT_FLAG) {
+            autokeywordMap.clear();
+            welcomeMap.clear();
+            eventWelcomeMap.clear();
+            keywordMap.clear();
+            blackKeywordMap.clear();
+
+            // Interactive Cache
+            interactiveDetails.clear();
+
+            List<MsgInteractiveMain> blackKeywordList = msgInteractiveMainService.findByInteractiveTypeAndInteractiveStatus(MsgInteractiveMain.INTERACTIVE_TYPE_BLACK_KEYWORD, MsgInteractiveMain.INTERACTIVE_STATUS_ACTIVE);
+            settingInteractiveMap(blackKeywordList, true);
+
+            List<MsgInteractiveMain> keywordList = msgInteractiveMainService.findByInteractiveTypeAndInteractiveStatus(MsgInteractiveMain.INTERACTIVE_TYPE_KEYWORD, MsgInteractiveMain.INTERACTIVE_STATUS_ACTIVE);
+            settingInteractiveMap(keywordList);
+            keywordList.forEach(main -> log.info("MainId: {}, MainKeyword: {}", main.getiMsgId(), main.getMainKeyword()));
 
             List<MsgInteractiveMain> interactiveList = msgInteractiveMainService.findByInteractiveTypeAndInteractiveStatus(MsgInteractiveMain.INTERACTIVE_TYPE_INTERACTIVE, MsgInteractiveMain.INTERACTIVE_STATUS_ACTIVE);
             settingInteractiveMap(interactiveList);
 
             List<MsgInteractiveMain> msgCampaignList = msgInteractiveMainService.findByInteractiveTypeAndInteractiveStatus(MsgInteractiveMain.INTERACTIVE_TYPE_CAMPAIGN, MsgInteractiveMain.INTERACTIVE_STATUS_ACTIVE);
             settingInteractiveMap(msgCampaignList);
-		}
-	}
+        }
+    }
 
-	private void settingInteractiveMap(List<MsgInteractiveMain> resultList){
-		this.settingInteractiveMap(resultList, false);
-	}
-	
-	/**
-	 * Setting Interactive Map
-	 * @param resultList
-	 * @param isBlack
-	 */
-	private void settingInteractiveMap(List<MsgInteractiveMain> resultList, boolean isBlack){
+    private void settingInteractiveMap(List<MsgInteractiveMain> resultList) {
+        this.settingInteractiveMap(resultList, false);
+    }
 
-		if(resultList != null && resultList.size() > 0){
-			for(MsgInteractiveMain main : resultList){
-				
-				String userStatus = main.getUserStatus();
-				
-				// 自動回應 簡便的設計之後要改掉
-				if(MsgInteractiveMain.INTERACTIVE_KEYWORD_LINE_BCS_AUTO_KEYWORD.equals(main.getMainKeyword())){
-					if(MsgInteractiveMain.USER_STATUS_ALL.equals(userStatus)){
-						settingKeyValue(autokeywordMap, LineUser.STATUS_UNBIND, main.getiMsgId());
-						settingKeyValue(autokeywordMap, LineUser.STATUS_BINDED, main.getiMsgId());
-					}
-					else{
-						settingKeyValue(autokeywordMap, userStatus, main.getiMsgId());
-					}
-				}
-				// 歡迎回應 簡便的設計之後要改掉
-				else if(MsgInteractiveMain.INTERACTIVE_KEYWORD_LINE_BCS_WELCOME_KEYWORD.equals(main.getMainKeyword())){
-					welcomeMap.add(main.getiMsgId());
-				}
-				// 歡迎回應 簡便的設計之後要改掉
-				else if(MsgInteractiveMain.INTERACTIVE_KEYWORD_LINE_BCS_EVENT_KEYWORD.equals(main.getMainKeyword())){
-					if(MsgInteractiveMain.USER_STATUS_ALL.equals(userStatus)){
-						settingKeyValue(eventWelcomeMap, LineUser.STATUS_UNBIND, main.getiMsgId());
-						settingKeyValue(eventWelcomeMap, LineUser.STATUS_BINDED, main.getiMsgId());
-					}
-					else{
-						settingKeyValue(eventWelcomeMap, userStatus, main.getiMsgId());
-					}
-				}
-				else{
-					
-					List<MsgInteractiveDetail> details =msgInteractiveDetailService.findByiMsgId(main.getiMsgId());
-					
-					if(MsgInteractiveMain.USER_STATUS_ALL.equals(userStatus)){
-						// 全部, 切分到 一般, 已串聯
-						settingKeywordMap(LineUser.STATUS_UNBIND, main, details, isBlack);
-						settingKeywordMap(LineUser.STATUS_BINDED, main, details, isBlack);
-					}
-					else{
-						settingKeywordMap(userStatus, main, details, isBlack);
-					}
-				}
-			}
-		}
-	}
-	
-	/**
-	 * Setting Keyword Map
-	 * @param userStatus
-	 * @param main
-	 * @param details
-	 * @param isBlack
-	 */
-	private void settingKeywordMap(String userStatus, MsgInteractiveMain main, List<MsgInteractiveDetail> details, boolean isBlack){
+    /**
+     * Setting Interactive Map
+     *
+     * @param resultList
+     * @param isBlack
+     */
+    private void settingInteractiveMap(List<MsgInteractiveMain> resultList, boolean isBlack) {
 
-		Map<String, List<Long>> map = null;
-		if(isBlack){
-			map = blackKeywordMap.get(userStatus);
-			if(map == null){
-				map = new HashMap<String, List<Long>>();
-				blackKeywordMap.put(userStatus, map);
-			}
-		}
-		else{
-			map = getIndexSetting(main.getInteractiveIndex()).get(userStatus);
-			if(map == null){
-				map = new HashMap<String, List<Long>>();
-				getIndexSetting(main.getInteractiveIndex()).put(userStatus, map);
-			}
-		}
-		
-		Long iMsgId = main.getiMsgId();
-		this.settingKeyword(map, main.getMainKeyword(), iMsgId);
-		
-		for(MsgInteractiveDetail detail : details){
-			this.settingKeyword(map, detail.getOtherKeyword(), iMsgId);
-		}
-	}
-	
-	private Map<String, Map<String, List<Long>>> getIndexSetting(Long index){
-		Map<String, Map<String, List<Long>>> result = null;
-		if(index != null){
-			result = keywordMap.get(index);
-		}
-		else{
-			index = -1L;
-			result = keywordMap.get(index);
-		}
-		
-		if(result == null){
-			result = new HashMap<String, Map<String, List<Long>>>();
-			keywordMap.put(index, result);
-		}
-		
-		return result;
-	}
-	
-	private void settingKeyword(Map<String, List<Long>> map, String keyword, Long iMsgId){
-		keyword = keyword.toLowerCase();
-		
-		this.settingKeyValue(map, keyword, iMsgId);
-	}
-	
-	private void settingKeyValue(Map<String, List<Long>> map, String key, Long iMsgId){
-		
-		List<Long> list = map.get(key);
-		if(list == null){
-			list = new ArrayList<Long>();
-			map.put(key, list);
-		}
-		
-		list.add(iMsgId);
-	}
-	
-	/**
-	 * Get Match keyword MsgId List
-	 * @param userStatus
-	 * @param keyword
-	 * @return List<Long>
-	 * @throws ExecutionException 
-	 */
-	public Map<Long, List<MsgDetail>> getMatchKeyword(String MID, String userStatus, String keyword) throws Exception{
+        if (resultList != null && resultList.size() > 0) {
+            for (MsgInteractiveMain main : resultList) {
 
-		logger.info("getMatchKeyword:" + MID + "-userStatus:" + userStatus + "-keyword:" + keyword);
-		Map<Long, List<MsgDetail>> result = interactiveHandler.checkJoinInteractive(MID, keyword);
-		if(result != null && result.size() > 0){
-			logger.info("checkJoinInteractive Success");
-			return result;
-		}
-		else{
-			result = new HashMap<Long, List<MsgDetail>>();
-		}
-		
-		// MatchBlackKeyword
-		Long iMsgIdBlack = getMatchBlackKeywordMsgId(userStatus, keyword);
-		logger.info("iMsgIdBlack = " + iMsgIdBlack);
-		if(iMsgIdBlack != null){
-			return null;
-		}
-		
-		MsgInteractiveMain main = getMatchKeywordMain(userStatus, keyword, MID);
-		logger.info("main = " + main);
-		if(main == null){
-			return null;
-		}
-		
-		List<MsgDetail> details = getMsgDetails(main.getiMsgId());
-		logger.info("details = " + details);
-		
-		/* 針對活動流程判斷 */
-		if (MsgInteractiveMain.INTERACTIVE_TYPE_CAMPAIGN.equals(main.getInteractiveType())) {
-		    details = campaignFlowHandler.startFlow(MID, main);
-		} else {
-		    details =interactiveHandler.checkIsInteractive(MID, main, details);
-		}
-		result.put(main.getiMsgId(), details);
-		
-		return result; 
-	}
-	
-	/**
-	 * Get Match BlackKeyword MsgId
-	 * @param userStatus
-	 * @param keyword
-	 * @return
-	 */
-	public Long getMatchBlackKeywordMsgId(String userStatus, String keyword){
+                String userStatus = main.getUserStatus();
 
-		synchronized (INIT_FLAG) {
-			Map<String, List<Long>> map = blackKeywordMap.get(userStatus);
-			
-			if(StringUtils.isNotBlank(keyword)){
-				keyword = keyword.toLowerCase();
-				
-				if(map != null){
-					List<Long> list = map.get(keyword);
-					if(list != null && list.size() > 0){
-						return randomOneMsg(list);
-					}
-				}
-			}
-			
-			return null;
-		}
-	}
-	
-	private List<Long> indexSetting(){
-		List<Long> result = new ArrayList<Long>();
-		
-		for(long i = 1; i < MsgInteractiveMain.indexLimit + 1; i++){
-			result.add(i);
-		}
-		
-		result.add(-1L);
-		
-		return result;
-	}
-	
-	/**
-	 * Get Match Keyword Main
-	 * @param userStatus
-	 * @param keyword
-	 * @param MID
-	 * @return
-	 */
-	private MsgInteractiveMain getMatchKeywordMain(String userStatus, String keyword, String MID){
+                // 自動回應 簡便的設計之後要改掉
+                if (MsgInteractiveMain.INTERACTIVE_KEYWORD_LINE_BCS_AUTO_KEYWORD.equals(main.getMainKeyword())) {
+                    if (MsgInteractiveMain.USER_STATUS_ALL.equals(userStatus)) {
+                        settingKeyValue(autokeywordMap, LineUser.STATUS_UNBIND, main.getiMsgId());
+                        settingKeyValue(autokeywordMap, LineUser.STATUS_BINDED, main.getiMsgId());
+                    } else {
+                        settingKeyValue(autokeywordMap, userStatus, main.getiMsgId());
+                    }
+                }
+                // 歡迎回應 簡便的設計之後要改掉
+                else if (MsgInteractiveMain.INTERACTIVE_KEYWORD_LINE_BCS_WELCOME_KEYWORD.equals(main.getMainKeyword())) {
+                    welcomeMap.add(main.getiMsgId());
+                }
+                // 歡迎回應 簡便的設計之後要改掉
+                else if (MsgInteractiveMain.INTERACTIVE_KEYWORD_LINE_BCS_EVENT_KEYWORD.equals(main.getMainKeyword())) {
+                    if (MsgInteractiveMain.USER_STATUS_ALL.equals(userStatus)) {
+                        settingKeyValue(eventWelcomeMap, LineUser.STATUS_UNBIND, main.getiMsgId());
+                        settingKeyValue(eventWelcomeMap, LineUser.STATUS_BINDED, main.getiMsgId());
+                    } else {
+                        settingKeyValue(eventWelcomeMap, userStatus, main.getiMsgId());
+                    }
+                } else {
 
-		logger.info("getMatchKeywordMain");
-		logger.info("keywordMap = " + keywordMap);
-		
-		logger.info("userStatus = " + userStatus);
-		logger.info("keyword = " + keyword);
-		logger.info("MID = " + MID);
-		
-		synchronized (INIT_FLAG) {
+                    List<MsgInteractiveDetail> details = msgInteractiveDetailService.findByiMsgId(main.getiMsgId());
 
-			logger.info("indexSetting = " + indexSetting);
-			// Different Index
-			for(Long index : indexSetting){
-				logger.info("index = " + index);
-				Map<String, Map<String, List<Long>>> indexMap = keywordMap.get(index);
-				logger.info("indexMap = " + indexMap);
-				if(indexMap != null){
-					Map<String, List<Long>> map = indexMap.get(userStatus);
-					logger.info("map = " + map);
+                    if (MsgInteractiveMain.USER_STATUS_ALL.equals(userStatus)) {
+                        // 全部, 切分到 一般, 已串聯
+                        settingKeywordMap(LineUser.STATUS_UNBIND, main, details, isBlack);
+                        settingKeywordMap(LineUser.STATUS_BINDED, main, details, isBlack);
+                    } else {
+                        settingKeywordMap(userStatus, main, details, isBlack);
+                    }
+                }
+            }
+        }
+    }
 
-					if(StringUtils.isNotBlank(keyword)){
-						keyword = keyword.toLowerCase();
-						logger.info("keyword = " + keyword);
-						
-						if(map != null){
-							
-							// Keyword
-							List<Long> list = map.get(keyword);
-							logger.info("list = " + list);
-							if(list != null && list.size() > 0){
-								MsgInteractiveMain main = checkMatch(list, MID);
-								logger.info("main = " + main);
-								if(main != null){
-									return main;
-								}
-							}
-						}
-					}
-				}
-			}
-	
-			if(autokeywordMap != null && autokeywordMap.size() > 0 && 
-				autokeywordMap.get(userStatus) != null && autokeywordMap.get(userStatus).size() > 0){
-				return checkMatch(autokeywordMap.get(userStatus), MID);
-			}
-			
-			return null;
-		}
-	}
-	
-	private MsgInteractiveMain checkMatch(List<Long> list, String MID){
-		Calendar calendarNow = Calendar.getInstance();
-		logger.info("calendarNow = " + calendarNow);
-		
-		List<Long> match = new ArrayList<Long>();
+    /**
+     * Setting Keyword Map
+     *
+     * @param userStatus
+     * @param main
+     * @param details
+     * @param isBlack
+     */
+    private void settingKeywordMap(String userStatus, MsgInteractiveMain main, List<MsgInteractiveDetail> details, boolean isBlack) {
 
-		if(list != null && list.size() > 0){
-			for(Long iMsgId : list){
-				logger.info("iMsgId = " + iMsgId);
-				MsgInteractiveMain main = getMsgMain(iMsgId);
-				logger.info("main = " + main);
-				// Check Time
-				
-				logger.info("checkActiveTime(main, calendarNow) = " + checkActiveTime(main, calendarNow));
-				
-				if(checkActiveTime(main, calendarNow)){
-					logger.info("main.getOtherRole() = " + main.getOtherRole());
-					// Check Other Role
-					if(StringUtils.isNotBlank(main.getOtherRole())){
-						
-						boolean isCheckMatchOtherRole = interactiveOtherRoleHandler.checkMatchOtherRole(MID, main.getOtherRole());
-						logger.info("isCheckMatchOtherRole = " + isCheckMatchOtherRole);
-						
-						if(isCheckMatchOtherRole){
-							match.add(iMsgId);
-						}
-					}
-					else{
-						match.add(iMsgId);
-					}
+        Map<String, List<Long>> map = null;
+        if (isBlack) {
+            map = blackKeywordMap.get(userStatus);
+            if (map == null) {
+                map = new HashMap<String, List<Long>>();
+                blackKeywordMap.put(userStatus, map);
+            }
+        } else {
+            map = getIndexSetting(main.getInteractiveIndex()).get(userStatus);
+            if (map == null) {
+                map = new HashMap<String, List<Long>>();
+                getIndexSetting(main.getInteractiveIndex()).put(userStatus, map);
+            }
+        }
 
-					logger.info("match = " + match);
-				}
-			}
-			
-			// randomOneMsg
-			if(match != null && match.size() > 0){
-				Long iMsgId = randomOneMsg(match);
-				logger.info("iMsgId = " + iMsgId);
-				return getMsgMain(iMsgId);
-			}
-		}
-		
-		return null;
-	}
-	
-	private boolean checkActiveTime(MsgInteractiveMain main, Calendar calendarNow){
-		if(StringUtils.isNotBlank(main.getInteractiveTimeType())){
-			if(MsgInteractiveMain.INTERACTIVE_TIME_TYPE_DAY.equals(main.getInteractiveTimeType())){
-				if(main.getInteractiveStartTime() != null && main.getInteractiveEndTime() != null){
+        Long iMsgId = main.getiMsgId();
+        this.settingKeyword(map, main.getMainKeyword(), iMsgId);
 
-					Calendar calendarStart = Calendar.getInstance();
-					calendarStart.setTime(main.getInteractiveStartTime());
+        for (MsgInteractiveDetail detail : details) {
+            this.settingKeyword(map, detail.getOtherKeyword(), iMsgId);
+        }
+    }
 
-					Calendar calendarEnd = Calendar.getInstance();
-					calendarEnd.setTime(main.getInteractiveEndTime());
-					
-					return TimeRangeUtil.isDayRange(calendarNow, calendarStart, calendarEnd);
-				}
-			}
-			else if(MsgInteractiveMain.INTERACTIVE_TIME_TYPE_RANGE.equals(main.getInteractiveTimeType())){
-				if(main.getInteractiveStartTime() != null && main.getInteractiveEndTime() != null){
+    private Map<String, Map<String, List<Long>>> getIndexSetting(Long index) {
+        Map<String, Map<String, List<Long>>> result = null;
+        if (index != null) {
+            result = keywordMap.get(index);
+        } else {
+            index = -1L;
+            result = keywordMap.get(index);
+        }
 
-					if(calendarNow.getTime().compareTo(main.getInteractiveStartTime()) >= 0 && 
-							calendarNow.getTime().compareTo(main.getInteractiveEndTime()) < 0){
-						return true;
-					}
-				}
-			}
-		}
-		else{
-			return true;
-		}
-		
-		return false;
-	}
-	
-	/**
-	 * Random One Msg
-	 * @param list
-	 * @return
-	 */
-	private Long randomOneMsg(List<Long> list){
-		logger.info("randomOneMsg Size:" + list.size());
+        if (result == null) {
+            result = new HashMap<String, Map<String, List<Long>>>();
+            keywordMap.put(index, result);
+        }
+
+        return result;
+    }
+
+    private void settingKeyword(Map<String, List<Long>> map, String keyword, Long iMsgId) {
+        keyword = keyword.toLowerCase();
+
+        this.settingKeyValue(map, keyword, iMsgId);
+    }
+
+    private void settingKeyValue(Map<String, List<Long>> map, String key, Long iMsgId) {
+
+        List<Long> list = map.get(key);
+        if (list == null) {
+            list = new ArrayList<Long>();
+            map.put(key, list);
+        }
+
+        list.add(iMsgId);
+    }
+
+    /**
+     * Get Match keyword MsgId List
+     *
+     * @param userStatus
+     * @param keyword
+     * @return List<Long>
+     * @throws ExecutionException
+     */
+    public Map<Long, List<MsgDetail>> getMatchKeyword(String MID, String userStatus, String keyword) throws Exception {
+
+        log.info("getMatchKeyword:" + MID + "-userStatus:" + userStatus + "-keyword:" + keyword);
+        Map<Long, List<MsgDetail>> result = interactiveHandler.checkJoinInteractive(MID, keyword);
+        if (result != null && result.size() > 0) {
+            log.info("checkJoinInteractive Success");
+            return result;
+        } else {
+            result = new HashMap<Long, List<MsgDetail>>();
+        }
+
+        // MatchBlackKeyword
+        Long iMsgIdBlack = getMatchBlackKeywordMsgId(userStatus, keyword);
+        log.info("iMsgIdBlack = " + iMsgIdBlack);
+        if (iMsgIdBlack != null) {
+            return null;
+        }
+
+        MsgInteractiveMain main = getMatchKeywordMain(userStatus, keyword, MID);
+        log.info("main = " + main);
+        if (main == null) {
+            return null;
+        }
+
+        List<MsgDetail> details = getMsgDetails(main.getiMsgId());
+        log.info("details = " + details);
+
+        /* 針對活動流程判斷 */
+        if (MsgInteractiveMain.INTERACTIVE_TYPE_CAMPAIGN.equals(main.getInteractiveType())) {
+            details = campaignFlowHandler.startFlow(MID, main);
+        } else {
+            details = interactiveHandler.checkIsInteractive(MID, main, details);
+        }
+        result.put(main.getiMsgId(), details);
+
+        return result;
+    }
+
+    /**
+     * Get Match BlackKeyword MsgId
+     *
+     * @param userStatus
+     * @param keyword
+     * @return
+     */
+    public Long getMatchBlackKeywordMsgId(String userStatus, String keyword) {
+
+        synchronized (INIT_FLAG) {
+            Map<String, List<Long>> map = blackKeywordMap.get(userStatus);
+
+            if (StringUtils.isNotBlank(keyword)) {
+                keyword = keyword.toLowerCase();
+
+                if (map != null) {
+                    List<Long> list = map.get(keyword);
+                    if (list != null && list.size() > 0) {
+                        return randomOneMsg(list);
+                    }
+                }
+            }
+
+            return null;
+        }
+    }
+
+    private List<Long> indexSetting() {
+        List<Long> result = new ArrayList<Long>();
+
+        for (long i = 1; i < MsgInteractiveMain.indexLimit + 1; i++) {
+            result.add(i);
+        }
+
+        result.add(-1L);
+
+        return result;
+    }
+
+    /**
+     * Get Match Keyword Main
+     *
+     * @param userStatus
+     * @param keyword
+     * @param MID
+     * @return
+     */
+    private MsgInteractiveMain getMatchKeywordMain(String userStatus, String keyword, String MID) {
+
+        log.info("getMatchKeywordMain");
+        log.info("keywordMap = " + keywordMap);
+
+        log.info("userStatus = " + userStatus);
+        log.info("keyword = " + keyword);
+        log.info("MID = " + MID);
+
+        synchronized (INIT_FLAG) {
+
+            log.info("indexSetting = " + indexSetting);
+            // Different Index
+            for (Long index : indexSetting) {
+                log.info("index = " + index);
+                Map<String, Map<String, List<Long>>> indexMap = keywordMap.get(index);
+                log.info("indexMap = " + indexMap);
+                if (indexMap != null) {
+                    Map<String, List<Long>> map = indexMap.get(userStatus);
+                    log.info("map = " + map);
+
+                    if (StringUtils.isNotBlank(keyword)) {
+                        keyword = keyword.toLowerCase();
+                        log.info("keyword = " + keyword);
+
+                        if (map != null) {
+
+                            // Keyword
+                            List<Long> list = map.get(keyword);
+                            log.info("list = " + list);
+                            if (list != null && list.size() > 0) {
+                                MsgInteractiveMain main = checkMatch(list, MID);
+                                log.info("main = " + main);
+                                if (main != null) {
+                                    return main;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (autokeywordMap != null && autokeywordMap.size() > 0 &&
+                    autokeywordMap.get(userStatus) != null && autokeywordMap.get(userStatus).size() > 0) {
+                return checkMatch(autokeywordMap.get(userStatus), MID);
+            }
+
+            return null;
+        }
+    }
+
+    private MsgInteractiveMain checkMatch(List<Long> list, String MID) {
+        Calendar calendarNow = Calendar.getInstance();
+        log.info("calendarNow = " + calendarNow);
+
+        List<Long> match = new ArrayList<Long>();
+
+        if (list != null && list.size() > 0) {
+            for (Long iMsgId : list) {
+                log.info("iMsgId = " + iMsgId);
+                MsgInteractiveMain main = getMsgMain(iMsgId);
+                log.info("main = " + main);
+                // Check Time
+
+                log.info("checkActiveTime(main, calendarNow) = " + checkActiveTime(main, calendarNow));
+
+                if (checkActiveTime(main, calendarNow)) {
+                    log.info("main.getOtherRole() = " + main.getOtherRole());
+                    // Check Other Role
+                    if (StringUtils.isNotBlank(main.getOtherRole())) {
+
+                        boolean isCheckMatchOtherRole = interactiveOtherRoleHandler.checkMatchOtherRole(MID, main.getOtherRole());
+                        log.info("isCheckMatchOtherRole = " + isCheckMatchOtherRole);
+
+                        if (isCheckMatchOtherRole) {
+                            match.add(iMsgId);
+                        }
+                    } else {
+                        match.add(iMsgId);
+                    }
+
+                    log.info("match = " + match);
+                }
+            }
+
+            // randomOneMsg
+            if (match != null && match.size() > 0) {
+                Long iMsgId = randomOneMsg(match);
+                log.info("iMsgId = " + iMsgId);
+                return getMsgMain(iMsgId);
+            }
+        }
+
+        return null;
+    }
+
+    private boolean checkActiveTime(MsgInteractiveMain main, Calendar calendarNow) {
+        if (StringUtils.isNotBlank(main.getInteractiveTimeType())) {
+            if (MsgInteractiveMain.INTERACTIVE_TIME_TYPE_DAY.equals(main.getInteractiveTimeType())) {
+                if (main.getInteractiveStartTime() != null && main.getInteractiveEndTime() != null) {
+
+                    Calendar calendarStart = Calendar.getInstance();
+                    calendarStart.setTime(main.getInteractiveStartTime());
+
+                    Calendar calendarEnd = Calendar.getInstance();
+                    calendarEnd.setTime(main.getInteractiveEndTime());
+
+                    return TimeRangeUtil.isDayRange(calendarNow, calendarStart, calendarEnd);
+                }
+            } else if (MsgInteractiveMain.INTERACTIVE_TIME_TYPE_RANGE.equals(main.getInteractiveTimeType())) {
+                if (main.getInteractiveStartTime() != null && main.getInteractiveEndTime() != null) {
+
+                    if (calendarNow.getTime().compareTo(main.getInteractiveStartTime()) >= 0 &&
+                            calendarNow.getTime().compareTo(main.getInteractiveEndTime()) < 0) {
+                        return true;
+                    }
+                }
+            }
+        } else {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Random One Msg
+     *
+     * @param list
+     * @return
+     */
+    private Long randomOneMsg(List<Long> list) {
+        log.info("randomOneMsg Size:" + list.size());
 
         int index = new Random().nextInt(list.size());
         return list.get(index);
-	}
-	
-	/**
-	 * Auto Response
-	 * @return
-	 */
-	public MsgInteractiveMain getAutoResponse(String MID, String userStatus){
-		synchronized (INIT_FLAG) {
+    }
 
-			if(autokeywordMap != null && autokeywordMap.size() > 0 && 
-				autokeywordMap.get(userStatus) != null && autokeywordMap.get(userStatus).size() > 0){
-				return checkMatch(autokeywordMap.get(userStatus), MID);
-			}
-			
-			return null;
-		}
-	}
-	
-	public boolean checkIsAutoResponse(Long iMsgId, String userStatus){
+    /**
+     * Auto Response
+     *
+     * @return
+     */
+    public MsgInteractiveMain getAutoResponse(String MID, String userStatus) {
+        synchronized (INIT_FLAG) {
 
-		if(autokeywordMap != null && autokeywordMap.size() > 0 && 
-			autokeywordMap.get(userStatus) != null && autokeywordMap.get(userStatus).size() > 0){
-			return autokeywordMap.get(userStatus).contains(iMsgId);
-		}
-		
-		return false;
-	}
-	
-	/**
-	 * Welcome Response
-	 * @return
-	 */
-	public Long getWelcomeResponse(){
-		synchronized (INIT_FLAG) {
+            if (autokeywordMap != null && autokeywordMap.size() > 0 &&
+                    autokeywordMap.get(userStatus) != null && autokeywordMap.get(userStatus).size() > 0) {
+                return checkMatch(autokeywordMap.get(userStatus), MID);
+            }
 
-			if(welcomeMap != null && welcomeMap.size() > 0){
-				return randomOneMsg(welcomeMap);
-			}
-			
-			return null;
-		}
-	}
-	
-	/**
-	 * Event Welcome Response
-	 * @return
-	 */
-	public Long getEventWelcomeResponse(String userStatus){
-		synchronized (INIT_FLAG) {
+            return null;
+        }
+    }
 
-			if(eventWelcomeMap != null && eventWelcomeMap.size() > 0 && 
-					eventWelcomeMap.get(userStatus) != null && eventWelcomeMap.get(userStatus).size() > 0){
-				return randomOneMsg(eventWelcomeMap.get(userStatus));
-			}
-			
-			return null;
-		}
-	}
-	
-	/**
-	 * Get Msg Details With Cache
-	 * @param iMsgId
-	 * @return
-	 */
-	public List<MsgDetail> getMsgDetails(Long iMsgId){
-		synchronized (INIT_FLAG) {
-			List<MsgDetail> details = interactiveDetails.get(iMsgId);
-			if(details != null){
-			}
-			else{
-				details = msgDetailService.findByMsgIdAndMsgParentType(iMsgId, MsgInteractiveMain.THIS_PARENT_TYPE);
-				interactiveDetails.put(iMsgId, details);
-			}
-			
-			return details;
-		}
-	}
-	
-	/**
-	 * Get Msg Main With Cache
-	 * @param iMsgId
-	 * @return
-	 */
-	private MsgInteractiveMain getMsgMain(Long iMsgId){
-		
-		return msgInteractiveMainService.findOne(iMsgId);
-	}
-	
-	public CampaignFlowData handleCampaignFlow(String MID, Object msg) throws Exception {
+    public boolean checkIsAutoResponse(Long iMsgId, String userStatus) {
+
+        if (autokeywordMap != null && autokeywordMap.size() > 0 &&
+                autokeywordMap.get(userStatus) != null && autokeywordMap.get(userStatus).size() > 0) {
+            return autokeywordMap.get(userStatus).contains(iMsgId);
+        }
+
+        return false;
+    }
+
+    /**
+     * Welcome Response
+     *
+     * @return
+     */
+    public Long getWelcomeResponse() {
+        synchronized (INIT_FLAG) {
+
+            if (welcomeMap != null && welcomeMap.size() > 0) {
+                return randomOneMsg(welcomeMap);
+            }
+
+            return null;
+        }
+    }
+
+    /**
+     * Event Welcome Response
+     *
+     * @return
+     */
+    public Long getEventWelcomeResponse(String userStatus) {
+        synchronized (INIT_FLAG) {
+
+            if (eventWelcomeMap != null && eventWelcomeMap.size() > 0 &&
+                    eventWelcomeMap.get(userStatus) != null && eventWelcomeMap.get(userStatus).size() > 0) {
+                return randomOneMsg(eventWelcomeMap.get(userStatus));
+            }
+
+            return null;
+        }
+    }
+
+    /**
+     * Get Msg Details With Cache
+     *
+     * @param iMsgId
+     * @return
+     */
+    public List<MsgDetail> getMsgDetails(Long iMsgId) {
+        synchronized (INIT_FLAG) {
+            List<MsgDetail> details = interactiveDetails.get(iMsgId);
+            if (details != null) {
+            } else {
+                details = msgDetailService.findByMsgIdAndMsgParentType(iMsgId, MsgInteractiveMain.THIS_PARENT_TYPE);
+                interactiveDetails.put(iMsgId, details);
+            }
+
+            return details;
+        }
+    }
+
+    /**
+     * Get Msg Main With Cache
+     *
+     * @param iMsgId
+     * @return
+     */
+    private MsgInteractiveMain getMsgMain(Long iMsgId) {
+
+        return msgInteractiveMainService.findOne(iMsgId);
+    }
+
+    public CampaignFlowData handleCampaignFlow(String MID, Object msg) throws Exception {
         return campaignFlowHandler.handle(MID, msg);
-	}
+    }
 }

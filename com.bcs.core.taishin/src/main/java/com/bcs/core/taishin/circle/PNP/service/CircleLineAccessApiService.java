@@ -51,13 +51,13 @@ public class CircleLineAccessApiService {
 
     private ScheduledExecutorService flushTimer = new ScheduledThreadPoolExecutor(1,
             new BasicThreadFactory.Builder()
-                    .namingPattern("Flush-Scheduled-%d")
+                    .namingPattern("C-Flush-Scheduled-%d")
                     .daemon(true).build()
     );
 
     private ScheduledExecutorService checkTokenTimer = new ScheduledThreadPoolExecutor(1,
             new BasicThreadFactory.Builder()
-                    .namingPattern("Check-Token-Scheduled-%d")
+                    .namingPattern("C-Check-Token-Scheduled-%d")
                     .daemon(true).build()
     );
 

@@ -12,7 +12,7 @@ import org.quartz.SchedulerException;
 /**
  * @author ???
  */
-@Slf4j
+@Slf4j(topic = "BNRecorder")
 public class BillingNoticeTask implements Job {
     BillingNoticeService billingNoticeService = ApplicationContextProvider.getApplicationContext().getBean(BillingNoticeService.class);
 

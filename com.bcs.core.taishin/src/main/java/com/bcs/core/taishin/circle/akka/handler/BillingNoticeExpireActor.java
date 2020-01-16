@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  * @author jessie
  */
-@Slf4j
+@Slf4j(topic = "BNRecorder")
 public class BillingNoticeExpireActor extends UntypedActor {
 
     @Override

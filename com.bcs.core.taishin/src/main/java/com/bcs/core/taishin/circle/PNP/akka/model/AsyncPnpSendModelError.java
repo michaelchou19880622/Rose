@@ -1,58 +1,30 @@
 package com.bcs.core.taishin.circle.PNP.akka.model;
 
-import java.util.Date;
-import java.util.List;
-
 import com.bcs.core.enums.API_TYPE;
 import com.bcs.core.json.AbstractBcsEntity;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
+import lombok.Getter;
 
-public class AsyncPnpSendModelError extends AbstractBcsEntity{
-	
-	private static final long serialVersionUID = 1L;
+import java.util.Date;
+import java.util.List;
 
-	private String ChannelId;
-	private API_TYPE apiType;
-	private String ErrorMsg;
-	private List<PnpDetail> pnpDetails;
-	private int retryTime = 0;
-	private Date date;
-	
-	public AsyncPnpSendModelError(String ChannelId, API_TYPE apiType, String ErrorMsg, List<PnpDetail> pnpDetails, Date date){
-		this.ChannelId = ChannelId;
-		this.pnpDetails = pnpDetails;
-		this.apiType = apiType;
-		this.ErrorMsg = ErrorMsg;
-		this.date = date;
-	}
+@Getter
+public class AsyncPnpSendModelError extends AbstractBcsEntity {
 
-	public String getChannelId() {
-		return ChannelId;
-	}
+    private static final long serialVersionUID = 1L;
 
-	public List<PnpDetail> getPnpDetails() {
-		return pnpDetails;
-	}
+    private String channelId;
+    private API_TYPE apiType;
+    private String errorMsg;
+    private List<PnpDetail> pnpDetails;
+    private int retryTime = 0;
+    private Date date;
 
-	public API_TYPE getApiType() {
-		return apiType;
-	}
-
-	public String getErrorMsg() {
-		return ErrorMsg;
-	}
-
-	public int retryTimeAdd() {
-		retryTime++;
-		return retryTime;
-	}
-
-	public int getRetryTime() {
-		return retryTime;
-	}
-
-	public Date getDate() {
-		return date;
-	}
-	
+    public AsyncPnpSendModelError(String channelId, API_TYPE apiType, String errorMsg, List<PnpDetail> pnpDetails, Date date) {
+        this.channelId = channelId;
+        this.pnpDetails = pnpDetails;
+        this.apiType = apiType;
+        this.errorMsg = errorMsg;
+        this.date = date;
+    }
 }

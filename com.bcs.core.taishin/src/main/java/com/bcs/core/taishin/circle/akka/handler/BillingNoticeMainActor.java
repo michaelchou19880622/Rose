@@ -19,7 +19,7 @@ import java.util.List;
  * @author ???
  * @see com.bcs.core.taishin.circle.service.BillingNoticeAkkaService
  */
-@Slf4j
+@Slf4j(topic = "BNRecorder")
 public class BillingNoticeMainActor extends UntypedActor {
     private final ActorRef pushMessageRouterActor;
     private final ActorRef updateStatusRouterActor;

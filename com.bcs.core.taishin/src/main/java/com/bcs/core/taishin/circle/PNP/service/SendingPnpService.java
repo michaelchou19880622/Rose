@@ -1,12 +1,5 @@
 package com.bcs.core.taishin.circle.PNP.service;
 
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.bcs.core.enums.API_TYPE;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.resource.CoreConfigReader;
@@ -16,54 +9,55 @@ import com.bcs.core.taishin.circle.PNP.akka.model.AsyncSendingClusterModel;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetail;
 import com.bcs.core.taishin.circle.PNP.plugin.PostLineResponse;
 import com.bcs.core.utils.ErrorRecord;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import java.util.List;
+
+@Slf4j(topic = "PnpRecorder")
 @Service
 public class SendingPnpService {
 
-	@Autowired
-	private CircleAkkaBotService akkaBotService;
-	
-	/** Logger */
-	private static Logger logger = Logger.getLogger(SendingPnpService.class);
+    @Autowired
+    private CircleAkkaBotService akkaBotService;
 
-	public void sendToLineAsync(List<PnpDetail> sendDetails, API_TYPE apiType) throws Exception{
+    public void sendToLineAsync(List<PnpDetail> sendDetails, API_TYPE apiType) throws Exception {
         sendToLineAsync(CONFIG_STR.Default.toString(), sendDetails, apiType);
     }
-	
-	public void sendToLineAsync(String ChannelId, List<PnpDetail> sendDetails, API_TYPE apiType) throws Exception{
-        logger.debug("sendToLineAsync");
-        if(ChannelId == null){
+
+    public void sendToLineAsync(String ChannelId, List<PnpDetail> sendDetails, API_TYPE apiType) throws Exception {
+        log.debug("sendToLineAsync");
+        if (ChannelId == null) {
             ChannelId = CONFIG_STR.Default.toString();
         }
-        
-        if(sendDetails != null && sendDetails.size() > 0) {
+
+        if (sendDetails != null && sendDetails.size() > 0) {
             AsyncPnpSendModel msgs = new AsyncPnpSendModel(ChannelId, apiType, sendDetails);
             boolean sendThis = CoreConfigReader.getBoolean(CONFIG_STR.BCS_API_CLUSTER_SEND_THIS.toString());
-            
+
             String url = CoreConfigReader.getString(CONFIG_STR.BCS_API_CLUSTER_SEND.toString());
-            
-            if(sendThis){
-                logger.info("sendToLineAsync:This Server:Phones:" + sendDetails.size());
+
+            if (sendThis) {
+                log.info("sendToLineAsync:This Server:Phones:" + sendDetails.size());
                 akkaBotService.sendingPnp(msgs);
-            }
-            else {
-                if(StringUtils.isNotBlank(url)){
-                    try{
-                        logger.info("sendToLineAsync:Different Server:Phones:" + sendDetails.size());
+            } else {
+                if (StringUtils.isNotBlank(url)) {
+                    try {
+                        log.info("sendToLineAsync:Different Server:Phones:" + sendDetails.size());
                         AsyncSendingClusterModel model = new AsyncSendingClusterModel(sendDetails, ChannelId, apiType.toString());
                         PostLineResponse response = CircleBcsApiClusterService.clusterApiSend(model);
-                        if(200 != response.getStatus()){
+                        if (200 != response.getStatus()) {
                             throw new Exception(response.toString());
                         }
-                    }
-                    catch(Exception e){
-                        logger.error(ErrorRecord.recordError(e));
-                        logger.info("Cluster send message failed,Use this server sendToLineAsync:This Server:Phones:" + sendDetails.size());
+                    } catch (Exception e) {
+                        log.error(ErrorRecord.recordError(e));
+                        log.info("Cluster send message failed,Use this server sendToLineAsync:This Server:Phones:" + sendDetails.size());
                         akkaBotService.sendingPnp(msgs);
                     }
-                }
-                else {
-                    logger.info("Cluster url is empty,sendToLineAsync:This Server:Phones:" + sendDetails.size());
+                } else {
+                    log.info("Cluster url is empty,sendToLineAsync:This Server:Phones:" + sendDetails.size());
                     akkaBotService.sendingPnp(msgs);
                 }
             }

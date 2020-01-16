@@ -16,7 +16,7 @@ import java.util.Date;
  *
  * @author jessie
  */
-@Slf4j
+@Slf4j(topic = "BNRecorder")
 public class BillingNoticePushMessageActor extends UntypedActor {
 
     @Override

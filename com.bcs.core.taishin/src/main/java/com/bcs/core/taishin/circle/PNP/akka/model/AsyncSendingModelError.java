@@ -1,89 +1,61 @@
 package com.bcs.core.taishin.circle.PNP.akka.model;
 
-import java.util.Date;
-import java.util.List;
-
 import com.bcs.core.enums.API_TYPE;
 import com.bcs.core.json.AbstractBcsEntity;
 import com.bcs.core.taishin.circle.PNP.plugin.MsgGenerator;
+import lombok.Getter;
 
-public class AsyncSendingModelError extends AbstractBcsEntity{
-	
-	private static final long serialVersionUID = 1L;
+import java.util.Date;
+import java.util.List;
 
-	private String ChannelId;
-	private List<MsgGenerator> msgGenerators;
-	private List<String> mids;
-	private API_TYPE apiType;
-	private String ErrorMsg;
-	private Long updateMsgId;
-	private int retryTime = 0;
-	private Date date;
-	
-	public AsyncSendingModelError(String ChannelId, List<MsgGenerator> msgGenerators, List<String> mids, API_TYPE apiType, String ErrorMsg, Date date){
-		this.ChannelId = ChannelId;
-		this.msgGenerators = msgGenerators;
-		this.mids = mids;
-		this.apiType = apiType;
-		this.ErrorMsg = ErrorMsg;
-		this.date = date;
-	}
-	
-	public AsyncSendingModelError(String ChannelId, List<MsgGenerator> msgGenerators, List<String> mids, API_TYPE apiType, String ErrorMsg, Long updateMsgId, Date date){
-		this.ChannelId = ChannelId;
-		this.msgGenerators = msgGenerators;
-		this.mids = mids;
-		this.apiType = apiType;
-		this.ErrorMsg = ErrorMsg;
-		this.updateMsgId = updateMsgId;
-		this.date = date;
-	}
-	
-	public AsyncSendingModelError(List<MsgGenerator> msgGenerators, String ChannelId, List<String> mids, API_TYPE apiType, String ErrorMsg, Long updateMsgId, Date date){
-		this.ChannelId = ChannelId;
-		this.msgGenerators = msgGenerators;
-		this.mids = mids;
-		this.apiType = apiType;
-		this.ErrorMsg = ErrorMsg;
-		this.updateMsgId = updateMsgId;
-		this.date = date;
-	}
+/**
+ * @author ???
+ */
+@Getter
+public class AsyncSendingModelError extends AbstractBcsEntity {
 
-	public String getChannelId() {
-		return ChannelId;
-	}
+    private static final long serialVersionUID = 1L;
 
-	public List<MsgGenerator> getMsgGenerators() {
-		return msgGenerators;
-	}
+    private String channelId;
+    private List<MsgGenerator> msgGeneratorList;
+    private List<String> midList;
+    private API_TYPE apiType;
+    private String errorMsg;
+    private Long updateMsgId;
+    private int retryTime = 0;
+    private Date date;
 
-	public List<String> getMids() {
-		return mids;
-	}
+    public AsyncSendingModelError(String channelId, List<MsgGenerator> msgGeneratorList, List<String> midList, API_TYPE apiType, String ErrorMsg, Date date) {
+        this.channelId = channelId;
+        this.msgGeneratorList = msgGeneratorList;
+        this.midList = midList;
+        this.apiType = apiType;
+        this.errorMsg = ErrorMsg;
+        this.date = date;
+    }
 
-	public API_TYPE getApiType() {
-		return apiType;
-	}
+    public AsyncSendingModelError(String channelId, List<MsgGenerator> msgGeneratorList, List<String> midList, API_TYPE apiType, String ErrorMsg, Long updateMsgId, Date date) {
+        this.channelId = channelId;
+        this.msgGeneratorList = msgGeneratorList;
+        this.midList = midList;
+        this.apiType = apiType;
+        this.errorMsg = ErrorMsg;
+        this.updateMsgId = updateMsgId;
+        this.date = date;
+    }
 
-	public String getErrorMsg() {
-		return ErrorMsg;
-	}
+    public AsyncSendingModelError(List<MsgGenerator> msgGeneratorList, String channelId, List<String> midList, API_TYPE apiType, String ErrorMsg, Long updateMsgId, Date date) {
+        this.channelId = channelId;
+        this.msgGeneratorList = msgGeneratorList;
+        this.midList = midList;
+        this.apiType = apiType;
+        this.errorMsg = ErrorMsg;
+        this.updateMsgId = updateMsgId;
+        this.date = date;
+    }
 
-	public Long getUpdateMsgId() {
-		return updateMsgId;
-	}
-
-	public int retryTimeAdd() {
-		retryTime++;
-		return retryTime;
-	}
-
-	public int getRetryTime() {
-		return retryTime;
-	}
-
-	public Date getDate() {
-		return date;
-	}
-	
+    public int retryTimeAdd() {
+        retryTime++;
+        return retryTime;
+    }
 }

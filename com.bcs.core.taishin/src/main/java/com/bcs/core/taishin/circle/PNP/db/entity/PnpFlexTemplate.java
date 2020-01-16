@@ -27,7 +27,7 @@ import java.util.Map;
  *
  * @author Alan
  */
-@Slf4j
+@Slf4j(topic = "PnpRecorder")
 @Getter
 @Setter
 @Entity

@@ -38,7 +38,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-@Slf4j
+@Slf4j(topic = "BNRecorder")
 @Service
 public class BillingNoticeFtpService {
 
@@ -115,13 +115,15 @@ public class BillingNoticeFtpService {
      */
     private Map<String, byte[]> downloadFtpFile(String fileExtension, List<FtpSetting> ftpSettingList) {
         Map<String, byte[]> map = new HashMap<>();
+        int i = 0;
         for (FtpSetting ftpSetting : ftpSettingList) {
+            i++;
             //log.info("Ftp Setting:\n{}", DataUtils.toPrettyJsonUseJackson(ftpSetting));
             ftpSetting.clearFileNames();
 
             if (StringUtils.isBlank(ftpSetting.getAccount())
                     || StringUtils.isBlank(ftpSetting.getPassword())) {
-                log.error("FTP account or password is blank!!");
+                log.error("FTP {} account or password is blank!!", i);
                 continue;
             }
             Map<String, byte[]> returnDataMap = ftpService.downloadMultipleFileByType(ftpSetting.getPath(), fileExtension, ftpSetting);
@@ -173,6 +175,7 @@ public class BillingNoticeFtpService {
 
     /**
      * 轉換Array[1~*]的內容成物件
+     *
      * @param fileContents file Contents
      * @return map
      */

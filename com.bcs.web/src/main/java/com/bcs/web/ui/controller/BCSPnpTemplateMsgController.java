@@ -1,20 +1,23 @@
 package com.bcs.web.ui.controller;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.bcs.core.aspect.annotation.WebServiceLog;
-import org.apache.log4j.Logger;
+import com.bcs.core.db.entity.SystemConfig;
+import com.bcs.core.db.service.SystemConfigService;
+import com.bcs.core.enums.CONFIG_STR;
+import com.bcs.core.exception.BcsNoticeException;
+import com.bcs.core.resource.CoreConfigReader;
+import com.bcs.core.taishin.api.model.PnpTemplateMsgModel;
+import com.bcs.core.taishin.api.model.TemplateActionModel;
+import com.bcs.core.taishin.circle.PNP.db.entity.PnpContentLink;
+import com.bcs.core.taishin.circle.PNP.db.entity.PnpContentTemplateMsg;
+import com.bcs.core.taishin.circle.PNP.db.entity.PnpContentTemplateMsgAction;
+import com.bcs.core.taishin.circle.PNP.db.service.PnpContentTemplateMsgService;
+import com.bcs.core.utils.ErrorRecord;
+import com.bcs.core.web.security.CurrentUser;
+import com.bcs.core.web.security.CustomUser;
+import com.bcs.core.web.ui.page.enums.BcsPageEnum;
+import com.bcs.web.aop.ControllerLog;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,688 +30,674 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.bcs.core.db.entity.SystemConfig;
-import com.bcs.core.db.service.SystemConfigService;
-import com.bcs.core.enums.CONFIG_STR;
-import com.bcs.core.exception.BcsNoticeException;
-import com.bcs.core.resource.CoreConfigReader;
-import com.bcs.core.taishin.api.model.PnpTemplateMsgModel;	//這個要改嗎?
-import com.bcs.core.taishin.api.model.TemplateActionModel;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpContentLink;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpContentTemplateMsg;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpContentTemplateMsgAction;
-import com.bcs.core.taishin.circle.PNP.db.service.PnpContentTemplateMsgService;
-//import com.bcs.core.taishin.service.ExportToExcelForBillingNoticePushBNApiEffects;
-import com.bcs.core.utils.ErrorRecord;
-import com.bcs.core.web.security.CurrentUser;
-import com.bcs.core.web.security.CustomUser;
-import com.bcs.core.web.ui.page.enums.BcsPageEnum;
-import com.bcs.web.aop.ControllerLog;
-import com.bcs.web.ui.service.LoadFileUIService;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 
+@Slf4j(topic = "PnpRecorder")
 @Controller
 @RequestMapping("/bcs")
 public class BCSPnpTemplateMsgController {
-	@Autowired
-	private PnpContentTemplateMsgService contentTemplateMsgService;
+    @Autowired
+    private PnpContentTemplateMsgService contentTemplateMsgService;
 
-	@Autowired
-	private SystemConfigService systemConfigService;
+    @Autowired
+    private SystemConfigService systemConfigService;
 
-	//@Autowired
-	//private ExportToExcelForBillingNoticePushBNApiEffects exportToExcelForBillingNoticePushBNApiEffects;
+    //@Autowired
+    //private ExportToExcelForBillingNoticePushBNApiEffects exportToExcelForBillingNoticePushBNApiEffects;
 
-	/** Logger */
-	private static Logger logger = Logger.getLogger(BCSPnpTemplateMsgController.class);
 
-	@WebServiceLog
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/pnpCreatePage")
-	public String templateMsgCreatePage(HttpServletRequest request, HttpServletResponse response) {
-		logger.info("pnpCreatePage");
-		return BcsPageEnum.PnpCreatePage.toString();
-	}
+    @WebServiceLog
+    @RequestMapping(method = RequestMethod.GET, value = "/edit/pnpCreatePage")
+    public String templateMsgCreatePage(HttpServletRequest request, HttpServletResponse response) {
+        log.info("pnpCreatePage");
+        return BcsPageEnum.PnpCreatePage.toString();
+    }
 
-	@WebServiceLog
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/pnpListPage")
-	public String templateMsgListPage(HttpServletRequest request, HttpServletResponse response) {
-		logger.info("pnpListPage");
-		return BcsPageEnum.PnpListPage.toString();
-	}
+    @WebServiceLog
+    @RequestMapping(method = RequestMethod.GET, value = "/edit/pnpListPage")
+    public String templateMsgListPage(HttpServletRequest request, HttpServletResponse response) {
+        log.info("pnpListPage");
+        return BcsPageEnum.PnpListPage.toString();
+    }
 
-	/**
-	 * 新增與更新樣板訊息
-	 */
-	@WebServiceLog
+    /**
+     * 新增與更新樣板訊息
+     */
+    @WebServiceLog
 //	@ControllerLog(description="新增與更新PNP樣板訊息")
-	@RequestMapping(method = RequestMethod.POST, value = "/edit/createPnp", consumes = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public ResponseEntity<?> createTemplateMsg(
-			HttpServletRequest request,
-			HttpServletResponse response,
-			@CurrentUser CustomUser customUser,
-			@RequestBody List<PnpTemplateMsgModel> createTemplateMsgModels, //PnpTemplateMsgModel不確定
-			@RequestParam String actionType,
-			@RequestParam String templateId) throws IOException {
-		logger.info("createTemplateMsgModels:" + createTemplateMsgModels);
-		try {
+    @RequestMapping(method = RequestMethod.POST, value = "/edit/createPnp", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> createTemplateMsg(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @CurrentUser CustomUser customUser,
+            @RequestBody List<PnpTemplateMsgModel> createTemplateMsgModels, //PnpTemplateMsgModel不確定
+            @RequestParam String actionType,
+            @RequestParam String templateId) throws IOException {
+        log.info("createTemplateMsgModels:" + createTemplateMsgModels);
+        try {
 
-			if (!validateData(createTemplateMsgModels)) {
-				throw new BcsNoticeException("必填欄位不可為空！");
-			}
+            if (!validateData(createTemplateMsgModels)) {
+                throw new BcsNoticeException("必填欄位不可為空！");
+            }
 
-			String adminUserAccount = customUser.getAccount(); //取得登入者的帳號
+            String adminUserAccount = customUser.getAccount(); //取得登入者的帳號
 
-			//初始化
-			//儲存用的List
-			List<PnpContentTemplateMsg> contentTemplateMsgs = new ArrayList<>();
-			List<PnpContentTemplateMsgAction> contentTemplateMsgActions = new ArrayList<>();
-			List<PnpContentLink> contentLinks = new ArrayList<>();
-			//先前的IdList
-			List<String> templateIds = new ArrayList<>();
-			List<Map<String, String>> actionIdAndLinkIds;
+            //初始化
+            //儲存用的List
+            List<PnpContentTemplateMsg> contentTemplateMsgs = new ArrayList<>();
+            List<PnpContentTemplateMsgAction> contentTemplateMsgActions = new ArrayList<>();
+            List<PnpContentLink> contentLinks = new ArrayList<>();
+            //先前的IdList
+            List<String> templateIds = new ArrayList<>();
+            List<Map<String, String>> actionIdAndLinkIds;
 
-			PnpContentTemplateMsg contentTemplateMsg; //儲存格式
-			PnpContentLink contentLink; //儲存格式
-			PnpContentTemplateMsgAction contentTemplateMsgAction; //儲存格式
-			String templateParentId = "";
-			String linkId = "";
-
-
-			// set old template with same Title's productSwitch to off
-			boolean productSwitch = createTemplateMsgModels.get(0).getTemplateSwitch();
-			String templateTitle = createTemplateMsgModels.get(0).getTemplateTitle();
-			if(productSwitch) {
-				logger.info("ProdutionSwith is On, other's will set to off!");
-				contentTemplateMsgService.setPreTitleTemplateToOff(templateTitle, adminUserAccount);
-			}
-
-			// Edit
-			if (actionType.equals("Edit")) {
-				// set old template with same Title to deleted
-				contentTemplateMsgService.getPreTemplateIds(templateId, adminUserAccount);
-				templateIds.add(templateId);
-				for(int i=1; i<createTemplateMsgModels.size(); i++){
-					templateIds.add(checkDuplicateUUID("1"));
-				}
-			// Add & Copy
-			} else {
-				for(int i=0; i<createTemplateMsgModels.size(); i++){
-					templateIds.add(checkDuplicateUUID("1"));
-				}
-			}
-
-			//取出每個templateMsg的資料
-			PnpTemplateMsgModel createTemplateMsgModel;
-			TemplateActionModel templateActionModel;
-			Map<String, String> map;
-			templateParentId = templateIds.get(0);
+            PnpContentTemplateMsg contentTemplateMsg; //儲存格式
+            PnpContentLink contentLink; //儲存格式
+            PnpContentTemplateMsgAction contentTemplateMsgAction; //儲存格式
+            String templateParentId = "";
+            String linkId = "";
 
 
-			// for every pages
-			for(int i = 0; i < createTemplateMsgModels.size(); i++){
-				createTemplateMsgModel = createTemplateMsgModels.get(i);
+            // set old template with same Title's productSwitch to off
+            boolean productSwitch = createTemplateMsgModels.get(0).isTemplateSwitch();
+            String templateTitle = createTemplateMsgModels.get(0).getTemplateTitle();
+            if (productSwitch) {
+                log.info("ProdutionSwith is On, other's will set to off!");
+                contentTemplateMsgService.setPreTitleTemplateToOff(templateTitle, adminUserAccount);
+            }
 
-				System.out.println("model " + i + ": " + createTemplateMsgModel.toString());
+            // Edit
+            if (actionType.equals("Edit")) {
+                // set old template with same Title to deleted
+                contentTemplateMsgService.getPreTemplateIds(templateId, adminUserAccount);
+                templateIds.add(templateId);
+                for (int i = 1; i < createTemplateMsgModels.size(); i++) {
+                    templateIds.add(checkDuplicateUUID("1"));
+                }
+                // Add & Copy
+            } else {
+                for (int i = 0; i < createTemplateMsgModels.size(); i++) {
+                    templateIds.add(checkDuplicateUUID("1"));
+                }
+            }
 
-				// 新增樣板
-				if (i + 1 > templateIds.size()) {
-					templateIds.add(checkDuplicateUUID("1"));
-				}
-
-				// ------------- adding ----------------------
-
-				//template的資料
-				contentTemplateMsg = new PnpContentTemplateMsg();
-
-				// i	TEMPLATE_ID
-				contentTemplateMsg.setTemplateId(templateIds.get(i));
-				// 0	PRODUCT_SWITCH
-				contentTemplateMsg.setProductSwitch(createTemplateMsgModel.getTemplateSwitch());
-
-				//
-				// 1	ALT_TEXT
-				if(!createTemplateMsgModel.getAltText().isEmpty()){
-					contentTemplateMsg.setAltText(createTemplateMsgModel.getAltText());
-				}
-				// 2 TEMPLATE_TYPE
-				contentTemplateMsg.setTemplateType(createTemplateMsgModel.getTemplateType());
-
-				// 5 CURFEW_START_TIME + 6 CURFEW_END_TIME
-				//logger.info("Curfew Time: " + createTemplateMsgModel.getCurfewStartTime().toString() + ", " + createTemplateMsgModel.getCurfewEndTime().toString());
-				contentTemplateMsg.setCurfewStartTime(createTemplateMsgModel.getCurfewStartTime());
-				contentTemplateMsg.setCurfewEndTime(createTemplateMsgModel.getCurfewEndTime());
-				//logger.info("Curfew Time: " + contentTemplateMsg.getCurfewStartTime().toString() + ", " + contentTemplateMsg.getCurfewEndTime().toString());
-
-				contentTemplateMsg.setTemplateLevel(createTemplateMsgModel.getTemplateLevel());
-
-				contentTemplateMsg.setModifyUser(adminUserAccount);
-				contentTemplateMsg.setModifyTime(new Date());
-				contentTemplateMsg.setStatus(PnpContentTemplateMsg.STATUS_ACTIVE);
-				contentTemplateMsg.setTemplateLetter(createTemplateMsgModel.getTemplateLetter());
-
-				if(i > 0){
-					contentTemplateMsg.setTemplateParentId(templateParentId);
-				}
-
-				if(!createTemplateMsgModel.getTemplateImageId().isEmpty()){
-					contentTemplateMsg.setTemplateImageId(createTemplateMsgModel.getTemplateImageId());
-				}
-				if(!createTemplateMsgModel.getTemplateTitle().isEmpty()){
-					contentTemplateMsg.setTemplateTitle(createTemplateMsgModel.getTemplateTitle());
-				}
-
-				contentTemplateMsgs.add(contentTemplateMsg);
+            //取出每個templateMsg的資料
+            PnpTemplateMsgModel createTemplateMsgModel;
+            TemplateActionModel templateActionModel;
+            Map<String, String> map;
+            templateParentId = templateIds.get(0);
 
 
-				// 取出template的action
-				List<TemplateActionModel> templateActions = createTemplateMsgModel.getTemplateActions();
-				if (actionType.equals("Edit")) { //變更
-					contentTemplateMsgService.getPreActionIdAndLinkId(templateIds.get(i)); //取得原先圖文訊息的DetailId與LinkId
-				}
+            // for every pages
+            for (int i = 0; i < createTemplateMsgModels.size(); i++) {
+                createTemplateMsgModel = createTemplateMsgModels.get(i);
 
-				//新增與複製
-				actionIdAndLinkIds = new ArrayList<>();
-				for(int k=0; k<templateActions.size(); k++){
-					map = new LinkedHashMap<>();
-					map.put("actionId", checkDuplicateUUID("2"));
-					map.put("linkId", null);
-					actionIdAndLinkIds.add(map);
-				}
+                System.out.println("model " + i + ": " + createTemplateMsgModel.toString());
 
-				for(int j=0; j<templateActions.size(); j++){
-					templateActionModel = templateActions.get(j);
+                // 新增樣板
+                if (i + 1 > templateIds.size()) {
+                    templateIds.add(checkDuplicateUUID("1"));
+                }
 
-					if(j+1>actionIdAndLinkIds.size()){
-						map = new LinkedHashMap<>();
-						map.put("actionId", checkDuplicateUUID("2"));
-						map.put("linkId", null);
-						actionIdAndLinkIds.add(map);
-					}
+                // ------------- adding ----------------------
 
-					linkId = actionIdAndLinkIds.get(j).get("linkId");
-					//action資料
-					contentTemplateMsgAction = new PnpContentTemplateMsgAction();
-					contentTemplateMsgAction.setTemplateIdAction(actionIdAndLinkIds.get(j).get("actionId"));
-					contentTemplateMsgAction.setTemplateId(templateIds.get(i));
-					contentTemplateMsgAction.setActionLetter(templateActionModel.getActionLetter());
-					contentTemplateMsgAction.setActionType(templateActionModel.getActionType());
-					contentTemplateMsgAction.setActionLabel(templateActionModel.getActionLabel());
-					contentTemplateMsgAction.setStatus(PnpContentTemplateMsgAction.STATUS_ACTIVE);
+                //template的資料
+                contentTemplateMsg = new PnpContentTemplateMsg();
 
-					switch(templateActionModel.getActionType()){
-						case PnpContentTemplateMsgAction.ACTION_TYPE_URI:
-							contentLink = new PnpContentLink();
-							if(linkId==null){
-								linkId = checkDuplicateUUID("3");
-							}
-							contentLink.setLinkId(linkId);
-							contentLink.setLinkTitle(templateActionModel.getActionLabel());
-							contentLink.setLinkUrl(templateActionModel.getActionText());
-							contentLink.setModifyTime(new Date());
-							contentLink.setModifyUser(adminUserAccount);
-							contentLinks.add(contentLink);
-							contentTemplateMsgAction.setLinkId(linkId);
-							break;
-						case PnpContentTemplateMsgAction.ACTION_TYPE_MESSAGE:
-							contentTemplateMsgAction.setActionText(templateActionModel.getActionText());
-							break;
-						case PnpContentTemplateMsgAction.ACTION_TYPE_POSTBACK:
-							//contentTemplateMsgAction.setActionText(templateActionModel.getActionText());
-							contentTemplateMsgAction.setActionData(templateActionModel.getActionData());
-							break;
-					}
+                // i	TEMPLATE_ID
+                contentTemplateMsg.setTemplateId(templateIds.get(i));
+                // 0	PRODUCT_SWITCH
+                contentTemplateMsg.setProductSwitch(createTemplateMsgModel.isTemplateSwitch());
 
-					contentTemplateMsgActions.add(contentTemplateMsgAction);
-				}
-			}
+                //
+                // 1	ALT_TEXT
+                if (!createTemplateMsgModel.getAltText().isEmpty()) {
+                    contentTemplateMsg.setAltText(createTemplateMsgModel.getAltText());
+                }
+                // 2 TEMPLATE_TYPE
+                contentTemplateMsg.setTemplateType(createTemplateMsgModel.getTemplateType());
 
-			//
-			System.out.println("final: "+contentTemplateMsgs.toString());
+                // 5 CURFEW_START_TIME + 6 CURFEW_END_TIME
+                //log.info("Curfew Time: " + createTemplateMsgModel.getCurfewStartTime().toString() + ", " + createTemplateMsgModel.getCurfewEndTime().toString());
+                contentTemplateMsg.setCurfewStartTime(createTemplateMsgModel.getCurfewStartTime());
+                contentTemplateMsg.setCurfewEndTime(createTemplateMsgModel.getCurfewEndTime());
+                //log.info("Curfew Time: " + contentTemplateMsg.getCurfewStartTime().toString() + ", " + contentTemplateMsg.getCurfewEndTime().toString());
 
-			contentTemplateMsgService.createTemplateMsg(contentTemplateMsgs, contentTemplateMsgActions, contentLinks);
+                contentTemplateMsg.setTemplateLevel(createTemplateMsgModel.getTemplateLevel());
 
-			return new ResponseEntity<>("save success", HttpStatus.OK);
-		} catch (Exception e) {
-			logger.error(ErrorRecord.recordError(e));
+                contentTemplateMsg.setModifyUser(adminUserAccount);
+                contentTemplateMsg.setModifyTime(new Date());
+                contentTemplateMsg.setStatus(PnpContentTemplateMsg.STATUS_ACTIVE);
+                contentTemplateMsg.setTemplateLetter(createTemplateMsgModel.getTemplateLetter());
 
-			if(e instanceof BcsNoticeException){
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			}else{
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-		}
-	}
+                if (i > 0) {
+                    contentTemplateMsg.setTemplateParentId(templateParentId);
+                }
 
-	/**
-	 * 取得樣板訊息
-	 */
-	@WebServiceLog
+                if (!createTemplateMsgModel.getTemplateImageId().isEmpty()) {
+                    contentTemplateMsg.setTemplateImageId(createTemplateMsgModel.getTemplateImageId());
+                }
+                if (!createTemplateMsgModel.getTemplateTitle().isEmpty()) {
+                    contentTemplateMsg.setTemplateTitle(createTemplateMsgModel.getTemplateTitle());
+                }
+
+                contentTemplateMsgs.add(contentTemplateMsg);
+
+
+                // 取出template的action
+                List<TemplateActionModel> templateActions = createTemplateMsgModel.getTemplateActions();
+                if (actionType.equals("Edit")) { //變更
+                    contentTemplateMsgService.getPreActionIdAndLinkId(templateIds.get(i)); //取得原先圖文訊息的DetailId與LinkId
+                }
+
+                //新增與複製
+                actionIdAndLinkIds = new ArrayList<>();
+                for (int k = 0; k < templateActions.size(); k++) {
+                    map = new LinkedHashMap<>();
+                    map.put("actionId", checkDuplicateUUID("2"));
+                    map.put("linkId", null);
+                    actionIdAndLinkIds.add(map);
+                }
+
+                for (int j = 0; j < templateActions.size(); j++) {
+                    templateActionModel = templateActions.get(j);
+
+                    if (j + 1 > actionIdAndLinkIds.size()) {
+                        map = new LinkedHashMap<>();
+                        map.put("actionId", checkDuplicateUUID("2"));
+                        map.put("linkId", null);
+                        actionIdAndLinkIds.add(map);
+                    }
+
+                    linkId = actionIdAndLinkIds.get(j).get("linkId");
+                    //action資料
+                    contentTemplateMsgAction = new PnpContentTemplateMsgAction();
+                    contentTemplateMsgAction.setTemplateIdAction(actionIdAndLinkIds.get(j).get("actionId"));
+                    contentTemplateMsgAction.setTemplateId(templateIds.get(i));
+                    contentTemplateMsgAction.setActionLetter(templateActionModel.getActionLetter());
+                    contentTemplateMsgAction.setActionType(templateActionModel.getActionType());
+                    contentTemplateMsgAction.setActionLabel(templateActionModel.getActionLabel());
+                    contentTemplateMsgAction.setStatus(PnpContentTemplateMsgAction.STATUS_ACTIVE);
+
+                    switch (templateActionModel.getActionType()) {
+                        case PnpContentTemplateMsgAction.ACTION_TYPE_URI:
+                            contentLink = new PnpContentLink();
+                            if (linkId == null) {
+                                linkId = checkDuplicateUUID("3");
+                            }
+                            contentLink.setLinkId(linkId);
+                            contentLink.setLinkTitle(templateActionModel.getActionLabel());
+                            contentLink.setLinkUrl(templateActionModel.getActionText());
+                            contentLink.setModifyTime(new Date());
+                            contentLink.setModifyUser(adminUserAccount);
+                            contentLinks.add(contentLink);
+                            contentTemplateMsgAction.setLinkId(linkId);
+                            break;
+                        case PnpContentTemplateMsgAction.ACTION_TYPE_MESSAGE:
+                            contentTemplateMsgAction.setActionText(templateActionModel.getActionText());
+                            break;
+                        case PnpContentTemplateMsgAction.ACTION_TYPE_POSTBACK:
+                            //contentTemplateMsgAction.setActionText(templateActionModel.getActionText());
+                            contentTemplateMsgAction.setActionData(templateActionModel.getActionData());
+                            break;
+                    }
+
+                    contentTemplateMsgActions.add(contentTemplateMsgAction);
+                }
+            }
+
+            //
+            System.out.println("final: " + contentTemplateMsgs.toString());
+
+            contentTemplateMsgService.createTemplateMsg(contentTemplateMsgs, contentTemplateMsgActions, contentLinks);
+
+            return new ResponseEntity<>("save success", HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(ErrorRecord.recordError(e));
+
+            if (e instanceof BcsNoticeException) {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+            } else {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+    }
+
+    /**
+     * 取得樣板訊息
+     */
+    @WebServiceLog
 //	@ControllerLog(description="取得PNP樣板訊息")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getPnp/{templateId}")
-	@ResponseBody
-	public ResponseEntity<?> getTemplateMsg(
-			HttpServletRequest request,
-			HttpServletResponse response,
-			@CurrentUser CustomUser customUser,
-			@PathVariable String templateId) throws IOException {
-		logger.info("getPnp TemplateMsg");
+    @RequestMapping(method = RequestMethod.GET, value = "/edit/getPnp/{templateId}")
+    @ResponseBody
+    public ResponseEntity<?> getTemplateMsg(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @CurrentUser CustomUser customUser,
+            @PathVariable String templateId) throws IOException {
+        log.info("getPnp TemplateMsg");
 
-		try{
-			Map<String, List<String>> result = contentTemplateMsgService.getContentTemplateMsg(templateId);
+        try {
+            Map<String, List<String>> result = contentTemplateMsgService.getContentTemplateMsg(templateId);
 
-			return new ResponseEntity<>(result, HttpStatus.OK);
-		}
-		catch(Exception e){
-			logger.error(ErrorRecord.recordError(e));
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(ErrorRecord.recordError(e));
 
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
-	/**
-	 * 取得樣板訊息列表
-	 */
-	@WebServiceLog
+    /**
+     * 取得樣板訊息列表
+     */
+    @WebServiceLog
 //	@ControllerLog(description="取得PNP樣板訊息列表")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getPnpAllList")
-	@ResponseBody
-	public ResponseEntity<?> getAllMsgList(
-			HttpServletRequest request,
-			HttpServletResponse response,
-			@CurrentUser CustomUser customUser) throws IOException {
-		logger.info("getPnpAllList");
+    @RequestMapping(method = RequestMethod.GET, value = "/edit/getPnpAllList")
+    @ResponseBody
+    public ResponseEntity<?> getAllMsgList(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @CurrentUser CustomUser customUser) throws IOException {
+        log.info("getPnpAllList");
 
-		try{
-			Map<String, List<String>> result = contentTemplateMsgService.getAllContentTemplateMsg();
+        try {
+            Map<String, List<String>> result = contentTemplateMsgService.getAllContentTemplateMsg();
 
-			return new ResponseEntity<>(result, HttpStatus.OK);
-		}
-		catch(Exception e){
-			logger.error(ErrorRecord.recordError(e));
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(ErrorRecord.recordError(e));
 
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
-	/**
-	 * 取得ProductionOn樣板訊息列表
-	 */
-	@WebServiceLog
+    /**
+     * 取得ProductionOn樣板訊息列表
+     */
+    @WebServiceLog
 //	@ControllerLog(description="取得PNP ProductionOn樣板訊息列表")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getPnpOnList")
-	@ResponseBody
-	public ResponseEntity<?> getOnMsgList(
-			HttpServletRequest request,
-			HttpServletResponse response,
-			@CurrentUser CustomUser customUser) throws IOException {
-		logger.info("getPnpOnList");
+    @RequestMapping(method = RequestMethod.GET, value = "/edit/getPnpOnList")
+    @ResponseBody
+    public ResponseEntity<?> getOnMsgList(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @CurrentUser CustomUser customUser) throws IOException {
+        log.info("getPnpOnList");
 
-		try{
-			Map<String, List<String>> result = contentTemplateMsgService.getProductOnContentTemplateMsg();
+        try {
+            Map<String, List<String>> result = contentTemplateMsgService.getProductOnContentTemplateMsg();
 
-			return new ResponseEntity<>(result, HttpStatus.OK);
-		}
-		catch(Exception e){
-			logger.error(ErrorRecord.recordError(e));
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(ErrorRecord.recordError(e));
 
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
-	/**
-	 * 取得ProductionOff樣板訊息列表
-	 */
-	@WebServiceLog
+    /**
+     * 取得ProductionOff樣板訊息列表
+     */
+    @WebServiceLog
 //	@ControllerLog(description="取得PNP ProductionOff樣板訊息列表")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getPnpOffList")
-	@ResponseBody
-	public ResponseEntity<?> getOffMsgList(
-			HttpServletRequest request,
-			HttpServletResponse response,
-			@CurrentUser CustomUser customUser) throws IOException {
-		logger.info("getPnpOffList");
+    @RequestMapping(method = RequestMethod.GET, value = "/edit/getPnpOffList")
+    @ResponseBody
+    public ResponseEntity<?> getOffMsgList(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @CurrentUser CustomUser customUser) throws IOException {
+        log.info("getPnpOffList");
 
-		try{
-			Map<String, List<String>> result = contentTemplateMsgService.getProductOffContentTemplateMsg();
+        try {
+            Map<String, List<String>> result = contentTemplateMsgService.getProductOffContentTemplateMsg();
 
-			return new ResponseEntity<>(result, HttpStatus.OK);
-		}
-		catch(Exception e){
-			logger.error(ErrorRecord.recordError(e));
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(ErrorRecord.recordError(e));
 
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 
-	///**
-	 //* 取得帳務通知成效Total
-	 //*/
-	//@ControllerLog(description="取得PNP成效清單")
-	//@RequestMapping(method = RequestMethod.GET, value = "/edit/getBNEffectsTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	//@ResponseBody
-	//public ResponseEntity<?> getBNEffectsTotalPages(
-			//HttpServletRequest request,
-			//HttpServletResponse response,
-			//@CurrentUser CustomUser customUser,
-			//@RequestParam(value = "startDate", required=false) String startDate,
-			//@RequestParam(value = "endDate", required=false) String endDate) throws IOException {
-		//logger.info("getBNEffectsTotalPages");
+    ///**
+    //* 取得帳務通知成效Total
+    //*/
+    //@ControllerLog(description="取得PNP成效清單")
+    //@RequestMapping(method = RequestMethod.GET, value = "/edit/getBNEffectsTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    //@ResponseBody
+    //public ResponseEntity<?> getBNEffectsTotalPages(
+    //HttpServletRequest request,
+    //HttpServletResponse response,
+    //@CurrentUser CustomUser customUser,
+    //@RequestParam(value = "startDate", required=false) String startDate,
+    //@RequestParam(value = "endDate", required=false) String endDate) throws IOException {
+    //log.info("getBNEffectsTotalPages");
 
-		//if(startDate == null) startDate = "1911-01-01";
-		//if(endDate == null) endDate = "3099-01-01";
+    //if(startDate == null) startDate = "1911-01-01";
+    //if(endDate == null) endDate = "3099-01-01";
 
-		//try{
-			//String count = contentTemplateMsgService.getBNEffectsTotalPages(startDate, endDate);
-			//return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count + "\"}", HttpStatus.OK);
-		//}
-		//catch(Exception e){
-			//logger.error(ErrorRecord.recordError(e));
-			//return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
-		//}
-	//}
+    //try{
+    //String count = contentTemplateMsgService.getBNEffectsTotalPages(startDate, endDate);
+    //return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count + "\"}", HttpStatus.OK);
+    //}
+    //catch(Exception e){
+    //log.error(ErrorRecord.recordError(e));
+    //return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
+    //}
+    //}
 
-	///**
-	 //* 取得帳務通知成效清單
-	 //*/
-	//@ControllerLog(description="取得帳務通知成效清單")
-	//@RequestMapping(method = RequestMethod.GET, value = "/edit/getBNEffectsList")
-	//@ResponseBody
-	//public ResponseEntity<?> getBNEffectsList(
-			//HttpServletRequest request,
-			//HttpServletResponse response,
-			//@CurrentUser CustomUser customUser,
-			//@RequestParam(value = "startDate", required=false) String startDate,
-			//@RequestParam(value = "endDate", required=false) String endDate,
-			//@RequestParam(value = "page", required=false) Integer page) throws IOException {
-		//logger.info("page1:" + page);
-		//if(startDate == null) startDate = "1911-01-01";
-		//if(endDate == null) endDate = "3099-01-01";
+    ///**
+    //* 取得帳務通知成效清單
+    //*/
+    //@ControllerLog(description="取得帳務通知成效清單")
+    //@RequestMapping(method = RequestMethod.GET, value = "/edit/getBNEffectsList")
+    //@ResponseBody
+    //public ResponseEntity<?> getBNEffectsList(
+    //HttpServletRequest request,
+    //HttpServletResponse response,
+    //@CurrentUser CustomUser customUser,
+    //@RequestParam(value = "startDate", required=false) String startDate,
+    //@RequestParam(value = "endDate", required=false) String endDate,
+    //@RequestParam(value = "page", required=false) Integer page) throws IOException {
+    //log.info("page1:" + page);
+    //if(startDate == null) startDate = "1911-01-01";
+    //if(endDate == null) endDate = "3099-01-01";
 
-		//try{
-			//Map<String, List<String>> result = contentTemplateMsgService.getBNEffects(startDate, endDate, page);
-			//return new ResponseEntity<>(result, HttpStatus.OK);
-		//}
-		//catch(Exception e){
-			//logger.error(ErrorRecord.recordError(e));
+    //try{
+    //Map<String, List<String>> result = contentTemplateMsgService.getBNEffects(startDate, endDate, page);
+    //return new ResponseEntity<>(result, HttpStatus.OK);
+    //}
+    //catch(Exception e){
+    //log.error(ErrorRecord.recordError(e));
 
-			//return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-		//}
-	//}
+    //return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    //}
+    //}
 
-	///**
-	 //* 取得帳務通知明細成效清單
-	 //*/
-	//@ControllerLog(description="取得帳務通知成效清單")
-	//@RequestMapping(method = RequestMethod.GET, value = "/edit/getBNEffectsDetailTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	//@ResponseBody
-	//public ResponseEntity<?> getBNEffectsDetailTotalPages(
-			//HttpServletRequest request,
-			//HttpServletResponse response,
-			//@CurrentUser CustomUser customUser,
-			//@RequestParam  String date,
-			//@RequestParam  String title,
-			//@RequestParam  String sendType) throws IOException {
-		//try{
-			//String count = contentTemplateMsgService.getBNEffectsDetailTotalPages(date, title, sendType);
-			//return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count + "\"}", HttpStatus.OK);
-		//}
-		//catch(Exception e){
-			//logger.error(ErrorRecord.recordError(e));
+    ///**
+    //* 取得帳務通知明細成效清單
+    //*/
+    //@ControllerLog(description="取得帳務通知成效清單")
+    //@RequestMapping(method = RequestMethod.GET, value = "/edit/getBNEffectsDetailTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    //@ResponseBody
+    //public ResponseEntity<?> getBNEffectsDetailTotalPages(
+    //HttpServletRequest request,
+    //HttpServletResponse response,
+    //@CurrentUser CustomUser customUser,
+    //@RequestParam  String date,
+    //@RequestParam  String title,
+    //@RequestParam  String sendType) throws IOException {
+    //try{
+    //String count = contentTemplateMsgService.getBNEffectsDetailTotalPages(date, title, sendType);
+    //return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count + "\"}", HttpStatus.OK);
+    //}
+    //catch(Exception e){
+    //log.error(ErrorRecord.recordError(e));
 
-			//return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
-		//}
-	//}
+    //return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
+    //}
+    //}
 
-	///**
-	 //* 取得帳務通知明細成效清單
-	 //*/
-	//@ControllerLog(description="取得帳務通知成效清單")
-	//@RequestMapping(method = RequestMethod.GET, value = "/edit/getBNEffectsDetailList")
-	//@ResponseBody
-	//public ResponseEntity<?> getBNEffectsDetailList(
-			//HttpServletRequest request,
-			//HttpServletResponse response,
-			//@CurrentUser CustomUser customUser,
-			//@RequestParam  String date,
-			//@RequestParam  String title,
-			//@RequestParam  String sendType,
-			//@RequestParam(value = "page", required=false) Integer page) throws IOException {
-		//logger.info("page1: " + page);
+    ///**
+    //* 取得帳務通知明細成效清單
+    //*/
+    //@ControllerLog(description="取得帳務通知成效清單")
+    //@RequestMapping(method = RequestMethod.GET, value = "/edit/getBNEffectsDetailList")
+    //@ResponseBody
+    //public ResponseEntity<?> getBNEffectsDetailList(
+    //HttpServletRequest request,
+    //HttpServletResponse response,
+    //@CurrentUser CustomUser customUser,
+    //@RequestParam  String date,
+    //@RequestParam  String title,
+    //@RequestParam  String sendType,
+    //@RequestParam(value = "page", required=false) Integer page) throws IOException {
+    //log.info("page1: " + page);
 
-		//try{
-			//Map<String, List<String>> result = contentTemplateMsgService.getBNEffectsDetail(date, title, sendType, page);
-			//return new ResponseEntity<>(result, HttpStatus.OK);
-		//}
-		//catch(Exception e){
-			//logger.error(ErrorRecord.recordError(e));
+    //try{
+    //Map<String, List<String>> result = contentTemplateMsgService.getBNEffectsDetail(date, title, sendType, page);
+    //return new ResponseEntity<>(result, HttpStatus.OK);
+    //}
+    //catch(Exception e){
+    //log.error(ErrorRecord.recordError(e));
 
-			//return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-		//}
-	//}
+    //return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    //}
+    //}
 
-	/**
-	 * 檢查必填欄位不可為空/get
-	 */
-	public Boolean validateData(List<PnpTemplateMsgModel> createTemplateMsgModels) {
-		PnpTemplateMsgModel createTemplateMsgModel;
-		TemplateActionModel templateActionModel;
-		boolean imageIsEmpty = createTemplateMsgModels.get(0).getTemplateImageId().isEmpty();
-		boolean titleIsEmpty = createTemplateMsgModels.get(0).getTemplateTitle().isEmpty();
-		String actionType;
+    /**
+     * 檢查必填欄位不可為空/get
+     */
+    public Boolean validateData(List<PnpTemplateMsgModel> createTemplateMsgModels) {
+        PnpTemplateMsgModel createTemplateMsgModel;
+        TemplateActionModel templateActionModel;
+        boolean imageIsEmpty = createTemplateMsgModels.get(0).getTemplateImageId().isEmpty();
+        boolean titleIsEmpty = createTemplateMsgModels.get(0).getTemplateTitle().isEmpty();
+        String actionType;
 
-		for(int i=0; i<createTemplateMsgModels.size(); i++){
-			createTemplateMsgModel = createTemplateMsgModels.get(i);
+        for (int i = 0; i < createTemplateMsgModels.size(); i++) {
+            createTemplateMsgModel = createTemplateMsgModels.get(i);
 
-			if(createTemplateMsgModel.getTemplateImageId().isEmpty() ^ imageIsEmpty){
-				return false;
-			}
+            if (createTemplateMsgModel.getTemplateImageId().isEmpty() ^ imageIsEmpty) {
+                return false;
+            }
 
-			if(createTemplateMsgModel.getTemplateTitle().isEmpty() ^ titleIsEmpty){
-				return false;
-			}
+            if (createTemplateMsgModel.getTemplateTitle().isEmpty() ^ titleIsEmpty) {
+                return false;
+            }
 
-			if(createTemplateMsgModel.getAltText().isEmpty() && i==0){
-				return false;
-			}
+            if (createTemplateMsgModel.getAltText().isEmpty() && i == 0) {
+                return false;
+            }
 
-			List<TemplateActionModel> templateActions = createTemplateMsgModel.getTemplateActions();
-			for(int j=0; j<templateActions.size(); j++){
-				templateActionModel = templateActions.get(j);
-				actionType = templateActionModel.getActionType();
+            List<TemplateActionModel> templateActions = createTemplateMsgModel.getTemplateActions();
+            for (int j = 0; j < templateActions.size(); j++) {
+                templateActionModel = templateActions.get(j);
+                actionType = templateActionModel.getActionType();
 
-				if(templateActionModel.getActionLabel().isEmpty()){
-					return false;
-				}
+                if (templateActionModel.getActionLabel().isEmpty()) {
+                    return false;
+                }
 
-				switch(actionType){
-					case "uri" :
-						if(templateActionModel.getActionText().isEmpty()){
-							return false;
-						}
-						break;
-					case "message" :
-						if(templateActionModel.getActionText().isEmpty()){
-							return false;
-						}
-						break;
-					case "postback" :
-						if(templateActionModel.getActionData().isEmpty()){
-							return false;
-						}
-						break;
-				}
-			}
-		}
-		return true;
-	}
+                switch (actionType) {
+                    case "uri":
+                        if (templateActionModel.getActionText().isEmpty()) {
+                            return false;
+                        }
+                        break;
+                    case "message":
+                        if (templateActionModel.getActionText().isEmpty()) {
+                            return false;
+                        }
+                        break;
+                    case "postback":
+                        if (templateActionModel.getActionData().isEmpty()) {
+                            return false;
+                        }
+                        break;
+                }
+            }
+        }
+        return true;
+    }
 
-	/**
-	 * 回傳一個沒有重覆的uuid
-	 */
-	public String checkDuplicateUUID(String queryType) {
-		String uuid = UUID.randomUUID().toString().toLowerCase();
-		boolean duplicateUUID = contentTemplateMsgService.checkDuplicateUUID(queryType, uuid);
-		while (duplicateUUID) {
-			uuid = UUID.randomUUID().toString().toLowerCase();
-			duplicateUUID = contentTemplateMsgService.checkDuplicateUUID(queryType, uuid);
-		}
+    /**
+     * 回傳一個沒有重覆的uuid
+     */
+    public String checkDuplicateUUID(String queryType) {
+        String uuid = UUID.randomUUID().toString().toLowerCase();
+        boolean duplicateUUID = contentTemplateMsgService.checkDuplicateUUID(queryType, uuid);
+        while (duplicateUUID) {
+            uuid = UUID.randomUUID().toString().toLowerCase();
+            duplicateUUID = contentTemplateMsgService.checkDuplicateUUID(queryType, uuid);
+        }
 
-		return uuid;
-	}
+        return uuid;
+    }
 
-	/**
-	 * 刪除樣板訊息
-	 */
-	@WebServiceLog
+    /**
+     * 刪除樣板訊息
+     */
+    @WebServiceLog
 //	@ControllerLog(description="刪除PNP樣板訊息")
-	@RequestMapping(method = RequestMethod.DELETE, value = "/admin/deletePnp/{templateId}")
-	@ResponseBody
-	public ResponseEntity<?> deleteTemplateMsg(
-			HttpServletRequest request,
-			HttpServletResponse response,
-			@CurrentUser CustomUser customUser,
-			@PathVariable String templateId) {
-		logger.info("deletePnp");
+    @RequestMapping(method = RequestMethod.DELETE, value = "/admin/deletePnp/{templateId}")
+    @ResponseBody
+    public ResponseEntity<?> deleteTemplateMsg(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @CurrentUser CustomUser customUser,
+            @PathVariable String templateId) {
+        log.info("deletePnp");
 
-		try {
-			// Check Delete Right
-			boolean isAdmin = customUser.isAdmin();
-			if(isAdmin) {
-				contentTemplateMsgService.deleteTemplateMsg(templateId, customUser.getAccount());
-				return new ResponseEntity<>("Delete Success", HttpStatus.OK);
-			} else {
-				throw new BcsNoticeException("此帳號沒有刪除權限");
-			}
-		} catch(Exception e) {
-			logger.error(ErrorRecord.recordError(e));
+        try {
+            // Check Delete Right
+            boolean isAdmin = customUser.isAdmin();
+            if (isAdmin) {
+                contentTemplateMsgService.deleteTemplateMsg(templateId, customUser.getAccount());
+                return new ResponseEntity<>("Delete Success", HttpStatus.OK);
+            } else {
+                throw new BcsNoticeException("此帳號沒有刪除權限");
+            }
+        } catch (Exception e) {
+            log.error(ErrorRecord.recordError(e));
 
-			if(e instanceof BcsNoticeException){
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			}
-			else{
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-		}
-	}
+            if (e instanceof BcsNoticeException) {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+            } else {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+    }
 
-	/**
-	 * 取得BigSwitch
-	 */
-	@ControllerLog(description="取得大開關")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/getPnpBigSwitch", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	@ResponseBody
-	public ResponseEntity<?> getBillingNoticeBigSwitch(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		logger.info("getPnpBigSwitch");
-		try {
-			logger.info(".bn.bigswitch = " + "." + CONFIG_STR.BN_BIGSWITCH.toString());
-			SystemConfig systemConfig = systemConfigService.findSystemConfig("." + CONFIG_STR.BN_BIGSWITCH.toString());
+    /**
+     * 取得BigSwitch
+     */
+    @ControllerLog(description = "取得大開關")
+    @RequestMapping(method = RequestMethod.GET, value = "/edit/getPnpBigSwitch", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> getBillingNoticeBigSwitch(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        log.info("getPnpBigSwitch");
+        try {
+            log.info(".bn.bigswitch = " + "." + CONFIG_STR.BN_BIGSWITCH.toString());
+            SystemConfig systemConfig = systemConfigService.findSystemConfig("." + CONFIG_STR.BN_BIGSWITCH.toString());
             String bigSwitch = CoreConfigReader.getString(CONFIG_STR.BN_BIGSWITCH, false);
             if (systemConfig != null) {
                 bigSwitch = systemConfig.getValue();
             }
-            logger.info("bigSwitch:" + bigSwitch);
+            log.info("bigSwitch:" + bigSwitch);
             return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + bigSwitch + "\"}", HttpStatus.OK);
-		} catch(Exception e) {
-			logger.error(ErrorRecord.recordError(e));
-			return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
+        } catch (Exception e) {
+            log.error(ErrorRecord.recordError(e));
+            return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
-	/**
-	 * 設置BigSwitch
-	 */
-	@ControllerLog(description="設置大開關")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/setPnpBigSwitch/{OnOff}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	@ResponseBody
-	public ResponseEntity<?> setPnpBigSwitch(HttpServletRequest request, HttpServletResponse response,  @PathVariable String OnOff) {
-		logger.info("setPnpBigSwitch, OnOff=" + OnOff);
-		try {
-			logger.info(".bn.bigswitch = " + "." + CONFIG_STR.BN_BIGSWITCH.toString());
-			SystemConfig systemConfig = systemConfigService.findSystemConfig("." + CONFIG_STR.BN_BIGSWITCH.toString());
-			if (systemConfig == null) {
-				systemConfig = new SystemConfig();
-				systemConfig.setConfigId("." + CONFIG_STR.BN_BIGSWITCH.toString());
-				systemConfig.setDescription("BigSwitch");
-			}
-			systemConfig.setValue(OnOff);
-			systemConfig.setModifyTime(Calendar.getInstance().getTime());
-			systemConfigService.save(systemConfig);
+    /**
+     * 設置BigSwitch
+     */
+    @ControllerLog(description = "設置大開關")
+    @RequestMapping(method = RequestMethod.GET, value = "/edit/setPnpBigSwitch/{OnOff}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> setPnpBigSwitch(HttpServletRequest request, HttpServletResponse response, @PathVariable String OnOff) {
+        log.info("setPnpBigSwitch, OnOff=" + OnOff);
+        try {
+            log.info(".bn.bigswitch = " + "." + CONFIG_STR.BN_BIGSWITCH.toString());
+            SystemConfig systemConfig = systemConfigService.findSystemConfig("." + CONFIG_STR.BN_BIGSWITCH.toString());
+            if (systemConfig == null) {
+                systemConfig = new SystemConfig();
+                systemConfig.setConfigId("." + CONFIG_STR.BN_BIGSWITCH.toString());
+                systemConfig.setDescription("BigSwitch");
+            }
+            systemConfig.setValue(OnOff);
+            systemConfig.setModifyTime(Calendar.getInstance().getTime());
+            systemConfigService.save(systemConfig);
 
-			logger.info("bigSwitch:" + systemConfig.getValue());
-			return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + systemConfig.getValue() + "\"}", HttpStatus.OK);
-		} catch(Exception e) {
-			logger.error(ErrorRecord.recordError(e));
-			return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
+            log.info("bigSwitch:" + systemConfig.getValue());
+            return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + systemConfig.getValue() + "\"}", HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(ErrorRecord.recordError(e));
+            return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
-	/**
+    /**
      * 匯出 Push API 成效報表
      */
-	//@ControllerLog(description="匯出 BN Push API 成效報表")
+    //@ControllerLog(description="匯出 BN Push API 成效報表")
     //@RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForBNPushApiEffects")
     //@ResponseBody
     //public void exportToExcelForBNPushApiEffects(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, @RequestParam String startDate, @RequestParam String endDate) {
 
-		//// file path
-        //String filePath = CoreConfigReader.getString("file.path");
+    //// file path
+    //String filePath = CoreConfigReader.getString("file.path");
 
-        //// file name
-		//SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
-		//Date date = new Date();
-        //String fileName = "BNPushApiEffects_" + sdf.format(date) + ".xlsx";
+    //// file name
+    //SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
+    //Date date = new Date();
+    //String fileName = "BNPushApiEffects_" + sdf.format(date) + ".xlsx";
 
-        //try {
-            //File folder = new File(filePath);
-            //if(!folder.exists()){
-                //folder.mkdirs();
-            //}
-            //exportToExcelForBillingNoticePushBNApiEffects.exportExcel(filePath, fileName, startDate, endDate);
-        //} catch (Exception e) {
-            //logger.error(ErrorRecord.recordError(e));
-        //}
-
-        //try {
-			//LoadFileUIService.loadFileToResponse(filePath, fileName, response);
-		//} catch (IOException e) {
-			//e.printStackTrace();
-		//}
+    //try {
+    //File folder = new File(filePath);
+    //if(!folder.exists()){
+    //folder.mkdirs();
+    //}
+    //exportToExcelForBillingNoticePushBNApiEffects.exportExcel(filePath, fileName, startDate, endDate);
+    //} catch (Exception e) {
+    //log.error(ErrorRecord.recordError(e));
     //}
 
-	///**
-     //* 匯出 Push API 成效報表
-     //*/
-	//@ControllerLog(description="匯出 BN Push API 成效報表")
+    //try {
+    //LoadFileUIService.loadFileToResponse(filePath, fileName, response);
+    //} catch (IOException e) {
+    //e.printStackTrace();
+    //}
+    //}
+
+    ///**
+    //* 匯出 Push API 成效報表
+    //*/
+    //@ControllerLog(description="匯出 BN Push API 成效報表")
     //@RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForBNPushApiEffectsDetail")
     //@ResponseBody
     //public void exportToExcelForBNPushApiEffectsDetail(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
-    		//@RequestParam String date, @RequestParam String title, @RequestParam String sendType) {
+    //@RequestParam String date, @RequestParam String title, @RequestParam String sendType) {
 
-		//// file path
-        ////String filePath = "C:\\bcs\\";
-        //String filePath = CoreConfigReader.getString("file.path");
+    //// file path
+    ////String filePath = "C:\\bcs\\";
+    //String filePath = CoreConfigReader.getString("file.path");
 
-        //// file name
-		//SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
-        //String fileName = "BNPushApiEffects_" + sdf.format(new Date()) + ".xlsx";
+    //// file name
+    //SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
+    //String fileName = "BNPushApiEffects_" + sdf.format(new Date()) + ".xlsx";
 
-        //try {
-            //File folder = new File(filePath);
-            //if(!folder.exists()){
-                //folder.mkdirs();
-            //}
-            //exportToExcelForBillingNoticePushBNApiEffects.exportExcel(filePath, fileName, date, title, sendType);
-        //} catch (Exception e) {
-            //logger.error(ErrorRecord.recordError(e));
-        //}
+    //try {
+    //File folder = new File(filePath);
+    //if(!folder.exists()){
+    //folder.mkdirs();
+    //}
+    //exportToExcelForBillingNoticePushBNApiEffects.exportExcel(filePath, fileName, date, title, sendType);
+    //} catch (Exception e) {
+    //log.error(ErrorRecord.recordError(e));
+    //}
 
-        //try {
-			//LoadFileUIService.loadFileToResponse(filePath, fileName, response);
-		//} catch (IOException e) {
-			//e.printStackTrace();
-		//}
+    //try {
+    //LoadFileUIService.loadFileToResponse(filePath, fileName, response);
+    //} catch (IOException e) {
+    //e.printStackTrace();
+    //}
     //}
 }
 

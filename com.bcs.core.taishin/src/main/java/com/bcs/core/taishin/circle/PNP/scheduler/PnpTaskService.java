@@ -22,7 +22,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
 /**
  * @see PnpMessageActor#onReceive
  */
-@Slf4j
+@Slf4j(topic = "PnpRecorder")
 @Service
 public class PnpTaskService {
     @Autowired

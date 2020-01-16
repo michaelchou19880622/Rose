@@ -10,12 +10,12 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import com.tsb.util.TrendPwMgmt;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPSClient;
-import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -31,9 +31,10 @@ import java.util.Vector;
  *
  * @author ???
  */
+
+@Slf4j(topic = "PnpRecorder")
 @Service
 public class PNPFtpService {
-    private static Logger logger = Logger.getLogger(PNPFtpService.class);
     private static boolean is64Bit = CoreConfigReader.getBoolean(CONFIG_STR.PNP_FTP_IS64BIT, true, false);
 
     /**
@@ -59,7 +60,7 @@ public class PNPFtpService {
             }
             ftpSettings.put(type.id, pnpFtpSetting);
         }
-        logger.info("initFtpSettings...OK");
+        log.info("initFtpSettings...OK");
     }
 
     /**
@@ -76,11 +77,11 @@ public class PNPFtpService {
         String resCode = pnpFtpSetting.getRESCode();
 
         Map<String, String> trendPwMgmt = loadFtp(host, serverHostName, serverHostNamePort, appCode, resCode);
-        logger.info(String.format("loginFTP: %s PWD: %s", trendPwMgmt.get("uid"), trendPwMgmt.get("pwd")));
+        log.info(String.format("loginFTP: %s PWD: %s", trendPwMgmt.get("uid"), trendPwMgmt.get("pwd")));
         pnpFtpSetting.setAccount(trendPwMgmt.get("uid"));
         pnpFtpSetting.setPassword(trendPwMgmt.get("pwd"));
-        logger.info("Download Side FTP Resource ID Password Login Done!!");
-        logger.info("下載段資源密碼系統的帳號密碼登入完成");
+        log.info("Download Side FTP Resource ID Password Login Done!!");
+        log.info("下載段資源密碼系統的帳號密碼登入完成");
 
         String smsHost = pnpFtpSetting.getSmsHost();
         String smsServerHostName = pnpFtpSetting.getSmsServerHostName();
@@ -88,11 +89,11 @@ public class PNPFtpService {
         String smsAPPCode = pnpFtpSetting.getSmsAPPCode();
         String smsRESCode = pnpFtpSetting.getSmsRESCode();
         Map<String, String> trendPwMgmtSMS = loadFtp(smsHost, smsServerHostName, smsServerHostNamePort, smsAPPCode, smsRESCode);
-        logger.info(String.format("login FTP: %s PWD: %s", trendPwMgmtSMS.get("uid"), trendPwMgmtSMS.get("pwd")));
+        log.info(String.format("login FTP: %s PWD: %s", trendPwMgmtSMS.get("uid"), trendPwMgmtSMS.get("pwd")));
         pnpFtpSetting.setSmsAccount(trendPwMgmtSMS.get("uid"));
         pnpFtpSetting.setSmsPassword(trendPwMgmtSMS.get("pwd"));
-        logger.info("Upload Side FTP Resource ID Password Login Done!!");
-        logger.info("上傳段資源密碼系統的帳號密碼登入完成");
+        log.info("Upload Side FTP Resource ID Password Login Done!!");
+        log.info("上傳段資源密碼系統的帳號密碼登入完成");
 
         return pnpFtpSetting;
     }
@@ -113,21 +114,21 @@ public class PNPFtpService {
      */
     private Map<String, String> loadFtp(PNPFtpSetting ftpSetting) {
         Map<String, String> data = new HashMap<>();
-        logger.info("ftpSetting.getChannelId() : " + ftpSetting.getChannelId());
-        logger.info("ftpSetting.getServerHostNamePort() : " + ftpSetting.getServerHostNamePort());
-        logger.info("ftpSetting.getAPPCode() : " + ftpSetting.getAPPCode());
-        logger.info("ftpSetting.getRESCode() : " + ftpSetting.getRESCode());
-        logger.info("is64Bit : " + is64Bit);
+        log.info("ftpSetting.getChannelId() : " + ftpSetting.getChannelId());
+        log.info("ftpSetting.getServerHostNamePort() : " + ftpSetting.getServerHostNamePort());
+        log.info("ftpSetting.getAPPCode() : " + ftpSetting.getAPPCode());
+        log.info("ftpSetting.getRESCode() : " + ftpSetting.getRESCode());
+        log.info("is64Bit : " + is64Bit);
         try {
             TrendPwMgmt lPwMgmt = new TrendPwMgmt(ftpSetting.getServerHostName(), ftpSetting.getServerHostNamePort(),
                     ftpSetting.getAPPCode(), ftpSetting.getRESCode(), is64Bit);
             data.put("uid", StringUtils.trimToEmpty(lPwMgmt.getUserId()));
             data.put("pwd", StringUtils.trimToEmpty(lPwMgmt.getPassword()));
-            logger.info("getHost:" + ftpSetting.getHost() + " / GetUID:" + data.get("uid") + " / GetPWD:"
+            log.info("getHost:" + ftpSetting.getHost() + " / GetUID:" + data.get("uid") + " / GetPWD:"
                     + data.get("pwd"));
             return data;
         } catch (Exception e) {
-            logger.error("TrendPwMgmt exception:" + e.getMessage());
+            log.error("TrendPwMgmt exception:" + e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -137,22 +138,22 @@ public class PNPFtpService {
      * 透過App Code Res Code 取得帳號密碼
      */
     private Map<String, String> loadFtp(String host, String serverHostName, int serverHostNamePort, String APPCode, String RESCode) {
-        logger.info("Host               : " + host);
-        logger.info("ServerHostName     : " + serverHostName);
-        logger.info("ServerHostNamePort : " + serverHostNamePort);
-        logger.info("APPCode            : " + APPCode);
-        logger.info("RESCode            : " + RESCode);
-        logger.info("Is64Bit            : " + is64Bit);
+        log.info("Host               : " + host);
+        log.info("ServerHostName     : " + serverHostName);
+        log.info("ServerHostNamePort : " + serverHostNamePort);
+        log.info("APPCode            : " + APPCode);
+        log.info("RESCode            : " + RESCode);
+        log.info("Is64Bit            : " + is64Bit);
         try {
             /* 透過TrendPwMgmt 取得帳號密碼 */
             TrendPwMgmt trendPwMgmt = new TrendPwMgmt(serverHostName, serverHostNamePort, APPCode, RESCode, is64Bit);
             Map<String, String> data = new HashMap<>();
             data.put("uid", StringUtils.trimToEmpty(trendPwMgmt.getUserId()));
             data.put("pwd", StringUtils.trimToEmpty(trendPwMgmt.getPassword()));
-            logger.info(String.format("Host: %s, Uid: %s, Pwd: %s", host, data.get("uid"), data.get("pwd")));
+            log.info(String.format("Host: %s, Uid: %s, Pwd: %s", host, data.get("uid"), data.get("pwd")));
             return data;
         } catch (Exception e) {
-            logger.error("trendPwMgmt exception:", e);
+            log.error("trendPwMgmt exception:", e);
             throw new RuntimeException(e);
         }
     }
@@ -188,33 +189,33 @@ public class PNPFtpService {
             String account = setting.getAccount();
             String password = setting.getPassword();
             // 第一次登入
-            logger.info("FTP Client Connecting 1...");
+            log.info("FTP Client Connecting 1...");
             if (account != null && !account.trim().isEmpty() && password != null && !password.trim().isEmpty()) {
                 lStatus = pFTPClient.login(account, password);
             }
 
             if (lStatus) {
-                logger.info(String.format("FTP Host Name: %s Login Success!!", setting.getHost()));
+                log.info(String.format("FTP Host Name: %s Login Success!!", setting.getHost()));
                 return true;
             } else {
-                logger.error(String.format("FTP Host Name: %s Login Fail!! APP[%s] RES[%s]，重新載入FTP連線參數!",
+                log.error(String.format("FTP Host Name: %s Login Fail!! APP[%s] RES[%s]，重新載入FTP連線參數!",
                         setting.getHost(), setting.getAPPCode(), setting.getRESCode()));
             }
 
             // T 登入失敗重新載入一次設定
             pFTPClient.disconnect();
-            logger.info("FTP Client Disconnect!!");
+            log.info("FTP Client Disconnect!!");
             // T 重新取得FTP 參數設定值
             Map<String, String> ftpSetting = loadFtp(setting);
-            logger.info(String.format("ID: %s, PWD: %s", ftpSetting.get("uid"), ftpSetting.get("pwd")));
-            logger.info("FTP Client Connecting 2...");
+            log.info(String.format("ID: %s, PWD: %s", ftpSetting.get("uid"), ftpSetting.get("pwd")));
+            log.info("FTP Client Connecting 2...");
             pFTPClient.connect(setting.getHost(), setting.getPort());
             lStatus = pFTPClient.login(ftpSetting.get("uid"), ftpSetting.get("pwd"));
 
             if (lStatus) {
-                logger.info(String.format("FTP Host Name: %s Login Success!!", setting.getHost()));
+                log.info(String.format("FTP Host Name: %s Login Success!!", setting.getHost()));
             } else {
-                logger.error(String.format("FTP Host Name: %s Login Fail!! APP[%s] RES[%s]，重新載入FTP連線參數!",
+                log.error(String.format("FTP Host Name: %s Login Fail!! APP[%s] RES[%s]，重新載入FTP連線參數!",
                         setting.getHost(), setting.getAPPCode(), setting.getRESCode()));
             }
 
@@ -224,15 +225,15 @@ public class PNPFtpService {
                 final String DEF_PW = "PASSWORD";
                 lStatus = pFTPClient.login(DEF_ID, DEF_PW);
                 if (lStatus) {
-                    logger.info(String.format("FTP Host Name: %s Login Success with Default ID and Password!!", setting.getHost()));
+                    log.info(String.format("FTP Host Name: %s Login Success with Default ID and Password!!", setting.getHost()));
                 } else {
-                    logger.error(String.format("FTP Host Name: %s Login Fail with Default ID and Password!! Stop Login!!", setting.getHost()));
+                    log.error(String.format("FTP Host Name: %s Login Fail with Default ID and Password!! Stop Login!!", setting.getHost()));
                 }
             }
             return lStatus;
 
         } catch (Exception e) {
-            logger.error("loginFTP:" + e.getMessage());
+            log.error("loginFTP:" + e.getMessage());
             return false;
         }
     }
@@ -261,10 +262,10 @@ public class PNPFtpService {
             }
 
             if (lStatus) {
-                logger.info(String.format("SMS Login FTP: %s 資源密碼系統的帳號密碼登入完成", setting.getSmsHost()));
+                log.info(String.format("SMS Login FTP: %s 資源密碼系統的帳號密碼登入完成", setting.getSmsHost()));
                 return true;
             } else {
-                logger.error(String.format("SMS Login FTP: %s 資源密碼系統的帳號密碼登入失敗 APP[%s] RES[%s]，重新載入FTP連線參數!",
+                log.error(String.format("SMS Login FTP: %s 資源密碼系統的帳號密碼登入失敗 APP[%s] RES[%s]，重新載入FTP連線參數!",
                         setting.getSmsHost(), setting.getSmsAPPCode(), setting.getSmsRESCode()));
             }
 
@@ -278,13 +279,13 @@ public class PNPFtpService {
             String resCode = setting.getSmsRESCode();
 
             Map<String, String> trendPwMgmt = loadFtp(host, serverHostName, serverHostNamePort, appCode, resCode);
-            logger.info("重新載入設定 SMS Login FTP:" + trendPwMgmt.get("uid") + " PWD:" + trendPwMgmt.get("pwd"));
+            log.info("重新載入設定 SMS Login FTP:" + trendPwMgmt.get("uid") + " PWD:" + trendPwMgmt.get("pwd"));
             pFTPClient.connect(setting.getSmsHost(), setting.getSmsPort());
             lStatus = pFTPClient.login(trendPwMgmt.get("uid"), trendPwMgmt.get("pwd"));
             if (lStatus) {
-                logger.info("重新載入設定 Login FTP:" + setting.getSmsHost() + "資源密碼系統的帳號密碼登入完成");
+                log.info("重新載入設定 Login FTP:" + setting.getSmsHost() + "資源密碼系統的帳號密碼登入完成");
             } else {
-                logger.error(String.format("loginFTP: %s 資源密碼系統的帳號密碼登入失敗 APP[%s] RES[%s]，改以原系統記錄帳號密碼進行登入!",
+                log.error(String.format("loginFTP: %s 資源密碼系統的帳號密碼登入失敗 APP[%s] RES[%s]，改以原系統記錄帳號密碼進行登入!",
                         setting.getSmsHost(), setting.getSmsAPPCode(), setting.getSmsRESCode()));
             }
 
@@ -292,14 +293,14 @@ public class PNPFtpService {
             if (!lStatus) {
                 lStatus = pFTPClient.login("ACCOUNT", "PASSWORD");
                 if (lStatus) {
-                    logger.info("SMS Login FTP:" + setting.getHost() + "原系統記錄帳號密碼登入完成");
+                    log.info("SMS Login FTP:" + setting.getHost() + "原系統記錄帳號密碼登入完成");
                 } else {
-                    logger.error("SMS Login FTP:" + setting.getHost() + "原系統記錄帳號密碼登入失敗，停止執行");
+                    log.error("SMS Login FTP:" + setting.getHost() + "原系統記錄帳號密碼登入失敗，停止執行");
                 }
             }
             return lStatus;
         } catch (Exception e) {
-            logger.error("smsLoginFTP:" + e.getMessage());
+            log.error("smsLoginFTP:" + e.getMessage());
             return false;
         }
     }
@@ -325,9 +326,9 @@ public class PNPFtpService {
                 session.connect();
                 lStatus = session.isConnected();
                 if (lStatus) {
-                    logger.info(String.format("Login SFTP: %s 資源密碼系統的帳號密碼登入完成", setting.getSmsHost()));
+                    log.info(String.format("Login SFTP: %s 資源密碼系統的帳號密碼登入完成", setting.getSmsHost()));
                 } else {
-                    logger.error(String.format("Login SFTP: %s 資源密碼系統的帳號密碼登入失敗 APP[%s] RES[%s]，重新載入FTP連線參數!",
+                    log.error(String.format("Login SFTP: %s 資源密碼系統的帳號密碼登入失敗 APP[%s] RES[%s]，重新載入FTP連線參數!",
                             setting.getSmsHost(), setting.getSmsAPPCode(), setting.getSmsRESCode()));
                 }
             }
@@ -339,16 +340,16 @@ public class PNPFtpService {
                 session = null;
                 // T 重新取得FTP 參數設定值
                 Map<String, String> trendPwMgmt = loadFtp(setting);
-                logger.info("loginFTP:" + trendPwMgmt.get("uid") + " PWD:" + trendPwMgmt.get("pwd"));
+                log.info("loginFTP:" + trendPwMgmt.get("uid") + " PWD:" + trendPwMgmt.get("pwd"));
                 session = jsch.getSession(trendPwMgmt.get("uid"), setting.getHost(), setting.getPort());
                 session.setPassword(trendPwMgmt.get("pwd"));
                 session.setConfig(sshConfig);
                 session.connect();
                 lStatus = session.isConnected();
                 if (lStatus) {
-                    logger.info(String.format("Login SFTP: %s 資源密碼系統的帳號密碼登入完成", setting.getSmsHost()));
+                    log.info(String.format("Login SFTP: %s 資源密碼系統的帳號密碼登入完成", setting.getSmsHost()));
                 } else {
-                    logger.error(String.format("Login SFTP: %s 資源密碼系統的帳號密碼登入失敗 APP[%s] RES[%s]，改以原系統記錄帳號密碼進行登入!",
+                    log.error(String.format("Login SFTP: %s 資源密碼系統的帳號密碼登入失敗 APP[%s] RES[%s]，改以原系統記錄帳號密碼進行登入!",
                             setting.getSmsHost(), setting.getSmsAPPCode(), setting.getSmsRESCode()));
                 }
 
@@ -360,14 +361,14 @@ public class PNPFtpService {
                     session.connect();
                     lStatus = session.isConnected();
                     if (lStatus) {
-                        logger.info("loginSFTP:" + setting.getHost() + "原系統記錄帳號密碼登入完成");
+                        log.info("loginSFTP:" + setting.getHost() + "原系統記錄帳號密碼登入完成");
                     } else {
-                        logger.error("loginSFTP:" + setting.getHost() + "原系統記錄帳號密碼登入失敗，停止執行");
+                        log.error("loginSFTP:" + setting.getHost() + "原系統記錄帳號密碼登入失敗，停止執行");
                     }
                 }
             }
         } catch (Exception ex) {
-            logger.error("loginSFTP Error: " + ex.getMessage());
+            log.error("loginSFTP Error: " + ex.getMessage());
         }
         return lStatus ? session : null;
     }
@@ -393,9 +394,9 @@ public class PNPFtpService {
                 session.connect();
                 lStatus = session.isConnected();
                 if (lStatus) {
-                    logger.info(String.format("SMS Login SFTP: %s 資源密碼系統的帳號密碼登入完成", setting.getSmsHost()));
+                    log.info(String.format("SMS Login SFTP: %s 資源密碼系統的帳號密碼登入完成", setting.getSmsHost()));
                 } else {
-                    logger.error(String.format("SMS Login SFTP: %s 資源密碼系統的帳號密碼登入失敗 APP[%s] RES[%s]，重新載入FTP連線參數!",
+                    log.error(String.format("SMS Login SFTP: %s 資源密碼系統的帳號密碼登入失敗 APP[%s] RES[%s]，重新載入FTP連線參數!",
                             setting.getSmsHost(), setting.getSmsAPPCode(), setting.getSmsRESCode()));
                 }
             }
@@ -413,7 +414,7 @@ public class PNPFtpService {
                 String resCode = setting.getSmsRESCode();
 
                 Map<String, String> trendPwMgmt = loadFtp(host, serverHostName, serverHostNamePort, appCode, resCode);
-                logger.info(String.format("SMS Login SFTP: %s PWD: %s", trendPwMgmt.get("uid"), trendPwMgmt.get("pwd")));
+                log.info(String.format("SMS Login SFTP: %s PWD: %s", trendPwMgmt.get("uid"), trendPwMgmt.get("pwd")));
 
                 session = jsch.getSession(trendPwMgmt.get("uid"), setting.getHost(), setting.getPort());
                 session.setPassword(trendPwMgmt.get("pwd"));
@@ -421,9 +422,9 @@ public class PNPFtpService {
                 session.connect();
                 lStatus = session.isConnected();
                 if (lStatus) {
-                    logger.info(String.format("SMS Login SFTP: %s 資源密碼系統的帳號密碼登入完成", setting.getSmsHost()));
+                    log.info(String.format("SMS Login SFTP: %s 資源密碼系統的帳號密碼登入完成", setting.getSmsHost()));
                 } else {
-                    logger.error(String.format("SMS Login SFTP: %s 資源密碼系統的帳號密碼登入失敗 APP[%s] RES[%s]，重新載入FTP連線參數!",
+                    log.error(String.format("SMS Login SFTP: %s 資源密碼系統的帳號密碼登入失敗 APP[%s] RES[%s]，重新載入FTP連線參數!",
                             setting.getSmsHost(), setting.getSmsAPPCode(), setting.getSmsRESCode()));
                 }
 
@@ -435,14 +436,14 @@ public class PNPFtpService {
                     session.connect();
                     lStatus = session.isConnected();
                     if (lStatus) {
-                        logger.info("smsLoginSFTP:" + setting.getHost() + "原系統記錄帳號密碼登入完成");
+                        log.info("smsLoginSFTP:" + setting.getHost() + "原系統記錄帳號密碼登入完成");
                     } else {
-                        logger.error("smsLoginSFTP:" + setting.getHost() + "原系統記錄帳號密碼登入失敗，停止執行");
+                        log.error("smsLoginSFTP:" + setting.getHost() + "原系統記錄帳號密碼登入失敗，停止執行");
                     }
                 }
             }
         } catch (Exception ex) {
-            logger.error("smsLoginSFTP Error: " + ex.getMessage());
+            log.error("smsLoginSFTP Error: " + ex.getMessage());
         }
         return lStatus ? session : null;
     }
@@ -485,10 +486,10 @@ public class PNPFtpService {
                 for (FTPFile file : files) {
                     String fileName = file.getName();
                     if (!file.isDirectory() && fileName.endsWith("txt")) {
-                        logger.info("start rename!!!!");
-                        logger.info("fileName :" + fileName);
-                        logger.info("ftpClient.printWorkingDirectory() :" + ftpClient.printWorkingDirectory());
-                        logger.info(ftpClient.rename(fileName, fileName + ".ok"));
+                        log.info("start rename!!!!");
+                        log.info("fileName :" + fileName);
+                        log.info("ftpClient.printWorkingDirectory() :" + ftpClient.printWorkingDirectory());
+                        log.info("{}", ftpClient.rename(fileName, fileName + ".ok"));
                     }
                 }
                 FTPFile[] filesOK = ftpClient.listFiles();
@@ -518,8 +519,7 @@ public class PNPFtpService {
                 }
             }
         } catch (Exception ex) {
-            logger.error(ex);
-            logger.error("downloadMultipleFileInFTPForDev Error: " + ex.getMessage());
+            log.error("downloadMultipleFileInFTPForDev Error: " + ex.getMessage());
         } finally {
             try {
                 if (ftpClient.isConnected()) {
@@ -527,8 +527,7 @@ public class PNPFtpService {
                     ftpClient.disconnect();
                 }
             } catch (Exception ex) {
-                logger.error(ex);
-                logger.error("downloadMultipleFileInFTPForDev Error: " + ex.getMessage());
+                log.error("downloadMultipleFileInFTPForDev Error: " + ex.getMessage());
             }
         }
         return lReturnDataMap;
@@ -545,8 +544,8 @@ public class PNPFtpService {
      * @see LoadFtpPnpDataTask#transFileToSMSFlow
      */
     public Map<String, byte[]> downloadMultipleFileByType(String directory, String extension, PNPFtpSetting setting) {
-        logger.info(String.format("Protocol           : %s", setting.getProtocol().equalsIgnoreCase("sftp")));
-        logger.info(String.format("IsPNPFtpTypeDevelop: %s", CoreConfigReader.isPNPFtpTypeDevelop()));
+        log.info(String.format("Protocol           : %s", setting.getProtocol().equalsIgnoreCase("sftp")));
+        log.info(String.format("IsPNPFtpTypeDevelop: %s", CoreConfigReader.isPNPFtpTypeDevelop()));
 
         if (setting.getProtocol().equalsIgnoreCase("sftp")) {
             if (CoreConfigReader.isPNPFtpTypeDevelop()) {
@@ -586,16 +585,16 @@ public class PNPFtpService {
                 ftpClient.changeWorkingDirectory(pDirectory);
                 ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
                 FTPFile[] lFiles = ftpClient.listFiles();
-                logger.info("downloadMultipleFileInFTP:" + pDirectory + " File size:" + lFiles.length);
+                log.info("downloadMultipleFileInFTP:" + pDirectory + " File size:" + lFiles.length);
                 if (!source.equals(AbstractPnpMainEntity.SOURCE_EVERY8D) && !source.equals(AbstractPnpMainEntity.SOURCE_UNICA)) {
                     //三竹、明宣需要使用rename依現行簡訊平台檢核機制 若可以rename為.ok表示檔案上傳完畢即可抓走，若無法rename表示檔案正在上傳  >>by 志豪 20190422 mail【台新 Line PNP】相關問題
                     for (FTPFile file : lFiles) {
                         String fileName = file.getName();
                         if (!file.isDirectory() && fileName.toUpperCase().endsWith("TXT")) {
-                            logger.info("start rename!!!!");
-                            logger.info("fileName :" + fileName);
-                            logger.info("ftpClient.printWorkingDirectory() :" + ftpClient.printWorkingDirectory());
-                            logger.info(ftpClient.rename(fileName, fileName + ".ok"));
+                            log.info("start rename!!!!");
+                            log.info("fileName :" + fileName);
+                            log.info("ftpClient.printWorkingDirectory() :" + ftpClient.printWorkingDirectory());
+                            log.info("", ftpClient.rename(fileName, fileName + ".ok"));
                         }
                     }
                     FTPFile[] filesOk = ftpClient.listFiles();
@@ -613,7 +612,7 @@ public class PNPFtpService {
                     ByteArrayOutputStream lDataTemp;
                     for (FTPFile lFtpFile : lFiles) {
                         String fileName = lFtpFile.getName();
-                        logger.info("downloadMultipleFileInFTP:" + pDirectory + " File :" + fileName);
+                        log.info("downloadMultipleFileInFTP:" + pDirectory + " File :" + fileName);
                         if (!lFtpFile.isDirectory() && fileName.toUpperCase().endsWith(extension.toUpperCase() + ".OK")) {
                             lDataTemp = new ByteArrayOutputStream();
                             //ex:資料夾裡有123.txt 、123.txt.ok，要抓取123.txt所以把.ok去掉
@@ -627,15 +626,14 @@ public class PNPFtpService {
                 }
             }
         } catch (Exception e) {
-            logger.error(e);
+            log.error("Exception", e);
         } finally {
             try {
                 if (ftpClient != null) {
                     ftpClient.disconnect();
                 }
             } catch (Exception e) {
-                logger.error(e);
-                logger.error("downloadMultipleFileInFTP Exception: " + e.getMessage());
+                log.error("downloadMultipleFileInFTP Exception: " + e.getMessage());
             }
         }
         return lReturnDataMap;
@@ -659,7 +657,7 @@ public class PNPFtpService {
         try {
             session = this.loginSFTP(setting);
             if (session == null) {
-                logger.error("downloadMultipleFileInSFTP session null");
+                log.error("downloadMultipleFileInSFTP session null");
                 return lReturnDatas;
             }
             channelSftp = (ChannelSftp) session.openChannel("sftp");
@@ -671,16 +669,16 @@ public class PNPFtpService {
                     //三竹、明宣需要使用rename依現行簡訊平台檢核機制 若可以rename為.ok表示檔案上傳完畢即可抓走，若無法rename表示檔案正在上傳  >>by 志豪 20190422 mail【台新 Line PNP】相關問題
                     Vector<ChannelSftp.LsEntry> list = channelSftp.ls("*." + extension);
                     for (ChannelSftp.LsEntry lFtpFile : list) {
-                        logger.info("sftp start rename!!!!");
+                        log.info("sftp start rename!!!!");
                         String fileName = lFtpFile.getFilename();
-                        logger.info("downloadMultipleFileInSFTPForDev fileName:" + fileName);
+                        log.info("downloadMultipleFileInSFTPForDev fileName:" + fileName);
                         channelSftp.rename(fileName, fileName + ".ok");
                     }
 
                     Vector<ChannelSftp.LsEntry> listOk = channelSftp.ls("*." + extension + ".ok");
                     for (ChannelSftp.LsEntry lFtpFile : list) {
                         String fileName = lFtpFile.getFilename();
-                        logger.info("downloadMultipleFileInSFTPForDev fileName:" + fileName);
+                        log.info("downloadMultipleFileInSFTPForDev fileName:" + fileName);
                         ByteArrayOutputStream lDataTemp = new ByteArrayOutputStream();
                         channelSftp.get(fileName, lDataTemp);
                         lDataTemp.flush();
@@ -693,7 +691,7 @@ public class PNPFtpService {
                     for (ChannelSftp.LsEntry lFtpFile : listOk) {
                         String fileName = lFtpFile.getFilename();
                         fileName = fileName.substring(0, fileName.lastIndexOf("."));//ex:資料夾裡有123.txt 、123.txt.ok，要抓取123.txt所以把.ok去掉
-                        logger.info("downloadMultipleFileInSFTPForDev fileName:" + fileName);
+                        log.info("downloadMultipleFileInSFTPForDev fileName:" + fileName);
                         ByteArrayOutputStream lDataTemp = new ByteArrayOutputStream();
                         channelSftp.get(fileName, lDataTemp);
                         lDataTemp.flush();
@@ -707,7 +705,7 @@ public class PNPFtpService {
 //				Map<String, Long> lFileSizeAndName = new HashMap<String, Long>();
 //				for (ChannelSftp.LsEntry lFtpFile : list) {
 //					String fileName = lFtpFile.getFilename();
-//					logger.info("downloadMultipleFileInSFTP:" + pDirectory + " File :" + fileName);
+//					log.info("downloadMultipleFileInSFTP:" + pDirectory + " File :" + fileName);
 //					lFileSizeAndName.put(lFtpFile.getFilename(), lFtpFile.getAttrs().getSize());
 //				}
 //				// T 隔五秒再重新查詢FTP ，判斷兩者的長度
@@ -734,13 +732,12 @@ public class PNPFtpService {
 //					}
 //				}
             } else {
-                logger.error("downloadMultipleFileInSFTP channelSftp false");
+                log.error("downloadMultipleFileInSFTP channelSftp false");
             }
 
 
         } catch (Exception ex) {
-            logger.error("downloadMultipleFileInSFTP Error: " + ex.getMessage());
-            logger.error(ex);
+            log.error("downloadMultipleFileInSFTP Error: " + ex.getMessage());
         } finally {
             try {
                 if (channelSftp != null && channelSftp.isConnected()) {
@@ -750,7 +747,7 @@ public class PNPFtpService {
                     session.disconnect();
                 }
             } catch (Exception ex) {
-                logger.error("downloadMultipleFileInSFTP Error: " + ex.getMessage());
+                log.error("downloadMultipleFileInSFTP Error: " + ex.getMessage());
             }
         }
 
@@ -798,16 +795,16 @@ public class PNPFtpService {
                         //三竹、明宣需要使用rename依現行簡訊平台檢核機制 若可以rename為.ok表示檔案上傳完畢即可抓走，若無法rename表示檔案正在上傳  >>by 志豪 20190422 mail【台新 Line PNP】相關問題
                         Vector<ChannelSftp.LsEntry> list = channelSftp.ls("*." + extension);
                         for (ChannelSftp.LsEntry lFtpFile : list) {
-                            logger.info("sftp start rename!!!!");
+                            log.info("sftp start rename!!!!");
                             String fileName = lFtpFile.getFilename();
-                            logger.info("downloadMultipleFileInSFTPForDev fileName:" + fileName);
+                            log.info("downloadMultipleFileInSFTPForDev fileName:" + fileName);
                             channelSftp.rename(fileName, fileName + ".ok");
                         }
 
                         Vector<ChannelSftp.LsEntry> listOk = channelSftp.ls("*." + extension + ".ok");
                         for (ChannelSftp.LsEntry lFtpFile : list) {
                             String fileName = lFtpFile.getFilename();
-                            logger.info("downloadMultipleFileInSFTPForDev fileName:" + fileName);
+                            log.info("downloadMultipleFileInSFTPForDev fileName:" + fileName);
                             ByteArrayOutputStream lDataTemp = new ByteArrayOutputStream();
                             channelSftp.get(fileName, lDataTemp);
                             lDataTemp.flush();
@@ -821,7 +818,7 @@ public class PNPFtpService {
                             String fileName = lFtpFile.getFilename();
                             //ex:資料夾裡有123.txt 、123.txt.ok，要抓取123.txt所以把.ok去掉
                             fileName = fileName.substring(0, fileName.lastIndexOf("."));
-                            logger.info("downloadMultipleFileInSFTPForDev fileName:" + fileName);
+                            log.info("downloadMultipleFileInSFTPForDev fileName:" + fileName);
                             ByteArrayOutputStream lDataTemp = new ByteArrayOutputStream();
                             channelSftp.get(fileName, lDataTemp);
                             lDataTemp.flush();
@@ -830,17 +827,16 @@ public class PNPFtpService {
                         }
                     }
                 } else {
-                    logger.error(" downloadMultipleFileInSFTPForDev channelSftp isConnected fail ");
+                    log.error(" downloadMultipleFileInSFTPForDev channelSftp isConnected fail ");
                 }
 
             } else {
-                logger.error(" downloadMultipleFileInSFTPForDev session isConnected fail ");
+                log.error(" downloadMultipleFileInSFTPForDev session isConnected fail ");
             }
 
 
         } catch (Exception ex) {
-            logger.error(ex);
-            logger.error(" downloadMultipleFileInSFTPForDev Error: " + ex.getMessage());
+            log.error(" downloadMultipleFileInSFTPForDev Error: " + ex.getMessage());
         } finally {
             try {
                 if (channelSftp != null && channelSftp.isConnected()) {
@@ -850,7 +846,7 @@ public class PNPFtpService {
                     session.disconnect();
                 }
             } catch (Exception ex) {
-                logger.error(" downloadMultipleFileInSFTPForDev Error: " + ex.getMessage());
+                log.error(" downloadMultipleFileInSFTPForDev Error: " + ex.getMessage());
             }
         }
         return lReturnDataMap;
@@ -899,7 +895,7 @@ public class PNPFtpService {
         try {
             session = loginSFTP(setting);
             if (session == null) {
-                logger.error("deleteFileInSFTP connection failed");
+                log.error("deleteFileInSFTP connection failed");
                 return;
             }
             channelSftp = (ChannelSftp) session.openChannel("sftp");
@@ -916,12 +912,11 @@ public class PNPFtpService {
                     }
                 }
             } else {
-                logger.error("deleteFileInSFTP channelSftp: " + channelSftp.isConnected());
+                log.error("deleteFileInSFTP channelSftp: " + channelSftp.isConnected());
             }
 
         } catch (Exception ex) {
-            logger.error(ex);
-            logger.error("deleteFileInSFTP Error: " + ex.getMessage());
+            log.error("deleteFileInSFTP Error: " + ex.getMessage());
         } finally {
             try {
                 if (channelSftp != null && channelSftp.isConnected()) {
@@ -931,7 +926,7 @@ public class PNPFtpService {
                     session.disconnect();
                 }
             } catch (Exception ex) {
-                logger.error("deleteFileInSFTP Error: " + ex.getMessage());
+                log.error("deleteFileInSFTP Error: " + ex.getMessage());
             }
         }
     }
@@ -959,7 +954,7 @@ public class PNPFtpService {
 
             /* Session is Not Connected */
             if (!session.isConnected()) {
-                logger.error("deleteFileInSFTPForDev session: " + session.isConnected());
+                log.error("deleteFileInSFTPForDev session: " + session.isConnected());
                 return;
             }
 
@@ -968,7 +963,7 @@ public class PNPFtpService {
 
             /* Channel is Not Connected */
             if (!channelSftp.isConnected()) {
-                logger.error("deleteFileInSFTPForDev channelSftp: " + channelSftp.isConnected());
+                log.error("deleteFileInSFTPForDev channelSftp: " + channelSftp.isConnected());
                 return;
             }
 
@@ -984,8 +979,7 @@ public class PNPFtpService {
                 }
             }
         } catch (Exception ex) {
-            logger.error(ex);
-            logger.error("deleteFileInSFTPForDev Error: " + ex.getMessage());
+            log.error("deleteFileInSFTPForDev Error: " + ex.getMessage());
         } finally {
             try {
                 if (channelSftp != null && channelSftp.isConnected()) {
@@ -995,7 +989,7 @@ public class PNPFtpService {
                     session.disconnect();
                 }
             } catch (Exception ex) {
-                logger.error("deleteFileInSFTPForDev Error: " + ex.getMessage());
+                log.error("deleteFileInSFTPForDev Error: " + ex.getMessage());
             }
         }
     }
@@ -1022,18 +1016,17 @@ public class PNPFtpService {
                 boolean success = ftpClient.deleteFile(processFileName);
                 setting.removeFileNames(processFileName);
                 if (!success) {
-                    logger.error("remove fail: " + processFileName);
+                    log.error("remove fail: " + processFileName);
                 }
                 if (source.equals(AbstractPnpMainEntity.SOURCE_EVERY8D) || source.equals(AbstractPnpMainEntity.SOURCE_UNICA)) {
                     success = ftpClient.deleteFile(processFileName + ".ok");
                     if (!success) {
-                        logger.error("remove fail: " + processFileName + ".ok");
+                        log.error("remove fail: " + processFileName + ".ok");
                     }
                 }
             }
         } catch (Exception ex) {
-            logger.error(ex);
-            logger.error("deleteFileInFTPForDev Error: " + ex.getMessage());
+            log.error("deleteFileInFTPForDev Error: " + ex.getMessage());
         } finally {
             try {
                 if (ftpClient.isConnected()) {
@@ -1041,8 +1034,7 @@ public class PNPFtpService {
                     ftpClient.disconnect();
                 }
             } catch (Exception ex) {
-                logger.error(ex);
-                logger.error("deleteFileInFTPForDev Error: " + ex.getMessage());
+                log.error("deleteFileInFTPForDev Error: " + ex.getMessage());
             }
         }
     }
@@ -1072,25 +1064,24 @@ public class PNPFtpService {
                 boolean success = ftpClient.deleteFile(processFileName);
                 setting.removeFileNames(processFileName);
                 if (!success) {
-                    logger.error("remove fail: " + processFileName);
+                    log.error("remove fail: " + processFileName);
                 }
                 if (source.equals(AbstractPnpMainEntity.SOURCE_EVERY8D) || source.equals(AbstractPnpMainEntity.SOURCE_UNICA)) {
                     success = ftpClient.deleteFile(processFileName + ".ok");
                     if (!success) {
-                        logger.error("remove fail: " + processFileName + ".ok");
+                        log.error("remove fail: " + processFileName + ".ok");
                     }
                 }
             }
         } catch (Exception e) {
-            logger.error(e);
-            logger.error("deleteFileInFTP Exception" + e.getMessage());
+            log.error("deleteFileInFTP Exception" + e.getMessage());
         } finally {
             try {
                 if (ftpClient != null) {
                     ftpClient.disconnect();
                 }
             } catch (Exception e) {
-                logger.error("deleteFileInFTP Exception" + e.getMessage());
+                log.error("deleteFileInFTP Exception" + e.getMessage());
             }
         }
     }
@@ -1114,29 +1105,28 @@ public class PNPFtpService {
     }
 
     private void uploadFileInFTP(InputStream targetStream, String fileName, String targetDir, PNPFtpSetting setting) throws IOException {
-        logger.info("start uploadFileInFTP ");
+        log.info("start uploadFileInFTP ");
 
-        logger.info(" targetStream      :" + targetStream);
-        logger.info(" fileName          :" + fileName);
-        logger.info(" targetDir         :" + targetDir);
-        logger.info(" PNPFtpSetting     :" + setting);
+        log.info(" targetStream      :" + targetStream);
+        log.info(" fileName          :" + fileName);
+        log.info(" targetDir         :" + targetDir);
+        log.info(" PNPFtpSetting     :" + setting);
 
         FTPClient ftpClient = new FTPClient();
         try {
             ftpClient.connect(setting.getSmsHost(), setting.getSmsPort());
-            logger.info("loginFTP : " + (smsLoginFTP(ftpClient, setting) ? "OK" : "fail"));
+            log.info("loginFTP : " + (smsLoginFTP(ftpClient, setting) ? "OK" : "fail"));
             ftpClient.enterLocalPassiveMode();
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
             ftpClient.setAutodetectUTF8(true);
-            logger.info(setting.getFileEncoding());
+            log.info(setting.getFileEncoding());
             ftpClient.setControlEncoding(setting.getFileEncoding());
             ftpClient.changeWorkingDirectory(targetDir);
 
             //上傳檔案
             ftpClient.storeFile(fileName, targetStream);
         } catch (Exception e) {
-            logger.error(e);
-            logger.error("uploadFileInFTP Exception" + e.getMessage());
+            log.error("uploadFileInFTP Exception" + e.getMessage());
         } finally {
             //關閉檔案
             targetStream.close();
@@ -1148,37 +1138,36 @@ public class PNPFtpService {
     }
 
     private void uploadFileInSFTP(InputStream uploadIs, String fileName, String targetDir, PNPFtpSetting setting) {
-        logger.info("start uploadFileInSFTP ");
+        log.info("start uploadFileInSFTP ");
         ChannelSftp channelSftp;
         Session session;
         try {
             session = smsLoginSFTP(setting);
             if (session == null) {
-                logger.error("uploadFileInSFTP connection failed");
+                log.error("uploadFileInSFTP connection failed");
                 return;
             }
             channelSftp = (ChannelSftp) session.openChannel("sftp");
             channelSftp.connect();
 
             if (!channelSftp.isConnected()) {
-                logger.error("uploadFileInSFTP channelSftp: " + channelSftp.isConnected());
+                log.error("uploadFileInSFTP channelSftp: " + channelSftp.isConnected());
                 return;
             }
             try {
                 Vector content = channelSftp.ls(targetDir);
                 if (content == null) {
                     boolean mkdirIsSuccess = mkdir(targetDir, channelSftp);
-                    logger.info("mkdirIsSuccess:" + mkdirIsSuccess);
+                    log.info("mkdirIsSuccess:" + mkdirIsSuccess);
                 }
             } catch (SftpException e) {
                 boolean mkdirIsSuccess = mkdir(targetDir, channelSftp);
-                logger.info("mkdirIsSuccess:" + mkdirIsSuccess);
+                log.info("mkdirIsSuccess:" + mkdirIsSuccess);
             }
             channelSftp.cd(targetDir);
             channelSftp.put(uploadIs, new String(fileName.getBytes(), setting.getFileEncoding()));
         } catch (Exception e) {
-            logger.error(e);
-            logger.error("uploadFileInSFTP Exception" + e.getMessage());
+            log.error("uploadFileInSFTP Exception" + e.getMessage());
         }
     }
 
@@ -1339,7 +1328,7 @@ public class PNPFtpService {
 //			}
 //			return lData;
 //		} catch (Exception e) {
-//			logger.error("downloadFile :" + e.getMessage());
+//			log.error("downloadFile :" + e.getMessage());
 //			try {
 //				logout(FTPClient);
 //			} catch (Exception lEXP) {

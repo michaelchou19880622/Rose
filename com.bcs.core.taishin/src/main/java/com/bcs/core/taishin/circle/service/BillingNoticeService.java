@@ -50,7 +50,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
-@Slf4j
+@Slf4j(topic = "BNRecorder")
 @Service
 public class BillingNoticeService {
     @Autowired

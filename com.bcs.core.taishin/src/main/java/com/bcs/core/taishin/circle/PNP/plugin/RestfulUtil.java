@@ -27,7 +27,7 @@ import java.security.cert.X509Certificate;
 
 @Getter
 @Setter
-@Slf4j
+@Slf4j(topic = "PnpRecorder")
 public class RestfulUtil {
 
     private HttpMethod method;

@@ -42,7 +42,7 @@ import java.util.Map;
  *
  * @author ???
  */
-@Slf4j
+@Slf4j(topic = "PnpRecorder")
 @Controller
 @RequestMapping("/bcs/pnpEmployee")
 public class BCSPnpReportController {

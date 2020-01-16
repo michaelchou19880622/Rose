@@ -56,7 +56,7 @@ import java.util.List;
  * @author ???
  * @see com.bcs.core.taishin.circle.PNP.scheduler.PnpTask#execute
  */
-@Slf4j
+@Slf4j(topic = "PnpRecorder")
 @Service
 public class PnpService {
     private PnpMainMitakeRepository pnpMainMitakeRepository;

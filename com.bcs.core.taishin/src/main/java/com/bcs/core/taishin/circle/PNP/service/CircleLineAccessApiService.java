@@ -43,7 +43,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-@Slf4j
+@Slf4j(topic = "PnpRecorder")
 @Service
 public class CircleLineAccessApiService {
     public static final String LINE_API_SYNC = "LINE_API_SYNC";

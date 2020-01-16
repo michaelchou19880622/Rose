@@ -2,7 +2,6 @@ package com.bcs.core.taishin.circle.PNP.db.repository;
 
 import com.bcs.core.db.persistence.EntityRepository;
 import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailEvery8d;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpDetailMitake;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;

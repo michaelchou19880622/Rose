@@ -12,6 +12,7 @@ import java.util.List;
 
 /**
  * The interface Billing notice main repository.
+ *
  * @author ???
  */
 public interface BillingNoticeMainRepository extends EntityRepository<BillingNoticeMain, Long> {

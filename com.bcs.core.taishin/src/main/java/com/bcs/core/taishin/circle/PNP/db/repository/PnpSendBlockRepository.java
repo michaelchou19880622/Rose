@@ -8,7 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PnpSendBlockRepository extends JpaRepository<PnpSendBlock, Long>{
-  List<PnpSendBlock> findByPhone(String phone);
-  List<PnpSendBlock> findByUid(String uid);
+public interface PnpSendBlockRepository extends JpaRepository<PnpSendBlock, Long> {
+    List<PnpSendBlock> findByPhone(String phone);
+
+    List<PnpSendBlock> findByUid(String uid);
 }

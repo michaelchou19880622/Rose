@@ -32,7 +32,6 @@ import javax.persistence.Table;
  *
  * @author Kenneth
  */
-@Slf4j
 @Getter
 @Setter
 @Entity

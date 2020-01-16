@@ -28,7 +28,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Slf4j
+@Slf4j(topic = "BNRecorder")
 @Service
 public class BillingNoticeSendMsgService {
 

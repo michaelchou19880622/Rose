@@ -1,6 +1,8 @@
 package com.bcs.core.taishin.circle.db.entity;
 
 import com.bcs.core.json.AbstractBcsEntity;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,8 +14,11 @@ import java.util.Date;
 
 /**
  * 台新人事資訊
+ *
  * @author ???
  */
+@Setter
+@Getter
 @Entity
 @Table(name = "BCS_TAISHIN_EMPLOYEE")
 public class TaishinEmployee extends AbstractBcsEntity {
@@ -80,84 +85,4 @@ public class TaishinEmployee extends AbstractBcsEntity {
      */
     @Column(name = "MODIFY_USER", columnDefinition = "nvarchar(50)")
     private String modifyUser;
-
-    public String getEmployeeId() {
-        return employeeId;
-    }
-
-    public void setEmployeeId(String employeeId) {
-        this.employeeId = employeeId;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getDepartmentId() {
-        return departmentId;
-    }
-
-    public void setDepartmentId(String departmentId) {
-        this.departmentId = departmentId;
-    }
-
-    public void setDepartmentName(String departmentName) {
-        this.departmentName = departmentName;
-    }
-
-    public void getDepartmentName(String departmentName) {
-        this.departmentName = departmentName;
-    }
-
-    public String getPccCode() {
-        return pccCode;
-    }
-
-    public void setPccCode(String pccCode) {
-        this.pccCode = pccCode;
-    }
-
-    public String getDivisionName() {
-        return divisionName;
-    }
-
-    public void setDivisionName(String divisionName) {
-        this.divisionName = divisionName;
-    }
-
-    public String getDepartmentName() {
-        return departmentName;
-    }
-
-    public String getGroupName() {
-        return groupName;
-    }
-
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
-    }
-
-    public Date getModifyTime() {
-        return modifyTime;
-    }
-
-    public void setModifyTime(Date modifyTime) {
-        this.modifyTime = modifyTime;
-    }
-
-    public String getModifyUser() {
-        return modifyUser;
-    }
-
-    public void setModifyUser(String modifyUser) {
-        this.modifyUser = modifyUser;
-    }
-
-    public String getEasyName() {
-        return easyName;
-    }
-
-    public void setEasyName(String easyName) {
-        this.easyName = easyName;
-    }
 }

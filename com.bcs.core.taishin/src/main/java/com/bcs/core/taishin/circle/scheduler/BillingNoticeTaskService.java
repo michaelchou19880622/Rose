@@ -19,7 +19,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
 /**
  * @author ???
  */
-@Slf4j
+@Slf4j(topic = "BNRecorder")
 @Service
 public class BillingNoticeTaskService {
 

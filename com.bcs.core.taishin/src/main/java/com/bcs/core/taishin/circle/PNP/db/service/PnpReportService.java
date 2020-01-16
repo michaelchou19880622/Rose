@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  * @author Alan Chen
  */
-@Slf4j
+@Slf4j(topic = "PnpRecorder")
 @Service
 public class PnpReportService {
 

@@ -11,7 +11,7 @@ import com.bcs.core.taishin.circle.PNP.akka.handler.SendingPnpHandlerMaster;
 import com.bcs.core.taishin.circle.PNP.akka.model.AsyncPnpSendModel;
 import com.bcs.core.utils.AkkaSystemFactory;
 import com.bcs.core.utils.ErrorRecord;
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
@@ -19,13 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+@Slf4j(topic = "PnpRecorder")
 @Service
 public class CircleAkkaBotService {
 
-    /**
-     * Logger
-     */
-    private static Logger logger = Logger.getLogger(CircleAkkaBotService.class);
 
     private List<ActorSystem> systemSending = new ArrayList<>();
     private List<ActorSystem> systemReceiving = new ArrayList<>();
@@ -36,9 +33,9 @@ public class CircleAkkaBotService {
 
     private CircleAkkaBotService() {
 
-        new AkkaSystemFactory<SendingMsgHandlerMaster>(systemSending, sendingMaster, SendingMsgHandlerMaster.class, "systemSending", "SendingMsgHandlerMaster");
-        new AkkaSystemFactory<ReceivingMsgHandlerMaster>(systemReceiving, receivingMaster, ReceivingMsgHandlerMaster.class, this.getClass().getSimpleName(), ReceivingMsgHandlerMaster.class.getSimpleName());
-        new AkkaSystemFactory<SendingPnpHandlerMaster>(systemPnpSending, sendingPnpMaster, SendingPnpHandlerMaster.class, "systemPnpSending", "SendingPnpMsgHandlerMaster");
+        new AkkaSystemFactory<>(systemSending, sendingMaster, SendingMsgHandlerMaster.class, "systemSending", "SendingMsgHandlerMaster");
+        new AkkaSystemFactory<>(systemReceiving, receivingMaster, ReceivingMsgHandlerMaster.class, this.getClass().getSimpleName(), ReceivingMsgHandlerMaster.class.getSimpleName());
+        new AkkaSystemFactory<>(systemPnpSending, sendingPnpMaster, SendingPnpHandlerMaster.class, "systemPnpSending", "SendingPnpMsgHandlerMaster");
     }
 
     public void sendingMsgs(AsyncSendingModel msgs) {
@@ -46,12 +43,12 @@ public class CircleAkkaBotService {
             ActorRef master = randomMaster(sendingMaster);
             master.tell(msgs, master);
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
     }
 
     private ActorRef randomMaster(List<ActorRef> masters) {
-        logger.debug("randomMaster Size:" + masters.size());
+        log.debug("randomMaster Size:" + masters.size());
 
         int index = new Random().nextInt(masters.size());
         return masters.get(index);
@@ -62,13 +59,13 @@ public class CircleAkkaBotService {
             ActorRef master = randomMaster(receivingMaster);
             master.tell(msgs, master);
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
     }
 
     @PreDestroy
     public void shutdownNow() {
-        logger.info("[DESTROY] AkkaBotService shutdownNow cleaning up...");
+        log.info("[DESTROY] AkkaBotService shutdownNow cleaning up...");
 
         try {
             int count = 0;
@@ -107,7 +104,7 @@ public class CircleAkkaBotService {
         }
 
         System.gc();
-        logger.info("[DESTROY] AkkaBotService shutdownNow destroyed");
+        log.info("[DESTROY] AkkaBotService shutdownNow destroyed");
     }
 
     public void sendingMsgs(AsyncEsnSendingModel msgs) {
@@ -115,7 +112,7 @@ public class CircleAkkaBotService {
             ActorRef master = randomMaster(sendingMaster);
             master.tell(msgs, master);
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
     }
 
@@ -124,7 +121,7 @@ public class CircleAkkaBotService {
             ActorRef master = randomMaster(sendingPnpMaster);
             master.tell(msgs, master);
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
     }
 }

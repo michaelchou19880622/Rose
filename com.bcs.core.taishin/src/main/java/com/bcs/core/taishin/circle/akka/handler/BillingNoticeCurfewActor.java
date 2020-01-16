@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  * @author jessie
  */
-@Slf4j
+@Slf4j(topic = "BNRecorder")
 public class BillingNoticeCurfewActor extends UntypedActor {
     @Override
     public void onReceive(Object object) throws Exception {

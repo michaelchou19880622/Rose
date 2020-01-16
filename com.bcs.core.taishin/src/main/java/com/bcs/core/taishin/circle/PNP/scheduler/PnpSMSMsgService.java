@@ -48,7 +48,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Kenneth, Alan
  */
-@Slf4j
+@Slf4j(topic = "PnpRecorder")
 @Service
 public class PnpSMSMsgService {
 

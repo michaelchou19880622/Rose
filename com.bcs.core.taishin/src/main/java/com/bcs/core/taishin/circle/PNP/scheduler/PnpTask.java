@@ -13,7 +13,7 @@ import org.quartz.SchedulerException;
  * @author ???
  * @see PnpTaskService#startTask
  */
-@Slf4j
+@Slf4j(topic = "PnpRecorder")
 public class PnpTask implements Job {
     private PnpService pnpService = ApplicationContextProvider.getApplicationContext().getBean(PnpService.class);
 

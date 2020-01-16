@@ -16,7 +16,7 @@ import java.util.List;
  *
  * @author jessie
  */
-@Slf4j
+@Slf4j(topic = "BNRecorder")
 public class BillingNoticeUpdateStatusActor extends UntypedActor {
     @Override
     public void onReceive(Object object) {

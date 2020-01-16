@@ -24,7 +24,7 @@ import java.util.Set;
 /**
  * @author ???
  */
-@Slf4j
+@Slf4j(topic = "BNRecorder")
 @Repository
 public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositoryCustom {
 

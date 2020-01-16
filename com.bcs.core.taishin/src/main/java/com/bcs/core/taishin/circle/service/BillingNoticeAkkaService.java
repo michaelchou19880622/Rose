@@ -15,7 +15,7 @@ import java.util.Random;
 /**
  * @author ???
  */
-@Slf4j
+@Slf4j(topic = "BNRecorder")
 @Service
 public class BillingNoticeAkkaService {
     private List<ActorSystem> actorSystemList = new ArrayList<>();

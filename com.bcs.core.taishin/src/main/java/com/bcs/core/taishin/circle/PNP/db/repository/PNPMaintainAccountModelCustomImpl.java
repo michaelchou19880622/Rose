@@ -12,7 +12,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.util.List;
 
-@Slf4j
+@Slf4j(topic = "PnpRecorder")
 @Repository
 public class PNPMaintainAccountModelCustomImpl implements PNPMaintainAccountModelCustom {
 

@@ -233,7 +233,6 @@ public class PNPFtpService {
 
         } catch (Exception e) {
             logger.error("loginFTP:" + e.getMessage());
-            logger.error("Exception", e);
             return false;
         }
     }
@@ -1217,7 +1216,7 @@ public class PNPFtpService {
 // 以下台新提供的Sample code 目前沒用到 暫留註記
 //	/**
 //	 * 查詢有效下載檔案清單
-//	 * 
+//	 *
 //	 * @param pDirectory 要下載檔案所在路徑
 //	 * @param pFtpConfig FTP Config
 //	 * @return 可供下載的檔案名稱
@@ -1317,11 +1316,11 @@ public class PNPFtpService {
 
 //	/**
 //	 * 單檔下傳
-//	 * 
+//	 *
 //	 * @param directory        指定Server端FTP特定目錄(e.g "/","/20081031/demo")
 //	 * @param fileNameInServer Server端要下傳的檔名(e.g. "downloadFromServer.txt")
 //	 * @return 下傳的File Object
-//	 * 
+//	 *
 //	 * @throws 異常時以RuntimeException拋出，並自動中斷FTP連線
 //	 */
 //	public byte[] downloadSingleFile(String directory, String pFileName, FtpSetting setting) {
@@ -1356,7 +1355,7 @@ public class PNPFtpService {
 
 //	/**
 //	 * 從FTP伺服器上下載指定數量檔案(下載檔案順序採檔案建立日期，先進先出)
-//	 * 
+//	 *
 //	 * @param pDirectory 要下載檔案所在路徑
 //	 * @param pFileCount 要下載的檔案數
 //	 * @param pFtpType   Ftp Server Type
@@ -1422,14 +1421,14 @@ public class PNPFtpService {
 //
 //	/**
 //	 * 單檔下傳
-//	 * 
+//	 *
 //	 * @param directory        指定Server端FTP特定目錄(e.g "/","/20081031/demo")
 //	 * @param fileNameInServer Server端要下傳的檔名(e.g. "downloadFromServer.txt")
 //	 * @param fileNameInClient Client端要產生的實體下傳檔案完整路徑(e.g.
 //	 *                         "c:/demo/downloadToClient.txt")
 //	 * @param pFtpConfig       FTP Config
 //	 * @return 下傳的File Object
-//	 * 
+//	 *
 //	 * @throws 異常時以RuntimeException拋出，並自動中斷FTP連線
 //	 */
 //	public File downloadFile(String directory, String fileNameInServer, String fileNameInClient, FtpSetting setting) {
@@ -1464,7 +1463,7 @@ public class PNPFtpService {
 
 //	/**
 //	 * 從FTP伺服器上下載指定名稱的檔案
-//	 * 
+//	 *
 //	 * @param pDirectory 要下載檔案所在路徑
 //	 * @param pFileNames 要下載的檔案名稱
 //	 * @param pFileCount 要下載的檔案數
@@ -1509,7 +1508,7 @@ public class PNPFtpService {
 //
 //	/**
 //	 * 列出當前FTP SERVER 上的目錄結構
-//	 * 
+//	 *
 //	 * @param pFTPClient Ftp Client
 //	 * @return pResult 測試結果
 //	 * @throws Java 例外
@@ -1540,7 +1539,7 @@ public class PNPFtpService {
 //
 //	/**
 //	 * 列印FTP SERVER 上的目錄結構
-//	 * 
+//	 *
 //	 * @param pFTPClient FTP CLIENT
 //	 * @param pFtpFile   FTP FILE
 //	 * @return 目錄資訊
@@ -1567,12 +1566,12 @@ public class PNPFtpService {
 
 //	/**
 //	 * 單檔上傳
-//	 * 
+//	 *
 //	 * @param directory 指定Server端FTP特定目錄(e.g "/","/20081031/demo")
 //	 * @param fileName  包含Client端實體路徑的完整檔名(e.g "c:/test/upload1.txt")
 //	 * @param pFtpTpye  Ftp Server Type
 //	 * @return 上傳成功或失敗
-//	 * 
+//	 *
 //	 * @throws 異常時以RuntimeException拋出，並自動中斷FTP連線
 //	 */
 //	public boolean uploadFile(String directory, String fileName, FtpSetting setting) {
@@ -1584,7 +1583,7 @@ public class PNPFtpService {
 //
 //	/**
 //	 * 上傳檔案
-//	 * 
+//	 *
 //	 * @param pFileName    檔名
 //	 * @param pFileContent 檔案InputStream
 //	 * @param pFtpConfig   FTP Config
@@ -1599,7 +1598,7 @@ public class PNPFtpService {
 //
 //	/**
 //	 * 上傳檔案
-//	 * 
+//	 *
 //	 * @param pFileContents 檔案內容List<檔名，檔案InputStream>
 //	 * @param pFtpConfig    FTP Config
 //	 * @return 上傳結果
@@ -1612,7 +1611,7 @@ public class PNPFtpService {
 
 //	/**
 //	 * 上傳檔案
-//	 * 
+//	 *
 //	 * @param pDirectory    指定上傳目錄
 //	 * @param pFileContents 檔案內容List<檔名，檔案InputStream>
 //	 * @param pFtpConfig    FTP Config
@@ -1630,7 +1629,7 @@ public class PNPFtpService {
 //
 //	/**
 //	 * 上傳檔案
-//	 * 
+//	 *
 //	 * @param pFtpDirectory FTP Server 分類資料夾
 //	 * @param pFileContents 檔案內容List<檔名，檔案InputStream>
 //	 * @param pFtpConfig    FTP Config
@@ -1668,13 +1667,13 @@ public class PNPFtpService {
 //
 //	/**
 //	 * 多檔上傳
-//	 * 
+//	 *
 //	 * @param directory    指定Server端FTP特定目錄(e.g "/","/20081031/demo")
 //	 * @param fileNameList 包含Client端實體路徑的完整檔名清單(e.g
 //	 *                     包含"c:/test/upload1.txt","c:/test/upload2.txt"二字串的List)
 //	 * @param pFtpConfig   FTP Config
 //	 * @return 上傳成功或失敗
-//	 * 
+//	 *
 //	 * @throws 異常時以RuntimeException拋出，並自動中斷FTP連線
 //	 */
 //	public boolean uploadFiles(String directory, List<String> fileNameList, FtpSetting setting) {
@@ -1709,7 +1708,7 @@ public class PNPFtpService {
 
 //	/**
 //	 * 測試FTP 連線
-//	 * 
+//	 *
 //	 * @param pFtpConfig FTP Config
 //	 */
 //	public String testFtpConnection(FtpSetting setting) {

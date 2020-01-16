@@ -22,8 +22,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "BCS_PNP_SEND_BLOCK", indexes = { @Index(name = "IDX-UID", columnList = "UID"),
-    @Index(name = "IDX-CREATE-TIME", columnList = "CREATE_TIME") })
+@Table(name = "BCS_PNP_SEND_BLOCK", indexes = { @Index(name = "IDX_UID", columnList = "UID"),
+    @Index(name = "IDX_CREATE_TIME", columnList = "CREATE_TIME") })
 public class PnpSendBlock {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

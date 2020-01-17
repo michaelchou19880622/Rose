@@ -43,4 +43,8 @@ public class BillingNoticeContentLink extends AbstractBcsEntity {
 
     @Column(name = "MODIFY_TIME")
     private Date modifyTime;
+
+    public BillingNoticeContentLink(String linkId) {
+        this.linkId = linkId;
+    }
 }

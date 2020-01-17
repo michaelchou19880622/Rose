@@ -118,7 +118,7 @@ public class BCSBillingNoticeTemplateMsgController {
 
 
 			// set old template with same Title's productSwitch to off
-			boolean productSwitch = createTemplateMsgModels.get(0).getTemplateSwitch();
+			boolean productSwitch = createTemplateMsgModels.get(0).isTemplateSwitch();
 			String templateTitle = createTemplateMsgModels.get(0).getTemplateTitle();
 			if(productSwitch) {
 				logger.info("ProdutionSwith is On, other's will set to off!");
@@ -166,7 +166,7 @@ public class BCSBillingNoticeTemplateMsgController {
 				// i	TEMPLATE_ID
 				contentTemplateMsg.setTemplateId(templateIds.get(i));
 				// 0	PRODUCT_SWITCH
-				contentTemplateMsg.setProductSwitch(createTemplateMsgModel.getTemplateSwitch());
+				contentTemplateMsg.setProductSwitch(createTemplateMsgModel.isTemplateSwitch());
 
 				//
 				// 1 ALT_TEXT

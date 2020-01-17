@@ -27,4 +27,9 @@ public class AsyncPnpSendModelError extends AbstractBcsEntity {
         this.errorMsg = errorMsg;
         this.date = date;
     }
+
+    public int retryTimeAdd() {
+        retryTime++;
+        return retryTime;
+    }
 }

@@ -18,7 +18,7 @@
         <param name="FolderDatePattern" value="yyyyMMdd"/>
         <param name="Append" value="true"/>
         <param name="MaxBackupIndex" value="200"/>
-        <param name="MaxFileSize" value="100KB"/>
+        <param name="MaxFileSize" value="200MB"/>
         <param name="File" value="/opt/taishin-log/taishin.log"/>
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss.SSS} %-5p [%-4L] %-30.30C{1} %-35M [%-27t] - %m%n"/>
@@ -34,7 +34,7 @@
         <param name="FolderDatePattern" value="yyyyMMdd"/>
         <param name="Append" value="true"/>
         <param name="MaxBackupIndex" value="200"/>
-        <param name="MaxFileSize" value="100KB"/>
+        <param name="MaxFileSize" value="200MB"/>
         <param name="File" value="/opt/taishin-log/taishin.error.log"/>
         <param name="Append" value="true"/>
         <layout class="org.apache.log4j.PatternLayout">
@@ -51,7 +51,7 @@
         <param name="FolderDatePattern" value="yyyyMMdd"/>
         <param name="Append" value="true"/>
         <param name="MaxBackupIndex" value="200"/>
-        <param name="MaxFileSize" value="100KB"/>
+        <param name="MaxFileSize" value="200MB"/>
         <param name="File" value="/opt/taishin-log/taishin.bn.log"/>
 
         <layout class="org.apache.log4j.PatternLayout">
@@ -72,7 +72,7 @@
         <param name="FolderDatePattern" value="yyyyMMdd"/>
         <param name="Append" value="true"/>
         <param name="MaxBackupIndex" value="200"/>
-        <param name="MaxFileSize" value="100KB"/>
+        <param name="MaxFileSize" value="200MB"/>
         <param name="File" value="/opt/taishin-log/taishin.pnp.log"/>
 
         <layout class="org.apache.log4j.PatternLayout">

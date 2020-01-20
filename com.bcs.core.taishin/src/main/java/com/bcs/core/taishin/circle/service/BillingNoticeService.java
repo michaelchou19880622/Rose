@@ -53,6 +53,11 @@ import java.util.Properties;
 @Slf4j(topic = "BNRecorder")
 @Service
 public class BillingNoticeService {
+
+
+    private static final int DEFAULT_SLEEP_TIME = 5_000;
+    private static final int DEFAULT_RETRY_COUNT = 3;
+
     @Autowired
     private BillingNoticeMainRepository billingNoticeMainRepository;
     @Autowired
@@ -252,7 +257,7 @@ public class BillingNoticeService {
         }
     }
 
-    public void pushLineMessage(BillingNoticeMain billingNoticeMain, ActorRef sendRef, ActorRef selfActorRef) {
+    public void pushLineMessage(BillingNoticeMain billingNoticeMain, ActorRef sendRef, ActorRef selfActorRef) throws InterruptedException {
         log.info("Push Line Message!!");
         String url = CoreConfigReader.getString(CONFIG_STR.LINE_MESSAGE_PUSH_URL.toString());
         String accessToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelToken.toString(), true);
@@ -272,56 +277,101 @@ public class BillingNoticeService {
         }
 
         for (BillingNoticeDetail detail : billingNoticeMain.getDetails()) {
-            log.info("To Line Uid: {}", detail.getUid());
+            boolean isDoRetry = false;
+            int i = 0;
+            int retryCountLimit = DEFAULT_RETRY_COUNT;
+            do {
+                i++;
+                log.info("This is count is {}", i);
 
-            JSONObject requestBody = new JSONObject();
-            requestBody.put("to", detail.getUid());
-            requestBody.put("messages", combineLineMessage(templateMsg, detail));
-            HttpEntity<String> httpEntity = new HttpEntity<>(requestBody.toString(), headers);
+                log.info("To Line Uid: {}", detail.getUid());
 
-            try {
-                RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
-                JSONObject result = restfulUtil.execute();
-                log.info("Result: {}", result.toString());
-                detail.setStatus(BillingNoticeMain.NOTICE_STATUS_COMPLETE);
-                log.info("Execute Success!!");
-            } catch (KeyManagementException | NoSuchAlgorithmException e1) {
-                log.info("NOTICE_STATUS_RETRY NoticeDetailId:" + detail.getNoticeDetailId());
-                log.error("NOTICE_STATUS_RETRY KeyManagementException | NoSuchAlgorithmException: ", e1);
-                detail.setStatus(BillingNoticeMain.NOTICE_STATUS_RETRY);
-            } catch (HttpClientErrorException he) {
-                log.error("HttpClientErrorException:", he);
-                JSONObject errorMessage = new JSONObject(he.getResponseBodyAsString());
-                if (errorMessage.has("message")) {
-                    log.error("HttpClientErrorException StatusCode: {}", he.getStatusCode().toString());
-                    if (errorMessage.has("details")) {
-                        log.error("HttpClientErrorException Details: {}", errorMessage.getJSONArray("details").toString());
+                JSONObject requestBody = new JSONObject();
+                requestBody.put("to", detail.getUid());
+                requestBody.put("messages", combineLineMessage(templateMsg, detail));
+                HttpEntity<String> httpEntity = new HttpEntity<>(requestBody.toString(), headers);
+
+                try {
+                    RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
+                    JSONObject result = restfulUtil.execute();
+                    log.info("Result: {}", result.toString());
+                    detail.setStatus(BillingNoticeMain.NOTICE_STATUS_COMPLETE);
+                    log.info("Execute Success!!");
+                    isDoRetry = false;
+                } catch (KeyManagementException | NoSuchAlgorithmException e1) {
+                    log.info("NOTICE_STATUS_RETRY NoticeDetailId:" + detail.getNoticeDetailId());
+                    log.error("NOTICE_STATUS_RETRY KeyManagementException | NoSuchAlgorithmException: ", e1);
+                    detail.setStatus(BillingNoticeMain.NOTICE_STATUS_RETRY);
+                    isDoRetry = i <= retryCountLimit;
+                    sleepProcess();
+                } catch (HttpClientErrorException he) {
+                    log.error("HttpClientErrorException:", he);
+                    JSONObject errorMessage = new JSONObject(he.getResponseBodyAsString());
+                    if (errorMessage.has("message")) {
+                        log.error("HttpClientErrorException StatusCode: {}", he.getStatusCode().toString());
+                        if (errorMessage.has("details")) {
+                            log.error("HttpClientErrorException Details: {}", errorMessage.getJSONArray("details").toString());
+                        }
                     }
-                }
-            } catch (HttpServerErrorException se) {
-                log.error("HttpServerErrorException Error :", se);
-                JSONObject errorMessage = new JSONObject(se.getResponseBodyAsString());
-                if (errorMessage.has("message")) {
-                    log.error("HttpServerErrorException StatusCode: {}", se.getStatusCode().toString());
-                    if (errorMessage.has("details")) {
-                        log.error("HttpServerErrorException Details: {}", errorMessage.getJSONArray("details").toString());
+                    isDoRetry = i <= retryCountLimit;
+                    sleepProcess();
+                } catch (HttpServerErrorException se) {
+                    log.error("HttpServerErrorException Error :", se);
+                    JSONObject errorMessage = new JSONObject(se.getResponseBodyAsString());
+                    if (errorMessage.has("message")) {
+                        log.error("HttpServerErrorException StatusCode: {}", se.getStatusCode().toString());
+                        if (errorMessage.has("details")) {
+                            log.error("HttpServerErrorException Details: {}", errorMessage.getJSONArray("details").toString());
+                        }
                     }
+                    detail.setStatus(BillingNoticeMain.NOTICE_STATUS_RETRY);
+                    isDoRetry = i <= retryCountLimit;
+                    sleepProcess();
+                } catch (NullPointerException ne) {
+                    log.info("NoticeDetailId:" + detail.getNoticeDetailId());
+                    log.error("NullPointException", ne);
+                    isDoRetry = false;
+                } catch (Exception e) {
+                    log.info("NOTICE_STATUS_RETRY NoticeDetailId:" + detail.getNoticeDetailId());
+                    log.error("NOTICE_STATUS_RETRY Exception:", e);
+                    detail.setStatus(BillingNoticeMain.NOTICE_STATUS_RETRY);
+                    isDoRetry = i <= retryCountLimit;
+                    sleepProcess();
                 }
-                detail.setStatus(BillingNoticeMain.NOTICE_STATUS_RETRY);
-            } catch (Exception e) {
-                log.info("NOTICE_STATUS_RETRY NoticeDetailId:" + detail.getNoticeDetailId());
-                log.error("NOTICE_STATUS_RETRY Exception:", e);
-                detail.setStatus(BillingNoticeMain.NOTICE_STATUS_RETRY);
+
+            } while(isDoRetry);
+
+            if (!BillingNoticeMain.NOTICE_STATUS_COMPLETE.equals(detail.getStatus())) {
+                detail.setStatus(BillingNoticeMain.NOTICE_STATUS_FAIL);
             }
+
 
             if (sendRef != null) {
                 sendRef.tell(detail, selfActorRef);
             } else {
                 billingNoticeAkkaService.tell(detail);
             }
-
         }
+    }
 
+
+    private void sleepProcess() throws InterruptedException {
+        //FIXME Add BN Send Sleep Time
+        int time = getLinePointProcessSleepTime();
+        if (time < 0) {
+            time = DEFAULT_SLEEP_TIME;
+        }
+        log.info("Thread Sleep {}ms", time);
+        Thread.sleep(time);
+    }
+
+
+    /**
+     * Get Line Point Process Sleep Time
+     */
+    private Integer getLinePointProcessSleepTime() {
+//        return CoreConfigReader.getInteger("line.point.api.sent.sleep.time", true);
+        return -1;
     }
 
     /**

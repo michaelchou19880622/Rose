@@ -40,7 +40,7 @@ public class BillingNoticePushMessageActor extends UntypedActor {
         }
     }
 
-    private void delay(BillingNoticeMain billingNoticeMain) throws SchedulerException {
+    private void delay(BillingNoticeMain billingNoticeMain) throws SchedulerException, InterruptedException {
         Date scheduleTime = DataUtils.convStrToDate(billingNoticeMain.getScheduleTime(), "yyyy-MM-dd hh:mm:ss");
         if (DataUtils.isPast(scheduleTime)) {
             immediate(billingNoticeMain);
@@ -50,7 +50,7 @@ public class BillingNoticePushMessageActor extends UntypedActor {
         ApplicationContextProvider.getApplicationContext().getBean(BillingNoticeTaskService.class).startTask(billingNoticeMain, scheduleTime);
     }
 
-    private void immediate(BillingNoticeMain billingNoticeMain) {
+    private void immediate(BillingNoticeMain billingNoticeMain) throws InterruptedException {
         log.info("Immediate!!");
         ApplicationContextProvider.getApplicationContext().getBean(BillingNoticeService.class).pushLineMessage(billingNoticeMain, this.getSender(), this.getSelf());
     }

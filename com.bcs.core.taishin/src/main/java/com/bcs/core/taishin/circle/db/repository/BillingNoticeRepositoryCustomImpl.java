@@ -134,10 +134,10 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
     public Long findAndUpdateFirstRetryDetailOnMain(String procApName, List<String> tempIds) {
         Date modifyTime = Calendar.getInstance().getTime();
         String sqlString = "select Top 1 m.NOTICE_MAIN_ID from BCS_BILLING_NOTICE_DETAIL b, BCS_BILLING_NOTICE_MAIN m  "
-                + "where  m.NOTICE_MAIN_ID = b.NOTICE_MAIN_ID  and b.STATUS = :status and m.TEMP_ID in (:tempIds) Order by b.CREAT_TIME "
+                + "where  m.NOTICE_MAIN_ID = b.NOTICE_MAIN_ID  and b.STATUS = :status and m.TEMP_ID in (:tempIds) Order by b.CREAT_TIME desc"
                 + "update BCS_BILLING_NOTICE_MAIN  set STATUS = :newStatus , PROC_AP_NAME = :procApName , MODIFY_TIME = :modifyTime "
                 + " where NOTICE_MAIN_ID  IN (select TOP 1 a.NOTICE_MAIN_ID from BCS_BILLING_NOTICE_MAIN a WITH(ROWLOCK) , BCS_BILLING_NOTICE_DETAIL d "
-                + " where a.NOTICE_MAIN_ID = d.NOTICE_MAIN_ID  and d.STATUS = :status and a.TEMP_ID in (:tempIds) Order by d.CREAT_TIME)  ";
+                + " where a.NOTICE_MAIN_ID = d.NOTICE_MAIN_ID  and d.STATUS = :status and a.TEMP_ID in (:tempIds) Order by d.CREAT_TIME) desc ";
 
         List<BigInteger> mains = (List<BigInteger>) entityManager.createNativeQuery(sqlString)
                 .setParameter("status", BillingNoticeMain.NOTICE_STATUS_RETRY)
@@ -161,10 +161,10 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
         Date modifyTime = Calendar.getInstance().getTime();
         // 找出第一個WAIT BillingNoticeMain 並更新
         String waitMainString = "select TOP 1 m.NOTICE_MAIN_ID from  BCS_BILLING_NOTICE_MAIN m  "
-                + "where m.STATUS = :status and m.TEMP_ID in (:tempIds) Order by m.CREAT_TIME "
+                + "where m.STATUS = :status and m.TEMP_ID in (:tempIds) Order by m.CREAT_TIME desc"
                 + "update BCS_BILLING_NOTICE_MAIN  set STATUS = :newStatus , PROC_AP_NAME = :procApName , MODIFY_TIME = :modifyTime "
                 + "   where NOTICE_MAIN_ID  IN (select TOP 1 a.NOTICE_MAIN_ID from BCS_BILLING_NOTICE_MAIN a WITH(ROWLOCK) "
-                + "		where a.STATUS = :status and a.TEMP_ID in (:tempIds) Order by a.CREAT_TIME)  ";
+                + "		where a.STATUS = :status and a.TEMP_ID in (:tempIds) Order by a.CREAT_TIME desc)  ";
         List<BigInteger> mainList = (List<BigInteger>) entityManager.createNativeQuery(waitMainString)
                 .setParameter("status", BillingNoticeMain.NOTICE_STATUS_WAIT)
                 .setParameter("tempIds", tempIds)

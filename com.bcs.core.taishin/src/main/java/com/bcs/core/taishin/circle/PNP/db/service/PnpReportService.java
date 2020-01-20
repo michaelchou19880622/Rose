@@ -1,15 +1,18 @@
 package com.bcs.core.taishin.circle.PNP.db.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
+import com.bcs.core.db.service.EntityManagerProviderService;
 import com.bcs.core.taishin.circle.PNP.code.PnpFtpSourceEnum;
 import com.bcs.core.taishin.circle.PNP.code.PnpProcessFlowEnum;
 import com.bcs.core.taishin.circle.PNP.code.PnpStatusEnum;
@@ -20,6 +23,7 @@ import com.bcs.core.utils.DataUtils;
 
 import com.bcs.core.web.security.CurrentUser;
 import com.bcs.core.web.security.CustomUser;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -37,8 +41,11 @@ import lombok.extern.slf4j.Slf4j;
 public class PnpReportService {
 
     private OracleService oracleService;
-    @PersistenceContext
-    private EntityManager entityManager;
+//    @PersistenceContext
+//    private EntityManager entityManager;
+
+    @Resource
+    private EntityManagerProviderService entityManagerProvider;
 
     @Autowired
     public PnpReportService(OracleService oracleService) {
@@ -54,6 +61,7 @@ public class PnpReportService {
     @SuppressWarnings("unchecked")
     public List<PnpDetailReport> getPnpDetailReportList(@CurrentUser CustomUser customUser, final PnpDetailReportParam pnpDetailReportParam) {
         pnpDetailReportParam.setRole(customUser.getRole());
+        EntityManager entityManager = entityManagerProvider.getEntityManager();
         Query query = entityManager.createNativeQuery(getDetailReportSql(pnpDetailReportParam).toString(), PnpDetailReport.class);
         List<PnpDetailReport> pnpDetailReportList = query.getResultList();
         log.info(DataUtils.toPrettyJsonUseJackson(pnpDetailReportList));
@@ -61,16 +69,48 @@ public class PnpReportService {
             log.info("List is Empty!!");
             return Collections.emptyList();
         }
-        pnpDetailReportList.forEach(report -> {
+
+
+        final boolean isCreateTime = pnpDetailReportParam.getDateType().equals(PnpDetailReportParam.CREATE_TIME);
+        final boolean isOrderTime = pnpDetailReportParam.getDateType().equals(PnpDetailReportParam.ORDER_TIME);
+        List<PnpDetailReport> reportFilterList;
+        if (isOrderTime) {
+            reportFilterList = pnpDetailReportList.stream()
+                    .filter(report -> DataUtils.isBetween(
+                            DataUtils.convStrToDate(report.getScheduleTime(), "yyyyMMddHHmmss"),
+                            DataUtils.truncDate(pnpDetailReportParam.getStartDate()),
+                            DataUtils.truncEndDate(pnpDetailReportParam.getEndDate()))
+                    ).collect(Collectors.toList());
+        } else if (isCreateTime){
+            reportFilterList = pnpDetailReportList.stream()
+                    .filter(report -> DataUtils.isBetween(
+                            DataUtils.convStrToDate(report.getScheduleTime(), "yyyyMMddHHmmss"),
+                            DataUtils.truncDate(pnpDetailReportParam.getStartDate()),
+                            DataUtils.truncEndDate(pnpDetailReportParam.getEndDate()))
+                    ).collect(Collectors.toList());
+        } else {
+             reportFilterList = new ArrayList<>();
+             Collections.copy(reportFilterList, pnpDetailReportList);
+        }
+
+        pnpDetailReportList.clear();
+
+        List<PnpDetailReport> reportFilterList2 = reportFilterList.stream()
+                .sorted(Comparator.comparing((PnpDetailReport report) ->
+                        DataUtils.convStrToDate(report.getCreateTime(), "yyyy-MM-dd HH:mm:ss")
+                ).reversed()).collect(Collectors.toList());
+
+        reportFilterList.clear();
+
+        reportFilterList2.forEach(report -> {
             report.setProcessFlow(englishProcFlowToChinese(report.getProcessFlow()));
             report.setFtpSource(englishSourceToChinese(report.getFtpSource()));
             report.setBcStatus(englishStatusToChinese(report.getBcStatus()));
             report.setPnpStatus(englishStatusToChinese(report.getPnpStatus()));
             report.setSmsStatus(englishStatusToChinese(report.getSmsStatus()));
         });
-        List<PnpDetailReport> reportList = pnpDetailReportList.stream().sorted(Comparator.comparing(PnpDetailReport::getCreateTime).reversed()).collect(Collectors.toList());
-        log.info("Sorted Report List", DataUtils.toPrettyJsonUseJackson(reportList));
-        return reportList;
+        log.info("Sorted Report List", DataUtils.toPrettyJsonUseJackson(reportFilterList2));
+        return reportFilterList2;
     }
 
     private StringBuilder getDetailReportSql(final PnpDetailReportParam pnpDetailReportParam) {
@@ -286,24 +326,24 @@ public class PnpReportService {
         final String sourceSystem = pnpDetailReportParam.getSourceSystem().trim();
         final String phoneNumber = pnpDetailReportParam.getPhone().trim();
         final String employeeId = pnpDetailReportParam.getEmployeeId().trim();
-        final Date startDate = pnpDetailReportParam.getStartDate();
-        final Date endDate = pnpDetailReportParam.getEndDate();
+//        final Date startDate = pnpDetailReportParam.getStartDate();
+//        final Date endDate = pnpDetailReportParam.getEndDate();
         final boolean isCreateTime = pnpDetailReportParam.getDateType().equals(PnpDetailReportParam.CREATE_TIME);
         final boolean isOrderTime = pnpDetailReportParam.getDateType().equals(PnpDetailReportParam.ORDER_TIME);
 
         /* 依照篩選條件過濾 */
-        if (startDate != null && isCreateTime) {
-            sb.append(String.format(" AND R1.CREATE_TIME >= '%s'", DataUtils.convDateToStr(DataUtils.truncDate(startDate), "yyyy-MM-dd HH:mm:ss")));
-        }
-        if (endDate != null && isCreateTime) {
-            sb.append(String.format(" AND R1.CREATE_TIME <= '%s'", DataUtils.convDateToStr(DataUtils.truncEndDate(endDate), "yyyy-MM-dd HH:mm:ss")));
-        }
-        if (startDate != null && isOrderTime) {
-            sb.append(String.format(" AND R1.SCHEDULE_TIME >= '%s'", DataUtils.convDateToStr(DataUtils.truncDate(startDate), "yyyy-MM-dd HH:mm:ss")));
-        }
-        if (endDate != null && isOrderTime) {
-            sb.append(String.format(" AND R1.SCHEDULE_TIME <= '%s'", DataUtils.convDateToStr(DataUtils.truncEndDate(endDate), "yyyy-MM-dd HH:mm:ss")));
-        }
+//        if (startDate != null && isCreateTime) {
+//            sb.append(String.format(" AND R1.CREATE_TIME >= '%s'", DataUtils.convDateToStr(DataUtils.truncDate(startDate), "yyyy-MM-dd HH:mm:ss")));
+//        }
+//        if (endDate != null && isCreateTime) {
+//            sb.append(String.format(" AND R1.CREATE_TIME <= '%s'", DataUtils.convDateToStr(DataUtils.truncEndDate(endDate), "yyyy-MM-dd HH:mm:ss")));
+//        }
+//        if (startDate != null && isOrderTime) {
+//            sb.append(String.format(" AND R1.SCHEDULE_TIME >= '%s'", DataUtils.convDateToStr(DataUtils.truncDate(startDate), "yyyy-MM-dd HH:mm:ss")));
+//        }
+//        if (endDate != null && isOrderTime) {
+//            sb.append(String.format(" AND R1.SCHEDULE_TIME <= '%s'", DataUtils.convDateToStr(DataUtils.truncEndDate(endDate), "yyyy-MM-dd HH:mm:ss")));
+//        }
         if (StringUtils.isNotBlank(account)) {
             sb.append(String.format(" AND R1.ACCOUNT = '%s'", account));
         }
@@ -332,7 +372,7 @@ public class PnpReportService {
         if (pnpDetailReportParam.isPageable()) {
             final Integer page = pnpDetailReportParam.getPage();
             final int[] pageRowArray = DataUtils.pageRowCalculate(page, 10);
-            sb.append(String.format(" OFFSET %s ROWS ", pageRowArray[0]-1));
+            sb.append(String.format(" OFFSET %s ROWS ", pageRowArray[0] - 1));
             sb.append(String.format(" FETCH NEXT %s ROWS ONLY", 10));
         }
 

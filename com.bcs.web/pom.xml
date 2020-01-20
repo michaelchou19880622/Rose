@@ -97,6 +97,7 @@
                 <package.environment>uat-ap</package.environment>
                 <rp.build.warname>taishinapi</rp.build.warname>
                 <maven.war.webxml>src/main/resources/uat-ap/web/web.xml</maven.war.webxml>
+                <aa>WEB-INF/lib/*pwd.jar, WEB-INF/lib/*TSIB.jar</aa>
             </properties>
         </profile>
         <profile>
@@ -108,6 +109,7 @@
                 <package.environment>uat-be</package.environment>
                 <rp.build.warname>taishinuat</rp.build.warname>
                 <maven.war.webxml>src/main/resources/uat-be/web/web.xml</maven.war.webxml>
+                <aa>WEB-INF/lib/*pwd.jar, WEB-INF/lib/*TSIB.jar</aa>
             </properties>
         </profile>
         <profile>
@@ -119,6 +121,9 @@
                 <package.environment>prod-be-oa</package.environment>
                 <rp.build.warname>taishinoa</rp.build.warname>
                 <maven.war.webxml>src/main/resources/prod-be-oa/web/web.xml</maven.war.webxml>
+                <aa>
+                    %regex[WEB-INF/lib/(?!log4j.*\.jar)(?!slf4j.*\.jar)(?!logging.*\.jar)(?!com.bcs.*\.jar).*\.jar]
+                </aa>
             </properties>
         </profile>
         <profile>
@@ -130,6 +135,9 @@
                 <package.environment>prod-be-oaapi</package.environment>
                 <rp.build.warname>taishinoaapi</rp.build.warname>
                 <maven.war.webxml>src/main/resources/prod-be-oaapi/web/web.xml</maven.war.webxml>
+                <aa>
+                    %regex[WEB-INF/lib/(?!log4j.*\.jar)(?!slf4j.*\.jar)(?!logging.*\.jar)(?!com.bcs.*\.jar).*\.jar]
+                </aa>
             </properties>
         </profile>
         <profile>
@@ -141,6 +149,9 @@
                 <package.environment>prod-ap-oa</package.environment>
                 <rp.build.warname>taishinoa</rp.build.warname>
                 <maven.war.webxml>src/main/resources/prod-ap-oa/web/web.xml</maven.war.webxml>
+                <aa>
+                    %regex[WEB-INF/lib/(?!log4j.*\.jar)(?!slf4j.*\.jar)(?!logging.*\.jar)(?!com.bcs.*\.jar).*\.jar]
+                </aa>
             </properties>
         </profile>
         <profile>
@@ -152,6 +163,9 @@
                 <package.environment>prod-ap-oaapi</package.environment>
                 <rp.build.warname>taishinoaapi</rp.build.warname>
                 <maven.war.webxml>src/main/resources/prod-ap-oaapi/web/web.xml</maven.war.webxml>
+                <aa>
+                    %regex[WEB-INF/lib/(?!log4j.*\.jar)(?!slf4j.*\.jar)(?!logging.*\.jar)(?!com.bcs.*\.jar).*\.jar]
+                </aa>
             </properties>
         </profile>
         <profile>
@@ -163,6 +177,7 @@
                 <package.environment>windows</package.environment>
                 <rp.build.warname>Taishin</rp.build.warname>
                 <maven.war.webxml>src/main/resources/windows/web/web.xml</maven.war.webxml>
+                <aa>WEB-INF/lib/*pwd.jar, WEB-INF/lib/*TSIB.jar</aa>
             </properties>
         </profile>
         <profile>
@@ -177,6 +192,7 @@
                 <package.environment>linux</package.environment>
                 <rp.build.warname>Taishin</rp.build.warname>
                 <maven.war.webxml>src/main/resources/linux/web/web.xml</maven.war.webxml>
+                <aa>WEB-INF/lib/*pwd.jar, WEB-INF/lib/*TSIB.jar</aa>
             </properties>
         </profile>
     </profiles>
@@ -227,15 +243,7 @@
                     </webResources>
                     <!-- web.xml is not mandatory since JavaEE 5 -->
                     <failOnMissingWebXml>true</failOnMissingWebXml>
-                    <!-- com.bcs.X jar & log jar 要包進去 -->
-                    <packagingExcludes>
-                        %regex[WEB-INF/lib/(?!log4j.*\.jar)(?!slf4j.*\.jar)(?!logging.*\.jar)(?!com.bcs.*\.jar).*\.jar]
-                    </packagingExcludes>
-<!--                     開啟這個需要註解Tomcat Share Libery 的設定，並與Richart同步上線-->
-<!--                    <packagingExcludes>-->
-<!--                        WEB-INF/lib/*pwd.jar,-->
-<!--                        WEB-INF/lib/*TSIB.jar-->
-<!--                    </packagingExcludes>-->
+                    <packagingExcludes>${aa}</packagingExcludes>
                     <warName>${rp.build.warname}</warName> <!-- set up war name -->
                 </configuration>
             </plugin>

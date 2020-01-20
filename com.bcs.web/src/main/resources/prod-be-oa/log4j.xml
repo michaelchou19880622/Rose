@@ -61,10 +61,27 @@
             <param name="levelMax" value="ERROR"/>
         </filter>
     </appender>
+    <appender name="PNP-ERR" class="com.bcs.core.log.appender.RollingFileWithSizeAndDayFolderAppender">
+        <param name="FileDatePattern" value="yyyy-MM-dd-HH-mm"/>
+        <param name="FolderDatePattern" value="yyyyMMdd"/>
+        <param name="Append" value="true"/>
+        <param name="MaxBackupIndex" value="200"/>
+        <param name="MaxFileSize" value="200MB"/>
+        <param name="File" value="/bcs/log/rose/pnp/taishin.be.oa.pnp.err.log"/>
+
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss.SSS} %-5p [%-4L] %-30.30C{1} %-35M [%-27t] - %m%n"/>
+        </layout>
+        <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <param name="levelMin" value="ERROR"/>
+            <param name="levelMax" value="ERROR"/>
+        </filter>
+    </appender>
     <!--使用Logger.getLogger("XXX")獲得此輸出器，且不會使用根輸出器-->
     <logger name="PnpRecorder" additivity="false">
         <level value="INFO"/>
         <appender-ref ref="PNP"/>
+        <appender-ref ref="PNP-ERR"/>
     </logger>
     <!-- Billing Notice -->
     <appender name="BN" class="com.bcs.core.log.appender.RollingFileWithSizeAndDayFolderAppender">

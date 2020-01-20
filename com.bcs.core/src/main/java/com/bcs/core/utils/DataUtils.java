@@ -268,4 +268,11 @@ public class DataUtils {
     public static int calTotalPage(int totalCount, int onePageCount){
         return totalCount / onePageCount + (totalCount % onePageCount == 0 ? 0 : 1);
     }
+
+    public static boolean isBetween(Date compareTime, Date startTime, Date endTime){
+        if (compareTime == null || startTime == null || endTime == null) {
+            return false;
+        }
+        return compareTime.before(endTime) && compareTime.after(startTime);
+    }
 }

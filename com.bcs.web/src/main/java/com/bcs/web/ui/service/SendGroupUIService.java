@@ -192,7 +192,7 @@ public class SendGroupUIService {
         log.info("existMids size:{}", existMids.size());
 
         if (existMids == null || existMids.isEmpty()) {
-            throw new BcsNoticeException("查無綁定或為綁定UID");
+            throw new BcsNoticeException("查無綁定或未綁定UID");
         }
 
         referenceId = UUID.randomUUID().toString().toLowerCase();

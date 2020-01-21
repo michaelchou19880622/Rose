@@ -138,10 +138,12 @@ public class PnpSMSMsgService {
             case MING:
                 /* Find Detail */
                 PnpDetailMing detail1 = pnpDetailMingRepository.findOne(detailId);
+                detail1.setDetailScheduleTime(DataUtils.convDateToStr(new Date(), "yyyy-MM-dd HH:mm:ss"));
                 List<PnpDetailMing> detailList = Collections.singletonList(detail1);
 
                 /* Find Main */
                 PnpMainMing main = pnpMainMingRepository.findOne(detail1.getPnpMainId());
+                main.setScheduleTime(DataUtils.convDateToStr(new Date(), "yyyy-MM-dd HH:mm:ss"));
                 main.setPnpDetailMingList(detailList);
 
                 /* Change Sms File Name */
@@ -154,6 +156,8 @@ public class PnpSMSMsgService {
             case UNICA:
                 /* Find Detail */
                 PnpDetailUnica detail2 = pnpDetailUnicaRepository.findOne(detailId);
+                //FIXME Datetime format?
+                detail2.setDetailScheduleTime(DataUtils.convDateToStr(new Date(), "yyyyMMddHHmmss"));
                 List<PnpDetailUnica> detailList2 = Collections.singletonList(detail2);
 
                 /* Find Main */
@@ -162,6 +166,7 @@ public class PnpSMSMsgService {
 
                 /* Change Sms File Name */
                 String smsFileName2 = changeFileName(main2.getOrigFileName(), new Date());
+                main2.setScheduleTime(DataUtils.convDateToStr(new Date(), "yyyyMMddHHmmss"));
                 main2.setSmsFileName(smsFileName2);
 
                 /* Send File To SMS FTP */
@@ -170,10 +175,12 @@ public class PnpSMSMsgService {
             case MITAKE:
                 /* Find Detail */
                 PnpDetailMitake detail3 = pnpDetailMitakeRepository.findOne(detailId);
+                detail3.setDetailScheduleTime(DataUtils.convDateToStr(new Date(), "yyyyMMddHHmmss"));
                 List<PnpDetailMitake> detailList3 = Collections.singletonList(detail3);
 
                 /* Find Main */
                 PnpMainMitake main3 = pnpMainMitakeRepository.findOne(detail3.getPnpMainId());
+                main3.setScheduleTime(DataUtils.convDateToStr(new Date(), "yyyyMMddHHmmss"));
                 main3.setPnpDetailMitakeList(detailList3);
 
                 /* Change Sms File Name */
@@ -186,10 +193,13 @@ public class PnpSMSMsgService {
             case EVERY8D:
                 /* Find Detail */
                 PnpDetailEvery8d detail4 = pnpDetailEvery8dRepository.findOne(detailId);
+                detail4.setDetailScheduleTime(DataUtils.convDateToStr(new Date(), "yyyyMMddHHmmss"));
                 List<PnpDetailEvery8d> detailList4 = Collections.singletonList(detail4);
 
                 /* Find Main */
                 PnpMainEvery8d main4 = pnpMainEvery8dRepository.findOne(detail4.getPnpMainId());
+                //FIXME Datetime format?
+                main4.setScheduleTime(DataUtils.convDateToStr(new Date(), "yyyyMMddHHmmss"));
                 main4.setPnpDetailEvery8dList(detailList4);
 
                 /* Change Sms File Name */

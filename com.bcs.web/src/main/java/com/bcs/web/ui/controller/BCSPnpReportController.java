@@ -185,18 +185,18 @@ public class BCSPnpReportController {
         row.put(14, r.getPid());
         row.put(15, DataUtils.maskString(r.getPhone(), '*', 2, 2));
         row.put(16, r.getUid());
-        row.put(17, r.getScheduleTime());
-        row.put(18, r.getBcTime());
-        row.put(19, r.getPnpTime());
-        row.put(20, r.getSmsTime());
+        row.put(17, DataUtils.convDateToStr(r.getScheduleTime(), "yyyy-MM-dd HH:mm:ss"));
+        row.put(18, DataUtils.convDateToStr(r.getBcTime(), "yyyy-MM-dd HH:mm:ss"));
+        row.put(19, DataUtils.convDateToStr(r.getPnpTime(), "yyyy-MM-dd HH:mm:ss"));
+        row.put(20, DataUtils.convDateToStr(r.getSmsTime(), "yyyy-MM-dd HH:mm:ss"));
         row.put(21, r.getBcStatus());
         row.put(22, r.getBcHttpStatusCode());
         row.put(23, r.getPnpStatus());
         row.put(24, r.getPnpHttpStatusCode());
         row.put(25, r.getSmsStatus());
         row.put(26, r.getIsInternational() == null ? null : r.getIsInternational().toString());
-        row.put(27, r.getCreateTime());
-        row.put(28, r.getModifyTime());
+        row.put(27, DataUtils.convDateToStr(r.getCreateTime(), "yyyy-MM-dd HH:mm:ss"));
+        row.put(28, DataUtils.convDateToStr(r.getModifyTime(), "yyyy-MM-dd HH:mm:ss"));
         return row;
     }
 

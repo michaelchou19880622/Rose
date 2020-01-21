@@ -167,25 +167,32 @@ public class SendGroupUIService {
 
             int i = 1;
             for (String mid : list) {
-                checkList.add(mid);
+                checkList.add(mid.trim());
 
                 /* 每一千筆處理一次 */
                 if (i % 1000 == 0) {
-                    existMids.addAll(lineUserService.findMidByMidInAndActive(checkList));
+                    log.info(">1000 checkList size:{}", checkList.size());
+                    List<String> lista = lineUserService.findMidByMidInAndActive(checkList);
+                    log.info("findMid List Result Size:{}", lista.size());
+                    existMids.addAll(lista);
                     checkList.clear();
                 }
                 i++;
             }
             /* 處理未滿一千的 */
             if (!checkList.isEmpty()) {
-                existMids.addAll(lineUserService.findMidByMidInAndActive(checkList));
+                log.info("<1000 checkList size:{}", checkList.size());
+                List<String> lista = lineUserService.findMidByMidInAndActive(checkList);
+                log.info("findMid List Result Size:{}", lista.size());
+                existMids.addAll(lista);
             }
         } catch (Exception e) {
             log.info("Exception", e);
         }
+        log.info("existMids size:{}", existMids.size());
 
         if (existMids == null || existMids.isEmpty()) {
-            throw new BcsNoticeException("上傳沒有UID");
+            throw new BcsNoticeException("查無綁定或為綁定UID");
         }
 
         referenceId = UUID.randomUUID().toString().toLowerCase();

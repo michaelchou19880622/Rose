@@ -12,6 +12,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.Date;
 
 /**
  * Pnp Detail Report Entity
@@ -59,22 +60,22 @@ public class PnpDetailReport {
      * 預約時間
      */
     @Column(name = "SCHEDULE_TIME")
-    private String scheduleTime;
+    private Date scheduleTime;
     /**
      * Bc發送時間
      */
     @Column(name = "BC_TIME")
-    private String bcTime;
+    private Date bcTime;
     /**
      * Pnp發送時間
      */
     @Column(name = "PNP_TIME")
-    private String pnpTime;
+    private Date pnpTime;
     /**
      * Sms發送時間
      */
     @Column(name = "SMS_TIME")
-    private String smsTime;
+    private Date smsTime;
     /**
      * Bc發送狀態
      */
@@ -146,7 +147,7 @@ public class PnpDetailReport {
      * 建立時間
      */
     @Column(name = "CREATE_TIME")
-    private String createTime;
+    private Date createTime;
     /**
      * 發送廠商訊息流水號
      */
@@ -156,7 +157,7 @@ public class PnpDetailReport {
      * 更新時間
      */
     @Column(name = "MODIFY_TIME")
-    private String modifyTime;
+    private Date modifyTime;
     /**
      * 訊息樣板ID
      */

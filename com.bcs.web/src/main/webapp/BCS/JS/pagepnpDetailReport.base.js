@@ -70,6 +70,7 @@ $(function() {
   $('#searchBtn').click(function() {
     if (dataValidate()) {
       cleanList();
+      page = 1;
       startDate = $('#startDate').val();
       endDate = $('#endDate').val();
       loadData();
@@ -244,13 +245,7 @@ $(function() {
           list.find('.pnpStatusCode').html(pnpStatus);
           list.find('.smsStatusCode').html(obj.smsStatus);
           list.find('.accountPccCode').html(obj.pccCode);
-          list
-            .find('.schedule_time')
-            .html(
-              moment(obj.scheduleTime, 'YYYY-MM-DD HH:mm:ss').format(
-                'YYYY-MM-DD HH:mm:ss'
-              )
-            );
+          list.find('.schedule_time').html(moment(obj.scheduleTime).format('YYYY-MM-DD HH:mm:ss'));
           list.find('.resendBtn').click(function() {
             resendSms(obj.detailId, obj.ftpSource);
           });
@@ -258,9 +253,9 @@ $(function() {
           $('#resultTable').append(list);
 
           var list2 = originalTr2.clone(true);
-          list2.find('.bc_time').html(obj.bcTime);
-          list2.find('.pnp_time').html(obj.pnpTime);
-          list2.find('.sms_time').html(obj.smsTime);
+          list2.find('.bc_time').html(moment(obj.bcTime).format('yyyy-MM-dd HH:mm:ss'));
+          list2.find('.pnp_time').html(moment(obj.pnpTime).format('yyyy-MM-dd HH:mm:ss'));
+          list2.find('.sms_time').html(moment(obj.smsTime).format('yyyy-MM-dd HH:mm:ss'));
 
           // <button id="resendBtn"
           // sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_PNP_ADMIN','ROLE_MARKET','ROLE_PNP_SEND_LINE_SEND','ROLE_PNP_SEND_LINE_VERIFY')">

@@ -70,47 +70,20 @@ public class PnpReportService {
             return Collections.emptyList();
         }
 
-
-        final boolean isCreateTime = pnpDetailReportParam.getDateType().equals(PnpDetailReportParam.CREATE_TIME);
-        final boolean isOrderTime = pnpDetailReportParam.getDateType().equals(PnpDetailReportParam.ORDER_TIME);
-        List<PnpDetailReport> reportFilterList;
-        if (isOrderTime) {
-            reportFilterList = pnpDetailReportList.stream()
-                    .filter(report -> DataUtils.isBetween(
-                            DataUtils.convStrToDate(report.getScheduleTime(), "yyyyMMddHHmmss"),
-                            DataUtils.truncDate(pnpDetailReportParam.getStartDate()),
-                            DataUtils.truncEndDate(pnpDetailReportParam.getEndDate()))
-                    ).collect(Collectors.toList());
-        } else if (isCreateTime){
-            reportFilterList = pnpDetailReportList.stream()
-                    .filter(report -> DataUtils.isBetween(
-                            DataUtils.convStrToDate(report.getScheduleTime(), "yyyyMMddHHmmss"),
-                            DataUtils.truncDate(pnpDetailReportParam.getStartDate()),
-                            DataUtils.truncEndDate(pnpDetailReportParam.getEndDate()))
-                    ).collect(Collectors.toList());
-        } else {
-             reportFilterList = new ArrayList<>();
-             Collections.copy(reportFilterList, pnpDetailReportList);
-        }
+        List<PnpDetailReport> reportFilterList = pnpDetailReportList.stream()
+                .sorted(Comparator.comparing(PnpDetailReport::getCreateTime).reversed()).collect(Collectors.toList());
 
         pnpDetailReportList.clear();
 
-        List<PnpDetailReport> reportFilterList2 = reportFilterList.stream()
-                .sorted(Comparator.comparing((PnpDetailReport report) ->
-                        DataUtils.convStrToDate(report.getCreateTime(), "yyyy-MM-dd HH:mm:ss")
-                ).reversed()).collect(Collectors.toList());
-
-        reportFilterList.clear();
-
-        reportFilterList2.forEach(report -> {
+        reportFilterList.forEach(report -> {
             report.setProcessFlow(englishProcFlowToChinese(report.getProcessFlow()));
             report.setFtpSource(englishSourceToChinese(report.getFtpSource()));
             report.setBcStatus(englishStatusToChinese(report.getBcStatus()));
             report.setPnpStatus(englishStatusToChinese(report.getPnpStatus()));
             report.setSmsStatus(englishStatusToChinese(report.getSmsStatus()));
         });
-        log.info("Sorted Report List", DataUtils.toPrettyJsonUseJackson(reportFilterList2));
-        return reportFilterList2;
+        log.info("Sorted Report List", DataUtils.toPrettyJsonUseJackson(reportFilterList));
+        return reportFilterList;
     }
 
     private StringBuilder getDetailReportSql(final PnpDetailReportParam pnpDetailReportParam) {
@@ -159,10 +132,10 @@ public class PnpReportService {
                 "      D.PROC_STAGE AS PROCESS_STAGE," +
                 "      D.SOURCE AS FTP_SOURCE," +
                 "      D.MSG AS MESSAGE," +
-                "      D.DETAIL_SCHEDULE_TIME AS SCHEDULE_TIME," +
-                "      CONVERT(VARCHAR, D.LINE_PUSH_TIME, 120) AS BC_TIME," +
-                "      CONVERT(VARCHAR, D.PNP_TIME, 120) AS PNP_TIME," +
-                "      CONVERT(VARCHAR, D.SMS_TIME, 120) AS SMS_TIME," +
+                "      CAST(FORMAT(CAST(REPLACE(REPLACE(REPLACE(REPLACE(D.DETAIL_SCHEDULE_TIME, '-', ''), '/' , ''), ' ', ''), ':', '') AS BIGINT),'####-##-## ##:##:##') AS DATETIME2(0)) AS SCHEDULE_TIME," +
+                "      D.LINE_PUSH_TIME AS BC_TIME," +
+                "      D.PNP_TIME AS PNP_TIME," +
+                "      D.SMS_TIME AS SMS_TIME," +
                 "      D.BC_STATUS AS BC_STATUS," +
                 "      D.PNP_STATUS AS PNP_STATUS," +
                 "      D.SMS_STATUS AS SMS_STATUS," +
@@ -187,8 +160,8 @@ public class PnpReportService {
                 "      A.ACCOUNT AS ACCOUNT," +
                 "      A.SOURCE_SYSTEM AS SOURCE_SYSTEM," +
                 "      A.EMPLOYEE_ID AS EMPLOYEE_ID," +
-                "      CONVERT(VARCHAR, D.CREAT_TIME, 120) AS CREATE_TIME," +
-                "      CONVERT(VARCHAR, D.MODIFY_TIME, 120) AS MODIFY_TIME" +
+                "      D.CREAT_TIME AS CREATE_TIME," +
+                "      D.MODIFY_TIME AS MODIFY_TIME" +
                 "    FROM BCS_PNP_DETAIL_MITAKE D" +
                 "    INNER JOIN BCS_PNP_MAIN_MITAKE AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID" +
                 "    INNER JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID" +
@@ -201,10 +174,10 @@ public class PnpReportService {
                 "      D.PROC_STAGE AS PROCESS_STAGE," +
                 "      D.SOURCE AS FTP_SOURCE," +
                 "      D.MSG AS MESSAGE," +
-                "      D.DETAIL_SCHEDULE_TIME AS SCHEDULE_TIME," +
-                "      CONVERT(VARCHAR, D.LINE_PUSH_TIME, 120) AS BC_TIME," +
-                "      CONVERT(VARCHAR, D.PNP_TIME, 120) AS PNP_TIME," +
-                "      CONVERT(VARCHAR, D.SMS_TIME, 120) AS SMS_TIME," +
+                "      CAST(FORMAT(CAST(REPLACE(REPLACE(REPLACE(REPLACE(D.DETAIL_SCHEDULE_TIME, '-', ''), '/' , ''), ' ', ''), ':', '') AS BIGINT),'####-##-## ##:##:##') AS DATETIME2(0)) AS SCHEDULE_TIME," +
+                "      D.LINE_PUSH_TIME AS BC_TIME," +
+                "      D.PNP_TIME AS PNP_TIME," +
+                "      D.SMS_TIME AS SMS_TIME," +
                 "      D.BC_STATUS AS BC_STATUS," +
                 "      D.PNP_STATUS AS PNP_STATUS," +
                 "      D.SMS_STATUS AS SMS_STATUS," +
@@ -229,8 +202,8 @@ public class PnpReportService {
                 "      A.ACCOUNT AS ACCOUNT," +
                 "      A.SOURCE_SYSTEM AS SOURCE_SYSTEM," +
                 "      A.EMPLOYEE_ID AS EMPLOYEE_ID," +
-                "      CONVERT(VARCHAR, D.CREAT_TIME, 120) AS CREATE_TIME," +
-                "      CONVERT(VARCHAR, D.MODIFY_TIME, 120) AS MODIFY_TIME" +
+                "      D.CREAT_TIME AS CREATE_TIME," +
+                "      D.MODIFY_TIME AS MODIFY_TIME" +
                 "    FROM BCS_PNP_DETAIL_MING D" +
                 "    INNER JOIN BCS_PNP_MAIN_MING AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID" +
                 "    INNER JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID" +
@@ -243,10 +216,10 @@ public class PnpReportService {
                 "      D.PROC_STAGE AS PROCESS_STAGE," +
                 "      D.SOURCE AS FTP_SOURCE," +
                 "      D.MSG AS MESSAGE," +
-                "      D.DETAIL_SCHEDULE_TIME AS SCHEDULE_TIME," +
-                "      CONVERT(VARCHAR, D.LINE_PUSH_TIME, 120) AS BC_TIME," +
-                "      CONVERT(VARCHAR, D.PNP_TIME, 120) AS PNP_TIME," +
-                "      CONVERT(VARCHAR, D.SMS_TIME, 120) AS SMS_TIME," +
+                "      CAST(FORMAT(CAST(REPLACE(REPLACE(REPLACE(REPLACE(D.DETAIL_SCHEDULE_TIME, '-', ''), '/' , ''), ' ', ''), ':', '') AS BIGINT),'####-##-## ##:##:##') AS DATETIME2(0)) AS SCHEDULE_TIME," +
+                "      D.LINE_PUSH_TIME AS BC_TIME," +
+                "      D.PNP_TIME AS PNP_TIME," +
+                "      D.SMS_TIME AS SMS_TIME," +
                 "      D.BC_STATUS AS BC_STATUS," +
                 "      D.PNP_STATUS AS PNP_STATUS," +
                 "      D.SMS_STATUS AS SMS_STATUS," +
@@ -271,8 +244,8 @@ public class PnpReportService {
                 "      A.ACCOUNT AS ACCOUNT," +
                 "      A.SOURCE_SYSTEM AS SOURCE_SYSTEM," +
                 "      A.EMPLOYEE_ID AS EMPLOYEE_ID," +
-                "      CONVERT(VARCHAR, D.CREAT_TIME, 120) AS CREATE_TIME," +
-                "      CONVERT(VARCHAR, D.MODIFY_TIME, 120) AS MODIFY_TIME" +
+                "      D.CREAT_TIME AS CREATE_TIME," +
+                "      D.MODIFY_TIME AS MODIFY_TIME" +
                 "    FROM BCS_PNP_DETAIL_UNICA D" +
                 "    INNER JOIN BCS_PNP_MAIN_UNICA AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID" +
                 "    INNER JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID" +
@@ -285,10 +258,10 @@ public class PnpReportService {
                 "      D.PROC_STAGE AS PROCESS_STAGE," +
                 "      D.SOURCE AS FTP_SOURCE," +
                 "      D.MSG AS MESSAGE," +
-                "      D.DETAIL_SCHEDULE_TIME AS SCHEDULE_TIME," +
-                "      CONVERT(VARCHAR, D.LINE_PUSH_TIME, 120) AS BC_TIME," +
-                "      CONVERT(VARCHAR, D.PNP_TIME, 120) AS PNP_TIME," +
-                "      CONVERT(VARCHAR, D.SMS_TIME, 120) AS SMS_TIME," +
+                "      CAST(FORMAT(CAST(REPLACE(REPLACE(REPLACE(REPLACE(D.DETAIL_SCHEDULE_TIME, '-', ''), '/' , ''), ' ', ''), ':', '') AS BIGINT),'####-##-## ##:##:##') AS DATETIME2(0)) AS SCHEDULE_TIME," +
+                "      D.LINE_PUSH_TIME AS BC_TIME," +
+                "      D.PNP_TIME AS PNP_TIME," +
+                "      D.SMS_TIME AS SMS_TIME," +
                 "      D.BC_STATUS AS BC_STATUS," +
                 "      D.PNP_STATUS AS PNP_STATUS," +
                 "      D.SMS_STATUS AS SMS_STATUS," +
@@ -313,8 +286,8 @@ public class PnpReportService {
                 "      A.ACCOUNT AS ACCOUNT," +
                 "      A.SOURCE_SYSTEM AS SOURCE_SYSTEM," +
                 "      A.EMPLOYEE_ID AS EMPLOYEE_ID," +
-                "      CONVERT(VARCHAR, D.CREAT_TIME, 120) AS CREATE_TIME," +
-                "      CONVERT(VARCHAR, D.MODIFY_TIME, 120) AS MODIFY_TIME" +
+                "      D.CREAT_TIME AS CREATE_TIME," +
+                "      D.MODIFY_TIME AS MODIFY_TIME" +
                 "    FROM BCS_PNP_DETAIL_EVERY8D D" +
                 "    INNER JOIN BCS_PNP_MAIN_EVERY8D AS M ON D.PNP_MAIN_ID = M.PNP_MAIN_ID" +
                 "    INNER JOIN BCS_PNP_MAINTAIN_ACCOUNT AS A ON M.PNP_MAINTAIN_ACCOUNT_ID = A.ID" +
@@ -326,24 +299,24 @@ public class PnpReportService {
         final String sourceSystem = pnpDetailReportParam.getSourceSystem().trim();
         final String phoneNumber = pnpDetailReportParam.getPhone().trim();
         final String employeeId = pnpDetailReportParam.getEmployeeId().trim();
-//        final Date startDate = pnpDetailReportParam.getStartDate();
-//        final Date endDate = pnpDetailReportParam.getEndDate();
+        final Date startDate = pnpDetailReportParam.getStartDate();
+        final Date endDate = pnpDetailReportParam.getEndDate();
         final boolean isCreateTime = pnpDetailReportParam.getDateType().equals(PnpDetailReportParam.CREATE_TIME);
         final boolean isOrderTime = pnpDetailReportParam.getDateType().equals(PnpDetailReportParam.ORDER_TIME);
 
         /* 依照篩選條件過濾 */
-//        if (startDate != null && isCreateTime) {
-//            sb.append(String.format(" AND R1.CREATE_TIME >= '%s'", DataUtils.convDateToStr(DataUtils.truncDate(startDate), "yyyy-MM-dd HH:mm:ss")));
-//        }
-//        if (endDate != null && isCreateTime) {
-//            sb.append(String.format(" AND R1.CREATE_TIME <= '%s'", DataUtils.convDateToStr(DataUtils.truncEndDate(endDate), "yyyy-MM-dd HH:mm:ss")));
-//        }
-//        if (startDate != null && isOrderTime) {
-//            sb.append(String.format(" AND R1.SCHEDULE_TIME >= '%s'", DataUtils.convDateToStr(DataUtils.truncDate(startDate), "yyyy-MM-dd HH:mm:ss")));
-//        }
-//        if (endDate != null && isOrderTime) {
-//            sb.append(String.format(" AND R1.SCHEDULE_TIME <= '%s'", DataUtils.convDateToStr(DataUtils.truncEndDate(endDate), "yyyy-MM-dd HH:mm:ss")));
-//        }
+        if (startDate != null && isCreateTime) {
+            sb.append(String.format(" AND R1.CREATE_TIME >= '%s'", DataUtils.convDateToStr(DataUtils.truncDate(startDate), "yyyy-MM-dd HH:mm:ss")));
+        }
+        if (endDate != null && isCreateTime) {
+            sb.append(String.format(" AND R1.CREATE_TIME <= '%s'", DataUtils.convDateToStr(DataUtils.truncEndDate(endDate), "yyyy-MM-dd HH:mm:ss")));
+        }
+        if (startDate != null && isOrderTime) {
+            sb.append(String.format(" AND R1.SCHEDULE_TIME >= '%s'", DataUtils.convDateToStr(DataUtils.truncDate(startDate), "yyyy-MM-dd HH:mm:ss")));
+        }
+        if (endDate != null && isOrderTime) {
+            sb.append(String.format(" AND R1.SCHEDULE_TIME <= '%s'", DataUtils.convDateToStr(DataUtils.truncEndDate(endDate), "yyyy-MM-dd HH:mm:ss")));
+        }
         if (StringUtils.isNotBlank(account)) {
             sb.append(String.format(" AND R1.ACCOUNT = '%s'", account));
         }

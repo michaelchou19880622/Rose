@@ -27,6 +27,6 @@ public interface BillingNoticeDetailRepository extends EntityRepository<BillingN
     @Transactional(rollbackFor = Exception.class, timeout = 30)
     void updateStatusByMainId(String status, Date modifyTime, Long noticeMainId);
 
-    List<BillingNoticeDetail> findByNoticeDetailIdIn(List<BigInteger> ids);
+    List<BillingNoticeDetail> findByNoticeDetailIdIn(List<Long> ids);
 
 }

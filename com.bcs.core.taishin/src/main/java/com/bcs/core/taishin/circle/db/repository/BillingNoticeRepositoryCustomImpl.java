@@ -83,7 +83,9 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
         List<BillingNoticeDetail> detailList = new ArrayList<>();
         List<List<BigInteger>> batchDetailIds = Lists.partition(detailIds, CircleEntityManagerControl.batchSize);
         for (List<BigInteger> ids : batchDetailIds) {
-            List<BillingNoticeDetail> details = billingNoticeDetailRepository.findByNoticeDetailIdIn(ids);
+            List<Long> list = new ArrayList<>();
+            ids.forEach(v -> list.add(Long.parseLong(v.toString())));
+            List<BillingNoticeDetail> details = billingNoticeDetailRepository.findByNoticeDetailIdIn(list);
             if (!details.isEmpty()) {
                 detailList.addAll(details);
             }
@@ -156,7 +158,8 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
         List<BigInteger> mainList = (List<BigInteger>) entityManager.createNativeQuery(waitMainString)
                 .setParameter("procApName", procApName)
                 .setParameter("status", BillingNoticeMain.NOTICE_STATUS_WAIT)
-                .setParameter("tempIds", tempIds);
+                .setParameter("tempIds", tempIds)
+                .getResultList();
 
         if (mainList != null && !mainList.isEmpty()) {
             return mainList.get(0).longValue();

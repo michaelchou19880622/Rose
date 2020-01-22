@@ -46,7 +46,7 @@ public class BillingNoticeFtpService {
     private BillingNoticeMainRepository billingNoticeMainRepository;
     private BillingNoticeDetailRepository billingNoticeDetailRepository;
     private BillingNoticeContentTemplateMsgRepository billingNoticeContentTemplateMsgRepository;
-    private FtpService ftpService;
+    private static FtpService ftpService = new FtpService();
     private ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1,
             new BasicThreadFactory.Builder()
                     .namingPattern("BN-FTP-Scheduled-%d")
@@ -59,12 +59,10 @@ public class BillingNoticeFtpService {
     public BillingNoticeFtpService(
             BillingNoticeMainRepository billingNoticeMainRepository,
             BillingNoticeDetailRepository billingNoticeDetailRepository,
-            BillingNoticeContentTemplateMsgRepository billingNoticeContentTemplateMsgRepository,
-            FtpService ftpService) {
+            BillingNoticeContentTemplateMsgRepository billingNoticeContentTemplateMsgRepository) {
         this.billingNoticeMainRepository = billingNoticeMainRepository;
         this.billingNoticeDetailRepository = billingNoticeDetailRepository;
         this.billingNoticeContentTemplateMsgRepository = billingNoticeContentTemplateMsgRepository;
-        this.ftpService = ftpService;
     }
 
     /**
@@ -120,7 +118,6 @@ public class BillingNoticeFtpService {
         int i = 0;
         for (FtpSetting ftpSetting : ftpSettingList) {
             i++;
-            //log.info("Ftp Setting:\n{}", DataUtils.toPrettyJsonUseJackson(ftpSetting));
             ftpSetting.clearFileNames();
 
             if (StringUtils.isBlank(ftpSetting.getAccount())

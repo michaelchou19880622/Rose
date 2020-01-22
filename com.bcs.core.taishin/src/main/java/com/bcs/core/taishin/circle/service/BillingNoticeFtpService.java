@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -95,6 +96,7 @@ public class BillingNoticeFtpService {
 
         try {
             List<FtpSetting> ftpSettingList = ftpService.getFtpSettings();
+            ftpSettingList.forEach(ftpSetting -> log.info("Ftp Path: {}", ftpSetting.getPath()));
             Map<String, byte[]> lReturnDataMap = downloadFtpFile(fileExtension, ftpSettingList);
             if (lReturnDataMap.isEmpty()) {
                 return;
@@ -334,6 +336,9 @@ public class BillingNoticeFtpService {
     private void saveDb(BillingNoticeMain billingNoticeMain) {
         List<BillingNoticeDetail> originalDetails = billingNoticeMain.getDetails();
         log.info("BillingNoticeFtpService BillingNoticeDetail size: {}", originalDetails.size());
+        String processApName = String.format("AIBCWEB%d", randomApName());
+        log.info("Main Id: {} -> {}", billingNoticeMain.getNoticeMainId(), processApName);
+        billingNoticeMain.setProcApName(processApName);
         billingNoticeMain = billingNoticeMainRepository.save(billingNoticeMain);
         List<BillingNoticeDetail> detailList = new ArrayList<>();
         for (BillingNoticeDetail detail : originalDetails) {
@@ -343,6 +348,14 @@ public class BillingNoticeFtpService {
         if (!detailList.isEmpty()) {
             billingNoticeDetailRepository.save(detailList);
         }
+    }
+
+    private int randomApName(){
+        int value;
+        do {
+            value = new Random().nextInt(5) + 1;
+        } while (value == 2);
+        return value;
     }
 
 

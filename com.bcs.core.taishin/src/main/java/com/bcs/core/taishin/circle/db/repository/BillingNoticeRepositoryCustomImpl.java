@@ -96,6 +96,8 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
         Long retryMainId = findAndUpdateFirstRetryDetailOnMain(procApName, tempIds);
         if (retryMainId != null) {
             retrySet.add(retryMainId);
+        } else {
+            log.debug("BCS_BILLING_NOTICE updateStatus retryMainId is null");
         }
         return retrySet;
     }
@@ -111,40 +113,25 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
         return waitSet;
     }
 
-//    /**
-//     * 根據NOTICE_DETAIL_ID找出BillingNoticeDetail
-//     *
-//     * @param ids
-//     * @return
-//     */
-//    @SuppressWarnings("unchecked")
-//    public List<BillingNoticeDetail> findBillingNoticeDetailById(List<BigInteger> ids) {
-//        String sqlString = "select  * from BCS_BILLING_NOTICE_DETAIL WHERE NOTICE_DETAIL_ID in (:ids) ";
-//        List<BillingNoticeDetail> details = entityManager.createNativeQuery(sqlString, BillingNoticeDetail.class)
-//                .setParameter("ids", ids).getResultList();
-//        return details;
-//    }
-
-
     /**
      * 找出第一個RETRY DETAIL 的 BillingNoticeMain 並更新狀態
      */
     @SuppressWarnings("unchecked")
     @Transactional(rollbackFor = Exception.class)
     public Long findAndUpdateFirstRetryDetailOnMain(String procApName, List<String> tempIds) {
-        Date modifyTime = Calendar.getInstance().getTime();
-        String sqlString = " select Top 1 m.NOTICE_MAIN_ID from BCS_BILLING_NOTICE_DETAIL b, BCS_BILLING_NOTICE_MAIN m"
-                + " where m.NOTICE_MAIN_ID = b.NOTICE_MAIN_ID and b.STATUS=:status and m.TEMP_ID in (:tempIds) Order by b.CREAT_TIME desc"
-                + " update BCS_BILLING_NOTICE_MAIN set STATUS=:newStatus, PROC_AP_NAME=:procApName, MODIFY_TIME=:modifyTime"
-                + " where NOTICE_MAIN_ID IN (select TOP 1 a.NOTICE_MAIN_ID from BCS_BILLING_NOTICE_MAIN a WITH(ROWLOCK) , BCS_BILLING_NOTICE_DETAIL d"
-                + " where a.NOTICE_MAIN_ID = d.NOTICE_MAIN_ID and d.STATUS=:status and a.TEMP_ID in (:tempIds) Order by d.CREAT_TIME desc)";
+        String sqlString =
+                " SELECT TOP 1 M.NOTICE_MAIN_ID" +
+                " FROM BCS_BILLING_NOTICE_DETAIL B, BCS_BILLING_NOTICE_MAIN M" +
+                " WHERE M.PROC_AP_NAME=:procApName" +
+                " AND M.NOTICE_MAIN_ID=B.NOTICE_MAIN_ID" +
+                " AND B.STATUS=:status" +
+                " AND M.TEMP_ID in (:tempIds)" +
+                " ORDER BY B.CREAT_TIME DESC";
 
         List<BigInteger> mains = (List<BigInteger>) entityManager.createNativeQuery(sqlString)
+                .setParameter("procApName", procApName)
                 .setParameter("status", BillingNoticeMain.NOTICE_STATUS_RETRY)
                 .setParameter("tempIds", tempIds)
-                .setParameter("procApName", procApName)
-                .setParameter("modifyTime", modifyTime)
-                .setParameter("newStatus", BillingNoticeMain.NOTICE_STATUS_SENDING)
                 .getResultList();
         if (mains != null && !mains.isEmpty()) {
             return mains.get(0).longValue();
@@ -158,27 +145,19 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
      */
     @Transactional(rollbackFor = Exception.class)
     public Long findAndUpdateFirstWaitMain(String procApName, List<String> tempIds) {
-        Date modifyTime = Calendar.getInstance().getTime();
-        // 找出第一個WAIT BillingNoticeMain 並更新
-        String waitMainString = " select TOP 1 m.NOTICE_MAIN_ID from  BCS_BILLING_NOTICE_MAIN m"
-                + " where m.STATUS = :status and m.TEMP_ID in (:tempIds) Order by m.CREAT_TIME desc"
-                + " update BCS_BILLING_NOTICE_MAIN  set STATUS = :newStatus , PROC_AP_NAME = :procApName , MODIFY_TIME = :modifyTime"
-                + " where NOTICE_MAIN_ID  IN (select TOP 1 a.NOTICE_MAIN_ID from BCS_BILLING_NOTICE_MAIN a WITH(ROWLOCK)"
-                + " where a.STATUS = :status and a.TEMP_ID in (:tempIds) Order by a.CREAT_TIME desc)";
+        String waitMainString =
+                " SELECT TOP 1 M.NOTICE_MAIN_ID" +
+                " FROM BCS_BILLING_NOTICE_MAIN M" +
+                " WHERE M.PROC_AP_NAME=:procApName" +
+                " AND M.STATUS=:status" +
+                " AND M.TEMP_ID IN (:tempIds)" +
+                " ORDER BY M.CREAT_TIME DESC";
+
         List<BigInteger> mainList = (List<BigInteger>) entityManager.createNativeQuery(waitMainString)
-                .setParameter("status", BillingNoticeMain.NOTICE_STATUS_WAIT)
-                .setParameter("tempIds", tempIds)
                 .setParameter("procApName", procApName)
-                .setParameter("modifyTime", modifyTime)
-                .setParameter("newStatus", BillingNoticeMain.NOTICE_STATUS_SENDING).getResultList();
-        /*TODO ALAN */
-//        List<BigInteger> mainList = billingNoticeMainRepository.findAndUpdateFirstWaitMain(
-//                BillingNoticeMain.NOTICE_STATUS_WAIT,
-//                tempIds,
-//                procApName,
-//                new Date(),
-//                BillingNoticeMain.NOTICE_STATUS_SENDING
-//        );
+                .setParameter("status", BillingNoticeMain.NOTICE_STATUS_WAIT)
+                .setParameter("tempIds", tempIds);
+
         if (mainList != null && !mainList.isEmpty()) {
             return mainList.get(0).longValue();
         }

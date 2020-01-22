@@ -121,7 +121,7 @@ public class BillingNoticeSendMsgService {
             log.info("Template Id List Is Empty!!");
             return Collections.emptyList();
         }
-
+        log.info("Start find wait and retry main!!");
         // 更新狀態
         Object[] returnArray = billingNoticeRepositoryCustom.updateStatus(procApName, templateIdList);
         Set<Long> allMainIdSet = (Set<Long>) returnArray[0];

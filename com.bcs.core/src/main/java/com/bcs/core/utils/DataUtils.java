@@ -1,5 +1,6 @@
 package com.bcs.core.utils;
 
+import java.net.InetAddress;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -274,5 +275,30 @@ public class DataUtils {
             return false;
         }
         return compareTime.before(endTime) && compareTime.after(startTime);
+    }
+
+
+    public static String getProcApName() {
+        try {
+            InetAddress localAddress = InetAddress.getLocalHost();
+            if (localAddress != null) {
+                return localAddress.getHostName();
+            }
+        } catch (Exception e) {
+            log.error("Exception" + e.getMessage());
+        }
+        return null;
+    }
+
+    public static String getProcApIp() {
+        try {
+            InetAddress localAddress = InetAddress.getLocalHost();
+            if (localAddress != null) {
+                return localAddress.getHostAddress();
+            }
+        } catch (Exception e) {
+            log.error("Exception" + e.getMessage());
+        }
+        return null;
     }
 }

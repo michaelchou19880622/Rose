@@ -11,6 +11,11 @@ import java.io.InterruptedIOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * Log4j Custom Appender By File Size
+ *
+ * @author Alan
+ */
 public class RollingFileWithSizeAndDayFolderAppender extends RollingFileAppender {
 
     /**
@@ -83,6 +88,8 @@ public class RollingFileWithSizeAndDayFolderAppender extends RollingFileAppender
         super.subAppend(event);
         if (fileName != null && qw != null) {
             long size = ((CountingQuietWriter) qw).getCount();
+
+            /* if over size roll over */
             if (size >= maxFileSize && size >= nextRollover) {
                 rollOver();
             }
@@ -124,18 +131,32 @@ public class RollingFileWithSizeAndDayFolderAppender extends RollingFileAppender
      * @return file name
      */
     private String genFileName(String name, int index) {
-        df = new SimpleDateFormat(this.fileDatePattern);
-        String dateStrSuffix = '_' + df.format(new Date()) + '_';
-        String fileName = "";
+        String fileName;
         if (index > 0) {
-            /* If index less 10 then add '0' else use origin index */
-            String num = index < 10 ? "0" + index : String.valueOf(index);
-            /* Always replace .log and add .log suffix */
-            fileName = name.replace(".log", "") + dateStrSuffix + num + ".log";
+            fileName = combineFileName(name, index);
         } else {
             fileName = name;
         }
         return fileName;
+    }
+
+    /**
+     * Always replace .log and add .log suffix
+     */
+    private String combineFileName(String name, int index) {
+        return name.replace(".log", "") + getDateStrSuffix() + getNumber(index) + ".log";
+    }
+
+    private String getDateStrSuffix() {
+        df = new SimpleDateFormat(this.fileDatePattern);
+        return '_' + df.format(new Date()) + '_';
+    }
+
+    /**
+     * If index less 10 then add '0' else use origin index
+     */
+    private String getNumber(int index) {
+        return index < 10 ? "0" + index : String.valueOf(index);
     }
 
     /**
@@ -175,23 +196,13 @@ public class RollingFileWithSizeAndDayFolderAppender extends RollingFileAppender
 //
 //    log4j配置如下
 //
-//### 输出到日志文件 ###
-//
 //    log4j.appender.bc=com.bingchuangapi.common.base.Log4jRollingFileAppender
-//
 //    log4j.appender.bc.File=${catalina.home}/logs/appapidebug.log
-//
 //    log4j.appender.bc.MaxFileSize=102400KB
-//
 //    log4j.appender.bc.Append=true
-//
 //    log4j.appender.bc.Threshold = debug
-//
 //    log4j.appender.bc.Encoding=UTF-8
-//
 //    log4j.appender.bc.MaxBackupIndex=100
-//
 //    log4j.appender.bc.layout=org.apache.log4j.PatternLayout
-//
 //    log4j.appender.bc.layout.ConversionPattern=%d{yyyy/MM/dd HH:mm:ss,SSS} %-5p %-20.20X{SessionID} %-20.20X{RequestID} %-10.10X{UserID} %-26.26c{1} %m%n
 }

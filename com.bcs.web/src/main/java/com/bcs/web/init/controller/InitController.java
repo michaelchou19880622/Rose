@@ -52,6 +52,7 @@ public class InitController {
     private PnpSMSMsgService pnpSmsMsgService;
     private LinePointSchedulerService linePointschedulerService;
     private SystemLogService systemLogService;
+//    private ServerInfoService serverInfoService;
 
     @Autowired
     public InitController(SchedulerService schedulerService,
@@ -69,7 +70,9 @@ public class InitController {
                           PnpPNPMsgService pnpMsgService,
                           PnpSMSMsgService pnpSmsMsgService,
                           LinePointSchedulerService linePointschedulerService,
-                          SystemLogService systemLogService) {
+                          SystemLogService systemLogService
+//                          ServerInfoService serverInfoService
+    ) {
         this.schedulerService = schedulerService;
         this.interactiveService = interactiveService;
         this.catchRecordBinded = catchRecordBinded;
@@ -86,6 +89,7 @@ public class InitController {
         this.pnpSmsMsgService = pnpSmsMsgService;
         this.linePointschedulerService = linePointschedulerService;
         this.systemLogService = systemLogService;
+//        this.serverInfoService = serverInfoService;
     }
 
     /**
@@ -93,6 +97,8 @@ public class InitController {
      */
     @PostConstruct
     public void init() {
+//        registerServerInfo();
+
         registerServer();
         loadScheduleFromDb();
         loadInteractiveMap();
@@ -106,6 +112,34 @@ public class InitController {
         liveChatTaskServiceCheckUserStatus();
         cleanSystemLogTask();
     }
+
+//    private void registerServerInfo() {
+//        try {
+//            initLog("REGISTER SERVER INFORMATION!!");
+//            ServerInfo serverInfo = new ServerInfo();
+//            serverInfo.setComputerName(DataUtils.getProcApName());
+//            serverInfo.setIp(DataUtils.getProcApIp());
+//            String serverType = CoreConfigReader.getString("server.type", false);
+//            ServerInfo.ServerType type = getServerType(serverType);
+//            serverInfo.setServerType(type);
+//            serverInfo.setCreateTime(new Date());
+//            serverInfo.setModifyTime(new Date());
+//            serverInfoService.saveServerInfo(serverInfo);
+//        }catch (Exception e) {
+//            log.error(ErrorRecord.recordError(e));
+//        }
+//    }
+//
+//    private ServerInfo.ServerType getServerType(String serverType) {
+//        if (StringUtils.isBlank(serverType)){
+//            return ServerInfo.ServerType.AP;
+//        }
+//        try {
+//            return ServerInfo.ServerType.valueOf(serverType);
+//        } catch (IllegalArgumentException e) {
+//            return ServerInfo.ServerType.AP;
+//        }
+//    }
 
     /**
      * 1
@@ -287,7 +321,7 @@ public class InitController {
         }
     }
 
-    private void initLog(String msg){
+    private void initLog(String msg) {
         log.info("[INIT] {}", msg);
     }
 }

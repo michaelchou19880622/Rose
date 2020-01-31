@@ -89,7 +89,7 @@
         <param name="Append" value="true"/>
         <param name="MaxBackupIndex" value="9999"/>
         <param name="MaxFileSize" value="400MB"/>
-        <param name="File" value="/bcs/log/rose/taishin.ap.oaapi.bn.log"/>
+        <param name="File" value="/bcs/log/rose/bn/taishin.ap.oaapi.bn.log"/>
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss.SSS} %-5p [%-4L] %-30.30C{1} %-35M [%-27t] - %m%n"/>
         </layout>
@@ -98,9 +98,26 @@
             <param name="levelMax" value="ERROR"/>
         </filter>
     </appender>
+    <!-- Billing Notice -->
+    <appender name="BN_ERR" class="com.bcs.core.log.appender.RollingFileWithSizeAndDayFolderAppender">
+        <param name="FileDatePattern" value="yyyy-MM-dd-HH-mm"/>
+        <param name="FolderDatePattern" value="yyyyMMdd"/>
+        <param name="Append" value="true"/>
+        <param name="MaxBackupIndex" value="9999"/>
+        <param name="MaxFileSize" value="400MB"/>
+        <param name="File" value="/bcs/log/rose/bn/taishin.ap.oaapi.bn.err.log"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss.SSS} %-5p [%-4L] %-30.30C{1} %-35M [%-27t] - %m%n"/>
+        </layout>
+        <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <param name="levelMin" value="ERROR"/>
+            <param name="levelMax" value="ERROR"/>
+        </filter>
+    </appender>
     <logger name="BNRecorder" additivity="false">
         <level value="INFO"/>
         <appender-ref ref="BN"/>
+        <appender-ref ref="BN_ERR"/>
     </logger>
     <root>
         <appender-ref ref="console"/>

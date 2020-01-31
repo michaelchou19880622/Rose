@@ -46,6 +46,7 @@ public class BillingNoticeFtpService {
     private BillingNoticeMainRepository billingNoticeMainRepository;
     private BillingNoticeDetailRepository billingNoticeDetailRepository;
     private BillingNoticeContentTemplateMsgRepository billingNoticeContentTemplateMsgRepository;
+    //    private ServerInfoService serverInfoService;
     private static FtpService ftpService = new FtpService();
     private ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1,
             new BasicThreadFactory.Builder()
@@ -59,10 +60,13 @@ public class BillingNoticeFtpService {
     public BillingNoticeFtpService(
             BillingNoticeMainRepository billingNoticeMainRepository,
             BillingNoticeDetailRepository billingNoticeDetailRepository,
-            BillingNoticeContentTemplateMsgRepository billingNoticeContentTemplateMsgRepository) {
+            BillingNoticeContentTemplateMsgRepository billingNoticeContentTemplateMsgRepository
+//            ServerInfoService serverInfoService
+    ) {
         this.billingNoticeMainRepository = billingNoticeMainRepository;
         this.billingNoticeDetailRepository = billingNoticeDetailRepository;
         this.billingNoticeContentTemplateMsgRepository = billingNoticeContentTemplateMsgRepository;
+//        this.serverInfoService = serverInfoService;
     }
 
     /**
@@ -128,8 +132,7 @@ public class BillingNoticeFtpService {
             Map<String, byte[]> returnDataMap = ftpService.downloadMultipleFileByType(ftpSetting.getPath(), fileExtension, ftpSetting);
             map.putAll(returnDataMap);
 
-            //TODO Alan:增加檔案清單卻又在進入時清除？
-            returnDataMap.keySet().forEach(ftpSetting::addFileNames);
+            returnDataMap.keySet().forEach(v -> ftpSetting.addFileNames(v));
         }
         return map;
     }
@@ -166,9 +169,10 @@ public class BillingNoticeFtpService {
 
     private void removeFtpFileProcess(Map<String, byte[]> lReturnDataMap, List<FtpSetting> ftpSettings) {
         if (lReturnDataMap.isEmpty()) {
+            log.info("Data Map is Empty!!");
             return;
         }
-        ftpSettings.forEach(ftp -> ftpService.deleteFileByType(ftp.getPath(), ftp.getFileNames().toArray(new String[0]), ftp));
+        ftpSettings.forEach(ftpSetting -> ftpService.deleteFileByType(ftpSetting.getPath(), ftpSetting.getFileNames().toArray(new String[0]), ftpSetting));
     }
 
 
@@ -333,8 +337,29 @@ public class BillingNoticeFtpService {
     private void saveDb(BillingNoticeMain billingNoticeMain) {
         List<BillingNoticeDetail> originalDetails = billingNoticeMain.getDetails();
         log.info("BillingNoticeFtpService BillingNoticeDetail size: {}", originalDetails.size());
-        String processApName = String.format("AIBCWEB%d", randomApName());
-        log.info("Main Id: {} -> {}", billingNoticeMain.getNoticeMainId(), processApName);
+        String processApName = "";
+
+        // FIXME 1 This statement is Hard-Code, should change to 2
+        String environment = CoreConfigReader.getString("environment", false);
+        switch (environment) {
+            case "sit":
+                break;
+            case "uat":
+                processApName = "AIMLAP-T";
+                break;
+            case "prod":
+                processApName = String.format("AIBCWEB%d", randomApName());
+                break;
+            default:
+                processApName = "";
+                break;
+        }
+
+        //FIXME 2 use ServerInfo table type is 'AP' list random one
+        //TODO ...
+
+
+        log.info("Process Ap Name -> {}", processApName);
         billingNoticeMain.setProcApName(processApName);
         billingNoticeMain = billingNoticeMainRepository.save(billingNoticeMain);
         List<BillingNoticeDetail> detailList = new ArrayList<>();
@@ -347,7 +372,7 @@ public class BillingNoticeFtpService {
         }
     }
 
-    private int randomApName(){
+    private int randomApName() {
         int value;
         do {
             value = new Random().nextInt(5) + 1;

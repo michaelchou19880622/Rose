@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -82,7 +81,7 @@ public class BillingNoticeSendMsgService {
             return;
         }
         try {
-            List<BillingNoticeMain> billingNoticeMainList = sendingBillingNoticeMain(getProcApName());
+            List<BillingNoticeMain> billingNoticeMainList = sendingBillingNoticeMain(DataUtils.getProcApName());
             if (billingNoticeMainList.isEmpty()) {
                 log.info("Main List is Empty!!");
                 return;
@@ -96,18 +95,6 @@ public class BillingNoticeSendMsgService {
         } catch (Exception e) {
             log.error("Exception", e);
         }
-    }
-
-    private String getProcApName() {
-        try {
-            InetAddress localAddress = InetAddress.getLocalHost();
-            if (localAddress != null) {
-                return localAddress.getHostName();
-            }
-        } catch (Exception e) {
-            log.error("getHostName error:" + e.getMessage());
-        }
-        return null;
     }
 
     /**

@@ -27,7 +27,7 @@ import java.util.Vector;
 /**
  * @author ???
  */
-@Slf4j
+@Slf4j(topic = "BNRecorder")
 @Service
 public class FtpService {
     private static String channelIds = CoreConfigReader.getString(CONFIG_STR.BN_FTP_CHANNELIDS, true, false);
@@ -200,14 +200,12 @@ public class FtpService {
             return false;
         }
         if (StringUtils.isBlank(setting.getAccount()) || StringUtils.isBlank(setting.getPassword())) {
-            log.error(
-                    "ftp setting error  account[" + setting.getAccount() + "] password[" + setting.getPassword() + "]");
+            log.error("ftp setting error  account[" + setting.getAccount() + "] password[" + setting.getPassword() + "]");
             return false;
         }
 
         if (StringUtils.isBlank(downloadSavePath) || StringUtils.isBlank(fileExtension)) {
-            log.error("ftp setting error  downloadSavePath[" + downloadSavePath + "] fileExtension[" + fileExtension
-                    + "]");
+            log.error("ftp setting error  downloadSavePath[" + downloadSavePath + "] fileExtension[" + fileExtension + "]");
             return false;
         }
         return true;
@@ -258,40 +256,38 @@ public class FtpService {
             boolean lStatus = false;
             String account = setting.getAccount();
             String password = setting.getPassword();
-            if ((account != null && account.length() > 0) && (password != null && password.length() > 0)) {
+            if (StringUtils.isNotBlank(account) && StringUtils.isNotBlank(password)) {
                 lStatus = pFtpClient.login(account, password);
                 if (lStatus) {
-                    log.info("loginFTP:{} 資源密碼系統的帳號密碼登入完成", setting.getHost());
-                } else {
-                    log.error("loginFtp:{} 資源密碼系統的帳號密碼登入失敗 APP[{}] RES[{}], 重新載入FTP連線參數！",
-                            new Object[]{setting.getHost(), setting.getAPPCode(), setting.getRESCode()});
+                    log.info("{} 資源密碼系統的帳號密碼登入完成", setting.getHost());
+                    return true;
                 }
+                log.error("{} 資源密碼系統的帳號密碼登入失敗 APP[{}] RES[{}], 重新載入FTP連線參數！",
+                        new Object[]{setting.getHost(), setting.getAPPCode(), setting.getRESCode()});
             }
+
             // T 重新載入一次設定
-            if (!lStatus) {
-                pFtpClient.disconnect();
-                // T 重新取得FTP 參數設定值
-                Map<String, String> trendPwMgmt = getTaishinFtpConnectionInfo(setting);
-                log.info("loginFTP:" + trendPwMgmt.get("uid") + " PWD:" + trendPwMgmt.get("pwd"));
-                pFtpClient.connect(setting.getHost(), setting.getPort());
-                lStatus = pFtpClient.login(trendPwMgmt.get("uid"), trendPwMgmt.get("pwd"));
-                if (lStatus) {
-                    log.info("loginFTP:{} 資源密碼系統的帳號密碼登入完成", setting.getHost());
-                } else {
-                    log.error("loginFtp:{} 資源密碼系統的帳號密碼登入失敗 APP[{}] RES[{}], 改以原系統記錄帳號密碼進行登入!",
-                            new Object[]{setting.getHost(), setting.getAPPCode(), setting.getRESCode()});
-                }
-                // T 以系統預設密碼登入
-                if (!lStatus) {
-                    lStatus = pFtpClient.login("ACCOUNT", "PASSWORD");
-                    if (lStatus) {
-                        log.info("loginFTP:{} 原系統記錄帳號密碼登入完成", setting.getHost());
-                    } else {
-                        log.error("loginFTP:{} 原系統記錄帳號密碼登入失敗，停止執行", setting.getHost());
-                    }
-                }
-                return lStatus;
+            // T 重新取得FTP 參數設定值
+            pFtpClient.disconnect();
+            Map<String, String> trendPwMgmt = getTaishinFtpConnectionInfo(setting);
+            log.info("loginFTP:" + trendPwMgmt.get("uid") + " PWD:" + trendPwMgmt.get("pwd"));
+            pFtpClient.connect(setting.getHost(), setting.getPort());
+            lStatus = pFtpClient.login(trendPwMgmt.get("uid"), trendPwMgmt.get("pwd"));
+            if (lStatus) {
+                log.info("{} 資源密碼系統的帳號密碼登入完成", setting.getHost());
+                return true;
             }
+            log.error("{} 資源密碼系統的帳號密碼登入失敗 APP[{}] RES[{}], 改以原系統記錄帳號密碼進行登入!",
+                    new Object[]{setting.getHost(), setting.getAPPCode(), setting.getRESCode()});
+
+            // T 以系統預設密碼登入
+            lStatus = pFtpClient.login("ACCOUNT", "PASSWORD");
+            if (lStatus) {
+                log.info("{} 原系統記錄帳號密碼登入完成", setting.getHost());
+                return true;
+            }
+            log.error("{} 原系統記錄帳號密碼登入失敗，停止執行", setting.getHost());
+            return false;
         } catch (Exception e) {
             log.error("loginFTP:" + e.getMessage());
         }
@@ -312,7 +308,7 @@ public class FtpService {
             // T 先以資源密碼系統取得的帳號密碼進行登入，登入失敗再以系統原本設定的帳號密碼登入系統
             String account = setting.getAccount();
             String password = setting.getPassword();
-            if ((account != null && account.length() > 0) && (password != null && password.length() > 0)) {
+            if (StringUtils.isNotBlank(account) && StringUtils.isNotBlank(password)) {
                 session = jsch.getSession(account, setting.getHost(), setting.getPort());
                 session.setPassword(password);
                 session.setConfig(sshConfig);
@@ -320,52 +316,47 @@ public class FtpService {
                 lStatus = session.isConnected();
                 if (lStatus) {
                     log.info("loginSFTP:" + setting.getHost() + "資源密碼系統的帳號密碼登入完成");
-                } else {
-                    log.error("loginSFTP:" + setting.getHost() + "資源密碼系統的帳號密碼登入失敗 APP[" + setting.getAPPCode() + "] RES["
-                            + setting.getRESCode() + "]，重新載入FTP連線參數!");
+                    return session;
                 }
-            }
-            // T 重新載入一次設定
-            if (!lStatus) {
-                if (session != null && session.isConnected()) {
-                    session.disconnect();
-                }
-                session = null;
-                // T 重新取得FTP 參數設定值
-                Map<String, String> trendPwMgmt = getTaishinFtpConnectionInfo(setting);
-                log.info("loginFTP:" + trendPwMgmt.get("uid") + " PWD:" + trendPwMgmt.get("pwd"));
-                session = jsch.getSession(trendPwMgmt.get("uid"), setting.getHost(), setting.getPort());
-                session.setPassword(trendPwMgmt.get("pwd"));
-                session.setConfig(sshConfig);
-                session.connect();
-                lStatus = session.isConnected();
-                if (lStatus) {
-                    log.info("loginSFTP:" + setting.getHost() + "資源密碼系統的帳號密碼登入完成");
-                } else {
-                    log.error("loginSFTP:" + setting.getHost() + "資源密碼系統的帳號密碼登入失敗 APP[" + setting.getAPPCode() + "] RES["
-                            + setting.getRESCode() + "]，改以原系統記錄帳號密碼進行登入!");
-                }
+                log.error("loginSFTP:" + setting.getHost() + "資源密碼系統的帳號密碼登入失敗 APP[" + setting.getAPPCode() + "] RES["
+                        + setting.getRESCode() + "]，重新載入FTP連線參數!");
 
-                // T 以系統預設密碼登入
-                if (!lStatus) {
-                    session = jsch.getSession("ACCOUNT", setting.getHost(), setting.getPort());
-                    session.setPassword("PASSWORD");
-                    session.setConfig(sshConfig);
-                    session.connect();
-                    lStatus = session.isConnected();
-                    if (lStatus) {
-                        log.info("loginSFTP:" + setting.getHost() + "原系統記錄帳號密碼登入完成");
-                    } else {
-                        log.error("loginSFTP:" + setting.getHost() + "原系統記錄帳號密碼登入失敗，停止執行");
-                    }
-                }
             }
+
+            // T 重新載入一次設定
+            // T 重新取得FTP 參數設定值
+            if (session != null && session.isConnected()) {
+                session.disconnect();
+            }
+            Map<String, String> trendPwMgmt = getTaishinFtpConnectionInfo(setting);
+            log.info("loginFTP:" + trendPwMgmt.get("uid") + " PWD:" + trendPwMgmt.get("pwd"));
+            session = jsch.getSession(trendPwMgmt.get("uid"), setting.getHost(), setting.getPort());
+            session.setPassword(trendPwMgmt.get("pwd"));
+            session.setConfig(sshConfig);
+            session.connect();
+            lStatus = session.isConnected();
+            if (lStatus) {
+                log.info("loginSFTP:" + setting.getHost() + "資源密碼系統的帳號密碼登入完成");
+                return session;
+            }
+            log.error("loginSFTP:" + setting.getHost() + "資源密碼系統的帳號密碼登入失敗 APP[" + setting.getAPPCode() + "] RES["
+                    + setting.getRESCode() + "]，改以原系統記錄帳號密碼進行登入!");
+
+
+            // T 以系統預設密碼登入
+            session = jsch.getSession("ACCOUNT", setting.getHost(), setting.getPort());
+            session.setPassword("PASSWORD");
+            session.setConfig(sshConfig);
+            session.connect();
+            lStatus = session.isConnected();
+            if (lStatus) {
+                log.info("loginSFTP:" + setting.getHost() + "原系統記錄帳號密碼登入完成");
+                return session;
+            }
+            log.error("loginSFTP:" + setting.getHost() + "原系統記錄帳號密碼登入失敗，停止執行");
+            return null;
         } catch (Exception ex) {
             log.error("loginSFTP Error: " + ex.getMessage());
-        }
-
-        if (lStatus) {
-            return session;
         }
         return null;
     }
@@ -433,7 +424,7 @@ public class FtpService {
             // 正式環境時使用
             return downloadMultipleFileInSFTP(directory, extension, setting);
         }
-        if (!CoreConfigReader.isBillingNoticeFtpTypeDevelop()) {
+        if (CoreConfigReader.isBillingNoticeFtpTypeDevelop()) {
             return downloadMultipleFileInFTPForDev(directory, extension, setting);
         }
         // 正式環境時使用
@@ -848,6 +839,8 @@ public class FtpService {
                         log.error("deleteFileInFTP remove fail: " + lFileName);
                     }
                 }
+            } else {
+                log.info("Ftp Connection Fail!!");
             }
         } catch (Exception e) {
             log.error("deleteFileInFTP Exception" + e.getMessage());

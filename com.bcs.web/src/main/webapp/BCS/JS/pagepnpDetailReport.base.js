@@ -245,7 +245,9 @@ $(function() {
           list.find('.pnpStatusCode').html(pnpStatus);
           list.find('.smsStatusCode').html(obj.smsStatus);
           list.find('.accountPccCode').html(obj.pccCode);
-          list.find('.schedule_time').html(moment(obj.scheduleTime).format('YYYY-MM-DD HH:mm:ss'));
+          if (obj.scheduleTime !== null) {
+            list.find('.schedule_time').html(moment(obj.scheduleTime).format('YYYY-MM-DD HH:mm:ss'));
+          }
           list.find('.resendBtn').click(function() {
             resendSms(obj.detailId, obj.ftpSource);
           });
@@ -253,10 +255,15 @@ $(function() {
           $('#resultTable').append(list);
 
           var list2 = originalTr2.clone(true);
-          list2.find('.bc_time').html(moment(obj.bcTime).format('yyyy-MM-dd HH:mm:ss'));
-          list2.find('.pnp_time').html(moment(obj.pnpTime).format('yyyy-MM-dd HH:mm:ss'));
-          list2.find('.sms_time').html(moment(obj.smsTime).format('yyyy-MM-dd HH:mm:ss'));
-
+          if (obj.bcTime !== null) {
+            list2.find('.bc_time').html(moment(obj.bcTime).format('YYYY-MM-dd HH:mm:ss'));
+          }
+          if (obj.pnpTime !== null) {
+            list2.find('.pnp_time').html(moment(obj.pnpTime).format('YYYY-MM-dd HH:mm:ss'));
+          }
+          if (obj.smsTime !== null) {
+            list2.find('.sms_time').html(moment(obj.smsTime).format('YYYY-MM-dd HH:mm:ss'));
+          }
           // <button id="resendBtn"
           // sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_PNP_ADMIN','ROLE_MARKET','ROLE_PNP_SEND_LINE_SEND','ROLE_PNP_SEND_LINE_VERIFY')">
           //     再次發送SMS

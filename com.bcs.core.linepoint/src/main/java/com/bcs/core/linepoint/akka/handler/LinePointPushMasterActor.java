@@ -19,10 +19,10 @@ public class LinePointPushMasterActor extends UntypedActor {
 //    private final ActorRef ftpTaskRouterActor;
 
     public LinePointPushMasterActor() {
-        pushMessageRouterActor = new AkkaRouterFactory<LinePointPushMessageActor>(getContext(), LinePointPushMessageActor.class, true).routerActor;
-//        pushApiRouterActor = new AkkaRouterFactory<LinePointPushApiActor>(getContext(), LinePointPushApiActor.class, true).routerActor;
-//        pushMessageRecordRouterActor = new AkkaRouterFactory<LinePointPushMessageRecordActor>(getContext(), LinePointPushMessageRecordActor.class, true).routerActor;
-//        ftpTaskRouterActor = new AkkaRouterFactory<LinePointFtpTaskActor>(getContext(), LinePointFtpTaskActor.class, true).routerActor;
+        pushMessageRouterActor = new AkkaRouterFactory<>(getContext(), LinePointPushMessageActor.class, true).routerActor;
+//        pushApiRouterActor = new AkkaRouterFactory<>(getContext(), LinePointPushApiActor.class, true).routerActor;
+//        pushMessageRecordRouterActor = new AkkaRouterFactory<>(getContext(), LinePointPushMessageRecordActor.class, true).routerActor;
+//        ftpTaskRouterActor = new AkkaRouterFactory<>(getContext(), LinePointFtpTaskActor.class, true).routerActor;
     }
 
     @Override
@@ -55,26 +55,35 @@ public class LinePointPushMasterActor extends UntypedActor {
     }
 
     private void methodA(LinePointPushModel object) throws CloneNotSupportedException {
-        LinePointPushModel pushApiModel = object;
-        /* Partition Size */
-        int buffer = 200;
-        JSONArray detailIds = pushApiModel.getDetailIds();
+        JSONArray detailIds = object.getDetailIds();
         log.info("Total Detail Size: {}", detailIds.toList().size());
-        int arrayLength = detailIds.length();
+        final int maxAkkaCount = 100;
+        final int buffer = getBuffer(detailIds.toList().size(), maxAkkaCount);
+        final int arrayLength = detailIds.length();
         int pointer = 0;
 
         while (pointer < arrayLength) {
             JSONArray partitionDetailIds = new JSONArray();
 
-            /* 每一百筆 */
             for (int counter = 0; (counter < buffer) && (pointer < arrayLength); counter++, pointer++) {
                 partitionDetailIds.put(detailIds.get(pointer));
             }
 
-            LinePointPushModel pushApiModelClone = (LinePointPushModel) pushApiModel.clone();
+            LinePointPushModel pushApiModelClone = (LinePointPushModel) object.clone();
             pushApiModelClone.setDetailIds(partitionDetailIds);
             log.info("To Akka Detail {} Size: {}", pointer, pushApiModelClone.getDetailIds().toList().size());
             pushMessageRouterActor.tell(pushApiModelClone, this.getSelf());
         }
     }
+
+    private int getBuffer(final int detailSize, final int maxActorCount) {
+        if (detailSize <= maxActorCount) {
+            return 1;
+        }
+        if (detailSize % maxActorCount == 0) {
+            return detailSize / maxActorCount;
+        }
+        return detailSize / maxActorCount + 1;
+    }
+
 }

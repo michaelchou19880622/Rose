@@ -12,7 +12,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.gson.GsonBuilder;
 
-import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 
 import lombok.experimental.UtilityClass;
@@ -177,10 +176,14 @@ public class DataUtils {
      * @return isFuture
      */
     public static boolean isFuture(Date compareDate) {
-        if (compareDate == null) {
+        return before(new Date(), compareDate);
+    }
+
+    public static boolean before(Date date, Date compareDate) {
+        if (date == null || compareDate == null) {
             return false;
         }
-        return new Date().before(compareDate);
+        return date.before(compareDate);
     }
 
     /**
@@ -190,10 +193,15 @@ public class DataUtils {
      * @return isPast
      */
     public static boolean isPast(Date compareDate) {
-        if (compareDate == null) {
+        return after(new Date(), compareDate);
+    }
+
+    public static boolean after(Date date, Date compareDate) {
+        if (date == null || compareDate == null) {
             return false;
         }
-        return new Date().after(compareDate);
+        return date.after(compareDate);
+
     }
 
     /**
@@ -270,7 +278,7 @@ public class DataUtils {
         return totalCount / onePageCount + (totalCount % onePageCount == 0 ? 0 : 1);
     }
 
-    public static boolean isBetween(Date compareTime, Date startTime, Date endTime){
+    public static boolean inBetween(Date compareTime, Date startTime, Date endTime){
         if (compareTime == null || startTime == null || endTime == null) {
             return false;
         }

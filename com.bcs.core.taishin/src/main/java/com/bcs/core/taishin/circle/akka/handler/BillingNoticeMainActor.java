@@ -9,9 +9,9 @@ import com.bcs.core.taishin.circle.service.BillingNoticeService;
 import com.bcs.core.utils.AkkaRouterFactory;
 import com.bcs.core.utils.DataUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ObjectUtils;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -62,26 +62,18 @@ public class BillingNoticeMainActor extends UntypedActor {
     }
 
     private void pushProcess(BillingNoticeMain object) {
-        int buffer = 100;
         List<BillingNoticeDetail> details = object.getDetails();
-        List<BillingNoticeDetail> partition;
-        int detailSize = details.size();
-        int count = 0;
-
+        final int detailSize = details.size();
+        final int maxActorCount = 20;
+        final int buffer = detailSize < 50 ? 5 : detailSize / maxActorCount;
         log.info("Detail: {}", DataUtils.toPrettyJsonUseJackson(details));
-
-        while (count < detailSize) {
-            int counter = 0;
-            partition = new ArrayList<>();
-            for (; (counter < buffer) && (count < detailSize); counter++, count++) {
-                partition.add(details.get(count));
-            }
-            log.info("To Akka Count: {}, Partition Size: {}", count, partition.size());
-
+        List<List<BillingNoticeDetail>> partitionList = ListUtils.partition(details, buffer);
+        partitionList.forEach(list -> {
+            log.info("To Akka Partition Size: {}", list.size());
             BillingNoticeMain billingNoticeMainClone = ObjectUtils.clone(object);
-            billingNoticeMainClone.setDetails(partition);
+            billingNoticeMainClone.setDetails(list);
             toPushActor(billingNoticeMainClone);
-        }
+        });
     }
 
     private void toPushActor(BillingNoticeMain billingNoticeMainClone) {

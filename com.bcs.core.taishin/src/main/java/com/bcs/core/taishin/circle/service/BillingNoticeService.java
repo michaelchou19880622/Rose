@@ -35,21 +35,22 @@ import org.springframework.web.client.HttpServerErrorException;
 import javax.mail.Address;
 import javax.mail.Authenticator;
 import javax.mail.Message;
-import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 
+/**
+ * @author ???
+ */
 @Slf4j(topic = "BNRecorder")
 @Service
 public class BillingNoticeService {
@@ -68,12 +69,11 @@ public class BillingNoticeService {
     private BillingNoticeContentTemplateMsgActionRepository billingNoticeContentTemplateMsgActionRepository;
     @Autowired
     private BillingNoticeAkkaService billingNoticeAkkaService;
-    private DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+    @Autowired
+    private BillingNoticeService billingNoticeService;
 
     /**
      * 找尋開啟的templateId
-     *
-     * @return
      */
     public List<String> findProductSwitchOnTemplateId() {
         return billingNoticeContentTemplateMsgRepository.findProductSwitchOnTemplateId();
@@ -81,50 +81,49 @@ public class BillingNoticeService {
 
     /**
      * 是否宵禁中
-     *
-     * @param template
-     * @return
      */
     public boolean isCurfew(BillingNoticeContentTemplateMsg template, Calendar now) {
-        boolean iscurfew = false;
+        boolean isCurfew = false;
+
         try {
             if (StringUtils.isNotBlank(template.getCurfewEndTime()) && StringUtils.isNotBlank(template.getCurfewStartTime())) {
+
                 Calendar curfewStartTime = (Calendar) now.clone();
                 String[] startTime = template.getCurfewStartTime().split(":");
                 curfewStartTime.set(Calendar.HOUR_OF_DAY, Integer.parseInt(startTime[0]));
                 curfewStartTime.set(Calendar.MINUTE, Integer.parseInt(startTime[1]));
                 curfewStartTime.set(Calendar.SECOND, Integer.parseInt(startTime[2]));
                 curfewStartTime.set(Calendar.MILLISECOND, 0);
+
                 Calendar curfewEndTime = (Calendar) now.clone();
                 String[] endTime = template.getCurfewEndTime().split(":");
-                curfewEndTime.set(Calendar.MILLISECOND, 0);
                 curfewEndTime.set(Calendar.HOUR_OF_DAY, Integer.parseInt(endTime[0]));
                 curfewEndTime.set(Calendar.MINUTE, Integer.parseInt(endTime[1]));
                 curfewEndTime.set(Calendar.SECOND, Integer.parseInt(endTime[2]));
+                curfewEndTime.set(Calendar.MILLISECOND, 0);
+
                 if (curfewStartTime.before(curfewEndTime)) {
-                    //未跨日 EX: 09:00:00 ~ 13:00:00
+                    //未跨日 EX: 3/19 09:00:00 ~ 3/19 13:00:00
+                    log.info("Not cross day");
                 } else {
-                    //跨日 EX: 3/19 23:00:00 ~ 3/20 01:00:00
-                    if (now.after(curfewStartTime)) {
-                        // 目前日期等於起始日 EX: now = 3/19 23:02:00
+                    //跨日 EX: 3/19 23:00:00 ~ 3/20 01:00:0
+                    log.info("Cross day!!");
+                    if (DataUtils.isPast(curfewStartTime.getTime())) {
                         curfewEndTime.add(Calendar.DATE, 1);
                     } else {
-                        // 目前日期等於截止日 EX: now = 3/20 00:02:00
                         curfewStartTime.add(Calendar.DATE, -1);
                     }
                 }
 
-                if (now.getTime().before(curfewEndTime.getTime()) && now.getTime().after(curfewStartTime.getTime())) {
-                    // 宵禁中
-                    iscurfew = true;
+                if (DataUtils.inBetween(new Date(), curfewStartTime.getTime(), curfewEndTime.getTime())) {
+                    isCurfew = true;
                 }
-                log.info("iscurfew: " + curfewStartTime.getTime() + "~" + curfewEndTime.getTime());
+                log.info("isCurfew: {}~{}", curfewStartTime.getTime(), curfewEndTime.getTime());
             }
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("CurfewEndTime/CurfewStartTime Parse Exception :" + e.getMessage());
         }
-        return iscurfew;
+        return isCurfew;
     }
 
     public BillingNoticeDetail save(BillingNoticeDetail billingNoticeDetail) {
@@ -136,40 +135,38 @@ public class BillingNoticeService {
 
     /**
      * update status 為不推送 並寄信
-     *
-     * @param billingNoticeMain
-     * @return
      */
+    @Transactional(rollbackFor = Exception.class, timeout = 30)
     public void updateStatusFailAndEmail(BillingNoticeMain billingNoticeMain) {
-        updateMainAndDetailStatus(billingNoticeMain, BillingNoticeMain.NOTICE_STATUS_FAIL);
-        //  send email Title , mailTemplate
-        StringBuilder contextBuilder = new StringBuilder("帳務系統重試失敗 ");
-        contextBuilder.append("\n 失敗ID:" + billingNoticeMain.getNoticeMainId());
+        updateMainAndDetailStatus(billingNoticeMain, BillingNoticeMain.NOTICE_STATUS_EXPIRED);
+
+        StringBuilder contextBuilder = new StringBuilder("帳務通知發送逾期!!");
+        contextBuilder
+                .append("\n ID:")
+                .append(billingNoticeMain.getNoticeMainId());
         if (billingNoticeMain.getExpiryTime() != null) {
-            contextBuilder.append("\n EXPIRY_TIME:" + df.format(billingNoticeMain.getExpiryTime()));
+            contextBuilder
+                    .append("\n EXPIRY_TIME:")
+                    .append(DataUtils.convDateToStr(billingNoticeMain.getExpiryTime(), "yyyy-MM-dd hh:mm:ss"));
+
         }
-        sendMail("帳務系統重試失敗", contextBuilder.toString());
+        sendMail("帳務通知發送逾期", contextBuilder.toString());
     }
 
     /**
      * update billingNoticeMain and BillingNoticeDetail status
      */
-    @Transactional(rollbackFor = Exception.class, timeout = 30)
     public void updateMainAndDetailStatus(BillingNoticeMain billingNoticeMain, String status) {
         List<BillingNoticeDetail> details = billingNoticeMain.getDetails();
         for (BillingNoticeDetail detail : details) {
             detail.setStatus(status);
             save(detail);
         }
-        Date now = new Date();
-        billingNoticeMainRepository.updateBillingNoticeMainStatus(status, now, billingNoticeMain.getNoticeMainId());
+        billingNoticeMainRepository.updateBillingNoticeMainStatus(status, new Date(), billingNoticeMain.getNoticeMainId());
     }
 
     /**
      * send email to system admin setting user
-     *
-     * @param title
-     * @param content
      */
     public void sendMail(String title, String content) {
         log.info("Billing Notice Send email : [" + title + "]" + content);
@@ -181,21 +178,23 @@ public class BillingNoticeService {
         String host = CoreConfigReader.getString(null, EMAIL_CONFIG.HOST.toString(), true, false);
         int port = -1;
         try {
-            port = Integer.parseInt(CoreConfigReader.getString(null, EMAIL_CONFIG.PORT.toString(), true, false));
+            port = Integer.parseInt(Objects.requireNonNull(CoreConfigReader.getString(null, EMAIL_CONFIG.PORT.toString(), true, false)));
         } catch (Exception e) {
             log.error("Billing Notice Send email smtp port is not number ");
         }
         final String username = CoreConfigReader.getString(null, EMAIL_CONFIG.USERNAME.toString(), true, false);
-        final String password = CoreConfigReader.getString(null, EMAIL_CONFIG.PASSWORD.toString(), true, false);// your password
+        final String password = CoreConfigReader.getString(null, EMAIL_CONFIG.PASSWORD.toString(), true, false);
         String auth = CoreConfigReader.getString(null, EMAIL_CONFIG.AUTH.toString(), true, false);
-        String starttls = CoreConfigReader.getString(null, EMAIL_CONFIG.STARTTLS_ENABLE.toString(), true, false);
+        String startTls = CoreConfigReader.getString(null, EMAIL_CONFIG.STARTTLS_ENABLE.toString(), true, false);
         String debug = CoreConfigReader.getString(null, EMAIL_CONFIG.DEBUG.toString(), true, false);
+
         Properties props = new Properties();
         props.put("mail.smtp.host", host);
         props.put("mail.smtp.auth", StringUtils.isBlank(auth) ? "false" : auth);
-        props.put("mail.smtp.starttls.enable", StringUtils.isBlank(starttls) ? "false" : starttls);
+        props.put("mail.smtp.starttls.enable", StringUtils.isBlank(startTls) ? "false" : startTls);
         props.put("mail.smtp.port", port);
         props.put("mail.debug", StringUtils.isBlank(debug) ? "false" : debug);
+
         if (StringUtils.isBlank(host) || port == -1 || StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
             log.error("Billing Notice Send email setting wrong ");
             return;
@@ -212,6 +211,7 @@ public class BillingNoticeService {
         try {
             final String decodePassword = CryptUtil.Decrypt(CryptUtil.AES, password, secret, iv);
             Session session = Session.getInstance(props, new Authenticator() {
+                @Override
                 protected javax.mail.PasswordAuthentication getPasswordAuthentication() {
                     return new javax.mail.PasswordAuthentication(username, decodePassword);
                 }
@@ -226,7 +226,7 @@ public class BillingNoticeService {
 
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(fromAddress));
-            message.setRecipients(Message.RecipientType.TO, recipients.toArray(new InternetAddress[0]));
+            message.setRecipients(Message.RecipientType.TO, recipients.toArray(new Address[0]));
             message.setSubject(title);
             message.setText(content);
 
@@ -235,10 +235,8 @@ public class BillingNoticeService {
 
             Transport.send(message);
 
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.error("Billing Notice Send email error : " + e.getMessage());
-        } catch (Exception e1) {
-            log.error("Billing Notice Send email error : " + e1.getMessage());
         }
     }
 
@@ -246,15 +244,15 @@ public class BillingNoticeService {
      * 若明細已無重試或等待發送/排程中或者傳遞中的狀態資料，則更新主檔狀態為完成
      */
     public void updateBillingNoticeMainStatusComplete(Long mainId) {
-        List<String> status = new ArrayList<>();
-        status.add(BillingNoticeMain.NOTICE_STATUS_WAIT);
-        status.add(BillingNoticeMain.NOTICE_STATUS_RETRY);
-        status.add(BillingNoticeMain.NOTICE_STATUS_SENDING);
-        status.add(BillingNoticeMain.NOTICE_STATUS_DRAFT);
-        status.add(BillingNoticeMain.NOTICE_STATUS_SCHEDULED);
-        if (billingNoticeDetailRepository.countByNoticeMainIdAndStatus(mainId, status) == 0) {
+//        List<String> status = new ArrayList<>();
+//        status.add(BillingNoticeMain.NOTICE_STATUS_WAIT);
+//        status.add(BillingNoticeMain.NOTICE_STATUS_RETRY);
+//        status.add(BillingNoticeMain.NOTICE_STATUS_SENDING);
+//        status.add(BillingNoticeMain.NOTICE_STATUS_DRAFT);
+//        status.add(BillingNoticeMain.NOTICE_STATUS_SCHEDULED);
+//        if (billingNoticeDetailRepository.countByNoticeMainIdAndStatus(mainId, status) == 0) {
             billingNoticeMainRepository.updateBillingNoticeMainStatus(BillingNoticeMain.NOTICE_STATUS_COMPLETE, new Date(), mainId);
-        }
+//        }
     }
 
     public void pushLineMessage(BillingNoticeMain billingNoticeMain, ActorRef sendRef, ActorRef selfActorRef) throws InterruptedException {
@@ -277,7 +275,7 @@ public class BillingNoticeService {
         }
 
         for (BillingNoticeDetail detail : billingNoticeMain.getDetails()) {
-            boolean isDoRetry = false;
+            boolean isDoRetry;
             int i = 0;
             int retryCountLimit = DEFAULT_RETRY_COUNT;
             do {
@@ -339,7 +337,7 @@ public class BillingNoticeService {
                     sleepProcess();
                 }
 
-            } while(isDoRetry);
+            } while (isDoRetry);
 
             if (!BillingNoticeMain.NOTICE_STATUS_COMPLETE.equals(detail.getStatus())) {
                 detail.setStatus(BillingNoticeMain.NOTICE_STATUS_FAIL);
@@ -352,12 +350,13 @@ public class BillingNoticeService {
                 billingNoticeAkkaService.tell(detail);
             }
         }
+        log.info("Complete Main is [{}]", billingNoticeMain.getNoticeMainId());
+        billingNoticeService.updateBillingNoticeMainStatusComplete(billingNoticeMain.getNoticeMainId());
     }
 
 
     private void sleepProcess() throws InterruptedException {
-        //FIXME Add BN Send Sleep Time
-        int time = getLinePointProcessSleepTime();
+        int time = getProcessSleepTime();
         if (time < 0) {
             time = DEFAULT_SLEEP_TIME;
         }
@@ -369,9 +368,8 @@ public class BillingNoticeService {
     /**
      * Get Line Point Process Sleep Time
      */
-    private Integer getLinePointProcessSleepTime() {
-//        return CoreConfigReader.getInteger("line.point.api.sent.sleep.time", true);
-        return -1;
+    private Integer getProcessSleepTime() {
+        return CoreConfigReader.getInteger("bn.api.sent.sleep.time", true);
     }
 
     /**

@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Controller
@@ -206,22 +207,14 @@ public class BCSLinePointController extends BCSBaseController {
     public ResponseEntity<?> findAllLinePointDetailByMainId(HttpServletRequest request, HttpServletResponse response,
                                                             @CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
         try {
-            try {
-                log.info("[findAllLinePointDetailByMainId] linePointMainId:" + linePointMainId);
-                // get Details
-                List<LinePointDetail> linePointDetails = linePointUIService.findByLinePointMainId(linePointMainId);
-                log.info("linePointDetails:" + linePointDetails);
-                return new ResponseEntity<>(linePointDetails, HttpStatus.OK);
-            } catch (Exception e) {
-                throw new BcsNoticeException(e.getMessage());
-            }
+            log.info("[findAllLinePointDetailByMainId] linePointMainId:" + linePointMainId);
+            // get Details
+            List<LinePointDetail> linePointDetails = linePointUIService.findByLinePointMainId(linePointMainId);
+            log.info("linePointDetails:" + linePointDetails);
+            return new ResponseEntity<>(linePointDetails, HttpStatus.OK);
         } catch (Exception e) {
             log.error(ErrorRecord.recordError(e));
-            if (e instanceof BcsNoticeException) {
-                return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-            } else {
-                return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
         }
     }
 
@@ -234,38 +227,37 @@ public class BCSLinePointController extends BCSBaseController {
         try {
             log.info("[findAllBcsLinePointMain]");
 
-            // null translation
-            if (StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) {
+            if (StringUtils.isBlank(startDateStr) || "null".equals(startDateStr)) {
                 startDateStr = "1911-01-01";
             }
-            if (StringUtils.isBlank(endDateStr) || endDateStr.equals("null")) {
+            if (StringUtils.isBlank(endDateStr) || "null".equals(endDateStr)) {
                 endDateStr = "3099-01-01";
             }
 
             // parse date data
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            Date startDate = null, endDate = null;
-            startDate = sdf.parse(startDateStr);
-            endDate = sdf.parse(endDateStr);
+            Date startDate = DataUtils.convStrToDate(startDateStr, "yyyy-MM-dd");
+            Date endDate = DataUtils.convStrToDate(endDateStr, "yyyy-MM-dd");
             endDate = DateUtils.addDays(endDate, 1);
-            log.info("startDate:" + startDate);
-            log.info("endDate:" + endDate);
+            log.info("startDate: {}", startDate);
+            log.info("endDate  : {}", endDate);
 
             //List<LinePointMain> result = new ArrayList<LinePointMain>();
             List<LinePointMain> list = this.linePointUIService.linePointMainFindBcsAndDate(startDate, endDate);
+            //FIXME Why query request can do update SQL?
             for (LinePointMain linePointMain : list) {
                 linePointUIService.updateLinePoint(linePointMain.getId().toString());
             }
+            //FIXME Why query again from database?
             list = this.linePointUIService.linePointMainFindBcsAndDate(startDate, endDate);
             //log.info("list:" + list);
             List<LinePointMain> result = competence(list, customUser);
 
 //		    result.addAll(list);
             log.info("result:" + ObjectUtil.objectToJsonStr(result));
-            return new ResponseEntity(result, HttpStatus.OK);
+            return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             log.error(ErrorRecord.recordError(e));
-            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
         }
     }
 
@@ -274,11 +266,9 @@ public class BCSLinePointController extends BCSBaseController {
     @ResponseBody
     public ResponseEntity<?> getAllLinePointMainList(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser) throws IOException {
         log.info("[findAllLinePointMain]");
-        List<LinePointMain> result = new ArrayList<LinePointMain>();
         List<LinePointMain> list = linePointUIService.linePointMainFindAll();
-        result.addAll(list);
-        log.debug("result:" + ObjectUtil.objectToJsonStr(result));
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        log.debug("result:" + ObjectUtil.objectToJsonStr(list));
+        return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
 
@@ -502,215 +492,63 @@ public class BCSLinePointController extends BCSBaseController {
         }
     }
 
+    /**
+     * List filter by Auth
+     *
+     * @param list       Point Main List
+     * @param customUser Custom user
+     * @return After filter list
+     * @throws Exception exception
+     */
     public List<LinePointMain> competence(List<LinePointMain> list, CustomUser customUser) throws Exception {
-        List<LinePointMain> result = new ArrayList();
+        List<LinePointMain> result = new ArrayList<>();
 
-        //取得權限
         String role = customUser.getRole();
         String empId = customUser.getAccount();
         // reset service name
         for (LinePointMain main : list) {
             String serviceName = "BCS";
-            if (main.getSendType().equals(LinePointMain.SEND_TYPE_API)) {
+            if (Objects.equals(main.getSendType(), LinePointMain.SEND_TYPE_API)) {
                 List<LinePointDetail> details = linePointDetailService.findByLinePointMainId(main.getId());
                 serviceName = details.get(0).getServiceName();
             }
             main.setSendType(serviceName);
 
-            if ("ROLE_ADMIN".equals(role) || "ROLE_REPORT".equals(role)) {
-                result.add(main);
-            } else if ("ROLE_LINE_SEND".equals(role) || "ROLE_LINE_VERIFY".equals(role)) {
+            switch (role) {
+                case "ROLE_ADMIN":
+                case "ROLE_REPORT":
+                    result.add(main);
+                    break;
+                case "ROLE_LINE_VERIFY":
+                case "ROLE_LINE_SEND":
+                    TaishinEmployee employee = oracleService.findByEmployeeId(empId);
+                    String department = main.getDepartmentFullName();
+                    String[] departmentName = department.split(" ");
+                    //Departmentname[0]; 處  DIVISION_NAME
+                    //Departmentname[1]; 部  DEPARTMENT_NAME
+                    //Departmentname[2]; 組  GROUP_NAME
 
-                TaishinEmployee employee = oracleService.findByEmployeeId(empId);
-//					TaishinEmployee employee = new TaishinEmployee();
-
-//					employee.setDivisionName("XTREME");
-//					employee.setDepartmentName("LINEBC");
-
-
-                String Department = main.getDepartmentFullName();
-                String[] Departmentname = Department.split(" ");
-                //Departmentname[0]; 處  DIVISION_NAME
-                //Departmentname[1]; 部  DEPARTMENT_NAME
-                //Departmentname[2]; 組  GROUP_NAME
-
-                //判斷邏輯  如果登錄者有組 那只能看到同組 顧處部組全都要一樣，沒有組有部 那就是處跟部要一樣才可以，只有處 就是處一樣即可
-                if (StringUtils.isNotBlank(employee.getGroupName())) {
-                    if (Departmentname[0].equals(employee.getDivisionName()) && Departmentname[1].equals(employee.getDepartmentName()) && Departmentname[2].equals(employee.getGroupName())) {
-                        result.add(main);
+                    //判斷邏輯  如果登錄者有組 那只能看到同組 顧處部組全都要一樣，沒有組有部 那就是處跟部要一樣才可以，只有處 就是處一樣即可
+                    if (StringUtils.isNotBlank(employee.getGroupName())) {
+                        if (departmentName[0].equals(employee.getDivisionName()) && departmentName[1].equals(employee.getDepartmentName()) && departmentName[2].equals(employee.getGroupName())) {
+                            result.add(main);
+                        }
+                    } else if (StringUtils.isNotBlank(employee.getDepartmentName())) {
+                        if (departmentName[0].equals(employee.getDivisionName()) && departmentName[1].equals(employee.getDepartmentName())) {
+                            result.add(main);
+                        }
+                    } else if (StringUtils.isNotBlank(employee.getDivisionName())) {
+                        if (departmentName[0].equals(employee.getDivisionName())) {
+                            result.add(main);
+                        }
+                    } else {
+                        log.info("The user does not match any auth role!!");
                     }
-                } else if (StringUtils.isNotBlank(employee.getDepartmentName())) {
-                    if (Departmentname[0].equals(employee.getDivisionName()) && Departmentname[1].equals(employee.getDepartmentName())) {
-                        result.add(main);
-                    }
-                } else if (StringUtils.isNotBlank(employee.getDivisionName())) {
-                    if (Departmentname[0].equals(employee.getDivisionName())) {
-                        result.add(main);
-                    }
-                }
+                    break;
+                default:
+                    break;
             }
         }
         return result;
     }
-
-//	@ControllerLog(description = "Get Manual Line Point Main")
-//	@GetMapping(value = "/edit/getManualLinePointMainList")
-//	@ResponseBody
-//	public ResponseEntity<?> getManualLinePointMainList(HttpServletRequest request, HttpServletResponse response,
-//			@CurrentUser CustomUser customUser) throws IOException {
-//		log.info("[getManualLinePointMainList]");
-//		List<LinePointMain> result = new ArrayList();
-//		List<LinePointMain> list = linePointUIService.linePointMainFindManual();
-//		result.addAll(list);
-//		log.debug("result:" + ObjectUtil.objectToJsonStr(result));
-//		return new ResponseEntity<>(result, HttpStatus.OK);
-//	}
-
-//	@ControllerLog(description = "Get Auto Line Point Main")
-//	@GetMapping(value = "/edit/getAutoLinePointMainList")
-//	@ResponseBody
-//	public ResponseEntity<?> getAutoLinePointMainList(HttpServletRequest request, HttpServletResponse response,
-//			@CurrentUser CustomUser customUser) throws IOException {
-//		log.info("[getAutoLinePointMainList]");
-//		List<LinePointMain> result = new ArrayList();
-//		List<LinePointMain> list = linePointUIService.linePointMainFindAuto();
-//		result.addAll(list);
-//		log.debug("result:" + ObjectUtil.objectToJsonStr(result));
-//		return new ResponseEntity<>(result, HttpStatus.OK);
-//	}
-
-    //----
-//	@ControllerLog(description = "Get All Line Point Main")
-////	@GetMapping(value = "/edit/getAllLinePointMainListSearch/{searchText}")
-//	@ResponseBody
-//	public ResponseEntity<?> getAllLinePointMainListSearch(HttpServletRequest request, HttpServletResponse response,
-//			@CurrentUser CustomUser customUser, @PathVariable String searchText) throws IOException {
-//		log.info("[findAllLinePointMainList]");
-//		try {
-//			List<LinePointMain> result = new ArrayList();
-//			List<LinePointMain> list = linePointUIService.linePointMainFindAll(searchText);
-//			result.addAll(list);
-//			log.debug("result:" + ObjectUtil.objectToJsonStr(result));
-//			return new ResponseEntity<>(result, HttpStatus.OK);
-//		}catch(Exception e) {
-//			log.info("Error1: " + e.getMessage());
-//			return new ResponseEntity<>("Error1: " + e.getMessage(), HttpStatus.OK);
-//		}
-//
-//	}
-
-//	@ControllerLog(description = "Get Manual Line Point Main")
-//	@GetMapping(value = "/edit/getManualLinePointMainListSearch/{searchText}")
-//	@ResponseBody
-//	public ResponseEntity<?> getManualLinePointMainListSearch(HttpServletRequest request, HttpServletResponse response,
-//			@CurrentUser CustomUser customUser, @PathVariable String searchText) throws IOException {
-//		log.info("[getManualLinePointMainListSearch]");
-//		List<LinePointMain> result = new ArrayList();
-//		List<LinePointMain> list = linePointUIService.linePointMainFindManual(searchText);
-//		result.addAll(list);
-//		log.debug("result:" + ObjectUtil.objectToJsonStr(result));
-//		return new ResponseEntity<>(result, HttpStatus.OK);
-//	}
-//
-//	@ControllerLog(description = "Get Auto Line Point Main")
-//	@GetMapping(value = "/edit/getAutoLinePointMainListSearch/{searchText}")
-//	@ResponseBody
-//	public ResponseEntity<?> getAutoLinePointMainListSearch(HttpServletRequest request, HttpServletResponse response,
-//			@CurrentUser CustomUser customUser, @PathVariable String searchText) throws IOException {
-//		log.info("[getAutoLinePointMainListSearch]");
-//		List<LinePointMain> result = new ArrayList();
-//		List<LinePointMain> list = linePointUIService.linePointMainFindAuto(searchText);
-//		result.addAll(list);
-//		log.debug("result:" + ObjectUtil.objectToJsonStr(result));
-//		return new ResponseEntity<>(result, HttpStatus.OK);
-//	}
-//	//----
-//	@ControllerLog(description = "Get Undone Manual Line Point Main")
-//	@GetMapping(value = "/edit/getUndoneManualLinePointMainList")
-//	@ResponseBody
-//	public ResponseEntity<?> getUndoneManualLinePointMainList(HttpServletRequest request, HttpServletResponse response,
-//			@CurrentUser CustomUser customUser ) throws IOException {
-//		log.info("getUndoneManualLinePointMainList");
-//		List<LinePointMain> result = new ArrayList();
-//		List<LinePointMain> list = linePointUIService.linePointMainFindUndoneManual();
-//		result.addAll(list);
-//		log.debug("result:" + ObjectUtil.objectToJsonStr(result));
-//		return new ResponseEntity<>(result, HttpStatus.OK);
-//	}
-//
-//	@ControllerLog(description = "Get Undone Auto Line Point Main")
-//	@GetMapping(value = "/edit/getUndoneAutoLinePointMainList")
-//	@ResponseBody
-//	public ResponseEntity<?> getUndoneAutoLinePointMainList(HttpServletRequest request, HttpServletResponse response,
-//			@CurrentUser CustomUser customUser ) throws IOException {
-//		log.info("getUndoneAutoLinePointMainList");
-//		List<LinePointMain> result = new ArrayList();
-//		List<LinePointMain> list = linePointUIService.linePointMainFindUndoneAuto();
-//		result.addAll(list);
-//		log.debug("result:" + ObjectUtil.objectToJsonStr(result));
-//		return new ResponseEntity<>(result, HttpStatus.OK);
-//	}
-//	@ControllerLog(description = "Get Success Line Point Detail")
-//	@GetMapping(value = "/edit/getSuccessLinePointDetailList/{linePointMainId}")
-//	@ResponseBody
-//	public ResponseEntity<?> getSuccessLinePointDetailList(HttpServletRequest request, HttpServletResponse response,
-//			@CurrentUser CustomUser customUser, @PathVariable String linePointMainId) throws IOException {
-//		log.info("getSuccessLinePointDetailList");
-//		Long mainId = Long.parseLong(linePointMainId);
-//
-//		List<LinePointDetail> result = new ArrayList();
-//		List<LinePointDetail> list = linePointUIService.findSuccess(mainId);
-//		result.addAll(list);
-//		log.debug("result:" + ObjectUtil.objectToJsonStr(result));
-//		return new ResponseEntity<>(result, HttpStatus.OK);
-//	}
-//	@ControllerLog(description = "Get Fail Line Point Detail")
-//	@GetMapping(value = "/edit/getFailLinePointDetailList/{linePointMainId}")
-//	@ResponseBody
-//	public ResponseEntity<?> getFailLinePointDetailList(HttpServletRequest request, HttpServletResponse response,
-//			@CurrentUser CustomUser customUser, @PathVariable String linePointMainId) throws IOException {
-//		log.info("getFailLinePointDetailList");
-//		Long mainId = Long.parseLong(linePointMainId);
-//
-//		List<LinePointDetail> result = new ArrayList();
-//		List<LinePointDetail> list = linePointUIService.findFail(mainId);
-//		result.addAll(list);
-//		log.debug("result:" + ObjectUtil.objectToJsonStr(result));
-//		return new ResponseEntity<>(result, HttpStatus.OK);
-//	}
-//	@ControllerLog(description = "Get Success Line Point Detail")
-//	@GetMapping(value = "/edit/getLinePointScheduledDetailList/{mainId}")
-//	@ResponseBody
-//	public ResponseEntity<?> getLinePointScheduledDetailList(HttpServletRequest request, HttpServletResponse response,
-//			@CurrentUser CustomUser customUser, @PathVariable Long mainId) throws IOException {
-//		log.info("getLinePointScheduledDetailList");
-//
-//		List<LinePointScheduledDetail> result = new ArrayList();
-//		List<LinePointScheduledDetail> list = linePointUIService.findScheduledDetailList(mainId);
-//		result.addAll(list);
-//		log.debug("result:" + ObjectUtil.objectToJsonStr(result));
-//		return new ResponseEntity<>(result, HttpStatus.OK);
-//	}
-
-//	@ControllerLog(description="deleteLinePointMain")
-//	@RequestMapping(method = RequestMethod.DELETE, value = "/edit/deleteLinePointMain")
-//	@ResponseBody
-//	public ResponseEntity<?> deleteLinePointMain( HttpServletRequest request,  HttpServletResponse response, @CurrentUser CustomUser customUser,
-//			@RequestParam(required=false) String campaignId, @RequestParam(required=false) String listType) throws IOException {
-//		log.info("deleteLinePointMain");
-//		try{
-//			if(StringUtils.isNotBlank(campaignId)){
-//				log.info("campaignId:" + campaignId);
-//				linePointUIService.deleteFromUI(Long.parseLong(campaignId), customUser.getAccount(), listType);
-//				return new ResponseEntity<>("Delete Success", HttpStatus.OK);
-//			} else
-//				throw new Exception("ID IS NULL");
-//		} catch(Exception e) {
-//			log.error(ErrorRecord.recordError(e));
-//			if(e instanceof BcsNoticeException)
-//				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-//			else
-//				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-//		}
-//	}
 }

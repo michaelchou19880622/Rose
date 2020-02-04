@@ -15,12 +15,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j(topic = "BNRecorder")
 public class BillingNoticeCurfewActor extends UntypedActor {
     @Override
-    public void onReceive(Object object) throws Exception {
-        Thread.currentThread().setName("Actor-BN-Curfew-" + Thread.currentThread().getId());
-        log.info("Curfew Actor Receive!!");
+    public void onReceive(Object object) {
+        try {
+            Thread.currentThread().setName("Actor-BN-Curfew-" + Thread.currentThread().getId());
+            log.info("Curfew Actor Receive!!");
 
-        if (object instanceof BillingNoticeMain) {
-            methodA((BillingNoticeMain) object);
+            if (object instanceof BillingNoticeMain) {
+                methodA((BillingNoticeMain) object);
+            }
+        } catch (Exception e) {
+            log.error("Exception", e);
         }
     }
 

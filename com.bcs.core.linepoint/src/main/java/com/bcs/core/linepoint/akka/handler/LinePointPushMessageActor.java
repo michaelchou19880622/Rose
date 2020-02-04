@@ -103,6 +103,7 @@ public class LinePointPushMessageActor extends UntypedActor {
 
             log.info("After Send Process Detail: {}", detail.toString());
             linePointDetailService.save(detail);
+            //FIXME CAL
             linePointMainService.save(linePointMain);
 
             if (LinePointDetail.STATUS_SUCCESS.equals(detail.getStatus())) {
@@ -164,14 +165,14 @@ public class LinePointPushMessageActor extends UntypedActor {
                 }
 
                 setDetail(detail, id, time, type, amount, balance);
-                if (linePointMain.getSuccessfulAmount() != null) {
-                    linePointMain.setSuccessfulAmount(linePointMain.getSuccessfulAmount() + amount);
-                }
-                if (linePointMain.getSuccessfulCount() != null) {
-                    linePointMain.setSuccessfulCount(linePointMain.getSuccessfulCount() + 1);
-                } else {
-                    linePointMain.setSuccessfulCount(1L);
-                }
+//                if (linePointMain.getSuccessfulAmount() != null) {
+//                    linePointMain.setSuccessfulAmount(linePointMain.getSuccessfulAmount() + amount);
+//                }
+//                if (linePointMain.getSuccessfulCount() != null) {
+//                    linePointMain.setSuccessfulCount(linePointMain.getSuccessfulCount() + 1);
+//                } else {
+//                    linePointMain.setSuccessfulCount(1L);
+//                }
                 isDoRetry = false;
             } catch (HttpClientErrorException e) {
                 log.error("HttpClientErrorException", e);

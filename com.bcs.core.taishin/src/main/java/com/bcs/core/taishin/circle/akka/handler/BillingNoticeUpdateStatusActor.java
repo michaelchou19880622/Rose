@@ -34,7 +34,7 @@ public class BillingNoticeUpdateStatusActor extends UntypedActor {
 
     private void updateProcess(BillingNoticeDetail object) {
         updateDetail(object);
-        updateMain(object);
+//        updateMain(object);
     }
 
     private void updateDetail(BillingNoticeDetail object) {

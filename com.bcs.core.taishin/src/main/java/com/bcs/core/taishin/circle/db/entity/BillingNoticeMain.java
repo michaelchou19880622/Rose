@@ -51,18 +51,15 @@ public class BillingNoticeMain extends AbstractBcsEntity {
     public static final String SENDING_MSG_TYPE_DELAY = "DELAY";
     public static final String SENDING_MSG_TYPE_SCHEDULE = "SCHEDULE";
 
-    //未發送
+    public static final String NOTICE_STATUS_DRAFT = "DRAFT";
     public static final String NOTICE_STATUS_WAIT = "WAIT";
-    //重試
-    public static final String NOTICE_STATUS_RETRY = "RETRY";
-    //發送失敗、不推送
-    public static final String NOTICE_STATUS_FAIL = "FAIL";
+    public static final String NOTICE_STATUS_SCHEDULED = "SCHEDULED";
     public static final String NOTICE_STATUS_SENDING = "SENDING";
     public static final String NOTICE_STATUS_DELETE = "DELETE";
-
-    public static final String NOTICE_STATUS_DRAFT = "DRAFT";
     public static final String NOTICE_STATUS_COMPLETE = "COMPLETE";
-    public static final String NOTICE_STATUS_SCHEDULED = "SCHEDULED";
+    public static final String NOTICE_STATUS_RETRY = "RETRY";
+    public static final String NOTICE_STATUS_FAIL = "FAIL";
+    public static final String NOTICE_STATUS_EXPIRED = "EXPIRED";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

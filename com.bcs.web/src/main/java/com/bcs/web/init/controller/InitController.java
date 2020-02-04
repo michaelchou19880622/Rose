@@ -17,6 +17,7 @@ import com.bcs.core.taishin.circle.PNP.scheduler.PnpSMSMsgService;
 import com.bcs.core.taishin.circle.service.BillingNoticeFtpService;
 import com.bcs.core.taishin.circle.service.BillingNoticeSendMsgService;
 import com.bcs.core.utils.DataSyncUtil;
+import com.bcs.core.utils.DataUtils;
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.web.ui.service.LinePointSchedulerService;
 import lombok.extern.slf4j.Slf4j;
@@ -97,6 +98,7 @@ public class InitController {
      */
     @PostConstruct
     public void init() {
+        log.info("HostName: {}, IP: {}", DataUtils.getProcApName(), DataUtils.getProcApIp());
 //        registerServerInfo();
 
         registerServer();

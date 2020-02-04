@@ -2,6 +2,7 @@ package com.bcs.core.taishin.circle.akka.handler;
 
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
+import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.spring.ApplicationContextProvider;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeDetail;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeMain;
@@ -64,8 +65,8 @@ public class BillingNoticeMainActor extends UntypedActor {
     private void pushProcess(BillingNoticeMain object) {
         List<BillingNoticeDetail> details = object.getDetails();
         final int detailSize = details.size();
-        final int maxActorCount = 20;
-        final int buffer = detailSize < 50 ? 5 : detailSize / maxActorCount;
+        final int maxActorCount = getMaxActorCount();
+        final int buffer = getBuffer(detailSize, maxActorCount);
         log.info("Detail: {}", DataUtils.toPrettyJsonUseJackson(details));
         List<List<BillingNoticeDetail>> partitionList = ListUtils.partition(details, buffer);
         partitionList.forEach(list -> {
@@ -74,6 +75,24 @@ public class BillingNoticeMainActor extends UntypedActor {
             billingNoticeMainClone.setDetails(list);
             toPushActor(billingNoticeMainClone);
         });
+    }
+
+    private int getMaxActorCount() {
+        int count = CoreConfigReader.getInteger("bn.push.detail.max.actor.count");
+        if (count <= 0){
+            count = 100;
+        }
+        return count;
+    }
+
+    private int getBuffer(final int detailSize, final int maxActorCount) {
+        if (detailSize <= maxActorCount) {
+            return 1;
+        }
+        if (detailSize % maxActorCount == 0) {
+            return detailSize / maxActorCount;
+        }
+        return detailSize / maxActorCount + 1;
     }
 
     private void toPushActor(BillingNoticeMain billingNoticeMainClone) {

@@ -344,6 +344,9 @@ public class BillingNoticeFtpService {
         switch (environment) {
             case "sit":
                 break;
+            case "linux":
+                processApName = "taishin";
+                break;
             case "uat":
                 processApName = "AIMLAP-T";
                 break;

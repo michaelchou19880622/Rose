@@ -74,7 +74,7 @@ public class BillingNoticeFtpService {
      */
     public void startCircle() {
         String unit = CoreConfigReader.getString(CONFIG_STR.BN_SCHEDULE_UNIT, true, false);
-        int time = CoreConfigReader.getInteger(CONFIG_STR.BN_SCHEDULE_TIME, true, false);
+        int time = CoreConfigReader.getInteger(CONFIG_STR.BN_FTP_SCHEDULE_TIME, true, false);
         if (time == -1) {
             log.error("BillingNoticeFtpService TimeUnit error :" + time + unit);
             return;
@@ -132,7 +132,7 @@ public class BillingNoticeFtpService {
             Map<String, byte[]> returnDataMap = ftpService.downloadMultipleFileByType(ftpSetting.getPath(), fileExtension, ftpSetting);
             map.putAll(returnDataMap);
 
-            returnDataMap.keySet().forEach(v -> ftpSetting.addFileNames(v));
+            returnDataMap.keySet().forEach(ftpSetting::addFileNames);
         }
         return map;
     }
@@ -257,7 +257,7 @@ public class BillingNoticeFtpService {
             BillingNoticeContentTemplateMsg template = getBillingNoticeTemplate(entry.getKey());
 
             if (template == null) {
-                log.error("Template Doesn't exist!! {}", entry.getKey());
+                log.error("Template Doesn't exist!! [{}]", entry.getKey());
                 return Collections.emptyList();
             }
 
@@ -396,8 +396,11 @@ public class BillingNoticeFtpService {
             log.info("Curfew NOTICE_STATUS_RETRY mainId:" + mainId);
         }
         Date now = new Date();
-        billingNoticeMainRepository.updateBillingNoticeMainStatus(status, now, mainId);
+
+        /* !!Priority update detail to wait */
         billingNoticeDetailRepository.updateStatusByMainId(status, now, mainId);
+        /* !!Second update main to wait. Because Ap discover data with main status */
+        billingNoticeMainRepository.updateBillingNoticeMainStatus(status, now, mainId);
     }
 
     /**

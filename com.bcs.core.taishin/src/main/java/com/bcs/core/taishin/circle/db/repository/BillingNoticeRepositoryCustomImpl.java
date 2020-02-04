@@ -95,23 +95,28 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
 
     private Set<Long> findRetryMainSet(String procApName, List<String> tempIds) {
         Set<Long> retrySet = new HashSet<>();
-        Long retryMainId = findAndUpdateFirstRetryDetailOnMain(procApName, tempIds);
-        if (retryMainId != null) {
-            retrySet.add(retryMainId);
-        } else {
-            log.debug("BCS_BILLING_NOTICE updateStatus retryMainId is null");
-        }
+        List<Long> retryMainIdList = findAndUpdateFirstRetryDetailOnMain(procApName, tempIds);
+        retryMainIdList.forEach(retryMainId -> {
+            if (retryMainId != null) {
+                retrySet.add(retryMainId);
+            } else {
+                log.debug("BCS_BILLING_NOTICE updateStatus retryMainId is null");
+            }
+
+        });
         return retrySet;
     }
 
     private Set<Long> findWaitMainSet(String procApName, List<String> tempIds) {
         Set<Long> waitSet = new HashSet<>();
-        Long waitMainId = findAndUpdateFirstWaitMain(procApName, tempIds);
-        if (waitMainId != null) {
-            waitSet.add(waitMainId);
-        } else {
-            log.debug("BCS_BILLING_NOTICE updateStatus waitMainId is null");
-        }
+        List<Long> waitMainIdList = findAndUpdateFirstWaitMain(procApName, tempIds);
+        waitMainIdList.forEach(waitMainId -> {
+            if (waitMainId != null) {
+                waitSet.add(waitMainId);
+            } else {
+                log.debug("BCS_BILLING_NOTICE updateStatus waitMainId is null");
+            }
+        });
         return waitSet;
     }
 
@@ -120,9 +125,9 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
      */
     @SuppressWarnings("unchecked")
     @Transactional(rollbackFor = Exception.class)
-    public Long findAndUpdateFirstRetryDetailOnMain(String procApName, List<String> tempIds) {
+    public List<Long> findAndUpdateFirstRetryDetailOnMain(String procApName, List<String> tempIds) {
         String sqlString =
-                " SELECT TOP 1 M.NOTICE_MAIN_ID" +
+                " SELECT TOP 10 M.NOTICE_MAIN_ID" +
                 " FROM BCS_BILLING_NOTICE_DETAIL B, BCS_BILLING_NOTICE_MAIN M" +
                 " WHERE M.PROC_AP_NAME=:procApName" +
                 " AND M.NOTICE_MAIN_ID=B.NOTICE_MAIN_ID" +
@@ -130,15 +135,32 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
                 " AND M.TEMP_ID in (:tempIds)" +
                 " ORDER BY B.CREAT_TIME DESC";
 
-        List<BigInteger> mains = (List<BigInteger>) entityManager.createNativeQuery(sqlString)
+        List<BigInteger> mainList = (List<BigInteger>) entityManager.createNativeQuery(sqlString)
                 .setParameter("procApName", procApName)
                 .setParameter("status", BillingNoticeMain.NOTICE_STATUS_RETRY)
                 .setParameter("tempIds", tempIds)
                 .getResultList();
-        if (mains != null && !mains.isEmpty()) {
-            return mains.get(0).longValue();
+
+        String updateString =
+                " UPDATE FROM BCS_BILLING_NOTICE_MAIN M " +
+                        " SET STATUS=:status, MODIFY_TIME=:modifyTime" +
+                        " WHERE M.NOTICE_MAIN_ID IN (:ids)" ;
+
+        int modifyCount = entityManager.createNativeQuery(updateString)
+                .setParameter("modifyTime", new Date())
+                .setParameter("status", BillingNoticeMain.NOTICE_STATUS_SENDING)
+                .setParameter("ids", mainList)
+                .executeUpdate();
+
+        log.info("Modify Count: {}", modifyCount);
+
+        if (mainList.isEmpty()) {
+            return Collections.emptyList();
         }
-        return null;
+        List<Long> list = new ArrayList<>();
+        mainList.forEach(v -> list.add(Long.parseLong(v.toString())));
+        mainList.clear();
+        return list;
     }
 
 
@@ -146,9 +168,9 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
      * 找出第一個WAIT BillingNoticeMain 並更新狀態
      */
     @Transactional(rollbackFor = Exception.class)
-    public Long findAndUpdateFirstWaitMain(String procApName, List<String> tempIds) {
+    public List<Long> findAndUpdateFirstWaitMain(String procApName, List<String> tempIds) {
         String waitMainString =
-                " SELECT TOP 1 M.NOTICE_MAIN_ID" +
+                " SELECT TOP 10 M.NOTICE_MAIN_ID" +
                 " FROM BCS_BILLING_NOTICE_MAIN M" +
                 " WHERE M.PROC_AP_NAME=:procApName" +
                 " AND M.STATUS=:status" +
@@ -161,10 +183,26 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
                 .setParameter("tempIds", tempIds)
                 .getResultList();
 
-        if (mainList != null && !mainList.isEmpty()) {
-            return mainList.get(0).longValue();
+        String updateString =
+                " UPDATE FROM BCS_BILLING_NOTICE_MAIN M " +
+                        " SET STATUS=:status, MODIFY_TIME=:modifyTime" +
+                        " WHERE M.NOTICE_MAIN_ID IN (:ids)" ;
+
+        int modifyCount = entityManager.createNativeQuery(updateString)
+                .setParameter("modifyTime", new Date())
+                .setParameter("status", BillingNoticeMain.NOTICE_STATUS_SENDING)
+                .setParameter("ids", mainList)
+                .executeUpdate();
+
+        log.info("Modify Count: {}", modifyCount);
+
+        if (mainList.isEmpty()) {
+           return Collections.emptyList();
         }
-        return null;
+        List<Long> list = new ArrayList<>();
+        mainList.forEach(v -> list.add(Long.parseLong(v.toString())));
+        mainList.clear();
+        return list;
     }
 
     /**

@@ -51,7 +51,7 @@ public class LiveChatService {
     }
 
     public void sendMsgToUser(LiveChatReplyModel receivedMessage, UserLiveChat userLiveChat) throws Exception {
-        this.sendMsgToUser(receivedMessage, userLiveChat, CONFIG_STR.ManualReply.name());
+        this.sendMsgToUser(receivedMessage, userLiveChat, CONFIG_STR.MANUAL_REPLY.name());
     }
 
     public void sendMsgToUser(LiveChatReplyModel receivedMessage, UserLiveChat userLiveChat, String channelName) throws Exception {
@@ -77,7 +77,7 @@ public class LiveChatService {
 
         userLiveChatService.save(userLiveChat);
 
-        String manualReplyChannelName = CoreConfigReader.getString(CONFIG_STR.MANUALREPLY_CHANNEL_NAME.toString(), true);
+        String manualReplyChannelName = CoreConfigReader.getString(CONFIG_STR.MANUAL_REPLY_CHANNEL_NAME.toString(), true);
 
         lineSwitchApiService.executeSwitch(CoreConfigReader.getString(manualReplyChannelName, "DestinationId", true), UID, "");    // 將使用者 switch 至真人客服的 channel
 //		messageProcessService.pushTextMsgAsync(UID,message,CONFIG_STR.ManualReply.toString()); 20190125 轉真人接通文案移除
@@ -90,7 +90,7 @@ public class LiveChatService {
         String status = userLiveChat.getStatus();
 
         if (status.equals(UserLiveChat.IN_PROGRESS)) {
-            String autoReplyChannelName = CoreConfigReader.getString(CONFIG_STR.AUTOREPLY_CHANNEL_NAME.toString(), true);
+            String autoReplyChannelName = CoreConfigReader.getString(CONFIG_STR.AUTO_REPLY_CHANNEL_NAME.toString(), true);
             String UID = userLiveChat.getUID();
             Date now = new Date();
 
@@ -102,7 +102,7 @@ public class LiveChatService {
             lineSwitchApiService.executeSwitch(CoreConfigReader.getString(autoReplyChannelName, "DestinationId", true), UID, "");
 
             if (message != null)
-                messageProcessService.pushTextMsgAsync(UID, message, CONFIG_STR.AutoReply.toString());
+                messageProcessService.pushTextMsgAsync(UID, message, CONFIG_STR.AUTO_REPLY.toString());
         }
     }
 

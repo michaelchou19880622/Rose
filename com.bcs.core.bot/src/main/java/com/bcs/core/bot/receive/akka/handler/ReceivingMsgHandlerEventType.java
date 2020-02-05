@@ -52,7 +52,7 @@ public class ReceivingMsgHandlerEventType extends UntypedActor {
                     String referenceId = "";
 
 
-                    boolean channelNameIsEqConfig = channelName.equals(CoreConfigReader.getString(CONFIG_STR.MANUALREPLY_CHANNEL_NAME.toString(), true));
+                    boolean channelNameIsEqConfig = channelName.equals(CoreConfigReader.getString(CONFIG_STR.MANUAL_REPLY_CHANNEL_NAME.toString(), true));
                     boolean eventIsMsgOrPostBack = MsgBotReceive.EVENT_TYPE_MESSAGE.equals(eventType) || MsgBotReceive.EVENT_TYPE_POSTBACK.equals(eventType);
                     boolean eventIsFollowOrUnFollow = MsgBotReceive.EVENT_TYPE_FOLLOW.equals(eventType) || MsgBotReceive.EVENT_TYPE_UNFOLLOW.equals(eventType);
                     boolean eventIsDelivery = MsgBotReceive.EVENT_TYPE_DELIVERY.equals(eventType);

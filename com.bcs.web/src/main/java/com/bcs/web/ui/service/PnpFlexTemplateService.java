@@ -1,7 +1,7 @@
 package com.bcs.web.ui.service;
 
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpFlexTemplate;
-import com.bcs.core.taishin.circle.PNP.db.repository.PnpFlexTemplateRepository;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpFlexTemplate;
+import com.bcs.core.taishin.circle.pnp.db.repository.PnpFlexTemplateRepository;
 import com.bcs.core.utils.DataUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -85,10 +85,10 @@ public class BCSCheckReportController extends BCSBaseController {
 	private ActionUserCouponService actionUserCouponService;
 	@Autowired
 	private LineTokenApiService lineTokenApiService;
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSMsgSendController.class);
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/catchRecordReceiveList")
 	@ResponseBody
 	public ResponseEntity<?> catchRecordReceiveList(HttpServletRequest request,HttpServletResponse response) throws Exception {
@@ -99,15 +99,15 @@ public class BCSCheckReportController extends BCSBaseController {
 		if(StringUtils.isNotBlank(zoomStr)){
 			zoom = Integer.parseInt(zoomStr);
 		}
-		
+
 		String calendarStr = request.getParameter("calendar");
 		int calendarField = parseCalendar(calendarStr);
-		
+
 		Map<String, AtomicLong> result = catchRecordReceive.getAll(calendarField, zoom);
-		
+
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
-	
+
 	private int parseCalendar(String calendarStr){
 		logger.info("parseCalendar:" + calendarStr);
 
@@ -120,10 +120,10 @@ public class BCSCheckReportController extends BCSBaseController {
 				calendarField = Calendar.DATE;
 			}
 		}
-		
+
 		return calendarField;
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/catchRecordBindedList")
 	@ResponseBody
 	public ResponseEntity<?> catchRecordBindedList(HttpServletRequest request,HttpServletResponse response) throws Exception {
@@ -134,15 +134,15 @@ public class BCSCheckReportController extends BCSBaseController {
 		if(StringUtils.isNotBlank(zoomStr)){
 			zoom = Integer.parseInt(zoomStr);
 		}
-		
+
 		String calendarStr = request.getParameter("calendar");
 		int calendarField = parseCalendar(calendarStr);
-		
+
 		Map<String, AtomicLong> result = catchRecordBinded.getAll(calendarField, zoom);
-		
+
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/catchHandleMsgReceiveTimeoutList")
 	@ResponseBody
 	public ResponseEntity<?> catchHandleMsgReceiveTimeoutList(HttpServletRequest request,HttpServletResponse response) throws Exception {
@@ -153,15 +153,15 @@ public class BCSCheckReportController extends BCSBaseController {
 		if(StringUtils.isNotBlank(zoomStr)){
 			zoom = Integer.parseInt(zoomStr);
 		}
-		
+
 		String calendarStr = request.getParameter("calendar");
 		int calendarField = parseCalendar(calendarStr);
-		
+
 		Map<String, AtomicLong> result = catchHandleMsgReceiveTimeout.getAll(calendarField, zoom);
-		
+
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/catchRecordOpAddReceiveList")
 	@ResponseBody
 	public ResponseEntity<?> catchRecordOpAddReceiveList(HttpServletRequest request,HttpServletResponse response) throws Exception {
@@ -172,15 +172,15 @@ public class BCSCheckReportController extends BCSBaseController {
 		if(StringUtils.isNotBlank(zoomStr)){
 			zoom = Integer.parseInt(zoomStr);
 		}
-		
+
 		String calendarStr = request.getParameter("calendar");
 		int calendarField = parseCalendar(calendarStr);
-		
+
 		Map<String, AtomicLong> result = catchRecordOpAddReceive.getAll(calendarField, zoom);
-		
+
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/catchRecordOpBlockedReceiveList")
 	@ResponseBody
 	public ResponseEntity<?> catchRecordOpBlockedReceiveList(HttpServletRequest request,HttpServletResponse response) throws Exception {
@@ -191,31 +191,31 @@ public class BCSCheckReportController extends BCSBaseController {
 		if(StringUtils.isNotBlank(zoomStr)){
 			zoom = Integer.parseInt(zoomStr);
 		}
-		
+
 		String calendarStr = request.getParameter("calendar");
 		int calendarField = parseCalendar(calendarStr);
-		
+
 		Map<String, AtomicLong> result = catchRecordOpBlockedReceive.getAll(calendarField, zoom);
-		
+
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/systemCheck")
 	@ResponseBody
 	public ResponseEntity<?> systemCheck(HttpServletRequest request,HttpServletResponse response) {
 		logger.info("systemCheck");
-		
+
 		ObjectNode result = SystemCheckUtil.Info();
-		
+
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/systemReportPage")
 	public String systemReportPage(
-			@CurrentUser CustomUser customUser,  
+			@CurrentUser CustomUser customUser,
 			HttpServletRequest request, HttpServletResponse response) {
 		logger.info("systemReportPage");
-		
+
 		return BcsPageEnum.SystemReportPage.toString();
 	}
 
@@ -236,14 +236,14 @@ public class BCSCheckReportController extends BCSBaseController {
 			endDate = sdf.format(calendar.getTime());
 			logger.info("startDate:" + startDate);
 			logger.info("endDate:" + endDate);
-			
+
 			Long result = userTraceLogService.countBinded2Block(startDate, endDate);
-			
+
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		}
-		
+
 		Long result = userTraceLogService.countBinded2Block();
-		
+
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 
@@ -259,7 +259,7 @@ public class BCSCheckReportController extends BCSBaseController {
 			Date timeStart = sdf.parse(startDate);
 			Calendar calendarStart = Calendar.getInstance();
 			calendarStart.setTime(timeStart);
-			
+
 			Date timeEnd = sdf.parse(endDate);
 			Calendar calendarEnd = Calendar.getInstance();
 			calendarEnd.setTime(timeEnd);
@@ -274,7 +274,7 @@ public class BCSCheckReportController extends BCSBaseController {
 			Map<String, Map<String, Long>> countReceiveList = recordReportService
 					.findRecordReportListByContentType(referenceId,
 							referenceId, startDate, endDate);
-			
+
 			Map<String, Long> result = new LinkedHashMap<String, Long>();
 
 			Date timeBreak = sdf.parse(startDate);
@@ -286,7 +286,7 @@ public class BCSCheckReportController extends BCSBaseController {
 
 					String startTimeStr = sdf.format(calendarStart.getTime());
 					Map<String, Long> mapReceive = countReceiveList.get(startTimeStr);
-					
+
 					Long count = null;
 
 					if(mapReceive != null){
@@ -295,31 +295,31 @@ public class BCSCheckReportController extends BCSBaseController {
 					if (count == null) {
 						count = msgBotReceiveService.countReceiveByType(sdf.format(calendarStart.getTime()), sdf.format(calendarBreak.getTime()), MsgBotReceive.EVENT_TYPE_MESSAGE);
 						count += msgBotReceiveService.countReceiveByType(sdf.format(calendarStart.getTime()), sdf.format(calendarBreak.getTime()), MsgBotReceive.EVENT_TYPE_POSTBACK);
-						
+
 						recordReportService
 								.saveByReferenceIdAndContentTypeAndDataTypeAndRecordTime(
 										startTimeStr,
 										referenceId,
 										referenceId,
-										referenceId, 
+										referenceId,
 										count);
 					}
-					
+
 					result.put(sdf.format(calendarStart.getTime()), count);
 
 					calendarStart.add(Calendar.DATE, 1);
 				}
 				else{
-				
+
 					break;
 				}
 			}
-			
+
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		}
-		
+
 		String result = "Error";
-		
+
 		return new ResponseEntity<>(result, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
@@ -341,7 +341,7 @@ public class BCSCheckReportController extends BCSBaseController {
 			}
 		}
 		catch(Exception e){}
-		
+
 		String startDate = request.getParameter("startDate");
 		String endDate = request.getParameter("endDate");
 		if(StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate) ){
@@ -349,7 +349,7 @@ public class BCSCheckReportController extends BCSBaseController {
 			Date timeStart = sdf.parse(startDate);
 			Calendar calendarStart = Calendar.getInstance();
 			calendarStart.setTime(timeStart);
-			
+
 			Date timeEnd = sdf.parse(endDate);
 			Calendar calendarEnd = Calendar.getInstance();
 			calendarEnd.setTime(timeEnd);
@@ -358,14 +358,14 @@ public class BCSCheckReportController extends BCSBaseController {
 			endDate = sdf.format(calendarEnd.getTime());
 			logger.info("startDate:" + startDate);
 			logger.info("endDate:" + endDate);
-			
+
 			String referenceId = RECORD_REPORT_TYPE.REFERENCE_ID_USER_GROUP.toString();
-			
+
 			// Query CONTENT_TYPE_RECEIVE_OP
 			Map<String, Long> receiveOpList = recordReportService
 					.findRecordReportListByRecordTime(referenceId,
 							RECORD_REPORT_TYPE.CONTENT_TYPE_RECEIVE_OP.toString(), opTypeData, startDate, endDate);
-			
+
 			Map<String, Long> result = new LinkedHashMap<String, Long>();
 
 			Date timeBreak = sdf.parse(startDate);
@@ -374,10 +374,10 @@ public class BCSCheckReportController extends BCSBaseController {
 			while(true){
 				if(calendarStart.compareTo(calendarEnd)  < 0){
 					calendarBreak.add(Calendar.DATE, 1);
-					
+
 					String startTimeStr = sdf.format(calendarStart.getTime());
 					String breakTimeStr = sdf.format(calendarBreak.getTime());
-					
+
 					Long count = null;
 					if(receiveOpList != null){
 						count = receiveOpList.get(startTimeStr);
@@ -392,25 +392,25 @@ public class BCSCheckReportController extends BCSBaseController {
 									opTypeData,
 									count);
 					}
-					
+
 					result.put(startTimeStr, count);
 
 					calendarStart.add(Calendar.DATE, 1);
 				}
 				else{
-				
+
 					break;
 				}
 			}
-			
+
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		}
-		
+
 		String result = "Error";
-		
+
 		return new ResponseEntity<>(result, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/countSystemLogList")
 	@ResponseBody
 	public ResponseEntity<?> countSystemLogList(HttpServletRequest request,HttpServletResponse response)  throws Exception {
@@ -419,7 +419,7 @@ public class BCSCheckReportController extends BCSBaseController {
 		String target = request.getParameter("target");
 		String action = request.getParameter("action");
 		String level = request.getParameter("level");
-		
+
 		String startDate = request.getParameter("startDate");
 		String endDate = request.getParameter("endDate");
 		if(StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate) ){
@@ -427,7 +427,7 @@ public class BCSCheckReportController extends BCSBaseController {
 			Date timeStart = sdf.parse(startDate);
 			Calendar calendarStart = Calendar.getInstance();
 			calendarStart.setTime(timeStart);
-			
+
 			Date timeEnd = sdf.parse(endDate);
 			Calendar calendarEnd = Calendar.getInstance();
 			calendarEnd.setTime(timeEnd);
@@ -436,7 +436,7 @@ public class BCSCheckReportController extends BCSBaseController {
 			endDate = sdf.format(calendarEnd.getTime());
 			logger.info("startDate:" + startDate);
 			logger.info("endDate:" + endDate);
-			
+
 			Map<String, Long> result = new LinkedHashMap<String, Long>();
 
 			Date timeBreak = sdf.parse(startDate);
@@ -445,9 +445,9 @@ public class BCSCheckReportController extends BCSBaseController {
 			while(true){
 				if(calendarStart.compareTo(calendarEnd)  < 0){
 					calendarBreak.add(Calendar.DATE, 1);
-					
+
 					Long count = 0L;
-					
+
 					if(StringUtils.isNotBlank(level)){
 						count = systemLogService.countByLevel(level, sdf.format(calendarStart.getTime()), sdf.format(calendarBreak.getTime()));
 					}
@@ -457,25 +457,25 @@ public class BCSCheckReportController extends BCSBaseController {
 					else{
 						count = systemLogService.countAll(sdf.format(calendarStart.getTime()), sdf.format(calendarBreak.getTime()));
 					}
-					
+
 					result.put(sdf.format(calendarStart.getTime()), count);
 
 					calendarStart.add(Calendar.DATE, 1);
 				}
 				else{
-				
+
 					break;
 				}
 			}
-			
+
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		}
-		
+
 		String result = "Error";
-		
+
 		return new ResponseEntity<>(result, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/systemLogList")
 	@ResponseBody
 	public ResponseEntity<?> systemLogList(HttpServletRequest request,HttpServletResponse response) {
@@ -486,12 +486,12 @@ public class BCSCheckReportController extends BCSBaseController {
 		if(StringUtils.isNotBlank(sizeStr)){
 			size = Integer.parseInt(sizeStr);
 		}
-		
+
 		Sort.Order order = new Sort.Order(Direction.DESC, "logId");
 		Sort sort = new Sort(order);
-		
+
 		Pageable pageable = new PageRequest(0, size, sort);
-		
+
 		Page<SystemLog> result = null;
 
 		String target = request.getParameter("target");
@@ -504,12 +504,12 @@ public class BCSCheckReportController extends BCSBaseController {
 			result = systemLogService.findByTargetAndAction(target, action, pageable);
 		}
 		else{
-			result = systemLogService.findAll(pageable);	
-		}		
-		
+			result = systemLogService.findAll(pageable);
+		}
+
 		return new ResponseEntity<>(result.getContent(), HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/actionUserCouponList")
 	@ResponseBody
 	public ResponseEntity<?> actionUserCouponList(HttpServletRequest request,HttpServletResponse response) throws Exception {
@@ -520,26 +520,26 @@ public class BCSCheckReportController extends BCSBaseController {
 		if(StringUtils.isNotBlank(sizeStr)){
 			size = Integer.parseInt(sizeStr);
 		}
-		
+
 		Sort.Order order = new Sort.Order(Direction.DESC, "id");
 		Sort sort = new Sort(order);
-		
+
 		Pageable pageable = new PageRequest(0, size, sort);
-		
+
 		List<ActionUserCoupon> result = new ArrayList<ActionUserCoupon>();
 
 		String couponId = request.getParameter("couponId");
-		
+
 		if(StringUtils.isNotBlank(couponId)){
 			result = actionUserCouponService.findByCouponId(couponId);
 		}
 		else{
 			result = actionUserCouponService.findAll(pageable).getContent();
-		}		
-		
+		}
+
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/userTraceLogList")
 	@ResponseBody
 	public ResponseEntity<?> userTraceLogList(HttpServletRequest request,HttpServletResponse response) throws Exception {
@@ -550,21 +550,21 @@ public class BCSCheckReportController extends BCSBaseController {
 		if(StringUtils.isNotBlank(sizeStr)){
 			size = Integer.parseInt(sizeStr);
 		}
-		
+
 		Sort.Order order = new Sort.Order(Direction.DESC, "logId");
 		Sort sort = new Sort(order);
-		
+
 		Pageable pageable = new PageRequest(0, size, sort);
-		
+
 		List<UserTraceLog> result = new ArrayList<UserTraceLog>();
 
 		String target = request.getParameter("target");
 		String action = request.getParameter("action");
 		String level = request.getParameter("level");
-		
+
 		String mid = request.getParameter("mid");
 		String referenceId = request.getParameter("referenceId");
-		
+
 		if(StringUtils.isNotBlank(level)){
 			result = userTraceLogService.findByLevel(level, pageable).getContent();
 		}
@@ -579,11 +579,11 @@ public class BCSCheckReportController extends BCSBaseController {
 		}
 		else{
 			result = userTraceLogService.findAll(pageable).getContent();
-		}		
-		
+		}
+
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/countUserTraceLogList")
 	@ResponseBody
 	public ResponseEntity<?> countUserTraceLogList(HttpServletRequest request,HttpServletResponse response)  throws Exception {
@@ -592,16 +592,16 @@ public class BCSCheckReportController extends BCSBaseController {
 		String target = request.getParameter("target");
 		String action = request.getParameter("action");
 		String level = request.getParameter("level");
-		
+
 		String startDate = request.getParameter("startDate");
 		String endDate = request.getParameter("endDate");
-		
+
 		if(StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate) ){
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			Date timeStart = sdf.parse(startDate);
 			Calendar calendarStart = Calendar.getInstance();
 			calendarStart.setTime(timeStart);
-			
+
 			Date timeEnd = sdf.parse(endDate);
 			Calendar calendarEnd = Calendar.getInstance();
 			calendarEnd.setTime(timeEnd);
@@ -610,7 +610,7 @@ public class BCSCheckReportController extends BCSBaseController {
 			endDate = sdf.format(calendarEnd.getTime());
 			logger.info("startDate:" + startDate);
 			logger.info("endDate:" + endDate);
-			
+
 			Map<String, Long> result = new LinkedHashMap<String, Long>();
 
 			Date timeBreak = sdf.parse(startDate);
@@ -619,9 +619,9 @@ public class BCSCheckReportController extends BCSBaseController {
 			while(true){
 				if(calendarStart.compareTo(calendarEnd)  < 0){
 					calendarBreak.add(Calendar.DATE, 1);
-					
+
 					Long count = 0L;
-					
+
 					if(StringUtils.isNotBlank(level)){
 						count = userTraceLogService.countByLevel(level, sdf.format(calendarStart.getTime()), sdf.format(calendarBreak.getTime()));
 					}
@@ -631,78 +631,78 @@ public class BCSCheckReportController extends BCSBaseController {
 					else{
 						count = userTraceLogService.countAll(sdf.format(calendarStart.getTime()), sdf.format(calendarBreak.getTime()));
 					}
-					
+
 					result.put(sdf.format(calendarStart.getTime()), count);
 
 					calendarStart.add(Calendar.DATE, 1);
 				}
 				else{
-				
+
 					break;
 				}
 			}
-			
+
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		}
-		
+
 		String result = "Error";
-		
+
 		return new ResponseEntity<>(result, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/clearConfigurationData")
 	@ResponseBody
 	public ResponseEntity<?> clearConfigurationData(HttpServletRequest request,HttpServletResponse response) throws Exception {
 		logger.info("clearConfigurationData");
-		
+
 		systemConfigService.clearData();
 		LineAccessApiService.clearData();
 		return new ResponseEntity<>("Success", HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/getConfigurationData")
 	@ResponseBody
 	public ResponseEntity<?> getConfigurationData(HttpServletRequest request,HttpServletResponse response) throws Exception {
 		logger.info("getConfigurationData");
-		
+
 		Map<String, String> result = systemConfigService.getSettingData();
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/checkAccessTokenTime")
 	@ResponseBody
 	public ResponseEntity<?> checkAccessTokenTime(HttpServletRequest request,HttpServletResponse response) throws Exception {
 		logger.info("checkAccessTokenTime");
-		
-		ObjectNode callVerifyResult = LineAccessApiService.callVerifyAPIAndIssueToken(CONFIG_STR.Default.toString(), false);
+
+		ObjectNode callVerifyResult = LineAccessApiService.callVerifyAPIAndIssueToken(CONFIG_STR.DEFAULT.toString(), false);
 		logger.info("callVerifyResult:" + callVerifyResult);
-		
+
 		return new ResponseEntity<>(callVerifyResult, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/callRefreshingAPI")
 	@ResponseBody
 	public ResponseEntity<?> callRefreshingAPI(HttpServletRequest request,HttpServletResponse response) throws Exception {
 		logger.info("callRefreshingAPI");
-		ObjectNode callRefreshingResult = LineAccessApiService.callVerifyAPIAndIssueToken(CONFIG_STR.Default.toString(), true);
+		ObjectNode callRefreshingResult = LineAccessApiService.callVerifyAPIAndIssueToken(CONFIG_STR.DEFAULT.toString(), true);
 		logger.info("callRefreshingResult:" + callRefreshingResult);
-		
+
 		return new ResponseEntity<>(callRefreshingResult, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/admin/callRefreshingAPI_Force")
 	@ResponseBody
 	public ResponseEntity<?> callRefreshingAPI_Force(HttpServletRequest request,HttpServletResponse response) throws Exception {
 		logger.info("callRefreshingAPI_Force");
-		
+
 		String channelId = request.getParameter("channelId");
 		if(StringUtils.isBlank(channelId)){
-			channelId = CONFIG_STR.Default.toString();
+			channelId = CONFIG_STR.DEFAULT.toString();
 		}
-		
+
 		boolean callRefreshingResult = LineAccessApiService.callRefreshingAPI(channelId);
 		logger.info("callRefreshingResult:" + callRefreshingResult);
-		
+
 		return new ResponseEntity<>("callRefreshingResult:" + callRefreshingResult, HttpStatus.OK);
 	}
 }

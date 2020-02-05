@@ -26,47 +26,47 @@ import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.spring.ApplicationContextProvider;
 import com.bcs.core.utils.RestfulUtil;
 
-public class PushMessageTask implements Job {	
+public class PushMessageTask implements Job {
 	PNPService PNPService = ApplicationContextProvider.getApplicationContext().getBean(PNPService.class);
-	
+
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		String url = CoreConfigReader.getString(CONFIG_STR.LINE_MESSAGE_PUSH_URL.toString());
-		String accessToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelToken.toString(), true);
-		String serviceCode = CoreConfigReader.getString(CONFIG_STR.AutoReply.toString(), CONFIG_STR.ChannelServiceCode.toString(), true);
+		String accessToken = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_TOKEN.toString(), true);
+		String serviceCode = CoreConfigReader.getString(CONFIG_STR.AUTO_REPLY.toString(), CONFIG_STR.CHANNEL_SERVICE_CODE.toString(), true);
 		PushApiModel pushApiModel = null;
 		RestfulUtil restfulUtil = null;
 		JSONObject requestBody = new JSONObject();
 		PushMessageRecord record = null;
-		
+
 		/* 設定 request headers */
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
 		headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 		headers.set(LINE_HEADER.HEADER_BOT_ServiceCode.toString(), serviceCode);
-		
+
 		try {
 			pushApiModel = (PushApiModel) context.getScheduler().getContext().get("PushApiModel");
 		} catch (SchedulerException e) {
 			e.printStackTrace();
 		}
-		
+
 		requestBody.put("messages", pushApiModel.getMessages());
-		
+
 		JSONArray uids = pushApiModel.getUid();
 		for(Integer i = 0; i < uids.length(); i++) {
 			record = new PushMessageRecord();
-			
+
 			requestBody.put("to", uids.get(i));
-			
+
 			/* 將 headers 跟 body 塞進 HttpEntity 中  */
 			HttpEntity<String> httpEntity = new HttpEntity<String>(requestBody.toString(), headers);
-			
+
 			try {
 				restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
-				
+
 				restfulUtil.execute();
-				
+
 				record.setDepartment(pushApiModel.getDepartment());
 				record.setUID(uids.get(i).toString());
 				record.setSendMessage(pushApiModel.getMessages().toString());
@@ -83,7 +83,7 @@ public class PushMessageTask implements Job {
 				if(e instanceof HttpClientErrorException) {
 					HttpClientErrorException exception = (HttpClientErrorException) e;
 					JSONObject errorMessage = new JSONObject(exception.getResponseBodyAsString());
-					
+
 					if(errorMessage.has("message")) {
 						record.setDepartment(pushApiModel.getDepartment());
 						record.setUID(uids.get(i).toString());

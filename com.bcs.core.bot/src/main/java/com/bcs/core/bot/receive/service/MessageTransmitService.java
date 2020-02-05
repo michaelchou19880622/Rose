@@ -42,35 +42,35 @@ public class MessageTransmitService {
 	@Autowired
 	private AkkaGatewayService akkaGatewayService;
 	@Autowired
-	private SwitchIconService switchIconService; 
+	private SwitchIconService switchIconService;
 
-	public void transmitToBOT(String ChannelId, String UID, String replyToken, String question, String msgId, String msgType) throws Exception {		
+	public void transmitToBOT(String ChannelId, String UID, String replyToken, String question, String msgId, String msgType) throws Exception {
 		JSONObject replyMessageObject = new JSONObject();
 		JSONArray messageList = new JSONArray();
-		
+
         /* 先判斷是否為文字訊息，否的話給予預設回覆 >>>20190128捨棄此判斷，將收到的訊息都拋給Pepper GW處理*/
-//      if(question != null) { 
+//      if(question != null) {
 			Date now = new Date();
-			
+
 			boolean isForwardLiveChat = false, isAttentionKeyword = false, isMarketingKeyword = false;
-			
+
             logger.info(">>> transmitToBOT.msgType: " + msgType);
             question = StringUtils.isBlank(question)? "":question;
             logger.info(">>> transmitToBOT.question: " + question);
-			
+
 			JSONObject responseObject = chatBotApiService.sendMessage(UID, question, null, msgType);
 			UserLiveChat userLiveChat = userLiveChatService.findByUIDAndNotFinishAndNotDiscrad(UID);
-			
+
 			if(!responseObject.has("line"))
 				throw new Exception("[Transmit to BOT] Encounter some errors when comuniacting with BOT!");
-			
+
 			isAttentionKeyword = messageProcessService.isAttentionKeyword(responseObject);
 			isForwardLiveChat = messageProcessService.isForward(responseObject);
             isMarketingKeyword = messageProcessService.isMarketingKeyword(responseObject);
-			
+
 			if(isAttentionKeyword || isForwardLiveChat || isMarketingKeyword) {	// 判斷是否需要推送轉客服專員的訊息
 				Integer switchMessageType = MessageProcessService.SWITCH_MESSAGE_NORMAL;
-				
+
 				if(userLiveChat == null){
 					userLiveChat = new UserLiveChat();
 					userLiveChat.setUID(UID);
@@ -79,28 +79,28 @@ public class MessageTransmitService {
 					userLiveChat.setModifyTime(now);
 					userLiveChatService.save(userLiveChat);
 				}
-				
+
 				/* 為行銷詞 */
 				if(isMarketingKeyword)
 					switchMessageType = MessageProcessService.SWITCH_MESSAGE_MARKETING_KEYWORD;
-				
-				/*為敏感詞 */				
+
+				/*為敏感詞 */
 				if(isAttentionKeyword)
 					switchMessageType = MessageProcessService.SWITCH_MESSAGE_KEYWORD;
-				
+
 				if(userLiveChatService.findLeaveMsgUserByUIDAndState(UID, UserLiveChat.COMPLETE) != null)	// 查詢此使用者有沒有留過言
 					messageList.put(messageProcessService.generateConfirmSwitchMsg(switchMessageType, true));
 				else
 					messageList.put(messageProcessService.generateConfirmSwitchMsg(switchMessageType, false));
-				
+
 				replyMessageObject.put("messages", messageList);
-				
-				switchIconService.appendSender(CONFIG_STR.AutoReply.toString(), replyMessageObject);
+
+				switchIconService.appendSender(CONFIG_STR.AUTO_REPLY.toString(), replyMessageObject);
 
 				replyMessageObject.put("replyToken", replyToken);
-				
+
 				logger.info(">>> Reply Message Object: " + replyMessageObject);
-				
+
 				akkaGatewayService.replyMessage(replyMessageObject);	// 以非同步的方式送出回覆訊息
 			} else {
 				if(userLiveChat != null && userLiveChat.getStatus().equals(UserLiveChat.BEGINNING)) {
@@ -108,39 +108,39 @@ public class MessageTransmitService {
 					userLiveChat.setModifyTime(now);
 					userLiveChatService.save(userLiveChat);
 				}
-				
+
 				if(responseObject.getJSONObject("line").getJSONArray("messages").length() > 0)
 					replyMessageObject.put("messages", responseObject.getJSONObject("line").getJSONArray("messages"));
 				else {
 					messageList.put(messageProcessService.defaultReplyMessage());
 					replyMessageObject.put("messages", messageList);
 				}
-				
+
 				replyMessageObject.put("replyToken", replyToken);
 			}
 //		} else {
 //			messageList.put(messageProcessService.defaultReplyMessage());
 //			replyMessageObject.put("messages", messageList);
-//			
+//
 //			switchIconService.appendSender(CONFIG_STR.AutoReply.toString(), replyMessageObject);
 //
 //			replyMessageObject.put("replyToken", replyToken);
-//			
+//
 //			logger.info(">>> Reply Message Object: " + replyMessageObject);
-//			
+//
 //			akkaGatewayService.replyMessage(replyMessageObject);	// 以非同步的方式送出回覆訊息
 //		}
 		messageProcessService.botReplyMessageRecorder(replyMessageObject, UID);  // 紀錄 BOT 回覆的訊息
 	}
-	
+
 	public void transmitToBOT(String ChannelId, String UID, String replyToken, LocationModel location) throws Exception {
 		JSONObject replyMessageObject = new JSONObject();
 		JSONArray messageList = new JSONArray();
 		JSONObject responseObject = chatBotApiService.sendMessage(UID, location);
-		
+
 		if(!responseObject.has("line"))
 			throw new Exception("[Transmit to BOT] Encounter some errors when comuniacting with BOT!");
-		
+
 		if(responseObject.getJSONObject("line").getJSONArray("messages").length() > 0)
 			replyMessageObject.put("messages", responseObject.getJSONObject("line").getJSONArray("messages"));
 		else {
@@ -148,9 +148,9 @@ public class MessageTransmitService {
 			replyMessageObject.put("messages", messageList);
 		}
 		replyMessageObject.put("replyToken", replyToken);
-		
-		switchIconService.appendSender(CONFIG_STR.AutoReply.toString(), replyMessageObject);
-			
+
+		switchIconService.appendSender(CONFIG_STR.AUTO_REPLY.toString(), replyMessageObject);
+
 		messageProcessService.botReplyMessageRecorder(replyMessageObject, UID);  // 紀錄 BOT 回覆的訊息
 	}
 

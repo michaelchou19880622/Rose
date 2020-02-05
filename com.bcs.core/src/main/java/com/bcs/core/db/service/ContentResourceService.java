@@ -160,7 +160,7 @@ public class ContentResourceService {
 	    boolean isBcsNoticeException = false;
 	    try {
 
-    	    String filePath = CoreConfigReader.getString(CONFIG_STR.FilePath) + System.getProperty("file.separator") + ContentResource.RESOURCE_TYPE_QRIMAGE;
+    	    String filePath = CoreConfigReader.getString(CONFIG_STR.FILE_PATH) + System.getProperty("file.separator") + ContentResource.RESOURCE_TYPE_QRIMAGE;
             File folder = new File(filePath);
             if(!folder.exists()){
                 folder.mkdirs();

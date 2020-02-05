@@ -1,6 +1,12 @@
 package com.bcs.core.enums;
 
+/**
+ * @author ???
+ */
 public enum CONFIG_STR {
+    /**
+     *
+     */
     SYSTEM_START_DATE("system.start.date"),
     SYSTEM_TYPE("bcs.system.type"),
 
@@ -10,30 +16,29 @@ public enum CONFIG_STR {
 
 
     SYSTEM_COUPON_USE_TIME("system.coupon.record.useTime"),
-    SYSTEM_REWARDCARD_USE_TIME("system.rewardcard.record.useTime"),
+    SYSTEM_REWARD_CARD_USE_TIME("system.rewardcard.record.useTime"),
 
     SYSTEM_USE_PROXY("system.use.proxy"),
     SYSTEM_CHECK_SIGNATURE("system.check.signature"),
 
-    BaseUrlHTTPS("bcs.base.https.url"),
-    BaseUrlHTTP("bcs.base.http.url"),
-    CdnUrlHTTPS("bcs.cdn.url"),
+    BASE_URL_HTTPS("bcs.base.https.url"),
+    BASE_URL_HTTP("bcs.base.http.url"),
+    CDN_URL_HTTPS("bcs.cdn.url"),
 
-    PageMobile("bcs.base.url.page.mobile"),
-    ResourceMobile("bcs.base.url.resource.mobile"),
+    PAGE_MOBILE("bcs.base.url.page.mobile"),
+    RESOURCE_MOBILE("bcs.base.url.resource.mobile"),
 
-    PageBCS("bcs.base.url.page.bcs"),
-    ResourceBCS("bcs.base.url.resource.bcs"),
+    PAGE_BCS("bcs.base.url.page.bcs"),
+    RESOURCE_BCS("bcs.base.url.resource.bcs"),
 
-    FilePath("file.path"),
-    BillingNoticeExportFilePath("billing.notice.file.path"),
+    FILE_PATH("file.path"),
+    BILLING_NOTICE_EXPORT_FILE_PATH("billing.notice.file.path"),
 
-    Default("TaishinBank"),
-    //Default("HPiCC"),
+    DEFAULT("TaishinBank"),
 
-    AutoReply("AutoReply"),
-    ManualReply("ManualReply"),
-    InManualReplyButNotSendMsg("InManualReplyButNotPush"),
+    AUTO_REPLY("AutoReply"),
+    MANUAL_REPLY("ManualReply"),
+    IN_MANUAL_REPLY_BUT_NOT_SEND_MSG("InManualReplyButNotPush"),
 
     M_PAGE("bcs.m.page"),
 
@@ -60,16 +65,16 @@ public enum CONFIG_STR {
     LINE_SWITCH_API_SWITCHER_SWITCH("line.switcher.switch"),
     LINE_SWITCH_API_SWITCHER_NOTICE("line.switcher.notice"),
 
-    ChannelToken("ChannelToken"),
-    ChannelServiceCode("ChannelServiceCode"),
-    ChannelRefresh("ChannelRefresh"),
+    CHANNEL_TOKEN("ChannelToken"),
+    CHANNEL_SERVICE_CODE("ChannelServiceCode"),
+    CHANNEL_REFRESH("ChannelRefresh"),
 
-    ChannelID("ChannelID"),
-    ChannelSecret("ChannelSecret"),
-    Channel_MID("Channel_MID"),
+    CHANNEL_ID("ChannelID"),
+    CHANNEL_SECRET("ChannelSecret"),
+    CHANNEL_MID("Channel_MID"),
 
-    ChannelSwitchIconName("ChannelSwitchIconName"),
-    ChannelSwitchIconUrl("ChannelSwitchIconUrl"),
+    CHANNEL_SWITCH_ICON_NAME("ChannelSwitchIconName"),
+    CHANNEL_SWITCH_ICON_URL("ChannelSwitchIconUrl"),
 
     EVENT_SHARE("bcs.event.share"),
     EVENT_SHARE_DELAY("bcs.event.share.delay"),
@@ -116,8 +121,8 @@ public enum CONFIG_STR {
     CHATLOG_GET_MAX_HOUR("chatlog.get.max.hour"),
     LIVECHAT_STATUS_CHECK_CRON("livechat.status.check.cron"),
 
-    AUTOREPLY_CHANNEL_NAME("autoreply.channel.name"),
-    MANUALREPLY_CHANNEL_NAME("manualreply.channel.name"),
+    AUTO_REPLY_CHANNEL_NAME("autoreply.channel.name"),
+    MANUAL_REPLY_CHANNEL_NAME("manualreply.channel.name"),
 
     TAISHIN_LOG_API_URL("taishin.log.api.url"),
     TAISHIN_LOG_API_KEY("taishin.log.api.key"),
@@ -141,7 +146,7 @@ public enum CONFIG_STR {
     BN_FTP_SCHEDULE_TIME("bn.ftp.schedule.time"),
     BN_SEND_SCHEDULE_TIME("bn.send.schedule.time"),
     BN_SCHEDULE_UNIT("bn.schedule.unit"),
-    BN_FTP_CHANNELIDS("bn.ftp.channelIds"),
+    BN_FTP_CHANNEL_IDS("bn.ftp.channelIds"),
     BN_FTP_TYPE("bn.ftp.type"),
     BN_FTP_PROTOCOL("bn.ftp.protocol"),
     BN_FTP_PATH("bn.ftp.path"),
@@ -157,16 +162,16 @@ public enum CONFIG_STR {
     BN_FTP_FILE_ENCODING("bn.ftp.fileEncoding"),
     BN_FTP_FILE_EXTENSION("bn.ftp.fileExtension"),
     BN_FTP_DOWNLOAD_SAVEFILEPATH("bn.ftpDownload.saveFilePath"),
-    IS_BN_SENDMSG("is.bn.sendMsg"),
-    IS_BN_FTPDOWNLOAD("is.bn.ftpDownload"),
-    BN_BIGSWITCH("bn.bigswitch"),
+    IS_BN_SEND_MSG("is.bn.sendMsg"),
+    IS_BN_FTP_DOWNLOAD("is.bn.ftpDownload"),
+    BN_BIG_SWITCH("bn.bigswitch"),
 
     //Billing Notice
     //PNP
     SYSTEM_PNP_FTP_INFO("system.pnp.ftp.info"),
-    PNP_BIGSWITCH("pnp.bigswitch"),
-    IS_PNP_FTPDOWNLOAD("pnp.ftpDownload"),
-    IS_PNP_SENDMSG("pnp.sendMsg"),
+    PNP_BIG_SWITCH("pnp.bigswitch"),
+    IS_PNP_FTP_DOWNLOAD("pnp.ftpDownload"),
+    IS_PNP_SEND_MSG("pnp.sendMsg"),
     PNP_FTP_IS64BIT("pnp.ftp.is64Bit"),
     PNP_FTP_TYPE("pnp.ftp.type"),
     PNP_FTP_FILE_EXTENSION("pnp.ftp.fileExtension"),
@@ -174,143 +179,146 @@ public enum CONFIG_STR {
     PNP_DELIVERY_EXPIRED_TIME("pnp.delivery.expired.time"),
 
     // DEFAULT PNP
-    PNP_FTP_SERVERHOSTNAME_("pnp.ftp.serverHostName."),
-    PNP_FTP_SERVERHOSTNAME_PORT_("pnp.ftp.serverHostName.port."),
-    PNP_FTP_HOST_("pnp.ftp.host."),
-    PNP_FTP_PORT_("pnp.ftp.port."),
-    PNP_FTP_USR_("pnp.ftp.usr."),
-    PNP_FTP_PASS_("pnp.ftp.pass."),
-    PNP_FTP_APPCODE_("pnp.ftp.APPCode."),
-    PNP_FTP_RESCODE_("pnp.ftp.RESCode."),
-    PNP_FTP_PROTOCOL_("pnp.ftp.protocol."),
-    PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_("pnp.ftp.download.to.local.path."),
-    PNP_FTP_DOWNLOAD_PATH_("pnp.ftp.download.path."),
-    PNP_PROC_FLOW_("pnp.proc.flow."),
+    PNP_FTP_SERVER_HOST_NAME("pnp.ftp.serverHostName."),
+    PNP_FTP_SERVER_HOST_NAME_PORT("pnp.ftp.serverHostName.port."),
+    PNP_FTP_HOST("pnp.ftp.host."),
+    PNP_FTP_PORT("pnp.ftp.port."),
+    PNP_FTP_USR("pnp.ftp.usr."),
+    PNP_FTP_PASS("pnp.ftp.pass."),
+    PNP_FTP_APP_CODE("pnp.ftp.APPCode."),
+    PNP_FTP_RES_CODE("pnp.ftp.RESCode."),
+    PNP_FTP_PROTOCOL("pnp.ftp.protocol."),
+    PNP_FTP_DOWNLOAD_TO_LOCAL_PATH("pnp.ftp.download.to.local.path."),
+    PNP_FTP_DOWNLOAD_PATH("pnp.ftp.download.path."),
+    PNP_PROC_FLOW("pnp.proc.flow."),
 
-    PNP_SMS_UPLOAD_PATH_("pnp.sms.upload.path."),
-    PNP_SMS_SERVERHOSTNAME_("pnp.sms.serverHostName."),
-    PNP_SMS_SERVERHOSTNAME_PORT_("pnp.sms.serverHostName.port."),
-    PNP_SMS_HOST_("pnp.sms.host."),
-    PNP_SMS_PORT_("pnp.sms.port."),
-    PNP_SMS_USR_("pnp.sms.usr."),
-    PNP_SMS_PASS_("pnp.sms.pass."),
-    PNP_SMS_APPCODE_("pnp.sms.APPCode."),
-    PNP_SMS_RESCODE_("pnp.sms.RESCode."),
-    PNP_SMS_PROTOCOL_("pnp.sms.protocol."),
+    PNP_SMS_UPLOAD_PATH("pnp.sms.upload.path."),
+    PNP_SMS_SERVER_HOST_NAME("pnp.sms.serverHostName."),
+    PNP_SMS_SERVER_HOST_NAME_PORT("pnp.sms.serverHostName.port."),
+    PNP_SMS_HOST("pnp.sms.host."),
+    PNP_SMS_PORT("pnp.sms.port."),
+    PNP_SMS_USR("pnp.sms.usr."),
+    PNP_SMS_PASS("pnp.sms.pass."),
+    PNP_SMS_APP_CODE("pnp.sms.APPCode."),
+    PNP_SMS_RES_CODE("pnp.sms.RESCode."),
+    PNP_SMS_PROTOCOL("pnp.sms.protocol."),
 
 
     //三竹
-    PNP_FTP_SERVERHOSTNAME_MITAKE("pnp.ftp.serverHostName.mitake"),
-    PNP_FTP_SERVERHOSTNAME_PORT_MITAKE("pnp.ftp.serverHostName.port.mitake"),
+    PNP_FTP_SERVER_HOST_NAME_MITAKE("pnp.ftp.serverHostName.mitake"),
+    PNP_FTP_SERVER_HOST_NAME_PORT_MITAKE("pnp.ftp.serverHostName.port.mitake"),
     PNP_FTP_HOST_MITAKE("pnp.ftp.host.mitake"),
     PNP_FTP_PORT_MITAKE("pnp.ftp.port.mitake"),
     PNP_FTP_USR_MITAKE("pnp.ftp.usr.mitake"),
     PNP_FTP_PASS_MITAKE("pnp.ftp.pass.mitake"),
-    PNP_FTP_APPCODE_MITAKE("pnp.ftp.APPCode.mitake"),
-    PNP_FTP_RESCODE_MITAKE("pnp.ftp.RESCode.mitake"),
+    PNP_FTP_APP_CODE_MITAKE("pnp.ftp.APPCode.mitake"),
+    PNP_FTP_RES_CODE_MITAKE("pnp.ftp.RESCode.mitake"),
     PNP_FTP_PROTOCOL_MITAKE("pnp.ftp.protocol.mitake"),
     PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_MITAKE("pnp.ftp.download.to.local.path.mitake"),
     PNP_FTP_DOWNLOAD_PATH_MITAKE("pnp.ftp.download.path.mitake"),
     PNP_PROC_FLOW_MITAKE("pnp.proc.flow.mitake"),
 
     PNP_SMS_UPLOAD_PATH_MITAKE("pnp.sms.upload.path.mitake"),
-    PNP_SMS_SERVERHOSTNAME_MITAKE("pnp.sms.serverHostName.mitake"),
-    PNP_SMS_SERVERHOSTNAME_PORT_MITAKE("pnp.sms.serverHostName.port.mitake"),
+    PNP_SMS_SERVER_HOST_NAME_MITAKE("pnp.sms.serverHostName.mitake"),
+    PNP_SMS_SERVER_HOST_NAME_PORT_MITAKE("pnp.sms.serverHostName.port.mitake"),
     PNP_SMS_HOST_MITAKE("pnp.sms.host.mitake"),
     PNP_SMS_PORT_MITAKE("pnp.sms.port.mitake"),
     PNP_SMS_USR_MITAKE("pnp.sms.usr.mitake"),
     PNP_SMS_PASS_MITAKE("pnp.sms.pass.mitake"),
-    PNP_SMS_APPCODE_MITAKE("pnp.sms.APPCode.mitake"),
-    PNP_SMS_RESCODE_MITAKE("pnp.sms.RESCode.mitake"),
+    PNP_SMS_APP_CODE_MITAKE("pnp.sms.APPCode.mitake"),
+    PNP_SMS_RES_CODE_MITAKE("pnp.sms.RESCode.mitake"),
     PNP_SMS_PROTOCOL_MITAKE("pnp.sms.protocol.mitake"),
 
     //三竹
     //互動
-    PNP_FTP_SERVERHOSTNAME_EVERY8D("pnp.ftp.serverHostName.every8d"),
-    PNP_FTP_SERVERHOSTNAME_PORT_EVERY8D("pnp.ftp.serverHostName.port.every8d"),
+    PNP_FTP_SERVER_HOST_NAME_EVERY8D("pnp.ftp.serverHostName.every8d"),
+    PNP_FTP_SERVER_HOST_NAME_PORT_EVERY8D("pnp.ftp.serverHostName.port.every8d"),
     PNP_FTP_HOST_EVERY8D("pnp.ftp.host.every8d"),
     PNP_FTP_PORT_EVERY8D("pnp.ftp.port.every8d"),
     PNP_FTP_USR_EVERY8D("pnp.ftp.usr.every8d"),
     PNP_FTP_PASS_EVERY8D("pnp.ftp.pass.every8d"),
-    PNP_FTP_APPCODE_EVERY8D("pnp.ftp.APPCode.every8d"),
-    PNP_FTP_RESCODE_EVERY8D("pnp.ftp.RESCode.every8d"),
+    PNP_FTP_APP_CODE_EVERY8D("pnp.ftp.APPCode.every8d"),
+    PNP_FTP_RES_CODE_EVERY8D("pnp.ftp.RESCode.every8d"),
     PNP_FTP_PROTOCOL_EVERY8D("pnp.ftp.protocol.every8d"),
     PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_EVERY8D("pnp.ftp.download.to.local.path.every8d"),
     PNP_FTP_DOWNLOAD_PATH_EVERY8D("pnp.ftp.download.path.every8d"),
     PNP_PROC_FLOW_EVERY8D("pnp.proc.flow.every8d"),
 
     PNP_SMS_UPLOAD_PATH_EVERY8D("pnp.sms.upload.path.every8d"),
-    PNP_SMS_SERVERHOSTNAME_EVERY8D("pnp.sms.serverHostName.every8d"),
-    PNP_SMS_SERVERHOSTNAME_PORT_EVERY8D("pnp.sms.serverHostName.port.every8d"),
+    PNP_SMS_SERVER_HOST_NAME_EVERY8D("pnp.sms.serverHostName.every8d"),
+    PNP_SMS_SERVER_HOST_NAME_PORT_EVERY8D("pnp.sms.serverHostName.port.every8d"),
     PNP_SMS_HOST_EVERY8D("pnp.sms.host.every8d"),
     PNP_SMS_PORT_EVERY8D("pnp.sms.port.every8d"),
     PNP_SMS_USR_EVERY8D("pnp.sms.usr.every8d"),
     PNP_SMS_PASS_EVERY8D("pnp.sms.pass.every8d"),
-    PNP_SMS_APPCODE_EVERY8D("pnp.sms.APPCode.every8d"),
-    PNP_SMS_RESCODE_EVERY8D("pnp.sms.RESCode.every8d"),
+    PNP_SMS_APP_CODE_EVERY8D("pnp.sms.APPCode.every8d"),
+    PNP_SMS_RES_CODE_EVERY8D("pnp.sms.RESCode.every8d"),
     PNP_SMS_PROTOCOL_EVERY8D("pnp.sms.protocol.every8d"),
 
 
     //互動
     //明宣
-    PNP_FTP_SERVERHOSTNAME_MING("pnp.ftp.serverHostName.ming"),
-    PNP_FTP_SERVERHOSTNAME_PORT_MING("pnp.ftp.serverHostName.port.ming"),
+    PNP_FTP_SERVER_HOST_NAME_MING("pnp.ftp.serverHostName.ming"),
+    PNP_FTP_SERVER_HOST_NAME_PORT_MING("pnp.ftp.serverHostName.port.ming"),
     PNP_FTP_HOST_MING("pnp.ftp.host.ming"),
     PNP_FTP_PORT_MING("pnp.ftp.port.ming"),
     PNP_FTP_USR_MING("pnp.ftp.usr.ming"),
     PNP_FTP_PASS_MING("pnp.ftp.pass.ming"),
-    PNP_FTP_APPCODE_MING("pnp.ftp.APPCode.ming"),
-    PNP_FTP_RESCODE_MING("pnp.ftp.RESCode.ming"),
+    PNP_FTP_APP_CODE_MING("pnp.ftp.APPCode.ming"),
+    PNP_FTP_RES_CODE_MING("pnp.ftp.RESCode.ming"),
     PNP_FTP_PROTOCOL_MING("pnp.ftp.protocol.ming"),
     PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_MING("pnp.ftp.download.to.local.path.ming"),
     PNP_FTP_DOWNLOAD_PATH_MING("pnp.ftp.download.path.ming"),
     PNP_PROC_FLOW_MING("pnp.proc.flow.ming"),
 
     PNP_SMS_UPLOAD_PATH_MING("pnp.sms.upload.path.ming"),
-    PNP_SMS_SERVERHOSTNAME_MING("pnp.sms.serverHostName.ming"),
-    PNP_SMS_SERVERHOSTNAME_PORT_MING("pnp.sms.serverHostName.port.ming"),
+    PNP_SMS_SERVER_HOST_NAME_MING("pnp.sms.serverHostName.ming"),
+    PNP_SMS_SERVER_HOST_NAME_PORT_MING("pnp.sms.serverHostName.port.ming"),
     PNP_SMS_HOST_MING("pnp.sms.host.ming"),
     PNP_SMS_PORT_MING("pnp.sms.port.ming"),
     PNP_SMS_USR_MING("pnp.sms.usr.ming"),
     PNP_SMS_PASS_MING("pnp.sms.pass.ming"),
-    PNP_SMS_APPCODE_MING("pnp.sms.APPCode.ming"),
-    PNP_SMS_RESCODE_MING("pnp.sms.RESCode.ming"),
+    PNP_SMS_APP_CODE_MING("pnp.sms.APPCode.ming"),
+    PNP_SMS_RES_CODE_MING("pnp.sms.RESCode.ming"),
     PNP_SMS_PROTOCOL_MING("pnp.sms.protocol.ming"),
     //明宣
     //UNICA
-    PNP_FTP_SERVERHOSTNAME_UNICA("pnp.ftp.serverHostName.unica"),
-    PNP_FTP_SERVERHOSTNAME_PORT_UNICA("pnp.ftp.serverHostName.port.unica"),
+    PNP_FTP_SERVER_HOST_NAME_UNICA("pnp.ftp.serverHostName.unica"),
+    PNP_FTP_SERVER_HOST_NAME_PORT_UNICA("pnp.ftp.serverHostName.port.unica"),
     PNP_FTP_HOST_UNICA("pnp.ftp.host.unica"),
     PNP_FTP_PORT_UNICA("pnp.ftp.port.unica"),
     PNP_FTP_USR_UNICA("pnp.ftp.usr.unica"),
     PNP_FTP_PASS_UNICA("pnp.ftp.pass.unica"),
-    PNP_FTP_APPCODE_UNICA("pnp.ftp.APPCode.unica"),
-    PNP_FTP_RESCODE_UNICA("pnp.ftp.RESCode.unica"),
+    PNP_FTP_APP_CODE_UNICA("pnp.ftp.APPCode.unica"),
+    PNP_FTP_RES_CODE_UNICA("pnp.ftp.RESCode.unica"),
     PNP_FTP_PROTOCOL_UNICA("pnp.ftp.protocol.unica"),
     PNP_FTP_DOWNLOAD_TO_LOCAL_PATH_UNICA("pnp.ftp.download.to.local.path.unica"),
     PNP_FTP_DOWNLOAD_PATH_UNICA("pnp.ftp.download.path.unica"),
     PNP_PROC_FLOW_UNICA("pnp.proc.flow.unica"),
 
     PNP_SMS_UPLOAD_PATH_UNICA("pnp.sms.upload.path.unica"),
-    PNP_SMS_SERVERHOSTNAME_UNICA("pnp.sms.serverHostName.unica"),
-    PNP_SMS_SERVERHOSTNAME_PORT_UNICA("pnp.sms.serverHostName.port.unica"),
+    PNP_SMS_SERVER_HOST_NAME_UNICA("pnp.sms.serverHostName.unica"),
+    PNP_SMS_SERVER_HOST_NAME_PORT_UNICA("pnp.sms.serverHostName.port.unica"),
     PNP_SMS_HOST_UNICA("pnp.sms.host.unica"),
     PNP_SMS_PORT_UNICA("pnp.sms.port.unica"),
     PNP_SMS_USR_UNICA("pnp.sms.usr.unica"),
     PNP_SMS_PASS_UNICA("pnp.sms.pass.unica"),
-    PNP_SMS_APPCODE_UNICA("pnp.sms.APPCode.unica"),
-    PNP_SMS_RESCODE_UNICA("pnp.sms.RESCode.unica"),
+    PNP_SMS_APP_CODE_UNICA("pnp.sms.APPCode.unica"),
+    PNP_SMS_RES_CODE_UNICA("pnp.sms.RESCode.unica"),
     PNP_SMS_PROTOCOL_UNICA("pnp.sms.protocol.unica"),
 
     //PNP白名單
+
     PNP_WHITELIST_VALIDATE("pnp.whitelist.validate"),
-    PNP_WHITELIST_ACCOUNT_PCCCODE_MITAKE(""),
-    PNP_WHITELIST_ACCOUNT_PCCCODE_EVERY8D(""),
-    PNP_WHITELIST_ACCOUNT_PCCCODE_MING(""),
-    PNP_WHITELIST_ACCOUNT_PCCCODE_UNICA(""),
+    PNP_WHITELIST_ACCOUNT_PCC_CODE_MITAKE(""),
+    PNP_WHITELIST_ACCOUNT_PCC_CODE_EVERY8D(""),
+    PNP_WHITELIST_ACCOUNT_PCC_CODE_MING(""),
+    PNP_WHITELIST_ACCOUNT_PCC_CODE_UNICA(""),
     PNP_SCHEDULE_TIME("pnp.schedule.time"),
+    PNP_FTP_SCHEDULE_TIME("pnp.ftp.schedule.time"),
+    PNP_SEND_SCHEDULE_TIME("pnp.send.schedule.time"),
     PNP_SCHEDULE_UNIT("pnp.schedule.unit"),
-    PNP_READLINES_ENCODE("pnp.readLines.encode"),
+    PNP_READ_LINES_ENCODE("pnp.readLines.encode"),
     LINE_PNP_PUSH_VERIFIED("line.pnp.push.verified"),
 
     // Line Point
@@ -320,20 +328,15 @@ public enum CONFIG_STR {
     LINE_POINT_API_CHANNEL_ID("line.point.api.channel.id"),
     LINE_POINT_API_CHANNEL_SECRET("line.point.api.channel.secret"),
 
-    CAVEAT_LINEPOINT_POINT("caveat.linepoint.point"),
-    //	// Oracle Database
-    ORACLE_DATASOURCE_URL("oracle.datasource.url"),
-    ORACLE_DATASOURCE_USERNAME("oracle.datasource.username"),
-    ORACLE_DATASOURCE_PASSWORD("oracle.datasource.password"),
-    ORACLE_DATASOURCE_DRIVER_NAME("oracle.datasource.driver.name"),
+    CAVEAT_LINE_POINT_POINT("caveat.linepoint.point"),
+    // Oracle Database
+    ORACLE_DATA_SOURCE_URL("oracle.datasource.url"),
+    ORACLE_DATA_SOURCE_USERNAME("oracle.datasource.username"),
+    ORACLE_DATA_SOURCE_PASSWORD("oracle.datasource.password"),
+    ORACLE_DATA_SOURCE_DRIVER_NAME("oracle.datasource.driver.name"),
     ORACLE_SCHEMA_HR("oracle.schema.hr"),
     ORACLE_SCHEMA_CMM("oracle.schema.cmm"),
     ORACLE_USE_DEPARTMENT_CHECK("oracle.use.department.check"),
-
-    //PNP監控
-//	PNP_PROC_FLOW("pnp.proc.flow"),
-
-    //PNP
     ;
 
     private final String str;
@@ -345,6 +348,7 @@ public enum CONFIG_STR {
     /**
      * @return the str
      */
+    @Override
     public String toString() {
         return str;
     }

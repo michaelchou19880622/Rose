@@ -304,7 +304,7 @@ public class LinePointPushMessageActor extends UntypedActor {
      * GetAccessToken
      */
     private String getAccessToken() {
-        return CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelToken.toString(), true);
+        return CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_TOKEN.toString(), true);
     }
 
     /**

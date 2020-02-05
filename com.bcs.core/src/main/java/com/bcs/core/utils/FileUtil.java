@@ -81,7 +81,7 @@ public class FileUtil {
         logger.info("resourceSize: " + resourceSize);
         logger.info("contentType: " + contentType);
 
-        String filePath = CoreConfigReader.getString(CONFIG_STR.FilePath) + System.getProperty("file.separator") + resourceType;
+        String filePath = CoreConfigReader.getString(CONFIG_STR.FILE_PATH) + System.getProperty("file.separator") + resourceType;
 
         logger.info("uploadFile:" + filePath + System.getProperty("file.separator") + resourceId);
 
@@ -278,7 +278,7 @@ public class FileUtil {
             resourceId = UUID.randomUUID().toString().toLowerCase();
         }
 
-        String filePath = CoreConfigReader.getString(CONFIG_STR.FilePath) + System.getProperty("file.separator") + resourceType;
+        String filePath = CoreConfigReader.getString(CONFIG_STR.FILE_PATH) + System.getProperty("file.separator") + resourceType;
 
         logger.info("resourceTitle:" + resourceTitle);
         logger.info("uploadFile:" + filePath + System.getProperty("file.separator") + resourceId);
@@ -492,7 +492,7 @@ public class FileUtil {
      */
     public static void getFile(HttpServletResponse response, ContentResource resource, boolean getPreview) throws Exception {
 
-        String filePath = CoreConfigReader.getString(CONFIG_STR.FilePath) + System.getProperty("file.separator") + resource.getResourceType();
+        String filePath = CoreConfigReader.getString(CONFIG_STR.FILE_PATH) + System.getProperty("file.separator") + resource.getResourceType();
 
         if (getPreview) {
             if (resource.getResourcePreview() != null) {
@@ -522,7 +522,7 @@ public class FileUtil {
     public static Boolean loadFromDB(ContentResource resource) throws Exception {
 
         if (resource != null) {
-            String filePath = CoreConfigReader.getString(CONFIG_STR.FilePath) + System.getProperty("file.separator") + resource.getResourceType();
+            String filePath = CoreConfigReader.getString(CONFIG_STR.FILE_PATH) + System.getProperty("file.separator") + resource.getResourceType();
 
             File file = new File(filePath + System.getProperty("file.separator"), resource.getResourceId());
 
@@ -551,7 +551,7 @@ public class FileUtil {
      */
     public static ByteArrayInputStream getFile(ContentResource resource, boolean getPreview) throws Exception {
 
-        String filePath = CoreConfigReader.getString(CONFIG_STR.FilePath) + System.getProperty("file.separator") + resource.getResourceType();
+        String filePath = CoreConfigReader.getString(CONFIG_STR.FILE_PATH) + System.getProperty("file.separator") + resource.getResourceType();
 
         if (getPreview) {
             if (resource.getResourcePreview() != null) {

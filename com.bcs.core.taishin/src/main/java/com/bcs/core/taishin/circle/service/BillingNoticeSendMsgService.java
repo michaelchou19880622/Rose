@@ -75,7 +75,7 @@ public class BillingNoticeSendMsgService {
 
     private void sendProcess() {
         log.info("BillingNoticeSendMsgService startCircle.... ");
-        boolean bigSwitch = CoreConfigReader.getBoolean(CONFIG_STR.BN_BIGSWITCH, true, false);
+        boolean bigSwitch = CoreConfigReader.getBoolean(CONFIG_STR.BN_BIG_SWITCH, true, false);
         log.info("帳務通知大開關: {}", bigSwitch);
         if (!bigSwitch) {
             return;

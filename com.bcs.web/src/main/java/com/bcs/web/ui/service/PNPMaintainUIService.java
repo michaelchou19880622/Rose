@@ -1,8 +1,8 @@
 package com.bcs.web.ui.service;
 
-import com.bcs.core.taishin.circle.PNP.db.entity.PNPMaintainAccountModel;
-import com.bcs.core.taishin.circle.PNP.db.repository.PNPMaintainAccountModelCustom;
-import com.bcs.core.taishin.circle.PNP.db.repository.PNPMaintainAccountModelRepository;
+import com.bcs.core.taishin.circle.pnp.db.entity.PNPMaintainAccountModel;
+import com.bcs.core.taishin.circle.pnp.db.repository.PNPMaintainAccountModelCustom;
+import com.bcs.core.taishin.circle.pnp.db.repository.PNPMaintainAccountModelRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

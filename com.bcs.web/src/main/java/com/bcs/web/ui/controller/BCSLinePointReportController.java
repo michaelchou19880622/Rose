@@ -258,8 +258,8 @@ public class BCSLinePointReportController extends BCSBaseController {
         try {
             HttpHeaders headers = new HttpHeaders();
             // String accessToken = linePointApiService.getLinePointChannelAccessToken();
-            String accessToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(),
-                    CONFIG_STR.ChannelToken.toString(), true);
+            String accessToken = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(),
+                    CONFIG_STR.CHANNEL_TOKEN.toString(), true);
             headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
             headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 
@@ -487,7 +487,7 @@ public class BCSLinePointReportController extends BCSBaseController {
                 // logger.info("employee : " + employee);
 
 //				TaishinEmployee employee = new TaishinEmployee();
-//				
+//
 //				employee.setDivisionName("XTREME");
 //				employee.setDepartmentName("LINEBC");
 
@@ -523,15 +523,15 @@ public class BCSLinePointReportController extends BCSBaseController {
 //    @RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForLPPushApiEffects")
 //    @ResponseBody
 //    public void exportToExcelForLPPushApiEffects(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser) {
-//      
+//
 //		// file path
 //        String filePath = CoreConfigReader.getString("file.path");
-//        
+//
 //        // file name
 //		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
 //		Date date = new Date();
 //        String fileName = "LPPushApiEffects_" + sdf.format(date) + ".xlsx";
-//        
+//
 //        try {
 //            File folder = new File(filePath);
 //            if(!folder.exists()){
@@ -552,17 +552,17 @@ public class BCSLinePointReportController extends BCSBaseController {
 //	@ControllerLog(description="匯出Line Point Push API Detail 成效報表")
 //    @RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForLPPushApiEffectsDetail/{mainId}/{status}")
 //    @ResponseBody
-//    public void exportToExcelForLPPushApiEffectsDetail(HttpServletRequest request, HttpServletResponse response, 
+//    public void exportToExcelForLPPushApiEffectsDetail(HttpServletRequest request, HttpServletResponse response,
 //    		@CurrentUser CustomUser customUser, @PathVariable Long mainId, @PathVariable String status) {
-//      
+//
 //		// file path
 //        String filePath = CoreConfigReader.getString("file.path");
-//        
+//
 //        // file name
 //		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
 //		Date date = new Date();
 //        String fileName = "LPPushApiEffectsDetail_" + sdf.format(date) + ".xlsx";
-//        
+//
 //        try {
 //            File folder = new File(filePath);
 //            if(!folder.exists()){

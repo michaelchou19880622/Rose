@@ -30,7 +30,7 @@ import java.util.Vector;
 @Slf4j(topic = "BNRecorder")
 @Service
 public class FtpService {
-    private static String channelIds = CoreConfigReader.getString(CONFIG_STR.BN_FTP_CHANNELIDS, true, false);
+    private static String channelIds = CoreConfigReader.getString(CONFIG_STR.BN_FTP_CHANNEL_IDS, true, false);
     private static String downloadSavePath = CoreConfigReader.getString(CONFIG_STR.BN_FTP_DOWNLOAD_SAVEFILEPATH, true, false);
     private static String fileExtension = CoreConfigReader.getString(CONFIG_STR.BN_FTP_FILE_EXTENSION, true, false);
     private static boolean is64Bit = CoreConfigReader.getBoolean(CONFIG_STR.BN_FTP_IS64BIT, true, false);

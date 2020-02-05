@@ -261,7 +261,7 @@ public class LinePointPushApiController {
             // ----------- execute --------------
             // initialize request header
             HttpHeaders headers = new HttpHeaders();
-            String accessToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelToken.toString(), true);
+            String accessToken = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_TOKEN.toString(), true);
 
             headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
             headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
@@ -442,7 +442,7 @@ public class LinePointPushApiController {
             // ---------------------------------------
             // initialize request header
             HttpHeaders headers = new HttpHeaders();
-            String accessToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelToken.toString(), true);
+            String accessToken = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_TOKEN.toString(), true);
             headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
             headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 

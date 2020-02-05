@@ -1,0 +1,91 @@
+package com.bcs.core.taishin.circle.pnp.akka.handler;
+
+import akka.actor.ActorRef;
+import akka.actor.UntypedActor;
+import com.bcs.core.taishin.circle.pnp.code.PnpStageEnum;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetail;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpMain;
+import com.bcs.core.utils.AkkaRouterFactory;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Master Actor
+ *
+ * @author ???
+ * @see com.bcs.core.taishin.circle.pnp.akka.PnpAkkaService
+ */
+@Slf4j(topic = "PnpRecorder")
+public class PnpMainActor extends UntypedActor {
+    /**
+     * BC Actor
+     */
+    private final ActorRef pushMessageRouterActor;
+    /**
+     * PNP Actor
+     */
+    private final ActorRef pnpMessageRouterActor;
+    /**
+     * 更新訊息狀態Actor
+     */
+    private final ActorRef updateStatusRouterActor;
+
+    private PnpMainActor() {
+        pushMessageRouterActor = new AkkaRouterFactory<>(getContext(), PnpPushMessageActor.class, true).routerActor;
+        pnpMessageRouterActor = new AkkaRouterFactory<>(getContext(), PnpMessageActor.class, true).routerActor;
+        updateStatusRouterActor = new AkkaRouterFactory<>(getContext(), PnpUpdateStatusActor.class, true).routerActor;
+    }
+
+    @Override
+    public void onReceive(Object object) {
+        try {
+            Thread.currentThread().setName("Actor-PNP-Main-" + Thread.currentThread().getId());
+
+
+            if (object instanceof PnpMain) {
+                PnpMain pnpMain = (PnpMain) object;
+                PnpStageEnum stage = PnpStageEnum.findEnumByName(pnpMain.getProcStage());
+                log.info("PnpMainActor onReceive object instanceof PnpMain!!! Stage: " + stage);
+                switch (stage) {
+                    case BC:
+                        tellActor(pushMessageRouterActor, pnpMain);
+                        break;
+                    case PNP:
+                        tellActor(pnpMessageRouterActor, pnpMain);
+                        break;
+                    case SMS:
+                        //TODO SMS Process
+                        break;
+                    default:
+                        break;
+                }
+            } else if (object instanceof PnpDetail) {
+                log.info("Tell Update Actor do Update!!");
+                updateStatusRouterActor.tell(object, this.getSelf());
+            }
+        } catch (Exception e) {
+            log.error("Exception", e);
+        }
+    }
+
+    private void tellActor(ActorRef someActor, PnpMain tellSomething) throws CloneNotSupportedException {
+        Integer buffer = 19;
+        List<? super PnpDetail> details = tellSomething.getPnpDetails();
+        List<? super PnpDetail> partition;
+        log.info("PnpMainActor onReceive details.size : {}", details.size());
+        Integer arrayLength = details.size();
+        Integer pointer = 0;
+        while (pointer < arrayLength) {
+            Integer counter = 0;
+            partition = new ArrayList<>();
+            for (; (counter < buffer) && (pointer < arrayLength); counter++, pointer++) {
+                partition.add((PnpDetail) details.get(pointer));
+            }
+            PnpMain pnpMainClone = (PnpMain) tellSomething.clone();
+            pnpMainClone.setPnpDetails(partition);
+            someActor.tell(pnpMainClone, this.getSelf());
+        }
+    }
+}

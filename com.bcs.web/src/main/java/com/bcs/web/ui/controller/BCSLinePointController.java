@@ -97,7 +97,7 @@ public class BCSLinePointController extends BCSBaseController {
     @GetMapping(value = "/edit/getCaveatLinePoint")
     public ResponseEntity<?> getCaveatLinePoint(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser) {
         log.info("getCaveatLinePoint");
-        String CaveatLinePoint = CoreConfigReader.getString(CONFIG_STR.CAVEAT_LINEPOINT_POINT, true);
+        String CaveatLinePoint = CoreConfigReader.getString(CONFIG_STR.CAVEAT_LINE_POINT_POINT, true);
         return new ResponseEntity<>(CaveatLinePoint, HttpStatus.OK);
     }
 
@@ -479,7 +479,7 @@ public class BCSLinePointController extends BCSBaseController {
         log.info("getSumCaveatLinePoint");
         log.info("linePointMainId : " + linePointMainId);
 
-        String caveatLinePoint = CoreConfigReader.getString(CONFIG_STR.CAVEAT_LINEPOINT_POINT, true);
+        String caveatLinePoint = CoreConfigReader.getString(CONFIG_STR.CAVEAT_LINE_POINT_POINT, true);
 
         try {
             String number = linePointDetailService.getCountLinePointDetailAmountMoreCaveatLinePoint(linePointMainId, caveatLinePoint);

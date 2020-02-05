@@ -26,7 +26,7 @@ public class CoreConfigReader {
 	 * @return
 	 */
 	public static boolean isBillingNoticeSendMsg(){
-		String isBillingNoticeSendMsg = getString(CONFIG_STR.IS_BN_SENDMSG);
+		String isBillingNoticeSendMsg = getString(CONFIG_STR.IS_BN_SEND_MSG);
 		if(StringUtils.isNotBlank(isBillingNoticeSendMsg) && "true".equals(isBillingNoticeSendMsg)){
 			return true;
 		}
@@ -38,7 +38,7 @@ public class CoreConfigReader {
 	 * @return
 	 */
 	public static boolean isBillingNoticeFtpDownload(){
-		String isBillingNoticeFtpDownload = getString(CONFIG_STR.IS_BN_FTPDOWNLOAD);
+		String isBillingNoticeFtpDownload = getString(CONFIG_STR.IS_BN_FTP_DOWNLOAD);
 		if(StringUtils.isNotBlank(isBillingNoticeFtpDownload) && "true".equals(isBillingNoticeFtpDownload)){
 			return true;
 		}
@@ -62,7 +62,7 @@ public class CoreConfigReader {
 	 * @return
 	 */
 	public static boolean isPNPSendMsg(){
-		String isPNPSendMsg = getString(CONFIG_STR.IS_PNP_SENDMSG);
+		String isPNPSendMsg = getString(CONFIG_STR.IS_PNP_SEND_MSG);
 		if(StringUtils.isNotBlank(isPNPSendMsg) && "true".equals(isPNPSendMsg)){
 			return true;
 		}
@@ -74,7 +74,7 @@ public class CoreConfigReader {
 	 * @return
 	 */
 	public static boolean isPNPFtpDownload(){
-		String isPNPFtpDownload = getString(CONFIG_STR.IS_PNP_FTPDOWNLOAD);
+		String isPNPFtpDownload = getString(CONFIG_STR.IS_PNP_FTP_DOWNLOAD);
 		if(StringUtils.isNotBlank(isPNPFtpDownload) && "true".equals(isPNPFtpDownload)){
 			return true;
 		}

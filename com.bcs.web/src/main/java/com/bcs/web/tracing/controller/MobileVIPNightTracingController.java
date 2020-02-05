@@ -151,7 +151,7 @@ public class MobileVIPNightTracingController extends BCSBaseController {
                 msgApiSendRecordModel.setMsgApiSendRecord(msgApiSendRecord);
 
                 try {
-                    sendingMsgService.sendApiMessage(msgApiSendRecordModel, CONFIG_STR.Default.toString(), API_TYPE.BOT.toString(), 0);
+                    sendingMsgService.sendApiMessage(msgApiSendRecordModel, CONFIG_STR.DEFAULT.toString(), API_TYPE.BOT.toString(), 0);
                 }catch(Exception e) {}
             }
         });

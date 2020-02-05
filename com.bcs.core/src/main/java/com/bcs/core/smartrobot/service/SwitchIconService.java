@@ -16,19 +16,19 @@ public class SwitchIconService {
 			messages.getJSONObject(i).put("sender", generateSenderJSONObject(channelId));
 		}
 	}
-	
+
 	public JSONObject generateSenderJSONObject(String channelId) {
-		String name = CoreConfigReader.getString(channelId, CONFIG_STR.ChannelSwitchIconName.toString(), true);
-		String iconUrl = CoreConfigReader.getString(channelId, CONFIG_STR.ChannelSwitchIconUrl.toString(), true);
+		String name = CoreConfigReader.getString(channelId, CONFIG_STR.CHANNEL_SWITCH_ICON_NAME.toString(), true);
+		String iconUrl = CoreConfigReader.getString(channelId, CONFIG_STR.CHANNEL_SWITCH_ICON_URL.toString(), true);
 		JSONObject senderObject = new JSONObject();
 		senderObject.put("iconUrl",iconUrl);
 		senderObject.put("name", name);
 		return senderObject;
 	}
-	
+
 	public Sender generateSenderModel(String channelId) {
-		String name = CoreConfigReader.getString(channelId, CONFIG_STR.ChannelSwitchIconName.toString(), true);
-		String iconUrl = CoreConfigReader.getString(channelId, CONFIG_STR.ChannelSwitchIconUrl.toString(), true);
+		String name = CoreConfigReader.getString(channelId, CONFIG_STR.CHANNEL_SWITCH_ICON_NAME.toString(), true);
+		String iconUrl = CoreConfigReader.getString(channelId, CONFIG_STR.CHANNEL_SWITCH_ICON_URL.toString(), true);
 		return new Sender(name, iconUrl);
 	}
 }

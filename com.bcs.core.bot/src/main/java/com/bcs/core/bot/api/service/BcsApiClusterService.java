@@ -30,7 +30,7 @@ public class BcsApiClusterService {
 
     public static PostLineResponse clusterApiSend(AsyncSendingClusterModel model) throws Exception {
         String sendMsg = ObjectUtil.objectToJsonStr(model);
-        String encode = SignatureValidationHelper.encode(sendMsg, CONFIG_STR.Default.toString());
+        String encode = SignatureValidationHelper.encode(sendMsg, CONFIG_STR.DEFAULT.toString());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8);

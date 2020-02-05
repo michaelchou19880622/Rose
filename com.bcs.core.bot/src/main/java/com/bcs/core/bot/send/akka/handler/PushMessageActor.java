@@ -27,36 +27,36 @@ public class PushMessageActor extends UntypedActor {
 	public void onReceive(Object object) throws Exception {
 		if(object instanceof PushApiModel) {
 			PushApiModel pushApiModel = (PushApiModel) object;
-			
+
 			if(pushApiModel.getSendTimeType().equals(PushApiModel.SEND_TYPE_IMMEDIATE)) {	// 立即發送
 				String url = CoreConfigReader.getString(CONFIG_STR.LINE_MESSAGE_PUSH_URL.toString());
-				String accessToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelToken.toString(), true);
-				String serviceCode = CoreConfigReader.getString(CONFIG_STR.AutoReply.toString(), CONFIG_STR.ChannelServiceCode.toString(), true);
+				String accessToken = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_TOKEN.toString(), true);
+				String serviceCode = CoreConfigReader.getString(CONFIG_STR.AUTO_REPLY.toString(), CONFIG_STR.CHANNEL_SERVICE_CODE.toString(), true);
 				JSONObject requestBody = new JSONObject();
 				PushMessageRecord record = null;
-				
+
 				/* 設定 request headers */
 				HttpHeaders headers = new HttpHeaders();
 				headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
 				headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 				headers.set(LINE_HEADER.HEADER_BOT_ServiceCode.toString(), serviceCode);
-				
+
 				requestBody.put("messages", pushApiModel.getMessages());
-				
+
 				JSONArray uids = pushApiModel.getUid();
 				for(Integer i = 0; i < uids.length(); i++) {
 					record = new PushMessageRecord();
-					
+
 					requestBody.put("to", uids.get(i));
-					
+
 					/* 將 headers 跟 body 塞進 HttpEntity 中  */
 					HttpEntity<String> httpEntity = new HttpEntity<String>(requestBody.toString(), headers);
-					
+
 					RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
-					
+
 					try {
 						restfulUtil.execute();
-						
+
 						record.setDepartment(pushApiModel.getDepartment());
 						record.setUID(uids.get(i).toString());
 						record.setSendMessage(pushApiModel.getMessages().toString());
@@ -69,7 +69,7 @@ public class PushMessageActor extends UntypedActor {
 						record.setPushTheme(pushApiModel.getPushTheme());
 					} catch (HttpClientErrorException e) {
 						JSONObject errorMessage = new JSONObject(e.getResponseBodyAsString());
-						
+
 						if(errorMessage.has("message")) {
 							record.setDepartment(pushApiModel.getDepartment());
 							record.setUID(uids.get(i).toString());
@@ -89,7 +89,7 @@ public class PushMessageActor extends UntypedActor {
 				}
 			} else {	// 預約發送
 				PushMessageTaskService pushMessageTaskService = ApplicationContextProvider.getApplicationContext().getBean(PushMessageTaskService.class);
-				
+
 				pushMessageTaskService.startTask(pushApiModel);
 			}
 		}

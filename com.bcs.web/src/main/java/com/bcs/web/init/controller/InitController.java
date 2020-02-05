@@ -10,10 +10,10 @@ import com.bcs.core.record.service.CatchRecordBinded;
 import com.bcs.core.record.service.CatchRecordOpAddReceive;
 import com.bcs.core.record.service.CatchRecordOpBlockedReceive;
 import com.bcs.core.resource.CoreConfigReader;
-import com.bcs.core.taishin.circle.PNP.scheduler.LoadFtpPnpDataTask;
-import com.bcs.core.taishin.circle.PNP.scheduler.PnpPNPMsgService;
-import com.bcs.core.taishin.circle.PNP.scheduler.PnpPushMsgService;
-import com.bcs.core.taishin.circle.PNP.scheduler.PnpSMSMsgService;
+import com.bcs.core.taishin.circle.pnp.scheduler.LoadFtpPnpDataTask;
+import com.bcs.core.taishin.circle.pnp.scheduler.PnpPNPMsgService;
+import com.bcs.core.taishin.circle.pnp.scheduler.PnpPushMsgService;
+import com.bcs.core.taishin.circle.pnp.scheduler.PnpSMSMsgService;
 import com.bcs.core.taishin.circle.service.BillingNoticeFtpService;
 import com.bcs.core.taishin.circle.service.BillingNoticeSendMsgService;
 import com.bcs.core.utils.DataSyncUtil;
@@ -313,7 +313,7 @@ public class InitController {
      */
     private void cleanSystemLogTask() {
         try {
-            if (CoreConfigReader.getBoolean("system.log.clean.schedule.enable")) {
+            if (CoreConfigReader.getBoolean("system.log.clean.schedule.enable", true)) {
                 int scheduleTime = 30;
                 int deleteRangeDay = 30;
                 systemLogService.deleteLogByRange(scheduleTime, TimeUnit.SECONDS, deleteRangeDay);

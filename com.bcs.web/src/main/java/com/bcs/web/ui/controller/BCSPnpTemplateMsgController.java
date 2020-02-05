@@ -8,10 +8,10 @@ import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.api.model.PnpTemplateMsgModel;
 import com.bcs.core.taishin.api.model.TemplateActionModel;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpContentLink;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpContentTemplateMsg;
-import com.bcs.core.taishin.circle.PNP.db.entity.PnpContentTemplateMsgAction;
-import com.bcs.core.taishin.circle.PNP.db.service.PnpContentTemplateMsgService;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpContentLink;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpContentTemplateMsg;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpContentTemplateMsgAction;
+import com.bcs.core.taishin.circle.pnp.db.service.PnpContentTemplateMsgService;
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.web.security.CurrentUser;
 import com.bcs.core.web.security.CustomUser;
@@ -591,9 +591,9 @@ public class BCSPnpTemplateMsgController {
     public ResponseEntity<?> getBillingNoticeBigSwitch(HttpServletRequest request, HttpServletResponse response) throws IOException {
         log.info("getPnpBigSwitch");
         try {
-            log.info(".bn.bigswitch = " + "." + CONFIG_STR.BN_BIGSWITCH.toString());
-            SystemConfig systemConfig = systemConfigService.findSystemConfig("." + CONFIG_STR.BN_BIGSWITCH.toString());
-            String bigSwitch = CoreConfigReader.getString(CONFIG_STR.BN_BIGSWITCH, false);
+            log.info(".bn.bigswitch = " + "." + CONFIG_STR.BN_BIG_SWITCH.toString());
+            SystemConfig systemConfig = systemConfigService.findSystemConfig("." + CONFIG_STR.BN_BIG_SWITCH.toString());
+            String bigSwitch = CoreConfigReader.getString(CONFIG_STR.BN_BIG_SWITCH, false);
             if (systemConfig != null) {
                 bigSwitch = systemConfig.getValue();
             }
@@ -614,11 +614,11 @@ public class BCSPnpTemplateMsgController {
     public ResponseEntity<?> setPnpBigSwitch(HttpServletRequest request, HttpServletResponse response, @PathVariable String OnOff) {
         log.info("setPnpBigSwitch, OnOff=" + OnOff);
         try {
-            log.info(".bn.bigswitch = " + "." + CONFIG_STR.BN_BIGSWITCH.toString());
-            SystemConfig systemConfig = systemConfigService.findSystemConfig("." + CONFIG_STR.BN_BIGSWITCH.toString());
+            log.info(".bn.bigswitch = " + "." + CONFIG_STR.BN_BIG_SWITCH.toString());
+            SystemConfig systemConfig = systemConfigService.findSystemConfig("." + CONFIG_STR.BN_BIG_SWITCH.toString());
             if (systemConfig == null) {
                 systemConfig = new SystemConfig();
-                systemConfig.setConfigId("." + CONFIG_STR.BN_BIGSWITCH.toString());
+                systemConfig.setConfigId("." + CONFIG_STR.BN_BIG_SWITCH.toString());
                 systemConfig.setDescription("BigSwitch");
             }
             systemConfig.setValue(OnOff);

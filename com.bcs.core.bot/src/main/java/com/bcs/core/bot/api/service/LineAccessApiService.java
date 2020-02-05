@@ -112,14 +112,14 @@ public class LineAccessApiService {
 
         List<LineMessagingService> lineMessagingServices = lineMessagingServiceMap.get(channel);
         if (lineMessagingServices == null || lineMessagingServices.isEmpty()) {
-            String channelToken = CoreConfigReader.getString(channelId, CONFIG_STR.ChannelToken.toString(), true);
+            String channelToken = CoreConfigReader.getString(channelId, CONFIG_STR.CHANNEL_TOKEN.toString(), true);
             log.info("channelToken = " + channelToken);
 
 //			// Michael Test, need modify.
 //			channelToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(), "ChannelToken", true);
 //			log.info("test channelToken = " + channelToken);
 
-            final String serviceCode = CoreConfigReader.getString(channelName, CONFIG_STR.ChannelServiceCode.toString(), true);
+            final String serviceCode = CoreConfigReader.getString(channelName, CONFIG_STR.CHANNEL_SERVICE_CODE.toString(), true);
             log.info("serviceCode = " + serviceCode);
 
             if (lineMessagingServices == null) {
@@ -188,7 +188,7 @@ public class LineAccessApiService {
         log.info("ChannelId:" + channelId);
         log.info("ChannelName:" + channelName);
 
-        if (channelName.equals(CONFIG_STR.InManualReplyButNotSendMsg.toString())) {
+        if (channelName.equals(CONFIG_STR.IN_MANUAL_REPLY_BUT_NOT_SEND_MSG.toString())) {
             throw new BcsNoticeException("使用者在真人客服無法推播");
         }
 
@@ -287,7 +287,7 @@ public class LineAccessApiService {
     }
 
     public static ObjectNode callVerifyAPIAndIssueToken(String channelId, boolean reIssue) throws Exception {
-        String accessToken = CoreConfigReader.getString(channelId, CONFIG_STR.ChannelToken.toString(), true);
+        String accessToken = CoreConfigReader.getString(channelId, CONFIG_STR.CHANNEL_TOKEN.toString(), true);
 
         LineTokenApiService lineTokenApiService = ApplicationContextProvider.getApplicationContext().getBean(LineTokenApiService.class);
         ObjectNode callVerifyResult = lineTokenApiService.callVerifyAPI(accessToken);
@@ -320,8 +320,8 @@ public class LineAccessApiService {
     }
 
     public static boolean callRefreshingAPI(String channelId) throws Exception {
-        String clientId = CoreConfigReader.getString(channelId, CONFIG_STR.ChannelID.toString(), true);
-        String clientSecret = CoreConfigReader.getString(channelId, CONFIG_STR.ChannelSecret.toString(), true);
+        String clientId = CoreConfigReader.getString(channelId, CONFIG_STR.CHANNEL_ID.toString(), true);
+        String clientSecret = CoreConfigReader.getString(channelId, CONFIG_STR.CHANNEL_SECRET.toString(), true);
 
         LineTokenApiService lineTokenApiService = ApplicationContextProvider.getApplicationContext().getBean(LineTokenApiService.class);
         SystemConfigService systemConfigService = ApplicationContextProvider.getApplicationContext().getBean(SystemConfigService.class);
@@ -333,7 +333,7 @@ public class LineAccessApiService {
         if (accessToken != null) {
             String token = accessToken.asText();
 
-            SystemConfig config = systemConfigService.findSystemConfig(channelId + "." + CONFIG_STR.ChannelToken.toString());
+            SystemConfig config = systemConfigService.findSystemConfig(channelId + "." + CONFIG_STR.CHANNEL_TOKEN.toString());
             config.setValue(token);
             systemConfigService.save(config);
             systemConfigService.clearData();

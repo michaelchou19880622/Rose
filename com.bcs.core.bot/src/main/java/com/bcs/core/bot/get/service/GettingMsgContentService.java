@@ -32,27 +32,27 @@ public class GettingMsgContentService {
 	private UserLiveChatService userLiveChatService;
 	/** Logger */
 	private static Logger logger = Logger.getLogger(GettingMsgContentService.class);
-	
+
 	public ContentResource getImageMessage(String ChannelId, String MID, String ApiType, String receiveMsgId) throws Exception{
 		return getImageMessage(ChannelId, MID, ApiType, receiveMsgId, 0);
 	}
-	
+
 	public ContentResource getImageMessage(String ChannelId, String MID, String ApiType, String receiveMsgId, int retryCount) throws Exception{
-			
+
 		// 儲存接收的圖片
 		try{
 			UserLiveChat userLiveChat = userLiveChatService.findByUID(MID);
-			String channelName = userLiveChat!=null ? CONFIG_STR.ManualReply.toString() : CONFIG_STR.AutoReply.toString();
+			String channelName = userLiveChat!=null ? CONFIG_STR.MANUAL_REPLY.toString() : CONFIG_STR.AUTO_REPLY.toString();
 			logger.debug("sendType:" + SEND_TYPE.REPLY_MSG.toString());
 			Response<ResponseBody> response = LineAccessApiService.getImageFromLine(ChannelId, channelName, receiveMsgId);
 
 			ResponseBody content = response.body();
 			// Check Response Status
 			checkStatus(response, MID, receiveMsgId);
-				
+
 			//this.saveLog(MID, response, iMsgId, targetId, targetId, LOG_TARGET_ACTION_TYPE.TARGET_InteractiveMsg, LOG_TARGET_ACTION_TYPE.ACTION_SendMatchMessage);
 		    ContentResource resource = contentResourceService.uploadFile(content.byteStream(), receiveMsgId, 0L, ContentResource.RESOURCE_TYPE_RECEIVEIMAGE, ContentResource.RESOURCE_TYPE_RECEIVEIMAGE, MID);
-			
+
 			return resource;
 		}
 		catch(Exception e){
@@ -64,19 +64,19 @@ public class GettingMsgContentService {
 				// Call Line Fail >= 5
 			}
 		}
-			
+
 		if(retryCount == 0){
 			// Update 關鍵字回應 記數
 			//ApplicationContextProvider.getApplicationContext().getBean(AkkaCoreService.class).recordMsgs(new MsgInteractiveRecord(iMsgId));
 		}
 		return null;
-		
+
 	}
-	
+
 	private void checkStatus(Response<ResponseBody> response, String mid, String receiveMsgId) throws Exception{
 
 		logger.debug("status:" + response.code());
-		
+
 		if(response.code() != 200){
 			List<Object> content = new ArrayList<Object>();
 			content.add(mid);

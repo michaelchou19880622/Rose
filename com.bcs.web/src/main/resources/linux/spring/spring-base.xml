@@ -39,7 +39,7 @@
 				<value>com.bcs.core.bc.db.entity</value>
 				<value>com.bcs.core.bot.db.entity</value>
 				<value>com.bcs.core.taishin.circle.db.entity</value>
-				<value>com.bcs.core.taishin.circle.PNP.db.entity</value>
+				<value>com.bcs.core.taishin.circle.pnp.db.entity</value>
 				<value>com.bcs.core.linepoint.db.entity</value>
 			</array>
      	</property>

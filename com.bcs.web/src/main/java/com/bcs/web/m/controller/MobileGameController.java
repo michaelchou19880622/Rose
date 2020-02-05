@@ -281,7 +281,7 @@ public class MobileGameController {
 		try {
 			String startTracingUrl = "";
 
-			String ChannelID = CoreConfigReader.getString(CONFIG_STR.Default.toString(),CONFIG_STR.ChannelID.toString(),true);
+			String ChannelID = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(),CONFIG_STR.CHANNEL_ID.toString(),true);
 
 			startTracingUrl = CoreConfigReader.getString(CONFIG_STR.LINE_OAUTH_URL_V2_1);
 			startTracingUrl = startTracingUrl.replace("{ChannelID}", ChannelID);
@@ -342,8 +342,8 @@ public class MobileGameController {
 			map.add("code", code);
 			map.add("redirect_uri", UriHelper.getScratchCardValidateUri());
 
-			String ChannelID = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelID.toString(), true);
-		    String ChannelSecret = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelSecret.toString(), true);
+			String ChannelID = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_ID.toString(), true);
+		    String ChannelSecret = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_SECRET.toString(), true);
 
 			map.add("client_id", ChannelID);
 			map.add("client_secret", ChannelSecret);

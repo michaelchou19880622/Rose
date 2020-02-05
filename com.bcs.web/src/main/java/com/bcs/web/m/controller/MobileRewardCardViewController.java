@@ -54,7 +54,6 @@ import com.bcs.core.web.m.service.MobilePageService;
 import com.bcs.core.web.security.CurrentUser;
 import com.bcs.core.web.security.CustomUser;
 import com.bcs.core.web.ui.page.enums.MobilePageEnum;
-import com.bcs.web.m.service.MobileCouponService;
 import com.bcs.web.m.service.MobileRewardCardService;
 import com.bcs.web.ui.model.ContentRewardCardModel;
 import com.bcs.web.ui.service.ActionUserCouponUIService;
@@ -384,7 +383,7 @@ public class MobileRewardCardViewController {
 		}
 
 		// 集點卡是否在使用期間
-		boolean isUseTime = CoreConfigReader.getBoolean(CONFIG_STR.SYSTEM_REWARDCARD_USE_TIME);
+		boolean isUseTime = CoreConfigReader.getBoolean(CONFIG_STR.SYSTEM_REWARD_CARD_USE_TIME);
 		boolean inUsingTime = false;
 		// Get Setting From ActionUserRewardCard
 		if (isUseTime) {
@@ -474,7 +473,7 @@ public class MobileRewardCardViewController {
 		Date rewardCardEndUsingTime = null;
 
 		// 集點卡是否在使用期間
-		boolean isUseTime = CoreConfigReader.getBoolean(CONFIG_STR.SYSTEM_REWARDCARD_USE_TIME);
+		boolean isUseTime = CoreConfigReader.getBoolean(CONFIG_STR.SYSTEM_REWARD_CARD_USE_TIME);
 
 		// Get Setting From ActionUserRewardCard
 		if (isUseTime) {
@@ -639,8 +638,8 @@ public class MobileRewardCardViewController {
 		try {
 			String lineoauthLink = "";
 
-			String ChannelID = CoreConfigReader.getString(CONFIG_STR.Default.toString(),
-					CONFIG_STR.ChannelID.toString(), true);
+			String ChannelID = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(),
+					CONFIG_STR.CHANNEL_ID.toString(), true);
 
 			lineoauthLink = CoreConfigReader.getString(CONFIG_STR.LINE_OAUTH_URL_V2_1);
 			lineoauthLink = lineoauthLink.replace("{ChannelID}", ChannelID);
@@ -832,7 +831,7 @@ public class MobileRewardCardViewController {
 				}
 
 				// 預時消失
-				boolean isUseTime = CoreConfigReader.getBoolean(CONFIG_STR.SYSTEM_REWARDCARD_USE_TIME);
+				boolean isUseTime = CoreConfigReader.getBoolean(CONFIG_STR.SYSTEM_REWARD_CARD_USE_TIME);
 				boolean inUsingTime = false;
 
 
@@ -931,8 +930,8 @@ public class MobileRewardCardViewController {
 
 		String rewardCardId = String.valueOf(contentRewardCardPoint.getRewardCardId());
 
-		String ChannelID = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelID.toString(), true);
-		String ChannelSecret = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelSecret.toString(), true);
+		String ChannelID = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_ID.toString(), true);
+		String ChannelSecret = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_SECRET.toString(), true);
 
 		ObjectNode result = lineWebLoginApiService.callRetrievingAPI(ChannelID, ChannelSecret, code,
 				UriHelper.getRewardCardValidateUri());

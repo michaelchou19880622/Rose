@@ -67,8 +67,8 @@ public class ConversationalCommerceController {
 
             JSONObject requestBody = new JSONObject(requestBodyString);
             String url = CoreConfigReader.getString(CONFIG_STR.LINE_MESSAGE_PUSH_URL.toString());
-            String accessToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelToken.toString(), true);
-            String serviceCode = CoreConfigReader.getString(CONFIG_STR.AutoReply.toString(), CONFIG_STR.ChannelServiceCode.toString(), true);
+            String accessToken = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_TOKEN.toString(), true);
+            String serviceCode = CoreConfigReader.getString(CONFIG_STR.AUTO_REPLY.toString(), CONFIG_STR.CHANNEL_SERVICE_CODE.toString(), true);
 
             /* 設定 request headers */
             HttpHeaders headers = new HttpHeaders();
@@ -76,7 +76,7 @@ public class ConversationalCommerceController {
             headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
             headers.set(LINE_HEADER.HEADER_BOT_ServiceCode.toString(), serviceCode);
 
-            switchIconService.appendSender(CONFIG_STR.AutoReply.toString(), requestBody);
+            switchIconService.appendSender(CONFIG_STR.AUTO_REPLY.toString(), requestBody);
 
             /* 將 headers 跟 body 塞進 HttpEntity 中 */
             HttpEntity<String> httpEntity = new HttpEntity<String>(requestBody.toString(), headers);

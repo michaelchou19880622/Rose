@@ -150,7 +150,7 @@ public class SendMsgUIService {
 
                 SendToBotModel sendToBotModel = new SendToBotModel();
 
-                sendToBotModel.setChannelId(CONFIG_STR.Default.toString());
+                sendToBotModel.setChannelId(CONFIG_STR.DEFAULT.toString());
                 sendToBotModel.setSendType(SEND_TYPE.PUSH_MSG);
 
                 // Validate Messages
@@ -177,7 +177,7 @@ public class SendMsgUIService {
                         PushMessage pushMessage = new PushMessage(mid, messageList);
                         sendToBotModel.setPushMessage(pushMessage);
 
-                        String channelName = inprogressMids.get(mid) != null ? CONFIG_STR.InManualReplyButNotSendMsg.toString() : CONFIG_STR.AutoReply.toString();
+                        String channelName = inprogressMids.get(mid) != null ? CONFIG_STR.IN_MANUAL_REPLY_BUT_NOT_SEND_MSG.toString() : CONFIG_STR.AUTO_REPLY.toString();
                         sendToBotModel.setChannelName(channelName);
 
                         Response<BotApiResponse> responseMulti = LineAccessApiService.sendToLine(sendToBotModel);

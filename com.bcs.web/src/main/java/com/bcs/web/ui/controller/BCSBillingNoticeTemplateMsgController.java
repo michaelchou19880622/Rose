@@ -610,9 +610,9 @@ public class BCSBillingNoticeTemplateMsgController {
 	public ResponseEntity<?> getBillingNoticeBigSwitch(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		logger.info("getBillingNoticeBigSwitch");
 		try {
-			logger.info(".bn.bigswitch = " + "." + CONFIG_STR.BN_BIGSWITCH.toString());
-			SystemConfig systemConfig = systemConfigService.findSystemConfig("." + CONFIG_STR.BN_BIGSWITCH.toString());
-            String bigSwitch = CoreConfigReader.getString(CONFIG_STR.BN_BIGSWITCH, false);
+			logger.info(".bn.bigswitch = " + "." + CONFIG_STR.BN_BIG_SWITCH.toString());
+			SystemConfig systemConfig = systemConfigService.findSystemConfig("." + CONFIG_STR.BN_BIG_SWITCH.toString());
+            String bigSwitch = CoreConfigReader.getString(CONFIG_STR.BN_BIG_SWITCH, false);
             if (systemConfig != null) {
                 bigSwitch = systemConfig.getValue();
             }
@@ -634,11 +634,11 @@ public class BCSBillingNoticeTemplateMsgController {
 	public ResponseEntity<?> setBillingNoticeBigSwitch(HttpServletRequest request, HttpServletResponse response,  @PathVariable String OnOff) {
 		logger.info("setBillingNoticeBigSwitch, OnOff=" + OnOff);
 		try {
-			logger.info(".bn.bigswitch = " + "." + CONFIG_STR.BN_BIGSWITCH.toString());
-			SystemConfig systemConfig = systemConfigService.findSystemConfig("." + CONFIG_STR.BN_BIGSWITCH.toString());
+			logger.info(".bn.bigswitch = " + "." + CONFIG_STR.BN_BIG_SWITCH.toString());
+			SystemConfig systemConfig = systemConfigService.findSystemConfig("." + CONFIG_STR.BN_BIG_SWITCH.toString());
 			if (systemConfig == null) {
 				systemConfig = new SystemConfig();
-				systemConfig.setConfigId("." + CONFIG_STR.BN_BIGSWITCH.toString());
+				systemConfig.setConfigId("." + CONFIG_STR.BN_BIG_SWITCH.toString());
 				systemConfig.setDescription("BigSwitch");
 			}
 			systemConfig.setValue(OnOff);

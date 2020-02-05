@@ -84,7 +84,7 @@ public class LiveChatController {
 
                     messageList.add(messageProcessService.generateWaitingMessage(messageType));
 
-                    messageProcessService.pushMessage(UID, messageList, CONFIG_STR.AutoReply.toString());
+                    messageProcessService.pushMessage(UID, messageList, CONFIG_STR.AUTO_REPLY.toString());
 
                     return new ResponseEntity<>(SUCCESS_PUSH_MESSAGE, HttpStatus.OK);
                 }
@@ -95,7 +95,7 @@ public class LiveChatController {
                     throw new BcsNoticeException(NOT_SUCCESS_USER_IN_NOT_IN_PROGRESS);
                 } else {
                     if (userLiveChat.getStatus().equals(UserLiveChat.WAITING))
-                        liveChatService.sendMsgToUser(receivedMessage, userLiveChat, CONFIG_STR.AutoReply.toString());
+                        liveChatService.sendMsgToUser(receivedMessage, userLiveChat, CONFIG_STR.AUTO_REPLY.toString());
                     else
                         liveChatService.sendMsgToUser(receivedMessage, userLiveChat);
 
@@ -224,7 +224,7 @@ public class LiveChatController {
 
                     messageList.add(messageProcessService.generateSurveyMessage(liveChatUser.getSurveyUrl()));
 
-                    messageProcessService.pushMessage(UID, messageList, CONFIG_STR.AutoReply.toString());
+                    messageProcessService.pushMessage(UID, messageList, CONFIG_STR.AUTO_REPLY.toString());
                 } else if (closeType == LiveChatUserModel.PASSIVE_CLOSE) {
                     message = LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.LIVE_CHAT_CLOSE_PASSIVE.toString());
 
@@ -242,7 +242,7 @@ public class LiveChatController {
 
                 userLiveChatService.save(userLiveChat);
 
-                messageProcessService.pushTextMsgAsync(UID, LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.LIVE_CHAT_CLOSE_PASSIVE.toString()), CONFIG_STR.AutoReply.name());
+                messageProcessService.pushTextMsgAsync(UID, LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.LIVE_CHAT_CLOSE_PASSIVE.toString()), CONFIG_STR.AUTO_REPLY.name());
             }
             liveChatApiService.resetChatFlow(UID);    // 通知碩網大腦，要 reset 錯誤回答的次數
 

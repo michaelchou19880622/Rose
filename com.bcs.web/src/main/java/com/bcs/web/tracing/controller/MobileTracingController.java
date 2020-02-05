@@ -87,7 +87,7 @@ public class MobileTracingController extends BCSBaseController {
 
             Long tracingId = Long.parseLong(tracingIdStr);
             logger.info("tracingId:" + tracingId);
-            
+
             String sessionMID = (String) request.getSession().getAttribute("MID");
             logger.info("sessionMID:" + sessionMID);
 
@@ -135,17 +135,17 @@ public class MobileTracingController extends BCSBaseController {
 
             boolean isGetFromSession = CoreConfigReader.getBoolean(CONFIG_STR.TRACING_CONFIG_GET_FROM_SESSION, true);
             logger.info("isGetFromSession:" + isGetFromSession);
-            
+
             boolean useSwitch = CoreConfigReader.getBoolean(CONFIG_STR.TRACING_CONFIG_USE_SWITCH, true);
             logger.info("useSwitch:" + useSwitch);
-            
+
             boolean checkMobile = CoreConfigReader.getBoolean(CONFIG_STR.TRACING_CONFIG_CHECK_MOBILE, true);
             logger.info("checkMobile:" + checkMobile);
 
             if (StringUtils.isNotBlank(sessionMID) && isGetFromSession) {
                 boolean isbinded = userValidateService.isBinding(sessionMID);
                 logger.info("isbinded:" + isbinded);
-                
+
                 if (isbinded) {
                     lineoauthLink = UriHelper.getLinkUriCode(linkIdBinded, code, event);
                     bcsTargetLink = UriHelper.getLinkUriCode(linkIdBinded, code, event);
@@ -156,9 +156,9 @@ public class MobileTracingController extends BCSBaseController {
             } else {
 
                 if (useSwitch) {
-                    String ChannelID = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelID.toString(), true);
+                    String ChannelID = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_ID.toString(), true);
                     logger.info("ChannelID:" + ChannelID);
-                    
+
                     lineoauthLink = CoreConfigReader.getString(CONFIG_STR.LINE_OAUTH_URL_V2_1);
                     lineoauthLink = lineoauthLink.replace("{ChannelID}", ChannelID);
                     lineoauthLink = lineoauthLink.replace("{RedirectUrl}", URLEncoder.encode(UriHelper.getOauthUrl(), "UTF-8"));
@@ -173,9 +173,9 @@ public class MobileTracingController extends BCSBaseController {
                     }
 
                     lineoauthLink = lineoauthLink.replace("{TracingId}", TracingIdStr);
-                    
+
                     logger.info("lineoauthLink:" + lineoauthLink);
-                    
+
                 } else {
 
                     lineoauthLink = this.getTargetUrl(contentLink, contentLinkBinded, sessionMID, true);
@@ -436,8 +436,8 @@ public class MobileTracingController extends BCSBaseController {
                                    ContentLink contentLinkUnMobile,
                                    String state) throws Exception {
 
-        String ChannelID = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelID.toString(), true);
-        String ChannelSecret = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelSecret.toString(), true);
+        String ChannelID = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_ID.toString(), true);
+        String ChannelSecret = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_SECRET.toString(), true);
 
         ObjectNode result = lineWebLoginApiService.callRetrievingAPI(ChannelID, ChannelSecret, code, UriHelper.getOauthUrl());
 

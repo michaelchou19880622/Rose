@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @see com.bcs.core.bot.akka.service.AkkaBotService
- * @see com.bcs.core.taishin.circle.PNP.akka.CircleAkkaBotService
+ * @see com.bcs.core.taishin.circle.pnp.akka.CircleAkkaBotService
  */
 @Slf4j
 public class ReceivingMsgHandlerMaster extends UntypedActor {

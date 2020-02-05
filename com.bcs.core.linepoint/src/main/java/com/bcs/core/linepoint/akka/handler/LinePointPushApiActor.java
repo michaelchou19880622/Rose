@@ -6,28 +6,19 @@ import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.jcodec.common.logging.Logger;
-import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.HttpClientErrorException;
 
-import com.bcs.core.linepoint.api.model.LinePointPushModel;
-import com.bcs.core.linepoint.api.model.LinePointResponseModel;
 import com.bcs.core.linepoint.db.entity.LinePointDetail;
-import com.bcs.core.linepoint.db.entity.LinePointMain;
-import com.bcs.core.linepoint.db.repository.LinePointMainRepository;
 import com.bcs.core.linepoint.db.service.LinePointDetailService;
 import com.bcs.core.enums.CONFIG_STR;
-import com.bcs.core.enums.LINE_HEADER;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.spring.ApplicationContextProvider;
 import com.bcs.core.utils.RestfulUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import akka.actor.UntypedActor;
 
@@ -42,7 +33,7 @@ public class LinePointPushApiActor extends UntypedActor {
 
 			// initialize request header
 			HttpHeaders headers = new HttpHeaders();
-			String accessToken = CoreConfigReader.getString("LinePoint", CONFIG_STR.ChannelToken.toString(), true); // LinePoint.ChannelToken
+			String accessToken = CoreConfigReader.getString("LinePoint", CONFIG_STR.CHANNEL_TOKEN.toString(), true); // LinePoint.ChannelToken
 			headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
 			headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 

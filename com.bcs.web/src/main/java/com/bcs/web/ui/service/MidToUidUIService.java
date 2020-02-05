@@ -36,7 +36,7 @@ import com.google.common.cache.LoadingCache;
 public class MidToUidUIService {
 	/** Logger */
 	private static Logger logger = Logger.getLogger(MidToUidUIService.class);
-	
+
 	@Autowired
 	private ImportDataFromExcel importMidFromExcel;
 	@Autowired
@@ -70,33 +70,33 @@ public class MidToUidUIService {
 
 		Set<String> mids = null;
 		if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType)){
-			mids = importMidFromExcel.importData(filePart.getInputStream());	
+			mids = importMidFromExcel.importData(filePart.getInputStream());
 		}
 		else if("text/plain".equals(contentType)){
-			mids = importMidFromText.importData(filePart.getInputStream());	
+			mids = importMidFromText.importData(filePart.getInputStream());
 		}
-		
+
 		if(mids != null && mids.size() > 0){
-			
-			String access_token = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelToken.toString(), true);
-			
+
+			String access_token = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_TOKEN.toString(), true);
+
 			List<String> list = new ArrayList<String>(mids);
 
 			List<String> existMids = new ArrayList<String>();
-			
+
 			// Check MID Exist by Part
 			List<String> check = new ArrayList<String>();
 			for(int i = 1; i <= list.size(); i++){
-				
+
 				String mid = list.get(i-1);
 				if(LineIdUtil.isLineMID(mid)){
 					check.add(mid);
-					
+
 					if(i % 50000 == 0){
 						logger.info("check.size():" + check.size());
 
 						ObjectNode nodeList = lineConvertingMidToUidService.callPostConvertingAPI(access_token, check);
-						
+
 						if(nodeList != null && nodeList.get("list") != null && nodeList.get("list").size() > 0){
 							for(JsonNode json : nodeList.get("list")){
 								existMids.add(json.asText());
@@ -108,9 +108,9 @@ public class MidToUidUIService {
 			}
 			logger.info("check.size():" + check.size());
 			if(check.size() > 0){
-				
+
 				ObjectNode nodeList = lineConvertingMidToUidService.callPostConvertingAPI(access_token, check);
-				
+
 				if(nodeList != null && nodeList.get("list") != null && nodeList.get("list").size() > 0){
 					for(JsonNode json : nodeList.get("list")){
 						existMids.add(json.asText());
@@ -121,18 +121,18 @@ public class MidToUidUIService {
 
 			if(existMids != null && existMids.size() > 0){
 				logger.debug("existMids:" + existMids);
-				
+
 				String referenceId = UUID.randomUUID().toString().toLowerCase();
-				
+
 				dataCache.put(referenceId, existMids);
 
 				Map<String, Object> result = new HashMap<String, Object>();
-		
+
 				result.put("tempId", referenceId);
 				result.put("count", existMids.size());
-				
+
 				SystemLogUtil.saveLogDebug("MidToUid", "Create", modifyUser, result, referenceId);
-				
+
 				return result;
 			}
 			else{
@@ -146,7 +146,7 @@ public class MidToUidUIService {
 			throw new BcsNoticeException("上傳沒有MID");
 		}
 	}
-	
+
 	public List<String> getMidToUidList(String referenceId) throws ExecutionException{
 		return dataCache.get(referenceId);
 	}
@@ -162,35 +162,35 @@ public class MidToUidUIService {
 
 		Set<String> mids = null;
 		if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType)){
-			mids = importMidFromExcel.importData(filePart.getInputStream());	
+			mids = importMidFromExcel.importData(filePart.getInputStream());
 		}
 		else if("text/plain".equals(contentType)){
 			mids = importMidFromText.importData(filePart.getInputStream());
 		}
-		
+
 		if(mids != null && mids.size() > 0){
-			
+
 			Date date = new Date();
-			
+
 			String filePath = ExportToTextFromList.exportToTextPath("MidToUid");
 			String saveFileName = ExportToTextFromList.exportToTextName("MidToUid", date);
-			
-			String access_token = CoreConfigReader.getString(CONFIG_STR.Default.toString(), CONFIG_STR.ChannelToken.toString(), true);
-			
+
+			String access_token = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_TOKEN.toString(), true);
+
 			List<String> list = new ArrayList<String>(mids);
 			List<ObjectNode> results = new ArrayList<ObjectNode>();
-			
+
 			// Check MID Exist by Part
 			List<String> check = new ArrayList<String>();
 			for(int i = 1; i <= list.size(); i++){
-				
+
 				String mid = list.get(i-1);
 				if(StringUtils.isNotBlank(mid) && 33 == mid.length()){
 					check.add(mid);
-					
+
 					if(i % 50000 == 0){
 						logger.info("check.size():" + check.size());
-						
+
 						ObjectNode nodeResult = lineConvertingMidToUidService.callPostConvertingAPI(access_token, check, true, filePath + System.getProperty("file.separator") + saveFileName);
 
 						logger.info("nodeResult:" + nodeResult);
@@ -201,7 +201,7 @@ public class MidToUidUIService {
 			}
 			logger.info("check.size():" + check.size());
 			if(check.size() > 0){
-				
+
 				ObjectNode nodeResult = lineConvertingMidToUidService.callPostConvertingAPI(access_token, check, true, filePath + System.getProperty("file.separator") + saveFileName);
 
 				logger.info("nodeResult:" + nodeResult);
@@ -211,7 +211,7 @@ public class MidToUidUIService {
 
 			if(results != null && results.size() > 0){
 				logger.debug("results:" + results);
-				
+
 				String referenceId = UUID.randomUUID().toString().toLowerCase();
 
 				List<String> path = new ArrayList<String>();
@@ -220,12 +220,12 @@ public class MidToUidUIService {
 				dataCache.put(referenceId, path);
 
 				Map<String, Object> result = new HashMap<String, Object>();
-		
+
 				result.put("tempId", referenceId);
 				result.put("count", list.size());
-				
+
 				SystemLogUtil.saveLogDebug("MidToUid", "Create", modifyUser, result, referenceId);
-				
+
 				return result;
 			}
 			else{

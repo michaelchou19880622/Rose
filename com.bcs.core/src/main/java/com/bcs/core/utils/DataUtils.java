@@ -3,13 +3,19 @@ package com.bcs.core.utils;
 import java.net.InetAddress;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
+import com.bcs.core.resource.CoreConfigReader;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.common.collect.Lists;
 import com.google.gson.GsonBuilder;
 
 import org.apache.commons.lang3.StringUtils;
@@ -309,4 +315,44 @@ public class DataUtils {
         }
         return null;
     }
+
+    public static String getRandomProcApName() {
+        String processApName = "";
+
+        // FIXME 1 This statement is Hard-Code, should change to 2
+        String environment = CoreConfigReader.getString("environment", false);
+        switch (environment) {
+            case "sit":
+                break;
+            case "linux":
+                processApName = "taishin";
+                break;
+            case "uat":
+                processApName = "AIMLAP-T";
+                break;
+            case "prod":
+                processApName = String.format("AIBCWEB%d", randomNumber(1, 6, Collections.singletonList(2)));
+                break;
+            default:
+                processApName = "";
+                break;
+        }
+
+        //FIXME 2 use ServerInfo table type is 'AP' list random one
+        //TODO ...
+
+
+        log.info("Process Ap Name -> {}", processApName);
+        return processApName;
+    }
+
+
+    public static int randomNumber(int start, int end, List<Integer> excludeNumbers) {
+        int value;
+        do {
+            value = new Random().nextInt(end - start + 1) + start;
+        } while (excludeNumbers.indexOf(value) != -1);
+        return value;
+    }
+
 }

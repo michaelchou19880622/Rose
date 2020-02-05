@@ -96,17 +96,17 @@ public class SendingMsgService {
     public void sendToLineAsync(MsgGenerator msgGenerator, List<String> midList, API_TYPE apiType) throws Exception {
         List<MsgGenerator> msgGenerators = new ArrayList<>();
         msgGenerators.add(msgGenerator);
-        sendToLineAsync(CONFIG_STR.Default.toString(), msgGenerators, null, midList, apiType, null);
+        sendToLineAsync(CONFIG_STR.DEFAULT.toString(), msgGenerators, null, midList, apiType, null);
     }
 
     public void sendToLineAsync(MsgGenerator msgGenerator, List<MsgDetail> details, List<String> midList, API_TYPE apiType, Long updateMsgId) throws Exception {
         List<MsgGenerator> msgGenerators = new ArrayList<>();
         msgGenerators.add(msgGenerator);
-        sendToLineAsync(CONFIG_STR.Default.toString(), msgGenerators, details, midList, apiType, updateMsgId);
+        sendToLineAsync(CONFIG_STR.DEFAULT.toString(), msgGenerators, details, midList, apiType, updateMsgId);
     }
 
     public void sendToLineAsync(List<MsgGenerator> msgGenerators, List<MsgDetail> details, List<String> midList, API_TYPE apiType, Long updateMsgId) throws Exception {
-        sendToLineAsync(CONFIG_STR.Default.toString(), msgGenerators, details, midList, apiType, updateMsgId);
+        sendToLineAsync(CONFIG_STR.DEFAULT.toString(), msgGenerators, details, midList, apiType, updateMsgId);
     }
 
     public void sendToLineAsync(String channelId, List<MsgGenerator> msgGenerators, List<MsgDetail> detailList, List<String> midList, API_TYPE apiType, Long updateMsgId) {
@@ -114,7 +114,7 @@ public class SendingMsgService {
         log.debug("Mid List Size: {}", midList.size());
 
         if (channelId == null) {
-            channelId = CONFIG_STR.Default.toString();
+            channelId = CONFIG_STR.DEFAULT.toString();
         }
 
         AsyncSendingModel asyncSendingModel;
@@ -211,7 +211,7 @@ public class SendingMsgService {
 
             sendToBotModel.setChannelId(channelId);
             sendToBotModel.setSendType(SEND_TYPE.REPLY_MSG);
-            sendToBotModel.setChannelName(CONFIG_STR.AutoReply.toString());
+            sendToBotModel.setChannelName(CONFIG_STR.AUTO_REPLY.toString());
 
             String codeError = "";
 
@@ -294,7 +294,7 @@ public class SendingMsgService {
 
             sendToBotModel.setChannelId(channelId);
             sendToBotModel.setSendType(SEND_TYPE.PUSH_MSG);
-            sendToBotModel.setChannelName(CONFIG_STR.AutoReply.toString());
+            sendToBotModel.setChannelName(CONFIG_STR.AUTO_REPLY.toString());
 
             // 回覆 關鍵字回應內容
             try {
@@ -341,7 +341,7 @@ public class SendingMsgService {
                     // 傳送 關鍵字回應
                     List<MsgDetail> details = interactiveService.getMsgDetails(iMsgId);
 
-                    ApplicationContextProvider.getApplicationContext().getBean(SendingMsgService.class).sendMatchMessage(iMsgId, details, CONFIG_STR.Default.toString(), mid, API_TYPE.BOT.toString(), sendEvent);
+                    ApplicationContextProvider.getApplicationContext().getBean(SendingMsgService.class).sendMatchMessage(iMsgId, details, CONFIG_STR.DEFAULT.toString(), mid, API_TYPE.BOT.toString(), sendEvent);
 
                     // incrementCount CatchRecord Receive
                     ApplicationContextProvider.getApplicationContext().getBean(CatchRecordReceive.class).incrementCount();
@@ -353,7 +353,7 @@ public class SendingMsgService {
 
                         MsgBotReceive receive = new MsgBotReceive();
 
-                        receive.setChannel(CONFIG_STR.Default.toString());
+                        receive.setChannel(CONFIG_STR.DEFAULT.toString());
 
                         receive.setEventType(MsgBotReceive.EVENT_TYPE_BCSEVENT);
                         receive.setMsgId("-");
@@ -441,7 +441,7 @@ public class SendingMsgService {
 
                 SendToBotModel sendToBotModel = new SendToBotModel();
 
-                sendToBotModel.setChannelId(CONFIG_STR.Default.toString());
+                sendToBotModel.setChannelId(CONFIG_STR.DEFAULT.toString());
                 sendToBotModel.setSendType(SEND_TYPE.PUSH_MSG);
 
                 List<Message> sendStrList = new ArrayList<>();
@@ -463,7 +463,7 @@ public class SendingMsgService {
                         PushMessage pushMessage = new PushMessage(mid, messageList);
                         sendToBotModel.setPushMessage(pushMessage);
 
-                        String channelName = inProgressMidMap.get(mid) != null ? CONFIG_STR.InManualReplyButNotSendMsg.toString() : CONFIG_STR.AutoReply.toString();
+                        String channelName = inProgressMidMap.get(mid) != null ? CONFIG_STR.IN_MANUAL_REPLY_BUT_NOT_SEND_MSG.toString() : CONFIG_STR.AUTO_REPLY.toString();
                         sendToBotModel.setChannelName(channelName);
 
                         Response<BotApiResponse> responseMulti = LineAccessApiService.sendToLine(sendToBotModel);
@@ -503,7 +503,7 @@ public class SendingMsgService {
             sendToBotModel.setChannelId(ChannelId);
             sendToBotModel.setSendType(SEND_TYPE.PUSH_MSG);
 
-            String channelName = inProgressMidMap.get(MID) != null ? CONFIG_STR.InManualReplyButNotSendMsg.toString() : CONFIG_STR.AutoReply.toString();
+            String channelName = inProgressMidMap.get(MID) != null ? CONFIG_STR.IN_MANUAL_REPLY_BUT_NOT_SEND_MSG.toString() : CONFIG_STR.AUTO_REPLY.toString();
             sendToBotModel.setChannelName(channelName);
 
             // 回覆 關鍵字回應內容

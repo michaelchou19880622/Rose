@@ -88,7 +88,7 @@ public class BillingNoticeFtpService {
      */
     private void ftpProcess() {
         log.info("StartCircle....");
-        boolean bigSwitch = CoreConfigReader.getBoolean(CONFIG_STR.BN_BIGSWITCH, true, false);
+        boolean bigSwitch = CoreConfigReader.getBoolean(CONFIG_STR.BN_BIG_SWITCH, true, false);
         String downloadSavePath = CoreConfigReader.getString(CONFIG_STR.BN_FTP_DOWNLOAD_SAVEFILEPATH, true, false);
         String fileExtension = CoreConfigReader.getString(CONFIG_STR.BN_FTP_FILE_EXTENSION, true, false);
 
@@ -337,33 +337,7 @@ public class BillingNoticeFtpService {
     private void saveDb(BillingNoticeMain billingNoticeMain) {
         List<BillingNoticeDetail> originalDetails = billingNoticeMain.getDetails();
         log.info("BillingNoticeFtpService BillingNoticeDetail size: {}", originalDetails.size());
-        String processApName = "";
-
-        // FIXME 1 This statement is Hard-Code, should change to 2
-        String environment = CoreConfigReader.getString("environment", false);
-        switch (environment) {
-            case "sit":
-                break;
-            case "linux":
-                processApName = "taishin";
-                break;
-            case "uat":
-                processApName = "AIMLAP-T";
-                break;
-            case "prod":
-                processApName = String.format("AIBCWEB%d", randomApName());
-                break;
-            default:
-                processApName = "";
-                break;
-        }
-
-        //FIXME 2 use ServerInfo table type is 'AP' list random one
-        //TODO ...
-
-
-        log.info("Process Ap Name -> {}", processApName);
-        billingNoticeMain.setProcApName(processApName);
+        billingNoticeMain.setProcApName(DataUtils.getRandomProcApName());
         billingNoticeMain = billingNoticeMainRepository.save(billingNoticeMain);
         List<BillingNoticeDetail> detailList = new ArrayList<>();
         for (BillingNoticeDetail detail : originalDetails) {
@@ -375,13 +349,6 @@ public class BillingNoticeFtpService {
         }
     }
 
-    private int randomApName() {
-        int value;
-        do {
-            value = new Random().nextInt(5) + 1;
-        } while (value == 2);
-        return value;
-    }
 
 
     /**

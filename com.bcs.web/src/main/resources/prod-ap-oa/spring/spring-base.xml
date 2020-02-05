@@ -2,13 +2,13 @@
 <beans
 	xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:p="http://www.springframework.org/schema/p"	
+	xmlns:p="http://www.springframework.org/schema/p"
 	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
 	xmlns:tx= "http://www.springframework.org/schema/tx"
 	xmlns:aop="http://www.springframework.org/schema/aop"
 	xsi:schemaLocation="
-		http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans
 		http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/context
 		http://www.springframework.org/schema/context/spring-context.xsd
@@ -19,18 +19,18 @@
 		http://www.springframework.org/schema/aop
 		http://www.springframework.org/schema/aop/spring-aop.xsd
 		">
-		
+
 	<context:component-scan base-package="com.bcs.*">
 		<context:exclude-filter type="annotation"
 			expression="org.springframework.stereotype.Controller" />
 	</context:component-scan>
-	
+
     <jpa:repositories base-package="com.bcs.*" />
-    
+
 	<bean id="HttpOncePerRequestFilter" class="com.bcs.web.ui.filter.HttpOncePerRequestFilter" />
-    
+
     <bean id="applicationContextProvder" class="com.bcs.core.spring.ApplicationContextProvider"/>
-	
+
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
     	<property name="dataSource">
 	        <bean class="com.bcs.core.db.persistence.QueryTimeoutConfiguredDataSource">
@@ -44,7 +44,7 @@
 				<value>com.bcs.core.bot.db.entity</value>
 				<value>com.bcs.core.pag.db.entity</value>
 				<value>com.bcs.core.taishin.circle.db.entity</value>
-				<value>com.bcs.core.taishin.circle.PNP.db.entity</value>
+				<value>com.bcs.core.taishin.circle.pnp.db.entity</value>
 				<value>com.bcs.core.linepoint.db.entity</value>
 			</array>
      	</property>
@@ -62,7 +62,7 @@
             	<prop key="hibernate.format_sql">false</prop>
                 <prop key="hibernate.connection.useUnicode">true</prop>
                 <prop key="hibernate.connection.characterEncoding">UTF-8</prop>
-                <prop key="hibernate.connection.charSet">UTF-8</prop> 
+                <prop key="hibernate.connection.charSet">UTF-8</prop>
             	<prop key="hibernate.hbm2ddl.auto">update</prop>
             	<prop key="hibernate.jdbc.batch_size">50</prop>
             	<prop key="hibernate.order_inserts">true</prop>
@@ -73,19 +73,19 @@
 	        </props>
 	    </property>
     </bean>
-    
+
     <!-- ======= JDBC connection pool start ======= -->
-     <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">  
-		<property name="dataSource" ref="dataSource"></property>  
-	</bean> 
+     <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
 	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
 	    <constructor-arg ref="hikariConfig" />
 	</bean>
-	
+
 	<bean id="hikariConfig" class="com.bcs.core.db.connection.BcsHikariConfig">
 		<property name="poolName" value="springHikariCP" />
-		
-		<!-- 
+
+		<!--
 			jtds 只支援 JDBC3 而不支援 JDBC4，所以須設定 connectionTestQuery
 			若是支援 JDBC4 的 driver 則不須設定 connectionTestQuery
 		-->
@@ -105,15 +105,15 @@
 		</property>
 	</bean>
 	<!-- ======= JDBC connection pool end ======= -->
-	   
+
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
 		<property name="entityManagerFactory" ref="entityManagerFactory" />
     	<property name="defaultTimeout" value="30" />
 	</bean>
-	
+
 	<!-- Enable Annotation based Declarative Transaction Management -->
 	<tx:annotation-driven transaction-manager="transactionManager"/>
-	
+
 	<!-- Transaction 先不使用 AOP 規範 service 方法名稱的作法，先使用 @Transactional 的作法即可
     <aop:config>
         <aop:pointcut id="serviceOperation" expression="execution(public * *..service..*Service.*(..))" />

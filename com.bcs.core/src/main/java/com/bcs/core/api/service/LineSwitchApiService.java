@@ -24,8 +24,8 @@ public class LineSwitchApiService {
 
 	public String executeSwitch(String destinationId, String UID, String note) throws Exception {
 		Date start = new Date();
-		try {			
-			String accessToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(), "ChannelToken", true);
+		try {
+			String accessToken = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), "ChannelToken", true);
 
 			logger.info("========== Start switching to another webhook ==========");
 			logger.info("-----> Access Token: " + accessToken);
@@ -45,7 +45,7 @@ public class LineSwitchApiService {
 			requestBody.put("note", note);
 
 			HttpEntity<String> httpEntity = new HttpEntity<String>(requestBody.toString(), headers);
-			
+
 			RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, CoreConfigReader.getString(CONFIG_STR.LINE_SWITCH_API_SWITCHER_SWITCH.toString()), httpEntity);
 
 			JSONObject responseObject = restfulUtil.execute();

@@ -82,7 +82,7 @@ public class LineProfileService {
     }
 
     public JSONObject getUserProfile(String UID) throws Exception {
-        String accessToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(), "ChannelToken", true);
+        String accessToken = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), "ChannelToken", true);
         String url = CoreConfigReader.getString(CONFIG_STR.LINE_GET_PROFILE_URL.toString());
         url = UriComponentsBuilder.fromUriString(url).path(UID).build().toUriString();
 

@@ -49,7 +49,7 @@ public class InitController {
     private BillingNoticeSendMsgService billingNoticeSendMsgService;
     private LoadFtpPnpDataTask loadFtpPnpDataTask;
     private PnpPushMsgService pnpPushMsgService;
-    private PnpPNPMsgService pnpMsgService;
+//    private PnpPNPMsgService pnpMsgService;
     private PnpSMSMsgService pnpSmsMsgService;
     private LinePointSchedulerService linePointschedulerService;
     private SystemLogService systemLogService;
@@ -68,7 +68,7 @@ public class InitController {
                           BillingNoticeSendMsgService billingNoticeSendMsgService,
                           LoadFtpPnpDataTask loadFtpPnpDataTask,
                           PnpPushMsgService pnpPushMsgService,
-                          PnpPNPMsgService pnpMsgService,
+//                          PnpPNPMsgService pnpMsgService,
                           PnpSMSMsgService pnpSmsMsgService,
                           LinePointSchedulerService linePointschedulerService,
                           SystemLogService systemLogService
@@ -86,7 +86,7 @@ public class InitController {
         this.billingNoticeSendMsgService = billingNoticeSendMsgService;
         this.loadFtpPnpDataTask = loadFtpPnpDataTask;
         this.pnpPushMsgService = pnpPushMsgService;
-        this.pnpMsgService = pnpMsgService;
+//        this.pnpMsgService = pnpMsgService;
         this.pnpSmsMsgService = pnpSmsMsgService;
         this.linePointschedulerService = linePointschedulerService;
         this.systemLogService = systemLogService;
@@ -240,8 +240,8 @@ public class InitController {
             if (CoreConfigReader.isPNPSendMsg()) {
                 initLog("PNP BC  PUSH MESSAGE SCHEDULE!!");
                 pnpPushMsgService.startCircle();
-                initLog("PNP PNP PUSH MESSAGE SCHEDULE!!");
-                pnpMsgService.startCircle();
+//                initLog("PNP PNP PUSH MESSAGE SCHEDULE!!");
+//                pnpMsgService.startCircle();
             } else {
                 initLog("PNP PUSH MESSAGE IS CLOSE!!");
             }

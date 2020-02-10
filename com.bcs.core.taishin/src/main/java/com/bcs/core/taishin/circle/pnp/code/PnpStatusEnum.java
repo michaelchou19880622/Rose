@@ -14,7 +14,7 @@ public enum PnpStatusEnum {
     FTP_DETAIL_SAVE("DRAFT", "FTP檔案內文儲存完畢"),
     FTP_MAIN_SAVE("WAIT", "FTP檔案全部儲存完畢"),
 
-    /* ========================================BC================================================*/
+    /* ========================================BC STATUS================================================*/
 
     BC_PROCESS("BC_PROCESS", "處理中"),
     BC_SENDING("BC_SENDING", "發送中"),
@@ -39,7 +39,7 @@ public enum PnpStatusEnum {
     USER_IS_SYSTEM_ADD_IGNORE("USER_IS_SYSTEM_ADD_IGNORE", "此為系統自動建立帳號，禁止發送BC"),
     USER_IS_SYSTEM_ADD_IGNORE_PNP("USER_IS_SYSTEM_ADD_IGNORE_PNP", "此為系統自動建立帳號，轉發PNP"),
     USER_IS_SYSTEM_ADD_IGNORE_SMS("USER_IS_SYSTEM_ADD_IGNORE_SMS", "此為系統自動建立帳號，轉發SMS"),
-    /* ========================================PNP================================================*/
+    /* ========================================PNP STATUS================================================*/
 
     PNP_SENDING("PNP_SENDING", "發送中"),
     PNP_SENT_CHECK_DELIVERY("CHECK_DELIVERY", "已發送至LINE平台"),
@@ -51,7 +51,7 @@ public enum PnpStatusEnum {
     PNP_USER_IN_BLACK_LIST_SMS_PROCESS("PNP_IN_BLACK_LIST_SMS_PROCESS", "該使用於黑名單中，轉發SMS"),
 
 
-    /* ========================================SMS================================================*/
+    /* ========================================SMS STATUS================================================*/
 
     SMS_RESEND("SMS_RESEND", "SMS重發"),
     SMS_SENDING("SMS_SENDING", "發送中"),
@@ -60,18 +60,12 @@ public enum PnpStatusEnum {
     SMS_SENT_FAIL("SMS_FAIL", "發送失敗"),
 
 
-    /* ========================================OLD================================================*/
-    @Deprecated
+    /* ========================================STATUS================================================*/
     PROCESS("PROCESS", "處理中"),
-    @Deprecated
     SENDING("SENDING", "發送中"),
-    @Deprecated
-    FINISH("FINISH", "已完成"),
-    @Deprecated
-    FAIL("FAIL", "失敗"),
-    @Deprecated
-    DELETE("DELETE", "已刪除"),
-    @Deprecated
+//    FINISH("FINISH", "已完成"),
+//    FAIL("FAIL", "失敗"),
+//    DELETE("DELETE", "已刪除"),
     COMPLETE("COMPLETE", "已完成");
 
     /**

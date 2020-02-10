@@ -2,6 +2,7 @@ package com.bcs.core.taishin.circle.pnp.akka.handler;
 
 import akka.actor.UntypedActor;
 import com.bcs.core.spring.ApplicationContextProvider;
+import com.bcs.core.taishin.circle.pnp.code.PnpSendTypeEnum;
 import com.bcs.core.taishin.circle.pnp.db.entity.AbstractPnpMainEntity;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.pnp.scheduler.PnpTaskService;
@@ -27,11 +28,11 @@ public class PnpMessageActor extends UntypedActor {
         try {
             Thread.currentThread().setName("Actor-PNP-PnpPush-" + Thread.currentThread().getId());
 
-            log.info("PnpMessageActor Receive!!");
+            log.debug("PnpMessageActor Receive!!");
             PnpMain pnpMain = (PnpMain) object;
             checkSendTypeThenDoSomething(pnpMain);
         } catch (Exception e) {
-            log.error("{}", e);
+            log.error("Exception", e);
         }
     }
 
@@ -43,13 +44,14 @@ public class PnpMessageActor extends UntypedActor {
      */
     private void checkSendTypeThenDoSomething(PnpMain pnpMain) throws SchedulerException {
         log.info("Send Type : " + pnpMain.getSendType());
-        switch (pnpMain.getSendType()) {
-            case AbstractPnpMainEntity.SEND_TYPE_IMMEDIATE:
-            case AbstractPnpMainEntity.SEND_TYPE_SCHEDULE_TIME_EXPIRED:
-                immediatePushMessage(pnpMain);
+        PnpSendTypeEnum sendType = PnpSendTypeEnum.findEnumByName(pnpMain.getSendType());
+        switch (sendType) {
+            case IMMEDIATE:
+            case SCHEDULE_TIME_EXPIRED:
+                immediate(pnpMain);
                 break;
-            case AbstractPnpMainEntity.SEND_TYPE_DELAY:
-                checkScheduleTimeThenDoImmediateOrDelay(pnpMain);
+            case DELAY:
+                delayOrImmediate(pnpMain);
                 break;
             default:
                 log.error("PnpPushMessageActor Type:" + pnpMain.getSendType() + " No Action");
@@ -63,10 +65,10 @@ public class PnpMessageActor extends UntypedActor {
      * @param pnpMain pnpMain
      * @throws SchedulerException SchedulerException
      */
-    private void checkScheduleTimeThenDoImmediateOrDelay(PnpMain pnpMain) throws SchedulerException {
+    private void delayOrImmediate(PnpMain pnpMain) throws SchedulerException {
         Date scheduleTime = getFormatScheduleTimeBySourceSystem(pnpMain.getSource(), pnpMain.getScheduleTime());
         if (DataUtils.isPast(scheduleTime)) {
-            immediatePushMessage(pnpMain);
+            immediate(pnpMain);
         } else {
             delayPushMessage(pnpMain, scheduleTime);
         }
@@ -96,8 +98,8 @@ public class PnpMessageActor extends UntypedActor {
      *
      * @param pnpMain pnpMain
      */
-    private void immediatePushMessage(PnpMain pnpMain) {
-        log.info("PNP Immediate Push Message");
+    private void immediate(PnpMain pnpMain) {
+        log.debug("PNP Immediate Push Message");
         PnpService pnpService = ApplicationContextProvider.getApplicationContext().getBean(PnpService.class);
         pnpService.pushPnpMessage(pnpMain, this.getSender(), this.getSelf());
     }
@@ -110,7 +112,7 @@ public class PnpMessageActor extends UntypedActor {
      * @throws SchedulerException SchedulerException
      */
     private void delayPushMessage(PnpMain pnpMain, Date scheduleTime) throws SchedulerException {
-        log.info("PNP Delay Push Message");
+        log.debug("PNP Delay Push Message");
         PnpTaskService pnpTaskService = ApplicationContextProvider.getApplicationContext().getBean(PnpTaskService.class);
         pnpTaskService.startTask(pnpMain, scheduleTime);
     }

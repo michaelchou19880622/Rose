@@ -9,13 +9,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 /**
  * @author ???
+ * @author Alan
  * @see com.bcs.core.taishin.circle.pnp.service.PnpService#pushLineMessage
  */
 @Slf4j(topic = "PnpRecorder")
@@ -54,19 +54,19 @@ public class PnpAkkaService {
      */
     @PreDestroy
     public void shutdownNow() {
-        log.info("[DESTROY] Pnp AkkaService shutdownNow cleaning up...");
+        log.debug("[DESTROY] Pnp AkkaService shutdownNow cleaning up...");
         try {
             int count = 0;
 
             for (ActorSystem actorSystem : actorSystemList) {
                 actorSystem.stop(pnpActorList.get(count));
                 actorSystem.shutdown();
-                log.info("Shutdown Actor[" + count + "]");
+                log.debug("Shutdown Actor[" + count + "]");
                 count++;
             }
         } catch (Exception e) {
             log.error("", e);
         }
-        log.info("[DESTROY] Pnp AkkaService Shutdown Destroyed");
+        log.debug("[DESTROY] Pnp AkkaService Shutdown Destroyed");
     }
 }

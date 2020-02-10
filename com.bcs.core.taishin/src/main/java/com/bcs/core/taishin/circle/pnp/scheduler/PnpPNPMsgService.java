@@ -11,7 +11,6 @@ import com.bcs.core.taishin.circle.pnp.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.pnp.db.repository.PnpRepositoryCustom;
 import com.bcs.core.utils.DataUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +29,7 @@ import java.util.concurrent.TimeUnit;
  * push失敗:轉寄SMS
  *
  * @author Kenneth
+ * @author Alan
  */
 @Slf4j(topic = "PnpRecorder")
 @Service
@@ -87,38 +87,44 @@ public class PnpPNPMsgService {
         };
         Arrays.stream(PnpFtpSourceEnum.values()).forEach(
                 type -> Arrays.stream(statusEnumArray).forEach(
-                        bcStatus -> sendMain(procApName, type, bcStatus)
+                        bcStatus -> sendMain(type, bcStatus)
                 )
         );
 
     }
 
-    private void sendMain(String procApName, PnpFtpSourceEnum type, PnpStatusEnum bcStatus) {
-        log.info(String.format("PNP Push ProcApName %s, Type: %s", procApName, type.english.toUpperCase()));
-        PnpMain pnpMain;
+    private void sendMain(PnpFtpSourceEnum type, PnpStatusEnum bcStatus) {
+        log.info(String.format("PNP Push Type: %s, BC status: %s",type.english.toUpperCase(), bcStatus.value));
+        final int onceProcessMainNumber = 100;
         try {
-            /* 取得BC失敗物件轉發PNP資料 */
-            List<? super PnpDetail> details = pnpRepositoryCustom.updateStatus(type, procApName, PnpStageEnum.PNP, bcStatus);
+            for (int i = 0; i < onceProcessMainNumber; i++) {
+                /* 1. Find Bc fail detail */
+                List<PnpDetail> allBcToPnpDetail = pnpRepositoryCustom.findAllBcToPnpDetail(type, PnpStageEnum.PNP, bcStatus);
+                if (allBcToPnpDetail.isEmpty()) {
+                    log.info("Detail list is empty!!");
+                    return;
+                }
 
-            if (CollectionUtils.isEmpty(details)) {
-                log.info("Detail is Empty:  " + type.english.toUpperCase());
-                return;
+                Long mainId = ((PnpDetail) allBcToPnpDetail.get(0)).getPnpMainId();
+                log.info("Main id is {}", mainId);
+                /* 2. Find detail main */
+                List<PnpMain> allMainList = pnpRepositoryCustom.findMainById(type, mainId);
+                if (allMainList.isEmpty()) {
+                    log.info("Main list is empty!!");
+                    return;
+                }
+                PnpMain main = (PnpMain) allMainList.get(0);
+                /* 3. Merge main and detail */
+                main.setPnpDetails(allBcToPnpDetail);
+                /* 4. Foreach tell akka */
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                log.info("Tell Akka Send PNP!!");
+                pnpAkkaService.tell(main);
             }
-            log.info(String.format("PNP FTP Type: %s, Detail Size: %d", type.english, details.size()));
-            log.info("details has data type:" + type.english);
-            PnpDetail oneDetail = (PnpDetail) details.get(0);
-            /* 組合Main、Detail */
-            pnpMain = pnpRepositoryCustom.findMainByMainId(type, oneDetail.getPnpMainId());
-            if (null == pnpMain) {
-                log.info("pnpMain type :" + type.english + "sendingMain not data");
-                return;
-            }
-            log.info("Sending handle Main: {}, type: {}", pnpMain.getOrigFileName(), type.english);
-            pnpMain.setProcStage(PnpStageEnum.PNP.value);
-            pnpMain.setPnpDetails(details);
-            log.info("Tell Akka Send PNP!!");
-            pnpAkkaService.tell(pnpMain);
-
         } catch (Exception e) {
             log.error("", e);
             log.error("pnpMain type :" + type.english + " sendingMain error:" + e.getMessage());

@@ -1,6 +1,7 @@
 package com.bcs.core.taishin.circle.pnp.db.entity;
 
 import com.bcs.core.json.AbstractBcsEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
@@ -93,24 +94,28 @@ public class PnpMain extends AbstractBcsEntity {
     /**
      * 發送時間
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "GMT+8")
     @Column(name = "SEND_TIME")
     private Date sendTime;
 
     /**
      * Line發送時間
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "GMT+8")
     @Column(name = "LINE_PUSH_TIME")
     private Date linePushTime;
 
     /**
      * PNP發送時間
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "GMT+8")
     @Column(name = "PNP_TIME")
     private Date pnpTime;
 
     /**
      * 簡訊發送時間
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "GMT+8")
     @Column(name = "SMS_TIME")
     private Date smsTime;
 
@@ -123,6 +128,7 @@ public class PnpMain extends AbstractBcsEntity {
     /**
      * 建立時間
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "GMT+8")
     @Column(name = "CREAT_TIME")
     private Date createTime;
 
@@ -141,6 +147,7 @@ public class PnpMain extends AbstractBcsEntity {
     /**
      * 更新時間
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "GMT+8")
     @Column(name = "MODIFY_TIME")
     private Date modifyTime;
 
@@ -154,7 +161,7 @@ public class PnpMain extends AbstractBcsEntity {
      * 不會異動ＤＢ 物件傳遞暫存用
      */
     @Transient
-    private List<? super PnpDetail> pnpDetails;
+    private List<PnpDetail> pnpDetails;
 
     /**
      * 不會異動ＤＢ 物件傳遞暫存用
@@ -179,11 +186,11 @@ public class PnpMain extends AbstractBcsEntity {
         modifyTime = Calendar.getInstance().getTime();
     }
 
-    public List<? super PnpDetail> getPnpDetails() {
+    public List<PnpDetail> getPnpDetails() {
         return pnpDetails;
     }
 
-    public void setPnpDetails(List<? super PnpDetail> details) {
+    public void setPnpDetails(List<PnpDetail> details) {
         this.pnpDetails = details;
     }
 

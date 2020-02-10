@@ -6,6 +6,7 @@ import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.circle.pnp.akka.PnpAkkaService;
 import com.bcs.core.taishin.circle.pnp.code.PnpFtpSourceEnum;
+import com.bcs.core.taishin.circle.pnp.code.PnpStatusEnum;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetail;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.pnp.db.repository.PnpRepositoryCustom;
@@ -19,12 +20,15 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 循環執行以Line push發送訊息
@@ -33,6 +37,7 @@ import java.util.concurrent.TimeUnit;
  * push失敗:跟據使用者設定的發送通路參數更新狀態為轉寄PNP或轉寄SMS或更新狀態失敗
  *
  * @author Kenneth
+ * @author Alan
  */
 @Slf4j(topic = "PnpRecorder")
 @Service
@@ -58,60 +63,72 @@ public class PnpPushMsgService {
      * Start Schedule
      */
     public void startCircle() {
+        scheduler.scheduleWithFixedDelay(this::sendProcess, 0, getTimeValue(), getTimeUnit());
+    }
 
-        final String unit = CoreConfigReader.getString(CONFIG_STR.PNP_SCHEDULE_UNIT, true, false);
-        final int time = CoreConfigReader.getInteger(CONFIG_STR.PNP_SEND_SCHEDULE_TIME, true, false);
-        if (time == -1) {
-            log.error("PNPSendMsgService TimeUnit error :" + time + unit);
-            return;
+    private int getTimeValue() {
+        int time = CoreConfigReader.getInteger(CONFIG_STR.PNP_SEND_SCHEDULE_TIME, true, false);
+        if (time <= 0) {
+            log.warn("Properties [pnp.send.schedule.time] does not found, use default value 30s!!");
+            time = 30;
         }
-        scheduler.scheduleWithFixedDelay(this::sendProcess, 0, time, TimeUnit.valueOf(unit));
+        return time;
+    }
+
+    private TimeUnit getTimeUnit() {
+        try {
+            return TimeUnit.valueOf(CoreConfigReader.getString(CONFIG_STR.PNP_SCHEDULE_UNIT, true, false));
+        } catch (IllegalArgumentException e) {
+            log.warn("Properties [pnp.schedule.unit] does not found or illegal value, use default value second!!");
+            return TimeUnit.SECONDS;
+        }
     }
 
     /**
-     * 根據PNPFTPType 依序Push
+     * 1. Find all main with status is wait.
+     * 2. Find all detail by main id.
+     * 3. Use phone number find
+     * 4. Tell akka
      */
     private void sendProcess() {
         int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIG_SWITCH, true, false);
         if (0 == bigSwitch || 1 == bigSwitch) {
-            log.warn("PNP_BIG_SWITCH : " + bigSwitch + "PnpPushMsgService stop sending...");
+            log.warn("Stop sending!!");
             return;
         }
 
         String procApName = DataUtils.getProcApName();
         for (PnpFtpSourceEnum type : PnpFtpSourceEnum.values()) {
-            log.info(String.format("BC Push ProcApName %s, Type: %s", procApName, type));
+            log.debug("Ftp source is {}", type.english);
             try {
-                List<Long> allMainIdList = new ArrayList<>();
                 /* 1.Find all main */
-                List<? super PnpMain> allMainList = pnpRepositoryCustom.findAllWaitMain(procApName, type.mainTable, type);
-                allMainList.forEach(obj -> {
-                    PnpMain main = (PnpMain) obj;
-                    allMainIdList.add(main.getPnpMainId());
-                });
+                List<PnpMain> allMainList = pnpRepositoryCustom.findAllMain(procApName, type);
                 if (allMainList.isEmpty()) {
                     return;
                 }
-                /* 2.Find all detail */
-                List<? super PnpDetail> allDetailList = pnpRepositoryCustom.findAllDetail(allMainIdList, type);
-                List<? super PnpDetail> allDetailList2 = usePhoneFindDetailUid(allDetailList);
-                allDetailList.clear();
 
-                /* 3.mapping main and detail by mainId */
-                allMainList.forEach(obj -> {
-                    PnpMain main = (PnpMain) obj;
-                    List<? super PnpDetail> idEqList = new ArrayList<>();
-                    allDetailList2.forEach(obj2 -> {
-                        PnpDetail d = (PnpDetail) obj2;
-                        if (d.getPnpMainId().equals(main.getPnpMainId())) {
-                            idEqList.add(d);
-                        }
-                    });
-                    main.setPnpDetails(idEqList);
+                allMainList.forEach(main -> {
+                    /* 2.Find all detail by main id */
+                    List<PnpDetail> allDetailList = pnpRepositoryCustom.findAllDetail(main.getPnpMainId(), type);
+                    /* 3.Use phone find detail uid */
+                    List<PnpDetail> filterDetailList = usePhoneFindDetailUid(allDetailList).stream()
+                            .filter(detail -> Objects.equals((detail).getStatus(), PnpStatusEnum.SENDING.value))
+                            .sorted(Comparator.comparing(PnpDetail::getPnpDetailId))
+                            .collect(Collectors.toList());
+                    allDetailList.clear();
 
-                    /* 4.Tell akka */
-                    log.info("Tell Akka Send BC!!");
-                    pnpAkkaService.tell(main);
+                    log.info("Main id and after filter detail list size, main id: {}, after filter detail size: {}", main.getPnpMainId(), filterDetailList.size());
+                    log.info("After filter detail list: {}", DataUtils.toPrettyJsonUseJackson(filterDetailList));
+
+                    if (filterDetailList.isEmpty()) {
+                        /* all detail sent to bc and pnp is finish, Update main status to complete, but not include sms */
+                        pnpRepositoryCustom.updateMainToComplete(main.getPnpMainId(), type, PnpStatusEnum.COMPLETE);
+                    } else {
+                        main.setPnpDetails(filterDetailList);
+                        /* 4.Tell akka */
+                        log.debug("Tell Akka Send BC!!");
+                        pnpAkkaService.tell(main);
+                    }
                 });
             } catch (Exception e) {
                 log.error("Exception", e);
@@ -123,9 +140,9 @@ public class PnpPushMsgService {
      * @param details details
      * @return XXXPnpDetail
      */
-    private List<? super PnpDetail> usePhoneFindDetailUid(List<? super PnpDetail> details) {
+    private List<PnpDetail> usePhoneFindDetailUid(List<PnpDetail> details) {
         List<String> phoneNumberList = addAllFormatPhoneNumberToList(details);
-        log.info("phoneNumberList : {}", DataUtils.toPrettyJsonUseJackson(phoneNumberList));
+        log.debug("phoneNumberList : {}", DataUtils.toPrettyJsonUseJackson(phoneNumberList));
 
         /* Return Original Object */
         if (CollectionUtils.isEmpty(phoneNumberList)) {
@@ -134,15 +151,17 @@ public class PnpPushMsgService {
 
         /* 透過電話號碼清單查尋UID */
         List<LineUser> lineUserList = lineUserService.findByMobileIn(phoneNumberList);
-        log.info("LineUserList:{}", DataUtils.toPrettyJsonUseJackson(lineUserList));
+        log.debug("LineUserList:{}", DataUtils.toPrettyJsonUseJackson(lineUserList));
         Map<String, String> uidPhoneNumberMap = generatePhoneNumberUidMapWithoutBlock(lineUserList);
         Map<String, String> phoneNumberStatusMap = generatePhoneNumberStatusMap(lineUserList);
-        log.info("uidPhoneNumberMap   :{}", DataUtils.toPrettyJsonUseJackson(uidPhoneNumberMap));
-        log.info("phoneNumberStatusMap:{}", DataUtils.toPrettyJsonUseJackson(phoneNumberStatusMap));
+        log.debug("uidPhoneNumberMap   :{}", DataUtils.toPrettyJsonUseJackson(uidPhoneNumberMap));
+        log.debug("phoneNumberStatusMap:{}", DataUtils.toPrettyJsonUseJackson(phoneNumberStatusMap));
         for (int i = 0; i < details.size(); i++) {
-            PnpDetail detail = (PnpDetail) details.get(i);
-            log.info("Phone Number : {}", detail.getPhone());
-            detail.setUid(getUidByPhoneNumberMap(uidPhoneNumberMap, detail.getPhone()));
+            PnpDetail detail = details.get(i);
+            log.debug("Phone Number : {}", detail.getPhone());
+            if (detail.getUid() == null || detail.getUid().trim().isEmpty()) {
+                detail.setUid(getUidByPhoneNumberMap(uidPhoneNumberMap, detail.getPhone()));
+            }
             detail.setBindStatus(getBindStatusByPhoneNumber(phoneNumberStatusMap, detail.getPhone()));
             details.set(i, detail);
         }
@@ -239,7 +258,7 @@ public class PnpPushMsgService {
     @PreDestroy
     public void destroy() {
         if (scheduler != null && !scheduler.isShutdown()) {
-            log.info("Shutdown....");
+            log.debug("Shutdown....");
             scheduler.shutdown();
         }
     }

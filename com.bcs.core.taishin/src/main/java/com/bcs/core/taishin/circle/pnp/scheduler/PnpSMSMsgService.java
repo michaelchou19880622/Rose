@@ -243,7 +243,7 @@ public class PnpSMSMsgService {
             final String procApName = DataUtils.getProcApName();
             log.info("Start Check Has BC Fail To SMS Data : {}, {} =========", type, status);
             /* Find Expired Data*/
-            List<PnpDetailMitake> detailList = pnpDetailMitakeRepository.findTop1ByBcStatusAndSmsStatusIsNullOrderByCreateTimeAsc(status.value);
+            List<PnpDetailMitake> detailList = pnpDetailMitakeRepository.findTop100ByBcStatusAndSmsStatusIsNullOrderByCreateTimeAsc(status.value);
 
             if (CollectionUtils.isEmpty(detailList)) {
                 log.info("{} No BC Fail Data!!", type);
@@ -276,7 +276,7 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsMitakeInputStream(main, afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -286,14 +286,14 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
                 PnpDetailMitake afterSaveDetail = pnpDetailMitakeRepository.save(detail);
                 log.info("After Save Detail : {}", DataUtils.toPrettyJsonUseJackson(afterSaveDetail));
 
-                pnpAkkaService.tell(main);
+//                pnpAkkaService.tell(main);
             }
         } catch (Exception e) {
             log.error("Exception", e);
@@ -306,7 +306,7 @@ public class PnpSMSMsgService {
             String procApName = DataUtils.getProcApName();
             log.info("Start Check Has BC Fail To SMS Data : {}, {} =========", type, status);
             /* Find Expired Data*/
-            List<PnpDetailMing> detailList = pnpDetailMingRepository.findTop1ByBcStatusAndSmsStatusIsNullOrderByCreateTimeAsc(status.value);
+            List<PnpDetailMing> detailList = pnpDetailMingRepository.findTop100ByBcStatusAndSmsStatusIsNullOrderByCreateTimeAsc(status.value);
 
             if (CollectionUtils.isEmpty(detailList)) {
                 log.info("{} No BC Fail Data!!", type);
@@ -339,7 +339,7 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsMingInputStream(afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -349,14 +349,14 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
                 PnpDetailMing afterSaveDetail = pnpDetailMingRepository.save(detail);
                 log.info("After Save Detail : {}", DataUtils.toPrettyJsonUseJackson(afterSaveDetail));
 
-                pnpAkkaService.tell(main);
+//                pnpAkkaService.tell(main);
             }
         } catch (Exception e) {
             log.error("Exception", e);
@@ -369,7 +369,7 @@ public class PnpSMSMsgService {
             String procApName = DataUtils.getProcApName();
             log.info("Start Check Has BC Fail To SMS Data : {}, {} =========", type, status);
             /* Find Expired Data*/
-            List<PnpDetailUnica> detailList = pnpDetailUnicaRepository.findTop1ByBcStatusAndSmsStatusIsNullOrderByCreateTimeAsc(status.value);
+            List<PnpDetailUnica> detailList = pnpDetailUnicaRepository.findTop100ByBcStatusAndSmsStatusIsNullOrderByCreateTimeAsc(status.value);
 
             if (CollectionUtils.isEmpty(detailList)) {
                 log.info("{} No BC Fail Data!!", type);
@@ -402,7 +402,7 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsUnicaInputStream(main, afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -412,14 +412,14 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
                 PnpDetailUnica afterSaveDetail = pnpDetailUnicaRepository.save(detail);
                 log.info("After Save Detail : {}", DataUtils.toPrettyJsonUseJackson(afterSaveDetail));
 
-                pnpAkkaService.tell(main);
+//                pnpAkkaService.tell(main);
             }
         } catch (Exception e) {
             log.error("Exception", e);
@@ -432,7 +432,7 @@ public class PnpSMSMsgService {
             String procApName = DataUtils.getProcApName();
             log.info("Start Check Has BC Fail To SMS Data : {}, {} =========", type, status);
             /* Find Expired Data*/
-            List<PnpDetailEvery8d> detailList = pnpDetailEvery8dRepository.findTop1ByBcStatusAndSmsStatusIsNullOrderByCreateTimeAsc(status.value);
+            List<PnpDetailEvery8d> detailList = pnpDetailEvery8dRepository.findTop100ByBcStatusAndSmsStatusIsNullOrderByCreateTimeAsc(status.value);
 
             if (CollectionUtils.isEmpty(detailList)) {
                 log.info("{} No BC Fail Data!!", type);
@@ -465,7 +465,7 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsEvery8dInputStream(main, afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -475,14 +475,14 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
                 PnpDetailEvery8d afterSaveDetail = pnpDetailEvery8dRepository.save(detail);
                 log.info("After Save Detail : {}", DataUtils.toPrettyJsonUseJackson(afterSaveDetail));
 
-                pnpAkkaService.tell(main);
+//                pnpAkkaService.tell(main);
             }
         } catch (Exception e) {
             log.error("Exception", e);
@@ -513,7 +513,7 @@ public class PnpSMSMsgService {
             String procApName = DataUtils.getProcApName();
             log.info("Start Check Has PNP Fail To SMS Data : {} =========", type);
             /* Find Expired Data*/
-            List<PnpDetailMitake> detailList = pnpDetailMitakeRepository.findTop1ByPnpStatusAndSmsStatusIsNullOrderByCreateTimeAsc(status.value);
+            List<PnpDetailMitake> detailList = pnpDetailMitakeRepository.findTop100ByPnpStatusAndSmsStatusIsNullOrderByCreateTimeAsc(status.value);
 
             if (CollectionUtils.isEmpty(detailList)) {
                 log.info("{} No PNP Fail Data!!", type);
@@ -546,7 +546,7 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsMitakeInputStream(main, afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -556,14 +556,14 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
                 PnpDetailMitake afterSaveDetail = pnpDetailMitakeRepository.save(detail);
                 log.info("After Save Detail : {}", DataUtils.toPrettyJsonUseJackson(afterSaveDetail));
 
-                pnpAkkaService.tell(main);
+//                pnpAkkaService.tell(main);
             }
         } catch (Exception e) {
             log.error("Exception", e);
@@ -576,7 +576,7 @@ public class PnpSMSMsgService {
             String procApName = DataUtils.getProcApName();
             log.info("Start Check Has PNP Fail To SMS Data : {} =========", type);
             /* Find Expired Data*/
-            List<PnpDetailMing> detailList = pnpDetailMingRepository.findTop1ByPnpStatusAndSmsStatusIsNullOrderByCreateTimeAsc(status.value);
+            List<PnpDetailMing> detailList = pnpDetailMingRepository.findTop100ByPnpStatusAndSmsStatusIsNullOrderByCreateTimeAsc(status.value);
 
             if (CollectionUtils.isEmpty(detailList)) {
                 log.info("{} No PNP Fail Data!!", type);
@@ -609,7 +609,7 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsMingInputStream(afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -619,14 +619,14 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
                 PnpDetailMing afterSaveDetail = pnpDetailMingRepository.save(detail);
                 log.info("After Save Detail : {}", DataUtils.toPrettyJsonUseJackson(afterSaveDetail));
 
-                pnpAkkaService.tell(main);
+//                pnpAkkaService.tell(main);
             }
         } catch (Exception e) {
             log.error("Exception", e);
@@ -639,7 +639,7 @@ public class PnpSMSMsgService {
             String procApName = DataUtils.getProcApName();
             log.info("Start Check Has PNP Fail To SMS Data : {} =========", type);
             /* Find Expired Data*/
-            List<PnpDetailUnica> detailList = pnpDetailUnicaRepository.findTop1ByPnpStatusAndSmsStatusIsNullOrderByCreateTimeAsc(status.value);
+            List<PnpDetailUnica> detailList = pnpDetailUnicaRepository.findTop100ByPnpStatusAndSmsStatusIsNullOrderByCreateTimeAsc(status.value);
 
             if (CollectionUtils.isEmpty(detailList)) {
                 log.info("{} No PNP Fail Data!!", type);
@@ -672,7 +672,7 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsUnicaInputStream(main, afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -682,14 +682,14 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
                 PnpDetailUnica afterSaveDetail = pnpDetailUnicaRepository.save(detail);
                 log.info("After Save Detail : {}", DataUtils.toPrettyJsonUseJackson(afterSaveDetail));
 
-                pnpAkkaService.tell(main);
+//                pnpAkkaService.tell(main);
             }
         } catch (Exception e) {
             log.error("Exception", e);
@@ -702,7 +702,7 @@ public class PnpSMSMsgService {
             String procApName = DataUtils.getProcApName();
             log.info("Start Check Has PNP Fail To SMS Data : {} =========", type);
             /* Find Expired Data*/
-            List<PnpDetailEvery8d> detailList = pnpDetailEvery8dRepository.findTop1ByPnpStatusAndSmsStatusIsNullOrderByCreateTimeAsc(status.value);
+            List<PnpDetailEvery8d> detailList = pnpDetailEvery8dRepository.findTop100ByPnpStatusAndSmsStatusIsNullOrderByCreateTimeAsc(status.value);
 
             if (CollectionUtils.isEmpty(detailList)) {
                 log.info("{} No PNP Fail Data!!", type);
@@ -735,7 +735,7 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsEvery8dInputStream(main, afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -745,14 +745,14 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
                 PnpDetailEvery8d afterSaveDetail = pnpDetailEvery8dRepository.save(detail);
                 log.info("After Save Detail : {}", DataUtils.toPrettyJsonUseJackson(afterSaveDetail));
 
-                pnpAkkaService.tell(main);
+//                pnpAkkaService.tell(main);
             }
         } catch (Exception e) {
             log.error("Exception", e);
@@ -782,7 +782,7 @@ public class PnpSMSMsgService {
             Date now = new Date();
 
             /* Find Expired Data*/
-            List<PnpDetailMitake> detailList = pnpDetailMitakeRepository.findTop1ByPnpStatusAndPnpDeliveryExpireTimeBeforeOrderByCreateTimeAsc(
+            List<PnpDetailMitake> detailList = pnpDetailMitakeRepository.findTop100ByPnpStatusAndPnpDeliveryExpireTimeBeforeOrderByCreateTimeAsc(
                     status.value, now);
 
             if (CollectionUtils.isEmpty(detailList)) {
@@ -794,7 +794,7 @@ public class PnpSMSMsgService {
             /* Update Expired Status */
             for (PnpDetailMitake detail : detailList) {
                 detail.setProcStage(PnpStageEnum.SMS.value);
-                detail.setStatus(PnpStatusEnum.SMS_SENDING.value);
+                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setPnpStatus(PnpStatusEnum.PNP_SENT_EXPIRED_FAIL_SMS_PROCESS.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENDING.value);
                 detail.setModifyTime(now);
@@ -818,7 +818,7 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsMitakeInputStream(main, afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -828,14 +828,14 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
                 PnpDetailMitake afterSaveDetail = pnpDetailMitakeRepository.save(detail);
                 log.info("After Save Detail : {}", DataUtils.toPrettyJsonUseJackson(afterSaveDetail));
 
-                pnpAkkaService.tell(main);
+//                pnpAkkaService.tell(main);
             }
         } catch (Exception e) {
             log.error("Exception", e);
@@ -853,7 +853,7 @@ public class PnpSMSMsgService {
             Date now = new Date();
 
             /* Find Expired Data*/
-            List<PnpDetailMing> detailList = pnpDetailMingRepository.findTop1ByPnpStatusAndPnpDeliveryExpireTimeBeforeOrderByCreateTimeAsc(
+            List<PnpDetailMing> detailList = pnpDetailMingRepository.findTop100ByPnpStatusAndPnpDeliveryExpireTimeBeforeOrderByCreateTimeAsc(
                     status.value, now);
 
             if (CollectionUtils.isEmpty(detailList)) {
@@ -865,7 +865,7 @@ public class PnpSMSMsgService {
             /* Update Expired Status */
             for (PnpDetailMing detail : detailList) {
                 detail.setProcStage(PnpStageEnum.SMS.value);
-                detail.setStatus(PnpStatusEnum.SMS_SENDING.value);
+                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setPnpStatus(PnpStatusEnum.PNP_SENT_EXPIRED_FAIL_SMS_PROCESS.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENDING.value);
                 detail.setModifyTime(now);
@@ -889,7 +889,7 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsMingInputStream(afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -899,14 +899,14 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
                 PnpDetailMing afterSaveDetail = pnpDetailMingRepository.save(detail);
                 log.info("After Save Detail : {}", DataUtils.toPrettyJsonUseJackson(afterSaveDetail));
 
-                pnpAkkaService.tell(main);
+//                pnpAkkaService.tell(main);
             }
         } catch (Exception e) {
             log.error("Exception", e);
@@ -924,7 +924,7 @@ public class PnpSMSMsgService {
             Date now = new Date();
 
             /* Find Expired Data*/
-            List<PnpDetailUnica> detailList = pnpDetailUnicaRepository.findTop1ByPnpStatusAndPnpDeliveryExpireTimeBeforeOrderByCreateTimeAsc(
+            List<PnpDetailUnica> detailList = pnpDetailUnicaRepository.findTop100ByPnpStatusAndPnpDeliveryExpireTimeBeforeOrderByCreateTimeAsc(
                     status.value, now);
 
             if (CollectionUtils.isEmpty(detailList)) {
@@ -936,7 +936,7 @@ public class PnpSMSMsgService {
             /* Update Expired Status */
             for (PnpDetailUnica detail : detailList) {
                 detail.setProcStage(PnpStageEnum.SMS.value);
-                detail.setStatus(PnpStatusEnum.SMS_SENDING.value);
+                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setPnpStatus(PnpStatusEnum.PNP_SENT_EXPIRED_FAIL_SMS_PROCESS.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENDING.value);
                 detail.setModifyTime(now);
@@ -960,7 +960,7 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsUnicaInputStream(main, afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -970,14 +970,14 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
                 PnpDetailUnica afterSaveDetail = pnpDetailUnicaRepository.save(detail);
                 log.info("After Save Detail : {}", DataUtils.toPrettyJsonUseJackson(afterSaveDetail));
 
-                pnpAkkaService.tell(main);
+//                pnpAkkaService.tell(main);
             }
         } catch (Exception e) {
             log.error("Exception", e);
@@ -996,7 +996,7 @@ public class PnpSMSMsgService {
             Date now = new Date();
 
             /* Find Expired Data*/
-            List<PnpDetailEvery8d> detailList = pnpDetailEvery8dRepository.findTop1ByPnpStatusAndPnpDeliveryExpireTimeBeforeOrderByCreateTimeAsc(
+            List<PnpDetailEvery8d> detailList = pnpDetailEvery8dRepository.findTop100ByPnpStatusAndPnpDeliveryExpireTimeBeforeOrderByCreateTimeAsc(
                     status.value, now);
 
             if (CollectionUtils.isEmpty(detailList)) {
@@ -1008,7 +1008,7 @@ public class PnpSMSMsgService {
             /* Update Expired Status */
             for (PnpDetailEvery8d detail : detailList) {
                 detail.setProcStage(PnpStageEnum.SMS.value);
-                detail.setStatus(PnpStatusEnum.SMS_SENDING.value);
+                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setPnpStatus(PnpStatusEnum.PNP_SENT_EXPIRED_FAIL_SMS_PROCESS.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENDING.value);
                 detail.setModifyTime(now);
@@ -1032,7 +1032,7 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsEvery8dInputStream(main, afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -1042,14 +1042,14 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
                 PnpDetailEvery8d afterSaveDetail = pnpDetailEvery8dRepository.save(detail);
                 log.info("After Save Detail : {}", DataUtils.toPrettyJsonUseJackson(afterSaveDetail));
 
-                pnpAkkaService.tell(main);
+//                pnpAkkaService.tell(main);
             }
         } catch (Exception e) {
             log.error("Exception", e);

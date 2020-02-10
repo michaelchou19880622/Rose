@@ -28,7 +28,6 @@ public enum PnpFtpSourceEnum {
      * 明宣來源
      */
     MING(3, "3", "ming", "明軒", "BCS_PNP_MAIN_MING", "BCS_PNP_DETAIL_MING", PnpDetailMing.class, PnpMainMing.class),
-
     /**
      * UNICA來源
      */

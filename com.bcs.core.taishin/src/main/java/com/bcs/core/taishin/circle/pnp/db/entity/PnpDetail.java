@@ -2,6 +2,7 @@ package com.bcs.core.taishin.circle.pnp.db.entity;
 
 import com.bcs.core.json.AbstractBcsEntity;
 import com.bcs.core.utils.DataUtils;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -80,12 +81,14 @@ public class PnpDetail extends AbstractBcsEntity {
     /**
      * 建立時間
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "GMT+8")
     @Column(name = "CREAT_TIME")
     private Date createTime;
 
     /**
      * 發送時間
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "GMT+8")
     @Column(name = "SEND_TIME")
     private Date sendTime;
 
@@ -116,6 +119,7 @@ public class PnpDetail extends AbstractBcsEntity {
     /**
      * 更新時間
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "GMT+8")
     @Column(name = "MODIFY_TIME")
     private Date modifyTime;
 
@@ -135,30 +139,35 @@ public class PnpDetail extends AbstractBcsEntity {
     /**
      * BC推播時間
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "GMT+8")
     @Column(name = "LINE_PUSH_TIME")
     private Date linePushTime;
 
     /**
      * PNP推播時間
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "GMT+8")
     @Column(name = "PNP_TIME")
     private Date pnpTime;
 
     /**
      * PNP 接收Line回傳時間
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "GMT+8")
     @Column(name = "PNP_DELIVERY_TIME")
     private Date pnpDeliveryTime;
 
     /**
      * web hook 送來 PNP DELIVERY的到期時間
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "GMT+8")
     @Column(name = "PNP_DELIVERY_EXPIRE_TIME")
     private Date pnpDeliveryExpireTime;
 
     /**
      * SMS 發送時間
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "GMT+8")
     @Column(name = "SMS_TIME")
     private Date smsTime;
 

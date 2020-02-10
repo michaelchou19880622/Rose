@@ -5,69 +5,82 @@ import com.bcs.core.taishin.circle.pnp.code.PnpStageEnum;
 import com.bcs.core.taishin.circle.pnp.code.PnpStatusEnum;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetail;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpMain;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
 import java.util.List;
 
 /**
  * The interface Pnp repository custom.
  *
- * @author ???
+ * @author Alan
  */
 public interface PnpRepositoryCustom {
-
     /**
-     * Update status list.
+     * Find all bc to pnp detail list.
      *
-     * @param type          the type
-     * @param processApName the process ap name
-     * @param stage         the stage
-     * @param bcStatus      the bc status
-     * @return the list
-     */
-    @Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
-    List<? super PnpDetail> updateStatus(PnpFtpSourceEnum type, String processApName, PnpStageEnum stage, PnpStatusEnum bcStatus);
-
-    /**
-     * Find all detail list.
-     *
-     * @param mainIds the main ids
-     * @param type    the type
+     * @param type     the type
+     * @param stage    the stage
+     * @param bcStatus the bc status
      * @return the list
      */
     @SuppressWarnings("unchecked")
     @Transactional(rollbackFor = Exception.class)
-    List<? super PnpDetail> findAllDetail(List<Long> mainIds, PnpFtpSourceEnum type);
+    List<PnpDetail> findAllBcToPnpDetail(PnpFtpSourceEnum type, PnpStageEnum stage, PnpStatusEnum bcStatus);
 
     /**
-     * Find all wait main list.
+     * Find all detail list.
+     *
+     * @param mainId the main id
+     * @param type   the type
+     * @return the list
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @SuppressWarnings("unchecked")
+    List<PnpDetail> findAllDetail(Long mainId, PnpFtpSourceEnum type);
+
+    /**
+     * Find all main list.
      *
      * @param procApName the proc ap name
-     * @param mainTable  the main table
      * @param type       the type
      * @return the list
      */
     @SuppressWarnings("unchecked")
     @Transactional(rollbackFor = Exception.class)
-    List<? super PnpMain> findAllWaitMain(String procApName, String mainTable, PnpFtpSourceEnum type);
+    List<PnpMain> findAllMain(String procApName, PnpFtpSourceEnum type);
 
     /**
-     * Find main by main id pnp main.
+     * Find main by id list.
      *
      * @param type   the type
      * @param mainId the main id
-     * @return the pnp main
-     */
-    PnpMain findMainByMainId(PnpFtpSourceEnum type, Long mainId);
-
-    /**
-     * Find pnp detail by id list.
-     *
-     * @param type the type
-     * @param ids  the ids
      * @return the list
      */
-    List<? super PnpDetail> findPnpDetailById(PnpFtpSourceEnum type, List<BigInteger> ids);
+    @SuppressWarnings("unchecked")
+    @Transactional(rollbackFor = Exception.class)
+    List<PnpMain> findMainById(PnpFtpSourceEnum type, Long mainId);
+
+
+    /**
+     * Count by status list int.
+     *
+     * @param statusList the status list
+     * @param type       the type
+     * @param mainId     the main id
+     * @return the int
+     */
+    @Transactional(rollbackFor = Exception.class)
+    int countByStatusList(List<String> statusList, PnpFtpSourceEnum type, long mainId);
+
+
+    /**
+     * Update main to complete int.
+     *
+     * @param mainId the main id
+     * @param type   the type
+     * @param status the status
+     * @return the int
+     */
+    @Transactional(rollbackFor = Exception.class)
+    int updateMainToComplete(long mainId, PnpFtpSourceEnum type, PnpStatusEnum status);
 }

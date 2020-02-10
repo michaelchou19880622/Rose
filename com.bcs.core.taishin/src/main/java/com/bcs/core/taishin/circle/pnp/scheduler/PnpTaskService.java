@@ -7,7 +7,6 @@ import com.bcs.core.taishin.circle.pnp.service.PnpService;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
 import org.quartz.Trigger;
 import org.quartz.impl.StdSchedulerFactory;
@@ -20,6 +19,8 @@ import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 /**
+ * @author ???
+ * @author Alan
  * @see PnpMessageActor#onReceive
  */
 @Slf4j(topic = "PnpRecorder")
@@ -32,32 +33,35 @@ public class PnpTaskService {
      * BC & PNP 開始排程
      * 將DB中訊息狀態改為Delay
      *
-     * @param pnpMain pnpMain
+     * @param pnpMain      pnpMain
      * @param scheduleTime scheduleTime
-     * @throws SchedulerException SchedulerException
-     *
-     * PNP Actor
+     *                     <p>
+     *                     PNP Actor
      * @see PnpMessageActor#onReceive
      * BC Actor
      * @see com.bcs.core.taishin.circle.pnp.akka.handler.PnpPushMessageActor#onReceive
      */
-    public void startTask(PnpMain pnpMain, Date scheduleTime) throws SchedulerException {
-        if (scheduleTime == null) {
-            return;
+    public void startTask(PnpMain pnpMain, Date scheduleTime) {
+        try {
+            if (scheduleTime == null) {
+                return;
+            }
+            SchedulerFactory schedulerFactory = new StdSchedulerFactory();
+            Scheduler scheduler = schedulerFactory.getScheduler();
+            /* Job */
+            JobDetail jobDetail = newJob(PnpTask.class).withIdentity("PNPMain", "PNP").build();
+            /* 執行週期 */
+            Trigger trigger = newTrigger().withIdentity("PNPMain", "PNP").startAt(scheduleTime).build();
+
+            scheduler.getContext().put("PnpMain", pnpMain);
+
+            scheduler.scheduleJob(jobDetail, trigger);
+            /* 批次開始將訊息狀態更改為Delay */
+            pnpService.updateMainAndDetailStatus(pnpMain, AbstractPnpMainEntity.SEND_TYPE_DELAY);
+            log.info("BC Scheduler Start!!");
+            scheduler.start();
+        } catch (Exception e) {
+            log.error("Exception", e);
         }
-        SchedulerFactory schedulerFactory = new StdSchedulerFactory();
-        Scheduler scheduler = schedulerFactory.getScheduler();
-        /* Job */
-        JobDetail jobDetail = newJob(PnpTask.class).withIdentity("PNPMain", "PNP").build();
-        /* 執行週期 */
-        Trigger trigger = newTrigger().withIdentity("PNPMain", "PNP").startAt(scheduleTime).build();
-
-        scheduler.getContext().put("PnpMain", pnpMain);
-
-        scheduler.scheduleJob(jobDetail, trigger);
-        /* 批次開始將訊息狀態更改為Delay */
-        pnpService.updateMainAndDetailStatus(pnpMain, AbstractPnpMainEntity.SEND_TYPE_DELAY);
-        log.info("BC Scheduler Start!!");
-        scheduler.start();
     }
 }

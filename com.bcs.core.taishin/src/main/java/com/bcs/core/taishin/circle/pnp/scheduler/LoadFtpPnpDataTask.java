@@ -58,6 +58,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
@@ -214,17 +215,17 @@ public class LoadFtpPnpDataTask {
 
                 switch (bigSwitch) {
                     case 0:
-                        log.info("{}: Stop Process!!", bigSwitch);
+                        log.debug("{}: Stop Process!!", bigSwitch);
                         break;
                     case 1:
                         /* 停止排程並轉發SMS */
-                        log.info("{}: Start put file to SMS FTP path process !!", bigSwitch);
+                        log.debug("{}: Start put file to SMS FTP path process !!", bigSwitch);
                         transFileToSMSFlow(source);
-                        log.info("{}: Transfer File To SMS Flow Complete!", bigSwitch);
+                        log.debug("{}: Transfer File To SMS Flow Complete!", bigSwitch);
                         break;
                     default:
                         /* 解析資料存到DB */
-                        log.info("{}: Parse Data Flow To Database!!", bigSwitch);
+                        log.debug("{}: Parse Data Flow To Database!!", bigSwitch);
                         parseDataFlow(source);
                         break;
                 }
@@ -441,10 +442,10 @@ public class LoadFtpPnpDataTask {
      * @throws Exception Exception
      * @see this#parseMingFiles
      */
-    private List<? super PnpDetail> parsePnpDetailMing(String fileContent, String flexTemplateId, String
+    private List<PnpDetail> parsePnpDetailMing(String fileContent, String flexTemplateId, String
             scheduleTime) throws Exception {
         log.info("flexTemplateId : " + flexTemplateId);
-        List<? super PnpDetail> details = new ArrayList<>();
+        List<PnpDetail> details = new ArrayList<>();
         /* 明宣沒有header所以從0開始 */
         final int columnSize = 9;
         if (StringUtils.isNotBlank(fileContent)) {
@@ -494,9 +495,9 @@ public class LoadFtpPnpDataTask {
      * @return Mitake物件清單
      * @throws Exception Exception
      */
-    private List<? super PnpDetail> parsePnpDetailMitake(List<String> fileContents, String
+    private List<PnpDetail> parsePnpDetailMitake(List<String> fileContents, String
             flexTemplateId, String scheduleTime) throws Exception {
-        List<? super PnpDetail> details = new ArrayList<>();
+        List<PnpDetail> details = new ArrayList<>();
         /* Mitake有header所以從1開始 */
         for (int i = 1, size = fileContents.size(); i < size; i++) {
             if (StringUtils.isNotBlank(fileContents.get(i))) {
@@ -537,9 +538,9 @@ public class LoadFtpPnpDataTask {
      * @return Every8d物件清單
      * @throws Exception Exception
      */
-    private List<? super PnpDetail> parsePnpDetailEvery8d(List<String> fileContents, String
+    private List<PnpDetail> parsePnpDetailEvery8d(List<String> fileContents, String
             flexTemplateId, String scheduleTime) throws Exception {
-        List<? super PnpDetail> details = new ArrayList<>();
+        List<PnpDetail> details = new ArrayList<>();
         /* Every8D有header所以從1開始 */
         for (int i = 1, size = fileContents.size(); i < size; i++) {
             if (StringUtils.isNotBlank(fileContents.get(i))) {
@@ -594,9 +595,9 @@ public class LoadFtpPnpDataTask {
      * @return Unica物件清單
      * @throws Exception Exception
      */
-    private List<? super PnpDetail> parsePnpDetailUnica(List<String> fileContents, String flexTemplateId, String
+    private List<PnpDetail> parsePnpDetailUnica(List<String> fileContents, String flexTemplateId, String
             scheduleTime) throws Exception {
-        List<? super PnpDetail> details = new ArrayList<>();
+        List<PnpDetail> details = new ArrayList<>();
         /* Unica有header所以從1開始 */
         for (int i = 1, size = fileContents.size(); i < size; i++) {
             if (StringUtils.isNotBlank(fileContents.get(i))) {

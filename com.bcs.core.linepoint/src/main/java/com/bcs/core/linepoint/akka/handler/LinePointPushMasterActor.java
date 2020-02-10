@@ -3,6 +3,7 @@ package com.bcs.core.linepoint.akka.handler;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import com.bcs.core.linepoint.api.model.LinePointPushModel;
+import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.utils.AkkaRouterFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -57,7 +58,7 @@ public class LinePointPushMasterActor extends UntypedActor {
     private void methodA(LinePointPushModel object) throws CloneNotSupportedException {
         JSONArray detailIds = object.getDetailIds();
         log.info("Total Detail Size: {}", detailIds.toList().size());
-        final int maxAkkaCount = 100;
+        final int maxAkkaCount = getMaxActorCount();
         final int buffer = getBuffer(detailIds.toList().size(), maxAkkaCount);
         final int arrayLength = detailIds.length();
         int pointer = 0;
@@ -86,4 +87,12 @@ public class LinePointPushMasterActor extends UntypedActor {
         return detailSize / maxActorCount + 1;
     }
 
-}
+    private int getMaxActorCount() {
+        int count = CoreConfigReader.getInteger("bn.push.detail.max.actor.count");
+        if (count <= 0) {
+            count = 100;
+        }
+        return count;
+    }
+
+    }

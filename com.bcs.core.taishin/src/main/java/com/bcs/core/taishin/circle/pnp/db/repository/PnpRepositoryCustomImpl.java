@@ -220,4 +220,34 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 .setParameter("NEW_STATUS", status.value)
                 .executeUpdate();
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public PnpDetail findDetailById(PnpFtpSourceEnum type, long detailId){
+        String selectSql = "SELECT * FROM " + type.detailTable +
+                " WHERE PNP_DETAIL_ID=:ID";
+        return (PnpDetail) providerService.getEntityManager().createNativeQuery(selectSql, type.detailClass)
+                .setParameter("ID", detailId)
+                .getSingleResult();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public PnpMain findSingleMainById(PnpFtpSourceEnum type, long mainId){
+        String selectSql = "SELECT * FROM " + type.mainTable +
+                " WHERE PNP_MAIN_ID=:ID";
+        return (PnpMain) providerService.getEntityManager().createNativeQuery(selectSql, type.mainClass)
+                .setParameter("ID", mainId)
+                .getSingleResult();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public List<PnpDetail> findDetailByStage(PnpFtpSourceEnum type){
+        String selectSql = "SELECT * FROM " + type.detailTable +
+                " WHERE PROC_STAGE=:STAGE AND SMS_STATUS IS NULL";
+        log.info(selectSql);
+        return providerService.getEntityManager().createNativeQuery(selectSql, type.detailClass)
+                .setParameter("STAGE", PnpStageEnum.SMS)
+                .getResultList();
+    }
 }

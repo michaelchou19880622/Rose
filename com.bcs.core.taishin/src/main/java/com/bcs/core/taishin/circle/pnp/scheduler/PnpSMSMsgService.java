@@ -6,10 +6,12 @@ import com.bcs.core.taishin.circle.pnp.akka.PnpAkkaService;
 import com.bcs.core.taishin.circle.pnp.code.PnpFtpSourceEnum;
 import com.bcs.core.taishin.circle.pnp.code.PnpStageEnum;
 import com.bcs.core.taishin.circle.pnp.code.PnpStatusEnum;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetail;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailEvery8d;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailMing;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailMitake;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailUnica;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpMainEvery8d;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpMainMing;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpMainMitake;
@@ -22,6 +24,7 @@ import com.bcs.core.taishin.circle.pnp.db.repository.PnpMainEvery8dRepository;
 import com.bcs.core.taishin.circle.pnp.db.repository.PnpMainMingRepository;
 import com.bcs.core.taishin.circle.pnp.db.repository.PnpMainMitakeRepository;
 import com.bcs.core.taishin.circle.pnp.db.repository.PnpMainUnicaRepository;
+import com.bcs.core.taishin.circle.pnp.db.repository.PnpRepositoryCustom;
 import com.bcs.core.taishin.circle.pnp.ftp.PNPFtpService;
 import com.bcs.core.taishin.circle.pnp.ftp.PnpFtpSetting;
 import com.bcs.core.utils.DataUtils;
@@ -71,6 +74,7 @@ public class PnpSMSMsgService {
     private PnpMainMingRepository pnpMainMingRepository;
     private PnpMainEvery8dRepository pnpMainEvery8dRepository;
     private PnpMainUnicaRepository pnpMainUnicaRepository;
+    private PnpRepositoryCustom pnpRepositoryCustom;
 
 
     @Autowired
@@ -83,7 +87,9 @@ public class PnpSMSMsgService {
                             PnpMainMitakeRepository pnpMainMitakeRepository,
                             PnpMainMingRepository pnpMainMingRepository,
                             PnpMainEvery8dRepository pnpMainEvery8dRepository,
-                            PnpMainUnicaRepository pnpMainUnicaRepository) {
+                            PnpMainUnicaRepository pnpMainUnicaRepository,
+                            PnpRepositoryCustom pnpRepositoryCustom
+    ) {
         this.pnpAkkaService = pnpAkkaService;
         this.pnpFtpService = pnpFtpService;
 
@@ -96,6 +102,8 @@ public class PnpSMSMsgService {
         this.pnpMainMingRepository = pnpMainMingRepository;
         this.pnpMainEvery8dRepository = pnpMainEvery8dRepository;
         this.pnpMainUnicaRepository = pnpMainUnicaRepository;
+
+        this.pnpRepositoryCustom = pnpRepositoryCustom;
     }
 
     /**
@@ -123,6 +131,66 @@ public class PnpSMSMsgService {
         sendingSmsMainForDeliveryExpired();
     }
 
+    private void sendProcess(PnpFtpSourceEnum type, PnpStatusEnum status) {
+
+        try {
+            final String procApName = DataUtils.getProcApName();
+            log.info("Start Check Has BC Fail To SMS Data : {}, {} =========", type, status);
+            /* Find Expired Data*/
+            List<PnpDetail> detailList = pnpRepositoryCustom.
+
+            if (CollectionUtils.isEmpty(detailList)) {
+                log.info("{} No BC Fail Data!!", type);
+                return;
+            }
+
+            /* Update Expired Status */
+            Date now = new Date();
+            for (PnpDetailMitake detail : detailList) {
+                detail.setProcStage(PnpStageEnum.SMS.value);
+                detail.setSmsStatus(PnpStatusEnum.SMS_SENDING.value);
+                detail.setModifyTime(now);
+            }
+
+            /* Update Status */
+            List<PnpDetailMitake> afterSaveList = pnpDetailMitakeRepository.save(detailList);
+            log.info("Update Status: [BC][FAIL] to [SMS][SENDING] Count : {}", afterSaveList.size());
+
+            now = new Date();
+            for (PnpDetailMitake detail : afterSaveList) {
+                log.info("Detail: {}", DataUtils.toPrettyJsonUseJackson(detail));
+
+                /* Find Main By Detail Id */
+                PnpMainMitake main = pnpMainMitakeRepository.findOne(detail.getPnpMainId());
+                main.setPnpDetailMitakeList(detailList);
+                String smsFileName = changeFileName(main.getOrigFileName(), now);
+                main.setSmsFileName(smsFileName);
+
+                /* Send File To SMS FTP */
+                uploadFileToSms(type, smsMitakeInputStream(main, afterSaveList), main.getSmsFileName());
+
+                /* Save Main */
+                main.setProcApName(procApName);
+                main.setProcStage(PnpStageEnum.SMS.value);
+                main.setSmsTime(now);
+                main.setModifyTime(now);
+                PnpMainMitake afterSaveMain = pnpMainMitakeRepository.save(main);
+                log.info("After Save Main : {}", DataUtils.toPrettyJsonUseJackson(afterSaveMain));
+
+                /* Save Detail */
+                detail.setSmsFileName(smsFileName);
+                detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
+                detail.setSmsTime(now);
+                detail.setModifyTime(now);
+                PnpDetailMitake afterSaveDetail = pnpDetailMitakeRepository.save(detail);
+                log.info("After Save Detail : {}", DataUtils.toPrettyJsonUseJackson(afterSaveDetail));
+
+//                pnpAkkaService.tell(main);
+            }
+        } catch (Exception e) {
+            log.error("Exception", e);
+        }
+    }
     /**
      * Resent Sms
      *
@@ -134,84 +202,36 @@ public class PnpSMSMsgService {
         if (ftpSourceEnum == null) {
             return false;
         }
+        PnpDetail detail = pnpRepositoryCustom.findDetailById(ftpSourceEnum, detailId);
+        detail.setDetailScheduleTime(DataUtils.convDateToStr(new Date(), "yyyy-MM-dd HH:mm:ss"));
+        List<PnpDetail> detailList0 = Collections.singletonList(detail);
+        PnpMain m = pnpRepositoryCustom.findSingleMainById(ftpSourceEnum, detail.getPnpMainId());
+        m.setScheduleTime(DataUtils.convDateToStr(new Date(), "yyyy-MM-dd HH:mm:ss"));
+        m.setPnpDetails(detailList0);
+
+        /* Change Sms File Name */
+        String smsFileName = changeFileName(m.getOrigFileName(), new Date());
+        m.setSmsFileName(smsFileName);
+
+        InputStream inputStream = null;
         switch (ftpSourceEnum) {
             case MING:
-                /* Find Detail */
-                PnpDetailMing detail1 = pnpDetailMingRepository.findOne(detailId);
-                detail1.setDetailScheduleTime(DataUtils.convDateToStr(new Date(), "yyyy-MM-dd HH:mm:ss"));
-                List<PnpDetailMing> detailList = Collections.singletonList(detail1);
-
-                /* Find Main */
-                PnpMainMing main = pnpMainMingRepository.findOne(detail1.getPnpMainId());
-                main.setScheduleTime(DataUtils.convDateToStr(new Date(), "yyyy-MM-dd HH:mm:ss"));
-                main.setPnpDetailMingList(detailList);
-
-                /* Change Sms File Name */
-                String smsFileName = changeFileName(main.getOrigFileName(), new Date());
-                main.setSmsFileName(smsFileName);
-
-                /* Send File To SMS FTP */
-                uploadFileToSms(ftpSourceEnum, smsMingInputStream(detailList), main.getSmsFileName());
-                return true;
-            case UNICA:
-                /* Find Detail */
-                PnpDetailUnica detail2 = pnpDetailUnicaRepository.findOne(detailId);
-                //FIXME Datetime format?
-                detail2.setDetailScheduleTime(DataUtils.convDateToStr(new Date(), "yyyyMMddHHmmss"));
-                List<PnpDetailUnica> detailList2 = Collections.singletonList(detail2);
-
-                /* Find Main */
-                PnpMainUnica main2 = pnpMainUnicaRepository.findOne(detail2.getPnpMainId());
-                main2.setPnpDetailUnicaList(detailList2);
-
-                /* Change Sms File Name */
-                String smsFileName2 = changeFileName(main2.getOrigFileName(), new Date());
-                main2.setScheduleTime(DataUtils.convDateToStr(new Date(), "yyyyMMddHHmmss"));
-                main2.setSmsFileName(smsFileName2);
-
-                /* Send File To SMS FTP */
-                uploadFileToSms(ftpSourceEnum, smsUnicaInputStream(main2, detailList2), main2.getSmsFileName());
-                return true;
-            case MITAKE:
-                /* Find Detail */
-                PnpDetailMitake detail3 = pnpDetailMitakeRepository.findOne(detailId);
-                detail3.setDetailScheduleTime(DataUtils.convDateToStr(new Date(), "yyyyMMddHHmmss"));
-                List<PnpDetailMitake> detailList3 = Collections.singletonList(detail3);
-
-                /* Find Main */
-                PnpMainMitake main3 = pnpMainMitakeRepository.findOne(detail3.getPnpMainId());
-                main3.setScheduleTime(DataUtils.convDateToStr(new Date(), "yyyyMMddHHmmss"));
-                main3.setPnpDetailMitakeList(detailList3);
-
-                /* Change Sms File Name */
-                String smsFileName3 = changeFileName(main3.getOrigFileName(), new Date());
-                main3.setSmsFileName(smsFileName3);
-
-                /* Send File To SMS FTP */
-                uploadFileToSms(ftpSourceEnum, smsMitakeInputStream(main3, detailList3), main3.getSmsFileName());
-                return true;
-            case EVERY8D:
-                /* Find Detail */
-                PnpDetailEvery8d detail4 = pnpDetailEvery8dRepository.findOne(detailId);
-                detail4.setDetailScheduleTime(DataUtils.convDateToStr(new Date(), "yyyyMMddHHmmss"));
-                List<PnpDetailEvery8d> detailList4 = Collections.singletonList(detail4);
-
-                /* Find Main */
-                PnpMainEvery8d main4 = pnpMainEvery8dRepository.findOne(detail4.getPnpMainId());
-                //FIXME Datetime format?
-                main4.setScheduleTime(DataUtils.convDateToStr(new Date(), "yyyyMMddHHmmss"));
-                main4.setPnpDetailEvery8dList(detailList4);
-
-                /* Change Sms File Name */
-                String smsFileName4 = changeFileName(main4.getOrigFileName(), new Date());
-                main4.setSmsFileName(smsFileName4);
-
-                /* Send File To SMS FTP */
-                uploadFileToSms(ftpSourceEnum, smsEvery8dInputStream(main4, detailList4), main4.getSmsFileName());
-                return true;
-            default:
+                inputStream = smsMingInputStream(detailList0);
                 break;
+            case UNICA:
+                inputStream = smsUnicaInputStream(m, detailList0);
+                break;
+            case MITAKE:
+                inputStream = smsMitakeInputStream(m, detailList0);
+                break;
+            case EVERY8D:
+                inputStream = smsEvery8dInputStream(m, detailList0);
+                break;
+            default:
+                return false;
         }
+        /* Send File To SMS FTP */
+        uploadFileToSms(ftpSourceEnum, inputStream, m.getSmsFileName());
         return true;
     }
 
@@ -1048,12 +1068,9 @@ public class PnpSMSMsgService {
 
     /**
      * Mitake
-     *
-     * @param main       main
-     * @param detailList detail List
-     * @return InputStream
      */
-    private InputStream smsMitakeInputStream(PnpMainMitake main, List<PnpDetailMitake> detailList) {
+    private InputStream smsMitakeInputStream(PnpMain m, List<PnpDetail> detailList) {
+        PnpMainMitake main = (PnpMainMitake) m;
         String tag = "&";
         /*
          * 三竹 header
@@ -1090,7 +1107,8 @@ public class PnpSMSMsgService {
 
         StringBuilder body = new StringBuilder();
 
-        for (PnpDetailMitake detail : detailList) {
+        for (PnpDetail d : detailList) {
+            PnpDetailMitake detail = (PnpDetailMitake) d;
             body.append(detail.getDestCategory() + tag);
             body.append(detail.getDestName() + tag);
             body.append(detail.getPhone() + tag);
@@ -1104,12 +1122,9 @@ public class PnpSMSMsgService {
 
     /**
      * Every8d
-     *
-     * @param main       main
-     * @param detailList detailList
-     * @return InputStream
      */
-    private InputStream smsEvery8dInputStream(PnpMainEvery8d main, List<PnpDetailEvery8d> detailList) {
+    private InputStream smsEvery8dInputStream(PnpMain m, List<PnpDetail> detailList) {
+        PnpMainEvery8d main = (PnpMainEvery8d) m;
         String tag = "&";
         /*
          * 互動 header
@@ -1150,7 +1165,8 @@ public class PnpSMSMsgService {
          */
 
         StringBuilder body = new StringBuilder();
-        for (PnpDetailEvery8d detail : detailList) {
+        for (PnpDetail d : detailList) {
+            PnpDetailEvery8d detail = (PnpDetailEvery8d) d;
             body.append(detail.getSn() + tag);
             body.append(detail.getDestName() + tag);
             body.append(detail.getPhone() + tag);
@@ -1170,12 +1186,9 @@ public class PnpSMSMsgService {
 
     /**
      * Unica
-     *
-     * @param main       main
-     * @param detailList detail List
-     * @return InputStream
      */
-    private InputStream smsUnicaInputStream(PnpMainUnica main, List<PnpDetailUnica> detailList) {
+    private InputStream smsUnicaInputStream(PnpMain m, List<PnpDetail> detailList) {
+        PnpMainUnica main = (PnpMainUnica) m;
         String tag = "&";
         /*
          * 互動 header
@@ -1216,7 +1229,8 @@ public class PnpSMSMsgService {
          */
 
         StringBuilder body = new StringBuilder();
-        for (PnpDetailUnica detail : detailList) {
+        for (PnpDetail d : detailList) {
+            PnpDetailUnica detail = (PnpDetailUnica) d;
             body.append(detail.getSn() + tag);
             body.append(detail.getDestName() + tag);
             body.append(detail.getPhone() + tag);
@@ -1240,10 +1254,11 @@ public class PnpSMSMsgService {
      * @return InputStream
      * @apiNote 流水號;;手機號碼;;簡訊內容;;預約時間;;批次帳號;;批次帳號;;0;;1;;有效秒數
      */
-    private InputStream smsMingInputStream(List<PnpDetailMing> detailList) {
+    private InputStream smsMingInputStream(List<PnpDetail> detailList) {
         StringBuilder body = new StringBuilder();
         String tag = ";;";
-        for (PnpDetailMing detail : detailList) {
+        for (PnpDetail d : detailList) {
+            PnpDetailMing detail = (PnpDetailMing) d;
             body.append(detail.getSn() + tag);
             body.append(detail.getPhone() + tag);
             body.append(detail.getMsg() + tag);

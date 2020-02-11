@@ -86,4 +86,10 @@ public interface PnpRepositoryCustom {
      */
     @Transactional(rollbackFor = Exception.class)
     int updateMainToComplete(long mainId, PnpFtpSourceEnum type, PnpStatusEnum status);
+
+    @Transactional(rollbackFor = Exception.class)
+    PnpDetail findDetailById(PnpFtpSourceEnum type, long detailId);
+
+    @Transactional(rollbackFor = Exception.class)
+    PnpMain findSingleMainById(PnpFtpSourceEnum type, long mainId);
 }

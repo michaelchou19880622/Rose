@@ -16,6 +16,13 @@ import java.util.List;
  */
 public interface PnpRepositoryCustom {
 
+    /**
+     * Check is all sent int.
+     *
+     * @param type   the type
+     * @param mainId the main id
+     * @return the int
+     */
     int checkIsAllSent(PnpFtpSourceEnum type, long mainId);
 
     /**

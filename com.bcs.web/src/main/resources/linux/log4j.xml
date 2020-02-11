@@ -97,7 +97,7 @@
             <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss.SSS} %-5p [%-4L] %-30.30C{1} %-35M [%-27t] - %m%n"/>
         </layout>
         <filter class="org.apache.log4j.varia.LevelRangeFilter">
-            <param name="levelMin" value="DEBUG"/>
+            <param name="levelMin" value="INFO"/>
             <param name="levelMax" value="ERROR"/>
         </filter>
     </appender>

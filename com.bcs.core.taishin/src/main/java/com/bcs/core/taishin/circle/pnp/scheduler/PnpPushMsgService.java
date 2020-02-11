@@ -99,7 +99,7 @@ public class PnpPushMsgService {
 
         String procApName = DataUtils.getProcApName();
         for (PnpFtpSourceEnum type : PnpFtpSourceEnum.values()) {
-            log.debug("Ftp source is {}", type.english);
+            log.info("Ftp source is {}", type.english);
             try {
                 /* 1.Find all main */
                 List<PnpMain> allMainList = pnpRepositoryCustom.findAllMain(procApName, type);
@@ -119,14 +119,19 @@ public class PnpPushMsgService {
 
                     log.info("Main id and after filter detail list size, main id: {}, after filter detail size: {}", main.getPnpMainId(), filterDetailList.size());
                     log.info("After filter detail list: {}", DataUtils.toPrettyJsonUseJackson(filterDetailList));
-
-                    if (filterDetailList.isEmpty() && pnpRepositoryCustom.checkIsAllSent(type, main.getPnpMainId()) == 0) {
+                    /* If detail list is empty not include any sending and detail from db is all sent  */
+                    boolean notSendIsEmpty = filterDetailList.isEmpty();
+                    boolean lastSendingIsEmpty = pnpRepositoryCustom.checkIsAllSent(type, main.getPnpMainId()) == 0;
+                    log.info("Filter detail list is empty (Wait,Process)->Sending ? {}", notSendIsEmpty);
+                    log.info("Last Sending is empty (equal zero) ? {}", lastSendingIsEmpty);
+                    if (notSendIsEmpty && lastSendingIsEmpty) {
                         /* all detail sent to bc and pnp is finish, Update main status to complete, but not include sms */
+                        log.info("Before update main to complete!!");
                         pnpRepositoryCustom.updateMainToComplete(main.getPnpMainId(), type, PnpStatusEnum.COMPLETE);
                     } else {
                         main.setPnpDetails(filterDetailList);
                         /* 4.Tell akka */
-                        log.debug("Tell Akka Send BC!!");
+                        log.info("Tell Akka Send BC!!");
                         pnpAkkaService.tell(main);
                     }
                 });

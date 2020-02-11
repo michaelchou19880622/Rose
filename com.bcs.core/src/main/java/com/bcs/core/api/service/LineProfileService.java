@@ -22,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.Arrays;
 import java.util.Date;
 
 @Service
@@ -98,7 +99,16 @@ public class LineProfileService {
         return restfulUtil.execute();
     }
 
-    public String getUserNickName(String UID) throws Exception {
-        return this.getUserProfile(UID).getString("displayName");
+    public String getUserNickName(String uid) throws Exception {
+        String srcNickName = this.getUserProfile(uid).getString("displayName");
+        logger.info("srcNickName = " + srcNickName);
+
+        byte[] bytes = srcNickName.getBytes("ISO-8859-1");
+        logger.info("bytes = " + Arrays.toString(bytes));
+
+        String decodeNickName = new String(bytes, "UTF-8");
+        logger.info("decodeNickName = " + decodeNickName);
+
+        return decodeNickName;
     }
 }

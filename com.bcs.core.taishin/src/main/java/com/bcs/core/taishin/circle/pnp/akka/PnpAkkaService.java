@@ -54,7 +54,7 @@ public class PnpAkkaService {
      */
     @PreDestroy
     public void shutdownNow() {
-        log.debug("[DESTROY] Pnp AkkaService shutdownNow cleaning up...");
+        log.info("[DESTROY] Pnp AkkaService shutdownNow cleaning up...");
         try {
             int count = 0;
 
@@ -67,6 +67,6 @@ public class PnpAkkaService {
         } catch (Exception e) {
             log.error("", e);
         }
-        log.debug("[DESTROY] Pnp AkkaService Shutdown Destroyed");
+        log.info("[DESTROY] Pnp AkkaService Shutdown Destroyed");
     }
 }

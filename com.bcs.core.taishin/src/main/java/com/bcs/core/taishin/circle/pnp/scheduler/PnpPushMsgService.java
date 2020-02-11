@@ -99,7 +99,7 @@ public class PnpPushMsgService {
 
         String procApName = DataUtils.getProcApName();
         for (PnpFtpSourceEnum type : PnpFtpSourceEnum.values()) {
-            log.debug("Ftp source is {}", type.english);
+            log.info("Ftp source is {}", type.english);
             try {
                 /* 1.Find all main */
                 List<PnpMain> allMainList = pnpRepositoryCustom.findAllMain(procApName, type);
@@ -119,14 +119,14 @@ public class PnpPushMsgService {
 
                     log.info("Main id and after filter detail list size, main id: {}, after filter detail size: {}", main.getPnpMainId(), filterDetailList.size());
                     log.info("After filter detail list: {}", DataUtils.toPrettyJsonUseJackson(filterDetailList));
-
+                    /* If detail list is empty not include any sending and detail from db is all sent  */
                     if (filterDetailList.isEmpty() && pnpRepositoryCustom.checkIsAllSent(type, main.getPnpMainId()) == 0) {
                         /* all detail sent to bc and pnp is finish, Update main status to complete, but not include sms */
                         pnpRepositoryCustom.updateMainToComplete(main.getPnpMainId(), type, PnpStatusEnum.COMPLETE);
                     } else {
                         main.setPnpDetails(filterDetailList);
                         /* 4.Tell akka */
-                        log.debug("Tell Akka Send BC!!");
+                        log.info("Tell Akka Send BC!!");
                         pnpAkkaService.tell(main);
                     }
                 });

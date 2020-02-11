@@ -13,7 +13,6 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -79,7 +78,7 @@ public class PnpMainActor extends UntypedActor {
     private void tellActor(ActorRef someActor, PnpMain tellSomething) {
         final List<PnpDetail> detailList = tellSomething.getPnpDetails();
         final int buffer = getBuffer(detailList.size(), getMaxActorCount());
-        log.debug("PnpMainActor onReceive details.size : {}", detailList.size());
+        log.info("PnpMainActor onReceive details.size : {}", detailList.size());
 
         List<List<PnpDetail>> partitionList = ListUtils.partition(detailList, buffer);
         partitionList.forEach(list -> {

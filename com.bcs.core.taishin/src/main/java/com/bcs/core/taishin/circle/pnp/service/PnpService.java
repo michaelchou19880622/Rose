@@ -29,7 +29,6 @@ import com.bcs.core.taishin.circle.pnp.db.repository.PnpMainEvery8dRepository;
 import com.bcs.core.taishin.circle.pnp.db.repository.PnpMainMingRepository;
 import com.bcs.core.taishin.circle.pnp.db.repository.PnpMainMitakeRepository;
 import com.bcs.core.taishin.circle.pnp.db.repository.PnpMainUnicaRepository;
-import com.bcs.core.taishin.circle.pnp.db.repository.PnpRepositoryCustom;
 import com.bcs.core.taishin.circle.pnp.db.service.PnpSendBlockService;
 import com.bcs.core.utils.DataUtils;
 import com.bcs.core.utils.RestfulUtil;
@@ -71,7 +70,6 @@ public class PnpService {
     private PnpAkkaService pnpAkkaService;
     private PnpSendBlockService pnpSendBlockService;
     private PnpFlexTemplateRepository pnpFlexTemplateRepository;
-    private PnpRepositoryCustom pnpRepositoryCustom;
 
     @Autowired
     public PnpService(PnpMainMitakeRepository pnpMainMitakeRepository,
@@ -79,9 +77,8 @@ public class PnpService {
                       PnpDetailEvery8dRepository pnpDetailEvery8dRepository, PnpMainUnicaRepository pnpMainUnicaRepository,
                       PnpDetailUnicaRepository pnpDetailUnicaRepository, PnpMainMingRepository pnpMainMingRepository,
                       PnpDetailMingRepository pnpDetailMingRepository, PnpAkkaService pnpAkkaService,
-                      PnpFlexTemplateRepository pnpFlexTemplateRepository, PnpSendBlockService pnpSendBlockService,
-                      PnpRepositoryCustom pnpRepositoryCustom
-    ) {
+                      PnpFlexTemplateRepository pnpFlexTemplateRepository, PnpSendBlockService pnpSendBlockService
+                      ) {
 
         this.pnpMainMitakeRepository = pnpMainMitakeRepository;
         this.pnpDetailMitakeRepository = pnpDetailMitakeRepository;
@@ -94,7 +91,6 @@ public class PnpService {
         this.pnpAkkaService = pnpAkkaService;
         this.pnpFlexTemplateRepository = pnpFlexTemplateRepository;
         this.pnpSendBlockService = pnpSendBlockService;
-        this.pnpRepositoryCustom = pnpRepositoryCustom;
     }
 
     /**
@@ -321,7 +317,7 @@ public class PnpService {
                          String httpStatusCode) {
         log.info("Next Stage :{}, {}", nextStage, httpStatusCode);
         PnpDetail d = route(nextStage, detail, httpStatusCode);
-        log.debug("detail: {}", DataUtils.toPrettyJsonUseJackson(d));
+        log.info("detail: {}", DataUtils.toPrettyJsonUseJackson(d));
         saveDetail(d);
     }
 
@@ -673,7 +669,7 @@ public class PnpService {
 
     private String combineLineFlexMessage(String msg, String templateId) {
         log.info("Msg : " + msg + "Template Id: " + templateId);
-        Long id;
+        long id;
         try {
             id = Long.parseLong(templateId);
         } catch (NumberFormatException e) {

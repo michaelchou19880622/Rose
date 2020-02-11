@@ -27,7 +27,7 @@ public class PnpPushMessageActor extends UntypedActor {
         try {
             Thread.currentThread().setName("Actor-PNP-BCPush-" + Thread.currentThread().getId());
 
-            log.debug("PnpPushMessageActor Receive!!");
+            log.info("PnpPushMessageActor Receive!!");
             PnpMain pnpMain = (PnpMain) object;
             checkSendTypeThenDoSomething(pnpMain);
         } catch (Exception e) {
@@ -80,7 +80,7 @@ public class PnpPushMessageActor extends UntypedActor {
      * @param pnpMain pnpMain
      */
     private void immediatePushMessage(PnpMain pnpMain) {
-        log.debug("BC Immediate Push Message");
+        log.info("BC Immediate Push Message");
         PnpService pnpService = ApplicationContextProvider.getApplicationContext().getBean(PnpService.class);
         pnpService.pushLineMessage(pnpMain, this.getSender(), this.getSelf());
     }
@@ -93,7 +93,7 @@ public class PnpPushMessageActor extends UntypedActor {
      * @throws SchedulerException SchedulerException
      */
     private void delayPushMessage(PnpMain pnpMain, Date scheduleTime) throws SchedulerException {
-        log.debug("BC Delay Push Message");
+        log.info("BC Delay Push Message");
         PnpTaskService pnpTaskService = ApplicationContextProvider.getApplicationContext().getBean(PnpTaskService.class);
         pnpTaskService.startTask(pnpMain, scheduleTime);
     }

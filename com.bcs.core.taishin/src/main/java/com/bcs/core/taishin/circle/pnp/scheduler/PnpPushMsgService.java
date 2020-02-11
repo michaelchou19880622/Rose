@@ -120,7 +120,7 @@ public class PnpPushMsgService {
                     log.info("Main id and after filter detail list size, main id: {}, after filter detail size: {}", main.getPnpMainId(), filterDetailList.size());
                     log.info("After filter detail list: {}", DataUtils.toPrettyJsonUseJackson(filterDetailList));
 
-                    if (filterDetailList.isEmpty()) {
+                    if (filterDetailList.isEmpty() && pnpRepositoryCustom.checkIsAllSent(type, main.getPnpMainId()) == 0) {
                         /* all detail sent to bc and pnp is finish, Update main status to complete, but not include sms */
                         pnpRepositoryCustom.updateMainToComplete(main.getPnpMainId(), type, PnpStatusEnum.COMPLETE);
                     } else {

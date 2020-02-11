@@ -276,7 +276,6 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsMitakeInputStream(main, afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -286,7 +285,6 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
@@ -339,7 +337,6 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsMingInputStream(afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -349,7 +346,6 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
@@ -402,7 +398,6 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsUnicaInputStream(main, afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -412,7 +407,6 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
@@ -465,7 +459,6 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsEvery8dInputStream(main, afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -475,7 +468,6 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
@@ -546,7 +538,6 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsMitakeInputStream(main, afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -556,7 +547,6 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
@@ -609,7 +599,6 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsMingInputStream(afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -619,7 +608,6 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
@@ -672,7 +660,6 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsUnicaInputStream(main, afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -682,7 +669,6 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
@@ -735,7 +721,6 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsEvery8dInputStream(main, afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -745,7 +730,6 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
@@ -794,7 +778,6 @@ public class PnpSMSMsgService {
             /* Update Expired Status */
             for (PnpDetailMitake detail : detailList) {
                 detail.setProcStage(PnpStageEnum.SMS.value);
-                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setPnpStatus(PnpStatusEnum.PNP_SENT_EXPIRED_FAIL_SMS_PROCESS.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENDING.value);
                 detail.setModifyTime(now);
@@ -818,7 +801,6 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsMitakeInputStream(main, afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -828,7 +810,6 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
@@ -865,7 +846,6 @@ public class PnpSMSMsgService {
             /* Update Expired Status */
             for (PnpDetailMing detail : detailList) {
                 detail.setProcStage(PnpStageEnum.SMS.value);
-                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setPnpStatus(PnpStatusEnum.PNP_SENT_EXPIRED_FAIL_SMS_PROCESS.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENDING.value);
                 detail.setModifyTime(now);
@@ -889,7 +869,6 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsMingInputStream(afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -899,7 +878,6 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
@@ -936,7 +914,6 @@ public class PnpSMSMsgService {
             /* Update Expired Status */
             for (PnpDetailUnica detail : detailList) {
                 detail.setProcStage(PnpStageEnum.SMS.value);
-                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setPnpStatus(PnpStatusEnum.PNP_SENT_EXPIRED_FAIL_SMS_PROCESS.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENDING.value);
                 detail.setModifyTime(now);
@@ -960,7 +937,6 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsUnicaInputStream(main, afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -970,7 +946,6 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
@@ -1008,7 +983,6 @@ public class PnpSMSMsgService {
             /* Update Expired Status */
             for (PnpDetailEvery8d detail : detailList) {
                 detail.setProcStage(PnpStageEnum.SMS.value);
-                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setPnpStatus(PnpStatusEnum.PNP_SENT_EXPIRED_FAIL_SMS_PROCESS.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENDING.value);
                 detail.setModifyTime(now);
@@ -1032,7 +1006,6 @@ public class PnpSMSMsgService {
                 uploadFileToSms(type, smsEvery8dInputStream(main, afterSaveList), main.getSmsFileName());
 
                 /* Save Main */
-                main.setStatus(PnpStatusEnum.COMPLETE.value);
                 main.setProcApName(procApName);
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -1042,7 +1015,6 @@ public class PnpSMSMsgService {
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
-                detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENT_CHECK_DELIVERY.value);
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);

@@ -15,6 +15,9 @@ import java.util.List;
  * @author Alan
  */
 public interface PnpRepositoryCustom {
+
+    int checkIsAllSent(PnpFtpSourceEnum type, long mainId);
+
     /**
      * Find all bc to pnp detail list.
      *

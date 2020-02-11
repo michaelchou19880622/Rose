@@ -3,11 +3,13 @@ package com.bcs.core.taishin.circle.pnp.ftp;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.circle.pnp.code.PnpFtpSourceEnum;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j(topic = "PnpRecorder")
 public class PnpFtpSetting {
 
     private String channelId;
@@ -42,32 +44,99 @@ public class PnpFtpSetting {
         /* 前方來源系統設定 */
         String englishName = type.english;
         PnpFtpSetting pnpFtpSetting = new PnpFtpSetting();
-        pnpFtpSetting.setFileEncoding(CoreConfigReader.getString(CONFIG_STR.PNP_READ_LINES_ENCODE, true, false));
+        String fileEncoding = CoreConfigReader.getString(CONFIG_STR.PNP_READ_LINES_ENCODE, true, false);
+        if (StringUtils.isBlank(fileEncoding)) {
+            log.warn("Properties [pnp.readLines.encode] does not found or value is blank!!");
+        }
+        String serverHostName = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_SERVER_HOST_NAME.toString() + englishName, true, false);
+        if (StringUtils.isBlank(serverHostName)) {
+            log.warn("Properties [pnp.ftp.serverHostName.] does not found or value is blank!!");
+        }
+        int serverHostPort = CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_SERVER_HOST_NAME_PORT.toString() + englishName, true, false);
+        if (serverHostPort <= 0) {
+            log.warn("Properties [pnp.ftp.serverHostName.port.] does not found or value is blank!!");
+        }
+        String account = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_USR.toString() + englishName, true, false);
+        if (StringUtils.isBlank(account)) {
+            log.warn("Properties [pnp.ftp.usr.] does not found or value is blank!!");
+        }
+        String password = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PASS.toString() + englishName, true, false);
+        if (StringUtils.isBlank(password)) {
+            log.warn("Properties [pnp.ftp.pass.] does not found or value is blank!!");
+        }
+        String ftpHost = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_HOST.toString() + englishName, true, false);
+        if (StringUtils.isBlank(ftpHost)) {
+            log.warn("Properties [pnp.ftp.host.] does not found or value is blank!!");
+        }
+        int ftpPort = CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_PORT.toString() +englishName, true, false);
+        if (ftpPort <= 0) {
+            log.warn("Properties [pnp.ftp.port.] does not found or value is blank!!");
+        }
+        String appCode = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_APP_CODE.toString() + englishName, true, false);
+        if (StringUtils.isBlank(appCode)) {
+            log.warn("Properties [pnp.ftp.APPCode.] does not found or value is blank!!");
+        }
+        String resCode = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_RES_CODE.toString() + englishName, true, false);
+        if (StringUtils.isBlank(resCode)) {
+            log.warn("Properties [pnp.ftp.RESCode.] does not found or value is blank!!");
+        }
+        String downloadPath = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_PATH.toString() + englishName, true, false);
+        if (StringUtils.isBlank(downloadPath)) {
+            log.warn("Properties [pnp.ftp.download.path] does not found or value is blank!!");
+        }
+        String smsUploadPath = CoreConfigReader.getString(CONFIG_STR.PNP_SMS_UPLOAD_PATH.toString() + englishName, true, false);
+        if (StringUtils.isBlank(smsUploadPath)) {
+            log.warn("Properties [pnp.sms.upload.path.] does not found or value is blank!!");
+        }
+        String downloadToLocalPath = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_TO_LOCAL_PATH.toString() + englishName, true, false);
+        if (StringUtils.isBlank(downloadToLocalPath)) {
+            log.warn("Properties [pnp.ftp.download.to.local.path.] does not found or value is blank!!");
+        }
+        String ftpProtocol = CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PROTOCOL.toString() + englishName, true, false);
+        if (StringUtils.isBlank(ftpProtocol)) {
+            log.warn("Properties [pnp.ftp.protocol.] does not found or value is blank!!");
+        }
+        String procFlow = CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW.toString() + englishName, true, false);
+        if (StringUtils.isBlank(procFlow)) {
+            log.warn("Properties [pnp.proc.flow] does not found or value is blank!!");
+        }
+
+        pnpFtpSetting.setFileEncoding(fileEncoding);
         pnpFtpSetting.setChannelId(englishName);
-        pnpFtpSetting.setServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_SERVER_HOST_NAME.toString() + englishName, true, false));
-        pnpFtpSetting.setServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_SERVER_HOST_NAME_PORT.toString() + englishName, true, false));
-        pnpFtpSetting.setAccount(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_USR.toString() + englishName, true, false));
-        pnpFtpSetting.setPassword(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PASS.toString() + englishName, true, false));
-        pnpFtpSetting.setHost(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_HOST.toString() + englishName, true, false));
-        pnpFtpSetting.setPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_PORT.toString() +englishName, true, false));
-        pnpFtpSetting.setAPPCode(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_APP_CODE.toString() + englishName, true, false));
-        pnpFtpSetting.setRESCode(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_RES_CODE.toString() + englishName, true, false));
-        pnpFtpSetting.setPath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_PATH.toString() + englishName, true, false));
-        pnpFtpSetting.setUploadPath(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_UPLOAD_PATH.toString() + englishName, true, false));
-        pnpFtpSetting.setDownloadSavePath(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_DOWNLOAD_TO_LOCAL_PATH.toString() + englishName, true, false));
-        pnpFtpSetting.setProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_FTP_PROTOCOL.toString() + englishName, true, false));
-        pnpFtpSetting.setFlow(CoreConfigReader.getString(CONFIG_STR.PNP_PROC_FLOW.toString() + englishName, true, false));
+        pnpFtpSetting.setServerHostName(serverHostName);
+        pnpFtpSetting.setServerHostNamePort(serverHostPort);
+        pnpFtpSetting.setAccount(account);
+        pnpFtpSetting.setPassword(password);
+        pnpFtpSetting.setHost(ftpHost);
+        pnpFtpSetting.setPort(ftpPort);
+        pnpFtpSetting.setAPPCode(appCode);
+        pnpFtpSetting.setRESCode(resCode);
+        pnpFtpSetting.setPath(downloadPath);
+        pnpFtpSetting.setUploadPath(smsUploadPath);
+        pnpFtpSetting.setDownloadSavePath(downloadToLocalPath);
+        pnpFtpSetting.setProtocol(ftpProtocol);
+        pnpFtpSetting.setFlow(procFlow);
+
+        String smsServerHostName = CoreConfigReader.getString(CONFIG_STR.PNP_SMS_SERVER_HOST_NAME.toString() + englishName, true, false);
+        int smsServerHostPort = CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_SERVER_HOST_NAME_PORT.toString() + englishName, true, false);
+        String smsAccount = CoreConfigReader.getString(CONFIG_STR.PNP_SMS_USR.toString() + englishName, true, false);
+        String smsPassword = CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PASS.toString() + englishName, true, false);
+        String smsHost = CoreConfigReader.getString(CONFIG_STR.PNP_SMS_HOST.toString() + englishName, true, false);
+        int smsPort = CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_PORT.toString() + englishName, true, false);
+        String smsAppCode = CoreConfigReader.getString(CONFIG_STR.PNP_SMS_APP_CODE.toString() + englishName, true, false);
+        String smsResCode = CoreConfigReader.getString(CONFIG_STR.PNP_SMS_RES_CODE.toString() + englishName, true, false);
+        String smsProtocol = CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PROTOCOL.toString() + englishName, true, false);
 
         /* SMS系統設定檔 */
-        pnpFtpSetting.setSmsServerHostName(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_SERVER_HOST_NAME.toString() + englishName, true, false));
-        pnpFtpSetting.setSmsServerHostNamePort(CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_SERVER_HOST_NAME_PORT.toString() + englishName, true, false));
-        pnpFtpSetting.setSmsAccount(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_USR.toString() + englishName, true, false));
-        pnpFtpSetting.setSmsPassword(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PASS.toString() + englishName, true, false));
-        pnpFtpSetting.setSmsHost(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_HOST.toString() + englishName, true, false));
-        pnpFtpSetting.setSmsPort(CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_PORT.toString() + englishName, true, false));
-        pnpFtpSetting.setSmsAPPCode(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_APP_CODE.toString() + englishName, true, false));
-        pnpFtpSetting.setSmsRESCode(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_RES_CODE.toString() + englishName, true, false));
-        pnpFtpSetting.setSmsProtocol(CoreConfigReader.getString(CONFIG_STR.PNP_SMS_PROTOCOL.toString() + englishName, true, false));
+        pnpFtpSetting.setSmsServerHostName(smsServerHostName);
+        pnpFtpSetting.setSmsServerHostNamePort(smsServerHostPort);
+        pnpFtpSetting.setSmsAccount(smsAccount);
+        pnpFtpSetting.setSmsPassword(smsPassword);
+        pnpFtpSetting.setSmsHost(smsHost);
+        pnpFtpSetting.setSmsPort(smsPort);
+        pnpFtpSetting.setSmsAPPCode(smsAppCode);
+        pnpFtpSetting.setSmsRESCode(smsResCode);
+        pnpFtpSetting.setSmsProtocol(smsProtocol);
         return pnpFtpSetting;
     }
 

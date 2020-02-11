@@ -29,6 +29,17 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     @Resource
     EntityManagerProviderService providerService;
 
+    @Override
+    public int checkIsAllSent(PnpFtpSourceEnum type, long mainId){
+        String sqlString = "SELECT COUNT(*) FROM " + type.detailTable +
+                " WHERE PNP_MAIN_ID=:MAIN_ID AND STATUS IN (:STATUS_LIST)";
+        int notSendCount = providerService.getEntityManager().createNativeQuery(sqlString)
+                .setParameter("MAIN_ID", mainId)
+                .setParameter("STATUS_LIST", Arrays.asList(PnpStatusEnum.FTP_MAIN_SAVE.value, PnpStatusEnum.PROCESS.value, PnpStatusEnum.SENDING))
+                .getFirstResult();
+        log.info("Not send count: {}", notSendCount);
+        return notSendCount;
+    }
     /**
      * 找出最近一筆 PNP 訊息狀態為 PROCESS 的 ID
      * 並更新 PNP 訊息狀態為 SENDING

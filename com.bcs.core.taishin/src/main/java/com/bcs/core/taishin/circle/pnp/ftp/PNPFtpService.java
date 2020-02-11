@@ -57,7 +57,7 @@ public class PNPFtpService {
 
             /* 如果不是開發環境則進行資源密碼系統取得帳號密碼 */
             if (!CoreConfigReader.isPNPFtpTypeDevelop()) {
-                pnpFtpSetting = useTrendPwMgmt(pnpFtpSetting);
+                pnpFtpSetting = useTrendPwMgmt(pnpFtpSetting, type);
             }
             ftpSettings.put(type.id, pnpFtpSetting);
         }
@@ -70,38 +70,46 @@ public class PNPFtpService {
      * @param pnpFtpSetting pnpFtpSetting
      * @return new PNPFtpSetting
      */
-    private PnpFtpSetting useTrendPwMgmt(final PnpFtpSetting pnpFtpSetting) {
+    private PnpFtpSetting useTrendPwMgmt(final PnpFtpSetting pnpFtpSetting, PnpFtpSourceEnum type) {
+        try {
+            PnpFtpSetting ftpSetting = ObjectUtils.clone(pnpFtpSetting);
+            final String host = pnpFtpSetting.getHost();
+            final String serverHostName = pnpFtpSetting.getServerHostName();
+            final int serverHostNamePort = pnpFtpSetting.getServerHostNamePort();
+            final String appCode = pnpFtpSetting.getAPPCode();
+            final String resCode = pnpFtpSetting.getRESCode();
 
-        PnpFtpSetting ftpSetting = ObjectUtils.clone(pnpFtpSetting);
-        final String host = pnpFtpSetting.getHost();
-        final String serverHostName = pnpFtpSetting.getServerHostName();
-        final int serverHostNamePort = pnpFtpSetting.getServerHostNamePort();
-        final String appCode = pnpFtpSetting.getAPPCode();
-        final String resCode = pnpFtpSetting.getRESCode();
+            final Map<String, String> trendPwMgmt = loadFtp(host, serverHostName, serverHostNamePort, appCode, resCode);
+            log.info(String.format("loginFTP: %s PWD: %s", trendPwMgmt.get("uid"), trendPwMgmt.get("pwd")));
 
-        final Map<String, String> trendPwMgmt = loadFtp(host, serverHostName, serverHostNamePort, appCode, resCode);
-        log.info(String.format("loginFTP: %s PWD: %s", trendPwMgmt.get("uid"), trendPwMgmt.get("pwd")));
+            if (ftpSetting == null) {
+                log.warn("Ftp setting is null then create new instance by ftp source type: {}!!", type.english);
+                ftpSetting = PnpFtpSetting.build(type);
+            }
+            ftpSetting.setAccount(trendPwMgmt.get("uid"));
+            ftpSetting.setPassword(trendPwMgmt.get("pwd"));
+            log.info("Download Side FTP Resource ID Password Login Done!!");
+            log.info("下載段資源密碼系統的帳號密碼登入完成");
 
-        ftpSetting.setAccount(trendPwMgmt.get("uid"));
-        ftpSetting.setPassword(trendPwMgmt.get("pwd"));
-        log.info("Download Side FTP Resource ID Password Login Done!!");
-        log.info("下載段資源密碼系統的帳號密碼登入完成");
+            final String smsHost = pnpFtpSetting.getSmsHost();
+            final String smsServerHostName = pnpFtpSetting.getSmsServerHostName();
+            final int smsServerHostNamePort = pnpFtpSetting.getSmsServerHostNamePort();
+            final String smsAPPCode = pnpFtpSetting.getSmsAPPCode();
+            final String smsRESCode = pnpFtpSetting.getSmsRESCode();
 
-        final String smsHost = pnpFtpSetting.getSmsHost();
-        final String smsServerHostName = pnpFtpSetting.getSmsServerHostName();
-        final int smsServerHostNamePort = pnpFtpSetting.getSmsServerHostNamePort();
-        final String smsAPPCode = pnpFtpSetting.getSmsAPPCode();
-        final String smsRESCode = pnpFtpSetting.getSmsRESCode();
+            final Map<String, String> trendPwMgmtSMS = loadFtp(smsHost, smsServerHostName, smsServerHostNamePort, smsAPPCode, smsRESCode);
+            log.info(String.format("login FTP: %s PWD: %s", trendPwMgmtSMS.get("uid"), trendPwMgmtSMS.get("pwd")));
 
-        final Map<String, String> trendPwMgmtSMS = loadFtp(smsHost, smsServerHostName, smsServerHostNamePort, smsAPPCode, smsRESCode);
-        log.info(String.format("login FTP: %s PWD: %s", trendPwMgmtSMS.get("uid"), trendPwMgmtSMS.get("pwd")));
+            ftpSetting.setSmsAccount(trendPwMgmtSMS.get("uid"));
+            ftpSetting.setSmsPassword(trendPwMgmtSMS.get("pwd"));
+            log.info("Upload Side FTP Resource ID Password Login Done!!");
+            log.info("上傳段資源密碼系統的帳號密碼登入完成");
 
-        ftpSetting.setSmsAccount(trendPwMgmtSMS.get("uid"));
-        ftpSetting.setSmsPassword(trendPwMgmtSMS.get("pwd"));
-        log.info("Upload Side FTP Resource ID Password Login Done!!");
-        log.info("上傳段資源密碼系統的帳號密碼登入完成");
-
-        return ftpSetting;
+            return ftpSetting;
+        } catch (Exception e) {
+            log.error("Exception", e);
+            return new PnpFtpSetting();
+        }
     }
 
     /**

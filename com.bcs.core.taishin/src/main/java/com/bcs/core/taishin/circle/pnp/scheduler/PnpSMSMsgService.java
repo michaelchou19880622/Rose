@@ -143,9 +143,9 @@ public class PnpSMSMsgService {
             Date now = new Date();
             for (PnpDetail detail : detailList) {
                 if (PnpStatusEnum.PNP_SENT_CHECK_DELIVERY.value.equals(detail.getPnpStatus())) {
-                    detail.setProcStage(PnpStageEnum.SMS.value);
                     detail.setPnpStatus(PnpStatusEnum.PNP_SENT_EXPIRED_FAIL_SMS_PROCESS.value);
                 }
+                detail.setProcStage(PnpStageEnum.SMS.value);
                 detail.setSmsStatus(PnpStatusEnum.SMS_SENDING.value);
                 detail.setModifyTime(now);
             }
@@ -153,15 +153,19 @@ public class PnpSMSMsgService {
             List<PnpDetail> afterSaveList = UpdateDetailStatus(type, detailList);
 
             for (PnpDetail detail : afterSaveList) {
+                now = new Date();
+                detail.setModifyTime(now);
+                detail.setDetailScheduleTime(DataUtils.convDateToStr(now, "yyyy-MM-dd HH:mm:ss"));
                 log.info("Detail: {}", DataUtils.toPrettyJsonUseJackson(detail));
 
                 /* Find Main By Detail Id */
-                PnpMain main = pnpMainMitakeRepository.findOne(detail.getPnpMainId());
-                main.setPnpDetails(detailList);
-                String smsFileName = changeFileName(main.getOrigFileName(), new Date());
+                PnpMain main = pnpRepositoryCustom.findSingleMainById(type, detail.getPnpMainId());
+                String smsFileName = changeFileName(main.getOrigFileName(), now);
+                main.setPnpDetails(Collections.singletonList(detail));
                 main.setSmsFileName(smsFileName);
+                main.setScheduleTime(DataUtils.convDateToStr(now, "yyyy-MM-dd HH:mm:ss"));
 
-                InputStream inputStream = getInputStream(type, detailList, main);
+                InputStream inputStream = getInputStream(type, Collections.singletonList(detail), main);
                 if (inputStream == null) {
                     log.error("InputStream is null!!");
                     return;
@@ -187,6 +191,37 @@ public class PnpSMSMsgService {
         } catch (Exception e) {
             log.error("Exception", e);
         }
+    }
+
+    /**
+     * Resent Sms
+     *
+     * @param detailId      Detail Id
+     * @param ftpSourceEnum Ftp Source Enum
+     * @return is Success
+     */
+    public boolean resendSms(long detailId, PnpFtpSourceEnum ftpSourceEnum) {
+        if (ftpSourceEnum == null) {
+            return false;
+        }
+        Date now = new Date();
+        PnpDetail detail = pnpRepositoryCustom.findDetailById(ftpSourceEnum, detailId);
+        detail.setDetailScheduleTime(DataUtils.convDateToStr(now, "yyyy-MM-dd HH:mm:ss"));
+        PnpMain main = pnpRepositoryCustom.findSingleMainById(ftpSourceEnum, detail.getPnpMainId());
+        main.setScheduleTime(DataUtils.convDateToStr(now, "yyyy-MM-dd HH:mm:ss"));
+        main.setPnpDetails(Collections.singletonList(detail));
+
+        /* Change Sms File Name */
+        String smsFileName = changeFileName(main.getOrigFileName(), now);
+        main.setSmsFileName(smsFileName);
+        InputStream inputStream = getInputStream(ftpSourceEnum, Collections.singletonList(detail), main);
+        if (inputStream == null) {
+            log.error("InputStream is null!!");
+            return false;
+        }
+        /* Send File To SMS FTP */
+        uploadFileToSms(ftpSourceEnum, inputStream, main.getSmsFileName());
+        return true;
     }
 
     private List<PnpDetail> UpdateDetailStatus(PnpFtpSourceEnum type, List<PnpDetail> detailList) {
@@ -299,36 +334,6 @@ public class PnpSMSMsgService {
         return list;
     }
 
-    /**
-     * Resent Sms
-     *
-     * @param detailId      Detail Id
-     * @param ftpSourceEnum Ftp Source Enum
-     * @return is Success
-     */
-    public boolean resendSms(long detailId, PnpFtpSourceEnum ftpSourceEnum) {
-        if (ftpSourceEnum == null) {
-            return false;
-        }
-        PnpDetail detail = pnpRepositoryCustom.findDetailById(ftpSourceEnum, detailId);
-        detail.setDetailScheduleTime(DataUtils.convDateToStr(new Date(), "yyyy-MM-dd HH:mm:ss"));
-        List<PnpDetail> detailList = Collections.singletonList(detail);
-        PnpMain main = pnpRepositoryCustom.findSingleMainById(ftpSourceEnum, detail.getPnpMainId());
-        main.setScheduleTime(DataUtils.convDateToStr(new Date(), "yyyy-MM-dd HH:mm:ss"));
-        main.setPnpDetails(detailList);
-
-        /* Change Sms File Name */
-        String smsFileName = changeFileName(main.getOrigFileName(), new Date());
-        main.setSmsFileName(smsFileName);
-        InputStream inputStream = getInputStream(ftpSourceEnum, detailList, main);
-        if (inputStream == null) {
-            log.error("InputStream is null!!");
-            return false;
-        }
-        /* Send File To SMS FTP */
-        uploadFileToSms(ftpSourceEnum, inputStream, main.getSmsFileName());
-        return true;
-    }
 
     /**
      * Change File Name (L)

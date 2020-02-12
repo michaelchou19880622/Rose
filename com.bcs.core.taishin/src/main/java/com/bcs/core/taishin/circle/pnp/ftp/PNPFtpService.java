@@ -1158,8 +1158,8 @@ public class PNPFtpService {
 
     private void uploadFileInSFTP(InputStream uploadIs, String fileName, String targetDir, PnpFtpSetting setting) {
         log.info("start uploadFileInSFTP ");
-        ChannelSftp channelSftp;
-        Session session;
+        ChannelSftp channelSftp = null;
+        Session session = null;
         try {
             session = smsLoginSFTP(setting);
             if (session == null) {
@@ -1187,6 +1187,13 @@ public class PNPFtpService {
             channelSftp.put(uploadIs, new String(fileName.getBytes(), setting.getFileEncoding()));
         } catch (Exception e) {
             log.error("uploadFileInSFTP Exception" + e.getMessage());
+        } finally {
+            if (channelSftp != null && channelSftp.isConnected()) {
+                channelSftp.disconnect();
+            }
+            if (session != null && session.isConnected()){
+                session.disconnect();
+            }
         }
     }
 

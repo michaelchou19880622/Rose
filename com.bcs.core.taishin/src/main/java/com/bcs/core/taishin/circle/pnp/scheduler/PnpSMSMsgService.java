@@ -164,7 +164,6 @@ public class PnpSMSMsgService {
                 main.setPnpDetails(Collections.singletonList(detail));
                 main.setSmsFileName(smsFileName);
                 main.setScheduleTime(DataUtils.convDateToStr(now, "yyyy-MM-dd HH:mm:ss"));
-
                 InputStream inputStream = getInputStream(type, Collections.singletonList(detail), main);
                 if (inputStream == null) {
                     log.error("InputStream is null!!");
@@ -229,24 +228,24 @@ public class PnpSMSMsgService {
         /* Update Status */
         switch (type) {
             case MING:
-                List<PnpDetailMing> l1 = detailList.stream().map(detail -> (PnpDetailMing)detail).collect(Collectors.toList());
+                List<PnpDetailMing> l1 = detailList.stream().map(detail -> (PnpDetailMing) detail).collect(Collectors.toList());
                 List<PnpDetailMing> after1 = pnpDetailMingRepository.save(l1);
-                afterSaveList = after1.stream().map(detail -> (PnpDetail)detail).collect(Collectors.toList());
+                afterSaveList = after1.stream().map(detail -> (PnpDetail) detail).collect(Collectors.toList());
                 break;
             case MITAKE:
-                List<PnpDetailMitake> l2 = detailList.stream().map(detail -> (PnpDetailMitake)detail).collect(Collectors.toList());
+                List<PnpDetailMitake> l2 = detailList.stream().map(detail -> (PnpDetailMitake) detail).collect(Collectors.toList());
                 List<PnpDetailMitake> after2 = pnpDetailMitakeRepository.save(l2);
-                afterSaveList = after2.stream().map(detail -> (PnpDetail)detail).collect(Collectors.toList());
+                afterSaveList = after2.stream().map(detail -> (PnpDetail) detail).collect(Collectors.toList());
                 break;
             case UNICA:
-                List<PnpDetailUnica> l3 = detailList.stream().map(detail -> (PnpDetailUnica)detail).collect(Collectors.toList());
+                List<PnpDetailUnica> l3 = detailList.stream().map(detail -> (PnpDetailUnica) detail).collect(Collectors.toList());
                 List<PnpDetailUnica> after3 = pnpDetailUnicaRepository.save(l3);
-                afterSaveList = after3.stream().map(detail -> (PnpDetail)detail).collect(Collectors.toList());
+                afterSaveList = after3.stream().map(detail -> (PnpDetail) detail).collect(Collectors.toList());
                 break;
             case EVERY8D:
-                List<PnpDetailEvery8d> l4 = detailList.stream().map(detail -> (PnpDetailEvery8d)detail).collect(Collectors.toList());
+                List<PnpDetailEvery8d> l4 = detailList.stream().map(detail -> (PnpDetailEvery8d) detail).collect(Collectors.toList());
                 List<PnpDetailEvery8d> after4 = pnpDetailEvery8dRepository.save(l4);
-                afterSaveList = after4.stream().map(detail -> (PnpDetail)detail).collect(Collectors.toList());
+                afterSaveList = after4.stream().map(detail -> (PnpDetail) detail).collect(Collectors.toList());
                 break;
             default:
                 break;
@@ -278,13 +277,13 @@ public class PnpSMSMsgService {
     private PnpMain saveMain(PnpFtpSourceEnum type, PnpMain main) {
         switch (type) {
             case MING:
-                return pnpMainMingRepository.save((PnpMainMing)main);
+                return pnpMainMingRepository.save((PnpMainMing) main);
             case MITAKE:
-                return pnpMainMitakeRepository.save((PnpMainMitake)main);
+                return pnpMainMitakeRepository.save((PnpMainMitake) main);
             case UNICA:
-                return pnpMainUnicaRepository.save((PnpMainUnica)main);
+                return pnpMainUnicaRepository.save((PnpMainUnica) main);
             case EVERY8D:
-                return pnpMainEvery8dRepository.save((PnpMainEvery8d)main);
+                return pnpMainEvery8dRepository.save((PnpMainEvery8d) main);
             default:
                 return null;
         }
@@ -293,13 +292,13 @@ public class PnpSMSMsgService {
     private PnpDetail saveDetail(PnpFtpSourceEnum type, PnpDetail detail) {
         switch (type) {
             case MING:
-                return pnpDetailMingRepository.save((PnpDetailMing)detail);
+                return pnpDetailMingRepository.save((PnpDetailMing) detail);
             case MITAKE:
-                return pnpDetailMitakeRepository.save((PnpDetailMitake)detail);
+                return pnpDetailMitakeRepository.save((PnpDetailMitake) detail);
             case UNICA:
-                return pnpDetailUnicaRepository.save((PnpDetailUnica)detail);
+                return pnpDetailUnicaRepository.save((PnpDetailUnica) detail);
             case EVERY8D:
-                return pnpDetailEvery8dRepository.save((PnpDetailEvery8d)detail);
+                return pnpDetailEvery8dRepository.save((PnpDetailEvery8d) detail);
             default:
                 return null;
         }
@@ -313,7 +312,9 @@ public class PnpSMSMsgService {
                 PnpStatusEnum.BC_USER_IN_BLACK_LIST_SMS_PROCESS.value,
                 PnpStatusEnum.USER_IS_SYSTEM_ADD_IGNORE_SMS.value
         ));
-        log.info("Bc to sms list size is {}", list.size());
+        if (!list.isEmpty()) {
+            log.info("Bc to sms list size is {}", list.size());
+        }
         return list;
     }
 
@@ -322,7 +323,9 @@ public class PnpSMSMsgService {
                 PnpStatusEnum.PNP_SENT_TO_LINE_FAIL_SMS_PROCESS.value,
                 PnpStatusEnum.PNP_USER_IN_BLACK_LIST_SMS_PROCESS.value
         ));
-        log.info("Pnp to sms list size is {}", list.size());
+        if (!list.isEmpty()) {
+            log.info("Pnp to sms list size is {}", list.size());
+        }
         return list;
     }
 
@@ -330,7 +333,9 @@ public class PnpSMSMsgService {
         List<PnpDetail> list = pnpRepositoryCustom.findDetailByPnpStatusAndExpired(type, Collections.singletonList(
                 PnpStatusEnum.PNP_SENT_CHECK_DELIVERY.value
         ));
-        log.info("Pnp expired to sms list size is {}", list.size());
+        if (!list.isEmpty()) {
+            log.info("Pnp expired to sms list size is {}", list.size());
+        }
         return list;
     }
 
@@ -377,7 +382,7 @@ public class PnpSMSMsgService {
         header.append(main.getGroupIDSource() + tag);
         header.append(main.getUsername() + "_L" + tag);
         header.append(main.getUserPassword() + tag);
-        header.append(main.getOrderTime() + tag);
+        header.append(DataUtils.convDateToStr(new Date(), "yyyyMMddHHmmss") + tag);
         header.append(main.getValidityTime() + tag);
         header.append(main.getMsgType() + "\r\n");
 
@@ -429,7 +434,7 @@ public class PnpSMSMsgService {
         header.append(main.getSubject() + tag);
         header.append(main.getUserID() + "_L" + tag);
         header.append(main.getPassword() + tag);
-        header.append(main.getOrderTime() + tag);
+        header.append(DataUtils.convDateToStr(new Date(), "yyyyMMddHHmmss") + tag);
         header.append(main.getExprieTime() + tag);
         header.append(main.getMsgType() + tag);
         header.append(main.getBatchID() + "\r\n");
@@ -493,7 +498,7 @@ public class PnpSMSMsgService {
         header.append(main.getSubject() + tag);
         header.append(main.getUserID() + "_L" + tag);
         header.append(main.getPassword() + tag);
-        header.append(main.getOrderTime() + tag);
+        header.append(DataUtils.convDateToStr(new Date(), "yyyyMMddHHmmss") + tag);
         header.append(main.getExprieTime() + tag);
         header.append(main.getMsgType() + tag);
         header.append(main.getBatchID() + "\r\n");

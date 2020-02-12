@@ -2,8 +2,6 @@ package com.bcs.core.taishin.circle.db.repository;
 
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeDetail;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeMain;
-import com.bcs.core.taishin.circle.db.entity.CircleEntityManagerControl;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -14,6 +12,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -62,35 +61,20 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
             }
 
             /* 3. Find Detail id list by Main id list */
-            List<BigInteger> detailIds = findAndUpdateDetailByMainAndStatus(allMainIds);
+            List<BillingNoticeDetail> detailList = findAllWaitRetryDetailByMainId(allMainIds);
 
-            /* Valid is empty */
-            if (detailIds.isEmpty()) {
-                log.debug("Detail Id List is Empty!!");
+            if (detailList.isEmpty()) {
+                log.info("Detail List is Empty!!");
                 return new Object[]{Collections.emptySet(), Collections.emptyList()};
             }
-
             /* 4. Find Detail object list by Detail id list */
-            return new Object[]{allMainIds, findDetailByIds(detailIds)};
+            return new Object[]{allMainIds, detailList};
         } catch (Exception e) {
             log.error("Exception", e);
             throw e;
         }
     }
 
-    private List<BillingNoticeDetail> findDetailByIds(List<BigInteger> detailIds) {
-        List<BillingNoticeDetail> detailList = new ArrayList<>();
-        List<List<BigInteger>> batchDetailIds = Lists.partition(detailIds, CircleEntityManagerControl.batchSize);
-        for (List<BigInteger> ids : batchDetailIds) {
-            List<Long> list = new ArrayList<>();
-            ids.forEach(v -> list.add(Long.parseLong(v.toString())));
-            List<BillingNoticeDetail> details = billingNoticeDetailRepository.findByNoticeDetailIdIn(list);
-            if (!details.isEmpty()) {
-                detailList.addAll(details);
-            }
-        }
-        return detailList;
-    }
 
     private Set<Long> findRetryMainSet(String procApName, List<String> tempIds) {
         Set<Long> retrySet = new HashSet<>();
@@ -126,14 +110,13 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
     @Transactional(rollbackFor = Exception.class)
     public List<Long> findAndUpdateFirstRetryDetailOnMain(String procApName, List<String> tempIds) {
         try {
-            String sqlString =
-                    " SELECT TOP 100 M.NOTICE_MAIN_ID" +
-                            " FROM BCS_BILLING_NOTICE_DETAIL B, BCS_BILLING_NOTICE_MAIN M" +
-                            " WHERE M.PROC_AP_NAME=:procApName" +
-                            " AND M.NOTICE_MAIN_ID=B.NOTICE_MAIN_ID" +
-                            " AND B.STATUS=:status" +
-                            " AND M.TEMP_ID in (:tempIds)" +
-                            " ORDER BY B.CREAT_TIME DESC";
+            String sqlString = " SELECT TOP 100 M.NOTICE_MAIN_ID" +
+                    " FROM BCS_BILLING_NOTICE_DETAIL B, BCS_BILLING_NOTICE_MAIN M" +
+                    " WHERE M.PROC_AP_NAME=:procApName" +
+                    " AND M.NOTICE_MAIN_ID=B.NOTICE_MAIN_ID" +
+                    " AND B.STATUS=:status" +
+                    " AND M.TEMP_ID in (:tempIds)" +
+                    " ORDER BY B.CREAT_TIME DESC";
 
             List<BigInteger> mainList = (List<BigInteger>) entityManager.createNativeQuery(sqlString)
                     .setParameter("procApName", procApName)
@@ -141,25 +124,21 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
                     .setParameter("tempIds", tempIds)
                     .getResultList();
 
-            if (mainList.isEmpty()){
+            if (mainList.isEmpty()) {
                 return Collections.emptyList();
             }
 
-            String updateString =
-                    " UPDATE BCS_BILLING_NOTICE_MAIN" +
-                            " SET STATUS=:status, MODIFY_TIME=:modifyTime" +
-                            " WHERE NOTICE_MAIN_ID IN (:ids)";
-
-            List<String> mainStrList = new ArrayList<>();
-            mainList.forEach(v -> mainStrList.add(v.toString()));
+            String updateString = "UPDATE BCS_BILLING_NOTICE_MAIN" +
+                    " SET STATUS=:status, MODIFY_TIME=:modifyTime" +
+                    " WHERE NOTICE_MAIN_ID IN (:ids)";
 
             int modifyCount = entityManager.createNativeQuery(updateString)
                     .setParameter("modifyTime", new Date())
                     .setParameter("status", BillingNoticeMain.NOTICE_STATUS_SENDING)
-                    .setParameter("ids", mainStrList)
+                    .setParameter("ids", mainList)
                     .executeUpdate();
 
-            log.info("Modify Count: {}", modifyCount);
+            log.info("Update main retry to sending!! {}", modifyCount);
 
             if (mainList.isEmpty()) {
                 return Collections.emptyList();
@@ -181,17 +160,16 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
     @Transactional(rollbackFor = Exception.class)
     public List<Long> findAndUpdateFirstWaitMain(String procApName, List<String> tempIds) {
         try {
-            String waitMainString =
-                    " SELECT TOP 100 NOTICE_MAIN_ID" +
-                            " FROM BCS_BILLING_NOTICE_MAIN" +
-                            " WHERE PROC_AP_NAME=:procApName" +
-                            " AND STATUS=:status" +
-                            " AND TEMP_ID IN (:tempIds)" +
-                            " ORDER BY CREAT_TIME DESC";
+            String waitMainString = " SELECT TOP 100 NOTICE_MAIN_ID" +
+                    " FROM BCS_BILLING_NOTICE_MAIN" +
+                    " WHERE PROC_AP_NAME=:procApName" +
+                    " AND STATUS=:status" +
+                    " AND TEMP_ID IN (:tempIds)" +
+                    " ORDER BY CREAT_TIME DESC";
 
             log.info("Wait String: {}", waitMainString);
 
-            List<BigInteger> mainList = (List<BigInteger>) entityManager.createNativeQuery(waitMainString)
+            List<BigInteger> mainList = entityManager.createNativeQuery(waitMainString)
                     .setParameter("procApName", procApName)
                     .setParameter("status", BillingNoticeMain.NOTICE_STATUS_WAIT)
                     .setParameter("tempIds", tempIds)
@@ -201,22 +179,18 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
                 return Collections.emptyList();
             }
 
-            String updateString = " UPDATE BCS_BILLING_NOTICE_MAIN" +
+            String updateString = "UPDATE BCS_BILLING_NOTICE_MAIN" +
                     " SET STATUS=:status, MODIFY_TIME=:modifyTime" +
                     " WHERE NOTICE_MAIN_ID IN (:ids)";
-
             log.info("Update String: {}", updateString);
-            List<String> mainStrList = new ArrayList<>();
-            mainList.forEach(v -> mainStrList.add(v.toString()));
-
 
             int modifyCount = entityManager.createNativeQuery(updateString)
                     .setParameter("modifyTime", new Date())
                     .setParameter("status", BillingNoticeMain.NOTICE_STATUS_SENDING)
-                    .setParameter("ids", mainStrList)
+                    .setParameter("ids", mainList)
                     .executeUpdate();
 
-            log.info("Modify Count: {}", modifyCount);
+            log.info("Update main wait to sending!! {}", modifyCount);
 
             if (mainList.isEmpty()) {
                 return Collections.emptyList();
@@ -236,19 +210,40 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
      */
     @SuppressWarnings("unchecked")
     @Transactional(rollbackFor = Exception.class)
-    public List<BigInteger> findAndUpdateDetailByMainAndStatus(Set<Long> mainIds) {
-        List<String> statusList = new ArrayList<>();
-        statusList.add(BillingNoticeMain.NOTICE_STATUS_WAIT);
-        statusList.add(BillingNoticeMain.NOTICE_STATUS_RETRY);
+    public List<BillingNoticeDetail> findAllWaitRetryDetailByMainId(Set<Long> mainIds) {
+        String selectSql = "SELECT NOTICE_DETAIL_ID FROM BCS_BILLING_NOTICE_DETAIL" +
+                " WHERE NOTICE_MAIN_ID IN (:IDS) " +
+                " AND STATUS IN (:STATUS_LIST)";
 
-        String sqlString = " select b.NOTICE_DETAIL_ID from BCS_BILLING_NOTICE_DETAIL b where b.NOTICE_MAIN_ID in (:mainIds) and b.STATUS in (:status)"
-                + " update BCS_BILLING_NOTICE_DETAIL set STATUS = :newStatus, MODIFY_TIME = :modifyTime where NOTICE_DETAIL_ID IN"
-                + " (select d.NOTICE_DETAIL_ID from BCS_BILLING_NOTICE_DETAIL d WITH(ROWLOCK) where d.NOTICE_MAIN_ID in (:mainIds) and d.STATUS in (:status))";
+        log.info(selectSql);
 
-        return (List<BigInteger>) entityManager.createNativeQuery(sqlString)
-                .setParameter("status", statusList).setParameter("mainIds", mainIds)
-                .setParameter("modifyTime", new Date())
-                .setParameter("newStatus", BillingNoticeMain.NOTICE_STATUS_SENDING).getResultList();
+        List<BigInteger> detailIdList = entityManager.createNativeQuery(selectSql)
+                .setParameter("STATUS_LIST", Arrays.asList(BillingNoticeMain.NOTICE_STATUS_WAIT, BillingNoticeMain.NOTICE_STATUS_RETRY))
+                .setParameter("IDS", mainIds)
+                .getResultList();
+
+        if (detailIdList.isEmpty()) {
+            log.info("Detail list is empty!!");
+            return Collections.emptyList();
+        }
+        String updateSql = "UPDATE BCS_BILLING_NOTICE_DETAIL" +
+                " SET STATUS=:NEW_STATUS, MODIFY_TIME=:MODIFY_TIME " +
+                " WHERE NOTICE_DETAIL_ID IN (:IDS)";
+        log.info(updateSql);
+        int i = entityManager.createNativeQuery(updateSql)
+                .setParameter("IDS", detailIdList)
+                .setParameter("MODIFY_TIME", new Date())
+                .setParameter("NEW_STATUS", BillingNoticeMain.NOTICE_STATUS_SENDING)
+                .executeUpdate();
+        if (i > 0) {
+            log.info("Update Wait and retry to sending!! {}", i);
+        }
+
+        String selectSql2 = "SELECT * FROM BCS_BILLING_NOTICE_DETAIL WHERE NOTICE_DETAIL_ID IN (:IDS)";
+        log.info(selectSql);
+        return entityManager.createNativeQuery(selectSql2, BillingNoticeDetail.class)
+                .setParameter("IDS", detailIdList)
+                .getResultList();
     }
 
 }

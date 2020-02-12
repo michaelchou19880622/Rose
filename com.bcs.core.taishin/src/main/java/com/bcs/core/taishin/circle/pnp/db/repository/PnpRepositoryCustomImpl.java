@@ -262,7 +262,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public List<PnpDetail> findDetailByBcStatus(PnpFtpSourceEnum type, List<String> statusList){
-        String selectSql = "SELECT TOP 100 * FROM " + type.detailTable +
+        String selectSql = "SELECT TOP 1000 * FROM " + type.detailTable +
                 " WHERE BC_STATUS IN (:STATUS_LIST)" +
                 " AND SMS_STATUS IS NULL";
         log.info(selectSql);
@@ -274,7 +274,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public List<PnpDetail> findDetailByPnpStatus(PnpFtpSourceEnum type, List<String> statusList){
-        String selectSql = "SELECT TOP 100 * FROM " + type.detailTable +
+        String selectSql = "SELECT TOP 1000 * FROM " + type.detailTable +
                 " WHERE BC_STATUS IN (:STATUS_LIST)" +
                 " AND SMS_STATUS IS NULL";
         log.info(selectSql);
@@ -286,7 +286,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public List<PnpDetail> findDetailByPnpStatusAndExpired(PnpFtpSourceEnum type, List<String> statusList){
-        String selectSql = "SELECT TOP 100 * FROM " + type.detailTable +
+        String selectSql = "SELECT TOP 1000 * FROM " + type.detailTable +
                 " WHERE PNP_STATUS IN (:STATUS_LIST)" +
                 " AND PNP_DELIVERY_EXPIRE_TIME < :NOW" +
                 " AND SMS_STATUS IS NULL";

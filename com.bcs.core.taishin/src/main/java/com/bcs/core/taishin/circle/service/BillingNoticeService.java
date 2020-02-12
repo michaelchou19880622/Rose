@@ -255,7 +255,7 @@ public class BillingNoticeService {
 //        }
     }
 
-    public void pushLineMessage(BillingNoticeMain billingNoticeMain, ActorRef sendRef, ActorRef selfActorRef) throws InterruptedException {
+    public void pushLineMessage(BillingNoticeMain billingNoticeMain, ActorRef sendRef, ActorRef selfActorRef){
         log.info("Push Line Message!!");
         String url = CoreConfigReader.getString(CONFIG_STR.LINE_MESSAGE_PUSH_URL.toString());
         String accessToken = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_TOKEN.toString(), true);
@@ -355,13 +355,18 @@ public class BillingNoticeService {
     }
 
 
-    private void sleepProcess() throws InterruptedException {
+    private void sleepProcess() {
         int time = getProcessSleepTime();
         if (time < 0) {
+            log.warn("Properties [bn.api.sent.sleep.time] does not found or value is blank, use default value is 5,000ms");
             time = DEFAULT_SLEEP_TIME;
         }
         log.info("Thread Sleep {}ms", time);
-        Thread.sleep(time);
+        try {
+            Thread.sleep(time);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
 

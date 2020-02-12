@@ -99,4 +99,13 @@ public interface PnpRepositoryCustom {
 
     @Transactional(rollbackFor = Exception.class)
     PnpMain findSingleMainById(PnpFtpSourceEnum type, long mainId);
+
+    @Transactional(rollbackFor = Exception.class)
+    List<PnpDetail> findDetailByBcStatus(PnpFtpSourceEnum type, List<String> statusList);
+
+    @Transactional(rollbackFor = Exception.class)
+    List<PnpDetail> findDetailByPnpStatus(PnpFtpSourceEnum type, List<String> statusList);
+
+    @Transactional(rollbackFor = Exception.class)
+    List<PnpDetail> findDetailByPnpStatusAndExpired(PnpFtpSourceEnum type, List<String> statusList);
 }

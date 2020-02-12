@@ -259,13 +259,41 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 .getSingleResult();
     }
 
+    @Override
     @Transactional(rollbackFor = Exception.class)
-    public List<PnpDetail> findDetailByStage(PnpFtpSourceEnum type){
-        String selectSql = "SELECT * FROM " + type.detailTable +
-                " WHERE PROC_STAGE=:STAGE AND SMS_STATUS IS NULL";
+    public List<PnpDetail> findDetailByBcStatus(PnpFtpSourceEnum type, List<String> statusList){
+        String selectSql = "SELECT TOP 100 * FROM " + type.detailTable +
+                " WHERE BC_STATUS IN (:STATUS_LIST)" +
+                " AND SMS_STATUS IS NULL";
         log.info(selectSql);
         return providerService.getEntityManager().createNativeQuery(selectSql, type.detailClass)
-                .setParameter("STAGE", PnpStageEnum.SMS)
+                .setParameter("STATUS_LIST", statusList)
+                .getResultList();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public List<PnpDetail> findDetailByPnpStatus(PnpFtpSourceEnum type, List<String> statusList){
+        String selectSql = "SELECT TOP 100 * FROM " + type.detailTable +
+                " WHERE BC_STATUS IN (:STATUS_LIST)" +
+                " AND SMS_STATUS IS NULL";
+        log.info(selectSql);
+        return providerService.getEntityManager().createNativeQuery(selectSql, type.detailClass)
+                .setParameter("STATUS_LIST", statusList)
+                .getResultList();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public List<PnpDetail> findDetailByPnpStatusAndExpired(PnpFtpSourceEnum type, List<String> statusList){
+        String selectSql = "SELECT TOP 100 * FROM " + type.detailTable +
+                " WHERE PNP_STATUS IN (:STATUS_LIST)" +
+                " AND PNP_DELIVERY_EXPIRE_TIME < :NOW" +
+                " AND SMS_STATUS IS NULL";
+        log.info(selectSql);
+        return providerService.getEntityManager().createNativeQuery(selectSql, type.detailClass)
+                .setParameter("STATUS_LIST", statusList)
+                .setParameter("NOW", new Date())
                 .getResultList();
     }
 }

@@ -5,7 +5,6 @@ import com.bcs.core.db.entity.LineUser;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.enums.LINE_HEADER;
 import com.bcs.core.resource.CoreConfigReader;
-import com.bcs.core.taishin.circle.pnp.akka.PnpAkkaService;
 import com.bcs.core.taishin.circle.pnp.akka.handler.PnpMessageActor;
 import com.bcs.core.taishin.circle.pnp.code.PnpFtpSourceEnum;
 import com.bcs.core.taishin.circle.pnp.code.PnpProcessFlowEnum;
@@ -59,6 +58,9 @@ import java.util.List;
 @Slf4j(topic = "PnpRecorder")
 @Service
 public class PnpService {
+    private static final int DEFAULT_SLEEP_TIME = 5_000;
+    private static final int DEFAULT_RETRY_COUNT = 3;
+
     private PnpMainMitakeRepository pnpMainMitakeRepository;
     private PnpDetailMitakeRepository pnpDetailMitakeRepository;
     private PnpMainEvery8dRepository pnpMainEvery8dRepository;
@@ -67,7 +69,6 @@ public class PnpService {
     private PnpDetailUnicaRepository pnpDetailUnicaRepository;
     private PnpMainMingRepository pnpMainMingRepository;
     private PnpDetailMingRepository pnpDetailMingRepository;
-    private PnpAkkaService pnpAkkaService;
     private PnpSendBlockService pnpSendBlockService;
     private PnpFlexTemplateRepository pnpFlexTemplateRepository;
 
@@ -76,9 +77,9 @@ public class PnpService {
                       PnpDetailMitakeRepository pnpDetailMitakeRepository, PnpMainEvery8dRepository pnpMainEvery8dRepository,
                       PnpDetailEvery8dRepository pnpDetailEvery8dRepository, PnpMainUnicaRepository pnpMainUnicaRepository,
                       PnpDetailUnicaRepository pnpDetailUnicaRepository, PnpMainMingRepository pnpMainMingRepository,
-                      PnpDetailMingRepository pnpDetailMingRepository, PnpAkkaService pnpAkkaService,
+                      PnpDetailMingRepository pnpDetailMingRepository,
                       PnpFlexTemplateRepository pnpFlexTemplateRepository, PnpSendBlockService pnpSendBlockService
-                      ) {
+    ) {
 
         this.pnpMainMitakeRepository = pnpMainMitakeRepository;
         this.pnpDetailMitakeRepository = pnpDetailMitakeRepository;
@@ -88,7 +89,6 @@ public class PnpService {
         this.pnpDetailUnicaRepository = pnpDetailUnicaRepository;
         this.pnpMainMingRepository = pnpMainMingRepository;
         this.pnpDetailMingRepository = pnpDetailMingRepository;
-        this.pnpAkkaService = pnpAkkaService;
         this.pnpFlexTemplateRepository = pnpFlexTemplateRepository;
         this.pnpSendBlockService = pnpSendBlockService;
     }
@@ -576,47 +576,49 @@ public class PnpService {
         HttpEntity<String> httpEntity = new HttpEntity<>(requestBody.toString(), headers);
 
         log.info("Before execute: mainId: {}, detailId: {}, to: {}", new Object[]{detail.getPnpMainId(), detail.getPnpDetailId(), to});
-        try {
-            RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
-            restfulUtil.execute();
-            httpStatusCode = restfulUtil.getStatusCode();
-            sendSuccessFlag = "200".equals(httpStatusCode);
-            log.info("RestfulUtil.getStatusCode: " + httpStatusCode);
-        } catch (HttpClientErrorException he) {
-            JSONObject errorMessage = new JSONObject(he.getResponseBodyAsString());
-
-            sendSuccessFlag = false;
-            httpStatusCode = he.getStatusCode().toString();
-            errorMsg = he.getMessage();
-
-            log.error("HttpClientErrorException error : {}", errorMsg);
-            if (errorMessage.has("message")) {
-                log.error("HttpClientErrorException statusCode: {}", httpStatusCode);
-                if (errorMessage.has("details")) {
-                    log.error("HttpClientErrorException details : " + errorMessage.getJSONArray("details").toString());
-                }
+        boolean isDoRetry;
+        int i = 0;
+        final int retryCountLimit = DEFAULT_RETRY_COUNT;
+        do {
+            i++;
+            log.info("This is count is {}", i);
+            try {
+                RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
+                restfulUtil.execute();
+                httpStatusCode = restfulUtil.getStatusCode();
+                sendSuccessFlag = "200".equals(httpStatusCode);
+                log.info("RestfulUtil.getStatusCode: " + httpStatusCode);
+                isDoRetry = false;
+            } catch (HttpClientErrorException ce) {
+                log.error("HttpClientErrorException", ce);
+                sendSuccessFlag = false;
+                httpStatusCode = ce.getStatusCode().toString();
+                errorMsg = ce.getMessage();
+                isDoRetry = i <= retryCountLimit;
+                sleepProcess();
+            } catch (HttpServerErrorException se) {
+                log.error("HttpServerErrorException Error :", se);
+                sendSuccessFlag = false;
+                httpStatusCode = se.getStatusCode().toString();
+                errorMsg = "BC伺服器錯誤，請洽資訊人員";
+                isDoRetry = i <= retryCountLimit;
+                sleepProcess();
+            } catch (NullPointerException ne) {
+                log.error("NullPointException", ne);
+                sendSuccessFlag = false;
+                httpStatusCode = "500";
+                errorMsg = "BC伺服器錯誤，請洽資訊人員!";
+                isDoRetry = false;
+            } catch (Exception e) {
+                log.info("Send fail PnpDetailId:" + detail.getPnpDetailId());
+                log.error("Send fail Exception:" + e.getMessage());
+                sendSuccessFlag = false;
+                httpStatusCode = "500";
+                errorMsg = "BC伺服器錯誤，請洽資訊人員";
+                isDoRetry = false;
             }
-        } catch (HttpServerErrorException se) {
-            log.error("HttpServerErrorException Error :", se);
-            JSONObject errorMessage = new JSONObject(se.getResponseBodyAsString());
-            if (errorMessage.has("message")) {
-                log.error("HttpServerErrorException StatusCode: {}", se.getStatusCode().toString());
-                if (errorMessage.has("details")) {
-                    log.error("HttpServerErrorException Details: {}", errorMessage.getJSONArray("details").toString());
-                }
-            }
-            sendSuccessFlag = false;
-            httpStatusCode = "500";
-            errorMsg = "BC伺服器錯誤，請洽資訊人員";
-        } catch (Exception e) {
-            log.info("Send fail PnpDetailId:" + detail.getPnpDetailId());
-            log.error("Send fail Exception:" + e.getMessage());
-            sendSuccessFlag = false;
-            httpStatusCode = "500";
-            errorMsg = "BC伺服器錯誤，請洽資訊人員";
-        }
-        log.info("sendSuccessFlag: {}, httpStatusCode: {}, errorMsg: {}",
-                new Object[]{sendSuccessFlag, httpStatusCode, errorMsg});
+        } while (isDoRetry);
+        log.info("sendSuccessFlag: {}, httpStatusCode: {}, errorMsg: {}", new Object[]{sendSuccessFlag, httpStatusCode, errorMsg});
         return new Object[]{sendSuccessFlag, httpStatusCode, errorMsg};
     }
 
@@ -727,5 +729,27 @@ public class PnpService {
         templateJson = templateJson.replace("buttonJsonArea", sb.toString());
         log.debug("final templateJson: " + DataUtils.toPrettyJsonUseJackson(templateJson));
         return templateJson;
+    }
+
+    private void sleepProcess() {
+        int time = getProcessSleepTime();
+        if (time < 0) {
+            log.warn("Properties [pnp.api.sent.sleep.time] does not found or value is blank, use default value is 5,000ms");
+            time = DEFAULT_SLEEP_TIME;
+        }
+        log.info("Thread Sleep {}ms", time);
+        try {
+            Thread.sleep(time);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+
+    /**
+     * Get Line Point Process Sleep Time
+     */
+    private Integer getProcessSleepTime() {
+        return CoreConfigReader.getInteger("pnp.api.sent.sleep.time", true);
     }
 }

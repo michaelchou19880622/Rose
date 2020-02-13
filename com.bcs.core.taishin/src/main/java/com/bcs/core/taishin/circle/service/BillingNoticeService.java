@@ -138,7 +138,7 @@ public class BillingNoticeService {
      */
     @Transactional(rollbackFor = Exception.class, timeout = 30)
     public void updateStatusFailAndEmail(BillingNoticeMain billingNoticeMain) {
-        updateMainAndDetailStatus(billingNoticeMain, BillingNoticeMain.NOTICE_STATUS_EXPIRED);
+        updateMainAndDetailStatus(billingNoticeMain, BillingNoticeMain.NOTICE_STATUS_FAIL);
 
         StringBuilder contextBuilder = new StringBuilder("帳務通知發送逾期!!");
         contextBuilder

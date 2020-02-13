@@ -41,9 +41,9 @@ public class ExportToExcelForBillingNoticePushBNApiEffects {
         try {
             Map<String, List<String>> bnEffects = billingNoticeContentTemplateMsgService.getBNEffects(startDate, endDate, null);
 
-            Integer sheetNumber = 1;
+            int sheetNumber = 1;
             Sheet sheet = this.createBNPushApiEffectsSheet(workbook, sheetNumber++);
-            Integer rowNumber = 1;
+            int rowNumber = 1;
             long sumSuccess = 0;
             long sumFail = 0;
             for (Object key : bnEffects.keySet()) {
@@ -136,9 +136,9 @@ public class ExportToExcelForBillingNoticePushBNApiEffects {
         try {
             Map<String, List<String>> bnEffects = billingNoticeContentTemplateMsgService.getBNEffectsDetail(date, title, sendType, null);
 
-            Integer sheetNumber = 1;
+            int sheetNumber = 1;
             Sheet sheet = this.createBNPushApiEffectsDetailSheet(workbook, sheetNumber++);
-            Integer rowNumber = 1;
+            int rowNumber = 1;
             for (Object key : bnEffects.keySet()) {
                 List<String> list = bnEffects.get(key);
                 //log.info("list2:" + list.toString());
@@ -187,7 +187,7 @@ public class ExportToExcelForBillingNoticePushBNApiEffects {
             row.createCell(5).setCellValue("UID");
 
             // column width
-            for (Integer col_index = 1; col_index <= 3; col_index++) {
+            for (int col_index = 1; col_index <= 3; col_index++) {
                 sheet.setColumnWidth(col_index, 20 * 256);
             }
             sheet.setColumnWidth(0, 40 * 256);

@@ -2,7 +2,6 @@ package com.bcs.core.taishin.circle.pnp.scheduler;
 
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.resource.CoreConfigReader;
-import com.bcs.core.taishin.circle.pnp.akka.PnpAkkaService;
 import com.bcs.core.taishin.circle.pnp.code.PnpFtpSourceEnum;
 import com.bcs.core.taishin.circle.pnp.code.PnpStageEnum;
 import com.bcs.core.taishin.circle.pnp.code.PnpStatusEnum;
@@ -43,7 +42,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -151,7 +152,7 @@ public class PnpSMSMsgService {
             }
 
             List<PnpDetail> afterSaveList = UpdateDetailStatus(type, detailList);
-
+            Map<String, InputStream> map = new HashMap<>();
             for (PnpDetail detail : afterSaveList) {
                 now = new Date();
                 detail.setModifyTime(now);
@@ -169,9 +170,15 @@ public class PnpSMSMsgService {
                     log.error("InputStream is null!!");
                     return;
                 }
-                /* Send File To SMS FTP */
-                uploadFileToSms(type, inputStream, main.getSmsFileName());
+                map.put(smsFileName, inputStream);
+            }
 
+            /* Send File To SMS FTP */
+            uploadFileToSms(type, map);
+
+            for (PnpDetail detail : afterSaveList) {
+                PnpMain main = pnpRepositoryCustom.findSingleMainById(type, detail.getPnpMainId());
+                String smsFileName = changeFileName(main.getOrigFileName(), now);
                 /* Save Main */
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
@@ -219,7 +226,7 @@ public class PnpSMSMsgService {
             return false;
         }
         /* Send File To SMS FTP */
-        uploadFileToSms(ftpSourceEnum, inputStream, main.getSmsFileName());
+        uploadFileToSms(ftpSourceEnum, Collections.singletonMap(main.getSmsFileName(), inputStream));
         return true;
     }
 
@@ -569,28 +576,18 @@ public class PnpSMSMsgService {
 
     /**
      * Upload File To SMS
-     *
-     * @param source       source
-     * @param targetStream targetStream
-     * @param fileName     fileName
      */
-    private void uploadFileToSms(PnpFtpSourceEnum source, InputStream targetStream, String fileName) {
+    private void uploadFileToSms(PnpFtpSourceEnum source, Map<String, InputStream> targetStreamMap) {
         log.info("Start Upload File To SMS!!");
 
-        if (targetStream == null) {
-            log.error("targetStream is null");
-            return;
-        }
         PnpFtpSetting setting = pnpFtpService.getFtpSettings(source);
         if (StringUtils.isBlank(setting.getAccount())
                 || StringUtils.isBlank(setting.getPassword())) {
             log.error("FTP account or password is blank!!");
             return;
         }
-        log.info("Upload File Name" + fileName);
-
         try {
-            pnpFtpService.uploadFileByType(targetStream, fileName, setting.getUploadPath(), setting);
+            pnpFtpService.uploadFileByType(targetStreamMap, setting.getUploadPath(), setting);
         } catch (Exception e) {
             log.error("Exception", e);
         }

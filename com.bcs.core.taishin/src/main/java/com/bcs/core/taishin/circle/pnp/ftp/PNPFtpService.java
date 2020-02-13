@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -1115,48 +1116,50 @@ public class PNPFtpService {
      * @param setting   FTP Config
      * @throws IOException IOException
      */
-    public void uploadFileByType(InputStream uploadIs, String fileName, String targetDir, PnpFtpSetting setting) throws IOException {
+    public void uploadFileByType(Map<String, InputStream> targetStreamMap, String targetDir, PnpFtpSetting setting) throws IOException {
         if ("sftp".equalsIgnoreCase(setting.getProtocol())) {
-            uploadFileInSFTP(uploadIs, fileName, targetDir, setting);
+            uploadFileInSFTP(targetStreamMap, targetDir, setting);
         } else {
-            uploadFileInFTP(uploadIs, fileName, targetDir, setting);
+            uploadFileInFTP(targetStreamMap, targetDir, setting);
         }
     }
 
-    private void uploadFileInFTP(InputStream targetStream, String fileName, String targetDir, PnpFtpSetting setting) throws IOException {
+    private void uploadFileInFTP(Map<String, InputStream> targetStreamMap, String targetDir, PnpFtpSetting setting) throws IOException {
         log.info("start uploadFileInFTP ");
 
-        log.info(" targetStream      :" + targetStream);
-        log.info(" fileName          :" + fileName);
-        log.info(" targetDir         :" + targetDir);
-        log.info(" PNPFtpSetting     :" + setting);
 
         FTPClient ftpClient = new FTPClient();
         try {
             ftpClient.connect(setting.getSmsHost(), setting.getSmsPort());
-            log.info("loginFTP : " + (smsLoginFTP(ftpClient, setting) ? "OK" : "fail"));
+            log.info("FTP login is success: {}", smsLoginFTP(ftpClient, setting));
             ftpClient.enterLocalPassiveMode();
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
             ftpClient.setAutodetectUTF8(true);
-            log.info(setting.getFileEncoding());
             ftpClient.setControlEncoding(setting.getFileEncoding());
             ftpClient.changeWorkingDirectory(targetDir);
 
-            //上傳檔案
-            ftpClient.storeFile(fileName, targetStream);
+            /* Upload file */
+            targetStreamMap.forEach((fileName, inputStream) -> {
+                log.info("TargetStream : {}", inputStream);
+                log.info("FileName     : {}", fileName);
+                log.info("TargetDir    : {}", targetDir);
+                log.info("FtpSetting   : {}", setting);
+                try {
+                    ftpClient.storeFile(fileName, inputStream);
+                    inputStream.close();
+                } catch (IOException e) {
+                    log.error("Exception", e);
+                }
+            });
         } catch (Exception e) {
-            log.error("uploadFileInFTP Exception" + e.getMessage());
+            log.error("Exception: {}", e.getMessage());
         } finally {
-            //關閉檔案
-            targetStream.close();
-            //登出
             ftpClient.logout();
-            //關閉連線
             ftpClient.disconnect();
         }
     }
 
-    private void uploadFileInSFTP(InputStream uploadIs, String fileName, String targetDir, PnpFtpSetting setting) {
+    private void uploadFileInSFTP(Map<String, InputStream> targetStreamMap, String targetDir, PnpFtpSetting setting) {
         log.info("start uploadFileInSFTP ");
         ChannelSftp channelSftp = null;
         Session session = null;
@@ -1184,7 +1187,15 @@ public class PNPFtpService {
                 log.info("mkdirIsSuccess:" + mkdirIsSuccess);
             }
             channelSftp.cd(targetDir);
-            channelSftp.put(uploadIs, new String(fileName.getBytes(), setting.getFileEncoding()));
+            ChannelSftp finalChannelSftp = channelSftp;
+            targetStreamMap.forEach((fileName, inputStream) -> {
+                try {
+                    finalChannelSftp.put(inputStream, new String(fileName.getBytes(), setting.getFileEncoding()));
+                    inputStream.close();
+                } catch (SftpException | IOException e) {
+                    log.error("Exception", e);
+                }
+            });
         } catch (Exception e) {
             log.error("uploadFileInSFTP Exception" + e.getMessage());
         } finally {

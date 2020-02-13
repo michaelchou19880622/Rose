@@ -58,7 +58,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
@@ -262,6 +261,7 @@ public class LoadFtpPnpDataTask {
             // 2. parse data to object
             List<Object> mains = new ArrayList<>();
 
+            Map<String, InputStream> map = new HashMap<>();
             for (Map.Entry<String, byte[]> entry : lReturnDataMap.entrySet()) {
                 final String fileName = entry.getKey();
                 final byte[] fileData = entry.getValue();
@@ -275,12 +275,12 @@ public class LoadFtpPnpDataTask {
                 log.info(" LoadFtbPnpDataTask handle file: {}", pnpFtpSetting.getDownloadSavePath() + File.separator + fileName);
                 final File targetFile = new File(pnpFtpSetting.getDownloadSavePath() + File.separator + fileName);
                 FileUtils.writeByteArrayToFile(targetFile, fileData);
-                try (InputStream targetStream = new FileInputStream(targetFile)) {
-
+                try {
+                    InputStream targetStream = new FileInputStream(targetFile);
                     if (!validateWhiteListHeader(source, fileName)) {
                         /* 白名單檢核錯誤 To SMS */
                         log.error("Valid WhiteList Header Fail!! To SMS");
-                        uploadFileToSms(source, targetStream, fileName);
+                        map.put(fileName, targetStream);
                         continue;
                     }
                     log.info("Valid WhiteList Header Success!! ");
@@ -291,15 +291,18 @@ public class LoadFtpPnpDataTask {
                     List<Object> pnpMains = parseFtpFile(source, fileName, fileContents);
                     if (ListUtils.isEmpty(pnpMains)) {
                         log.error("Valid WhiteList Content Fail!! To SMS");
-                        uploadFileToSms(source, targetStream, fileName);
+                        map.put(fileName, targetStream);
                         continue;
                     }
                     log.info("Valid WhiteList Content Success!! ");
                     mains.addAll(pnpMains);
-
+                    targetStream.close();
                 } catch (Exception e) {
                     log.warn("Exception", e);
                 }
+            }
+            if (!map.isEmpty()) {
+                uploadFileToSms(source, map);
             }
             saveDraftToDatabaseBySource(source, mains);
             removeFtpFile(pnpFtpSetting, lReturnDataMap);
@@ -368,19 +371,20 @@ public class LoadFtpPnpDataTask {
             }
             final Map<String, byte[]> lReturnDataMap = new HashMap<>(returnDataMap);
 
-
+            Map<String, InputStream> map = new HashMap<>();
             for (Map.Entry<String, byte[]> entry : lReturnDataMap.entrySet()) {
                 final String fileName = entry.getKey();
                 byte[] fileData = entry.getValue();
                 log.info(" LoadFtbPnpDataTask handle file:" + pnpFtpSetting.getDownloadSavePath() + File.separator + fileName);
                 final File targetFile = new File(pnpFtpSetting.getDownloadSavePath() + File.separator + fileName);
                 FileUtils.writeByteArrayToFile(targetFile, fileData);
-                try (InputStream targetStream = new FileInputStream(targetFile)) {
-                    log.info("uploadFileToSMS : " + fileName);
-                    uploadFileToSms(source, targetStream, fileName);
-                }
+                InputStream targetStream = new FileInputStream(targetFile);
+                log.info("uploadFileToSMS : " + fileName);
+                map.put(fileName, targetStream);
             }
-
+            if (!map.isEmpty()) {
+                uploadFileToSms(source, map);
+            }
             // 4. remove file
             removeFtpFile(pnpFtpSetting, lReturnDataMap);
 
@@ -1336,7 +1340,7 @@ public class LoadFtpPnpDataTask {
     }
 
 
-    private void uploadFileToSms(PnpFtpSourceEnum source, InputStream targetStream, String fileName) {
+    private void uploadFileToSms(PnpFtpSourceEnum source, Map<String, InputStream> targetStreamMap) {
         log.info("start uploadFileToSMS ");
 
         final PnpFtpSetting setting = pnpFtpService.getFtpSettings(source);
@@ -1345,10 +1349,8 @@ public class LoadFtpPnpDataTask {
             log.error("FTP account or password is blank!!");
             return;
         }
-        log.info(" fileName...." + fileName);
-
         try {
-            pnpFtpService.uploadFileByType(targetStream, fileName, setting.getUploadPath(), setting);
+            pnpFtpService.uploadFileByType(targetStreamMap, setting.getUploadPath(), setting);
         } catch (Exception e) {
             log.error("Exception", e);
             log.error("SMS uploadFileToSMS error:" + e.getMessage());

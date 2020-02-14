@@ -51,7 +51,7 @@ public class LiveChatService {
     }
 
     public void sendMsgToUser(LiveChatReplyModel receivedMessage, UserLiveChat userLiveChat) throws Exception {
-        this.sendMsgToUser(receivedMessage, userLiveChat, CONFIG_STR.MANUAL_REPLY.name());
+        this.sendMsgToUser(receivedMessage, userLiveChat, CONFIG_STR.MANUAL_REPLY.toString());
     }
 
     public void sendMsgToUser(LiveChatReplyModel receivedMessage, UserLiveChat userLiveChat, String channelName) throws Exception {

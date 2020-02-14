@@ -10,8 +10,9 @@ import com.bcs.core.log.util.SystemLogUtil;
 import com.bcs.core.receive.helper.SignatureValidationHelper;
 import com.bcs.core.receive.model.ReceivedModelOriginal;
 import com.bcs.core.resource.CoreConfigReader;
+import com.bcs.core.utils.DataUtils;
 import com.bcs.core.utils.ErrorRecord;
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -19,64 +20,73 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 
 
+/**
+ * The type Line bot api controller.
+ *
+ * @author ???
+ * @author Alan
+ */
+@Slf4j
 @Controller
 @RequestMapping("/line")
 public class LineBotApiController {
 
-    @Autowired
     private AkkaBotService akkaBotService;
-    /**
-     * Logger
-     */
-    private static Logger logger = Logger.getLogger(LineBotApiController.class);
+
+    @Autowired
+    public LineBotApiController(AkkaBotService akkaBotService) {
+        this.akkaBotService = akkaBotService;
+    }
 
     /**
-     * @param receivingMsg
-     * @param ChannelId
-     * @param ChannelName
-     * @param request
-     * @param response
+     * Line bot api receiving.
+     *
+     * @param receivingMsg the receiving msg
+     * @param channelId    the channel id
+     * @param channelName  the channel name
+     * @param request      the request
+     * @param response     the response
      */
     @WebServiceLog
-    @PostMapping(value = "/bot/api/receiving/{ChannelId}/{ChannelName}", consumes = MediaType.APPLICATION_JSON_VALUE + "; charset=UTF-8")
-    public void lineBotApiReceiving(@RequestBody String receivingMsg, @PathVariable String ChannelId, @PathVariable String ChannelName, HttpServletRequest request, HttpServletResponse response) {
-        logger.info("-------lineBotApiReceiving-------");
+    @PostMapping(value = "/bot/api/receiving/{channelId}/{channelName}", consumes = MediaType.APPLICATION_JSON_VALUE + "; charset=UTF-8")
+    public void lineBotApiReceiving(@RequestBody String receivingMsg, @PathVariable String channelId, @PathVariable String channelName, HttpServletRequest request, HttpServletResponse response) {
+        log.info("LineBotApi Receiving start!!");
         Date start = new Date();
-        logger.info("Receiving Message : " + receivingMsg);
-
         try {
+            log.info("Receiving Message: {}", DataUtils.toPrettyJsonUseJackson(receivingMsg));
             String channelSignature = request.getHeader(LINE_HEADER.HEADER_BOT_ChannelSignature.toString());
-
-            if (CoreConfigReader.getBoolean(CONFIG_STR.SYSTEM_CHECK_SIGNATURE.toString())) {
-                boolean validate = SignatureValidationHelper.signatureValidation(receivingMsg, ChannelName, channelSignature);
-                if (!validate) {
-                    logger.info("Signature Valid Fail!!");
-                    response.setStatus(470);
-                    SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_LineBotApi, LOG_TARGET_ACTION_TYPE.ACTION_Receive, start, 470, receivingMsg, "470");
-                    return;
-                }
+            if (signatureValidIsFail(receivingMsg, channelName, response, start, channelSignature)) {
+                return;
             }
-
-            ReceivedModelOriginal msgs = new ReceivedModelOriginal(receivingMsg, ChannelId, ChannelName, channelSignature, API_TYPE.BOT);
-
-            akkaBotService.receivingMsgs(msgs);
-            logger.info("-------lineBotApiReceiving Success-------");
-            response.setStatus(200);
-            SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_LineBotApi, LOG_TARGET_ACTION_TYPE.ACTION_Receive, start, 200, receivingMsg, "200");
+            akkaBotService.receivingMsgs(new ReceivedModelOriginal(receivingMsg, channelId, channelName, channelSignature, API_TYPE.BOT));
+            responseProcess(receivingMsg, response, start, "LineBotApi Receiving finish!!", 200, "200");
             return;
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
-        logger.info("-------lineBotApiReceiving Fail-------");
-        response.setStatus(470);
-        SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_LineBotApi, LOG_TARGET_ACTION_TYPE.ACTION_Receive, start, 470, receivingMsg, "470");
-        return;
+        responseProcess(receivingMsg, response, start, "LineBotApi Receiving fail!!", 470, "470");
+    }
+
+    private void responseProcess(@RequestBody String receivingMsg, HttpServletResponse response, Date start, String s, int i, String s2) {
+        log.info(s);
+        response.setStatus(i);
+        SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_LineBotApi, LOG_TARGET_ACTION_TYPE.ACTION_Receive, start, i, receivingMsg, s2);
+    }
+
+    private boolean signatureValidIsFail(@RequestBody String receivingMsg, @PathVariable String channelName, HttpServletResponse response, Date start, String channelSignature) {
+        if (CoreConfigReader.getBoolean(CONFIG_STR.SYSTEM_CHECK_SIGNATURE)) {
+            boolean validIsFail = !SignatureValidationHelper.signatureValidation(receivingMsg, channelName, channelSignature);
+            if (validIsFail) {
+                responseProcess(receivingMsg, response, start, "Signature Valid Fail!!", 470, "470");
+                return true;
+            }
+        }
+        return false;
     }
 }

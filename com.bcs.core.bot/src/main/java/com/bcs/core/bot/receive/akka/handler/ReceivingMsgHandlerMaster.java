@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
+ * @author ???
+ * @author Alan
  * @see com.bcs.core.bot.akka.service.AkkaBotService
  * @see com.bcs.core.taishin.circle.pnp.akka.CircleAkkaBotService
  */
@@ -43,25 +45,33 @@ public class ReceivingMsgHandlerMaster extends UntypedActor {
     public void onReceive(Object message) throws Exception {
         try {
             Thread.currentThread().setName("Actor-Receive-Msg-Master-" + Thread.currentThread().getId());
-
             if (message instanceof ReceivedModelOriginal) {
-                log.info("-------onReceive Step1-------");
-
-                routerEventTypeActor.tell(message, getSelf());
+                step1(message);
             } else if (message instanceof Map) {
-                log.info("-------onReceive Step2-------");
-
-                Map<String, Object> map = (Map<String, Object>) message;
-                String target = (String) map.get("Target");
-
-                if (MsgBotReceive.EVENT_TYPE_MESSAGE.equals(target) || MsgBotReceive.EVENT_TYPE_POSTBACK.equals(target)) {
-                    routerMsgReceiveActor.tell(message, getSelf());
-                } else if (MsgBotReceive.EVENT_TYPE_FOLLOW.equals(target) || MsgBotReceive.EVENT_TYPE_UNFOLLOW.equals(target)) {
-                    routerMsgReceiveOpActor.tell(message, getSelf());
-                }
+                step2(message);
             }
         } catch (Exception e) {
-            log.error("{}: {}", "Exception", e);
+            log.error("Exception", e);
         }
     }
+
+    private void step1(Object message) {
+        log.info("-------onReceive Step1-------");
+        routerEventTypeActor.tell(message, getSelf());
+    }
+
+    @SuppressWarnings("unchecked")
+    private void step2(Object message) {
+        log.info("-------onReceive Step2-------");
+
+        Map<String, Object> map = (Map<String, Object>) message;
+        String target = (String) map.get("Target");
+
+        if (MsgBotReceive.EVENT_TYPE_MESSAGE.equals(target) || MsgBotReceive.EVENT_TYPE_POSTBACK.equals(target)) {
+            routerMsgReceiveActor.tell(message, getSelf());
+        } else if (MsgBotReceive.EVENT_TYPE_FOLLOW.equals(target) || MsgBotReceive.EVENT_TYPE_UNFOLLOW.equals(target)) {
+            routerMsgReceiveOpActor.tell(message, getSelf());
+        }
+    }
+
 }

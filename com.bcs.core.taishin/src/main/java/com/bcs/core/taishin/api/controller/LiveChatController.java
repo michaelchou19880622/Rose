@@ -242,7 +242,7 @@ public class LiveChatController {
 
                 userLiveChatService.save(userLiveChat);
 
-                messageProcessService.pushTextMsgAsync(UID, LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.LIVE_CHAT_CLOSE_PASSIVE.toString()), CONFIG_STR.AUTO_REPLY.name());
+                messageProcessService.pushTextMsgAsync(UID, LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.LIVE_CHAT_CLOSE_PASSIVE.toString()), CONFIG_STR.AUTO_REPLY.toString());
             }
             liveChatApiService.resetChatFlow(UID);    // 通知碩網大腦，要 reset 錯誤回答的次數
 

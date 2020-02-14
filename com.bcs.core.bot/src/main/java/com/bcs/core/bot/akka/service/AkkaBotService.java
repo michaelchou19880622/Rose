@@ -11,7 +11,7 @@ import com.bcs.core.send.akka.model.AsyncEsnSendingModel;
 import com.bcs.core.send.akka.model.AsyncSendingModel;
 import com.bcs.core.utils.AkkaSystemFactory;
 import com.bcs.core.utils.ErrorRecord;
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
@@ -22,15 +22,13 @@ import java.util.List;
 import java.util.Random;
 
 /**
+ * @author ???
+ * @author Alan
  * @see com.bcs.web.receive.controller.LineBCApiClusterController
  */
+@Slf4j
 @Service
 public class AkkaBotService {
-
-    /**
-     * Logger
-     */
-    private static Logger logger = Logger.getLogger(AkkaBotService.class);
 
     private List<ActorSystem> systemSending = new ArrayList<>();
     private List<ActorSystem> systemReceiving = new ArrayList<>();
@@ -38,36 +36,37 @@ public class AkkaBotService {
     private List<ActorRef> receivingMaster = new ArrayList<>();
 
     private AkkaBotService() {
-
-        new AkkaSystemFactory<SendingMsgHandlerMaster>(systemSending, sendingMaster, SendingMsgHandlerMaster.class, "systemSending", "SendingMsgHandlerMaster");
-        new AkkaSystemFactory<ReceivingMsgHandlerMaster>(systemReceiving, receivingMaster, ReceivingMsgHandlerMaster.class, this.getClass().getSimpleName(), ReceivingMsgHandlerMaster.class.getSimpleName());
+        new AkkaSystemFactory<>(systemSending, sendingMaster, SendingMsgHandlerMaster.class, "systemSending", "SendingMsgHandlerMaster");
+        new AkkaSystemFactory<>(systemReceiving, receivingMaster, ReceivingMsgHandlerMaster.class, this.getClass().getSimpleName(), ReceivingMsgHandlerMaster.class.getSimpleName());
     }
 
     /**
-	 * 發送訊息
-     * @param msgs
+     * 發送訊息
+     *
+     * @param object object
      * @see com.bcs.core.bot.send.service.SendingMsgService#sendToLineAsync(List, List, List, API_TYPE, Long)
      * @see com.bcs.web.receive.controller.LineBCApiClusterController#lineBCApiClusterSend(AsyncSendingClusterModel, String, HttpServletRequest, HttpServletResponse)
      */
-    public void sendingMsgs(AsyncSendingModel msgs) {
+    public void sendingMsgs(AsyncSendingModel object) {
         try {
             ActorRef master = randomMaster(sendingMaster);
-            master.tell(msgs, master);
+            master.tell(object, master);
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
     }
 
     private ActorRef randomMaster(List<ActorRef> masters) {
-        logger.debug("randomMaster Size:" + masters.size());
+        log.debug("randomMaster Size:" + masters.size());
 
         int index = new Random().nextInt(masters.size());
         return masters.get(index);
     }
 
     /**
-	 * 接收訊息
-     * @param msgs
+     * 接收訊息
+     *
+     * @param msgs msgs
      * @see com.bcs.web.receive.controller.LineBotApiController#lineBotApiReceiving
      */
     public void receivingMsgs(ReceivedModelOriginal msgs) {
@@ -75,40 +74,8 @@ public class AkkaBotService {
             ActorRef master = randomMaster(receivingMaster);
             master.tell(msgs, master);
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
-    }
-
-    @PreDestroy
-    public void shutdownNow() {
-        logger.info("[DESTROY] AkkaBotService shutdownNow cleaning up...");
-
-        try {
-            int count = 0;
-            for (ActorSystem system : systemSending) {
-                system.stop(sendingMaster.get(count));
-                count++;
-
-                system.shutdown();
-                system = null;
-            }
-        } catch (Exception e) {
-        }
-
-        try {
-            int count = 0;
-            for (ActorSystem system : systemReceiving) {
-                system.stop(receivingMaster.get(count));
-                count++;
-
-                system.shutdown();
-                system = null;
-            }
-        } catch (Exception e) {
-        }
-
-        System.gc();
-        logger.info("[DESTROY] AkkaBotService shutdownNow destroyed");
     }
 
     public void sendingMsgs(AsyncEsnSendingModel msgs) {
@@ -116,7 +83,35 @@ public class AkkaBotService {
             ActorRef master = randomMaster(sendingMaster);
             master.tell(msgs, master);
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
+    }
+
+    @PreDestroy
+    public void shutdownNow() {
+        log.info("[DESTROY] AkkaBotService shutdownNow cleaning up...");
+
+        try {
+            int count = 0;
+            for (ActorSystem system : systemSending) {
+                system.stop(sendingMaster.get(count));
+                count++;
+                system.shutdown();
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+
+        try {
+            int count = 0;
+            for (ActorSystem system : systemReceiving) {
+                system.stop(receivingMaster.get(count));
+                count++;
+                system.shutdown();
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        log.info("[DESTROY] AkkaBotService shutdownNow destroyed");
     }
 }

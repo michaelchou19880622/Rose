@@ -2,15 +2,13 @@ package com.bcs.core.bot.db.repository;
 
 import com.bcs.core.bot.db.entity.MsgBotReceive;
 import com.bcs.core.db.repository.EntityManagerControl;
-import com.bcs.core.utils.DataUtils;
+import com.bcs.core.db.service.EntityManagerProviderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 
@@ -23,8 +21,8 @@ public class MsgBotReceiveRepositoryImpl {
     @Autowired
     private EntityManagerControl entityManagerControl;
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    @Resource
+    private EntityManagerProviderService providerService;
 
     public void bulkPersist(List<MsgBotReceive> msgReceives) {
         if (CollectionUtils.isEmpty(msgReceives)) {
@@ -46,59 +44,23 @@ public class MsgBotReceiveRepositoryImpl {
      * @param detailTable Detail Table
      * @param detailId    Detail Id
      */
-    @Modifying
     @Transactional(rollbackFor = Exception.class)
-    public synchronized void updatePnpDetailStatus(String detailTable, String detailId) {
+    public void updatePnpDetailStatus(String detailTable, String detailId) {
         try {
-
-            String now = DataUtils.formatDateToString(new Date(), "yyyy-MM-dd HH:mm:ss.SSS");
-            String queryString = String.format(" update %s set " +
-                            " status = '%s'," +
-                            " pnp_status = '%s'," +
-                            " send_time = convert(datetime, '%s', 121)," +
-                            " modify_time = convert(datetime, '%s', 121)," +
-                            " pnp_delivery_time = convert(datetime, '%s', 121) " +
-                            " where pnp_detail_id = '%s';",
-                    detailTable, "PNP_COMPLETE", "PNP_COMPLETE", now, now, now, detailId);
+            String queryString = "UPDATE " + detailTable +
+                    " SET PNP_STATUS='PNP_COMPLETE'," +
+                    " SEND_TIME=:NOW," +
+                    " MODIFY_TIME=:NOW," +
+                    " PNP_DELIVERY_TIME=:NOW" +
+                    " WHERE PNP_DETAIL_ID=" + detailId;
             log.info("queryString:" + queryString);
-            int updateNum = entityManager.createNativeQuery(queryString).executeUpdate();
-            log.info("Update Status Return Int : " + updateNum);
-            entityManager.flush();
-            entityManager.clear();
+            int updateNum = providerService.getEntityManager().createNativeQuery(queryString)
+                    .setParameter("NOW", new Date())
+                    .executeUpdate();
+            log.info("Update Status Return Int : {}, {}", updateNum, detailId);
         } catch (Exception e) {
             log.error("Exception", e);
             throw e;
         }
     }
-
-    /**
-     * 更新PNP Main Table 狀態
-     * 狀態更新為 PNP_COMPLETE
-     *
-     * @param mainTable Detail Table
-     * @param mainId    Detail Id
-     */
-    @Modifying
-    @Transactional(rollbackFor = Exception.class)
-    public synchronized void updatePnpMainStatus(String mainTable, String mainId) {
-        try {
-            String now = DataUtils.formatDateToString(new Date(), "yyyy-MM-dd HH:mm:ss.SSS");
-            String queryString = String.format(" update %s set" +
-                            " status = '%s'," +
-                            " send_time = convert(datetime, '%s', 121)," +
-                            " modify_time = convert(datetime, '%s', 121)" +
-                            " where pnp_main_id = '%s'",
-                    mainTable, "PNP_COMPLETE", now, now, mainId);
-            log.info("queryString:" + queryString);
-            int updateNum = entityManager.createNativeQuery(queryString).executeUpdate();
-            log.info("Update Status Return Int : " + updateNum);
-            entityManager.flush();
-            entityManager.clear();
-        } catch (Exception e) {
-            log.error("Exception", e);
-            throw e;
-        }
-    }
-
-
 }

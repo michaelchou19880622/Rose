@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Alan
@@ -295,5 +296,26 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 .setParameter("STATUS_LIST", statusList)
                 .setParameter("NOW", new Date())
                 .getResultList();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void restoreNotSendDetail(){
+        AtomicInteger i = new AtomicInteger();
+        Arrays.stream(PnpFtpSourceEnum.values()).forEach(type -> {
+            String updateSql = "UPDATE " + type.detailTable +
+                    " SET STATUS=:NEW_STATUS," +
+                    " MODIFY_TIME=:NOW" +
+                    " WHERE STATUS=:OLD_STATUS";
+            log.info(updateSql);
+            i.addAndGet(providerService.getEntityManager().createNativeQuery(updateSql)
+                    .setParameter("OLD_STATUS", PnpStatusEnum.SENDING.value)
+                    .setParameter("NEW_STATUS", PnpStatusEnum.FTP_MAIN_SAVE.value)
+                    .setParameter("NOW", new Date())
+                    .executeUpdate());
+        });
+        if (i.get() > 0) {
+            log.info("Restore PNP detail status sending to wait!! {}", i.get());
+        }
     }
 }

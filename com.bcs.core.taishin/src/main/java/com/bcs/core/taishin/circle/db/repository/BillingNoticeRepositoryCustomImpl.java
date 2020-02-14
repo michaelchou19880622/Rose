@@ -246,4 +246,22 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
                 .getResultList();
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void restoreNotSendDetail() {
+        String updateSql = "UPDATE BCS_BILLING_NOTICE_DETAIL" +
+                " SET STATUS=:NEW_STATUS, MODIFY_TIME=:NOW" +
+                " WHERE STATUS=:OLD_STATUS";
+        log.info(updateSql);
+        int i = entityManager.createNativeQuery(updateSql)
+                .setParameter("OLD_STATUS", BillingNoticeMain.NOTICE_STATUS_SENDING)
+                .setParameter("NEW_STATUS", BillingNoticeMain.NOTICE_STATUS_WAIT)
+                .setParameter("NOW", new Date())
+                .executeUpdate();
+        if (i > 0) {
+            log.info("Restore Billing-Notice detail status sending to wait!! {}", i);
+        }
+
+    }
+
 }

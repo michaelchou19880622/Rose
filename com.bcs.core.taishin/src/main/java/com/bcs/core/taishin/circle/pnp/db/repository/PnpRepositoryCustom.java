@@ -108,4 +108,7 @@ public interface PnpRepositoryCustom {
 
     @Transactional(rollbackFor = Exception.class)
     List<PnpDetail> findDetailByPnpStatusAndExpired(PnpFtpSourceEnum type, List<String> statusList);
+
+    @Transactional(rollbackFor = Exception.class)
+    void restoreNotSendDetail();
 }

@@ -10,8 +10,9 @@ import com.bcs.core.record.service.CatchRecordBinded;
 import com.bcs.core.record.service.CatchRecordOpAddReceive;
 import com.bcs.core.record.service.CatchRecordOpBlockedReceive;
 import com.bcs.core.resource.CoreConfigReader;
+import com.bcs.core.taishin.circle.db.repository.BillingNoticeRepositoryCustom;
+import com.bcs.core.taishin.circle.pnp.db.repository.PnpRepositoryCustom;
 import com.bcs.core.taishin.circle.pnp.scheduler.LoadFtpPnpDataTask;
-import com.bcs.core.taishin.circle.pnp.scheduler.PnpPNPMsgService;
 import com.bcs.core.taishin.circle.pnp.scheduler.PnpPushMsgService;
 import com.bcs.core.taishin.circle.pnp.scheduler.PnpSMSMsgService;
 import com.bcs.core.taishin.circle.service.BillingNoticeFtpService;
@@ -49,10 +50,12 @@ public class InitController {
     private BillingNoticeSendMsgService billingNoticeSendMsgService;
     private LoadFtpPnpDataTask loadFtpPnpDataTask;
     private PnpPushMsgService pnpPushMsgService;
-//    private PnpPNPMsgService pnpMsgService;
+    //    private PnpPNPMsgService pnpMsgService;
     private PnpSMSMsgService pnpSmsMsgService;
     private LinePointSchedulerService linePointschedulerService;
     private SystemLogService systemLogService;
+    private PnpRepositoryCustom pnpRepositoryCustom;
+    private BillingNoticeRepositoryCustom billingNoticeRepositoryCustom;
 //    private ServerInfoService serverInfoService;
 
     @Autowired
@@ -71,8 +74,10 @@ public class InitController {
 //                          PnpPNPMsgService pnpMsgService,
                           PnpSMSMsgService pnpSmsMsgService,
                           LinePointSchedulerService linePointschedulerService,
-                          SystemLogService systemLogService
+                          SystemLogService systemLogService,
 //                          ServerInfoService serverInfoService
+                          PnpRepositoryCustom pnpRepositoryCustom,
+                          BillingNoticeRepositoryCustom billingNoticeRepositoryCustom
     ) {
         this.schedulerService = schedulerService;
         this.interactiveService = interactiveService;
@@ -91,6 +96,8 @@ public class InitController {
         this.linePointschedulerService = linePointschedulerService;
         this.systemLogService = systemLogService;
 //        this.serverInfoService = serverInfoService;
+        this.pnpRepositoryCustom = pnpRepositoryCustom;
+        this.billingNoticeRepositoryCustom = billingNoticeRepositoryCustom;
     }
 
     /**
@@ -104,8 +111,10 @@ public class InitController {
         registerServer();
         loadScheduleFromDb();
         loadInteractiveMap();
+        billingNoticeRepositoryCustom.restoreNotSendDetail();
         billingNoticeFtpServiceStartCircle();
         billingNoticeSendMsgServiceStartCircle();
+        pnpRepositoryCustom.restoreNotSendDetail();
         loadFtpPnpDataTaskStartCircle();
         pnpMsgServiceStartCircle();
         pnpSmsMsgServiceStartCircle();

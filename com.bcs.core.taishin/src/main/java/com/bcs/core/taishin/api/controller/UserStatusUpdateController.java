@@ -77,7 +77,9 @@ public class UserStatusUpdateController {
                 throw new Exception("UidError");
             }
 
-            if (LineUser.STATUS_BINDED.equals(model.getStatus()) || LineUser.STATUS_UNBIND.equals(model.getStatus())) {
+            if (LineUser.STATUS_BINDED.equals(model.getStatus())
+                    || LineUser.STATUS_UNBIND.equals(model.getStatus())
+                    || LineUser.STATUS_SYS_ADD.equals(model.getStatus())) {
                 // Validate
             } else {
                 throw new Exception("StatusError");

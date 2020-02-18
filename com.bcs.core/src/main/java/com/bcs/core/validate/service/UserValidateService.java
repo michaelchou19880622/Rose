@@ -11,27 +11,29 @@ import com.bcs.core.utils.ErrorRecord;
 
 @Service
 public class UserValidateService {
-	@Autowired
-	private LineUserService lineUserService;
-	
-	/** Logger */
-	private static Logger logger = Logger.getLogger(UserValidateService.class);
-	
-	public boolean isBinding(String MID){
-		
-		try{
-			if(StringUtils.isNotBlank(MID)){
-				LineUser lineUser = lineUserService.findByMid(MID);
-				// Validate MID is Binding
-				if(lineUser != null && LineUser.STATUS_BINDED.equals(lineUser.getStatus())){
-					return true;
-				}
-			}
-		}
-		catch(Exception e){
-			logger.error(ErrorRecord.recordError(e));
-		}
-		
-		return false; 
-	}
+    @Autowired
+    private LineUserService lineUserService;
+
+    /**
+     * Logger
+     */
+    private static Logger logger = Logger.getLogger(UserValidateService.class);
+
+    public boolean isBinding(String MID) {
+
+        try {
+            if (StringUtils.isNotBlank(MID)) {
+                LineUser lineUser = lineUserService.findByMid(MID);
+                // Validate MID is Binding
+                if (lineUser != null && (LineUser.STATUS_BINDED.equals(lineUser.getStatus())
+                        || LineUser.STATUS_SYS_ADD.equals(lineUser.getStatus()))) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            logger.error(ErrorRecord.recordError(e));
+        }
+
+        return false;
+    }
 }

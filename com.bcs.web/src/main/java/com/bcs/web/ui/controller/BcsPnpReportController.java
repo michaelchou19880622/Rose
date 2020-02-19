@@ -41,11 +41,12 @@ import java.util.Map;
  * Bcs pnp report controller.
  *
  * @author ???
+ * @author Alan
  */
 @Slf4j(topic = "PnpRecorder")
 @Controller
 @RequestMapping("/bcs/pnpEmployee")
-public class BCSPnpReportController {
+public class BcsPnpReportController {
     private final PnpReportService pnpReportService;
     private final PnpSMSMsgService pnpSMSMsgService;
 
@@ -53,9 +54,33 @@ public class BCSPnpReportController {
      * Instantiates a new Bcs pnp report controller.
      */
     @Autowired
-    public BCSPnpReportController(final PnpReportService pnpReportService, PnpSMSMsgService pnpSMSMsgService) {
+    public BcsPnpReportController(final PnpReportService pnpReportService, PnpSMSMsgService pnpSMSMsgService) {
         this.pnpReportService = pnpReportService;
         this.pnpSMSMsgService = pnpSMSMsgService;
+    }
+
+    /**
+     * Pnp detail report page string.
+     *
+     * @return the string
+     */
+    @WebServiceLog
+    @GetMapping("/pnpDetailReportPage")
+    public String pnpDetailReportPage() {
+        log.info("pnpDetailReportPage");
+        return BcsPageEnum.PNP_DETAIL_REPORT_PAGE.toString();
+    }
+
+    /**
+     * Pnp analysis report page string.
+     *
+     * @return the string
+     */
+    @WebServiceLog
+    @GetMapping("/pnpAnalysisReportPage")
+    public String pnpAnalysisReportPage() {
+        log.info("pnpAnalysisReportPage");
+        return BcsPageEnum.PNP_ANALYSIS_REPORT_PAGE.toString();
     }
 
     @WebServiceLog
@@ -77,17 +102,6 @@ public class BCSPnpReportController {
         return new ResponseEntity<>(isSuccess, HttpStatus.OK);
     }
 
-    /**
-     * Pnp detail report page string.
-     *
-     * @return the string
-     */
-    @WebServiceLog
-    @GetMapping("/pnpDetailReportPage")
-    public String pnpDetailReportPage() {
-        log.info("pnpDetailReportPage");
-        return BcsPageEnum.PnpDetailReportPage.toString();
-    }
 
     @WebServiceLog
     @PostMapping(value = "/getPNPDetailReport", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -116,7 +130,6 @@ public class BCSPnpReportController {
     @ResponseBody
     public ResponseEntity<?> getPnpDetailReportTotalPages(@CurrentUser final CustomUser customUser,
                                                           @RequestBody final PnpDetailReportParam param) {
-
         try {
             param.setEmployeeId(customUser.getAccount().toUpperCase());
             final List<PnpDetailReport> result = pnpReportService.getPnpDetailReportList(customUser, param);

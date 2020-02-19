@@ -60,9 +60,9 @@ public class UserStatusUpdateController {
     @RequestMapping(method = RequestMethod.POST, value = "/userStatusUpdate/{ChannelId}",
             consumes = MediaType.APPLICATION_JSON_VALUE + "; charset=UTF-8")
     public ResponseEntity<?> userStatusUpdate(@RequestBody String updateModel, @PathVariable String ChannelId, HttpServletRequest request, HttpServletResponse response) {
-        logger.debug("-------userStatusUpdate-------");
+        logger.info("-------userStatusUpdate-------");
         Date start = new Date();
-        logger.debug("updateModel:" + updateModel);
+        logger.info("updateModel:" + updateModel);
 
         String error = "";
 
@@ -80,14 +80,14 @@ public class UserStatusUpdateController {
             if (LineUser.STATUS_BINDED.equals(model.getStatus())
                     || LineUser.STATUS_UNBIND.equals(model.getStatus())
                     || LineUser.STATUS_SYS_ADD.equals(model.getStatus())) {
-                // Validate
+                logger.info("User status equal binded or unbind or system-add!!");
             } else {
                 throw new Exception("StatusError");
             }
 
             richartValidateService.bindedLineUser(model);
 
-            logger.debug("-------userStatusUpdate Success-------");
+            logger.info("-------userStatusUpdate Success-------");
             response.setStatus(200);
             SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_BcsApi, LOG_TARGET_ACTION_TYPE.ACTION_BcsApi_UpdateStatus, start, 200, updateModel, "200");
             return new ResponseEntity<>(createResult(200, "Success"), HttpStatus.OK);
@@ -95,7 +95,7 @@ public class UserStatusUpdateController {
             error = e.getMessage();
             logger.error(ErrorRecord.recordError(e));
         }
-        logger.debug("-------userStatusUpdate Fail-------");
+        logger.info("-------userStatusUpdate Fail-------");
         response.setStatus(500);
         SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_BcsApi, LOG_TARGET_ACTION_TYPE.ACTION_BcsApi_UpdateStatus, start, 500, updateModel, "500");
         return new ResponseEntity<>(createResult(500, error), HttpStatus.INTERNAL_SERVER_ERROR);

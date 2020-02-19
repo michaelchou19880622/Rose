@@ -53,6 +53,7 @@ public class RichartValidateService {
             throw new Exception("StatusError:" + model.getStatus());
         }
 
+        //TODO 目前使用Taishin MLBC的時間，未來確認是否有相關用途，如無可更改為現在時間
         Date date = new Date(model.getTime());
 
         LineUser lineUser = lineUserService.findByMid(uid);

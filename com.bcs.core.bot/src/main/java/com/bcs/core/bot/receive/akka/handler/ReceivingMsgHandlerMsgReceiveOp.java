@@ -32,42 +32,51 @@ import java.util.Objects;
 public class ReceivingMsgHandlerMsgReceiveOp extends UntypedActor {
 
     @Override
-    @SuppressWarnings("unchecked")
     public void onReceive(Object message) {
-        log.debug("-------Get Operation Save-------");
-
+        log.info("-------Get Operation Save-------");
         if (message instanceof Map) {
-            Map<String, Object> map = (Map<String, Object>) message;
-            MsgBotReceive receive = (MsgBotReceive) map.get("Content");
-            receive.setReferenceId(Objects.toString(map.get("iMsgId")));
-
-            final String MID = receive.getSourceId();
-            log.info("MID: {}", MID);
-
-            if (MsgBotReceive.EVENT_TYPE_FOLLOW.equals(receive.getEventType())) {
-                ApplicationContextProvider.getApplicationContext().getBean(CatchRecordOpAddReceive.class).incrementCount();
-            } else if (MsgBotReceive.EVENT_TYPE_UNFOLLOW.equals(receive.getEventType())) {
-                ApplicationContextProvider.getApplicationContext().getBean(CatchRecordOpBlockedReceive.class).incrementCount();
-            }
-
-
-            final Date NOW = new Date();
-            if (MsgBotReceive.EVENT_TYPE_FOLLOW.equals(receive.getEventType())) {
-                newFriend(receive, MID, NOW);
-            } else if (MsgBotReceive.EVENT_TYPE_UNFOLLOW.equals(receive.getEventType())) {
-                blockFriend(receive, MID, NOW);
-            }
-
-            /* Save Record */
-            try {
-                ApplicationContextProvider.getApplicationContext().getBean(MsgBotReceiveService.class).bulkPersist(receive);
-            } catch (Exception e) {
-                log.error(ErrorRecord.recordError(e));
-            }
+            mapProcess(message);
         }
         ReceivingMsgHandlerMaster.taskCount.addAndGet(-1L);
         ReceivingMsgHandlerMaster.updateDate = Calendar.getInstance().getTime();
-        log.debug("-------Get Operation Save End-------");
+        log.info("-------Get Operation Save End-------");
+    }
+
+    /**
+     * 標準綁定及封鎖處理程序(經由LineChannel)
+     * @param message message map
+     */
+    @SuppressWarnings("unchecked")
+    private void mapProcess(Object message) {
+        Map<String, Object> map = (Map<String, Object>)message;
+        MsgBotReceive receive = (MsgBotReceive) map.get("Content");
+        receive.setReferenceId(Objects.toString(map.get("iMsgId")));
+
+        final String mid = receive.getSourceId();
+        log.info("MID: {}", mid);
+
+        /* Increment Count */
+        if (MsgBotReceive.EVENT_TYPE_FOLLOW.equals(receive.getEventType())) {
+            ApplicationContextProvider.getApplicationContext().getBean(CatchRecordOpAddReceive.class).incrementCount();
+        } else if (MsgBotReceive.EVENT_TYPE_UNFOLLOW.equals(receive.getEventType())) {
+            ApplicationContextProvider.getApplicationContext().getBean(CatchRecordOpBlockedReceive.class).incrementCount();
+        }
+
+        /* Update User or new user */
+        log.info("Event type is {}", receive.getEventType());
+        final Date now = new Date();
+        if (MsgBotReceive.EVENT_TYPE_FOLLOW.equals(receive.getEventType())) {
+            newFriend(receive, mid, now);
+        } else if (MsgBotReceive.EVENT_TYPE_UNFOLLOW.equals(receive.getEventType())) {
+            blockFriend(receive, mid, now);
+        }
+
+        /* Save Record */
+        try {
+            ApplicationContextProvider.getApplicationContext().getBean(MsgBotReceiveService.class).bulkPersist(receive);
+        } catch (Exception e) {
+            log.error(ErrorRecord.recordError(e));
+        }
     }
 
     /**
@@ -143,23 +152,21 @@ public class ReceivingMsgHandlerMsgReceiveOp extends UntypedActor {
 
         log.debug("channelId:" + channelId);
         log.debug("apiType:" + apiType);
-        final String MID = content.getSourceId();
-        log.debug("MID:" + MID);
+        final String mid = content.getSourceId();
+        log.info("MID:" + mid);
         try {
             // 新增好友
             if (MsgBotReceive.EVENT_TYPE_FOLLOW.equals(content.getEventType())) {
 
                 // 取得 關鍵字回應 設定
                 Long iMsgId = interactiveService.getWelcomeResponse();
-                log.debug("Get Welcome iMsgId:" + iMsgId);
+                log.info("Get Welcome iMsgId:" + iMsgId);
 
                 if (iMsgId != null) {
                     String replyToken = content.getReplyToken();
                     // 傳送 關鍵字回應
                     List<MsgDetail> details = interactiveService.getMsgDetails(iMsgId);
-                    ApplicationContextProvider.getApplicationContext().getBean(SendingMsgService.class).sendMatchMessage(replyToken, iMsgId, details, channelId, MID, apiType, null);
-
-                    // 記錄自動回應 iMsgId
+                    ApplicationContextProvider.getApplicationContext().getBean(SendingMsgService.class).sendMatchMessage(replyToken, iMsgId, details, channelId, mid, apiType, null);
                     return iMsgId;
                 }
             }

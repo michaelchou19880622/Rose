@@ -221,6 +221,7 @@ public class MobileTracingController extends BCSBaseController {
         boolean isbinded = userValidateService.isBinding(sessionMID);
 
         if (isbinded) {
+            logger.info("User is binded!!");
             String linkUrl = contentLinkBinded.getLinkUrl();
             boolean isBcsPage = UriHelper.checkIsBcsPage(linkUrl);
 
@@ -230,6 +231,7 @@ public class MobileTracingController extends BCSBaseController {
                 return linkUrl;
             }
         } else {
+            logger.info("User is not binded!!");
             String linkUrl = contentLink.getLinkUrl();
             boolean isBcsPage = UriHelper.checkIsBcsPage(linkUrl);
 

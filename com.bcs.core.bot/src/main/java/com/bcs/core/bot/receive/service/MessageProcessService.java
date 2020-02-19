@@ -310,6 +310,7 @@ public class MessageProcessService {
 				JSONObject message = messageList.getJSONObject(index);
 				String messageType = message.getString("type");
 
+				//FIXME 可能會有長度爆掉的地方
 				record.setMsgType(messageType);
 				record.setUID(UID);
 				record.setReplyToken(replyMessageObject.getString("replyToken"));
@@ -318,6 +319,7 @@ public class MessageProcessService {
 
 				switch(messageType) {
 					case BotReplyRecord.MESSAGE_TYPE_TEXT:
+						//FIXME 可能會有長度爆掉的地方
 						record.setMsgText(message.getString("text"));
 						break;
 					case BotReplyRecord.MESSAGE_TYPE_STICKER:
@@ -325,21 +327,26 @@ public class MessageProcessService {
 						break;
 					case BotReplyRecord.MESSAGE_TYPE_IMAGE:
 						record.setMsgText("[圖片]");
+						//FIXME 可能會有長度爆掉的地方
 						record.setReferenceLinkUrl(message.getString("originalContentUrl"));
 						break;
 					case BotReplyRecord.MESSAGE_TYPE_VIDEO:
 						record.setMsgText("[影片]");
+						//FIXME 可能會有長度爆掉的地方
 						record.setReferenceLinkUrl(message.getString("originalContentUrl"));
 						break;
 					case BotReplyRecord.MESSAGE_TYPE_AUDIO:
 						record.setMsgText("[音訊]");
+						//FIXME 可能會有長度爆掉的地方
 						record.setReferenceLinkUrl(message.getString("originalContentUrl"));
 						break;
 					case BotReplyRecord.MESSAGE_TYPE_LOCATION:
 						record.setMsgText("[位置]");
+						//FIXME 可能會有長度爆掉的地方
 						record.setLocation(message.getString("latitude") + ", " + message.getString("longitude"));
 						break;
 					case BotReplyRecord.MESSAGE_TYPE_TEMPLATE:
+						//FIXME 可能會有長度爆掉的地方
 						if(!message.getJSONObject("template").isNull("title"))
 							record.setMsgText(message.getJSONObject("template").getString("title") + " " + message.getJSONObject("template").getString("text"));
 						else
@@ -347,6 +354,7 @@ public class MessageProcessService {
 						break;
 					case BotReplyRecord.MESSAGE_TYPE_IMAGEMAP:
 						record.setMsgText("[圖文訊息]");
+						//FIXME 可能會有長度爆掉的地方
 						record.setReferenceLinkUrl(message.getString("baseUrl"));
 						break;
 				}

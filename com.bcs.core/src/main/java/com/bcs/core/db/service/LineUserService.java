@@ -94,6 +94,29 @@ public class LineUserService {
             Date time = new Date();
             lineUser = new LineUser();
             lineUser.setMid(mid);
+            lineUser.setStatus(LineUser.STATUS_BINDED);
+            lineUser.setIsBinded(LineUser.STATUS_UNBIND);
+            lineUser.setModifyTime(time);
+            lineUser.setCreateTime(time);
+            lineUser.setSoureType("user");
+            save(lineUser);
+        }
+        return lineUser;
+    }
+
+
+    /**
+     * Find by mid and create unbind line user.
+     *
+     * @param mid the mid
+     * @return the line user
+     */
+    public LineUser findByMidAndCreateSysAdd(String mid) {
+        LineUser lineUser = findByMid(mid);
+        if (lineUser == null) {
+            Date time = new Date();
+            lineUser = new LineUser();
+            lineUser.setMid(mid);
             lineUser.setStatus(LineUser.STATUS_SYS_ADD);
             lineUser.setIsBinded(LineUser.STATUS_UNBIND);
             lineUser.setModifyTime(time);

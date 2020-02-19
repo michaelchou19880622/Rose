@@ -24,6 +24,7 @@ public class UserValidateService {
         try {
             if (StringUtils.isNotBlank(MID)) {
                 LineUser lineUser = lineUserService.findByMid(MID);
+                logger.info("User: " + lineUser);
                 // Validate MID is Binding
                 if (lineUser != null && (LineUser.STATUS_BINDED.equals(lineUser.getStatus())
                         || LineUser.STATUS_SYS_ADD.equals(lineUser.getStatus()))) {

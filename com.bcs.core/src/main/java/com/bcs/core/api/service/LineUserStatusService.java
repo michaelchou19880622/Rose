@@ -27,7 +27,7 @@ public class LineUserStatusService {
     private static Logger logger = Logger.getLogger(LineUserStatusService.class);
 
     public void callLineUserStatusAPI(String uid, String status, long time) {
-        logger.debug("callLineUserStatusAPI");
+        logger.info("callLineUserStatusAPI");
 
         try (CloseableHttpClient httpClient = HttpClientUtil.getSingleInstance()) {
 
@@ -36,7 +36,7 @@ public class LineUserStatusService {
             HttpPost request = new HttpPost(uri);
             request.addHeader("content-type", "application/json;charset=utf-8");
 
-            logger.debug("URI : " + request.getURI());
+            logger.info("URI : " + request.getURI());
 
             ObjectMapper mapper = new ObjectMapper();
             ObjectNode node = mapper.createObjectNode();
@@ -51,20 +51,20 @@ public class LineUserStatusService {
             HttpResponse clientResponse = httpClient.execute(request);
 
             int httpStatus = clientResponse.getStatusLine().getStatusCode();
-            logger.debug("clientResponse StatusCode : " + httpStatus);
+            logger.info("clientResponse StatusCode : " + httpStatus);
 
             String result = "";
             if (clientResponse.getEntity() != null && clientResponse.getEntity().getContent() != null) {
                 result += InputStreamUtil.getInputStr(clientResponse.getEntity().getContent());
             }
-            logger.debug("clientResponse result : " + result);
+            logger.info("clientResponse result : " + result);
 
             if (httpStatus == HttpStatus.OK.value()) {
                 JsonNode resultNode = mapper.readTree(result);
                 String resultStr = resultNode.get("result").toString();
                 logger.info("resultStr=" + resultStr);
                 if ("0".equals(resultStr)) {
-                    logger.debug("更新失敗:" + resultNode.get("uid"));
+                    logger.info("更新失敗:" + resultNode.get("uid"));
                     SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.ACTION_RICHART_API, LOG_TARGET_ACTION_TYPE.ACTION_SendToRichartApiStatus, result, resultNode.get("uid").toString());
                 }
             }

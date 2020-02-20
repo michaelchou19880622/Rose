@@ -1,40 +1,44 @@
 package com.bcs.core.validate.service;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.bcs.core.db.entity.LineUser;
 import com.bcs.core.db.service.LineUserService;
 import com.bcs.core.utils.ErrorRecord;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+/**
+ * User validate service
+ * @author Jessie Wang
+ * @author Alan
+ */
+@Slf4j
 @Service
 public class UserValidateService {
     @Autowired
     private LineUserService lineUserService;
 
     /**
-     * Logger
+     * User is bound
+     *
+     * @param mid mid
+     * @return is bound
      */
-    private static Logger logger = Logger.getLogger(UserValidateService.class);
-
-    public boolean isBinding(String MID) {
-
-        try {
-            if (StringUtils.isNotBlank(MID)) {
-                LineUser lineUser = lineUserService.findByMid(MID);
-                logger.info("User: " + lineUser);
-                // Validate MID is Binding
-                if (lineUser != null && (LineUser.STATUS_BINDED.equals(lineUser.getStatus())
-                        || LineUser.STATUS_SYS_ADD.equals(lineUser.getStatus()))) {
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+    public boolean isBound(String mid) {
+        if (StringUtils.isBlank(mid)) {
+            return false;
         }
-
-        return false;
+        try {
+            LineUser lineUser = lineUserService.findByMid(mid);
+            if (lineUser == null) {
+                return false;
+            }
+            log.info("User: " + lineUser);
+            return LineUser.STATUS_BINDED.equals(lineUser.getStatus());
+        } catch (Exception e) {
+            log.error(ErrorRecord.recordError(e));
+            return false;
+        }
     }
 }

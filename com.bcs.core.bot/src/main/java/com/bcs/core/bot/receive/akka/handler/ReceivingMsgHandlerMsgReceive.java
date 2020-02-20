@@ -27,6 +27,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
+import javax.sound.sampled.Line;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -112,58 +113,49 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
         logger.info("ApiType:" + ApiType);
         logger.info("MID:" + mid);
 
-        Map<Long, List<MsgDetail>> result = new HashMap<>();
+        Map<Long, List<MsgDetail>> result;
 
         try {
             //FIXME Change find user method to sysAdd
             LineUser lineUser = lineUserService.findByMidAndCreateSysAdd(mid);
             logger.info("lineUser = " + lineUser);
 
+            /* For keyword process condition */
             String userStatus = LineUser.STATUS_UNBIND;
-
             if (lineUser != null) {
-                userStatus = lineUser.getStatus();
+                userStatus = LineUser.STATUS_SYS_ADD.equals(lineUser.getStatus())
+                        ? LineUser.STATUS_UNBIND
+                        : lineUser.getStatus();
             }
 
-            logger.info("userStatus = " + userStatus);
+            logger.info("User status for keyword process: " + userStatus);
 
             if (MsgBotReceive.EVENT_TYPE_POSTBACK.equals(content.getEventType())) {
                 text = content.getPostbackData();
 
                 if (text.contains("action=")) {
                     String switchAction = text.split("action=")[1];
-
                     liveChatService.handleSwitchAction(switchAction, ChannelId, mid, replyToken);
-
                     return -3L;
                 } else if (text.contains("category=")) {
                     String category = text.split("category=")[1];
-
                     liveChatService.startProcess(ChannelId, replyToken, mid, category);
-
                     return -3L;
                 } else if (text.contains("waitingAction=")) {
                     String waitingAction = text.split("waitingAction=")[1];
-
                     liveChatService.handleWaitingAction(waitingAction, mid);
-
                     return -3L;
                 } else if (text.contains("leaveMessageAction=")) {
                     String leaveMessageAction = text.split("leaveMessageAction=")[1];
-
                     logger.info(">>> 使用者選擇：" + leaveMessageAction);
-
                     liveChatService.handleLeaveMessageAction(leaveMessageAction, ChannelId, mid, replyToken);
-
                     return -3L;
                 } else if (text.contains("leaveMsgCategory=")) {
                     String leaveMsgCategory = text.split("leaveMsgCategory=")[1];
-
                     liveChatService.leaveMessage(ChannelId, replyToken, leaveMsgCategory, mid);
-
                     return -3L;
                 } else {
-                    /* 將其餘的 Postback Event Data 丟給 Pepper GW */
+                    logger.info("Not match any!! Post back event data to Pepper gateway!!");
                 }
             }
 
@@ -191,6 +183,7 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
                 logger.info("result.size() = " + result.size());
                 if (result.size() == 0) {
                     // 取得 關鍵字回應 設定
+                    //FIXME Use user status for what?
                     result = interactiveService.getMatchKeyword(mid, userStatus, text);
                 }
 
@@ -221,6 +214,7 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
                     }
                 } else {
                     // 紀錄 是否 黑名單選擇
+                    //FIXME Use user status for what?
                     Long iMsgIdBlack = interactiveService.getMatchBlackKeywordMsgId(userStatus, text);
                     if (iMsgIdBlack != null) {
                         // Update 關鍵字回應 記數
@@ -250,6 +244,7 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
                     }
                 }
             } else {
+                //FIXME Use user status for what?
                 MsgInteractiveMain main = interactiveService.getAutoResponse(mid, userStatus);
                 logger.info("main = " + main);
 

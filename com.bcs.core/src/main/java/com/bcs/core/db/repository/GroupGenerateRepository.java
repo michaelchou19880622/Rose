@@ -153,8 +153,6 @@ public class GroupGenerateRepository {
             }
         }
 
-        sb.append(") as main");
-
         log.info(sb.toString());
 
         if (StringUtils.isBlank(sb)) {

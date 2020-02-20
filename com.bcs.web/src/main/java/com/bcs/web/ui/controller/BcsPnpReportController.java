@@ -102,6 +102,22 @@ public class BcsPnpReportController {
         return new ResponseEntity<>(isSuccess, HttpStatus.OK);
     }
 
+    @WebServiceLog
+    @PostMapping(value = "/getPNPAnalysisReport", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> getPnpAnalysisReport(@CurrentUser final CustomUser customUser,
+                                                @RequestBody final PnpDetailReportParam param) {
+        try {
+            param.setEmployeeId(customUser.getAccount().toUpperCase());
+            final List<PnpDetailReport> result = pnpReportService.getPnpDetailReportList(customUser, param);
+            log.info(DataUtils.toPrettyJsonUseJackson(result));
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (final Exception e) {
+            log.error("Exception", e);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
     @WebServiceLog
     @PostMapping(value = "/getPNPDetailReport", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

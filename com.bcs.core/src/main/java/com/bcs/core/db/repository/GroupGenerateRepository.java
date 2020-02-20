@@ -124,7 +124,7 @@ public class GroupGenerateRepository {
                 sb.append(", ");
                 sb.append(generateUploadMidSettingFrom(uploadMidSetting, sendGroupDetails.size() * 2 + 1));
             } else {
-//                selectColumns = selectColumns.replace("MID", "SETMID");
+                sb = new StringBuilder();
                 sb.append(String.format(" SELECT %s FROM", selectColumns));
                 sb.append(generateUploadMidSettingFrom(uploadMidSetting, 1));
                 if (StringUtils.isNotBlank(mid)) {

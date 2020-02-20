@@ -88,9 +88,9 @@ public class LogAspect {
                     .functionName(description).queryString(methodName).data(objectListData).clientIp(ip)
                     .userId(accountAndMid).functionStatus(LogApiModel.SUCCESS).build();
 
-            if (accountAndMid != null && ip != null) {
-                richartAkkaService.excuteLogApi(logApiModel);
-            }
+//            if (accountAndMid != null && ip != null) {
+//                richartAkkaService.excuteLogApi(logApiModel);
+//            }
 
             logger.info("=====前置通知结束=====");
         } catch (Exception e) {

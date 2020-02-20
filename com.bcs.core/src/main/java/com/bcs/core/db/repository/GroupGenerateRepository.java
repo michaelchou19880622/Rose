@@ -42,7 +42,7 @@ public class GroupGenerateRepository {
             return (BigInteger) result;
         } else if (result instanceof Integer) {
             log.debug("findMidCountBySendGroupDetail : Integer:" + result);
-            return BigInteger.valueOf((long) result);
+            return BigInteger.valueOf(Long.parseLong(result.toString()));
         } else {
             return BigInteger.ZERO;
         }

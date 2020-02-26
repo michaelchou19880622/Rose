@@ -106,7 +106,7 @@ public class BcsPnpReportController {
     @PostMapping(value = "/getPNPAnalysisReport", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public ResponseEntity<?> getPnpAnalysisReport(@CurrentUser final CustomUser customUser,
-                                                @RequestBody final PnpDetailReportParam param) {
+                                                  @RequestBody final PnpDetailReportParam param) {
         try {
             param.setEmployeeId(customUser.getAccount().toUpperCase());
             final List<PnpDetailReport> result = pnpReportService.getPnpDetailReportList(customUser, param);
@@ -197,15 +197,27 @@ public class BcsPnpReportController {
 
     private Map<Integer, String> getBodyMap(final PnpDetailReport r, final int columnSize) {
         final Map<Integer, String> row = new LinkedHashMap<>(columnSize);
-        row.put(0, r.getId());
+        if (r.getMainId() != null && r.getDetailId() != null) {
+            row.put(0, r.getMainId() + "." + r.getDetailId());
+        } else {
+            row.put(0, "");
+        }
         row.put(1, r.getSourceSystem());
         row.put(2, r.getProcessFlow());
         row.put(3, r.getProcessStage() + '_' + r.getFtpSource());
         row.put(4, r.getAccount());
         row.put(5, r.getPccCode());
-        row.put(6, r.getMainId());
+        if (r.getMainId() != null) {
+            row.put(6, Long.toString(r.getMainId()));
+        } else {
+            row.put(6, "");
+        }
         row.put(7, r.getSn());
-        row.put(8, r.getTemplate());
+        if (r.getTemplateId() != null) {
+            row.put(8, Long.toString(r.getTemplateId()));
+        } else {
+            row.put(8, "");
+        }
         row.put(9, r.getMessage());
         row.put(10, r.getMessagePoint() == null ? null : r.getMessagePoint().toString());
         row.put(11, r.getCampaignId());

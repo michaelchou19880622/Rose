@@ -101,7 +101,7 @@ public class PnpReportService {
                 " BC_HTTP_STATUS_CODE," +
                 " PNP_HTTP_STATUS_CODE," +
                 " SN," +
-                " TEMPLATE," +
+                " TEMPLATE_ID," +
                 " MAIN_ID," +
                 " DETAIL_ID," +
                 " MESSAGE_POINT," +
@@ -124,7 +124,8 @@ public class PnpReportService {
                 " FROM (" +
                 "  (" +
                 "    SELECT" +
-                "      CONCAT(D.PNP_MAIN_ID, '.', D.PNP_DETAIL_ID) AS ID," +
+//                "      CONCAT(D.PNP_MAIN_ID, '.', D.PNP_DETAIL_ID) AS ID," +
+                "      D.PNP_DETAIL_ID as ID," +
                 "      D.PROC_FLOW AS PROCESS_FLOW," +
                 "      D.PROC_STAGE AS PROCESS_STAGE," +
                 "      D.SOURCE AS FTP_SOURCE," +
@@ -139,7 +140,7 @@ public class PnpReportService {
                 "      D.BC_HTTP_STATUS_CODE AS BC_HTTP_STATUS_CODE," +
                 "      D.PNP_HTTP_STATUS_CODE AS PNP_HTTP_STATUS_CODE," +
                 "      D.DEST_NAME AS SN," +
-                "      D.FLEX_TEMPLATE_ID AS TEMPLATE," +
+                "      D.FLEX_TEMPLATE_ID AS TEMPLATE_ID," +
                 "      CONVERT(VARCHAR, D.PNP_MAIN_ID) AS MAIN_ID," +
                 "      CONVERT(VARCHAR, D.PNP_DETAIL_ID) AS DETAIL_ID," +
                 "      1 AS MESSAGE_POINT," +
@@ -166,7 +167,8 @@ public class PnpReportService {
                 "  UNION ALL" +
                 "  (" +
                 "    SELECT" +
-                "      CONCAT(D.PNP_MAIN_ID, '.', D.PNP_DETAIL_ID) AS ID," +
+//                "      CONCAT(D.PNP_MAIN_ID, '.', D.PNP_DETAIL_ID) AS ID," +
+                "      D.PNP_DETAIL_ID as ID," +
                 "      D.PROC_FLOW AS PROCESS_FLOW," +
                 "      D.PROC_STAGE AS PROCESS_STAGE," +
                 "      D.SOURCE AS FTP_SOURCE," +
@@ -181,7 +183,7 @@ public class PnpReportService {
                 "      D.BC_HTTP_STATUS_CODE AS BC_HTTP_STATUS_CODE," +
                 "      D.PNP_HTTP_STATUS_CODE AS PNP_HTTP_STATUS_CODE," +
                 "      D.SN AS SN," +
-                "      D.FLEX_TEMPLATE_ID AS TEMPLATE," +
+                "      D.FLEX_TEMPLATE_ID AS TEMPLATE_ID," +
                 "      CONVERT(VARCHAR, D.PNP_MAIN_ID) AS MAIN_ID," +
                 "      CONVERT(VARCHAR, D.PNP_DETAIL_ID) AS DETAIL_ID," +
                 "      1 AS MESSAGE_POINT," +
@@ -208,7 +210,8 @@ public class PnpReportService {
                 "  UNION ALL" +
                 "  (" +
                 "    SELECT" +
-                "      CONCAT(D.PNP_MAIN_ID, '.', D.PNP_DETAIL_ID) AS ID," +
+//                "      CONCAT(D.PNP_MAIN_ID, '.', D.PNP_DETAIL_ID) AS ID," +
+                "      D.PNP_DETAIL_ID as ID," +
                 "      D.PROC_FLOW AS PROCESS_FLOW," +
                 "      D.PROC_STAGE AS PROCESS_STAGE," +
                 "      D.SOURCE AS FTP_SOURCE," +
@@ -223,7 +226,7 @@ public class PnpReportService {
                 "      D.BC_HTTP_STATUS_CODE AS BC_HTTP_STATUS_CODE," +
                 "      D.PNP_HTTP_STATUS_CODE AS PNP_HTTP_STATUS_CODE," +
                 "      D.SN AS SN," +
-                "      D.FLEX_TEMPLATE_ID  AS TEMPLATE," +
+                "      D.FLEX_TEMPLATE_ID  AS TEMPLATE_ID," +
                 "      CONVERT(VARCHAR, D.PNP_MAIN_ID) AS MAIN_ID," +
                 "      CONVERT(VARCHAR, D.PNP_DETAIL_ID) AS DETAIL_ID," +
                 "      1 AS MESSAGE_POINT," +
@@ -250,7 +253,8 @@ public class PnpReportService {
                 "  UNION ALL" +
                 "  (" +
                 "    SELECT" +
-                "      CONCAT(D.PNP_MAIN_ID, '.', D.PNP_DETAIL_ID) AS ID," +
+//                "      CONCAT(D.PNP_MAIN_ID, '.', D.PNP_DETAIL_ID) AS ID," +
+                "      D.PNP_DETAIL_ID as ID," +
                 "      D.PROC_FLOW AS PROCESS_FLOW," +
                 "      D.PROC_STAGE AS PROCESS_STAGE," +
                 "      D.SOURCE AS FTP_SOURCE," +
@@ -265,7 +269,7 @@ public class PnpReportService {
                 "      D.BC_HTTP_STATUS_CODE AS BC_HTTP_STATUS_CODE," +
                 "      D.PNP_HTTP_STATUS_CODE AS PNP_HTTP_STATUS_CODE," +
                 "      D.SN AS SN," +
-                "      D.FLEX_TEMPLATE_ID  AS TEMPLATE," +
+                "      D.FLEX_TEMPLATE_ID AS TEMPLATE_ID," +
                 "      CONVERT(VARCHAR, D.PNP_MAIN_ID) AS MAIN_ID," +
                 "      CONVERT(VARCHAR, D.PNP_DETAIL_ID) AS DETAIL_ID," +
                 "      1 AS MESSAGE_POINT," +

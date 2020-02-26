@@ -36,6 +36,7 @@ public class PushApiController {
     public ResponseEntity<?> pushMessage(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBodyString) {
         try {
             logger.info("-------------------- pushMessage --------------------");
+            logger.info("[pushMessage] Request body: " + requestBodyString);
 
             if (request.getHeader(HttpHeaders.AUTHORIZATION) == null) {
                 return new ResponseEntity<>("{\"result\": 0, \"msg\": \"Missing 'Authorization' header.\"}", HttpStatus.BAD_REQUEST);
@@ -56,7 +57,6 @@ public class PushApiController {
                 }
             }
 
-            logger.info("[pushMessage] Request body: " + requestBodyString);
 
             PushApiModel pushApiModel = new PushApiModel();
 

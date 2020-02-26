@@ -10,6 +10,7 @@ import com.bcs.core.log.util.UserTraceLogUtil;
 import com.bcs.core.record.service.CatchRecordBinded;
 import com.bcs.core.taishin.api.model.UpdateStatusFieldModel;
 import com.bcs.core.taishin.api.model.UpdateStatusModel;
+import com.bcs.core.utils.DataUtils;
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.utils.LineIdUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -60,7 +61,6 @@ public class RichartValidateService {
         if (lineUser == null) {
             lineUser = new LineUser();
         }
-
         lineUser.setMid(uid);
         lineUser.setStatus(lineUser.getStatus().equals(LineUser.STATUS_BLOCK) ? lineUser.getStatus() : model.getStatus());
         lineUser.setIsBinded(model.getStatus());
@@ -70,13 +70,16 @@ public class RichartValidateService {
         if (lineUser.getCreateTime() == null) {
             lineUser.setCreateTime(date);
         }
+        lineUserService.save(lineUser);
+        logger.info("After save user: " + DataUtils.toPrettyJsonUseJackson(lineUser));
+
         List<UserFieldSet> exsitedUserFieldSets = userFieldSetService.findByMid(uid);
 
         // Save UpdateStatusFieldModel
         List<UpdateStatusFieldModel> fields = model.getField();
         if (fields != null && fields.size() > 0) {
             for (int i = 0; i < fields.size(); i++) {
-                Boolean isExsited = false;
+                boolean isExsited = false;
                 UpdateStatusFieldModel field = fields.get(i);
                 if (StringUtils.isBlank(field.getKey())) {
                     throw new Exception("FieldError:[" + i + "]:KeyNull");
@@ -91,17 +94,20 @@ public class RichartValidateService {
                     throw new Exception("FieldError:[" + i + "]:ValueNull");
                 }
 
-                for (UserFieldSet exsitedUserFieldSet : exsitedUserFieldSets) {//更新已存在相同KEY的資料
+                //更新資料
+                //更新已存在相同KEY的資料
+                for (UserFieldSet exsitedUserFieldSet : exsitedUserFieldSets) {
                     if (exsitedUserFieldSet.getKeyData().equals(field.getKey().toUpperCase())) {
                         exsitedUserFieldSet.setValue(field.getValue());
                         exsitedUserFieldSet.setSetTime(date);
+                        exsitedUserFieldSet.setFormat("API");
                         userFieldSetService.save(exsitedUserFieldSet);
                         isExsited = true;
                         break;
                     }
                 }
-
-                if (!isExsited) {//新增資料
+                //新增資料
+                if (!isExsited) {
                     UserFieldSet set = new UserFieldSet();
                     set.setKeyData(field.getKey().toUpperCase());
                     set.setName(field.getName());
@@ -109,11 +115,11 @@ public class RichartValidateService {
                     set.setType(field.getType());
                     set.setMid(uid);
                     set.setValue(field.getValue());
+                    set.setFormat("API");
                     userFieldSetService.save(set);
                 }
             }
         }
-        lineUserService.save(lineUser);
         UserTraceLogUtil.saveLogTrace(LOG_TARGET_ACTION_TYPE.TARGET_LineUser, LOG_TARGET_ACTION_TYPE.ACTION_Binded, uid, lineUser, uid);
         // Catch Record Binded
         catchRecordBinded.incrementCount();

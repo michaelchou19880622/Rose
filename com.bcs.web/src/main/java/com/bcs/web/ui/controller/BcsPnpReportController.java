@@ -41,11 +41,12 @@ import java.util.Map;
  * Bcs pnp report controller.
  *
  * @author ???
+ * @author Alan
  */
 @Slf4j(topic = "PnpRecorder")
 @Controller
 @RequestMapping("/bcs/pnpEmployee")
-public class BCSPnpReportController {
+public class BcsPnpReportController {
     private final PnpReportService pnpReportService;
     private final PnpSMSMsgService pnpSMSMsgService;
 
@@ -53,9 +54,33 @@ public class BCSPnpReportController {
      * Instantiates a new Bcs pnp report controller.
      */
     @Autowired
-    public BCSPnpReportController(final PnpReportService pnpReportService, PnpSMSMsgService pnpSMSMsgService) {
+    public BcsPnpReportController(final PnpReportService pnpReportService, PnpSMSMsgService pnpSMSMsgService) {
         this.pnpReportService = pnpReportService;
         this.pnpSMSMsgService = pnpSMSMsgService;
+    }
+
+    /**
+     * Pnp detail report page string.
+     *
+     * @return the string
+     */
+    @WebServiceLog
+    @GetMapping("/pnpDetailReportPage")
+    public String pnpDetailReportPage() {
+        log.info("pnpDetailReportPage");
+        return BcsPageEnum.PNP_DETAIL_REPORT_PAGE.toString();
+    }
+
+    /**
+     * Pnp analysis report page string.
+     *
+     * @return the string
+     */
+    @WebServiceLog
+    @GetMapping("/pnpAnalysisReportPage")
+    public String pnpAnalysisReportPage() {
+        log.info("pnpAnalysisReportPage");
+        return BcsPageEnum.PNP_ANALYSIS_REPORT_PAGE.toString();
     }
 
     @WebServiceLog
@@ -77,17 +102,22 @@ public class BCSPnpReportController {
         return new ResponseEntity<>(isSuccess, HttpStatus.OK);
     }
 
-    /**
-     * Pnp detail report page string.
-     *
-     * @return the string
-     */
     @WebServiceLog
-    @GetMapping("/pnpDetailReportPage")
-    public String pnpDetailReportPage() {
-        log.info("pnpDetailReportPage");
-        return BcsPageEnum.PnpDetailReportPage.toString();
+    @PostMapping(value = "/getPNPAnalysisReport", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> getPnpAnalysisReport(@CurrentUser final CustomUser customUser,
+                                                  @RequestBody final PnpDetailReportParam param) {
+        try {
+            param.setEmployeeId(customUser.getAccount().toUpperCase());
+            final List<PnpDetailReport> result = pnpReportService.getPnpDetailReportList(customUser, param);
+            log.info(DataUtils.toPrettyJsonUseJackson(result));
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (final Exception e) {
+            log.error("Exception", e);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
+
 
     @WebServiceLog
     @PostMapping(value = "/getPNPDetailReport", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -116,7 +146,6 @@ public class BCSPnpReportController {
     @ResponseBody
     public ResponseEntity<?> getPnpDetailReportTotalPages(@CurrentUser final CustomUser customUser,
                                                           @RequestBody final PnpDetailReportParam param) {
-
         try {
             param.setEmployeeId(customUser.getAccount().toUpperCase());
             final List<PnpDetailReport> result = pnpReportService.getPnpDetailReportList(customUser, param);
@@ -168,15 +197,27 @@ public class BCSPnpReportController {
 
     private Map<Integer, String> getBodyMap(final PnpDetailReport r, final int columnSize) {
         final Map<Integer, String> row = new LinkedHashMap<>(columnSize);
-        row.put(0, r.getId());
+        if (r.getMainId() != null && r.getDetailId() != null) {
+            row.put(0, r.getMainId() + "." + r.getDetailId());
+        } else {
+            row.put(0, "");
+        }
         row.put(1, r.getSourceSystem());
         row.put(2, r.getProcessFlow());
         row.put(3, r.getProcessStage() + '_' + r.getFtpSource());
         row.put(4, r.getAccount());
         row.put(5, r.getPccCode());
-        row.put(6, r.getMainId());
+        if (r.getMainId() != null) {
+            row.put(6, Long.toString(r.getMainId()));
+        } else {
+            row.put(6, "");
+        }
         row.put(7, r.getSn());
-        row.put(8, r.getTemplate());
+        if (r.getTemplateId() != null) {
+            row.put(8, Long.toString(r.getTemplateId()));
+        } else {
+            row.put(8, "");
+        }
         row.put(9, r.getMessage());
         row.put(10, r.getMessagePoint() == null ? null : r.getMessagePoint().toString());
         row.put(11, r.getCampaignId());

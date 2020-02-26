@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.springframework.org/security/tags" th:with="strList = ${ {'/BCS/JS/pagepnpAnalysisReport.base.js'} }">
+
+<head th:replace="/BCS/Views/Common/Head :: head ('PNP Analysis Report Page', ${strList})">
+</head>
+<style type="text/css">
+.table-warp {
+    overflow: auto;
+    width: 100%;
+    height: 500px;
+    /* 固定高度 */
+}
+
+.table-responsive {
+    display: block;
+    width: 100%;
+    /* overflow-x: hidden; */
+    border: none;
+    word-wrap: break-word;
+}
+
+table {
+    table-layout: fixed;
+    width: 200px;
+    /* 固定寬度 */
+}
+
+thead tr th {
+    position: sticky;
+    top: 0;
+    /* 列首永遠固定於上 */
+}
+
+.base_td {
+    min-height: 1rem;
+}
+
+.td1 {
+    max-width: 1rem;
+    min-width: 1rem;
+}
+
+.td3 {
+    max-width: 3rem;
+    min-width: 3rem;
+}
+
+.td5 {
+    max-width: 5rem;
+    min-width: 5rem;
+}
+
+.td7 {
+    max-width: 7rem;
+    min-width: 7rem;
+}
+
+.td10 {
+    max-width: 10rem;
+    min-width: 10rem;
+}
+
+.td20 {
+    max-width: 20rem;
+    min-width: 20rem;
+}
+
+.td30 {
+    max-width: 30rem;
+    min-width: 30rem;
+}
+
+.odd-row {
+    background: #e7eaf0;
+}
+
+.searchArea {
+    padding: 10px;
+}
+
+.searchArea-section {
+    box-sizing: border-box;
+    display: inline-block;
+    padding: 5px;
+}
+
+.searchArea .paramGroup label {
+    display: inline-block;
+    min-width: 6rem;
+    text-align: right;
+    margin: 5px;
+}
+
+.searchArea .paramGroup input {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px #ddd solid;
+    font-size: 1rem;
+    width: 100px;
+}
+
+.searchArea .paramGroup button {
+    display: inline-block;
+}
+
+.btn {
+    border: none;
+    border-radius: 5px;
+    /* height: 50px; */
+    padding: 10px;
+    font-size: 14px;
+    min-width: 8rem;
+}
+
+
+.btn2 {
+    border: none;
+    border-radius: 5px;
+    /* height: 50px; */
+    padding: 10px;
+    font-size: 14px;
+}
+
+.btn-warn {
+    color: #fff;
+    background: #f55;
+}
+
+.btn-warn:hover {
+    position: relative;
+    background: #c00;
+}
+
+.btn-pri {
+    color: #fff;
+    background: #07f;
+}
+
+.btn-pri:hover {
+    position: relative;
+    background: #05c;
+}
+
+.btn-pri:active {
+    position: relative;
+    left: 1px;
+    top: 2px;
+}
+
+.btn-create {
+    color: #fff;
+    background: #3d9970;
+}
+
+.btn-create:hover {
+    position: relative;
+    background: #2c8859;
+}
+
+.btn-create:active {
+    position: relative;
+    left: 1px;
+    top: 2px;
+}
+
+.btn-style {
+    color: #000;
+    background: #aaa;
+}
+
+.btn_style:disabled {
+    color: #ddd;
+    background: #bbb;
+}
+
+.btn-style-pressed {
+    color: #FFF;
+    background: #07F;
+}
+</style>
+
+<body>
+<header th:replace="/BCS/Views/Common/Header :: header"></header>
+<div class="LyContents">
+    <div th:replace="/BCS/Views/Common/Menu :: menu ('PagepnpAnalysisReport')"></div>
+    <div class="LyMain" role="main">
+            <section>
+                <header class="ContentHead">
+                    <h3 class="CHTtl">PNP分析報表</h3>
+                </header>
+                <!-- ***************************************************** -->
+                <div class="searchArea">
+                    <div class="searchArea-section">
+                        <div class="paramGroup">
+                            <label class="param-label">發送帳號</label>
+                            <input type="text" id="accountInput" name="accountInput" value="" maxlength="30" />
+                        </div>
+                        <div class="paramGroup">
+                            <label class="param-label">前方來源系統</label>
+                            <input type="text" id="sourceSystemInput" name="sourceSystemInput" value="" maxlength="20" />
+                        </div>
+                    </div>
+                    <div class="searchArea-section">
+                        <div class="paramGroup">
+                            <label class="param-label">PCC-CODE</label>
+                            <input type="text" id="pccCodeInput" name="pccCodeInput" value="" maxlength="20" />
+                        </div>
+                        <div class="paramGroup">
+                            <label class="param-label">電話號碼</label>
+                            <input type="text" id="phoneNumber" name="phoneNumber" value="" maxlength="10" />
+                        </div>
+                    </div>
+                    <div class="searchArea-section">
+                        <div class="paramGroup">
+                            <label class="param-label"></label>
+                        </div>
+                        <div class="paramGroup">
+                            <label class="param-label">日期</label>
+                            <button class="btn2 btn-style-pressed" id="isCreateTimeBtn">建立時間</button>
+                            <button class="btn2 btn-style" id="isOrderTimeBtn">預約時間</button>
+                            <input type="text" class="datepicker" id="startDate" placeholder="YYYY-MM-DD" maxlength="10"/> ➤
+                            <input type="text" class="datepicker" id="endDate" placeholder="YYYY-MM-DD" maxlength="10"/>
+                        </div>
+                        <div class="paramGroup">
+                            <label class="param-label"></label>
+                            <button id="searchBtn" class="btn btn-pri">
+                                Search
+                            </button>
+                            <button id="exportBtn" class="btn btn-pri">
+                                匯出Excel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="CHBtnSet">
+                    <div class="CHLeft">
+                        <ul>
+                            <li class="CHLeftBtn">
+                                <input id="backBtn" class="btn prev" type="button" value="<" style="cursor: pointer;" />
+                                <span id="pageAndTotalPages">1/0</span>
+                                <input id="nextBtn" class="btn next" type="button" value=">" style="cursor: pointer;" />
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mainFrame">
+                    <div class="table-warp">
+                        <table border="1" id="resultTable" class="table-responsive resultTable">
+                            <thead>
+                            <tr>
+                                <th class="td1">#</th>
+                                <th class="td10">發送日期</th>
+                                <th class="td10">處</th>
+                                <th class="td10">部</th>
+                                <th class="td10">組</th>
+                                <th class="td10">前方來源系統</th>
+                                <th class="td10">發送帳號</th>
+                                <th class="td10">PccCode</th>
+                                <th class="td10">訊息樣板</th>
+                                <th class="td10">通路流</th>
+                                <th class="td10">訊息內文長度</th>
+                                <th class="td10">訊息內文</th>
+                                <th class="td10">行銷通路代碼</th>
+                                <th class="td10">發送通路</th>
+                                <th class="td10">SMS通路總通數</th>
+                                <th class="td10">SMS成功總通數</th>
+                                <th class="td10">SMS失敗通數</th>
+                                <th class="td10">SMS成功點數</th>
+                                <th class="td10">SMS成功率</th>
+                                <th class="td10">PNP發送通路</th>
+                                <th class="td10">PNP通路總通數</th>
+                                <th class="td10">PNP成功通數</th>
+                                <th class="td10">PNP失敗通數</th>
+                                <th class="td10">PNP成功率</th>
+                                <th class="td10">BC發送通路</th>
+                                <th class="td10">BC通路總通數</th>
+                                <th class="td10">BC成功通數</th>
+                                <th class="td10">BC失敗通數</th>
+                                <th class="td10">BC成功率</th>
+                                <th class="td10">總通數</th>
+                                <th class="td10">資料建立日期</th>
+                                <th class="td10">資料更新日期</th>
+                            </tr>
+                            </thead>
+                            <tbody class="resultTbody">
+                            <!-- ============================ -->
+                            <tr class="resultList">
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                                <td rowspan="1" class="td1 no"></td>
+                            </tr>
+                            <!-- ============================ -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+    </div>
+</div>
+</body>
+
+</html>

@@ -353,7 +353,7 @@ public class PnpService {
                 return detail;
             case "BC_USER_IN_BLACK_LIST_TO_SMS":
                 log.info("BC_USER_IN_BLACK_LIST_TO_SMS");
-                detail.setProcStage(PnpStageEnum.BC.value);
+                detail.setProcStage(PnpStageEnum.SMS.value);
                 detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setBcStatus(PnpStatusEnum.BC_USER_IN_BLACK_LIST_SMS_PROCESS.value);
                 detail.setBcHttpStatusCode(httpStatusCode);

@@ -276,7 +276,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     @Transactional(rollbackFor = Exception.class)
     public List<PnpDetail> findDetailByPnpStatus(PnpFtpSourceEnum type, List<String> statusList){
         String selectSql = "SELECT TOP 1000 * FROM " + type.detailTable +
-                " WHERE BC_STATUS IN (:STATUS_LIST)" +
+                " WHERE PNP_STATUS IN (:STATUS_LIST)" +
                 " AND SMS_STATUS IS NULL";
         log.info(selectSql);
         return providerService.getEntityManager().createNativeQuery(selectSql, type.detailClass)

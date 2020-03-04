@@ -471,7 +471,7 @@ public class BillingNoticeContentTemplateMsgService {
     @SuppressWarnings("unchecked")
     public String getBnEffectsDetailTotalPages(String date, String templateName, String sendType) {
         String queryString = "select count(*) from ( "
-                + "SELECT D.CREAT_TIME, T.TEMPLATE_TYPE, D.TITLE, D.TEXT, D.STATUS, D.UID, "
+                + "SELECT D.CREAT_TIME, M.ORIG_FILE_TYPE, D.TITLE, D.TEXT, D.STATUS, D.UID, "
                 + "DENSE_RANK() OVER ( ORDER BY D.MODIFY_TIME desc, D.NOTICE_DETAIL_ID) AS RowNum "
                 + "from BCS_BILLING_NOTICE_DETAIL D "
                 + "join BCS_BILLING_NOTICE_MAIN M on D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
@@ -527,8 +527,21 @@ public class BillingNoticeContentTemplateMsgService {
         }
 
         log.info("getBNEffectsDetail:");
+//        String queryString = "select * from ( "
+//                + "SELECT D.CREAT_TIME, T.TEMPLATE_TYPE, D.TITLE, D.TEXT, D.STATUS, D.UID, "
+//                + "DENSE_RANK() OVER ( ORDER BY D.MODIFY_TIME desc, D.NOTICE_DETAIL_ID) AS RowNum "
+//                + "from BCS_BILLING_NOTICE_DETAIL D "
+//                + "join BCS_BILLING_NOTICE_MAIN M on D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
+//                + "join BCS_BN_CONTENT_TEMPLATE T on M.TEMP_ID  = T.TEMPLATE_ID "
+//                + "WHERE D.SEND_TIME >= '" + date + "' "
+//                + "AND D.SEND_TIME <  DATEADD(DAY, 1, '" + date + "') "
+//                + "AND T.TEMPLATE_ID = N'" + templateName + "' "
+//                + "AND M.SEND_TYPE = '" + sendType + "' "
+//                + ") as result "
+//                + "where RowNum >= ?1 and RowNum < ?2 ";
+
         String queryString = "select * from ( "
-                + "SELECT D.CREAT_TIME, T.TEMPLATE_TYPE, D.TITLE, D.TEXT, D.STATUS, D.UID, "
+                + "SELECT D.CREAT_TIME, M.ORIG_FILE_TYPE, D.TITLE, D.TEXT, D.STATUS, D.UID, "
                 + "DENSE_RANK() OVER ( ORDER BY D.MODIFY_TIME desc, D.NOTICE_DETAIL_ID) AS RowNum "
                 + "from BCS_BILLING_NOTICE_DETAIL D "
                 + "join BCS_BILLING_NOTICE_MAIN M on D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "

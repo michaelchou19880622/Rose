@@ -224,37 +224,55 @@ public class PnpService {
                 continue;
             }
 
-            if (LineUser.STATUS_SYS_ADD.equals(detail.getBindStatus())) {
-                switch (processFlow) {
-                    case BC_SMS:
-                        nextStage = "USER_IS_SYSTEM_ADD_IGNORE_TO_SMS";
-                        break;
-                    case BC_PNP_SMS:
-                        nextStage = "USER_IS_SYSTEM_ADD_IGNORE_TO_PNP";
-                        break;
-                    case BC:
-                    default:
-                        nextStage = "USER_IS_SYSTEM_ADD_IGNORE";
-                        break;
-                }
-                gotoNext(nextStage, detail, sendRef, selfActorRef, "");
-                continue;
+            /* User bind status switch */
+            switch (detail.getBindStatus()) {
+                case LineUser.STATUS_SYS_ADD:
+                    switch (processFlow) {
+                        case BC_SMS:
+                            nextStage = "USER_IS_SYSTEM_ADD_IGNORE_TO_SMS";
+                            break;
+                        case BC_PNP_SMS:
+                            nextStage = "USER_IS_SYSTEM_ADD_IGNORE_TO_PNP";
+                            break;
+                        case BC:
+                        default:
+                            nextStage = "USER_IS_SYSTEM_ADD_IGNORE";
+                            break;
+                    }
+                    gotoNext(nextStage, detail, sendRef, selfActorRef, "");
+                    continue;
+                case LineUser.STATUS_BLOCK:
+                    switch (processFlow) {
+                        case BC_SMS:
+                        case BC_PNP_SMS:
+                            nextStage = "BC_USER_BLOCK_CHANNEL_TO_SMS";
+                            break;
+                        case BC:
+                        default:
+                            nextStage = "BC_USER_BLOCK_CHANNEL";
+                            break;
+                    }
+                    gotoNext(nextStage, detail, sendRef, selfActorRef, "");
+                    continue;
+                case LineUser.STATUS_UNBIND:
+                    switch (processFlow) {
+                        case BC_SMS:
+                            nextStage = "USER_IS_UNBIND_IGNORE_TO_SMS";
+                            break;
+                        case BC_PNP_SMS:
+                            nextStage = "USER_IS_UNBIND_IGNORE_TO_PNP";
+                            break;
+                        case BC:
+                        default:
+                            nextStage = "USER_IS_UNBIND_IGNORE";
+                            break;
+                    }
+                    gotoNext(nextStage, detail, sendRef, selfActorRef, "");
+                    continue;
+                default:
+                    break;
             }
-            /* User Block Channel */
-            if (LineUser.STATUS_BLOCK.equals(detail.getBindStatus())) {
-                switch (processFlow) {
-                    case BC_SMS:
-                    case BC_PNP_SMS:
-                        nextStage = "BC_USER_BLOCK_CHANNEL_TO_SMS";
-                        break;
-                    case BC:
-                    default:
-                        nextStage = "BC_USER_BLOCK_CHANNEL";
-                        break;
-                }
-                gotoNext(nextStage, detail, sendRef, selfActorRef, "");
-                continue;
-            }
+
             /* User Uid Not Found */
             if (StringUtils.isBlank(detail.getUid())) {
                 switch (processFlow) {
@@ -269,7 +287,6 @@ public class PnpService {
                         nextStage = "BC_UID_NOT_FOUND";
                         break;
                 }
-
                 gotoNext(nextStage, detail, sendRef, selfActorRef, "");
                 continue;
             }
@@ -342,6 +359,27 @@ public class PnpService {
                 detail.setProcStage(PnpStageEnum.SMS.value);
                 detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setBcStatus(PnpStatusEnum.USER_IS_SYSTEM_ADD_IGNORE_SMS.value);
+                detail.setBcHttpStatusCode(httpStatusCode);
+                return detail;
+            case "USER_IS_UNBIND_IGNORE_TO_SMS":
+                log.info("USER_IS_UNBIND_IGNORE_TO_SMS");
+                detail.setProcStage(PnpStageEnum.SMS.value);
+                detail.setStatus(PnpStatusEnum.COMPLETE.value);
+                detail.setBcStatus(PnpStatusEnum.USER_IS_UNBIND_IGNORE_TO_SMS.value);
+                detail.setBcHttpStatusCode(httpStatusCode);
+                return detail;
+            case "USER_IS_UNBIND_IGNORE_TO_PNP":
+                log.info("USER_IS_UNBIND_IGNORE_TO_PNP");
+                detail.setProcStage(PnpStageEnum.PNP.value);
+                detail.setStatus(PnpStatusEnum.COMPLETE.value);
+                detail.setBcStatus(PnpStatusEnum.USER_IS_UNBIND_IGNORE_TO_PNP.value);
+                detail.setBcHttpStatusCode(httpStatusCode);
+                return detail;
+            case "USER_IS_UNBIND_IGNORE":
+                log.info("USER_IS_UNBIND_IGNORE");
+                detail.setProcStage(PnpStageEnum.BC.value);
+                detail.setStatus(PnpStatusEnum.COMPLETE.value);
+                detail.setBcStatus(PnpStatusEnum.USER_IS_UNBIND_IGNORE.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
                 return detail;
             case "BC_USER_IN_BLACK_LIST":

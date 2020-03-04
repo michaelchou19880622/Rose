@@ -39,6 +39,11 @@ public enum PnpStatusEnum {
     USER_IS_SYSTEM_ADD_IGNORE("USER_IS_SYSTEM_ADD_IGNORE", "此為系統自動建立帳號，禁止發送BC"),
     USER_IS_SYSTEM_ADD_IGNORE_PNP("USER_IS_SYSTEM_ADD_IGNORE_PNP", "此為系統自動建立帳號，轉發PNP"),
     USER_IS_SYSTEM_ADD_IGNORE_SMS("USER_IS_SYSTEM_ADD_IGNORE_SMS", "此為系統自動建立帳號，轉發SMS"),
+
+    USER_IS_UNBIND_IGNORE_TO_SMS("USER_IS_UNBIND_IGNORE_TO_SMS", "使用者未綁定，轉發SMS"),
+    USER_IS_UNBIND_IGNORE_TO_PNP("USER_IS_UNBIND_IGNORE_TO_PNP", "使用者未綁定，轉發PNP"),
+    USER_IS_UNBIND_IGNORE("USER_IS_UNBIND_IGNORE", "使用者未綁定，禁止發送BC"),
+
     /* ========================================PNP STATUS================================================*/
 
     PNP_SENDING("PNP_SENDING", "發送中"),
@@ -63,9 +68,6 @@ public enum PnpStatusEnum {
     /* ========================================STATUS================================================*/
     PROCESS("PROCESS", "處理中"),
     SENDING("SENDING", "發送中"),
-//    FINISH("FINISH", "已完成"),
-//    FAIL("FAIL", "失敗"),
-//    DELETE("DELETE", "已刪除"),
     COMPLETE("COMPLETE", "已完成");
 
     /**
@@ -90,8 +92,8 @@ public enum PnpStatusEnum {
         this.chinese = chinese;
     }
 
-    public static PnpStatusEnum findEnumByName(String value){
-        for (PnpStatusEnum e : PnpStatusEnum.values()){
+    public static PnpStatusEnum findEnumByName(String value) {
+        for (PnpStatusEnum e : PnpStatusEnum.values()) {
             if (e.value.equals(value)) {
                 return e;
             }

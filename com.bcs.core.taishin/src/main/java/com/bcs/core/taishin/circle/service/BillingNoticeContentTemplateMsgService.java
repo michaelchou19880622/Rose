@@ -511,11 +511,11 @@ public class BillingNoticeContentTemplateMsgService {
 
                 "select * from ( "
                         + " select FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd') as 'Day',"
-                        + " BCT.TEMPLATE_TYPE as 'TTYPE',"
+                        + " BNN.ORIG_FILE_TYPE as 'TTYPE',"
                         + " BCT.TEMPLATE_ID as 'TID',"
                         + " BNM.SEND_TYPE as 'STYPE',"
                         + " SUM(case when BND.STATUS = 'COMPLETE' then 1 else 0 end) AS 'Complete',"
-                        + " SUM(case when BND.STATUS = 'FAIL' then 1 else 0 end) AS 'Fail',"
+                        + " SUM(case when BND.STATUS != 'COMPLETE' then 1 else 0 end) AS 'Fail',"
                         + " DENSE_RANK() OVER ( ORDER BY FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd') desc, "
                         + "	BCT.TEMPLATE_TYPE, "
                         + "	BCT.TEMPLATE_ID ) AS RowNum"

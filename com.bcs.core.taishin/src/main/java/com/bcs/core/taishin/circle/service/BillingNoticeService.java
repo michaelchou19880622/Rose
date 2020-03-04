@@ -127,9 +127,6 @@ public class BillingNoticeService {
     }
 
     public BillingNoticeDetail save(BillingNoticeDetail billingNoticeDetail) {
-        if (billingNoticeDetail.getStatus().equals(BillingNoticeMain.NOTICE_STATUS_COMPLETE)) {
-            billingNoticeDetail.setSendTime(Calendar.getInstance().getTime());
-        }
         return billingNoticeDetailRepository.save(billingNoticeDetail);
     }
 
@@ -160,7 +157,7 @@ public class BillingNoticeService {
         List<BillingNoticeDetail> details = billingNoticeMain.getDetails();
         for (BillingNoticeDetail detail : details) {
             detail.setStatus(status);
-            save(detail);
+            billingNoticeDetailRepository.save(detail);
         }
         billingNoticeMainRepository.updateBillingNoticeMainStatus(status, new Date(), billingNoticeMain.getNoticeMainId());
     }
@@ -240,22 +237,7 @@ public class BillingNoticeService {
         }
     }
 
-    /**
-     * 若明細已無重試或等待發送/排程中或者傳遞中的狀態資料，則更新主檔狀態為完成
-     */
-    public void updateBillingNoticeMainStatusComplete(Long mainId) {
-//        List<String> status = new ArrayList<>();
-//        status.add(BillingNoticeMain.NOTICE_STATUS_WAIT);
-//        status.add(BillingNoticeMain.NOTICE_STATUS_RETRY);
-//        status.add(BillingNoticeMain.NOTICE_STATUS_SENDING);
-//        status.add(BillingNoticeMain.NOTICE_STATUS_DRAFT);
-//        status.add(BillingNoticeMain.NOTICE_STATUS_SCHEDULED);
-//        if (billingNoticeDetailRepository.countByNoticeMainIdAndStatus(mainId, status) == 0) {
-            billingNoticeMainRepository.updateBillingNoticeMainStatus(BillingNoticeMain.NOTICE_STATUS_COMPLETE, new Date(), mainId);
-//        }
-    }
-
-    public void pushLineMessage(BillingNoticeMain billingNoticeMain, ActorRef sendRef, ActorRef selfActorRef){
+    public void pushLineMessage(BillingNoticeMain billingNoticeMain, ActorRef sendRef, ActorRef selfActorRef) {
         log.info("Push Line Message!!");
         String url = CoreConfigReader.getString(CONFIG_STR.LINE_MESSAGE_PUSH_URL.toString());
         String accessToken = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_TOKEN.toString(), true);
@@ -294,6 +276,7 @@ public class BillingNoticeService {
                     JSONObject result = restfulUtil.execute();
                     log.info("Result: {}", result.toString());
                     detail.setStatus(BillingNoticeMain.NOTICE_STATUS_COMPLETE);
+                    detail.setSendTime(new Date());
                     log.info("Execute Success!!");
                     isDoRetry = false;
                 } catch (KeyManagementException | NoSuchAlgorithmException e1) {
@@ -343,15 +326,11 @@ public class BillingNoticeService {
                 detail.setStatus(BillingNoticeMain.NOTICE_STATUS_FAIL);
             }
 
-
-            if (sendRef != null) {
-                sendRef.tell(detail, selfActorRef);
-            } else {
-                billingNoticeAkkaService.tell(detail);
-            }
+            /* Update detail */
+            billingNoticeDetailRepository.save(detail);
         }
         log.info("Complete Main is [{}]", billingNoticeMain.getNoticeMainId());
-        billingNoticeService.updateBillingNoticeMainStatusComplete(billingNoticeMain.getNoticeMainId());
+        billingNoticeMainRepository.updateBillingNoticeMainStatus(BillingNoticeMain.NOTICE_STATUS_COMPLETE, new Date(), billingNoticeMain.getNoticeMainId());
     }
 
 

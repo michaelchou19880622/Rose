@@ -23,13 +23,11 @@ import java.util.List;
 @Slf4j(topic = "BNRecorder")
 public class BillingNoticeMainActor extends UntypedActor {
     private final ActorRef pushMessageRouterActor;
-    private final ActorRef updateStatusRouterActor;
     private final ActorRef expireRouterActor;
     private final ActorRef curfewActor;
 
     public BillingNoticeMainActor() {
         pushMessageRouterActor = new AkkaRouterFactory<>(getContext(), BillingNoticePushMessageActor.class, true).routerActor;
-        updateStatusRouterActor = new AkkaRouterFactory<>(getContext(), BillingNoticeUpdateStatusActor.class, true).routerActor;
         expireRouterActor = new AkkaRouterFactory<>(getContext(), BillingNoticeExpireActor.class, true).routerActor;
         curfewActor = new AkkaRouterFactory<>(getContext(), BillingNoticeCurfewActor.class, true).routerActor;
     }
@@ -41,9 +39,6 @@ public class BillingNoticeMainActor extends UntypedActor {
         try {
             if (object instanceof BillingNoticeMain) {
                 pushRoute((BillingNoticeMain) object);
-            }
-            if (object instanceof BillingNoticeDetail) {
-                toUpdateActor(object);
             }
         } catch (Exception e) {
             log.error("Exception", e);
@@ -108,10 +103,5 @@ public class BillingNoticeMainActor extends UntypedActor {
     private void toCurfewActor(BillingNoticeMain object) {
         log.info("To CurfewActor!!");
         curfewActor.tell(object, this.getSelf());
-    }
-
-    private void toUpdateActor(Object object) {
-        log.info("To UpdateActor!!");
-        updateStatusRouterActor.tell(object, this.getSelf());
     }
 }

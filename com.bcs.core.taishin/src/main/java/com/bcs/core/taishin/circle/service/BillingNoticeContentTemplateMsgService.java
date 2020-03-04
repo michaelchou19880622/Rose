@@ -1,5 +1,6 @@
 package com.bcs.core.taishin.circle.service;
 
+import com.bcs.core.db.service.EntityManagerProviderService;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentLink;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsg;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsgAction;
@@ -11,12 +12,13 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
 import javax.persistence.Query;
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,10 +26,13 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author ???
+ */
 @Slf4j(topic = "BNRecorder")
 @Service
 public class BillingNoticeContentTemplateMsgService {
@@ -38,48 +43,46 @@ public class BillingNoticeContentTemplateMsgService {
     private BillingNoticeContentTemplateMsgActionRepository contentTemplateMsgActionRepository;
     @Autowired
     private BillingNoticeContentLinkService contentLinkService;
-
-    @PersistenceContext
-    EntityManager entityManager;
+    @Resource
+    EntityManagerProviderService providerService;
 
     protected LoadingCache<String, Map<String, List<String>>> dataCache;
 
-    private Timer flushTimer = new Timer();
+    private ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1,
+            new BasicThreadFactory.Builder()
+                    .namingPattern("BN-ReSync-Scheduled-%d")
+                    .daemon(true).build()
+    );
 
-    private class CustomTask extends TimerTask {
-
-        @Override
-        public void run() {
-
-            try {
-                // Check Data Sync
-                Boolean isReSyncData = DataSyncUtil.isReSyncData(TEMPLATE_SYNC);
-                if (isReSyncData) {
-                    dataCache.invalidateAll();
-                    DataSyncUtil.syncDataFinish(TEMPLATE_SYNC);
-                }
-            } catch (Exception e) {
-                log.error(ErrorRecord.recordError(e));
-            }
-        }
-    }
 
     public BillingNoticeContentTemplateMsgService() {
-
-        flushTimer.schedule(new CustomTask(), 120000, 30000);
-
+        scheduler.scheduleWithFixedDelay(this::process, 120, 30, TimeUnit.SECONDS);
         dataCache = CacheBuilder.newBuilder()
                 .concurrencyLevel(1)
                 .expireAfterAccess(30, TimeUnit.MINUTES)
                 .build(new CacheLoader<String, Map<String, List<String>>>() {
                     @Override
-                    public Map<String, List<String>> load(String key) throws Exception {
-                        return new HashMap<String, List<String>>();
+                    public Map<String, List<String>> load(String key) {
+                        return new HashMap<>();
                     }
                 });
     }
 
-    public void getPreTemplateIds(String templateId, String account) throws Exception {
+    private void process() {
+        try {
+            // Check Data Sync
+            boolean isReSyncData = DataSyncUtil.isReSyncData(TEMPLATE_SYNC);
+            if (isReSyncData) {
+                dataCache.invalidateAll();
+                DataSyncUtil.syncDataFinish(TEMPLATE_SYNC);
+            }
+        } catch (Exception e) {
+            log.error(ErrorRecord.recordError(e));
+        }
+
+    }
+
+    public void getPreTemplateIds(String templateId, String account) {
         try {
             List<BillingNoticeContentTemplateMsg> contentTemplateMsgs = contentTemplateMsgRepository.findByParentTemplateId(templateId);
             for (BillingNoticeContentTemplateMsg contentTemplateMsg : contentTemplateMsgs) {
@@ -101,8 +104,7 @@ public class BillingNoticeContentTemplateMsgService {
         }
     }
 
-    // set Other Same Title Template's Production Switch To Off
-    public void setPreTitleTemplateToOff(String templateTitle, String account) throws Exception {
+    public void setPreTitleTemplateToOff(String templateTitle, String account) {
         try {
             List<BillingNoticeContentTemplateMsg> contentTemplateMsgs = contentTemplateMsgRepository.findByTemplateTitle(templateTitle);
             for (BillingNoticeContentTemplateMsg contentTemplateMsg : contentTemplateMsgs) {
@@ -116,11 +118,6 @@ public class BillingNoticeContentTemplateMsgService {
         } catch (Exception e) {
             log.info(e.getMessage());
         }
-    }
-
-
-    public BillingNoticeContentTemplateMsg getSelectedContentTemplateMsg(String templateId) {
-        return contentTemplateMsgRepository.findOne(templateId);
     }
 
     /**
@@ -159,29 +156,28 @@ public class BillingNoticeContentTemplateMsgService {
         } catch (Exception e) {
         }
 
-        String queryString =
-                "SELECT BCS_BN_CONTENT_TEMPLATE.TEMPLATE_ID, "
-                        + "BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH, "
-                        + "BCS_BN_CONTENT_TEMPLATE.ALT_TEXT,"
-                        + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TYPE,"
-                        + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_IMAGE_ID,"
-                        + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TITLE,"
-                        + "BCS_BN_CONTENT_TEMPLATE.CURFEW_START_TIME, "
-                        + "BCS_BN_CONTENT_TEMPLATE.CURFEW_END_TIME, "
-                        + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TEXT, "
-                        + "BCS_BN_CONTENT_TEMPLATE_ACTION.ACTION_TYPE,"
-                        + "BCS_BN_CONTENT_TEMPLATE_ACTION.ACTION_LABEL,"
-                        + "BCS_BN_CONTENT_TEMPLATE_ACTION.ACTION_DATA,"
-                        + "BCS_BN_CONTENT_TEMPLATE_ACTION.ACTION_TEXT,"
-                        + "BCS_BN_CONTENT_LINK.LINK_URL, "
-                        + "BCS_BN_CONTENT_LINK.LINK_ID "
-                        + "FROM BCS_BN_CONTENT_TEMPLATE "
-                        + "LEFT JOIN BCS_BN_CONTENT_TEMPLATE_ACTION ON BCS_BN_CONTENT_TEMPLATE.TEMPLATE_ID = BCS_BN_CONTENT_TEMPLATE_ACTION.TEMPLATE_ID "
-                        + "LEFT JOIN BCS_BN_CONTENT_LINK ON BCS_BN_CONTENT_TEMPLATE_ACTION.LINK_ID = BCS_BN_CONTENT_LINK.LINK_ID "
-                        + "WHERE (BCS_BN_CONTENT_TEMPLATE.TEMPLATE_ID = ?1 OR BCS_BN_CONTENT_TEMPLATE.TEMPLATE_PARENT_ID = ?1) AND BCS_BN_CONTENT_TEMPLATE.STATUS <> 'DELETE' AND BCS_BN_CONTENT_TEMPLATE_ACTION.STATUS <> 'DELETE' "
-                        + "ORDER BY BCS_BN_CONTENT_TEMPLATE.TEMPLATE_LETTER, BCS_BN_CONTENT_TEMPLATE_ACTION.ACTION_LETTER";
+        String queryString = "SELECT BCS_BN_CONTENT_TEMPLATE.TEMPLATE_ID, "
+                + "BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH, "
+                + "BCS_BN_CONTENT_TEMPLATE.ALT_TEXT,"
+                + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TYPE,"
+                + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_IMAGE_ID,"
+                + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TITLE,"
+                + "BCS_BN_CONTENT_TEMPLATE.CURFEW_START_TIME, "
+                + "BCS_BN_CONTENT_TEMPLATE.CURFEW_END_TIME, "
+                + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TEXT, "
+                + "BCS_BN_CONTENT_TEMPLATE_ACTION.ACTION_TYPE,"
+                + "BCS_BN_CONTENT_TEMPLATE_ACTION.ACTION_LABEL,"
+                + "BCS_BN_CONTENT_TEMPLATE_ACTION.ACTION_DATA,"
+                + "BCS_BN_CONTENT_TEMPLATE_ACTION.ACTION_TEXT,"
+                + "BCS_BN_CONTENT_LINK.LINK_URL, "
+                + "BCS_BN_CONTENT_LINK.LINK_ID "
+                + "FROM BCS_BN_CONTENT_TEMPLATE "
+                + "LEFT JOIN BCS_BN_CONTENT_TEMPLATE_ACTION ON BCS_BN_CONTENT_TEMPLATE.TEMPLATE_ID = BCS_BN_CONTENT_TEMPLATE_ACTION.TEMPLATE_ID "
+                + "LEFT JOIN BCS_BN_CONTENT_LINK ON BCS_BN_CONTENT_TEMPLATE_ACTION.LINK_ID = BCS_BN_CONTENT_LINK.LINK_ID "
+                + "WHERE (BCS_BN_CONTENT_TEMPLATE.TEMPLATE_ID = ?1 OR BCS_BN_CONTENT_TEMPLATE.TEMPLATE_PARENT_ID = ?1) AND BCS_BN_CONTENT_TEMPLATE.STATUS <> 'DELETE' AND BCS_BN_CONTENT_TEMPLATE_ACTION.STATUS <> 'DELETE' "
+                + "ORDER BY BCS_BN_CONTENT_TEMPLATE.TEMPLATE_LETTER, BCS_BN_CONTENT_TEMPLATE_ACTION.ACTION_LETTER";
 
-        Query query = entityManager.createNativeQuery(queryString).setParameter(1, templateId);
+        Query query = providerService.getEntityManager().createNativeQuery(queryString).setParameter(1, templateId);
         List<Object[]> list = query.getResultList();
         log.info("list:" + list);
 
@@ -197,10 +193,8 @@ public class BillingNoticeContentTemplateMsgService {
                         for (int j = 9; j <= 14; j++) {
                             if (o[j] == null) {
                                 dataList.add(null);
-                                //log.info("j=" + j  + ", null");
                             } else {
                                 dataList.add(o[j].toString());
-                                //log.info("j=" + j  + ", " + o[j].toString());
                             }
                         }
                         break;
@@ -211,18 +205,13 @@ public class BillingNoticeContentTemplateMsgService {
 
                 if (o[i] == null) {
                     dataList.add(null);
-                    //log.info("i=" + i  + ", null");
                 } else {
                     dataList.add(o[i].toString());
-                    //log.info("i=" + i  + ", " + o[i].toString());
                 }
             }
         }
 
-        //log.info("map:"+map);
-        if (map != null) {
-            dataCache.put(templateId, map);
-        }
+        dataCache.put(templateId, map);
         return map;
     }
 
@@ -231,40 +220,37 @@ public class BillingNoticeContentTemplateMsgService {
      */
     @SuppressWarnings("unchecked")
     public Map<String, List<String>> getAllContentTemplateMsg() {
-        String queryString =
-                "SELECT BCS_BN_CONTENT_TEMPLATE.TEMPLATE_ID, "
-                        + "BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH, "
-                        + "BCS_BN_CONTENT_TEMPLATE.ALT_TEXT, "
-                        + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TYPE, "
-                        + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_IMAGE_ID, "
-                        + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TITLE, "
-                        + "BCS_BN_CONTENT_TEMPLATE.CURFEW_START_TIME, "
-                        + "BCS_BN_CONTENT_TEMPLATE.CURFEW_END_TIME, "
-                        + "BCS_BN_CONTENT_TEMPLATE.MODIFY_TIME, "
-                        + "BCS_ADMIN_USER.USER_NAME "
-                        + "FROM BCS_BN_CONTENT_TEMPLATE "
-                        + "LEFT JOIN BCS_ADMIN_USER ON BCS_BN_CONTENT_TEMPLATE.MODIFY_USER = BCS_ADMIN_USER.ACCOUNT "
-                        + "WHERE BCS_BN_CONTENT_TEMPLATE.STATUS = 'ACTIVE' AND BCS_BN_CONTENT_TEMPLATE.TEMPLATE_LEVEL <> 'COLUMN'"
-                        + "ORDER BY BCS_BN_CONTENT_TEMPLATE.MODIFY_TIME DESC";
+        String queryString = "SELECT BCS_BN_CONTENT_TEMPLATE.TEMPLATE_ID, "
+                + "BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH, "
+                + "BCS_BN_CONTENT_TEMPLATE.ALT_TEXT, "
+                + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TYPE, "
+                + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_IMAGE_ID, "
+                + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TITLE, "
+                + "BCS_BN_CONTENT_TEMPLATE.CURFEW_START_TIME, "
+                + "BCS_BN_CONTENT_TEMPLATE.CURFEW_END_TIME, "
+                + "BCS_BN_CONTENT_TEMPLATE.MODIFY_TIME, "
+                + "BCS_ADMIN_USER.USER_NAME "
+                + "FROM BCS_BN_CONTENT_TEMPLATE "
+                + "LEFT JOIN BCS_ADMIN_USER ON BCS_BN_CONTENT_TEMPLATE.MODIFY_USER = BCS_ADMIN_USER.ACCOUNT "
+                + "WHERE BCS_BN_CONTENT_TEMPLATE.STATUS = 'ACTIVE' AND BCS_BN_CONTENT_TEMPLATE.TEMPLATE_LEVEL <> 'COLUMN'"
+                + "ORDER BY BCS_BN_CONTENT_TEMPLATE.MODIFY_TIME DESC";
 
-        Query query = entityManager.createNativeQuery(queryString);
+        Query query = providerService.getEntityManager().createNativeQuery(queryString);
         List<Object[]> list = query.getResultList();
 
         Map<String, List<String>> map = new LinkedHashMap<>();
         for (Object[] o : list) {
             for (int i = 0, max = o.length; i < max; i++) {
                 if (i == 0) {
-                    map.put(o[0].toString(), new ArrayList<String>());
+                    map.put(o[0].toString(), new ArrayList<>());
                     continue;
                 }
 
                 List<String> dataList = map.get(o[0]);
                 if (o[i] == null) {
                     dataList.add("");
-                    //log.info("i=" + i  + ", null");
                 } else {
                     dataList.add(o[i].toString());
-                    //log.info("i=" + i  + ", " + o[i].toString());
                 }
             }
         }
@@ -279,40 +265,37 @@ public class BillingNoticeContentTemplateMsgService {
      */
     @SuppressWarnings("unchecked")
     public Map<String, List<String>> getProductOnContentTemplateMsg() {
-        String queryString =
-                "SELECT BCS_BN_CONTENT_TEMPLATE.TEMPLATE_ID, "
-                        + "BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH, "
-                        + "BCS_BN_CONTENT_TEMPLATE.ALT_TEXT, "
-                        + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TYPE, "
-                        + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_IMAGE_ID, "
-                        + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TITLE, "
-                        + "BCS_BN_CONTENT_TEMPLATE.CURFEW_START_TIME, "
-                        + "BCS_BN_CONTENT_TEMPLATE.CURFEW_END_TIME, "
-                        + "BCS_BN_CONTENT_TEMPLATE.MODIFY_TIME, "
-                        + "BCS_ADMIN_USER.USER_NAME "
-                        + "FROM BCS_BN_CONTENT_TEMPLATE "
-                        + "LEFT JOIN BCS_ADMIN_USER ON BCS_BN_CONTENT_TEMPLATE.MODIFY_USER = BCS_ADMIN_USER.ACCOUNT "
-                        + "WHERE BCS_BN_CONTENT_TEMPLATE.STATUS = 'ACTIVE' AND BCS_BN_CONTENT_TEMPLATE.TEMPLATE_LEVEL <> 'COLUMN' AND BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH = 'True'"
-                        + "ORDER BY BCS_BN_CONTENT_TEMPLATE.MODIFY_TIME DESC";
+        String queryString = "SELECT BCS_BN_CONTENT_TEMPLATE.TEMPLATE_ID, "
+                + "BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH, "
+                + "BCS_BN_CONTENT_TEMPLATE.ALT_TEXT, "
+                + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TYPE, "
+                + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_IMAGE_ID, "
+                + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TITLE, "
+                + "BCS_BN_CONTENT_TEMPLATE.CURFEW_START_TIME, "
+                + "BCS_BN_CONTENT_TEMPLATE.CURFEW_END_TIME, "
+                + "BCS_BN_CONTENT_TEMPLATE.MODIFY_TIME, "
+                + "BCS_ADMIN_USER.USER_NAME "
+                + "FROM BCS_BN_CONTENT_TEMPLATE "
+                + "LEFT JOIN BCS_ADMIN_USER ON BCS_BN_CONTENT_TEMPLATE.MODIFY_USER = BCS_ADMIN_USER.ACCOUNT "
+                + "WHERE BCS_BN_CONTENT_TEMPLATE.STATUS = 'ACTIVE' AND BCS_BN_CONTENT_TEMPLATE.TEMPLATE_LEVEL <> 'COLUMN' AND BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH = 'True'"
+                + "ORDER BY BCS_BN_CONTENT_TEMPLATE.MODIFY_TIME DESC";
 
-        Query query = entityManager.createNativeQuery(queryString);
+        Query query = providerService.getEntityManager().createNativeQuery(queryString);
         List<Object[]> list = query.getResultList();
 
         Map<String, List<String>> map = new LinkedHashMap<>();
         for (Object[] o : list) {
             for (int i = 0, max = o.length; i < max; i++) {
                 if (i == 0) {
-                    map.put(o[0].toString(), new ArrayList<String>());
+                    map.put(o[0].toString(), new ArrayList<>());
                     continue;
                 }
 
                 List<String> dataList = map.get(o[0]);
                 if (o[i] == null) {
                     dataList.add("");
-                    //log.info("i=" + i  + ", null");
                 } else {
                     dataList.add(o[i].toString());
-                    //log.info("i=" + i  + ", " + o[i].toString());
                 }
             }
         }
@@ -327,40 +310,37 @@ public class BillingNoticeContentTemplateMsgService {
      */
     @SuppressWarnings("unchecked")
     public Map<String, List<String>> getProductOffContentTemplateMsg() {
-        String queryString =
-                "SELECT BCS_BN_CONTENT_TEMPLATE.TEMPLATE_ID, "
-                        + "BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH, "
-                        + "BCS_BN_CONTENT_TEMPLATE.ALT_TEXT, "
-                        + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TYPE, "
-                        + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_IMAGE_ID, "
-                        + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TITLE, "
-                        + "BCS_BN_CONTENT_TEMPLATE.CURFEW_START_TIME, "
-                        + "BCS_BN_CONTENT_TEMPLATE.CURFEW_END_TIME, "
-                        + "BCS_BN_CONTENT_TEMPLATE.MODIFY_TIME, "
-                        + "BCS_ADMIN_USER.USER_NAME "
-                        + "FROM BCS_BN_CONTENT_TEMPLATE "
-                        + "LEFT JOIN BCS_ADMIN_USER ON BCS_BN_CONTENT_TEMPLATE.MODIFY_USER = BCS_ADMIN_USER.ACCOUNT "
-                        + "WHERE BCS_BN_CONTENT_TEMPLATE.STATUS = 'ACTIVE' AND BCS_BN_CONTENT_TEMPLATE.TEMPLATE_LEVEL <> 'COLUMN' AND BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH = 'False'"
-                        + "ORDER BY BCS_BN_CONTENT_TEMPLATE.MODIFY_TIME DESC";
+        String queryString = "SELECT BCS_BN_CONTENT_TEMPLATE.TEMPLATE_ID, "
+                + "BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH, "
+                + "BCS_BN_CONTENT_TEMPLATE.ALT_TEXT, "
+                + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TYPE, "
+                + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_IMAGE_ID, "
+                + "BCS_BN_CONTENT_TEMPLATE.TEMPLATE_TITLE, "
+                + "BCS_BN_CONTENT_TEMPLATE.CURFEW_START_TIME, "
+                + "BCS_BN_CONTENT_TEMPLATE.CURFEW_END_TIME, "
+                + "BCS_BN_CONTENT_TEMPLATE.MODIFY_TIME, "
+                + "BCS_ADMIN_USER.USER_NAME "
+                + "FROM BCS_BN_CONTENT_TEMPLATE "
+                + "LEFT JOIN BCS_ADMIN_USER ON BCS_BN_CONTENT_TEMPLATE.MODIFY_USER = BCS_ADMIN_USER.ACCOUNT "
+                + "WHERE BCS_BN_CONTENT_TEMPLATE.STATUS = 'ACTIVE' AND BCS_BN_CONTENT_TEMPLATE.TEMPLATE_LEVEL <> 'COLUMN' AND BCS_BN_CONTENT_TEMPLATE.PRODUCT_SWITCH = 'False'"
+                + "ORDER BY BCS_BN_CONTENT_TEMPLATE.MODIFY_TIME DESC";
 
-        Query query = entityManager.createNativeQuery(queryString);
+        Query query = providerService.getEntityManager().createNativeQuery(queryString);
         List<Object[]> list = query.getResultList();
 
         Map<String, List<String>> map = new LinkedHashMap<>();
         for (Object[] o : list) {
             for (int i = 0, max = o.length; i < max; i++) {
                 if (i == 0) {
-                    map.put(o[0].toString(), new ArrayList<String>());
+                    map.put(o[0].toString(), new ArrayList<>());
                     continue;
                 }
 
                 List<String> dataList = map.get(o[0]);
                 if (o[i] == null) {
                     dataList.add("");
-                    //log.info("i=" + i  + ", null");
                 } else {
                     dataList.add(o[i].toString());
-                    //log.info("i=" + i  + ", " + o[i].toString());
                 }
             }
         }
@@ -375,183 +355,111 @@ public class BillingNoticeContentTemplateMsgService {
      */
     @SuppressWarnings("unchecked")
     public String getBNEffectsTotalPages(String startDate, String endDate) {
-        String queryString =
-//		"select count(*) from "
-//		+"(SELECT D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') AS 'Day', M.SEND_TYPE "
-//		+"FROM BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M  "
-//		+"ON D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
-//		+"WHERE FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') >= '" + startDate + "' "
-//		+"AND FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') <= '" + endDate + "' "
-//		+"GROUP BY D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd'), M.SEND_TYPE) as result; ";
-
-//		"select count(*) from ( "
-//		+"SELECT FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd') AS 'Day', D.TITLE, M.SEND_TYPE, "
-//		+"SUM(case when D.STATUS = 'COMPLETE' then 1 else 0 end) AS 'Complete', "
-//		+"SUM(case when D.STATUS = 'FAIL' then 1 else 0 end) AS 'Fail', "
-//		+"DENSE_RANK() OVER ( ORDER BY FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd') desc, D.TITLE, M.SEND_TYPE) AS RowNum "
-//		+"FROM BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M "
-//		+"ON D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
-//		+"WHERE D.MODIFY_TIME >= '" + startDate + "' "
-//		+"AND D.MODIFY_TIME < DATEADD(DAY, 1, '" + endDate + "') "
-//		+"GROUP BY FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd'), D.TITLE, M.SEND_TYPE "
-//		+") as result ";
-                "select count(*) from ( "
-                        + " select FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd') as 'Day',"
-                        + " BCT.TEMPLATE_TYPE as 'TTYPE',"
-                        + " BCT.TEMPLATE_ID as 'TID',"
-                        + " BNM.SEND_TYPE as 'STYPE',"
-                        + " SUM(case when BND.STATUS = 'COMPLETE' then 1 else 0 end) AS 'Complete',"
-                        + " SUM(case when BND.STATUS = 'FAIL' then 1 else 0 end) AS 'Fail',"
-                        + " DENSE_RANK() OVER ( ORDER BY FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd') desc, "
-                        + "	BCT.TEMPLATE_TYPE, "
-                        + "	BCT.TEMPLATE_ID ) AS RowNum"
-                        + " from  BCS_BILLING_NOTICE_MAIN BNM "
-                        + " left join BCS_BILLING_NOTICE_DETAIL BND on BND.NOTICE_MAIN_ID = BNM.NOTICE_MAIN_ID"
-                        + " left join BCS_BN_CONTENT_TEMPLATE BCT on BNM.TEMP_ID  = BCT.TEMPLATE_ID"
-                        + " WHERE BNM.MODIFY_TIME >= '" + startDate + "' "
-                        + " AND BNM.MODIFY_TIME < DATEADD(DAY, 1, '" + endDate + "') "
-                        + " group by FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd'), "
-                        + " BCT.TEMPLATE_TYPE ,"
-                        + " BCT.TEMPLATE_ID,"
-                        + " BNM.SEND_TYPE"
-                        + ") as result ";
+        String queryString = "SELECT COUNT(*) FROM ( "
+                + " SELECT FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd') AS 'Day',"
+                + " BNM.ORIG_FILE_TYPE AS 'TTYPE',"
+                + " BCT.TEMPLATE_ID AS 'TID',"
+                + " BNM.SEND_TYPE AS 'STYPE',"
+                + " SUM(CASE WHEN BND.STATUS = 'COMPLETE' THEN 1 ELSE 0 END) AS 'Complete',"
+                + " SUM(CASE WHEN BND.STATUS != 'COMPLETE' THEN 1 ELSE 0 END) AS 'Fail',"
+                + " DENSE_RANK() OVER ( ORDER BY FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd') desc, "
+                + "	BCT.TEMPLATE_TYPE, "
+                + "	BCT.TEMPLATE_ID ) AS RowNum"
+                + " FROM BCS_BILLING_NOTICE_MAIN BNM "
+                + " LEFT JOIN BCS_BILLING_NOTICE_DETAIL BND ON BND.NOTICE_MAIN_ID = BNM.NOTICE_MAIN_ID"
+                + " LEFT JOIN BCS_BN_CONTENT_TEMPLATE BCT ON BNM.TEMP_ID  = BCT.TEMPLATE_ID"
+                + " WHERE BNM.MODIFY_TIME >= '" + startDate + "' "
+                + " AND BNM.MODIFY_TIME < DATEADD(DAY, 1, '" + endDate + "') "
+                + " GROUP BY FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd'), "
+                + " BNM.ORIG_FILE_TYPE,"
+                + " BCT.TEMPLATE_TYPE,"
+                + " BCT.TEMPLATE_ID,"
+                + " BNM.SEND_TYPE"
+                + ") AS result ";
 
         log.info("str1: " + queryString);
 
-        Query query = entityManager.createNativeQuery(queryString);
-        List<Object[]> list = query.getResultList();
+        List<Object[]> list = providerService.getEntityManager()
+                .createNativeQuery(queryString)
+                .getResultList();
+
         String listStr = list.toString();
         log.info("List1:" + list.toString());
 
         // Total = Empty set,  []  => 0
-        if (listStr.length() <= 2) return "0";
+        if (listStr.length() <= 2) {
+            return "0";
+        }
 
         // Total < 10
         char c1 = listStr.charAt(listStr.length() - 2); // 個位數
-        if (listStr.length() == 3) return (c1 == '0') ? "0" : "1"; // [0] => 0 , [1] => 1
+        if (listStr.length() == 3) {
+            return (c1 == '0') ? "0" : "1"; // [0] => 0 , [1] => 1
+        }
 
         // Total >= 10
-        if (c1 == '0') return listStr.substring(1, listStr.length() - 2); // [430] => 43
+        if (c1 == '0') {
+            return listStr.substring(1, listStr.length() - 2); // [430] => 43
+        }
         char c10 = listStr.charAt(listStr.length() - 3); // 十位數
         return listStr.substring(1, listStr.length() - 3) + (++c10); // [431] => 44
     }
-
-//    public static String getString(String listStr) {
-//		// Total = Empty set. []  => 0
-//		if(listStr.length() <= 2) return "0";
-//
-//		// Total < 10
-//		char c1 = listStr.charAt(listStr.length() - 2); // 個位數
-//		if(listStr.length() == 3) return (c1=='0') ? "0" : "1"; // [0] => 0 , [x] => 1
-//
-//		// Total >= 10
-//		if(c1 == '0') return listStr.substring(1, listStr.length() - 2); // [430] => 43
-//		char c10 = listStr.charAt(listStr.length() - 3); // 十位數
-//    	return listStr.substring(1, listStr.length() - 3) + (++c10); // [431] => 44
-//    }
-//    public static void main(String[] Args) {
-//		String listStr = "[431]";
-//    	System.out.println( getString(listStr));
-//    }
 
     /**
      * 取得帳務通知成效清單
      */
     @SuppressWarnings("unchecked")
-    public Map<String, List<String>> getBNEffects(String startDate, String endDate, Integer page) {
-        Integer rowStart, rowEnd;
+    public Map<String, List<String>> getBnEffects(String startDate, String endDate, Integer page) {
+        int rowStart;
+        int rowEnd;
         if (page == null) {
             rowStart = 1;
-            rowEnd = Integer.MAX_VALUE; // get all data
+            rowEnd = Integer.MAX_VALUE;
         } else {
-            page--; // 1~199 => 0~198
+            page--;
             rowStart = page * 10 + 1;
-            rowEnd = rowStart + 10; // 10 as Size
+            rowEnd = rowStart + 10;
         }
 
         String queryString =
-//		"SELECT D.TITLE AS 'Title', "
-//		+"FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') AS 'Day', "
-//		+"M.SEND_TYPE AS 'Type', "
-//		+"SUM(case when D.STATUS = 'COMPLETE' then 1 else 0 end) AS 'Complete', "
-//		+"SUM(case when D.STATUS = 'FAIL' then 1 else 0 end) AS 'Fail' "
-//		+"FROM  BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M "
-//		+"ON D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
-//		+"WHERE (case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end) >= '" + startDate + "' "
-//		+"AND (case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end) <= '" + endDate + "' "
-//		+"GROUP BY D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd'), M.SEND_TYPE "
-//		+"ORDER BY 'Title', 'Day', 'Type'; ";
-
-//		"select * from "
-//		+"(SELECT D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') AS 'Day', M.SEND_TYPE,  "
-//		+"SUM(case when D.STATUS = 'COMPLETE' then 1 else 0 end) AS 'Complete',  "
-//		+"SUM(case when D.STATUS = 'FAIL' then 1 else 0 end) AS 'Fail', "
-//		+"DENSE_RANK() OVER ( ORDER BY D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') desc, "
-//		+"M.SEND_TYPE) AS RowNum "
-//		+"FROM  BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M  "
-//		+"ON D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
-//		+"WHERE FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') >= '" + startDate + "' "
-//		+"AND FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') <= '" + endDate + "' "
-//		+"GROUP BY D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd'), M.SEND_TYPE  "
-//		+") as result where RowNum >= ?1 and RowNum <= ?2 ; ";
-
-                //2019/11/18 SUN 修改帳務通知報表顯示內容
-//		"select * from ( "
-//		+"SELECT FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd') AS 'Day', D.TITLE, M.SEND_TYPE, "
-//		+"SUM(case when D.STATUS = 'COMPLETE' then 1 else 0 end) AS 'Complete', "
-//		+"SUM(case when D.STATUS = 'FAIL' then 1 else 0 end) AS 'Fail', "
-//		+"DENSE_RANK() OVER ( ORDER BY FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd') desc, D.TITLE, M.SEND_TYPE) AS RowNum "
-//		+"FROM BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M "
-//		+"ON D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
-//		+"WHERE D.MODIFY_TIME >= '" + startDate + "' "
-//		+"AND D.MODIFY_TIME < DATEADD(DAY, 1, '" + endDate + "') "
-//		+"GROUP BY FORMAT(D.MODIFY_TIME, 'yyyy-MM-dd'), D.TITLE, M.SEND_TYPE "
-//		+") as result "
-//		+"where RowNum >= ?1 and RowNum < ?2 ";
-
-                "select * from ( "
-                        + " select FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd') as 'Day',"
-                        + " BNN.ORIG_FILE_TYPE as 'TTYPE',"
-                        + " BCT.TEMPLATE_ID as 'TID',"
-                        + " BNM.SEND_TYPE as 'STYPE',"
-                        + " SUM(case when BND.STATUS = 'COMPLETE' then 1 else 0 end) AS 'Complete',"
-                        + " SUM(case when BND.STATUS != 'COMPLETE' then 1 else 0 end) AS 'Fail',"
-                        + " DENSE_RANK() OVER ( ORDER BY FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd') desc, "
-                        + "	BCT.TEMPLATE_TYPE, "
-                        + "	BCT.TEMPLATE_ID ) AS RowNum"
-                        + " from  BCS_BILLING_NOTICE_MAIN BNM "
-                        + " left join BCS_BILLING_NOTICE_DETAIL BND on BND.NOTICE_MAIN_ID = BNM.NOTICE_MAIN_ID"
-                        + " left join BCS_BN_CONTENT_TEMPLATE BCT on BNM.TEMP_ID  = BCT.TEMPLATE_ID"
-                        + " WHERE BNM.MODIFY_TIME >= '" + startDate + "' "
-                        + " AND BNM.MODIFY_TIME < DATEADD(DAY, 1, '" + endDate + "') "
-                        + " group by FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd'), "
-                        + " BCT.TEMPLATE_TYPE ,"
-                        + " BCT.TEMPLATE_ID,"
-                        + " BNM.SEND_TYPE"
-                        + ") as result "
-                        + "where RowNum >= ?1 and RowNum < ?2 ";
-
+                " SELECT FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd') AS 'Day',"
+                + " BNM.ORIG_FILE_TYPE AS 'TTYPE',"
+                + " BCT.TEMPLATE_ID AS 'TID',"
+                + " BNM.SEND_TYPE AS 'STYPE',"
+                + " SUM(CASE WHEN BND.STATUS = 'COMPLETE' THEN 1 ELSE 0 END) AS 'Complete',"
+                + " SUM(CASE WHEN BND.STATUS != 'COMPLETE' THEN 1 ELSE 0 END) AS 'Fail'"
+                + " FROM  BCS_BILLING_NOTICE_MAIN BNM "
+                + " LEFT JOIN BCS_BILLING_NOTICE_DETAIL BND ON BND.NOTICE_MAIN_ID = BNM.NOTICE_MAIN_ID"
+                + " LEFT JOIN BCS_BN_CONTENT_TEMPLATE BCT ON BNM.TEMP_ID  = BCT.TEMPLATE_ID"
+                + " WHERE BNM.MODIFY_TIME >= '" + startDate + "' "
+                + " AND BNM.MODIFY_TIME < DATEADD(DAY, 1, '" + endDate + "') "
+                + " GROUP BY FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd'), "
+                + " BNM.ORIG_FILE_TYPE ,"
+                + "	BCT.TEMPLATE_TYPE, "
+                + " BCT.TEMPLATE_ID,"
+                + " BNM.SEND_TYPE" +
+                " ORDER BY Day ASC" +
+                " OFFSET " + rowStart + "ROWS" +
+                " FETCH NEXT " + Math.abs(rowEnd - rowStart) + " ROWS ONLY";
 
         log.info("str1: " + queryString);
 
-        Query query = entityManager.createNativeQuery(queryString).setParameter(1, rowStart).setParameter(2, rowEnd);
-        List<Object[]> list = query.getResultList();
+        List<Object[]> list = providerService.getEntityManager()
+                .createNativeQuery(queryString)
+                .getResultList();
         log.info("List1: " + list.toString());
 
         Map<String, List<String>> map = new LinkedHashMap<>();
-        Integer count = 0;
+        int count = 0;
         for (Object[] o : list) {
             count++;
-            //log.info("c:" + count);
-            List<String> dataList = new ArrayList<String>();
-            map.put(count.toString(), dataList);
+            List<String> dataList = new ArrayList<>();
+            map.put(Integer.toString(count), dataList);
             for (int i = 0, max = 6; i < max; i++) {
                 if (o[i] == null) {
                     dataList.add("");
-                    //log.info("i=" + i  + ", null");
                 } else {
                     dataList.add(o[i].toString());
-                    //log.info("i=" + i  + ", " + o[i].toString());
                 }
             }
         }
@@ -561,46 +469,40 @@ public class BillingNoticeContentTemplateMsgService {
     }
 
     @SuppressWarnings("unchecked")
-    public String getBNEffectsDetailTotalPages(String date, String templateName, String sendType) {
-        String queryString =
-//		"select count(*) from "
-//		+"(SELECT D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') AS 'Day', M.SEND_TYPE "
-//		+"FROM BCS_BILLING_NOTICE_DETAIL AS D LEFT JOIN BCS_BILLING_NOTICE_MAIN AS M  "
-//		+"ON D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
-//		+"WHERE FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') >= '" + startDate + "' "
-//		+"AND FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd') <= '" + endDate + "' "
-//		+"GROUP BY D.TITLE, FORMAT((case when D.STATUS = 'COMPLETE' then D.SEND_TIME else D.MODIFY_TIME end), 'yyyy-MM-dd'), M.SEND_TYPE) as result; ";
-
-
-                "select count(*) from ( "
-                        //+"SELECT D.TITLE, D.CREAT_TIME, D.MODIFY_TIME, D.SEND_TIME, D.STATUS, D.UID, "
-                        + "SELECT D.CREAT_TIME, T.TEMPLATE_TYPE, D.TITLE, D.TEXT, D.STATUS, D.UID, "
-                        + "DENSE_RANK() OVER ( ORDER BY D.MODIFY_TIME desc, D.NOTICE_DETAIL_ID) AS RowNum "
-                        + "from BCS_BILLING_NOTICE_DETAIL D "
-                        + "join BCS_BILLING_NOTICE_MAIN M on D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
-                        + "join BCS_BN_CONTENT_TEMPLATE T on M.TEMP_ID  = T.TEMPLATE_ID "
-                        + "WHERE D.MODIFY_TIME >= '" + date + "' "
-                        + "AND D.MODIFY_TIME <  DATEADD(DAY, 1, '" + date + "') "
-                        + "AND T.TEMPLATE_ID = N'" + templateName + "' "
-                        + "AND M.SEND_TYPE = '" + sendType + "' "
-                        //+"AND (D.STATUS = 'FAIL' or D.STATUS = 'COMPLETE') "
-                        + ") as result ";
+    public String getBnEffectsDetailTotalPages(String date, String templateName, String sendType) {
+        String queryString = "select count(*) from ( "
+                + "SELECT D.CREAT_TIME, T.TEMPLATE_TYPE, D.TITLE, D.TEXT, D.STATUS, D.UID, "
+                + "DENSE_RANK() OVER ( ORDER BY D.MODIFY_TIME desc, D.NOTICE_DETAIL_ID) AS RowNum "
+                + "from BCS_BILLING_NOTICE_DETAIL D "
+                + "join BCS_BILLING_NOTICE_MAIN M on D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
+                + "join BCS_BN_CONTENT_TEMPLATE T on M.TEMP_ID  = T.TEMPLATE_ID "
+                + "WHERE D.SEND_TIME >= '" + date + "' "
+                + "AND D.SEND_TIME <  DATEADD(DAY, 1, '" + date + "') "
+                + "AND T.TEMPLATE_ID = N'" + templateName + "' "
+                + "AND M.SEND_TYPE = '" + sendType + "' "
+                + ") as result ";
         log.info("str1: " + queryString);
 
-        Query query = entityManager.createNativeQuery(queryString);
+        Query query = providerService.getEntityManager().createNativeQuery(queryString);
         List<Object[]> list = query.getResultList();
         String listStr = list.toString();
         log.info("List1:" + list.toString());
 
         // Total = Empty set,  []  => 0
-        if (listStr.length() <= 2) return "0";
+        if (listStr.length() <= 2) {
+            return "0";
+        }
 
         // Total < 10
         char c1 = listStr.charAt(listStr.length() - 2); // 個位數
-        if (listStr.length() == 3) return (c1 == '0') ? "0" : "1"; // [0] => 0 , [1] => 1
+        if (listStr.length() == 3) {
+            return (c1 == '0') ? "0" : "1"; // [0] => 0 , [1] => 1
+        }
 
         // Total >= 10
-        if (c1 == '0') return listStr.substring(1, listStr.length() - 2); // [430] => 43
+        if (c1 == '0') {
+            return listStr.substring(1, listStr.length() - 2); // [430] => 43
+        }
         char c10 = listStr.charAt(listStr.length() - 3); // 十位數
         return listStr.substring(1, listStr.length() - 3) + (++c10); // [431] => 44
     }
@@ -609,54 +511,52 @@ public class BillingNoticeContentTemplateMsgService {
      * 取得帳務通知成效清單
      */
     @SuppressWarnings("unchecked")
-    public Map<String, List<String>> getBNEffectsDetail(String date, String templateName, String sendType, Integer page) {
-        Integer rowStart, rowEnd;
+    public Map<String, List<String>> getBnEffectsDetail(String date, String templateName, String sendType, Integer page) {
+        int rowStart;
+        int rowEnd;
         if (page == null) {
             rowStart = 1;
-            rowEnd = Integer.MAX_VALUE; // get all data
+            // get all data
+            rowEnd = Integer.MAX_VALUE;
         } else {
-            page--; // 1~199 => 0~198
+            // 1~199 => 0~198
+            page--;
             rowStart = page * 10 + 1;
-            rowEnd = rowStart + 10; // 10 as Size
+            // 10 as Size
+            rowEnd = rowStart + 10;
         }
 
         log.info("getBNEffectsDetail:");
-        String queryString =
-                "select * from ( "
-                        //+"SELECT D.TITLE, D.CREAT_TIME, D.MODIFY_TIME, D.SEND_TIME, D.STATUS, D.UID, "
-                        + "SELECT D.CREAT_TIME, T.TEMPLATE_TYPE, D.TITLE, D.TEXT, D.STATUS, D.UID, "
-                        + "DENSE_RANK() OVER ( ORDER BY D.MODIFY_TIME desc, D.NOTICE_DETAIL_ID) AS RowNum "
-                        + "from BCS_BILLING_NOTICE_DETAIL D "
-                        + "join BCS_BILLING_NOTICE_MAIN M on D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
-                        + "join BCS_BN_CONTENT_TEMPLATE T on M.TEMP_ID  = T.TEMPLATE_ID "
-                        + "WHERE D.MODIFY_TIME >= '" + date + "' "
-                        + "AND D.MODIFY_TIME <  DATEADD(DAY, 1, '" + date + "') "
-                        + "AND T.TEMPLATE_ID = N'" + templateName + "' "
-                        + "AND M.SEND_TYPE = '" + sendType + "' "
-                        //+"AND (D.STATUS = 'FAIL' or D.STATUS = 'COMPLETE') "
-                        + ") as result "
-                        + "where RowNum >= ?1 and RowNum < ?2 ";
+        String queryString = "select * from ( "
+                + "SELECT D.CREAT_TIME, T.TEMPLATE_TYPE, D.TITLE, D.TEXT, D.STATUS, D.UID, "
+                + "DENSE_RANK() OVER ( ORDER BY D.MODIFY_TIME desc, D.NOTICE_DETAIL_ID) AS RowNum "
+                + "from BCS_BILLING_NOTICE_DETAIL D "
+                + "join BCS_BILLING_NOTICE_MAIN M on D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
+                + "join BCS_BN_CONTENT_TEMPLATE T on M.TEMP_ID  = T.TEMPLATE_ID "
+                + "WHERE D.SEND_TIME >= '" + date + "' "
+                + "AND D.SEND_TIME <  DATEADD(DAY, 1, '" + date + "') "
+                + "AND T.TEMPLATE_ID = N'" + templateName + "' "
+                + "AND M.SEND_TYPE = '" + sendType + "' "
+                + ") as result "
+                + "where RowNum >= ?1 and RowNum < ?2 ";
 
         log.info("str1: " + queryString);
 
-        Query query = entityManager.createNativeQuery(queryString).setParameter(1, rowStart).setParameter(2, rowEnd);
+        Query query = providerService.getEntityManager().createNativeQuery(queryString).setParameter(1, rowStart).setParameter(2, rowEnd);
         List<Object[]> list = query.getResultList();
         log.info("List1: " + list.toString());
 
         Map<String, List<String>> map = new LinkedHashMap<>();
-        Integer count = 0;
+        int count = 0;
         for (Object[] o : list) {
             count++;
-            //log.info("c:" + count);
-            List<String> dataList = new ArrayList<String>();
-            map.put(count.toString(), dataList);
+            List<String> dataList = new ArrayList<>();
+            map.put(Integer.toString(count), dataList);
             for (int i = 0, max = 6; i < max; i++) {
                 if (o[i] == null) {
                     dataList.add("");
-                    //log.info("i=" + i  + ", null");
                 } else {
                     dataList.add(o[i].toString());
-                    //log.info("i=" + i  + ", " + o[i].toString());
                 }
             }
         }
@@ -669,18 +569,16 @@ public class BillingNoticeContentTemplateMsgService {
      * 檢查有無重覆使用到UUID
      */
     public Boolean checkDuplicateUUID(String queryType, String uuid) {
-        if (queryType == "1") {
+        if ("1".equals(queryType)) {
             BillingNoticeContentTemplateMsg contentTemplateMsg = contentTemplateMsgRepository.findOne(uuid);
-            if (contentTemplateMsg == null) return false;
-        } else if (queryType == "2") {
+            return contentTemplateMsg != null;
+        } else if ("2".equals(queryType)) {
             BillingNoticeContentTemplateMsgAction contentTemplateMsgAction = contentTemplateMsgActionRepository.findOne(uuid);
-            if (contentTemplateMsgAction == null) return false;
+            return contentTemplateMsgAction != null;
         } else {
             BillingNoticeContentLink contentLink = contentLinkService.findOne(uuid);
-            if (contentLink == null) return false;
+            return contentLink != null;
         }
-
-        return true;
     }
 
     /**
@@ -723,6 +621,17 @@ public class BillingNoticeContentTemplateMsgService {
         for (BillingNoticeContentTemplateMsg contentTemplateMsg : contentTemplateMsgs) {
             dataCache.refresh(contentTemplateMsg.getTemplateId());
             DataSyncUtil.settingReSync(TEMPLATE_SYNC);
+        }
+    }
+
+    /**
+     * Stop Schedule : Wait for Executing Jobs to Finish
+     */
+    @PreDestroy
+    public void destroy() {
+        if (scheduler != null && !scheduler.isShutdown()) {
+            log.debug("Shutdown....");
+            scheduler.shutdown();
         }
     }
 }

@@ -371,7 +371,7 @@ public class PnpService {
             case "USER_IS_UNBIND_IGNORE_TO_PNP":
                 log.info("USER_IS_UNBIND_IGNORE_TO_PNP");
                 detail.setProcStage(PnpStageEnum.PNP.value);
-                detail.setStatus(PnpStatusEnum.COMPLETE.value);
+                detail.setStatus(PnpStatusEnum.PROCESS.value);
                 detail.setBcStatus(PnpStatusEnum.USER_IS_UNBIND_IGNORE_TO_PNP.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
                 return detail;

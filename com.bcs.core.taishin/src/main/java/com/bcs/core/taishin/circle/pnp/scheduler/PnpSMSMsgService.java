@@ -317,6 +317,7 @@ public class PnpSMSMsgService {
                 PnpStatusEnum.BC_USER_BLOCKED_SMS_PROCESS.value,
                 PnpStatusEnum.BC_UID_NOT_FOUND_SMS_PROCESS.value,
                 PnpStatusEnum.BC_USER_IN_BLACK_LIST_SMS_PROCESS.value,
+                PnpStatusEnum.USER_IS_UNBIND_IGNORE_TO_SMS.value,
                 PnpStatusEnum.USER_IS_SYSTEM_ADD_IGNORE_SMS.value
         ));
         if (!list.isEmpty()) {

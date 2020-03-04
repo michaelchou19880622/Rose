@@ -39,7 +39,7 @@ public class ExportToExcelForBillingNoticePushBNApiEffects {
 
     private void getBNPushApiEffects(Workbook workbook, String startDate, String endDate) {
         try {
-            Map<String, List<String>> bnEffects = billingNoticeContentTemplateMsgService.getBNEffects(startDate, endDate, null);
+            Map<String, List<String>> bnEffects = billingNoticeContentTemplateMsgService.getBnEffects(startDate, endDate, null);
 
             int sheetNumber = 1;
             Sheet sheet = this.createBNPushApiEffectsSheet(workbook, sheetNumber++);
@@ -134,7 +134,7 @@ public class ExportToExcelForBillingNoticePushBNApiEffects {
 
     private void getBNPushApiEffects(Workbook workbook, String date, String title, String sendType) {
         try {
-            Map<String, List<String>> bnEffects = billingNoticeContentTemplateMsgService.getBNEffectsDetail(date, title, sendType, null);
+            Map<String, List<String>> bnEffects = billingNoticeContentTemplateMsgService.getBnEffectsDetail(date, title, sendType, null);
 
             int sheetNumber = 1;
             Sheet sheet = this.createBNPushApiEffectsDetailSheet(workbook, sheetNumber++);
@@ -180,7 +180,7 @@ public class ExportToExcelForBillingNoticePushBNApiEffects {
             // first row
             Row row = sheet.createRow(0);
             row.createCell(0).setCellValue("發送時間");
-            row.createCell(1).setCellValue("推播時間");
+            row.createCell(1).setCellValue("推播類型");
             row.createCell(2).setCellValue("訊息標題");
             row.createCell(3).setCellValue("訊息內容");
             row.createCell(4).setCellValue("發送結果");

@@ -432,7 +432,7 @@ public class BCSBillingNoticeTemplateMsgController {
 		if(endDate == null) endDate = "3099-01-01";
 
 		try{
-			Map<String, List<String>> result = contentTemplateMsgService.getBNEffects(startDate, endDate, page);
+			Map<String, List<String>> result = contentTemplateMsgService.getBnEffects(startDate, endDate, page);
 			logger.info("getBNEffectsList, page=" + page + " sizeOfList=" + result.size());
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		}
@@ -457,7 +457,7 @@ public class BCSBillingNoticeTemplateMsgController {
 			@RequestParam  String templateName,
 			@RequestParam  String sendType) throws IOException {
 		try{
-			String count = contentTemplateMsgService.getBNEffectsDetailTotalPages(date, templateName, sendType);
+			String count = contentTemplateMsgService.getBnEffectsDetailTotalPages(date, templateName, sendType);
 			return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count + "\"}", HttpStatus.OK);
 		}
 		catch(Exception e){
@@ -485,7 +485,7 @@ public class BCSBillingNoticeTemplateMsgController {
 		logger.info("page1: " + page);
 
 		try{
-			Map<String, List<String>> result = contentTemplateMsgService.getBNEffectsDetail(date, templateName, sendType, page);
+			Map<String, List<String>> result = contentTemplateMsgService.getBnEffectsDetail(date, templateName, sendType, page);
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		}
 		catch(Exception e){

@@ -249,7 +249,7 @@ public class FtpService {
     private boolean loginFTP(FTPClient pFtpClient, FtpSetting setting) {
         try {
 
-            pFtpClient.setDefaultTimeout(1000000);
+            pFtpClient.setDefaultTimeout(5 * 60 * 1000);
             pFtpClient.connect(setting.getHost(), setting.getPort());
 
             // T 先以資源密碼系統取得的帳號密碼進行登入，登入失敗再以系統原本設定的帳號密碼登入系統
@@ -312,6 +312,7 @@ public class FtpService {
                 session = jsch.getSession(account, setting.getHost(), setting.getPort());
                 session.setPassword(password);
                 session.setConfig(sshConfig);
+                session.setTimeout(5 * 60 * 1000);
                 session.connect();
                 lStatus = session.isConnected();
                 if (lStatus) {
@@ -333,6 +334,7 @@ public class FtpService {
             session = jsch.getSession(trendPwMgmt.get("uid"), setting.getHost(), setting.getPort());
             session.setPassword(trendPwMgmt.get("pwd"));
             session.setConfig(sshConfig);
+            session.setTimeout(5 * 60 * 1000);
             session.connect();
             lStatus = session.isConnected();
             if (lStatus) {
@@ -347,6 +349,7 @@ public class FtpService {
             session = jsch.getSession("ACCOUNT", setting.getHost(), setting.getPort());
             session.setPassword("PASSWORD");
             session.setConfig(sshConfig);
+            session.setTimeout(5 * 60 * 1000);
             session.connect();
             lStatus = session.isConnected();
             if (lStatus) {
@@ -371,6 +374,7 @@ public class FtpService {
     public Map<String, byte[]> downloadMultipleFileInFTPForDev(String pDirectory, String extension, FtpSetting setting) {
         Map<String, byte[]> lReturnDataMap = new HashMap<>();
         FTPClient ftpClient = getFtpClient(setting);
+        ftpClient.setConnectTimeout(5 * 60 * 1000);
         try {
             ftpClient.connect(setting.getHost(), setting.getPort());
             ftpClient.login(setting.getAccount(), setting.getPassword());
@@ -444,6 +448,7 @@ public class FtpService {
         Map<String, byte[]> lReturnDataMap = new HashMap<>();
         try {
             ftpClient = getFtpClient(setting);
+            ftpClient.setConnectTimeout(5 * 60 * 1000);
             if (loginFTP(ftpClient, setting)) {
                 ftpClient.changeWorkingDirectory(pDirectory);
                 ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
@@ -740,6 +745,7 @@ public class FtpService {
             session = jsch.getSession(setting.getAccount(), setting.getHost(), setting.getPort());
             session.setPassword(setting.getPassword());
             session.setConfig(sshConfig);
+            session.setTimeout(5 * 60 * 1000);
             session.connect();
             if (session.isConnected()) {
                 log.info("Session is connected!!");
@@ -784,6 +790,7 @@ public class FtpService {
      */
     private void deleteFileInFTPForDev(String pDirectory, String[] pFileNames, FtpSetting setting) {
         FTPClient ftpClient = getFtpClient(setting);
+        ftpClient.setConnectTimeout(5 * 60 * 1000);
         try {
             ftpClient.connect(setting.getHost(), setting.getPort());
             ftpClient.login(setting.getAccount(), setting.getPassword());
@@ -826,6 +833,7 @@ public class FtpService {
         FTPClient ftpClient = null;
         try {
             ftpClient = getFtpClient(setting);
+            ftpClient.setConnectTimeout(5 * 60 * 1000);
             if (loginFTP(ftpClient, setting)) {
                 log.info("Ftp Connection success!!");
                 ftpClient.changeWorkingDirectory(pDirectory);

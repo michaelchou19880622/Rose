@@ -47,6 +47,12 @@ public class PushApiController {
         try {
             log.info("-------------------- pushMessage --------------------");
             log.info("[pushMessage] Request body: " + requestBodyString);
+            
+            pushApiModel = new PushApiModel();
+
+            PushApiRequestValidator.validate(requestBodyString, pushApiModel);
+            
+            log.info("pushApiModel => {}", pushApiModel);
 
             if (request.getHeader(HttpHeaders.AUTHORIZATION) == null) {
                 return new ResponseEntity<>("{\"result\": 0, \"msg\": \"Missing 'Authorization' header.\"}", HttpStatus.BAD_REQUEST);
@@ -76,12 +82,6 @@ public class PushApiController {
                     return new ResponseEntity<>("{\"result\": 0, \"msg\": \"Invalid token.\"}", HttpStatus.UNAUTHORIZED);
                 }
             }
-
-            pushApiModel = new PushApiModel();
-
-            PushApiRequestValidator.validate(requestBodyString, pushApiModel);
-            
-            log.info("pushApiModel => {}", pushApiModel);
 
             PNPService.tell(pushApiModel);
 

@@ -81,7 +81,7 @@ public class PushMessageActor extends UntypedActor {
 
 						record.setDepartment(pushApiModel.getDepartment());
 						record.setUID(uids.get(i).toString());
-						record.setSendMessage(pushApiModel.getMessages().toString());
+						record.setSendMessage(sendMessage);
 						record.setStatusCode(HttpStatus.OK.toString());
 						record.setMainMessage("Success");
 						record.setSendType(pushApiModel.getSendTimeType());
@@ -112,16 +112,20 @@ public class PushMessageActor extends UntypedActor {
 						if(errorMessage.has("message")) {
 							record.setDepartment(pushApiModel.getDepartment());
 							record.setUID(uids.get(i).toString());
-							record.setSendMessage(pushApiModel.getMessages().toString());
+							record.setSendMessage(sendMessage);
 							record.setStatusCode(e.getStatusCode().toString());
-							record.setMainMessage(errorMessage.getString("message"));
+							record.setMainMessage("Fail");
 							record.setSendType(pushApiModel.getSendTimeType());
 							record.setSendTime(new Date());
 							record.setCreateTime(pushApiModel.getTriggerTime());
 							record.setServiceName(pushApiModel.getServiceName());
 							record.setPushTheme(pushApiModel.getPushTheme());
-							if(errorMessage.has("details"))
+							
+							if (errorMessage.has("details")) {
 								record.setDetailMessage(errorMessage.getJSONArray("details").toString());
+							} else {
+								record.setDetailMessage(strErrorMessage);
+							}
 						} 
 					} catch (Exception e) {
 						log.info("Exception = {}", e);
@@ -152,6 +156,7 @@ public class PushMessageActor extends UntypedActor {
 						record.setMainMessage(exceptionErrorMessage);
 						record.setSendType(pushApiModel.getSendTimeType());
 						record.setCreateTime(pushApiModel.getTriggerTime());
+						record.setDetailMessage(exceptionErrorMessage);
 					}
 					this.getSender().tell(record, this.getSelf());
 				}

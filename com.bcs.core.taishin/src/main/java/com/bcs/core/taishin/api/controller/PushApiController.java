@@ -116,7 +116,8 @@ public class PushApiController {
 				record.setSendTime(dateSendTime);
 				record.setCreateTime(pushApiModel.getTriggerTime());
 				record.setMainMessage("Error");
-				record.setSendMessage(e.getClass().getName() + " occurred, please check the log.");
+				record.setSendMessage(sendMessage);
+				record.setDetailMessage(e.getClass().getName() + " occurred, please check the log.");
 				
 				PushMessageRecordService pushMessageRecordService = ApplicationContextProvider.getApplicationContext().getBean(PushMessageRecordService.class);
 				pushMessageRecordService.save(record);

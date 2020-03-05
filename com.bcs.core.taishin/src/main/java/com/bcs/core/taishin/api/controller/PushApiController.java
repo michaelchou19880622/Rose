@@ -48,15 +48,24 @@ public class PushApiController {
                 }
 
                 String token = authorization.split("key=")[1];
+                logger.info("[pushMessage] token: " + token);
+                
                 String secret = CoreConfigReader.getString(CONFIG_STR.AES_SECRET_KEY, true);
+                logger.info("[pushMessage] secret: " + secret);
+                
                 String iv = CoreConfigReader.getString(CONFIG_STR.AES_INITIALIZATION_VECTOR, true);
+                logger.info("[pushMessage] iv: " + iv);
+                
                 String originalToken = CoreConfigReader.getString(CONFIG_STR.API_ORIGINAL_TOKEN, true);
+                logger.info("[pushMessage] originalToken: " + originalToken);
+                
+                String descryptedToken = CryptUtil.Decrypt(CryptUtil.AES, token, secret, iv);
+                logger.info("[pushMessage] descryptedToken: " + descryptedToken);
 
-                if (!CryptUtil.Decrypt(CryptUtil.AES, token, secret, iv).equals(originalToken)) {
+                if (!descryptedToken.equals(originalToken)) {
                     return new ResponseEntity<>("{\"result\": 0, \"msg\": \"Invalid token.\"}", HttpStatus.UNAUTHORIZED);
                 }
             }
-
 
             PushApiModel pushApiModel = new PushApiModel();
 

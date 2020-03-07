@@ -136,7 +136,7 @@ $(function(){
 					
 					var encodeTitle = encodeURI(valueObj[1]);
 					var link = bcs.bcsContextPath + '/admin/reportBNEffectsDetailPage?date=' + valueObj[0] + '&templateName=' + valueObj[2] + '&sendType=' + valueObj[3]
-																				     +'&startDate=' + startDate + '&endDate=' + endDate + '&pages=' + page;
+																				     +'&startDate=' + startDate + '&endDate=' + endDate + '&pages=' + page + '&bnType=' + valueObj[1];
 					
 					rowDOM.find('.sendDate').html('<a>' + valueObj[0] + '</a>').end().find('a').attr('href', link);
 					rowDOM.find('.templateType').text(valueObj[1]);

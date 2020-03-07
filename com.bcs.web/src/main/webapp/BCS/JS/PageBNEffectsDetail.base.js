@@ -1,6 +1,7 @@
 $(function(){
 	var originalTr = {};
 	var date = null, title = null, sendType = null;
+	var bnType = $.urlParam("bnType");
 	var startDate = $.urlParam("startDate");
 	var endDate = $.urlParam("endDate");
 	var page = 1, totalPages = 0;
@@ -57,7 +58,7 @@ $(function(){
 		$('.btn_add.back').attr('href', '../admin/reportBNEffectsPage?startDate=' + startDate + '&endDate=' + endDate + '&pages=' + pages);
 
 		// set ExportButton
-		var exportUrl = '../edit/exportToExcelForBNPushApiEffectsDetail?date=' + date + '&title=' + templateName + '&sendType=' + sendType;
+		var exportUrl = '../edit/exportToExcelForBNPushApiEffectsDetail?date=' + date + '&title=' + templateName + '&sendType=' + sendType + '&bnType=' + bnType;
 		$('.btn_add.exportToExcel').attr('href', exportUrl);
 		
 		// set table
@@ -76,7 +77,7 @@ $(function(){
 		
 		$.ajax({
 			type : "GET",
-			url : '../edit/getBNEffectsDetailList?date=' + date + '&templateName=' + templateName + '&sendType=' + sendType + '&page=' + page
+			url : '../edit/getBNEffectsDetailList?date=' + date + '&templateName=' + templateName + '&sendType=' + sendType + '&page=' + page + '&bnType=' + bnType
 		}).success(function(response){
 			if(response.length === 0) {
 				//$('<tr class="dataTemplate"><td colspan="4">此日期區間無任何資料</td></tr>').appendTo($('#tableBody'));

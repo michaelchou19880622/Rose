@@ -481,11 +481,12 @@ public class BCSBillingNoticeTemplateMsgController {
 			@RequestParam  String date,
 			@RequestParam  String templateName,
 			@RequestParam  String sendType,
+			@RequestParam  String bnType,
 			@RequestParam(value = "page", required=false) Integer page) throws IOException {
 		logger.info("page1: " + page);
 
 		try{
-			Map<String, List<String>> result = contentTemplateMsgService.getBnEffectsDetail(date, templateName, sendType, page);
+			Map<String, List<String>> result = contentTemplateMsgService.getBnEffectsDetail(date, templateName, sendType, bnType, page);
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		}
 		catch(Exception e){
@@ -695,7 +696,7 @@ public class BCSBillingNoticeTemplateMsgController {
     @RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForBNPushApiEffectsDetail")
     @ResponseBody
     public void exportToExcelForBNPushApiEffectsDetail(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
-    		@RequestParam String date, @RequestParam String title, @RequestParam String sendType) {
+    		@RequestParam String date, @RequestParam String title, @RequestParam String sendType, @RequestParam String bnType) {
 
 		// file path
         //String filePath = "C:\\bcs\\";
@@ -710,7 +711,7 @@ public class BCSBillingNoticeTemplateMsgController {
             if(!folder.exists()){
                 folder.mkdirs();
             }
-            exportToExcelForBillingNoticePushBNApiEffects.exportExcel(filePath, fileName, date, title, sendType);
+            exportToExcelForBillingNoticePushBNApiEffects.exportExcel(filePath, fileName, date, title, sendType, bnType);
         } catch (Exception e) {
             logger.error(ErrorRecord.recordError(e));
         }

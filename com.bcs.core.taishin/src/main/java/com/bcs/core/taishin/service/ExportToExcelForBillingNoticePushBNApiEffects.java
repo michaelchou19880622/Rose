@@ -118,12 +118,12 @@ public class ExportToExcelForBillingNoticePushBNApiEffects {
         return sheet;
     }
 
-    public void exportExcel(String exportPath, String fileName, String date, String title, String sendType) {
+    public void exportExcel(String exportPath, String fileName, String date, String title, String sendType, String bnType) {
         try {
             Workbook workbook = new XSSFWorkbook();
             FileOutputStream out = new FileOutputStream(exportPath + System.getProperty("file.separator") + fileName);
 
-            this.getBNPushApiEffects(workbook, date, title, sendType);
+            this.getBNPushApiEffects(workbook, date, title, sendType, bnType);
             workbook.write(out);
             out.close();
             workbook.close();
@@ -132,9 +132,9 @@ public class ExportToExcelForBillingNoticePushBNApiEffects {
         }
     }
 
-    private void getBNPushApiEffects(Workbook workbook, String date, String title, String sendType) {
+    private void getBNPushApiEffects(Workbook workbook, String date, String title, String sendType, String bnType) {
         try {
-            Map<String, List<String>> bnEffects = billingNoticeContentTemplateMsgService.getBnEffectsDetail(date, title, sendType, null);
+            Map<String, List<String>> bnEffects = billingNoticeContentTemplateMsgService.getBnEffectsDetail(date, title, sendType, bnType, null);
 
             int sheetNumber = 1;
             Sheet sheet = this.createBNPushApiEffectsDetailSheet(workbook, sheetNumber++);

@@ -413,11 +413,11 @@ public class BillingNoticeContentTemplateMsgService {
         int rowStart;
         int rowEnd;
         if (page == null) {
-            rowStart = 1;
+            rowStart = 0;
             rowEnd = Integer.MAX_VALUE;
         } else {
             page--;
-            rowStart = page * 10 + 1;
+            rowStart = page * 10;
             rowEnd = rowStart + 10;
         }
 
@@ -439,7 +439,7 @@ public class BillingNoticeContentTemplateMsgService {
                 + " BCT.TEMPLATE_ID,"
                 + " BNM.SEND_TYPE" +
                 " ORDER BY Day ASC" +
-                " OFFSET " + rowStart + "ROWS" +
+                " OFFSET " + rowStart + " ROWS" +
                 " FETCH NEXT " + Math.abs(rowEnd - rowStart) + " ROWS ONLY";
 
         log.info("str1: " + queryString);
@@ -511,17 +511,17 @@ public class BillingNoticeContentTemplateMsgService {
      * 取得帳務通知成效清單
      */
     @SuppressWarnings("unchecked")
-    public Map<String, List<String>> getBnEffectsDetail(String date, String templateName, String sendType, Integer page) {
+    public Map<String, List<String>> getBnEffectsDetail(String date, String templateName, String sendType, String bnType, Integer page) {
         int rowStart;
         int rowEnd;
         if (page == null) {
-            rowStart = 1;
+            rowStart = 0;
             // get all data
             rowEnd = Integer.MAX_VALUE;
         } else {
             // 1~199 => 0~198
             page--;
-            rowStart = page * 10 + 1;
+            rowStart = page * 10;
             // 10 as Size
             rowEnd = rowStart + 10;
         }
@@ -548,8 +548,9 @@ public class BillingNoticeContentTemplateMsgService {
                 + "join BCS_BN_CONTENT_TEMPLATE T on M.TEMP_ID  = T.TEMPLATE_ID "
                 + "WHERE D.SEND_TIME >= '" + date + "' "
                 + "AND D.SEND_TIME <  DATEADD(DAY, 1, '" + date + "') "
-                + "AND T.TEMPLATE_ID = N'" + templateName + "' "
+                + "AND T.TEMPLATE_ID = '" + templateName + "' "
                 + "AND M.SEND_TYPE = '" + sendType + "' "
+                + "AND M.ORIG_FILE_TYPE = N'" + bnType + "' "
                 + ") as result "
                 + "where RowNum >= ?1 and RowNum < ?2 ";
 

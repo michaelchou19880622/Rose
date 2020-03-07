@@ -65,6 +65,9 @@ public class BillingNoticeSendMsgService {
     public void startCircle() {
         String unit = CoreConfigReader.getString(CONFIG_STR.BN_SCHEDULE_UNIT, true, false);
         int time = CoreConfigReader.getInteger(CONFIG_STR.BN_SEND_SCHEDULE_TIME, true, false);
+
+        log.info("startCircle : unit = {} time = {}", unit, time);
+        
         if (time == -1) {
             log.error(" BillingNoticeSendMsgService TimeUnit error :" + time + unit);
             return;

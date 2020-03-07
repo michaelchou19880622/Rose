@@ -65,23 +65,31 @@ public class CryptUtil {
         logger.info("[CryptUtil] Decrypt - encryptedString: " + encryptedString);
         logger.info("[CryptUtil] Decrypt - secret key: " + secretKey);
         
-        if(algorithm.equals("AES")) {
-            byte[] raw = secretKey.getBytes();
-            SecretKeySpec secretKeySpec = new SecretKeySpec(raw, algorithm);
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            IvParameterSpec iv = new IvParameterSpec(initializationVector.getBytes());
-            
-            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, iv);
-            
-            byte[] decryptedContent = cipher.doFinal(Base64.getDecoder().decode(encryptedString));
-            String decryptedString = new String(decryptedContent);
-            
-            logger.info("[CryptUtil] Decrypt - result: " + decryptedString);
-            
-            return decryptedString;
-        } else {
-            throw new IllegalArgumentException("Unsupporting algorithm!");
-        }
+		if (algorithm.equals("AES")) {
+			byte[] raw = secretKey.getBytes();
+	        logger.info("[CryptUtil] Decrypt - raw: " + raw);
+	        
+			SecretKeySpec secretKeySpec = new SecretKeySpec(raw, algorithm);
+	        logger.info("[CryptUtil] Decrypt - secretKeySpec: " + secretKeySpec);
+	        
+			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+	        logger.info("[CryptUtil] Decrypt - cipher: " + cipher);
+			
+			IvParameterSpec iv = new IvParameterSpec(initializationVector.getBytes());
+	        logger.info("[CryptUtil] Decrypt - iv: " + iv);
+
+			cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, iv);
+
+			byte[] decryptedContent = cipher.doFinal(Base64.getDecoder().decode(encryptedString));
+	        logger.info("[CryptUtil] Decrypt - decryptedContent: " + decryptedContent);
+	        
+			String decryptedString = new String(decryptedContent);
+			logger.info("[CryptUtil] Decrypt - result: " + decryptedString);
+
+			return decryptedString;
+		} else {
+			throw new IllegalArgumentException("Unsupporting algorithm!");
+		}
     }
 
 }

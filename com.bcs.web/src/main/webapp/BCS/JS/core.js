@@ -266,6 +266,7 @@ $(function(){
   $.BCS.blockMsgRead = { "message" : "讀取資料中...."};
   $.BCS.blockMsgUpload = { "message" : "上傳資料中...."};
   $.BCS.blockMsgSave = { "message" : "儲存資料中...."};
+  $.BCS.blockMsgCheckingUID = { "message" : "UID查詢中...."};
 
   $.BCS.formatNumber = function(number, size){
 

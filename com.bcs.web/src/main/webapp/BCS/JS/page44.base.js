@@ -40,19 +40,123 @@ $(function(){
 		}
 	};
 	
-	$('#userID').blur(function(){
-		CheckID();
-		isBIND = 1 ;   // 1 尚未查詢 2 查詢後未綁定 3查詢後已綁定
-		$(".showResult").html("");
-		if(isTrueID){
-			showblank();
-		}else{
-			showerror();
+	//身分證字號或外籍人士居留証驗證
+	/*
+	 * 第一個字元代表地區，轉換方式為：A轉換成1,0兩個字元，B轉換成1,1……但是Z、I、O分別轉換為33、34、35
+	 * 第二個字元代表性別，1代表男性，2代表女性
+	 * 第三個字元到第九個字元為流水號碼。
+	 * 第十個字元為檢查號碼。
+	 * 每個相對應的數字相乘，如A123456789代表1、0、1、2、3、4、5、6、7、8，相對應乘上1987654321，再相加。
+	 * 相加後的值除以模數，也就是10，取餘數再以模數10減去餘數，若等於檢查碼，則驗證通過
+	 */
+	function idNumberIdentify() {
+		var idNumber = $('#userID').val();
+		
+		console.info("idNumber = " + idNumber);
+	     
+		userIdNumber = idNumber.toUpperCase();
+		console.info("idNumber.toUpperCase = " + userIdNumber);
+
+		// 驗證填入身分證字號長度及格式
+		if (userIdNumber.length != 10) {
+			console.info("格式錯誤");
+			return false;
 		}
-	});
+		
+//		1.	(^[A-Za-z][12][\d]{8}$) 	: 本國人+外來人口 : 第1碼為英文，後9碼為數字
+//		2.	([\d]{8}[A-Za-z][A-Za-z]$) 	: 外國人(舊制) : 前8碼為數字，後2碼為英文
+//		3.	([A-Za-z][A-Za-z][\d]{8}$) 	: FNS外國人(舊制) : 前2碼為英文，後8碼為數字
+//		4.	([\d]{10}$) 				: 中國籍人士(舊制) : 10碼數字
+        if (!/(^[A-Za-z][12][\d]{8}$)|([\d]{8}[A-Za-z][A-Za-z]$)|([A-Za-z][A-Za-z][\d]{8}$)|([\d]{10}$)/.test(userIdNumber)) {
+        	console.info("格式錯誤");
+	        return false;
+        }
+        
+
+        return true;
+        
+//        var idHeader = "ABCDEFGHJKLMNPQRSTUVXYWZIO";
+//        
+//        if (/^[A-Za-z][12][\d]{8}$/.test(userIdNumber)) { // 身分證號規則
+//        	
+//	        userIdNumber = (idHeader.indexOf(userIdNumber.substring(0, 1)) + 10) 
+//					        + ''
+//					        + userIdNumber.substr(1, 9);
+//			console.info("1-1 userIdNumber = " + userIdNumber);
+//	       
+//	        
+//	        s = parseInt(userIdNumber.substr(0, 1)) 
+//		        + parseInt(userIdNumber.substr(1, 1)) * 9 
+//		        + parseInt(userIdNumber.substr(2, 1)) * 8 
+//		        + parseInt(userIdNumber.substr(3, 1)) * 7 
+//		        + parseInt(userIdNumber.substr(4, 1)) * 6 
+//		        + parseInt(userIdNumber.substr(5, 1)) * 5 
+//		        + parseInt(userIdNumber.substr(6, 1)) * 4 
+//		        + parseInt(userIdNumber.substr(7, 1)) * 3 
+//		        + parseInt(userIdNumber.substr(8, 1)) * 2 
+//		        + parseInt(userIdNumber.substr(9, 1));
+//			console.info("1-1 s = " + s);
+//	 
+//	        checkNum = parseInt(userIdNumber.substr(10, 1));
+//			console.info("1-1 checkNum = " + checkNum);
+//	        
+//	        if ((s % 10) == 0 || (10 - s % 10) == checkNum) {
+//	            return true;
+//	        } else {
+//	            return false;
+//	        }
+//        } else if (/[A-Za-z][A-Da-d][\d]{8}$/.test(userIdNumber)) { // 居留證號規則
+//        	
+//	        userIdNumber = (idHeader.indexOf(userIdNumber.substring(0, 1)) + 10) 
+//					        + '' 
+//					        + ((idHeader.indexOf(userIdNumber.substr(1, 1)) + 10) % 10) 
+//					        + '' 
+//					        + userIdNumber.substr(2, 8);
+//			console.info("1-2 userIdNumber = " + userIdNumber);
+//	 
+//
+//			s = parseInt(userIdNumber.substr(0, 1)) 
+//				+ parseInt(userIdNumber.substr(1, 1)) * 9 
+//				+ parseInt(userIdNumber.substr(2, 1)) * 8 
+//				+ parseInt(userIdNumber.substr(3, 1)) * 7
+//				+ parseInt(userIdNumber.substr(4, 1)) * 6 
+//				+ parseInt(userIdNumber.substr(5, 1)) * 5 
+//				+ parseInt(userIdNumber.substr(6, 1)) * 4 
+//				+ parseInt(userIdNumber.substr(7, 1)) * 3
+//				+ parseInt(userIdNumber.substr(8, 1)) * 2 
+//				+ parseInt(userIdNumber.substr(9, 1));
+//			console.info("1-2 s = " + s);
+//	 
+//	        checkNum = parseInt(userIdNumber.substr(10, 1));
+//			console.info("1-2 checkNum = " + checkNum);
+//	        
+//	        if ((s % 10) == 0 || (10 - s % 10) == checkNum) {
+//	            return true;
+//	        } else {
+//	            return false;
+//	        }
+//        }
+	}
 	
+//	$('#userID').blur(function(){
+////		CheckID();
+//		isBIND = 1 ;   // 1 尚未查詢 2 查詢後未綁定 3查詢後已綁定
+//		
+//		isTrueID = idNumberIdentify();
+//		console.info("check isTrueID = " + isTrueID);
+//		
+//		$(".showResult").html("");
+//		if(isTrueID){
+//			showblank();
+//		}else{
+//			showerror();
+//		}
+//	});
 	
 	$('#InquireUID').click(function(){
+
+		isTrueID = idNumberIdentify();
+		console.info("check isTrueID = " + isTrueID);
 		
 		if(!isTrueID){
 			showerror();
@@ -60,8 +164,9 @@ $(function(){
 			showblank();
 			var userId = $('#userID').val();
 			
+			$('.LyMain').block($.BCS.blockMsgCheckingUID);
+			
 			$.ajax({
-				
 				type : "POST",
 				url : bcs.bcsContextPath + '/tsmb/inquireUserLineUrl?userId=' + userId ,
 	            cache: false,
@@ -104,8 +209,10 @@ $(function(){
 
 			}).fail(function(response){
 				console.info(response);
+				$('.LyMain').unblock();
 				$(".showResult").html('查無此ID').css("color","red").css("fontSize", "35px");
 			}).done(function(){
+				$('.LyMain').unblock();
 			});
 		
 		}

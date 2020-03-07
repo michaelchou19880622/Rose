@@ -112,7 +112,6 @@ public class PushApiController {
 				record.setDepartment(pushApiModel.getDepartment());
 				record.setServiceName(pushApiModel.getServiceName());
 				record.setPushTheme(pushApiModel.getPushTheme());
-				record.setStatusCode("none");
 				record.setSendTime(dateSendTime);
 				record.setCreateTime(pushApiModel.getTriggerTime());
 				record.setMainMessage("Error");

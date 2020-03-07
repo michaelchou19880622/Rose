@@ -152,7 +152,6 @@ public class PushMessageActor extends UntypedActor {
 						record.setPushTheme(pushApiModel.getPushTheme());
 						record.setUID(uids.get(i).toString());
 						record.setSendMessage(sendMessage);
-						record.setStatusCode("none");
 						record.setMainMessage(exceptionErrorMessage);
 						record.setSendType(pushApiModel.getSendTimeType());
 						record.setCreateTime(pushApiModel.getTriggerTime());

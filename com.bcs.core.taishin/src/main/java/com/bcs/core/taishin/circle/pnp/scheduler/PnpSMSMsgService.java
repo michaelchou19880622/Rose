@@ -151,7 +151,7 @@ public class PnpSMSMsgService {
                 detail.setModifyTime(now);
             }
 
-            List<PnpDetail> afterSaveList = UpdateDetailStatus(type, detailList);
+            List<PnpDetail> afterSaveList = updateDetailStatus(type, detailList);
             Map<String, InputStream> map = new HashMap<>();
             for (PnpDetail detail : afterSaveList) {
                 now = new Date();
@@ -213,6 +213,7 @@ public class PnpSMSMsgService {
         Date now = new Date();
         PnpDetail detail = pnpRepositoryCustom.findDetailById(ftpSourceEnum, detailId);
         detail.setDetailScheduleTime(DataUtils.convDateToStr(now, "yyyy-MM-dd HH:mm:ss"));
+        detail.setModifyTime(now);
         PnpMain main = pnpRepositoryCustom.findSingleMainById(ftpSourceEnum, detail.getPnpMainId());
         main.setScheduleTime(DataUtils.convDateToStr(now, "yyyy-MM-dd HH:mm:ss"));
         main.setPnpDetails(Collections.singletonList(detail));
@@ -227,10 +228,11 @@ public class PnpSMSMsgService {
         }
         /* Send File To SMS FTP */
         uploadFileToSms(ftpSourceEnum, Collections.singletonMap(main.getSmsFileName(), inputStream));
+        updateDetailStatus(ftpSourceEnum, Collections.singletonList(detail));
         return true;
     }
 
-    private List<PnpDetail> UpdateDetailStatus(PnpFtpSourceEnum type, List<PnpDetail> detailList) {
+    private List<PnpDetail> updateDetailStatus(PnpFtpSourceEnum type, List<PnpDetail> detailList) {
         List<PnpDetail> afterSaveList = new ArrayList<>();
         /* Update Status */
         switch (type) {

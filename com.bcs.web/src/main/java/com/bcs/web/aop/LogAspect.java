@@ -1,6 +1,6 @@
 package com.bcs.web.aop;
 
-import com.bcs.core.taishin.akka.service.RichartAkkaService;
+import com.bcs.core.taishin.akka.service.TaishinAkkaService;
 import com.bcs.core.taishin.api.model.LogApiModel;
 import com.bcs.core.utils.IpUtil;
 import com.bcs.core.web.security.CustomUser;
@@ -31,7 +31,7 @@ public class LogAspect {
     private String REPORT = "((.*)report(.*))";
 
     @Autowired
-    private RichartAkkaService richartAkkaService;
+    private TaishinAkkaService taishinAkkaService;
 
     /**
      * Controller層切入點
@@ -89,7 +89,7 @@ public class LogAspect {
                     .userId(accountAndMid).functionStatus(LogApiModel.SUCCESS).build();
 
 //            if (accountAndMid != null && ip != null) {
-//                richartAkkaService.excuteLogApi(logApiModel);
+//                taishinAkkaService.excuteLogApi(logApiModel);
 //            }
 
             logger.info("=====前置通知结束=====");

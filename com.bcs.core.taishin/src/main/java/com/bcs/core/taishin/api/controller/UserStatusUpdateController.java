@@ -9,7 +9,7 @@ import com.bcs.core.enums.LOG_TARGET_ACTION_TYPE;
 import com.bcs.core.log.util.SystemLogUtil;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.api.model.UpdateStatusModel;
-import com.bcs.core.taishin.service.RichartValidateService;
+import com.bcs.core.taishin.service.TaishinValidateService;
 import com.bcs.core.utils.CryptUtil;
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.utils.LineIdUtil;
@@ -43,7 +43,7 @@ import java.util.Map;
 @RequestMapping("/api")
 public class UserStatusUpdateController {
     @Autowired
-    private RichartValidateService richartValidateService;
+    private TaishinValidateService taishinValidateService;
 
     @Autowired
     private AdminUserService adminUserService;
@@ -85,7 +85,7 @@ public class UserStatusUpdateController {
                 throw new Exception("StatusError");
             }
 
-            richartValidateService.bindedLineUser(model);
+            taishinValidateService.bindedLineUser(model);
 
             logger.info("-------userStatusUpdate Success-------");
             response.setStatus(200);

@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class RichartValidateService {
+public class TaishinValidateService {
     @Autowired
     private LineUserService lineUserService;
     @Autowired
@@ -34,7 +34,7 @@ public class RichartValidateService {
     /**
      * Logger
      */
-    private static Logger logger = Logger.getLogger(RichartValidateService.class);
+    private static Logger logger = Logger.getLogger(TaishinValidateService.class);
 
     @Transactional(rollbackFor = Exception.class, timeout = 30)
     public void bindedLineUser(UpdateStatusModel model) throws Exception {

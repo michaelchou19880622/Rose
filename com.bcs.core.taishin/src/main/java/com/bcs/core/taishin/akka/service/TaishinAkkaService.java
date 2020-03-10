@@ -17,15 +17,15 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 
 @Service
-public class RichartAkkaService {
+public class TaishinAkkaService {
 
 	/** Logger */
-	private static Logger logger = Logger.getLogger(RichartAkkaService.class);
+	private static Logger logger = Logger.getLogger(TaishinAkkaService.class);
 
 	private List<ActorRef> akkaPostApiMaster = new ArrayList<ActorRef>();
 	private List<ActorSystem> systemakkaPostApi = new ArrayList<ActorSystem>();
 
-	public RichartAkkaService() {
+	public TaishinAkkaService() {
 		new AkkaSystemFactory<AkkaPostApiMaster>(systemakkaPostApi, akkaPostApiMaster, AkkaPostApiMaster.class, "systemakkaPostApi", "akkaPostApiMaster");
 	}
 
@@ -43,7 +43,7 @@ public class RichartAkkaService {
 
 	@PreDestroy
 	public void shutdownNow(){
-		logger.info("[DESTROY] Richart AkkaService shutdownNow cleaning up...");
+		logger.info("[DESTROY] Taishin AkkaService shutdownNow cleaning up...");
 		try {
 			int count = 0;
 			for(ActorSystem system : systemakkaPostApi){
@@ -57,6 +57,6 @@ public class RichartAkkaService {
 		}
 
 		System.gc();
-		logger.info("[DESTROY] Richart AkkaService shutdownNow destroyed");
+		logger.info("[DESTROY] Taishin AkkaService shutdownNow destroyed");
 	}
 }

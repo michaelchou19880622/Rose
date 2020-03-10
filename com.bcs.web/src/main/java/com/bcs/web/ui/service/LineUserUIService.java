@@ -160,7 +160,7 @@ public class LineUserUIService {
 		BIRTHMONTH("BIRTHMONTH","出生月","String"),
 		BIRTHDAY("BIRTHDAY","出生日","String"),
 		HASCC("HASCC","有無gogo卡","String"),
-		HASSA("HASSA","有無Richart帳戶(台幣)","String"),
+		HASSA("HASSA","有無Taishin帳戶(台幣)","String"),
 		UID("UID","LineID","String"),
 		BINDINGTIME("BINDINGTIME","綁定時間","Date"),
 		SENDINGTIME("SENDINGTIME","資料更新時間","Date"),

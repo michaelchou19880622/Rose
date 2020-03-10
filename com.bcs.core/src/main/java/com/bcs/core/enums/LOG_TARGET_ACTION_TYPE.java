@@ -53,8 +53,8 @@ public enum LOG_TARGET_ACTION_TYPE {
 			ACTION_SMARTROBOT_BOT_API("SMARTROBOT_BOT_API"),
 			ACTION_SMARTROBOT_BOT_API_Error("SMARTROBOT_BOT_Error"),
 			
-			ACTION_RICHART_API("RICHART_API"),
-			ACTION_SendToRichartApiStatus("SendToRichartApiStatus"),
+			ACTION_TAISHIN_API("TAISHIN_API"),
+			ACTION_SendToTaishinApiStatus("SendToTaishinApiStatus"),
 
 	/**
 	 * TARGET_COUPON
@@ -135,20 +135,20 @@ public enum LOG_TARGET_ACTION_TYPE {
 		ACTION_GameDo_AcceptedPrize("GameDo_AcceptedPrize"),
 		ACTION_ShareTrigger("ShareTrigger"),
 		
-	TARGET_RichartApi("RichartApi"),
-		ACTION_RichartApi_AdUserSync("RichartApi_AdUserSync"),
-		ACTION_RichartApi_START_CHAT("RichartApi_StartChat"),
-		ACTION_RichartApi_ADD_MESSAGE("RichartApi_AddMessage"),
-		ACTION_RichartApi_CLOSE_CHAT("RichartApi_CloseChat"),
+	TARGET_TaishinApi("TaishinApi"),
+		ACTION_TaishinApi_AdUserSync("TaishinApi_AdUserSync"),
+		ACTION_TaishinApi_START_CHAT("TaishinApi_StartChat"),
+		ACTION_TaishinApi_ADD_MESSAGE("TaishinApi_AddMessage"),
+		ACTION_TaishinApi_CLOSE_CHAT("TaishinApi_CloseChat"),
 		
-	TARGET_RichartAdApi("RichartAdApi"),
-		ACTION_RichartAdApi_AdUserSync("RichartAdApi_AdUserSync"),
-	TARGET_RichartLogApi("RichartLogApi"),
-		ACTION_RichartLogAPi("RichartLogApi"),
-		ACTION_RichartLogAPi_Error("RichartLogApi_Error"),
+	TARGET_TaishinAdApi("TaishinAdApi"),
+		ACTION_TaishinAdApi_AdUserSync("TaishinAdApi_AdUserSync"),
+		
+	TARGET_TaishinLogApi("TaishinLogApi"),
+		ACTION_TaishinLogApi("TaishinLogApi"),
+		ACTION_TaishinLogApi_Error("TaishinLogApi_Error"),
 	
 	TARGET_REWARD_CARD("RewardCardDo"),
-
 			ACTION_RewardCardList("RewardCardList"),
 			ACTION_RewardCardGet("RewardCardGet"),
 			ACTION_RewardCardUse("RewardCardUse"),

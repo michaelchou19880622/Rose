@@ -65,7 +65,7 @@ public class LineUserStatusService {
                 logger.info("resultStr=" + resultStr);
                 if ("0".equals(resultStr)) {
                     logger.info("更新失敗:" + resultNode.get("uid"));
-                    SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.ACTION_RICHART_API, LOG_TARGET_ACTION_TYPE.ACTION_SendToRichartApiStatus, result, resultNode.get("uid").toString());
+                    SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.ACTION_TAISHIN_API, LOG_TARGET_ACTION_TYPE.ACTION_SendToTaishinApiStatus, result, resultNode.get("uid").toString());
                 }
             }
 

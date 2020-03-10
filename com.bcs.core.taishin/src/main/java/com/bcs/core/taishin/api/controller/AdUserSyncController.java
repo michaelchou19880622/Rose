@@ -4,7 +4,7 @@ import com.bcs.core.aspect.annotation.WebServiceLog;
 import com.bcs.core.enums.LOG_TARGET_ACTION_TYPE;
 import com.bcs.core.log.util.SystemLogUtil;
 import com.bcs.core.taishin.api.model.AdUserSyncModel;
-import com.bcs.core.taishin.service.RichartAdService;
+import com.bcs.core.taishin.service.TaishinAdService;
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.utils.ObjectUtil;
 import org.apache.log4j.Logger;
@@ -29,7 +29,7 @@ import java.util.Map;
 @RequestMapping("/api")
 public class AdUserSyncController {
     @Autowired
-    private RichartAdService richartAdService;
+    private TaishinAdService taishinAdService;
 
     /**
      * Logger
@@ -51,11 +51,11 @@ public class AdUserSyncController {
             AdUserSyncModel model = ObjectUtil.jsonStrToObject(syncModel, AdUserSyncModel.class);
             logger.info("-------adUserSync model-------:" + model);
 
-            richartAdService.syncAdUser(model);
+            taishinAdService.syncAdUser(model);
 
             logger.info("-------adUserSync Success-------");
             response.setStatus(200);
-            SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_RichartApi, LOG_TARGET_ACTION_TYPE.ACTION_RichartApi_AdUserSync, start, 200, syncModel, "200");
+            SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_TaishinApi, LOG_TARGET_ACTION_TYPE.ACTION_TaishinApi_AdUserSync, start, 200, syncModel, "200");
             return new ResponseEntity<>(createResult(200, "Success"), HttpStatus.OK);
         } catch (Exception e) {
             error = e.getMessage();
@@ -63,7 +63,7 @@ public class AdUserSyncController {
         }
         logger.info("-------adUserSync Fail-------");
         response.setStatus(500);
-        SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_RichartApi, LOG_TARGET_ACTION_TYPE.ACTION_RichartApi_AdUserSync, start, 500, syncModel, "500");
+        SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_TaishinApi, LOG_TARGET_ACTION_TYPE.ACTION_TaishinApi_AdUserSync, start, 500, syncModel, "500");
         return new ResponseEntity<>(createResult(500, error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

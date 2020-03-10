@@ -111,7 +111,7 @@ public class ReceivingMsgHandlerMsgReceiveOp extends UntypedActor {
             lineUserService.save(user);
             lineUserService.saveLog(user, user.getMid(), LOG_TARGET_ACTION_TYPE.ACTION_Block, user.getMid());
         }
-        //call Richart api通知user已封鎖
+        //call Taishin api通知user已封鎖
         lineUserStatusService.callLineUserStatusAPI(mid, LineUser.STATUS_BLOCK, now.getTime());
     }
 

@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 
 @Service
-public class RichartAdService {
+public class TaishinAdService {
     @Autowired
     private AdminUserService adminUserService;
     @Autowired
@@ -25,7 +25,7 @@ public class RichartAdService {
     /**
      * Logger
      */
-    private static Logger logger = Logger.getLogger(RichartAdService.class);
+    private static Logger logger = Logger.getLogger(TaishinAdService.class);
 
     @Transactional(rollbackFor = Exception.class, timeout = 30)
     public void syncAdUser(AdUserSyncModel model) throws Exception {

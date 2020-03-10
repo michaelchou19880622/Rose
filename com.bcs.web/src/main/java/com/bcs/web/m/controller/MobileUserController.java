@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.bcs.core.db.service.LineUserService;
 import com.bcs.core.enums.BCS_PAGE_TYPE;
 import com.bcs.core.resource.UriHelper;
-import com.bcs.core.taishin.service.RichartValidateService;
+import com.bcs.core.taishin.service.TaishinValidateService;
 import com.bcs.core.utils.UrlUtil;
 import com.bcs.core.validate.service.UserValidateService;
 import com.bcs.core.web.m.service.MobilePageService;
@@ -35,7 +35,7 @@ public class MobileUserController {
 	@Autowired
 	private MobilePageService mobilePageService;
 	@Autowired
-	private RichartValidateService pagValidateService;
+	private TaishinValidateService pagValidateService;
 	@Autowired
 	private MobileGameController mobileGameController;
 

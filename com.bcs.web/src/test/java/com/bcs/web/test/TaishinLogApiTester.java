@@ -16,18 +16,18 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.bcs.core.db.entity.AdminUser;
 import com.bcs.core.db.service.AdminUserService;
-import com.bcs.core.taishin.akka.service.RichartAkkaService;
+import com.bcs.core.taishin.akka.service.TaishinAkkaService;
 import com.bcs.core.taishin.api.model.LogApiModel;
 
 import junit.framework.TestCase;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath*:spring/spring-base.xml", "classpath*:spring/spring-security.xml"})
-public class RichartLogApiTester extends TestCase {
-	private static Logger logger = Logger.getLogger(RichartLogApiTester.class);
+public class TaishinLogApiTester extends TestCase {
+	private static Logger logger = Logger.getLogger(TaishinLogApiTester.class);
 	
 	@Autowired
-	private RichartAkkaService richartAkkaSerive;
+	private TaishinAkkaService richartAkkaSerive;
     
 	@Test
 	public void test_Log_Api() throws Exception {		

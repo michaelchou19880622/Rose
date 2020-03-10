@@ -91,13 +91,13 @@ public class LiveChatApiService {
 						result.setTimestamp(new Date(Long.parseLong(chatInfo.getString("time")) * 1000));
 					}
 					
-					SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_RichartApi, LOG_TARGET_ACTION_TYPE.ACTION_RichartApi_START_CHAT, start, 200, responseObject.toString(), 200 + "");
+					SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_TaishinApi, LOG_TARGET_ACTION_TYPE.ACTION_TaishinApi_START_CHAT, start, 200, responseObject.toString(), 200 + "");
 					return result;
 				}
 		} catch (Exception e) {
 			String error = ErrorRecord.recordError(e, false);
 			logger.error(error);
-			SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_RichartApi, LOG_TARGET_ACTION_TYPE.ACTION_RichartApi_START_CHAT, error, e.getMessage());
+			SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_TaishinApi, LOG_TARGET_ACTION_TYPE.ACTION_TaishinApi_START_CHAT, error, e.getMessage());
 			throw new BcsNoticeException(e.getMessage());
 		}
 	}
@@ -142,16 +142,16 @@ public class LiveChatApiService {
 			if (result.getError()) {
 				JSONObject errorMessage = new JSONObject(responseObject.get("r").toString());
 				result.setErrorMessage(errorMessage.getString("originalMessage"));
-				SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_RichartApi, LOG_TARGET_ACTION_TYPE.ACTION_RichartApi_ADD_MESSAGE, errorMessage, result.getErrorMessage());
+				SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_TaishinApi, LOG_TARGET_ACTION_TYPE.ACTION_TaishinApi_ADD_MESSAGE, errorMessage, result.getErrorMessage());
 				throw new BcsNoticeException(result.getErrorMessage());
 			}
 			
-			SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_RichartApi, LOG_TARGET_ACTION_TYPE.ACTION_RichartApi_ADD_MESSAGE, start, 200, responseObject.toString(), 200 + "");			
+			SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_TaishinApi, LOG_TARGET_ACTION_TYPE.ACTION_TaishinApi_ADD_MESSAGE, start, 200, responseObject.toString(), 200 + "");			
 			return result;
 		} catch (Exception e) {
 			String error = ErrorRecord.recordError(e, false);
 			logger.error(error);
-			SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_RichartApi, LOG_TARGET_ACTION_TYPE.ACTION_RichartApi_ADD_MESSAGE, error, e.getMessage());
+			SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_TaishinApi, LOG_TARGET_ACTION_TYPE.ACTION_TaishinApi_ADD_MESSAGE, error, e.getMessage());
 			throw new BcsNoticeException(error);
 		}
 	}
@@ -185,7 +185,7 @@ public class LiveChatApiService {
 		} catch (Exception e) {
 			String error = ErrorRecord.recordError(e, false);
 			logger.error(error);
-			SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_RichartApi, LOG_TARGET_ACTION_TYPE.ACTION_RichartApi_ADD_MESSAGE, error, e.getMessage());
+			SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_TaishinApi, LOG_TARGET_ACTION_TYPE.ACTION_TaishinApi_ADD_MESSAGE, error, e.getMessage());
 			throw new BcsNoticeException(error);
 		}
 	}
@@ -243,15 +243,15 @@ public class LiveChatApiService {
 			if (result.getError() && result.getTextMessage()!=null) {
 				JSONObject errorMessage = new JSONObject(responseObject.get("r").toString());
 				result.setErrorMessage(errorMessage.getString("originalMessage"));
-				SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_RichartApi, LOG_TARGET_ACTION_TYPE.ACTION_RichartApi_CLOSE_CHAT, errorMessage, result.getErrorMessage());
+				SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_TaishinApi, LOG_TARGET_ACTION_TYPE.ACTION_TaishinApi_CLOSE_CHAT, errorMessage, result.getErrorMessage());
 			}
 			
-			SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_RichartApi, LOG_TARGET_ACTION_TYPE.ACTION_RichartApi_CLOSE_CHAT, start, 200, responseObject.toString(), 200 + "");			
+			SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_TaishinApi, LOG_TARGET_ACTION_TYPE.ACTION_TaishinApi_CLOSE_CHAT, start, 200, responseObject.toString(), 200 + "");			
 			return result;
 		} catch (Exception e) {
 			String error = ErrorRecord.recordError(e, false);
 			logger.error(error);
-			SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_RichartApi, LOG_TARGET_ACTION_TYPE.ACTION_RichartApi_CLOSE_CHAT, error, e.getMessage());
+			SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_TaishinApi, LOG_TARGET_ACTION_TYPE.ACTION_TaishinApi_CLOSE_CHAT, error, e.getMessage());
 			throw new BcsNoticeException(error);
 		}	
 	}

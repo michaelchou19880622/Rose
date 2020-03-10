@@ -72,20 +72,20 @@ public class AkkaPostApiMaster extends UntypedActor {
 
                 if (!status.equals("200")) {
                     logger.error(responseObject);
-                    SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_RichartLogApi, LOG_TARGET_ACTION_TYPE.ACTION_RichartLogAPi_Error, "error", responseObject.toString());
-                    SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_RichartLogApi, LOG_TARGET_ACTION_TYPE.ACTION_RichartLogAPi_Error, start, Integer.parseInt(status), "error", status + "");
+                    SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_TaishinLogApi, LOG_TARGET_ACTION_TYPE.ACTION_TaishinLogApi_Error, "error", responseObject.toString());
+                    SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_TaishinLogApi, LOG_TARGET_ACTION_TYPE.ACTION_TaishinLogApi_Error, start, Integer.parseInt(status), "error", status + "");
                 } else {
-                    SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_RichartLogApi, LOG_TARGET_ACTION_TYPE.ACTION_RichartLogAPi, start, Integer.parseInt(status), responseObject.toString(), status + "");
+                    SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_TaishinLogApi, LOG_TARGET_ACTION_TYPE.ACTION_TaishinLogApi, start, Integer.parseInt(status), responseObject.toString(), status + "");
                 }
 
             } catch (HttpStatusCodeException exception) {
                 String error = ErrorRecord.recordError(exception, false);
                 int status = exception.getStatusCode().value();
                 logger.error(error);
-                SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_RichartLogApi,
-                        LOG_TARGET_ACTION_TYPE.ACTION_RichartLogAPi_Error, error, exception.getMessage());
-                SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_RichartLogApi,
-                        LOG_TARGET_ACTION_TYPE.ACTION_RichartLogAPi_Error, start, status, error, status + "");
+                SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_TaishinLogApi,
+                        LOG_TARGET_ACTION_TYPE.ACTION_TaishinLogApi_Error, error, exception.getMessage());
+                SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_TaishinLogApi,
+                        LOG_TARGET_ACTION_TYPE.ACTION_TaishinLogApi_Error, start, status, error, status + "");
             }
         }
     }

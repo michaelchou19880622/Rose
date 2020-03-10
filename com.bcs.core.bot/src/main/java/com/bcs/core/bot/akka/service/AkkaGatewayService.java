@@ -40,7 +40,7 @@ public class AkkaGatewayService {
 
 	@PreDestroy
 	public void shutdownNow(){
-		logger.info("[DESTROY] Richart AkkaService shutdownNow cleaning up...");
+		logger.info("[DESTROY] Taishin AkkaService shutdownNow cleaning up...");
 		try {
 			int count = 0;
 			for(ActorSystem system : actorSystemList){
@@ -54,6 +54,6 @@ public class AkkaGatewayService {
 		}
 
 		System.gc();
-		logger.info("[DESTROY] Richart AkkaService shutdownNow destroyed");
+		logger.info("[DESTROY] Taishin AkkaService shutdownNow destroyed");
 	}
 }

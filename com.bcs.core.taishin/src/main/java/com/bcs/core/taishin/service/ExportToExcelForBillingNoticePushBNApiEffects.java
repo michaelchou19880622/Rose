@@ -106,12 +106,13 @@ public class ExportToExcelForBillingNoticePushBNApiEffects {
             row.createCell(5).setCellValue("發送失敗數");
             row.createCell(6).setCellValue("發送數量");
             // column width
-            sheet.setColumnWidth(0, 13 * 256);
-            sheet.setColumnWidth(1, 50 * 256);
-            sheet.setColumnWidth(2, 15 * 256);
+            sheet.setColumnWidth(0, 15 * 256);
+            sheet.setColumnWidth(1, 15 * 256);
+            sheet.setColumnWidth(2, 50 * 256);
             sheet.setColumnWidth(3, 15 * 256);
             sheet.setColumnWidth(4, 15 * 256);
             sheet.setColumnWidth(5, 15 * 256);
+            sheet.setColumnWidth(6, 15 * 256);
         } catch (Exception e) {
             log.error(ErrorRecord.recordError(e));
         }

@@ -47,7 +47,7 @@ $(function(){
 			if(response.length === 0) {
 				hasData = false;
 				
-				$('<tr class="dataTemplate"><td colspan="4">此日期區間無任何資料</td></tr>').appendTo($('#tableBody'));
+				$('<tr class="dataTemplate"><td colspan="8">此日期區間無任何資料</td></tr>').appendTo($('#tableBody'));
 			} else {
 				hasData = true;
 				var completeSum = 0;

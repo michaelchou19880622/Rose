@@ -18,6 +18,7 @@ $(function(){
 			$('#TotalPages').text('/' + totalPages);
 		}
 	});
+	
 	$('.btn.next').click(function(){
 		if(page < totalPages) {
 			page++;
@@ -28,6 +29,37 @@ $(function(){
 			$('#TotalPages').text('/' + totalPages);
 		}
 	});
+	
+
+	document.getElementById('page').onkeypress = function(e) {
+		console.info('[page] onkeypress e = ' + e);
+		
+		if (!e) {
+			e = window.event;
+		}
+
+		var keyCode = e.keyCode || e.which;
+		
+		if (keyCode == '13') { // Enter pressed
+			page = $('#page').val();
+			
+			if (page > totalPages) {
+				alert("欲選取頁數大於總頁數");
+			} else if (page == 0) {
+				alert("欲選取頁數不可為0");
+			} else {
+				
+				loadData();
+				
+				// set pageAndTotalPage
+				console.info(page + '/' + totalPages);
+				
+				$('#page').val(page);
+				$('#TotalPages').text('/' + totalPages);
+			}
+			return false;
+		}
+	}
 	
 	$('#jumpPage').click(function(){
 		page = $('#page').val();
@@ -53,12 +85,13 @@ $(function(){
 		date = $.urlParam("date");
 		templateName = $.urlParam("templateName");
 		sendType = $.urlParam("sendType");
+		bnType = $.urlParam("bnType");
 		
 		// set back button
-		$('.btn_add.back').attr('href', '../admin/reportBNEffectsPage?startDate=' + startDate + '&endDate=' + endDate + '&pages=' + pages);
+		$('.btn_add.back').attr('href', bcs.bcsContextPath + '/admin/reportBNEffectsPage?startDate=' + startDate + '&endDate=' + endDate + '&pages=' + pages);
 
 		// set ExportButton
-		var exportUrl = '../edit/exportToExcelForBNPushApiEffectsDetail?date=' + date + '&title=' + templateName + '&sendType=' + sendType + '&bnType=' + bnType;
+		var exportUrl = bcs.bcsContextPath + '/edit/exportToExcelForBNPushApiEffectsDetail?date=' + date + '&title=' + templateName + '&sendType=' + sendType + '&bnType=' + bnType;
 		$('.btn_add.exportToExcel').attr('href', exportUrl);
 		
 		// set table
@@ -77,10 +110,10 @@ $(function(){
 		
 		$.ajax({
 			type : "GET",
-			url : '../edit/getBNEffectsDetailList?date=' + date + '&templateName=' + templateName + '&sendType=' + sendType + '&page=' + page + '&bnType=' + bnType
+			url : bcs.bcsContextPath + '/edit/getBNEffectsDetailList?date=' + date + '&templateName=' + templateName + '&sendType=' + sendType + '&page=' + page + '&bnType=' + bnType
 		}).success(function(response){
 			if(response.length === 0) {
-				//$('<tr class="dataTemplate"><td colspan="4">此日期區間無任何資料</td></tr>').appendTo($('#tableBody'));
+				$('<tr class="dataTemplate"><td colspan="6">此日期區間無任何資料</td></tr>').appendTo($('#tableBody'));
 			} else {
 				for(key in response){
 					var rowDOM = originalTr.clone(true);
@@ -113,7 +146,7 @@ $(function(){
 		$('.LyMain').block($.BCS.blockMsgRead);
 		$.ajax({
 			type : "GET",
-			url : bcs.bcsContextPath + '/edit/getBNEffectsDetailTotalPages?date=' + date + '&templateName=' + templateName + '&sendType=' + sendType
+			url : bcs.bcsContextPath + '/edit/getBNEffectsDetailTotalPages?date=' + date + '&templateName=' + templateName + '&sendType=' + sendType + '&bnType=' + bnType
 		}).success(function(response){
 			console.info('msg1: ', response['msg']);
 			totalPages = parseInt(response['msg']);

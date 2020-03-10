@@ -97,14 +97,12 @@ $(function(){
 	
 	var setExportButtonSource = function() {
 		if(hasData) {
-			var exportUrl = '../edit/exportToExcelForBNPushApiEffects?startDate='+ startDate + '&endDate=' + endDate;	
+			var exportUrl = bcs.bcsContextPath + '/edit/exportToExcelForBNPushApiEffects?startDate=' + startDate + '&endDate=' + endDate;	
 			$('.btn_add.exportToExcel').attr('href', exportUrl);
 		} else {
 			$('.btn_add.exportToExcel').attr('href', '#');
 		}
 	}
-	
-	// --------------------------------
 	
 	var loadData = function(){
 		$('.LyMain').block($.BCS.blockMsgRead);
@@ -119,8 +117,13 @@ $(function(){
 			type : 'GET',
 			url : bcs.bcsContextPath + '/edit/getBNEffectsList?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page
 		}).success(function(response){
+			console.info("response = ", response);
+			
 			if(response.length === 0) {
 				hasData = false;
+				
+				$('<tr class="dataTemplate"><td colspan="7">此日期區間無任何資料</td></tr>').appendTo($('#tableBody'));
+				
 			} else {
 				hasData = true;
 				var completeSum = 0;

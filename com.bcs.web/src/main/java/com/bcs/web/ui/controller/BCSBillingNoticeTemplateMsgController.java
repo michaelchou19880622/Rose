@@ -2,6 +2,7 @@ package com.bcs.web.ui.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -455,9 +456,10 @@ public class BCSBillingNoticeTemplateMsgController {
 			@CurrentUser CustomUser customUser,
 			@RequestParam  String date,
 			@RequestParam  String templateName,
-			@RequestParam  String sendType) throws IOException {
+			@RequestParam  String sendType,
+			@RequestParam  String bnType) throws IOException {
 		try{
-			String count = contentTemplateMsgService.getBnEffectsDetailTotalPages(date, templateName, sendType);
+			String count = contentTemplateMsgService.getBnEffectsDetailTotalPages(date, templateName, sendType, bnType);
 			return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count + "\"}", HttpStatus.OK);
 		}
 		catch(Exception e){
@@ -478,11 +480,16 @@ public class BCSBillingNoticeTemplateMsgController {
 			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser,
-			@RequestParam  String date,
-			@RequestParam  String templateName,
-			@RequestParam  String sendType,
-			@RequestParam  String bnType,
+			@RequestParam String date,
+			@RequestParam String templateName,
+			@RequestParam String sendType,
+			@RequestParam String bnType,
 			@RequestParam(value = "page", required=false) Integer page) throws IOException {
+		
+		logger.info("date: " + date);
+		logger.info("templateName: " + templateName);
+		logger.info("sendType: " + sendType);
+		logger.info("bnType: " + bnType);
 		logger.info("page1: " + page);
 
 		try{
@@ -654,73 +661,100 @@ public class BCSBillingNoticeTemplateMsgController {
 		}
 	}
 
-	/**
-     * 匯出 Push API 成效報表
-     */
+	/* 匯出帳務通知推送成效列表報表 */
 	@WebServiceLog
 //	@ControllerLog(description="匯出 BN Push API 成效報表")
     @RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForBNPushApiEffects")
     @ResponseBody
     public void exportToExcelForBNPushApiEffects(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, @RequestParam String startDate, @RequestParam String endDate) {
-
+		
+        logger.info("startDate = " + startDate);
+        logger.info("endDate = " + endDate);
+        
 		// file path
         String filePath = CoreConfigReader.getString("file.path");
 
         // file name
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
-		Date date = new Date();
-        String fileName = "BNPushApiEffects_" + sdf.format(date) + ".xlsx";
-
-        try {
-            File folder = new File(filePath);
-            if(!folder.exists()){
-                folder.mkdirs();
-            }
+		SimpleDateFormat sdf_src = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat sdf_dest = new SimpleDateFormat("yyyyMMdd");
+		
+		String fn_Date_Start;
+		String fn_Date_End;
+		String fileName;
+		
+		try {
+			fn_Date_Start = sdf_dest.format(sdf_src.parse(startDate));
+	        logger.info("fn_Date_Start = " + fn_Date_Start);
+	        
+			fn_Date_End = sdf_dest.format(sdf_src.parse(endDate));
+	        logger.info("fn_Date_End = " + fn_Date_End);
+			
+			fileName = "BNPushApiReport_" + fn_Date_Start + "-" + fn_Date_End + ".xlsx";
+	        logger.info("fileName = " + fileName);
+	        
+			File folder = new File(filePath);
+			if (!folder.exists()) {
+				folder.mkdirs();
+			}
+            
             exportToExcelForBillingNoticePushBNApiEffects.exportExcel(filePath, fileName, startDate, endDate);
-        } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
-        }
-
-        try {
+            
 			LoadFileUIService.loadFileToResponse(filePath, fileName, response);
+			
+		} catch (ParseException e) {
+	        logger.info("ParseException : " + e.getMessage().toString());
+	        
+            logger.error(ErrorRecord.recordError(e));
 		} catch (IOException e) {
-			e.printStackTrace();
+	        logger.info("IOException : " + e.getMessage().toString());
+	        
+            logger.error(ErrorRecord.recordError(e));
 		}
     }
 
-	/**
-     * 匯出 Push API 成效報表
-     */
+	/* 匯出帳務通知推送成效明細報表 */
 	@WebServiceLog
 //	@ControllerLog(description="匯出 BN Push API 成效報表")
     @RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForBNPushApiEffectsDetail")
-    @ResponseBody
-    public void exportToExcelForBNPushApiEffectsDetail(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
-    		@RequestParam String date, @RequestParam String title, @RequestParam String sendType, @RequestParam String bnType) {
+	@ResponseBody
+	public void exportToExcelForBNPushApiEffectsDetail(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, @RequestParam String date,
+			@RequestParam String title, @RequestParam String sendType, @RequestParam String bnType) {
+
+		logger.info("date = " + date);
 
 		// file path
-        //String filePath = "C:\\bcs\\";
-        String filePath = CoreConfigReader.getString("file.path");
+		String filePath = CoreConfigReader.getString("file.path");
 
-        // file name
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
-        String fileName = "BNPushApiEffects_" + sdf.format(new Date()) + ".xlsx";
+		// file name
+		SimpleDateFormat sdf_src = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat sdf_dest = new SimpleDateFormat("yyyyMMdd");
 
-        try {
-            File folder = new File(filePath);
-            if(!folder.exists()){
-                folder.mkdirs();
-            }
-            exportToExcelForBillingNoticePushBNApiEffects.exportExcel(filePath, fileName, date, title, sendType, bnType);
-        } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
-        }
+		String fn_Date;
+		
+		String fileName;
 
         try {
+
+        	fn_Date = sdf_dest.format(sdf_src.parse(date));
+	        logger.info("fn_Date = " + fn_Date);
+	        
+			fileName = "BNPushApiDetailReport_" + fn_Date + ".xlsx";
+	        logger.info("fileName = " + fileName);
+        	
+			File folder = new File(filePath);
+			if (!folder.exists()) {
+				folder.mkdirs();
+			}
+
+			exportToExcelForBillingNoticePushBNApiEffects.exportExcel(filePath, fileName, date, title, sendType, bnType);
+
 			LoadFileUIService.loadFileToResponse(filePath, fileName, response);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+            
+        } catch (Exception e) {
+	        logger.info("Exception : " + e.getMessage().toString());
+        	
+            logger.error(ErrorRecord.recordError(e));
+        } 
     }
 }
 

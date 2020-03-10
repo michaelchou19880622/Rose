@@ -469,17 +469,18 @@ public class BillingNoticeContentTemplateMsgService {
     }
 
     @SuppressWarnings("unchecked")
-    public String getBnEffectsDetailTotalPages(String date, String templateName, String sendType) {
+    public String getBnEffectsDetailTotalPages(String date, String templateName, String sendType, String bnType) {
         String queryString = "select count(*) from ( "
                 + "SELECT D.CREAT_TIME, M.ORIG_FILE_TYPE, D.TITLE, D.TEXT, D.STATUS, D.UID, "
                 + "DENSE_RANK() OVER ( ORDER BY D.MODIFY_TIME desc, D.NOTICE_DETAIL_ID) AS RowNum "
                 + "from BCS_BILLING_NOTICE_DETAIL D "
                 + "join BCS_BILLING_NOTICE_MAIN M on D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
                 + "join BCS_BN_CONTENT_TEMPLATE T on M.TEMP_ID  = T.TEMPLATE_ID "
-                + "WHERE D.SEND_TIME >= '" + date + "' "
-                + "AND D.SEND_TIME <  DATEADD(DAY, 1, '" + date + "') "
+                + "WHERE D.MODIFY_TIME >= '" + date + "' "
+                + "AND D.MODIFY_TIME <  DATEADD(DAY, 1, '" + date + "') "
                 + "AND T.TEMPLATE_ID = N'" + templateName + "' "
                 + "AND M.SEND_TYPE = '" + sendType + "' "
+                + "AND M.ORIG_FILE_TYPE = N'" + bnType + "' "
                 + ") as result ";
         log.info("str1: " + queryString);
 
@@ -546,9 +547,9 @@ public class BillingNoticeContentTemplateMsgService {
                 + "from BCS_BILLING_NOTICE_DETAIL D "
                 + "join BCS_BILLING_NOTICE_MAIN M on D.NOTICE_MAIN_ID = M.NOTICE_MAIN_ID "
                 + "join BCS_BN_CONTENT_TEMPLATE T on M.TEMP_ID  = T.TEMPLATE_ID "
-                + "WHERE D.SEND_TIME >= '" + date + "' "
-                + "AND D.SEND_TIME <  DATEADD(DAY, 1, '" + date + "') "
-                + "AND T.TEMPLATE_ID = '" + templateName + "' "
+                + "WHERE D.MODIFY_TIME >= '" + date + "' "
+                + "AND D.MODIFY_TIME <  DATEADD(DAY, 1, '" + date + "') "
+                + "AND T.TEMPLATE_ID = N'" + templateName + "' "
                 + "AND M.SEND_TYPE = '" + sendType + "' "
                 + "AND M.ORIG_FILE_TYPE = N'" + bnType + "' "
                 + ") as result "

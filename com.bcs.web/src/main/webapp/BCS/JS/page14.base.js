@@ -297,9 +297,13 @@ $(function(){
 
 				var otherRoleStr = "";
 				var groupSettingStr = groupSetting[keyObj.otherRole];
-				if(groupSettingStr){
+				console.info('groupSettingStr = ', groupSettingStr);
+				
+				if (groupSettingStr) {
 					otherRoleStr = groupSettingStr;
 				}
+				console.info('otherRoleStr = ', otherRoleStr);
+				
 				msgData.find('.otherRole').html(otherRoleStr);
 				
 				msgData.find('.msgContent').html(msgContent);

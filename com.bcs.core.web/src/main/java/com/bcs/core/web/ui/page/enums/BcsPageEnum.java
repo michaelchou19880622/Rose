@@ -45,7 +45,7 @@ public enum BcsPageEnum {
     ReportPageVisitDetailPage("/BCS/Views/Page23"),
     ReportPushApiEffectsPage("/BCS/Views/Page-PushApiEffects"),
     ReportBNEffectsPage("/BCS/Views/PageBNEffects"),
-    ReportBNEffectsDetailPage("/BCS/Views/PageBNEffectsDetail"),
+	ReportBNEffectsDetailPage("/BCS/Views/PageBNEffectsDetail"),
 
     InteractiveResponsePage("/BCS/Views/Page12"),
     InteractiveResponseDisablePage("/BCS/Views/Page12-1"),

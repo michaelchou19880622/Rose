@@ -1,6 +1,14 @@
 package com.bcs.core.bot.receive.akka.handler;
 
-import akka.actor.UntypedActor;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+//import org.apache.log4j.log;
+
 import com.bcs.core.api.service.model.LocationModel;
 import com.bcs.core.bot.db.entity.MsgBotReceive;
 import com.bcs.core.bot.db.service.MsgBotReceiveService;
@@ -23,26 +31,21 @@ import com.bcs.core.interactive.service.InteractiveService;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.spring.ApplicationContextProvider;
 import com.bcs.core.utils.ErrorRecord;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 
-import javax.sound.sampled.Line;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import akka.actor.UntypedActor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
 
-    /**
-     * Logger
-     */
-    private static Logger logger = Logger.getLogger(ReceivingMsgHandlerMsgReceive.class);
+//    /**
+//     * log
+//     */
+//    private static log log = log.getlog(ReceivingMsgHandlerMsgReceive.class);
 
     @Override
     public void onReceive(Object message) {
-        logger.debug("-------Get Message Save-------");
+        log.debug("-------Get Message Save-------");
         InteractiveService interactiveService = ApplicationContextProvider.getApplicationContext().getBean(InteractiveService.class);
 
         boolean recordText = CoreConfigReader.getBoolean(CONFIG_STR.RECORD_RECEIVE_AUTORESPONSE_TEXT, true);
@@ -56,7 +59,7 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
             LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
 
             String mid = receive.getSourceId();
-            logger.debug("MID:" + mid);
+            log.debug("MID:" + mid);
 
             //FIXME Change find user method to sysAdd
             LineUser lineUser = lineUserService.findByMidAndCreateSysAdd(mid);
@@ -76,18 +79,18 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
                         receive.setText("-RemoveBySystemForSecurity-");
                     }
                 }
-                logger.info("map : " + map);
-                logger.info("receive : " + receive);
+                log.info("map : " + map);
+                log.info("receive : " + receive);
                 // Save Record
                 ApplicationContextProvider.getApplicationContext().getBean(MsgBotReceiveService.class).bulkPersist(receive);
             } catch (Exception e) {
-                logger.error(ErrorRecord.recordError(e));
+                log.error(ErrorRecord.recordError(e));
             }
         }
 
         ReceivingMsgHandlerMaster.taskCount.addAndGet(-1L);
         ReceivingMsgHandlerMaster.updateDate = Calendar.getInstance().getTime();
-        logger.debug("-------Get Message Save End-------");
+        log.debug("-------Get Message Save End-------");
     }
 
     /**
@@ -109,16 +112,16 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
         String text = content.getText();
         String replyToken = content.getReplyToken();
 
-        logger.info("ChannelId:" + ChannelId);
-        logger.info("ApiType:" + ApiType);
-        logger.info("MID:" + mid);
+        log.info("ChannelId:" + ChannelId);
+        log.info("ApiType:" + ApiType);
+        log.info("MID:" + mid);
 
         Map<Long, List<MsgDetail>> result;
 
         try {
             //FIXME Change find user method to sysAdd
             LineUser lineUser = lineUserService.findByMidAndCreateSysAdd(mid);
-            logger.info("lineUser = " + lineUser);
+            log.info("lineUser = " + lineUser);
 
             /* For keyword process condition */
             String userStatus = LineUser.STATUS_UNBIND;
@@ -128,7 +131,7 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
                         : lineUser.getStatus();
             }
 
-            logger.info("User status for keyword process: " + userStatus);
+            log.info("User status for keyword process: " + userStatus);
 
             if (MsgBotReceive.EVENT_TYPE_POSTBACK.equals(content.getEventType())) {
                 text = content.getPostbackData();
@@ -147,7 +150,7 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
                     return -3L;
                 } else if (text.contains("leaveMessageAction=")) {
                     String leaveMessageAction = text.split("leaveMessageAction=")[1];
-                    logger.info(">>> 使用者選擇：" + leaveMessageAction);
+                    log.info(">>> 使用者選擇：" + leaveMessageAction);
                     liveChatService.handleLeaveMessageAction(leaveMessageAction, ChannelId, mid, replyToken);
                     return -3L;
                 } else if (text.contains("leaveMsgCategory=")) {
@@ -155,7 +158,7 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
                     liveChatService.leaveMessage(ChannelId, replyToken, leaveMsgCategory, mid);
                     return -3L;
                 } else {
-                    logger.info("Not match any!! Post back event data to Pepper gateway!!");
+                    log.info("Not match any!! Post back event data to Pepper gateway!!");
                 }
             }
 
@@ -173,38 +176,38 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
 
             // 處理活動流程(如果先前有觸發過，否則一律回傳空值)
             result = handleCampaignFlow(mid, text, content.getReplyToken(), ChannelId, ApiType, content.getMsgId(), content.getMsgType());
-            logger.info("1-1 result = " + result);
+            log.info("1-1 result = " + result);
 
             if (StringUtils.isNotBlank(text) || (result.size() > 0)) {
                 if (recordText) {
-                    logger.debug("Get Keyword:" + text);
+                    log.debug("Get Keyword:" + text);
                 }
 
-                logger.info("result.size() = " + result.size());
+                log.info("result.size() = " + result.size());
                 if (result.size() == 0) {
                     // 取得 關鍵字回應 設定
                     //FIXME Use user status for what?
                     result = interactiveService.getMatchKeyword(mid, userStatus, text);
                 }
 
-                logger.info("1-2 result = " + result);
+                log.info("1-2 result = " + result);
 
                 if (result != null && result.size() == 1) {
                     for (Long iMsgId : result.keySet()) {
                         List<MsgDetail> details = result.get(iMsgId);
 
                         if (recordText) {
-                            logger.debug("Match Keyword:" + text + ",iMsgId:" + iMsgId);
+                            log.debug("Match Keyword:" + text + ",iMsgId:" + iMsgId);
                         }
 
-                        logger.info("@@@@@@@@@@@@@@@@@@@ SendingMsgService @@@@@@@@@@@@@@@@@@@");
-                        logger.info("replyToken = " + replyToken);
-                        logger.info("iMsgId = " + iMsgId);
-                        logger.info("details = " + details);
-                        logger.info("ChannelId = " + ChannelId);
-                        logger.info("MID = " + mid);
-                        logger.info("ApiType = " + ApiType);
-                        logger.info("content.getMsgId() = " + content.getMsgId());
+                        log.info("@@@@@@@@@@@@@@@@@@@ SendingMsgService @@@@@@@@@@@@@@@@@@@");
+                        log.info("replyToken = " + replyToken);
+                        log.info("iMsgId = " + iMsgId);
+                        log.info("details = " + details);
+                        log.info("ChannelId = " + ChannelId);
+                        log.info("MID = " + mid);
+                        log.info("ApiType = " + ApiType);
+                        log.info("content.getMsgId() = " + content.getMsgId());
 
                         // 傳送 關鍵字回應
                         ApplicationContextProvider.getApplicationContext().getBean(SendingMsgService.class).sendMatchMessage(replyToken, iMsgId, details, ChannelId, mid, ApiType, content.getMsgId());
@@ -219,11 +222,11 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
                     if (iMsgIdBlack != null) {
                         // Update 關鍵字回應 記數
                         ApplicationContextProvider.getApplicationContext().getBean(MsgInteractiveMainService.class).increaseSendCountByMsgInteractiveId(iMsgIdBlack);
-                        logger.debug("Match BlackKeyword:" + text + ",iMsgIdBlack:" + iMsgIdBlack);
+                        log.debug("Match BlackKeyword:" + text + ",iMsgIdBlack:" + iMsgIdBlack);
                         return iMsgIdBlack;
                     } else {
                         // 未設定 預設回應
-                        logger.info("◎ 不符合任何關鍵字，把訊息丟給Pepper GW處理: " + text);
+                        log.info("◎ 不符合任何關鍵字，把訊息丟給Pepper GW處理: " + text);
 
                         UserLiveChat userLiveChat = ApplicationContextProvider.getApplicationContext().getBean(UserLiveChatService.class).findLeaveMsgUserByUIDAndState(mid,
                                 UserLiveChat.LEAVE_MESSAGE);
@@ -235,7 +238,7 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
                                     content.getMsgType());
                             return -2L;
                         } else {
-                            logger.info("◎ 使用者 " + mid + " 留言，留言內容為： " + text);
+                            log.info("◎ 使用者 " + mid + " 留言，留言內容為： " + text);
 
                             liveChatService.leaveMessage(ChannelId, replyToken, userLiveChat, text);
 
@@ -246,7 +249,7 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
             } else {
                 //FIXME Use user status for what?
                 MsgInteractiveMain main = interactiveService.getAutoResponse(mid, userStatus);
-                logger.info("main = " + main);
+                log.info("main = " + main);
 
                 if (main != null) {
                     Long iMsgId = main.getiMsgId();
@@ -266,21 +269,21 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
                 }
             }
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
 
         return -1L;
     }
 
     private static Map<Long, List<MsgDetail>> handleCampaignFlow(String MID, Object msg, String replyToken, String ChannelId, String ApiType, String msgId, String msgType) throws Exception {
-        logger.debug(("MID=" + MID + ", msg=" + msg + ", replyToken=" + replyToken + ", ChannelId=" + ChannelId + ", ApiType=" + ApiType + ", msgId=" + msgId + ", msgType=" + msgType));
+        log.debug(("MID=" + MID + ", msg=" + msg + ", replyToken=" + replyToken + ", ChannelId=" + ChannelId + ", ApiType=" + ApiType + ", msgId=" + msgId + ", msgType=" + msgType));
         Map<Long, List<MsgDetail>> iMsgIdAndMsgDetails = new HashMap<Long, List<MsgDetail>>();
         InteractiveService interactiveService = ApplicationContextProvider.getApplicationContext().getBean(InteractiveService.class);
 
         // 是否為Image Message
         if (MsgBotReceive.MESSAGE_TYPE_IMAGE.equals(msgType)) {
             ContentResource resource = ApplicationContextProvider.getApplicationContext().getBean(GettingMsgContentService.class).getImageMessage(ChannelId, MID, ApiType, msgId);
-            logger.info("receiveImageId:" + resource.getResourceId());
+            log.info("receiveImageId:" + resource.getResourceId());
             msg = resource;
         }
 
@@ -301,7 +304,7 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
     public static void trasmitToCustomerService(MsgBotReceive msg, String ChannelId, String ChannelName, String ApiType) throws Exception {
         MessageTransmitService messageTransmitService = ApplicationContextProvider.getApplicationContext().getBean(MessageTransmitService.class);
 
-        logger.info(">>> 要傳送給真人客服的訊息：" + msg);
+        log.info(">>> 要傳送給真人客服的訊息：" + msg);
         Map<Long, List<MsgDetail>> errResult = messageTransmitService.transmitToLiveChat(msg);
 
         // error message response

@@ -107,15 +107,22 @@ public class BillingNoticeSendMsgService {
     @SuppressWarnings("unchecked")
     public List<BillingNoticeMain> sendingBillingNoticeMain(String procApName) {
         List<String> templateIdList = billingNoticeService.findProductSwitchOnTemplateId();
+        log.info("templateIdList = {}", templateIdList);
+        
         if (templateIdList == null || templateIdList.isEmpty()) {
             log.info("Template Id List Is Empty!!");
             return Collections.emptyList();
         }
+        
         log.info("Start find wait and retry main!!");
+        
         // 更新狀態
         Object[] returnArray = billingNoticeRepositoryCustom.updateStatus(procApName, templateIdList);
         Set<Long> allMainIdSet = (Set<Long>) returnArray[0];
+        log.info("allMainIdSet = {}", allMainIdSet);
+        
         List<BillingNoticeDetail> allDetails = (List<BillingNoticeDetail>) returnArray[1];
+        log.info("allDetails = {}", allDetails);
 
         if (allMainIdSet.isEmpty()) {
             log.info("Main Id Set Is Empty!!");
@@ -123,27 +130,35 @@ public class BillingNoticeSendMsgService {
         }
 
         List<BillingNoticeMain> billingNoticeMainList = new ArrayList<>();
+        
         //組裝資料
         for (Long mainId : allMainIdSet) {
             BillingNoticeMain bnMain = billingNoticeMainRepository.findOne(mainId);
-            log.info("Original File Name: {}", bnMain.getOrigFileName());
+            log.info("NoticeMainId = {}, Original File Name = {}", bnMain.getNoticeMainId(), bnMain.getOrigFileName());
+            
             List<BillingNoticeDetail> details = new ArrayList<>();
+            
             for (BillingNoticeDetail detail : allDetails) {
                 if (detail.getNoticeMainId().longValue() == mainId.longValue()) {
                     details.add(detail);
                 }
             }
+            
             bnMain.setDetails(details);
+            
             BillingNoticeContentTemplateMsg template = billingNoticeContentTemplateMsgRepository.findOne(bnMain.getTempId());
             if (template == null) {
                 log.error("BillingNoticeContentTemplateMsg :" + bnMain.getTempId() + " is null");
                 continue;
             }
+            
             bnMain.setTemplate(template);
+            
             List<BillingNoticeContentTemplateMsgAction> actions = billingNoticeContentTemplateMsgActionRepository.findNotDeletedTemplateId(template.getTemplateId());
             bnMain.setTemplateActions(actions);
             billingNoticeMainList.add(bnMain);
         }
+        
         return billingNoticeMainList;
     }
 

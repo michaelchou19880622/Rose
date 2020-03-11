@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,12 +48,18 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
     @Override
     @Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
     public Object[] updateStatus(String procApName, List<String> tempIds) {
-        log.info("Process Ap Name: {}", procApName);
+        log.info("[updateStatus] Process Ap Name: {}", procApName);
+        log.info("[updateStatus] tempIds: {}", tempIds);
+        
         try {
             Set<Long> allMainIds = new HashSet<>();
+            
             /* 1. Find wait main set and update status to sending */
+            log.info("1. Find wait main set and update status to sending");
             allMainIds.addAll(findWaitMainSet(procApName, tempIds));
+            
             /* 2. Find retry main set and update status to sending */
+            log.info("2. Find retry main set and update status to sending");
             allMainIds.addAll(findRetryMainSet(procApName, tempIds));
 
             /* Valid is empty */
@@ -61,13 +69,17 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
             }
 
             /* 3. Find Detail id list by Main id list */
+            log.info("3. Find Detail id list by Main id list");
             List<BillingNoticeDetail> detailList = findAllWaitRetryDetailByMainId(allMainIds);
 
             if (detailList.isEmpty()) {
                 log.info("Detail List is Empty!!");
                 return new Object[]{Collections.emptySet(), Collections.emptyList()};
             }
+            
             /* 4. Find Detail object list by Detail id list */
+            log.info("4. Find Detail object list by Detail id list");
+            
             return new Object[]{allMainIds, detailList};
         } catch (Exception e) {
             log.error("Exception", e);
@@ -79,27 +91,35 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
     private Set<Long> findRetryMainSet(String procApName, List<String> tempIds) {
         Set<Long> retrySet = new HashSet<>();
         List<Long> retryMainIdList = findAndUpdateFirstRetryDetailOnMain(procApName, tempIds);
+        log.info("retryMainIdList = {}", retryMainIdList);
+        
         retryMainIdList.forEach(retryMainId -> {
             if (retryMainId != null) {
                 retrySet.add(retryMainId);
             } else {
-                log.debug("BCS_BILLING_NOTICE updateStatus retryMainId is null");
+                log.info("BCS_BILLING_NOTICE updateStatus retryMainId is null");
             }
 
         });
+        
+        log.info("retrySet = {}", retrySet);
         return retrySet;
     }
 
     private Set<Long> findWaitMainSet(String procApName, List<String> tempIds) {
         Set<Long> waitSet = new HashSet<>();
         List<Long> waitMainIdList = findAndUpdateFirstWaitMain(procApName, tempIds);
+        log.info("waitMainIdList = {}", waitMainIdList);
+        
         waitMainIdList.forEach(waitMainId -> {
             if (waitMainId != null) {
                 waitSet.add(waitMainId);
             } else {
-                log.debug("BCS_BILLING_NOTICE updateStatus waitMainId is null");
+                log.info("BCS_BILLING_NOTICE updateStatus waitMainId is null");
             }
         });
+        
+        log.info("waitSet = {}", waitSet);
         return waitSet;
     }
 
@@ -157,7 +177,7 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
     /**
      * 找出第一個WAIT BillingNoticeMain 並更新狀態
      */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, timeout = 300)
     public List<Long> findAndUpdateFirstWaitMain(String procApName, List<String> tempIds) {
         try {
             String waitMainString = " SELECT TOP 100 NOTICE_MAIN_ID" +
@@ -168,8 +188,9 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
                     " ORDER BY CREAT_TIME DESC";
 
             log.info("Wait String: {}", waitMainString);
-
-            List<BigInteger> mainList = entityManager.createNativeQuery(waitMainString)
+            
+            @SuppressWarnings("unchecked")
+			List<BigInteger> mainList = entityManager.createNativeQuery(waitMainString)
                     .setParameter("procApName", procApName)
                     .setParameter("status", BillingNoticeMain.NOTICE_STATUS_WAIT)
                     .setParameter("tempIds", tempIds)
@@ -190,11 +211,9 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
                     .setParameter("ids", mainList)
                     .executeUpdate();
 
-            log.info("Update main wait to sending!! {}", modifyCount);
+            log.info("Update main wait to sending!!");
+            log.info("The number of entities updated : {}", modifyCount);
 
-            if (mainList.isEmpty()) {
-                return Collections.emptyList();
-            }
             List<Long> list = new ArrayList<>();
             mainList.forEach(v -> list.add(Long.parseLong(v.toString())));
             mainList.clear();

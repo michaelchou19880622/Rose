@@ -41,14 +41,6 @@ $(function(){
 	};
 	
 	//身分證字號或外籍人士居留証驗證
-	/*
-	 * 第一個字元代表地區，轉換方式為：A轉換成1,0兩個字元，B轉換成1,1……但是Z、I、O分別轉換為33、34、35
-	 * 第二個字元代表性別，1代表男性，2代表女性
-	 * 第三個字元到第九個字元為流水號碼。
-	 * 第十個字元為檢查號碼。
-	 * 每個相對應的數字相乘，如A123456789代表1、0、1、2、3、4、5、6、7、8，相對應乘上1987654321，再相加。
-	 * 相加後的值除以模數，也就是10，取餘數再以模數10減去餘數，若等於檢查碼，則驗證通過
-	 */
 	function idNumberIdentify() {
 		var idNumber = $('#userID').val();
 		
@@ -75,67 +67,6 @@ $(function(){
 
         return true;
         
-//        var idHeader = "ABCDEFGHJKLMNPQRSTUVXYWZIO";
-//        
-//        if (/^[A-Za-z][12][\d]{8}$/.test(userIdNumber)) { // 身分證號規則
-//        	
-//	        userIdNumber = (idHeader.indexOf(userIdNumber.substring(0, 1)) + 10) 
-//					        + ''
-//					        + userIdNumber.substr(1, 9);
-//			console.info("1-1 userIdNumber = " + userIdNumber);
-//	       
-//	        
-//	        s = parseInt(userIdNumber.substr(0, 1)) 
-//		        + parseInt(userIdNumber.substr(1, 1)) * 9 
-//		        + parseInt(userIdNumber.substr(2, 1)) * 8 
-//		        + parseInt(userIdNumber.substr(3, 1)) * 7 
-//		        + parseInt(userIdNumber.substr(4, 1)) * 6 
-//		        + parseInt(userIdNumber.substr(5, 1)) * 5 
-//		        + parseInt(userIdNumber.substr(6, 1)) * 4 
-//		        + parseInt(userIdNumber.substr(7, 1)) * 3 
-//		        + parseInt(userIdNumber.substr(8, 1)) * 2 
-//		        + parseInt(userIdNumber.substr(9, 1));
-//			console.info("1-1 s = " + s);
-//	 
-//	        checkNum = parseInt(userIdNumber.substr(10, 1));
-//			console.info("1-1 checkNum = " + checkNum);
-//	        
-//	        if ((s % 10) == 0 || (10 - s % 10) == checkNum) {
-//	            return true;
-//	        } else {
-//	            return false;
-//	        }
-//        } else if (/[A-Za-z][A-Da-d][\d]{8}$/.test(userIdNumber)) { // 居留證號規則
-//        	
-//	        userIdNumber = (idHeader.indexOf(userIdNumber.substring(0, 1)) + 10) 
-//					        + '' 
-//					        + ((idHeader.indexOf(userIdNumber.substr(1, 1)) + 10) % 10) 
-//					        + '' 
-//					        + userIdNumber.substr(2, 8);
-//			console.info("1-2 userIdNumber = " + userIdNumber);
-//	 
-//
-//			s = parseInt(userIdNumber.substr(0, 1)) 
-//				+ parseInt(userIdNumber.substr(1, 1)) * 9 
-//				+ parseInt(userIdNumber.substr(2, 1)) * 8 
-//				+ parseInt(userIdNumber.substr(3, 1)) * 7
-//				+ parseInt(userIdNumber.substr(4, 1)) * 6 
-//				+ parseInt(userIdNumber.substr(5, 1)) * 5 
-//				+ parseInt(userIdNumber.substr(6, 1)) * 4 
-//				+ parseInt(userIdNumber.substr(7, 1)) * 3
-//				+ parseInt(userIdNumber.substr(8, 1)) * 2 
-//				+ parseInt(userIdNumber.substr(9, 1));
-//			console.info("1-2 s = " + s);
-//	 
-//	        checkNum = parseInt(userIdNumber.substr(10, 1));
-//			console.info("1-2 checkNum = " + checkNum);
-//	        
-//	        if ((s % 10) == 0 || (10 - s % 10) == checkNum) {
-//	            return true;
-//	        } else {
-//	            return false;
-//	        }
-//        }
 	}
 	
 //	$('#userID').blur(function(){

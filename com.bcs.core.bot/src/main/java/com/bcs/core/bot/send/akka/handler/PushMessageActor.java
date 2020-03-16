@@ -25,15 +25,19 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class PushMessageActor extends UntypedActor {
+
+	/* 因為欄位設定(nvarchar 1024)，暫定最多只取1000長度的data。 */
+    public static final int MAX_DATA_LENGTH = 1000;
+	
 	@Override
 	public void onReceive(Object object) throws Exception {
 		log.info("---------------- PushMessageActor ----------------");
 		if(object instanceof PushApiModel) {
 			PushApiModel pushApiModel = (PushApiModel) object;
 			log.info("PushApiModel => {}", pushApiModel);
+			
 			log.info("pushApiModel.getSendTimeType() = {}", pushApiModel.getSendTimeType());
-
-			if(pushApiModel.getSendTimeType().equals(PushApiModel.SEND_TYPE_IMMEDIATE)) {	// 立即發送
+			if (pushApiModel.getSendTimeType().equals(PushApiModel.SEND_TYPE_IMMEDIATE)) { // 立即發送
 				String url = CoreConfigReader.getString(CONFIG_STR.LINE_MESSAGE_PUSH_URL.toString());
 				log.info("URL => {}", url);
 				
@@ -53,14 +57,16 @@ public class PushMessageActor extends UntypedActor {
 				log.info("Headers => {}", headers);
 
 				requestBody.put("messages", pushApiModel.getMessages());
+				log.info("1-1 requestBody => {}", requestBody.toString());
 
 				JSONArray uids = pushApiModel.getUid();
 				log.info("Uids => {}", uids);
+				
 				for(Integer i = 0; i < uids.length(); i++) {
 					PushMessageRecord record = new PushMessageRecord();
 
 					requestBody.put("to", uids.get(i));
-					log.info("requestBody => {}", requestBody.toString());
+					log.info("1-2 requestBody => {}", requestBody.toString());
 
 					/* 將 headers 跟 body 塞進 HttpEntity 中  */
 					HttpEntity<String> httpEntity = new HttpEntity<String>(requestBody.toString(), headers);
@@ -69,14 +75,16 @@ public class PushMessageActor extends UntypedActor {
 
 					try {
 						JSONObject jsonObjOfRestfulExcuted = restfulUtil.execute();
-						log.info("jsonObjOfRestfulExcuted => {}", jsonObjOfRestfulExcuted);
+						log.info("jsonObjOfRestfulExcuted => {}", jsonObjOfRestfulExcuted.toString());
 						
 						String sendMessage = pushApiModel.getMessages().toString();
 						log.info("sendMessage => {}", sendMessage);
 						log.info("sendMessage Length => {}", sendMessage.length());
 						
-						if (sendMessage.length() >= 200) {  // 因為DB欄位設定的關係(nvarchar 255)，暫時修改最多只取200長度的data。
-							sendMessage = sendMessage.substring(0, 200);
+						if (sendMessage.length() >= MAX_DATA_LENGTH) {  // 因為DB欄位設定的關係(nvarchar 255)，暫時修改最多只取200長度的data。
+							sendMessage = sendMessage.substring(0, MAX_DATA_LENGTH);
+							log.info("substring sendMessage = {}", sendMessage);
+							log.info("substring sendMessage.length() = {}", sendMessage.length());
 						}
 
 						record.setDepartment(pushApiModel.getDepartment());
@@ -89,6 +97,7 @@ public class PushMessageActor extends UntypedActor {
 						record.setCreateTime(pushApiModel.getTriggerTime());
 						record.setServiceName(pushApiModel.getServiceName());
 						record.setPushTheme(pushApiModel.getPushTheme());
+						
 					} catch (HttpClientErrorException e) {
 						log.info("HttpClientErrorException => {}", e);
 						JSONObject errorMessage = new JSONObject(e.getResponseBodyAsString());
@@ -97,16 +106,20 @@ public class PushMessageActor extends UntypedActor {
 						log.info("strErrorMessage => {}", strErrorMessage);
 						log.info("strErrorMessage Length => {}", strErrorMessage.length());
 						
-						if (strErrorMessage.length() >= 200) {  // 因為DB欄位設定的關係(nvarchar 255)，暫時修改最多只取200長度的data。
-							strErrorMessage = strErrorMessage.substring(0, 200);
+						if (strErrorMessage.length() >= MAX_DATA_LENGTH) {
+							strErrorMessage = strErrorMessage.substring(0, MAX_DATA_LENGTH);
+							log.info("substring strErrorMessage = {}", strErrorMessage);
+							log.info("substring strErrorMessage.length() = {}", strErrorMessage.length());
 						}
 						
 						String sendMessage = pushApiModel.getMessages().toString();
 						log.info("sendMessage = {}", sendMessage);
 						log.info("sendMessage.length() = {}", sendMessage.length());
 						
-						if (sendMessage.length() >= 200) {  // 因為DB欄位設定的關係(nvarchar 255)，暫時修改最多只取200長度的data。
-							sendMessage = sendMessage.substring(0, 200);
+						if (sendMessage.length() >= MAX_DATA_LENGTH) {
+							sendMessage = sendMessage.substring(0, MAX_DATA_LENGTH);
+							log.info("substring sendMessage = {}", sendMessage);
+							log.info("substring sendMessage.length() = {}", sendMessage.length());
 						}
 
 						if(errorMessage.has("message")) {
@@ -122,11 +135,23 @@ public class PushMessageActor extends UntypedActor {
 							record.setPushTheme(pushApiModel.getPushTheme());
 							
 							if (errorMessage.has("details")) {
-								record.setDetailMessage(errorMessage.getJSONArray("details").toString());
+								
+								String detailErrorMessage = errorMessage.getJSONArray("details").toString();
+								log.info("detailErrorMessage => {}", detailErrorMessage);
+								log.info("detailErrorMessage Length => {}", detailErrorMessage.length());
+								
+								if (detailErrorMessage.length() >= MAX_DATA_LENGTH) {
+									detailErrorMessage = detailErrorMessage.substring(0, MAX_DATA_LENGTH);
+									log.info("substring detailErrorMessage = {}", detailErrorMessage);
+									log.info("substring detailErrorMessage.length() = {}", detailErrorMessage.length());
+								}
+								
+								record.setDetailMessage(detailErrorMessage);
 							} else {
 								record.setDetailMessage(strErrorMessage);
 							}
 						} 
+						
 					} catch (Exception e) {
 						log.info("Exception = {}", e);
 						
@@ -134,16 +159,20 @@ public class PushMessageActor extends UntypedActor {
 						log.info("exceptionErrorMessage = {}", exceptionErrorMessage);
 						log.info("exceptionErrorMessage.length() = {}", exceptionErrorMessage.length());
 						
-						if (exceptionErrorMessage.length() >= 200) {  // 因為DB欄位設定的關係(nvarchar 255)，暫時修改最多只取200長度的data。
-							exceptionErrorMessage = exceptionErrorMessage.substring(0, 200);
+						if (exceptionErrorMessage.length() >= MAX_DATA_LENGTH) {
+							exceptionErrorMessage = exceptionErrorMessage.substring(0, MAX_DATA_LENGTH);
+							log.info("substring exceptionErrorMessage = {}", exceptionErrorMessage);
+							log.info("substring exceptionErrorMessage.length() = {}", exceptionErrorMessage.length());
 						}
 						
 						String sendMessage = pushApiModel.getMessages().toString();
 						log.info("sendMessage = {}", sendMessage);
 						log.info("sendMessage.length() = {}", sendMessage.length());
 						
-						if (sendMessage.length() >= 200) {  // 因為DB欄位設定的關係(nvarchar 255)，暫時修改最多只取200長度的data。
-							sendMessage = sendMessage.substring(0, 200);
+						if (sendMessage.length() >= MAX_DATA_LENGTH) {
+							sendMessage = sendMessage.substring(0, MAX_DATA_LENGTH);
+							log.info("substring sendMessage = {}", sendMessage);
+							log.info("substring sendMessage.length() = {}", sendMessage.length());
 						}
 						
 						record.setDepartment(pushApiModel.getDepartment());
@@ -152,14 +181,15 @@ public class PushMessageActor extends UntypedActor {
 						record.setPushTheme(pushApiModel.getPushTheme());
 						record.setUID(uids.get(i).toString());
 						record.setSendMessage(sendMessage);
-						record.setMainMessage(exceptionErrorMessage);
+						record.setMainMessage("Error");
 						record.setSendType(pushApiModel.getSendTimeType());
 						record.setCreateTime(pushApiModel.getTriggerTime());
 						record.setDetailMessage(exceptionErrorMessage);
 					}
+
 					this.getSender().tell(record, this.getSelf());
 				}
-			} else {	// 預約發送
+			} else { // 預約發送
 				log.info("pushApiModel = {}", pushApiModel);
 				PushMessageTaskService pushMessageTaskService = ApplicationContextProvider.getApplicationContext().getBean(PushMessageTaskService.class);
 

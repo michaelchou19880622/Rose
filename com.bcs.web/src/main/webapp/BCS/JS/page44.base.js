@@ -52,6 +52,10 @@ $(function(){
 		// 驗證填入身分證字號長度及格式
 		if (userIdNumber.length != 10) {
 			console.info("格式錯誤");
+
+			// 清除Result顯示
+			$(".showResult").html("");
+			
 			return false;
 		}
 		
@@ -61,6 +65,10 @@ $(function(){
 //		4.	([\d]{10}$) 				: 中國籍人士(舊制) : 10碼數字
         if (!/(^[A-Za-z][\d]{9}$)|([\d]{8}[A-Za-z][A-Za-z]$)|([A-Za-z][A-Za-z][\d]{8}$)|([\d]{10}$)/.test(userIdNumber)) {
         	console.info("格式錯誤");
+
+			// 清除Result顯示
+			$(".showResult").html("");
+        	
 	        return false;
         }
         

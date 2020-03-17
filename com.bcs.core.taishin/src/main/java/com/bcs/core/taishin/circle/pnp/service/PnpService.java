@@ -208,7 +208,8 @@ public class PnpService {
                 log.warn("Process flow is null, to bc!!");
                 processFlow = PnpProcessFlowEnum.BC;
             }
-            /* User In Block List */
+            
+            /* User In Black List */
             if (userInBlackList(detail.getUid(), detail.getPhone())) {
                 switch (processFlow) {
                     case BC_SMS:

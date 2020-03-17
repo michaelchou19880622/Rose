@@ -154,7 +154,7 @@ public class ExecuteSendMsgTask {
         if (midList == null || midList.isEmpty()) {
             throw new BcsNoticeException("群組設定錯誤:查不到發送目標");
         }
-        log.debug("executeSendMsg midList ============ :" + midList.size());
+        log.info("executeSendMsg midList ============ :" + midList.size());
         MsgSendMain msgSendMain = msgSendMainService.copyFromMsgMain(msgId, (long) midList.size(), groupTitle);
 
         List<MsgDetail> details = msgDetailService.findByMsgIdAndMsgParentType(msgSendMain.getMsgSendId(), MsgSendMain.THIS_PARENT_TYPE);
@@ -190,13 +190,17 @@ public class ExecuteSendMsgTask {
             AdminUserService adminUserService = ApplicationContextProvider.getApplicationContext().getBean(AdminUserService.class);
 
             List<AdminUser> list = adminUserService.findByMidNotNull();
+            log.info("SendToAdminGroup list.size() = {}" + list.size());
+            
             List<String> midListTest = new ArrayList<>();
+            
             if (list != null && !list.isEmpty()) {
                 for (AdminUser adminUser : list) {
                     if (StringUtils.isNotBlank(adminUser.getMid())) {
                         midListTest.add(adminUser.getMid());
                     }
                 }
+                log.info("SendToAdminGroup midListTest.size() = {}" + midListTest.size());
             }
 
             MsgDetail detail = new MsgDetail();

@@ -110,12 +110,14 @@ public class SendingMsgService {
     }
 
     public void sendToLineAsync(String channelId, List<MsgGenerator> msgGenerators, List<MsgDetail> detailList, List<String> midList, API_TYPE apiType, Long updateMsgId) {
-        log.debug("sendToLineAsync");
-        log.debug("Mid List Size: {}", midList.size());
+        log.info("---------- sendToLineAsync ----------");
+        log.info("[sendToLineAsync] Mid List Size: {}", midList.size());
 
         if (channelId == null) {
             channelId = CONFIG_STR.DEFAULT.toString();
         }
+
+        log.info("[sendToLineAsync] channelId: {}", channelId);
 
         AsyncSendingModel asyncSendingModel;
         if (updateMsgId != null) {
@@ -123,29 +125,32 @@ public class SendingMsgService {
         } else {
             asyncSendingModel = new AsyncSendingModel(channelId, msgGenerators, midList, apiType);
         }
+        log.info("[sendToLineAsync] asyncSendingModel: {}", asyncSendingModel);
 
         if (detailList == null) {
-            log.info("Detail List Is Null!!");
+            log.info("[sendToLineAsync] Detail List Is Null!!");
             akkaBotService.sendingMsgs(asyncSendingModel);
             return;
         }
 
         if (CoreConfigReader.getBoolean(CONFIG_STR.BCS_API_CLUSTER_SEND_THIS.toString())) {
-            log.info("[rest.api.cluster.send.this] is True!!");
+            log.info("[sendToLineAsync] [rest.api.cluster.send.this] is True!!");
             akkaBotService.sendingMsgs(asyncSendingModel);
             return;
         }
 
         if (StringUtils.isBlank(CoreConfigReader.getString(CONFIG_STR.BCS_API_CLUSTER_SEND.toString()))) {
-            log.info("[rest.api.cluster.send] is Blank!!");
+            log.info("[sendToLineAsync] [rest.api.cluster.send] is Blank!!");
             akkaBotService.sendingMsgs(asyncSendingModel);
             return;
         }
 
         try {
-            log.info("Last!!");
+            log.info("[sendToLineAsync] Last!!");
             AsyncSendingClusterModel model = new AsyncSendingClusterModel(channelId, detailList, midList, apiType.toString(), updateMsgId);
             PostLineResponse response = BcsApiClusterService.clusterApiSend(model);
+            log.info("[sendToLineAsync] response: {}", response);
+            
             if (HttpStatus.OK.value() != response.getStatus()) {
                 throw new Exception(response.toString());
             }

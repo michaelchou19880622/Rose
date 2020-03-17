@@ -329,6 +329,9 @@ public class BillingNoticeService {
             /* Update detail */
             billingNoticeDetailRepository.save(detail);
         }
+        
+        // TODO:再檢查一次Detail
+        
         log.info("Complete Main is [{}]", billingNoticeMain.getNoticeMainId());
         billingNoticeMainRepository.updateBillingNoticeMainStatus(BillingNoticeMain.NOTICE_STATUS_COMPLETE, new Date(), billingNoticeMain.getNoticeMainId());
     }

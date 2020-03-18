@@ -197,7 +197,7 @@ public class PNPFtpService {
     private boolean loginFtp(FTPClient pFtpClient, PnpFtpSetting setting) {
         try {
 
-            pFtpClient.setDefaultTimeout(1000000);
+            pFtpClient.setDefaultTimeout(1000000); //milliseconds
             pFtpClient.connect(setting.getHost(), setting.getPort());
 
             boolean lStatus = false;

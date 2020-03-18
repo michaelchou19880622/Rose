@@ -1,20 +1,5 @@
 package com.bcs.core.taishin.circle.ftp;
 
-import com.bcs.core.enums.CONFIG_STR;
-import com.bcs.core.resource.CoreConfigReader;
-import com.bcs.core.utils.DataUtils;
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.Session;
-import com.tsb.util.TrendPwMgmt;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPFile;
-import org.apache.commons.net.ftp.FTPSClient;
-import org.springframework.stereotype.Service;
-
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -23,6 +8,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
+import org.apache.commons.net.ftp.FTPSClient;
+import org.springframework.stereotype.Service;
+
+import com.bcs.core.enums.CONFIG_STR;
+import com.bcs.core.resource.CoreConfigReader;
+import com.bcs.core.utils.DataUtils;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.tsb.util.TrendPwMgmt;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author ???
@@ -315,6 +318,8 @@ public class FtpService {
                 session.setTimeout(5 * 60 * 1000);
                 session.connect();
                 lStatus = session.isConnected();
+                log.info("1-1 session.isConnected() = {}", lStatus);
+                
                 if (lStatus) {
                     log.info("loginSFTP:" + setting.getHost() + "資源密碼系統的帳號密碼登入完成");
                     return session;
@@ -337,6 +342,7 @@ public class FtpService {
             session.setTimeout(5 * 60 * 1000);
             session.connect();
             lStatus = session.isConnected();
+            log.info("1-2 session.isConnected() = {}", lStatus);
             if (lStatus) {
                 log.info("loginSFTP:" + setting.getHost() + "資源密碼系統的帳號密碼登入完成");
                 return session;
@@ -352,6 +358,7 @@ public class FtpService {
             session.setTimeout(5 * 60 * 1000);
             session.connect();
             lStatus = session.isConnected();
+            log.info("1-3 session.isConnected() = {}", lStatus);
             if (lStatus) {
                 log.info("loginSFTP:" + setting.getHost() + "原系統記錄帳號密碼登入完成");
                 return session;
@@ -517,7 +524,12 @@ public class FtpService {
      * @return 下載的檔案內容
      */
     private Map<String, byte[]> downloadMultipleFileInSFTP(String pDirectory, String extension, FtpSetting setting) {
-        Map<String, byte[]> lReturnDataMap = new HashMap<>();
+		log.info("---------- downloadMultipleFileInSFTP ----------");
+		log.info("pDirectory = {}", pDirectory);
+		log.info("extension = {}", extension);
+		log.info("setting = {}", setting);
+    	
+    	Map<String, byte[]> lReturnDataMap = new HashMap<>();
         ChannelSftp channelSftp = null;
         Session session = null;
         try {
@@ -527,12 +539,16 @@ public class FtpService {
                 return lReturnDataMap;
             }
             channelSftp = (ChannelSftp) session.openChannel("sftp");
-            channelSftp.connect();
+            channelSftp.connect(5 * 60 * 1000);  
+            
             if (channelSftp.isConnected()) {
+				log.info("channelSftp.isConnected() = {}", channelSftp.isConnected());
                 channelSftp.cd(pDirectory);
+                
                 // 取得FTP中的files
                 Vector<ChannelSftp.LsEntry> list = channelSftp.ls("*." + extension);
                 list.addAll(channelSftp.ls("*." + extension.toLowerCase()));
+				log.info("1-1 list = {}", list.toArray());
 
                 Map<String, Long> lFileSizeAndName = new HashMap<>();
                 for (ChannelSftp.LsEntry lFtpFile : list) {
@@ -540,26 +556,47 @@ public class FtpService {
                     log.info("downloadMultipleFileInSFTP:" + pDirectory + " File :" + fileName);
                     lFileSizeAndName.put(lFtpFile.getFilename(), lFtpFile.getAttrs().getSize());
                 }
-                // T 隔五秒再重新查詢FTP ，判斷兩者的長度
-                try {
-                    BigDecimal lWaitingTime = new BigDecimal("5");
-                    if (lWaitingTime.intValue() <= 0) {
-                        lWaitingTime = new BigDecimal("5");
-                    }
-                    Thread.sleep(lWaitingTime.intValue());
-                } catch (InterruptedException lIE) {
-                    log.error(lIE.getMessage());
-                    Thread.currentThread().interrupt();
-                }
+                
+//                // T 隔五秒再重新查詢FTP ，判斷兩者的長度
+//                try {
+//                    BigDecimal lWaitingTime = new BigDecimal("5");
+//                    if (lWaitingTime.intValue() <= 0) {
+//                        lWaitingTime = new BigDecimal("5");
+//                    }
+//                    
+//    				log.info("Check file size after 5 seconds... [START]");
+//                    Thread.sleep(lWaitingTime.intValue());
+//                } catch (InterruptedException lIE) {
+//                    log.error("InterruptedException: {}", lIE);
+//                    Thread.currentThread().interrupt();
+//                }
+                
+                // T 隔15秒再重新查詢FTP ，判斷兩者的長度
+				log.info("Wait 15 seconds, then check file size again.");
+				for (int i = 1; i <= 15; i++) {
+					log.info("Wait {} seconds..", i);
+					
+					Thread.sleep(1000L);
+				}
+                
+				log.info("Start to check files size again.");
                 list = channelSftp.ls("*." + extension);
                 list.addAll(channelSftp.ls("*." + extension.toLowerCase()));
+				log.info("1-2 list = {}", list.toArray());
 
                 ByteArrayOutputStream lDataTemp = null;
                 for (ChannelSftp.LsEntry lFtpFile : list) {
-                    // T 只有檔案在五秒間隔裡檔案大小完全一致才算完整可以處理檔案
-                    if (lFileSizeAndName.containsKey(lFtpFile.getFilename())
-                            && lFtpFile.getAttrs().getSize() == lFileSizeAndName.get(lFtpFile.getFilename())) {
-                        lDataTemp = new ByteArrayOutputStream();
+                    // T 只有檔案在15秒間隔裡檔案大小完全一致才算完整可以處理檔案
+                	
+                	String sftpFileName = lFtpFile.getFilename();
+                	long sftpFileSize = lFtpFile.getAttrs().getSize();
+    				log.info("sftpFileName = {}, sftpFileSize", sftpFileName, sftpFileSize);
+                	
+                    if (lFileSizeAndName.containsKey(sftpFileName) && (sftpFileSize == lFileSizeAndName.get(sftpFileName))) {
+						log.info("The file [{}] has been transferred and the file size [{}] has not changed", 
+								lFtpFile.getFilename(), lFtpFile.getAttrs().getSize());
+                    	
+                    	lDataTemp = new ByteArrayOutputStream();
                         channelSftp.get(lFtpFile.getFilename(), lDataTemp);
                         lDataTemp.flush();
                         lReturnDataMap.put(lFtpFile.getFilename(), lDataTemp.toByteArray());
@@ -570,21 +607,25 @@ public class FtpService {
                 log.error("downloadMultipleFileInSFTP channelSftp false");
             }
 
+		} catch (JSchException je) {
+			log.error("JSchException: {}", je);
 
-        } catch (Exception ex) {
-            log.error("downloadMultipleFileInSFTP Error: " + ex.getMessage());
-        } finally {
-            try {
-                if (channelSftp != null && channelSftp.isConnected()) {
-                    channelSftp.disconnect();
-                }
-                if (session != null && session.isConnected()) {
-                    session.disconnect();
-                }
-            } catch (Exception ex) {
-                log.error("downloadMultipleFileInSFTP Error: " + ex.getMessage());
-            }
-        }
+		} catch (Exception ex) {
+			log.error("downloadMultipleFileInSFTP Error: {}", ex);
+		} finally {
+			try {
+				if (channelSftp != null && channelSftp.isConnected()) {
+					channelSftp.disconnect();
+					log.info("channelSftp disconnected");
+				}
+				if (session != null && session.isConnected()) {
+					session.disconnect();
+					log.info("session disconnected");
+				}
+			} catch (Exception ex) {
+				log.error("downloadMultipleFileInSFTP Error: {}", ex);
+			}
+		}
 
         return lReturnDataMap;
     }

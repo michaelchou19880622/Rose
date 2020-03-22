@@ -59,6 +59,7 @@ public class SFTPUtil {
             if(session != null) {
                 session.disconnect();
             }
+            session = null;
         }
 
 	    return this;

@@ -101,9 +101,10 @@ public class PnpMainActor extends UntypedActor {
 
     private int getMaxActorCount() {
         int count = CoreConfigReader.getInteger("bn.push.detail.max.actor.count", true);
+        log.info("getMaxActorCount from database : {}", count);
         if (count <= 0) {
-            log.warn("Properties [bn.push.detail.max.actor.count] does not found, use default value is 100!!");
-            count = 100;
+            count = 50;
+            log.warn("Properties [bn.push.detail.max.actor.count] does not found, use default value is {}!!", count);
         }
         return count;
     }

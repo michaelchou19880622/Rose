@@ -155,6 +155,7 @@ public class ReceivingMsgHandlerMsgReceiveOp extends UntypedActor {
         final String mid = content.getSourceId();
         log.info("MID:" + mid);
         try {
+        	
             // 新增好友
             if (MsgBotReceive.EVENT_TYPE_FOLLOW.equals(content.getEventType())) {
 

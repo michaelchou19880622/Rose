@@ -114,10 +114,15 @@ public class LineUserService {
     public LineUser findByMidAndCreateSysAdd(String mid) {
         LineUser lineUser = findByMid(mid);
         if (lineUser == null) {
+        	
+        	
             Date time = new Date();
             lineUser = new LineUser();
             lineUser.setMid(mid);
+
+        	// TODO: 增加防呆，先打LINE API檢查FriendStatus (false -> SYSADD; true -> UNBIND)
             lineUser.setStatus(LineUser.STATUS_SYS_ADD);
+            
             lineUser.setIsBinded(LineUser.STATUS_UNBIND);
             lineUser.setModifyTime(time);
             lineUser.setCreateTime(time);

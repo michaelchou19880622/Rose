@@ -38,7 +38,9 @@ public class ReceivingMsgHandlerEventType extends UntypedActor {
             if (!list.isEmpty()) {
                 int count = 0;
                 Date start = original.getStart();
+                
                 for (MsgBotReceive msg : list) {
+                    log.info("MsgBotReceive = {}", msg);
 
                     ReceivingMsgHandlerMaster.taskCount.addAndGet(1L);
 
@@ -46,27 +48,56 @@ public class ReceivingMsgHandlerEventType extends UntypedActor {
                     log.info("eventType:" + eventType);
 
                     String channelId = original.getChannelId();
+                    log.info("channelId = {}", channelId);
+                    
                     String channelName = original.getChannelName();
+                    log.info("channelName = {}", channelName);
+                    
                     String apiType = original.getApiType().toString();
+                    log.info("apiType = {}", apiType);
+                    
+                    String manualReplyChannelName = CoreConfigReader.getString(CONFIG_STR.MANUAL_REPLY_CHANNEL_NAME.toString(), true);
+                    log.info("manualReplyChannelName = {}", manualReplyChannelName);
+
+                    boolean channelNameIsEqConfig = channelName.equals(manualReplyChannelName);
+                    log.info("channelNameIsEqConfig = {}", channelNameIsEqConfig);
+                   
+                    boolean eventIsMsgOrPostBack = MsgBotReceive.EVENT_TYPE_MESSAGE.equals(eventType) || MsgBotReceive.EVENT_TYPE_POSTBACK.equals(eventType);
+                    log.info("eventIsMsgOrPostBack = {}", eventIsMsgOrPostBack);
+                   
+                    boolean eventIsFollowOrUnFollow = MsgBotReceive.EVENT_TYPE_FOLLOW.equals(eventType) || MsgBotReceive.EVENT_TYPE_UNFOLLOW.equals(eventType);
+                    log.info("eventIsFollowOrUnFollow = {}", eventIsFollowOrUnFollow);
+                   
+                    boolean eventIsDelivery = MsgBotReceive.EVENT_TYPE_DELIVERY.equals(eventType);
+                    log.info("eventIsDelivery = {}", eventIsDelivery);
 
                     String referenceId = "";
-
-
-                    boolean channelNameIsEqConfig = channelName.equals(CoreConfigReader.getString(CONFIG_STR.MANUAL_REPLY_CHANNEL_NAME.toString(), true));
-                    boolean eventIsMsgOrPostBack = MsgBotReceive.EVENT_TYPE_MESSAGE.equals(eventType) || MsgBotReceive.EVENT_TYPE_POSTBACK.equals(eventType);
-                    boolean eventIsFollowOrUnFollow = MsgBotReceive.EVENT_TYPE_FOLLOW.equals(eventType) || MsgBotReceive.EVENT_TYPE_UNFOLLOW.equals(eventType);
-                    boolean eventIsDelivery = MsgBotReceive.EVENT_TYPE_DELIVERY.equals(eventType);
-
+                    
                     if (channelNameIsEqConfig) {
+                        log.info("CHECK 1-1 : channelNameIsEqConfig : {}", channelNameIsEqConfig);
+                    	
                         methodA(msg, eventType, channelId, channelName, apiType);
+                        
                     } else if (eventIsMsgOrPostBack) {
+                        log.info("CHECK 2-1 : eventIsMsgOrPostBack : {}", eventIsMsgOrPostBack);
+                        
                         referenceId = methodB(msg, eventType, channelId, channelName, apiType);
+                        log.info("CHECK 2-2 : referenceId = {}", referenceId);
+                        
                     } else if (eventIsFollowOrUnFollow) {
+                        log.info("CHECK 3-1 : eventIsFollowOrUnFollow: {}", eventIsFollowOrUnFollow);
+                    	
                         referenceId = methodC(msg, eventType, channelId, apiType);
+                        log.info("CHECK 3-2 : referenceId = {}", referenceId);
+                        
                     } else if (eventIsDelivery) {
+                        log.info("CHECK 4-1 : eventIsDelivery: {}", eventIsDelivery);
+                        
                         updatePnpMainAndDetail(msg);
+                        
                     } else {
                         // Unknown eventType
+                        log.info("CHECK 1-5 : Unknown eventType: {}", eventType);
                     }
 
                     SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_ReceivingMsgHandler, LOG_TARGET_ACTION_TYPE.ACTION_HandleMsgReceive, start, 200, msg.toString(), referenceId);
@@ -83,6 +114,7 @@ public class ReceivingMsgHandlerEventType extends UntypedActor {
         //for pnp DELIVERY notification
         log.info("-------Get Line Return PNP Delivery Notification-------");
         ApplicationContextProvider.getApplicationContext().getBean(MsgBotReceiveService.class).bulkPersist(msg);
+        
         //收到delivery時update PNP status為complete
         ApplicationContextProvider.getApplicationContext().getBean(MsgBotReceiveService.class).updatePnpStatus(msg.getDeliveryData());
     }

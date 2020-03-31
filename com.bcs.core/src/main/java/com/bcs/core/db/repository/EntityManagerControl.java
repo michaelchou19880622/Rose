@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Repository
 public class EntityManagerControl {
-    private static final String INIT_FLAG = "INIT_FLAG";
+	private final Object lock = new Object();
 
     /**
      * Logger
@@ -67,7 +67,7 @@ public class EntityManagerControl {
 //		logger.info("EntityManagerControl persistFlush execute");
 
         try {
-            synchronized (INIT_FLAG) {
+            synchronized (lock) {
                 boolean isPersistAdd = false;
                 logger.debug("EntityManagerControl persistFlush execute:" + queueAdd.size());
 

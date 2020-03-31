@@ -97,6 +97,8 @@ public class MobileRewardCardViewController {
 	@Autowired
 	private ActionUserCouponService actionUserCouponService;
 
+	private final Object lock = new Object();
+
 	protected LoadingCache<String, ContentRewardCardModel> dataCache;
 
 	/** Logger */
@@ -402,7 +404,7 @@ public class MobileRewardCardViewController {
 		}
 
 		// 若尚未領用，則驗證領用期間、領用次數限制
-		synchronized (ActionUserRewardCardUIService.GET_REWARD_CARD_FLAG) {
+		synchronized (lock) {
 			if (!actionUserRewardCardUIService.isGetRewardCard(sessionMID, rewardCardId)) {
 				if((contentRewardCard.getRewardCardFlag()!=null &&
 						contentRewardCard.getRewardCardFlag().equals(ContentRewardCard.REWARD_CARD_FLAG_PRIVATE))){

@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 @Repository
 public class CircleEntityManagerControl {
-    private static final String INIT_FLAG = "INIT_FLAG";
+    private final Object lock = new Object();
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -65,7 +65,7 @@ public class CircleEntityManagerControl {
 //		log.info("EntityManagerControl persistFlush execute");
 
         try {
-            synchronized (INIT_FLAG) {
+            synchronized (lock) {
                 boolean isPersistAdd = false;
                 log.debug("CircleEntityManagerControl persistFlush execute:" + queueAdd.size());
 

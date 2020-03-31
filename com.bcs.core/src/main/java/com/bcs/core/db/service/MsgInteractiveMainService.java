@@ -34,7 +34,7 @@ import com.google.common.cache.LoadingCache;
 public class MsgInteractiveMainService {
 	public static final String INTERACTIVE_MAIN_SYNC = "INTERACTIVE_MAIN_SYNC";
 
-	private static final String INIT_FLAG = "INIT_FLAG";
+    private final Object lock = new Object();
 	/** Logger */
 	private static Logger logger = Logger.getLogger(MsgInteractiveMainService.class);
 	@Autowired
@@ -145,7 +145,7 @@ public class MsgInteractiveMainService {
 	}
 
 	public void increaseSendCountByMsgInteractiveId(Long iMsgId){
-		synchronized (INIT_FLAG) {
+		synchronized (lock) {
 			if(increaseMap.get(iMsgId) == null){
 				increaseMap.put(iMsgId, new AtomicLong(1L));
 			}
@@ -156,7 +156,7 @@ public class MsgInteractiveMainService {
 	}
 
 	public void flushIncrease(){
-		synchronized (INIT_FLAG) {
+		synchronized (lock) {
 			logger.debug("MsgInteractiveMainService flushTimer execute");
 			for(Map.Entry<Long, AtomicLong> map : increaseMap.entrySet()){
 				if(map.getValue().longValue() != 0){

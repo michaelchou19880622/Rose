@@ -34,7 +34,7 @@ public class HttpClientUtil {
 
     private static Logger logger = Logger.getLogger(HttpClientUtil.class);
 
-    private static final String INIT_FLAG = "INIT_FLAG";
+    private final Object lock = new Object();
 
     private static List<CloseableHttpClient> httpClientList = new ArrayList<>();
     private final static int timeout = 1;
@@ -61,7 +61,7 @@ public class HttpClientUtil {
     }
 
     public static HttpClient generateClient() throws Exception {
-        synchronized (INIT_FLAG) {
+        synchronized (lock) {
             if (httpClientList == null) {
                 httpClientList = new ArrayList<>();
             }
@@ -77,7 +77,7 @@ public class HttpClientUtil {
     }
 
     public static void clearData() {
-        synchronized (INIT_FLAG) {
+        synchronized (lock) {
             try {
                 for (CloseableHttpClient client : httpClientList) {
                     client.close();

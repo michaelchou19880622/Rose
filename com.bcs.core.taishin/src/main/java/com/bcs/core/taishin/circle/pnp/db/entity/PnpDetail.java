@@ -101,19 +101,19 @@ public class PnpDetail extends AbstractBcsEntity {
     /**
      * 明細檔狀態；select for update wait時更新此欄位，防止重複發送
      */
-    @Column(name = "BC_STATUS", columnDefinition = "nvarchar(20)")
+    @Column(name = "BC_STATUS", columnDefinition = "nvarchar(30)")
     private String bcStatus;
 
     /**
      * 明細檔狀態；select for update wait時更新此欄位，防止重複發送
      */
-    @Column(name = "PNP_STATUS", columnDefinition = "nvarchar(20)")
+    @Column(name = "PNP_STATUS", columnDefinition = "nvarchar(30)")
     private String pnpStatus;
 
     /**
      * 明細檔狀態；select for update wait時更新此欄位，防止重複發送
      */
-    @Column(name = "SMS_STATUS", columnDefinition = "nvarchar(20)")
+    @Column(name = "SMS_STATUS", columnDefinition = "nvarchar(30)")
     private String smsStatus;
 
     /**

@@ -34,7 +34,7 @@ public class HttpClientUtil {
 
     private static Logger logger = Logger.getLogger(HttpClientUtil.class);
 
-    private final Object lock = new Object();
+    private static final Object lock = new Object();
 
     private static List<CloseableHttpClient> httpClientList = new ArrayList<>();
     private final static int timeout = 1;

@@ -465,8 +465,10 @@ $(function(){
 		templateData.templateSwitch = templateSwitches[0].checked;
 		
 		templateData.altText = templateTable.find('#altText').val();
-		console.info("contentText:", templateTable.find('#contentText').val());
+		
 		templateData.templateText = templateTable.find('#contentText').val();
+		console.info("templateData.templateText = ", templateData.templateText);
+		
 		templateData.templateType = templateType;
 		templateData.templateImageId = templateTable.find('.imgId').val();
 		templateData.templateActions = actions;
@@ -587,11 +589,38 @@ $(function(){
 //				alert("必須所有column都有標題或都沒有!");
 //				return false;
 //			}
-			
-			if(templateTable.find('#altText').val() == "" && i==0){
-				alert("Column"+ (i+1) + "必須輸入非手機顯示訊息！");
-				return false;
+
+			if (i == 0) { // Column 1
+				var altTextMsg = templateTable.find('#altText').val();
+				console.info("Column" + (i + 1) + '非手機顯示訊息 = ' + altTextMsg);
+				
+				if (altTextMsg == "") {
+					alert("Column" + (i + 1) + "必須輸入非手機顯示訊息！");
+					return false;
+				}
 			}
+			else { // Column 2, Column3, ...., Column5
+				var contextTextMsg = templateTable.find('#contentText').val();
+				console.info("Column" + (i + 1) + "訊息內容 = " + contextTextMsg);
+
+				if (contextTextMsg == "" && i >= 1) {
+					alert("Column" + (i + 1) + "訊息內容不能為空，請確認是否已正確填寫?");
+					return false;
+				}
+
+				if (contextTextMsg.length > 60) {
+					alert("Column" + (i + 1) + "訊息內容不能超過60個字，請重新輸入。");
+					return false;
+				}
+			}
+//				
+//			var altTextMsg = templateTable.find('#altText').val();
+//			console.info('altTextMsg = ', altTextMsg);
+//			
+//			if (altTextMsg == "" && i == 0) {
+//				alert("Column" + (i + 1) + "必須輸入非手機顯示訊息！");
+//				return false;
+//			}
 			
 			for(var j=0; j<actionNumber; j++){
 				actionType = $(actionTypeTds[j]).find('.actionType:checked').val();

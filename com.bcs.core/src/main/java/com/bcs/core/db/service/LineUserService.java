@@ -1,9 +1,13 @@
 package com.bcs.core.db.service;
 
+import com.bcs.core.api.service.LineFriendShipStatusService;
 import com.bcs.core.db.entity.LineUser;
 import com.bcs.core.db.entity.UserTraceLog;
 import com.bcs.core.db.repository.LineUserRepository;
 import com.bcs.core.enums.LOG_TARGET_ACTION_TYPE;
+import com.bcs.core.spring.ApplicationContextProvider;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,7 +125,18 @@ public class LineUserService {
             lineUser.setMid(mid);
 
         	// TODO: 增加防呆，先打LINE API檢查FriendStatus (false -> SYSADD; true -> UNBIND)
-            lineUser.setStatus(LineUser.STATUS_SYS_ADD);
+            // Get FriendShip Status
+//			ObjectNode getFriendShipStatus = ApplicationContextProvider.getApplicationContext().getBean(LineFriendShipStatusService.class).getFriendShipStatusService(access_token);
+//			if (getFriendShipStatus != null 
+//					&& getFriendShipStatus.get("friendFlag") != null 
+//					&& StringUtils.isNotBlank(getFriendShipStatus.get("friendFlag").asText())) {
+//				
+//				boolean isFriend = getFriendShipStatus.get("friendFlag").asBoolean();
+//				
+//				lineUser.setStatus((isFriend)? LineUser.STATUS_UNBIND : LineUser.STATUS_SYS_ADD);
+//			}
+            
+            lineUser.setStatus(LineUser.STATUS_SYS_ADD); // 上面的防呆機制打開後，這行可以移除。
             
             lineUser.setIsBinded(LineUser.STATUS_UNBIND);
             lineUser.setModifyTime(time);

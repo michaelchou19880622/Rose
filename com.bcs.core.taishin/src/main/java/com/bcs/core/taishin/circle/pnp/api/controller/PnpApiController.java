@@ -48,9 +48,9 @@ public class PnpApiController {
 
             String accessToken = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_TOKEN.toString(), true);
             headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-
-            String serviceCode = CoreConfigReader.getString(CONFIG_STR.AUTO_REPLY.toString(), CONFIG_STR.CHANNEL_SERVICE_CODE.toString(), true);
-            headers.set(LINE_HEADER.HEADER_BOT_ServiceCode.toString(), serviceCode);
+//
+//            String serviceCode = CoreConfigReader.getString(CONFIG_STR.AUTO_REPLY.toString(), CONFIG_STR.CHANNEL_SERVICE_CODE.toString(), true);
+//            headers.set(LINE_HEADER.HEADER_BOT_ServiceCode.toString(), serviceCode);
 
             String rawDeliveryTag = "PNP_DELIVERY;;Ming;;1024;;1025;;" + phoneHash;
             String deliveryTag = String.format("%1$-" + 64 + "s", rawDeliveryTag); // 64 <= tag length <= 100，不夠則補空格

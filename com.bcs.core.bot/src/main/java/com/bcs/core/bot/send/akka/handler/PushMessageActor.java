@@ -44,8 +44,8 @@ public class PushMessageActor extends UntypedActor {
 				String accessToken = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_TOKEN.toString(), true);
 				log.info("accessToken => {}", accessToken);
 				
-				String serviceCode = CoreConfigReader.getString(CONFIG_STR.AUTO_REPLY.toString(), CONFIG_STR.CHANNEL_SERVICE_CODE.toString(), true);
-				log.info("serviceCode => {}", serviceCode);
+//				String serviceCode = CoreConfigReader.getString(CONFIG_STR.AUTO_REPLY.toString(), CONFIG_STR.CHANNEL_SERVICE_CODE.toString(), true);
+//				log.info("serviceCode => {}", serviceCode);
 				
 				JSONObject requestBody = new JSONObject();
 
@@ -53,7 +53,7 @@ public class PushMessageActor extends UntypedActor {
 				HttpHeaders headers = new HttpHeaders();
 				headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
 				headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-				headers.set(LINE_HEADER.HEADER_BOT_ServiceCode.toString(), serviceCode);
+//				headers.set(LINE_HEADER.HEADER_BOT_ServiceCode.toString(), serviceCode);
 				log.info("Headers => {}", headers);
 
 				requestBody.put("messages", pushApiModel.getMessages());

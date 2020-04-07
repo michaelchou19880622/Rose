@@ -26,14 +26,25 @@ import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.spring.ApplicationContextProvider;
 import com.bcs.core.utils.RestfulUtil;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class PushMessageTask implements Job {
 	PNPService PNPService = ApplicationContextProvider.getApplicationContext().getBean(PNPService.class);
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
+		log.info("PushMessageTask-PNPService");
+
+		log.info("PushMessageTask-PNPService : context = {}", context);
+		
 		String url = CoreConfigReader.getString(CONFIG_STR.LINE_MESSAGE_PUSH_URL.toString());
+		log.info("PushMessageTask-PNPService : url = {}", url);
+		
 		String accessToken = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_TOKEN.toString(), true);
-		String serviceCode = CoreConfigReader.getString(CONFIG_STR.AUTO_REPLY.toString(), CONFIG_STR.CHANNEL_SERVICE_CODE.toString(), true);
+		log.info("PushMessageTask-PNPService : accessToken = {}", accessToken);
+		
+//		String serviceCode = CoreConfigReader.getString(CONFIG_STR.AUTO_REPLY.toString(), CONFIG_STR.CHANNEL_SERVICE_CODE.toString(), true);
 		PushApiModel pushApiModel = null;
 		RestfulUtil restfulUtil = null;
 		JSONObject requestBody = new JSONObject();
@@ -43,13 +54,16 @@ public class PushMessageTask implements Job {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
 		headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-		headers.set(LINE_HEADER.HEADER_BOT_ServiceCode.toString(), serviceCode);
+//		headers.set(LINE_HEADER.HEADER_BOT_ServiceCode.toString(), serviceCode);
+		log.info("PushMessageTask-PNPService : headers = {}", headers);
 
 		try {
 			pushApiModel = (PushApiModel) context.getScheduler().getContext().get("PushApiModel");
 		} catch (SchedulerException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
+			log.info("PushMessageTask-PNPService : SchedulerException = {}", e);
 		}
+		log.info("PushMessageTask-PNPService : pushApiModel = {}", pushApiModel);
 
 		requestBody.put("messages", pushApiModel.getMessages());
 
@@ -79,7 +93,9 @@ public class PushMessageTask implements Job {
 				record.setPushTheme(pushApiModel.getPushTheme());
 			} catch (KeyManagementException | NoSuchAlgorithmException e1) {
 				e1.printStackTrace();
+				log.info("PushMessageTask-PNPService : KeyManagementException | NoSuchAlgorithmException = {}", e1);
 			} catch (Exception e) {
+				log.info("PushMessageTask-PNPService : Exception = {}", e);
 				if(e instanceof HttpClientErrorException) {
 					HttpClientErrorException exception = (HttpClientErrorException) e;
 					JSONObject errorMessage = new JSONObject(exception.getResponseBodyAsString());

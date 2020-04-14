@@ -422,7 +422,7 @@ public class BillingNoticeContentTemplateMsgService {
         }
 
         String queryString =
-                " SELECT FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd') AS 'Day',"
+                " SELECT FORMAT(BND.MODIFY_TIME, 'yyyy-MM-dd') AS 'Day',"
                 + " BNM.ORIG_FILE_TYPE AS 'TTYPE',"
                 + " BCT.TEMPLATE_ID AS 'TID',"
                 + " BNM.SEND_TYPE AS 'STYPE',"
@@ -431,9 +431,9 @@ public class BillingNoticeContentTemplateMsgService {
                 + " FROM  BCS_BILLING_NOTICE_MAIN BNM "
                 + " LEFT JOIN BCS_BILLING_NOTICE_DETAIL BND ON BND.NOTICE_MAIN_ID = BNM.NOTICE_MAIN_ID"
                 + " LEFT JOIN BCS_BN_CONTENT_TEMPLATE BCT ON BNM.TEMP_ID  = BCT.TEMPLATE_ID"
-                + " WHERE BNM.MODIFY_TIME >= '" + startDate + "' "
-                + " AND BNM.MODIFY_TIME < DATEADD(DAY, 1, '" + endDate + "') "
-                + " GROUP BY FORMAT(BNM.MODIFY_TIME, 'yyyy-MM-dd'), "
+                + " WHERE BND.MODIFY_TIME >= '" + startDate + "' "
+                + " AND BND.MODIFY_TIME < DATEADD(DAY, 1, '" + endDate + "') "
+                + " GROUP BY FORMAT(BND.MODIFY_TIME, 'yyyy-MM-dd'), "
                 + " BNM.ORIG_FILE_TYPE ,"
                 + "	BCT.TEMPLATE_TYPE, "
                 + " BCT.TEMPLATE_ID,"

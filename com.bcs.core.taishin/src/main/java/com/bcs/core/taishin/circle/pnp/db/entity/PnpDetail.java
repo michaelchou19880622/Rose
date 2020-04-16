@@ -233,13 +233,13 @@ public class PnpDetail extends AbstractBcsEntity {
     public void prePersist() {
         createTime = new Date();
         modifyTime = createTime;
-        log.info("Create Time is Update to : {}", DataUtils.formatDateToString(createTime, "yyyy-MM-dd HH:mm:ss"));
-        log.info("Modify Time is Update to : {}", DataUtils.formatDateToString(modifyTime, "yyyy-MM-dd HH:mm:ss"));
+//        log.info("Create Time is Update to : {}", DataUtils.formatDateToString(createTime, "yyyy-MM-dd HH:mm:ss"));
+//        log.info("Modify Time is Update to : {}", DataUtils.formatDateToString(modifyTime, "yyyy-MM-dd HH:mm:ss"));
     }
 
     @PreUpdate
     public void preUpdate() {
         modifyTime = new Date();
-        log.info("Modify Time is Update to : {}", DataUtils.formatDateToString(modifyTime, "yyyy-MM-dd HH:mm:ss"));
+//        log.info("Modify Time is Update to : {}", DataUtils.formatDateToString(modifyTime, "yyyy-MM-dd HH:mm:ss"));
     }
 }

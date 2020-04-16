@@ -571,8 +571,8 @@ public class PNPFtpService {
      * @see LoadFtpPnpDataTask#transFileToSMSFlow(PnpFtpSourceEnum)
      */
     public Map<String, byte[]> downloadMultipleFileByType(String directory, String extension, PnpFtpSetting setting) {
-        log.info(String.format("Protocol           : %s", setting.getProtocol().equalsIgnoreCase("sftp")));
-        log.info(String.format("IsPNPFtpTypeDevelop: %s", CoreConfigReader.isPNPFtpTypeDevelop()));
+        // log.info(String.format("Protocol           : %s", setting.getProtocol().equalsIgnoreCase("sftp")));
+        // log.info(String.format("IsPNPFtpTypeDevelop: %s", CoreConfigReader.isPNPFtpTypeDevelop()));
 
         if ("sftp".equalsIgnoreCase(setting.getProtocol())) {
             if (CoreConfigReader.isPNPFtpTypeDevelop()) {
@@ -1163,10 +1163,10 @@ public class PNPFtpService {
 
             /* Upload file */            
 			for(Map.Entry<String, InputStream> targetStreamSet : targetStreamMap.entrySet()){
-                log.info("TargetStream : {}", targetStreamSet.getValue());
+                // log.info("TargetStream : {}", targetStreamSet.getValue());
                 log.info("FileName     : {}", targetStreamSet.getKey());
-                log.info("TargetDir    : {}", targetDir);
-                log.info("FtpSetting   : {}", setting);
+                // log.info("TargetDir    : {}", targetDir);
+                // log.info("FtpSetting   : {}", setting);
                 
                 try {
     				if (targetStreamSet.getKey() != null) {

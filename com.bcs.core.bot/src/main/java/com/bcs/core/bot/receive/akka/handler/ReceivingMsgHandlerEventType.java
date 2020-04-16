@@ -43,7 +43,6 @@ public class ReceivingMsgHandlerEventType extends UntypedActor {
                     ReceivingMsgHandlerMaster.taskCount.addAndGet(1L);
 
                     String eventType = msg.getEventType();
-                    log.info("eventType:" + eventType);
 
                     String channelId = original.getChannelId();
                     String channelName = original.getChannelName();
@@ -57,6 +56,9 @@ public class ReceivingMsgHandlerEventType extends UntypedActor {
                     boolean eventIsFollowOrUnFollow = MsgBotReceive.EVENT_TYPE_FOLLOW.equals(eventType) || MsgBotReceive.EVENT_TYPE_UNFOLLOW.equals(eventType);
                     boolean eventIsDelivery = MsgBotReceive.EVENT_TYPE_DELIVERY.equals(eventType);
 
+                    log.info(String.format("eventType:%s, channelId:%s, channelName:%s, apiType:%s, channelNameIsEqConfig:%b, eventIsMsgOrPostBack:%b, eventIsFollowOrUnFollow:%b, eventIsDelivery:%b" , 
+                    		               eventType, channelId, channelName, apiType, channelNameIsEqConfig, eventIsMsgOrPostBack, eventIsFollowOrUnFollow, eventIsDelivery));
+
                     if (channelNameIsEqConfig) {
                         methodA(msg, eventType, channelId, channelName, apiType);
                     } else if (eventIsMsgOrPostBack) {
@@ -66,15 +68,18 @@ public class ReceivingMsgHandlerEventType extends UntypedActor {
                     } else if (eventIsDelivery) {
                         updatePnpMainAndDetail(msg);
                     } else {
+                    	log.info("methodUnknow");
                         // Unknown eventType
                     }
-
                     SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_ReceivingMsgHandler, LOG_TARGET_ACTION_TYPE.ACTION_HandleMsgReceive, start, 200, msg.toString(), referenceId);
                     count++;
                     start = new Date();
                 }
                 SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_ReceivingMsgHandler, LOG_TARGET_ACTION_TYPE.ACTION_HandleMsgReceiveAll, original.getStart(), 200, 15000, "count:" + count + "-" + original.getReceivingMsg(), "200-" + count);
             }
+        }
+        else {
+            log.info("Receiving Msg is not an instanceof ReceivedModelOriginal!!");        	
         }
         log.debug("ReceivingMsgHandlerEventType End");
     }

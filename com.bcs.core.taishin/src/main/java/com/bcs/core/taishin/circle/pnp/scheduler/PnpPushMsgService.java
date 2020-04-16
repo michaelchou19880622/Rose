@@ -109,31 +109,55 @@ public class PnpPushMsgService {
 
                 allMainList.forEach(main -> {
                     /* 2.Find all detail by main id */
+//                    int detailCount = pnpRepositoryCustom.getDetailCountByMainId(type, main.getPnpMainId());
                     List<PnpDetail> allDetailList = pnpRepositoryCustom.findAllDetail(main.getPnpMainId(), type);
-                    /* 3.Use phone find detail uid */
-                    List<PnpDetail> filterDetailList = usePhoneFindDetailUid(allDetailList).stream()
-                            .filter(detail -> Objects.equals((detail).getStatus(), PnpStatusEnum.SENDING.value))
-                            .sorted(Comparator.comparing(PnpDetail::getPnpDetailId))
-                            .collect(Collectors.toList());
-                    allDetailList.clear();
-
-                    log.info("Main id and after filter detail list size, main id: {}, after filter detail size: {}", main.getPnpMainId(), filterDetailList.size());
-                    log.info("After filter detail list: {}", DataUtils.toPrettyJsonUseJackson(filterDetailList));
-                    /* If detail list is empty not include any sending and detail from db is all sent  */
-                    boolean notSendIsEmpty = filterDetailList.isEmpty();
-                    boolean lastSendingIsEmpty = pnpRepositoryCustom.checkIsAllSent(type, main.getPnpMainId()) == 0;
-                    log.info("Filter detail list is empty (Wait,Process)->Sending ? {}", notSendIsEmpty);
-                    log.info("Last Sending is empty (equal zero) ? {}", lastSendingIsEmpty);
-                    if (notSendIsEmpty && lastSendingIsEmpty) {
-                        /* all detail sent to bc and pnp is finish, Update main status to complete, but not include sms */
-                        log.info("Before update main to complete!!");
-                        pnpRepositoryCustom.updateMainToComplete(main.getPnpMainId(), type, PnpStatusEnum.COMPLETE);
-                    } else {
-                        main.setPnpDetails(filterDetailList);
-                        /* 4.Tell akka */
-                        log.info("Tell Akka Send BC!!");
-                        pnpAkkaService.tell(main);
+                    int detailCount = allDetailList.size();
+                    log.info(String.format("detain Count : %s, detail Table : %s,  main id: %s", detailCount, type.detailTable,  main.getPnpMainId().toString()));
+                    
+                    if (detailCount > 0) {
+	                    List<PnpDetail> allDetailListAndUpdate = pnpRepositoryCustom.findAllDetailAndUpdateStatus(main.getPnpMainId(), type);
+	                    /* 3.Use phone find detail uid */
+	                    List<PnpDetail> filterDetailList = usePhoneFindDetailUid(allDetailListAndUpdate).stream()
+	                            .filter(detail -> Objects.equals((detail).getStatus(), PnpStatusEnum.SENDING.value))
+	                            .sorted(Comparator.comparing(PnpDetail::getPnpDetailId))
+	                            .collect(Collectors.toList());
+	                    
+	                    List<PnpDetail> filterDetailCompleteList = usePhoneFindDetailUid(allDetailList).stream()
+	                            .filter(detail -> Objects.equals((detail).getStatus(), PnpStatusEnum.COMPLETE.value))
+	                            .sorted(Comparator.comparing(PnpDetail::getPnpDetailId))
+	                            .collect(Collectors.toList());
+	                    
+//	                    for (PnpDetail detail : filterDetailList) {
+//		                    log.info(String.format("Filter and Update Detail id: %s, detail status: %s, main id: %s",  detail.getPnpDetailId(), detail.getStatus(), main.getPnpMainId()));
+//	                    }
+//	                    for (PnpDetail detail : allDetailList) {
+//		                    log.info(String.format("Filter Complete Detail id: %s, detail status: %s, main id: %s",  detail.getPnpDetailId(), detail.getStatus(), main.getPnpMainId()));
+//	                    }
+	                    allDetailList.clear();
+	                    
+	                    log.info("Main id and after filter detail list size, main id: {}, after filter detail size: {}", main.getPnpMainId(), filterDetailList.size());
+	                    // log.info("After filter detail list: {}", DataUtils.toPrettyJsonUseJackson(filterDetailList));
+	                    
+	                    /* If detail list is empty not include any sending and detail from db is all sent  */
+	                    if (detailCount == filterDetailCompleteList.size()) {
+	                        /* all detail sent to bc and pnp is finish, Update main status to complete, but not include sms */
+	                        log.info("Before update main id: {} to complete!!", main.getPnpMainId());
+	                        pnpRepositoryCustom.updateMainToComplete(main.getPnpMainId(), type, PnpStatusEnum.COMPLETE);
+	                    } 
+	                    else if (filterDetailList.size() > 0){
+	                        main.setPnpDetails(filterDetailList);
+	                        /* 4.Tell akka */
+	                        log.info("Tell Akka Send BC main id: {} !!",  main.getPnpMainId());
+	                        pnpAkkaService.tell(main);
+	                    }
+	                    else {
+	                        log.info("Do Nothing, main id: {}", main.getPnpMainId());	                    	
+	                    }
                     }
+                    else {
+	                    log.info("AllDetailList size is Empty in main id : {}", main.getPnpMainId());                    	
+                    }
+                    	
                 });
             } catch (Exception e) {
                 log.error("Exception", e);

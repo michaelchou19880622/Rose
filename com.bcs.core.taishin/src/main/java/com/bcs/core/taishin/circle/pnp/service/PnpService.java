@@ -114,8 +114,9 @@ public class PnpService {
             }
         }
         pnpDetail.setModifyTime(new Date());
-        log.info(String.format("Before Save Detail:%n%s", pnpDetail.toString()));
-
+//        log.info(String.format("Before Save Detail:%n%s", pnpDetail.toString()));
+        log.info(String.format("Before Save Detail id:%s, ProcStage:%s, Status:%s, PnPStatus:%s, BCStatus:%s, SMSStatus:%s ", pnpDetail.getPnpDetailId().toString(), pnpDetail.getProcStage(), pnpDetail.getStatus(), pnpDetail.getPnpStatus(), pnpDetail.getBcStatus(),pnpDetail.getSmsStatus()));
+        
         if (source == null) {
             return null;
         }
@@ -298,7 +299,11 @@ public class PnpService {
             final Object[] pushResult = pnpPushMessage(url, headers, detail, detail.getUid());
             final boolean isSuccess = (boolean) pushResult[0];
             final String httpStatusCode = (String) pushResult[1];
-
+            //FIXME : For Testing.
+//            final boolean isSuccess = true;
+//            final String httpStatusCode = "200";
+			
+            
             if (!isSuccess) {
                 switch (processFlow) {
                     case BC_SMS:
@@ -322,7 +327,9 @@ public class PnpService {
     }
 
     public boolean userInBlackList(final String uid, final String phone) {
-        log.info("UID: {}, Phone: {}", uid, phone);
+    	if (uid != null) {
+            log.info("UID: {}, Phone: {}", uid, phone);
+    	}
         if (StringUtils.isNotBlank(uid)) {
             List<PnpSendBlock> pnpSendBlockList = pnpSendBlockService.findByUid(uid);
             if (CollectionUtils.isNotEmpty(pnpSendBlockList)) {
@@ -335,107 +342,108 @@ public class PnpService {
 
     public void gotoNext(String nextStage, PnpDetail detail, ActorRef sendRef, ActorRef selfActorRef,
                          String httpStatusCode) {
-        log.info("Next Stage :{}, {}", nextStage, httpStatusCode);
-        PnpDetail d = route(nextStage, detail, httpStatusCode);
-        log.info("detail: {}", DataUtils.toPrettyJsonUseJackson(d));
-        saveDetail(d);
+//        log.info("Next Stage :{}, {}", nextStage, httpStatusCode);
+        PnpDetail nextDetail = route(nextStage, detail, httpStatusCode);
+//        log.info("detail: {}", DataUtils.toPrettyJsonUseJackson(nextDetail));
+//        log.info(String.format("Before Save Detail id:%s, Status:%s, PnPStatus:%s, BCStatus:%s, SMSStatus:%s ", nextDetail.getPnpDetailId().toString(), nextDetail.getStatus(), nextDetail.getPnpStatus(), nextDetail.getBcStatus(), nextDetail.getSmsStatus()));
+        saveDetail(nextDetail);
     }
 
     public PnpDetail route(String nextStage, PnpDetail detail, String httpStatusCode) {
         switch (nextStage) {
             case "USER_IS_SYSTEM_ADD_IGNORE":
-                log.info("USER_IS_SYSTEM_ADD_IGNORE");
+                log.info("USER_IS_SYSTEM_ADD_IGNORE , Detail id : {}", detail.getPnpDetailId());
                 detail.setProcStage(PnpStageEnum.BC.value);
                 detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setBcStatus(PnpStatusEnum.USER_IS_SYSTEM_ADD_IGNORE.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
                 return detail;
             case "USER_IS_SYSTEM_ADD_IGNORE_TO_PNP":
-                log.info("USER_IS_SYSTEM_ADD_IGNORE_PNP");
+                log.info("USER_IS_SYSTEM_ADD_IGNORE_PNP, Detail id : {}", detail.getPnpDetailId());
                 detail.setProcStage(PnpStageEnum.PNP.value);
                 detail.setStatus(PnpStatusEnum.PROCESS.value);
                 detail.setBcStatus(PnpStatusEnum.USER_IS_SYSTEM_ADD_IGNORE_PNP.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
                 return detail;
             case "USER_IS_SYSTEM_ADD_IGNORE_TO_SMS":
-                log.info("USER_IS_SYSTEM_ADD_IGNORE_SMS");
+                log.info("USER_IS_SYSTEM_ADD_IGNORE_SMS, Detail id : {}", detail.getPnpDetailId());
                 detail.setProcStage(PnpStageEnum.SMS.value);
                 detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setBcStatus(PnpStatusEnum.USER_IS_SYSTEM_ADD_IGNORE_SMS.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
                 return detail;
             case "USER_IS_UNBIND_IGNORE_TO_SMS":
-                log.info("USER_IS_UNBIND_IGNORE_TO_SMS");
+                log.info("USER_IS_UNBIND_IGNORE_TO_SMS, Detail id : {}", detail.getPnpDetailId());
                 detail.setProcStage(PnpStageEnum.SMS.value);
                 detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setBcStatus(PnpStatusEnum.USER_IS_UNBIND_IGNORE_TO_SMS.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
                 return detail;
             case "USER_IS_UNBIND_IGNORE_TO_PNP":
-                log.info("USER_IS_UNBIND_IGNORE_TO_PNP");
+                log.info("USER_IS_UNBIND_IGNORE_TO_PNP, Detail id : {}", detail.getPnpDetailId());
                 detail.setProcStage(PnpStageEnum.PNP.value);
                 detail.setStatus(PnpStatusEnum.PROCESS.value);
                 detail.setBcStatus(PnpStatusEnum.USER_IS_UNBIND_IGNORE_TO_PNP.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
                 return detail;
             case "USER_IS_UNBIND_IGNORE":
-                log.info("USER_IS_UNBIND_IGNORE");
+                log.info("USER_IS_UNBIND_IGNORE, Detail id : {}", detail.getPnpDetailId());
                 detail.setProcStage(PnpStageEnum.BC.value);
                 detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setBcStatus(PnpStatusEnum.USER_IS_UNBIND_IGNORE.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
                 return detail;
             case "BC_USER_IN_BLACK_LIST":
-                log.info("BC_USER_IN_BLACK_LIST");
+                log.info("BC_USER_IN_BLACK_LIST, Detail id : {}", detail.getPnpDetailId());
                 detail.setProcStage(PnpStageEnum.BC.value);
                 detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setBcStatus(PnpStatusEnum.BC_USER_IN_BLACK_LIST.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
                 return detail;
             case "BC_USER_IN_BLACK_LIST_TO_SMS":
-                log.info("BC_USER_IN_BLACK_LIST_TO_SMS");
+                log.info("BC_USER_IN_BLACK_LIST_TO_SMS, Detail id : {}", detail.getPnpDetailId());
                 detail.setProcStage(PnpStageEnum.SMS.value);
                 detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setBcStatus(PnpStatusEnum.BC_USER_IN_BLACK_LIST_SMS_PROCESS.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
                 return detail;
             case "BC_USER_BLOCK_CHANNEL":
-                log.info("BC_USER_BLOCK_CHANNEL");
+                log.info("BC_USER_BLOCK_CHANNEL, Detail id : {}", detail.getPnpDetailId());
                 detail.setProcStage(PnpStageEnum.BC.value);
                 detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setBcStatus(PnpStatusEnum.BC_USER_BLOCKED.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
                 return detail;
             case "BC_USER_BLOCK_CHANNEL_TO_SMS":
-                log.info("BC_USER_BLOCK_CHANNEL_TO_SMS");
+                log.info("BC_USER_BLOCK_CHANNEL_TO_SMS, Detail id : {}", detail.getPnpDetailId());
                 detail.setProcStage(PnpStageEnum.SMS.value);
                 detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setBcStatus(PnpStatusEnum.BC_USER_BLOCKED_SMS_PROCESS.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
                 return detail;
             case "BC_UID_NOT_FOUND":
-                log.info("BC_UID_NOT_FOUND");
+                log.info("BC_UID_NOT_FOUND, Detail id : {}", detail.getPnpDetailId());
                 detail.setProcStage(PnpStageEnum.BC.value);
                 detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setBcStatus(PnpStatusEnum.BC_UID_NOT_FOUND.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
                 return detail;
             case "BC_UID_NOT_FOUND_TO_PNP":
-                log.info("BC_UID_NOT_FOUND_TO_PNP");
+                log.info("BC_UID_NOT_FOUND_TO_PNP, Detail id : {}", detail.getPnpDetailId());
                 detail.setProcStage(PnpStageEnum.PNP.value);
                 detail.setStatus(PnpStatusEnum.PROCESS.value);
                 detail.setBcStatus(PnpStatusEnum.BC_UID_NOT_FOUND_PNP_PROCESS.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
                 return detail;
             case "BC_UID_NOT_FOUND_TO_SMS":
-                log.info("BC_UID_NOT_FOUND_TO_SMS");
+                log.info("BC_UID_NOT_FOUND_TO_SMS, Detail id : {}", detail.getPnpDetailId());
                 detail.setProcStage(PnpStageEnum.SMS.value);
                 detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setBcStatus(PnpStatusEnum.BC_UID_NOT_FOUND_SMS_PROCESS.value);
                 detail.setBcHttpStatusCode(httpStatusCode);
                 return detail;
             case "BC_FAIL":
-                log.info("BC_FAIL");
+                log.info("BC_FAIL, Detail id : {}", detail.getPnpDetailId());
                 detail.setProcStage(PnpStageEnum.BC.value);
                 detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setBcStatus(PnpStatusEnum.BC_SENT_FAIL.value);
@@ -443,7 +451,7 @@ public class PnpService {
                 detail.setBcHttpStatusCode(httpStatusCode);
                 return detail;
             case "BC_FAIL_TO_PNP":
-                log.info("BC_FAIL_TO_PNP");
+                log.info("BC_FAIL_TO_PNP, Detail id : {}", detail.getPnpDetailId());
                 detail.setProcStage(PnpStageEnum.PNP.value);
                 detail.setStatus(PnpStatusEnum.PROCESS.value);
                 detail.setBcStatus(PnpStatusEnum.BC_SENT_FAIL_PNP_PROCESS.value);
@@ -451,7 +459,7 @@ public class PnpService {
                 detail.setBcHttpStatusCode(httpStatusCode);
                 return detail;
             case "BC_FAIL_TO_SMS":
-                log.info("BC_FAIL_TO_SMS");
+                log.info("BC_FAIL_TO_SMS, Detail id : {}", detail.getPnpDetailId());
                 detail.setProcStage(PnpStageEnum.SMS.value);
                 detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setBcStatus(PnpStatusEnum.BC_SENT_FAIL_SMS_PROCESS.value);
@@ -459,7 +467,7 @@ public class PnpService {
                 detail.setBcHttpStatusCode(httpStatusCode);
                 return detail;
             case "BC_SUCCESS":
-                log.info("BC_SUCCESS");
+                log.info("BC_SUCCESS, Detail id : {}", detail.getPnpDetailId());
                 detail.setProcStage(PnpStageEnum.BC.value);
                 detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setBcStatus(PnpStatusEnum.BC_SENT_COMPLETE.value);
@@ -467,35 +475,38 @@ public class PnpService {
                 detail.setBcHttpStatusCode(httpStatusCode);
                 return detail;
             case "PNP_USER_IN_BLOCK_LIST_TO_SMS":
-                log.info("PNP_USER_IN_BLOCK_LIST_TO_SMS");
+                log.info("PNP_USER_IN_BLOCK_LIST_TO_SMS, Detail id : {}", detail.getPnpDetailId());
                 detail.setProcStage(PnpStageEnum.SMS.value);
                 detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setPnpStatus(PnpStatusEnum.PNP_USER_IN_BLACK_LIST_SMS_PROCESS.value);
                 return detail;
             case "PNP_FAIL":
-                log.info("PNP_FAIL");
+                log.info("PNP_FAIL, Detail id : {}", detail.getPnpDetailId());
                 detail.setProcStage(PnpStageEnum.SMS.value);
                 detail.setStatus(PnpStatusEnum.COMPLETE.value);
                 detail.setPnpStatus(PnpStatusEnum.PNP_SENT_TO_LINE_FAIL_SMS_PROCESS.value);
                 detail.setPnpTime(new Date());
                 return detail;
             case "PNP_SUCCESS":
-                log.info("PNP_SUCCESS");
                 Date pnpSendTime = new Date();
                 detail.setPnpTime(pnpSendTime);
-                int expiredUnit = CoreConfigReader.getInteger(CONFIG_STR.PNP_DELIVERY_EXPIRED_TIME_UNIT, true, false);
-                int expired = CoreConfigReader.getInteger(CONFIG_STR.PNP_DELIVERY_EXPIRED_TIME, true, false);
-                log.info(String.format("expired: %s, expiredUnit: %s", expired, expiredUnit));
+                int expiredUnit = CoreConfigReader.getInteger(CONFIG_STR.PNP_DELIVERY_EXPIRED_TIME_UNIT);
+                int expired = CoreConfigReader.getInteger(CONFIG_STR.PNP_DELIVERY_EXPIRED_TIME);
+                
+                // log.info(String.format("expired: %s, expiredUnit: %s", expired, expiredUnit));
 
                 Calendar calendar = new GregorianCalendar();
                 calendar.setTime(pnpSendTime);
                 calendar.add(expiredUnit, expired);
                 detail.setPnpDeliveryExpireTime(calendar.getTime());
-                log.info("Pnp Send Time            : " + DataUtils.formatDateToString(pnpSendTime, "yyyy-MM-dd HH:mm:ss"));
-                log.info("Pnp Delivery Expire Time : "
-                        + DataUtils.formatDateToString(calendar.getTime(), "yyyy-MM-dd HH:mm:ss"));
+                // log.info("Pnp Send Time            : " + DataUtils.formatDateToString(pnpSendTime, "yyyy-MM-dd HH:mm:ss"));
+                // log.info("Pnp Delivery Expire Time : "
+                //        + DataUtils.formatDateToString(calendar.getTime(), "yyyy-MM-dd HH:mm:ss"));
                 detail.setStatus(PnpStatusEnum.COMPLETE.value);
-                detail.setPnpStatus(PnpStatusEnum.PNP_SENT_CHECK_DELIVERY.value);
+                //防止pnp check delilvery webhook回寫狀態為PNP_SENT_COMPLETE動作較快的情境. 
+                if (! PnpStatusEnum.PNP_SENT_COMPLETE.value.equals(detail.getPnpStatus())) {
+                    detail.setPnpStatus(PnpStatusEnum.PNP_SENT_CHECK_DELIVERY.value);
+                }                	                	
                 return detail;
             default:
                 log.info("this is default switch");
@@ -544,7 +555,11 @@ public class PnpService {
                 Object[] pushResult = pnpPushMessage(url, headers, detail, detail.getPhoneHash());
                 boolean isSuccess = (boolean) pushResult[0];
                 String httpStatusCode = (String) pushResult[1];
-
+                //FIXME : For Testing.
+//                boolean isSuccess = true;
+//                String httpStatusCode = "200";
+    			
+               
                 detail.setPnpHttpStatusCode(httpStatusCode);
 
                 Date pnpSendTime = new Date();
@@ -555,8 +570,8 @@ public class PnpService {
                     nextStage = "PNP_FAIL";
                 }
                 gotoNext(nextStage, detail, sendRef, selfActorRef, httpStatusCode);
-                log.debug(String.format("Process Flow: %s, After Proc Stage: %s, After Status: %s", detail.getProcFlow(),
-                        detail.getProcStage(), detail.getStatus()));
+                //log.info(String.format("Process Flow: %s, After Proc Stage: %s, After Status: %s", detail.getProcFlow(),
+                //        detail.getProcStage(), detail.getStatus()));
 //                if (sendRef != null) {
 //                    log.debug("Tell SendRef: " + sendRef);
 //                    sendRef.tell(detail, selfActorRef);
@@ -611,7 +626,7 @@ public class PnpService {
             jsonArray.put(new JSONObject(message));
             requestBody.put("messages", jsonArray);
         }
-        log.debug("Pnp Push RequestBody : " + DataUtils.toPrettyJsonUseJackson(requestBody.toString()));
+        // log.debug("Pnp Push RequestBody : " + DataUtils.toPrettyJsonUseJackson(requestBody.toString()));
 
         /* 將 headers 跟 body 塞進 HttpEntity 中 */
         HttpEntity<String> httpEntity = new HttpEntity<>(requestBody.toString(), headers);
@@ -622,23 +637,23 @@ public class PnpService {
         final int retryCountLimit = DEFAULT_RETRY_COUNT;
         do {
             i++;
-            log.info("This is count is {}", i);
+            //log.info("This is count is {}", i);
             try {
                 RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
                 restfulUtil.execute();
                 httpStatusCode = restfulUtil.getStatusCode();
                 sendSuccessFlag = "200".equals(httpStatusCode);
-                log.info("RestfulUtil.getStatusCode: " + httpStatusCode);
+                // log.info("RestfulUtil.getStatusCode: " + httpStatusCode);
                 isDoRetry = false;
             } catch (HttpClientErrorException ce) {
-                log.error("HttpClientErrorException", ce);
+                log.error("RetryCount :{}, HttpClientErrorException : {}, ",i, ce );
                 sendSuccessFlag = false;
                 httpStatusCode = ce.getStatusCode().toString();
                 errorMsg = ce.getMessage();
                 isDoRetry = i <= retryCountLimit;
                 sleepProcess();
             } catch (HttpServerErrorException se) {
-                log.error("HttpServerErrorException Error :", se);
+                log.error("RetryCount :{}, HttpServerErrorException Error :",i, se);
                 sendSuccessFlag = false;
                 httpStatusCode = se.getStatusCode().toString();
                 errorMsg = "BC伺服器錯誤，請洽資訊人員";
@@ -711,7 +726,7 @@ public class PnpService {
     }
 
     private String combineLineFlexMessage(String msg, String templateId) {
-        log.info("Msg : " + msg + "Template Id: " + templateId);
+        // log.info("Msg : " + msg + "Template Id: " + templateId);
         long id;
         try {
             id = Long.parseLong(templateId);
@@ -768,7 +783,7 @@ public class PnpService {
             }
         }
         templateJson = templateJson.replace("buttonJsonArea", sb.toString());
-        log.debug("final templateJson: " + DataUtils.toPrettyJsonUseJackson(templateJson));
+        // log.debug("final templateJson: " + DataUtils.toPrettyJsonUseJackson(templateJson));
         return templateJson;
     }
 

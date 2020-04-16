@@ -62,7 +62,7 @@ public class EntityManagerControl {
         }
     }
 
-    @Transactional(rollbackFor = Exception.class, timeout = 3000)
+    @Transactional(rollbackFor = Exception.class, timeout = 300)
     public void persistFlush() {
 //		logger.info("EntityManagerControl persistFlush execute");
 
@@ -108,8 +108,8 @@ public class EntityManagerControl {
         logger.debug("EntityManagerControl persistFlush end");
     }
 
-    @Transactional(rollbackFor = Exception.class, timeout = 30)
-    public void persistInsert(List<Object> list) {
+    @Transactional(rollbackFor = Exception.class, timeout = 300)
+    public void persistInsert(List<?> list) {
 
         if (CollectionUtils.isEmpty(list)) {
             return;
@@ -125,5 +125,7 @@ public class EntityManagerControl {
                 entityManager.clear();
             }
         }
+        entityManager.flush();
+        entityManager.clear();        
     }
 }

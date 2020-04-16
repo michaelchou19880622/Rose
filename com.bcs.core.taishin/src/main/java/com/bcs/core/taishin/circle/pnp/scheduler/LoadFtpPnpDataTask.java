@@ -30,8 +30,10 @@ import com.bcs.core.taishin.circle.pnp.db.repository.PnpMainMitakeRepository;
 import com.bcs.core.taishin.circle.pnp.db.repository.PnpMainUnicaRepository;
 import com.bcs.core.taishin.circle.pnp.ftp.PNPFtpService;
 import com.bcs.core.taishin.circle.pnp.ftp.PnpFtpSetting;
+import com.bcs.core.db.repository.EntityManagerControl;
 import com.bcs.core.utils.DataUtils;
 import com.bcs.core.utils.ErrorRecord;
+import com.bcs.core.utils.ObjectUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
@@ -81,6 +83,7 @@ public class LoadFtpPnpDataTask {
 
     private static final String TAG = "\\&";
     private static final String MING_TAG = "\\;;";
+    private static final int FTP_CHUNK_SIZE = 1000;
 
     private ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1,
             new BasicThreadFactory.Builder()
@@ -137,6 +140,11 @@ public class LoadFtpPnpDataTask {
     private PNPMaintainAccountModelRepository pnpMaintainAccountModelRepository;
 
     /**
+     * EntityManagerControl for Persist Insert
+     */
+    @Autowired
+    private EntityManagerControl entityManagerControl;   
+    /**
      * 是否驗證白名單
      */
     private boolean whiteListValidate = CoreConfigReader.getBoolean(CONFIG_STR.PNP_WHITELIST_VALIDATE, true, false);
@@ -187,6 +195,7 @@ public class LoadFtpPnpDataTask {
     public void startCircle() {
         /* 批次執行時間單位 */
         final String unit = CoreConfigReader.getString(CONFIG_STR.PNP_SCHEDULE_UNIT, true, false);
+        //FIXME : check schedule time setting.
         /* 批次開始執行時間 */
         final int time = CoreConfigReader.getInteger(CONFIG_STR.PNP_FTP_SCHEDULE_TIME, true, false);
 
@@ -272,7 +281,7 @@ public class LoadFtpPnpDataTask {
                     log.info("Process Expect encoding : {}", encoding);
                     log.info("{} encoding: {}", fileName, encoding);
                 }
-                log.info(" LoadFtbPnpDataTask handle file: {}", pnpFtpSetting.getDownloadSavePath() + File.separator + fileName);
+                log.info(" LoadFtpPnpDataTask handle file: {}", pnpFtpSetting.getDownloadSavePath() + File.separator + fileName);
                 final File targetFile = new File(pnpFtpSetting.getDownloadSavePath() + File.separator + fileName);
                 FileUtils.writeByteArrayToFile(targetFile, fileData);
                 try {
@@ -286,13 +295,16 @@ public class LoadFtpPnpDataTask {
                     log.info("Valid WhiteList Header Success!! ");
                     /* 檢核白名單檔名上的帳號是否與來源對應 */
                     List<String> fileContents = IOUtils.readLines(targetStream, encoding);
-                    log.info("File Content List : " + fileContents.toString());
+//                    log.info("File Content List : " + fileContents.toString());
                     // 依來源解成各格式
                     List<Object> pnpMains = parseFtpFile(source, fileName, fileContents);
                     if (ListUtils.isEmpty(pnpMains)) {
                         log.error("Valid WhiteList Content Fail!! To SMS");
                         map.put(fileName, targetStream);
                         continue;
+                    }
+                    else {
+                        log.info("pnpMains is not empty ");                    	
                     }
                     log.info("Valid WhiteList Content Success!! ");
                     mains.addAll(pnpMains);
@@ -375,7 +387,7 @@ public class LoadFtpPnpDataTask {
             for (Map.Entry<String, byte[]> entry : lReturnDataMap.entrySet()) {
                 final String fileName = entry.getKey();
                 byte[] fileData = entry.getValue();
-                log.info(" LoadFtbPnpDataTask handle file:" + pnpFtpSetting.getDownloadSavePath() + File.separator + fileName);
+                log.info(" LoadFtpPnpDataTask handle file:" + pnpFtpSetting.getDownloadSavePath() + File.separator + fileName);
                 final File targetFile = new File(pnpFtpSetting.getDownloadSavePath() + File.separator + fileName);
                 FileUtils.writeByteArrayToFile(targetFile, fileData);
                 InputStream targetStream = new FileInputStream(targetFile);
@@ -452,6 +464,8 @@ public class LoadFtpPnpDataTask {
         List<PnpDetail> details = new ArrayList<>();
         /* 明宣沒有header所以從0開始 */
         final int columnSize = 9;
+        // TODO : 因為無資料可測試, 後續可參考Mitake進行效能優化.
+        // TODO : Need to optimize and check for loop 目前只讀一行..
         if (StringUtils.isNotBlank(fileContent)) {
             final String[] detailData = fileContent.split(MING_TAG, columnSize);
             if (detailData.length == columnSize) {
@@ -503,6 +517,9 @@ public class LoadFtpPnpDataTask {
             flexTemplateId, String scheduleTime) throws Exception {
         List<PnpDetail> details = new ArrayList<>();
         /* Mitake有header所以從1開始 */
+        
+        List<String> phoneNumberList = new ArrayList<>();
+        
         for (int i = 1, size = fileContents.size(); i < size; i++) {
             if (StringUtils.isNotBlank(fileContents.get(i))) {
                 final int columnSize = 4;
@@ -522,15 +539,49 @@ public class LoadFtpPnpDataTask {
                     detail.setMsg(detailData[3]);
                     detail.setFlexTemplateId(flexTemplateId);
                     detail.setDetailScheduleTime(scheduleTime);
-                    LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
-                    final String mid = lineUserService.getMidByMobile(detail.getPhone());
-                    detail.setUid(mid);
+                    /* 優化成先把所有門號存在List中, 一次全部Query. */
+                    // LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
+                    // final String mid = lineUserService.getMidByMobile(detail.getPhone());
+                    // String mid = null;
+                    String phoneNumber = StringUtils.trimToEmpty(detail.getPhone());
+                    phoneNumberList.add(phoneNumber);
                     details.add(detail);
                 } else {
                     log.error("parsePnpDetailMitake error Data:" + Arrays.toString(detailData));
                 }
             }
         }
+        
+        if (details.size() > 0) {
+//	        log.info("Begin PhoneList query, phoneNumberList :{}", phoneNumberList);
+	        log.info("Begin PhoneList query");
+	        long start = System.currentTimeMillis();
+	        LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
+	        
+	        int targetSize = FTP_CHUNK_SIZE;
+	        // duplicate ListUtils name..
+	        List<List<String>> splitPhoneNumberLists = org.apache.commons.collections4.ListUtils.partition(phoneNumberList, targetSize);
+	        List<Object[]> midPhoneList  = new ArrayList<>(); 
+	        HashMap<String, String> midPhoneMap=new HashMap<String, String>();
+	        
+	        for (List<String> splitPhoneNumberList : splitPhoneNumberLists) {
+		        midPhoneList = lineUserService.findMidsByMobileIn(splitPhoneNumberList);
+//		        log.info( "splitPhoneNumberList size:{}, splitPhoneNumberList :{}, ", splitPhoneNumberList.size(), splitPhoneNumberList );
+//		        log.info(" midPhoneListCount : {}, midPhoneList : {}", midPhoneList.size(), ObjectUtil.objectToJsonStr(midPhoneList));                
+		        for (Object[] objArray : midPhoneList) {
+		        	midPhoneMap.put(objArray[0].toString(), objArray[1].toString());
+		        }
+            }	        
+	        // log.info(" midPhoneMap Size: {}, midPhoneMap : {}", midPhoneMap.size(), midPhoneMap);
+	        for (int i = 0; i < details.size() ; i++) {
+	        	PnpDetail detail = details.get(i);
+		    //    log.info(" i : {} , midPhoneMap.get(detail.getPhone() : {}", i, midPhoneMap.get(detail.getPhone()));
+	        	detail.setUid(midPhoneMap.get(detail.getPhone()));	        	
+	        }	        
+	        long end = System.currentTimeMillis();	        
+	        log.info("End PhoneList Query  . Time duration : " + (end - start) + " milliseconds.");
+        }
+        log.info("parsePnpDetailMitake End");
 
         return details;
     }
@@ -546,6 +597,7 @@ public class LoadFtpPnpDataTask {
             flexTemplateId, String scheduleTime) throws Exception {
         List<PnpDetail> details = new ArrayList<>();
         /* Every8D有header所以從1開始 */
+        // TODO : 因為無資料可測試, 後續可參考Mitake進行效能優化.
         for (int i = 1, size = fileContents.size(); i < size; i++) {
             if (StringUtils.isNotBlank(fileContents.get(i))) {
                 final int columnSize = 10;
@@ -580,6 +632,7 @@ public class LoadFtpPnpDataTask {
                     detail.setVariable2(detailData[9]);
                     detail.setDetailScheduleTime(scheduleTime);
                     detail.setFlexTemplateId(flexTemplateId);
+                    //TODO : Need to optimize
                     LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
                     final String mid = lineUserService.getMidByMobile(detail.getPhone());
                     detail.setUid(mid);
@@ -603,6 +656,7 @@ public class LoadFtpPnpDataTask {
             scheduleTime) throws Exception {
         List<PnpDetail> details = new ArrayList<>();
         /* Unica有header所以從1開始 */
+        // TODO : 因為無資料可測試, 後續可參考Mitake進行效能優化.        
         for (int i = 1, size = fileContents.size(); i < size; i++) {
             if (StringUtils.isNotBlank(fileContents.get(i))) {
                 final int columnSize = 10;
@@ -635,6 +689,7 @@ public class LoadFtpPnpDataTask {
                     detail.setVariable2(detailData[9]);
                     detail.setFlexTemplateId(flexTemplateId);
                     detail.setDetailScheduleTime(scheduleTime);
+                  //TODO : Need to optimize
                     LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
                     final String mid = lineUserService.getMidByMobile(detail.getPhone());
                     detail.setUid(mid);
@@ -779,11 +834,11 @@ public class LoadFtpPnpDataTask {
 
         pnpMain.setProcApName(DataUtils.getRandomProcApName());
 
+        
         if (PnpSendTypeEnum.DELAY.value.equals(pnpMain.getSendType())
                 || PnpSendTypeEnum.SCHEDULE_TIME_EXPIRED.value.equals(pnpMain.getSendType())) {
             pnpMain.setScheduleTime(pnpMain.getOrderTime());
         }
-
         pnpMain.setPnpDetails(parsePnpDetailMitake(fileContents, accountModel.getTemplate(), pnpMain.getScheduleTime()));
         List<Object> mains = new ArrayList<>();
         mains.add(pnpMain);
@@ -961,8 +1016,14 @@ public class LoadFtpPnpDataTask {
         List<? super PnpDetail> originalDetails = pnpMainMitake.getPnpDetails();
         log.info(" saveMitakeDB MitakeDetails size:" + originalDetails.size());
         /* 變更檔名為.OK */
+        
+        log.info("Starting batch operation using Bulk Copy API.");
+        long start = System.currentTimeMillis();
+
         pnpMainMitake.setOrigFileName(pnpMainMitake.getOrigFileName().replace(".ok", ""));
-        pnpMainMitake = pnpMainMitakeRepository.save(pnpMainMitake);
+        pnpMainMitake = pnpMainMitakeRepository.save(pnpMainMitake);        
+        log.info(String.format("After PNP Main ID %s -- Status:%s, ProcStage:%s", pnpMainMitake.getPnpMainId(), pnpMainMitake.getStatus(), pnpMainMitake.getProcStage()));
+
         List<PnpDetailMitake> details = new ArrayList<>();
         for (Object detail : originalDetails) {
             PnpDetailMitake pnpDetail = (PnpDetailMitake) detail;
@@ -973,13 +1034,19 @@ public class LoadFtpPnpDataTask {
             pnpDetail.setStatus(PnpStatusEnum.FTP_DETAIL_SAVE.value);
             details.add(pnpDetail);
         }
-        if (CollectionUtils.isNotEmpty(details)) {
-            List<List<PnpDetailMitake>> detailsPartitionList = Lists.partition(details, CircleEntityManagerControl.batchSize);
-            for (List<PnpDetailMitake> detailList : detailsPartitionList) {
-                pnpDetailMitakeRepository.save(detailList);
-            }
-            log.info("Update Status : " + PnpStatusEnum.FTP_DETAIL_SAVE.value);
-        }
+        
+    	entityManagerControl.persistInsert(details);
+    	
+//        if (CollectionUtils.isNotEmpty(details)) {
+//           List<List<PnpDetailMitake>> detailsPartitionList = Lists.partition(details, CircleEntityManagerControl.batchSize);
+//          for (List<PnpDetailMitake> detailList : detailsPartitionList) {
+//              pnpDetailMitakeRepository.save(detailList);
+//          }
+//        }	
+        log.info(String.format("Update Status : %s, PNP Main ID: %s, ProcStage:%s" ,PnpStatusEnum.FTP_DETAIL_SAVE.value , pnpMainMitake.getPnpMainId(), pnpMainMitake.getProcStage()));
+        long end = System.currentTimeMillis();
+        log.info("Finished batch operation using Bulk Copy API. Time duration : " + (end - start) + " milliseconds.");
+
     }
 
 
@@ -1011,7 +1078,7 @@ public class LoadFtpPnpDataTask {
             for (List<PnpDetailUnica> detailList : detailsPartitionList) {
                 pnpDetailUnicaRepository.save(detailList);
             }
-            log.info("Update Status : " + PnpStatusEnum.FTP_DETAIL_SAVE.value);
+            log.info("Update Status : {}, PNP Main ID: {}" ,PnpStatusEnum.FTP_DETAIL_SAVE.value , pnpMainUnica.getPnpMainId());            
         }
     }
 
@@ -1044,7 +1111,7 @@ public class LoadFtpPnpDataTask {
             for (List<PnpDetailEvery8d> detailList : detailsPartitionList) {
                 pnpDetailEvery8dRepository.save(detailList);
             }
-            log.info("Update Status : " + PnpStatusEnum.FTP_DETAIL_SAVE.value);
+            log.info("Update Status : {}, PNP Main ID: {}" ,PnpStatusEnum.FTP_DETAIL_SAVE.value , pnpMainEvery8d.getPnpMainId());                        
         }
     }
 
@@ -1080,7 +1147,7 @@ public class LoadFtpPnpDataTask {
             for (List<PnpDetailMing> detailList : detailsPartitionList) {
                 pnpDetailMingRepository.save(detailList);
             }
-            log.info("Update Status : " + PnpStatusEnum.FTP_DETAIL_SAVE.value);
+            log.info("Update Status : {}, PNP Main ID: {}" ,PnpStatusEnum.FTP_DETAIL_SAVE.value , pnpMainMing.getPnpMainId());                        
         }
     }
 
@@ -1101,7 +1168,7 @@ public class LoadFtpPnpDataTask {
         final Date now = Calendar.getInstance().getTime();
         pnpDetailMitakeRepository.updateStatusByMainId(status, now, mainId);
         pnpMainMitakeRepository.updatePnpMainMitakeStatus(status, now, mainId);
-        log.info("Update Status : " + status);
+        log.info("Update Status : {} , PNP Main ID: {}" + status , mainId);            
     }
 
     /**
@@ -1117,7 +1184,7 @@ public class LoadFtpPnpDataTask {
         final Date now = Calendar.getInstance().getTime();
         pnpDetailEvery8dRepository.updateStatusByMainId(status, now, mainId);
         pnpMainEvery8dRepository.updatePnpMainEvery8dStatus(status, now, mainId);
-        log.info("Update Status : " + status);
+        log.info("Update Status : {} , PNP Main ID: {}" + status , mainId);            
     }
 
     /**
@@ -1133,7 +1200,7 @@ public class LoadFtpPnpDataTask {
         final Date now = Calendar.getInstance().getTime();
         pnpDetailUnicaRepository.updateStatusByMainId(status, now, mainId);
         pnpMainUnicaRepository.updatePnpMainUnicaStatus(status, now, mainId);
-        log.info("Update Status : " + status);
+        log.info("Update Status : {} , PNP Main ID: {}" + status , mainId);            
     }
 
     /**
@@ -1149,7 +1216,7 @@ public class LoadFtpPnpDataTask {
         final Date now = Calendar.getInstance().getTime();
         pnpDetailMingRepository.updateStatusByMainId(status, now, mainId);
         pnpMainMingRepository.updatePnpMainMingStatus(status, now, mainId);
-        log.info("Update Status : " + status);
+        log.info("Update Status : {} , PNP Main ID: {}" + status , mainId);            
     }
 
     /*================================================================================*/

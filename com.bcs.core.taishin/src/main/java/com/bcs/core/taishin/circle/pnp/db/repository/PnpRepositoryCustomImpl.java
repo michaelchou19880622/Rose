@@ -34,15 +34,32 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     public int checkIsAllSent(PnpFtpSourceEnum type, long mainId) {
         String sqlString = "SELECT COUNT(*) FROM " + type.detailTable +
                 " WHERE PNP_MAIN_ID=:MAIN_ID AND STATUS IN (:STATUS_LIST)";
-        log.info(sqlString);
-        int notSendCount = providerService.getEntityManager().createNativeQuery(sqlString)
-                .setParameter("MAIN_ID", mainId)
-                .setParameter("STATUS_LIST", Arrays.asList(PnpStatusEnum.FTP_MAIN_SAVE.value, PnpStatusEnum.PROCESS.value, PnpStatusEnum.SENDING))
-                .getFirstResult();
-        log.info("Not send count: {}", notSendCount);
+        // log.info(sqlString);
+        int notSendCount = ((Number)providerService.getEntityManager().createNativeQuery(sqlString)
+                              .setParameter("MAIN_ID", mainId)
+                              .setParameter("STATUS_LIST", Arrays.asList(PnpStatusEnum.FTP_DETAIL_SAVE.value, PnpStatusEnum.FTP_MAIN_SAVE.value, PnpStatusEnum.PROCESS.value, PnpStatusEnum.SENDING))
+                              .getSingleResult()).intValue();
+        log.info("checkIsAllSent() -- main id: {}, Not send count: {}", mainId, notSendCount);
         return notSendCount;
     }
 
+
+   /**
+    * 計算Detail Table有多少筆 某Main ID數量.
+    * 
+    */
+    @Transactional(rollbackFor = Exception.class)
+    public int getDetailCountByMainId(PnpFtpSourceEnum type, long mainId) {
+        String sqlString = "SELECT COUNT(*) FROM " + type.detailTable +
+                " WHERE PNP_MAIN_ID=:MAIN_ID";
+        // log.info(sqlString);
+        int detailCount = ((Number)providerService.getEntityManager().createNativeQuery(sqlString)
+        		           .setParameter("MAIN_ID", mainId)
+        		           .getSingleResult()).intValue();
+        log.info("getDetailCountByMainId() -- Main id {}, DetailCount: {}", mainId, detailCount);
+        return detailCount;
+    }    
+    
     /**
      * 找出最近一筆 PNP 訊息狀態為 PROCESS 的 ID
      * 並更新 PNP 訊息狀態為 SENDING
@@ -64,7 +81,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 "   AND B.PROC_STAGE=:STAGE " +
                 "   ORDER BY B.CREAT_TIME" +
                 " ) ";
-        log.info(sqlString);
+        // log.info(sqlString);
 
         List<BigInteger> detailIdList = providerService.getEntityManager().createNativeQuery(sqlString)
                 .setParameter("STATUS", PnpStatusEnum.PROCESS.value)
@@ -97,7 +114,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     }
 
     /**
-     * Wait -> Sending
+     * Find All Details
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -105,23 +122,41 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     public List<PnpDetail> findAllDetail(Long mainId, PnpFtpSourceEnum type) {
         String detailTable = type.detailTable;
 
+        String selectSql = "SELECT * FROM " + detailTable + " WHERE PNP_MAIN_ID=:MAIN_ID";
+//        log.info(selectSql);
+
+        return providerService.getEntityManager().createNativeQuery(selectSql, type.detailClass)
+                .setParameter("MAIN_ID", mainId)
+                .getResultList();
+    }
+    
+    /**
+     * Wait -> Sending
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @SuppressWarnings("unchecked")
+    public List<PnpDetail> findAllDetailAndUpdateStatus(Long mainId, PnpFtpSourceEnum type) {
+        String detailTable = type.detailTable;
+
         String sql = "SELECT PNP_DETAIL_ID FROM " + detailTable +
                 " WHERE PNP_MAIN_ID=:MAIN_ID" +
                 " AND STATUS IN (:STATUS_LIST)";
-        log.info(sql);
+        // log.info(sql);
 
         List<BigInteger> detailIdList = (List<BigInteger>) providerService.getEntityManager().createNativeQuery(sql)
                 .setParameter("MAIN_ID", mainId)
-                .setParameter("STATUS_LIST", Arrays.asList(PnpStatusEnum.FTP_MAIN_SAVE.value, PnpStatusEnum.PROCESS.value))
+                .setParameter("STATUS_LIST", Arrays.asList(PnpStatusEnum.FTP_DETAIL_SAVE.value, PnpStatusEnum.FTP_MAIN_SAVE.value, PnpStatusEnum.PROCESS.value))
                 .getResultList();
 
         if (detailIdList.isEmpty()) {
             log.info("Detail id list is empty by mainId is {}", mainId);
             return Collections.emptyList();
         }
-        log.info("Detail id list size: {}\n" +
-                "value: {}", detailIdList.size(), DataUtils.toPrettyJsonUseJackson(detailIdList));
-
+//        log.info("Detail id list size: {}\n" +
+//               "value: {}", detailIdList.size(), DataUtils.toPrettyJsonUseJackson(detailIdList));
+        log.info("Detail id list size: {}" + detailIdList.size());
+        		
         String updateSql = "UPDATE " + detailTable +
                 " SET STATUS=:NEW_STATUS," +
                 " MODIFY_TIME=:MODIFY_TIME" +
@@ -133,7 +168,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 .setParameter("NEW_STATUS", PnpStatusEnum.SENDING.value)
                 .setParameter("IDS", detailIdList)
                 .setParameter("MODIFY_TIME", new Date())
-                .setParameter("STATUS_LIST", Arrays.asList(PnpStatusEnum.FTP_MAIN_SAVE.value, PnpStatusEnum.PROCESS.value))
+                .setParameter("STATUS_LIST", Arrays.asList(PnpStatusEnum.FTP_DETAIL_SAVE.value, PnpStatusEnum.FTP_MAIN_SAVE.value, PnpStatusEnum.PROCESS.value))
                 .executeUpdate();
         if (i > 0) {
             log.info("Updated [WAIT] and [PROCESS] to [SENDING]!! {}", i);
@@ -154,15 +189,16 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     @SuppressWarnings("unchecked")
     @Transactional(rollbackFor = Exception.class)
     public List<PnpMain> findAllMain(String procApName, PnpFtpSourceEnum type) {
+    	
         String waitMainString = "SELECT TOP 100 PNP_MAIN_ID FROM " + type.mainTable +
                 " WHERE STATUS NOT IN (:STATUS_LIST)" +
                 " AND PROC_AP_NAME=:PROC_AP_NAME" +
                 " ORDER BY CREAT_TIME";
 
-        log.info(waitMainString);
+        // log.info(waitMainString);
 
         List<BigInteger> mainList = (List<BigInteger>) providerService.getEntityManager().createNativeQuery(waitMainString)
-                .setParameter("STATUS_LIST", Collections.singletonList(PnpStatusEnum.COMPLETE.value))
+                .setParameter("STATUS_LIST", Arrays.asList(PnpStatusEnum.FTP_DETAIL_SAVE.value, PnpStatusEnum.COMPLETE.value))
                 .setParameter("PROC_AP_NAME", procApName)
                 .getResultList();
 
@@ -177,7 +213,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 " SET STATUS=:NEW_STATUS, MODIFY_TIME=:MODIFY_TIME " +
                 " WHERE PNP_MAIN_ID IN (:IDS)";
 
-        log.info(updateSql);
+        // log.info(updateSql);
 
         int i = providerService.getEntityManager().createNativeQuery(updateSql)
                 .setParameter("MODIFY_TIME", new Date())
@@ -188,10 +224,12 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
         if (i > 0) {
             log.info("Update Main Status: [WAIT] to [BC][SENDING]: {}", i);
         }
-
+        else {
+            log.info("No Need to Update Main Status.");        	
+        }
         String selectSql = "SELECT * FROM " + type.mainTable + " WHERE PNP_MAIN_ID IN (:ids)";
 
-        log.info(selectSql);
+        // log.info(selectSql);
 
         return providerService.getEntityManager().createNativeQuery(selectSql, type.mainClass)
                 .setParameter("ids", mainList)
@@ -204,7 +242,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     @Transactional(rollbackFor = Exception.class)
     public List<PnpMain> findMainById(PnpFtpSourceEnum type, Long mainId) {
         String sqlString = "SELECT * FROM " + type.mainTable + " WHERE PNP_MAIN_ID = :MAIN_ID";
-        log.info(sqlString);
+        // log.info(sqlString);
         return providerService.getEntityManager().createNativeQuery(sqlString, type.mainClass)
                 .setParameter("MAIN_ID", mainId)
                 .getResultList();
@@ -216,7 +254,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
         String selectSql = "SELECT COUNT(PNP_DETAIL_ID) FROM " + type.detailTable +
                 " WHERE PNP_MAIN_ID=:MAIN_ID" +
                 " AND STATUS IN (:STATUS_LIST)";
-        log.info(selectSql);
+        // log.info(selectSql);
 
         return providerService.getEntityManager().createNativeQuery(selectSql)
                 .setParameter("MAIN_ID", mainId)
@@ -231,7 +269,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
         String updateSql = " UPDATE " + type.mainTable +
                 " SET STATUS=:NEW_STATUS, MODIFY_TIME=:MODIFY_TIME" +
                 " WHERE PNP_MAIN_ID =:ID";
-        log.info(updateSql);
+        // log.info(updateSql);
 
         return providerService.getEntityManager().createNativeQuery(updateSql)
                 .setParameter("MODIFY_TIME", new Date())
@@ -266,7 +304,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
         String selectSql = "SELECT TOP 1000 * FROM " + type.detailTable +
                 " WHERE BC_STATUS IN (:STATUS_LIST)" +
                 " AND SMS_STATUS IS NULL";
-        log.info(selectSql);
+        // log.info(selectSql);
         return providerService.getEntityManager().createNativeQuery(selectSql, type.detailClass)
                 .setParameter("STATUS_LIST", statusList)
                 .getResultList();
@@ -278,7 +316,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
         String selectSql = "SELECT TOP 1000 * FROM " + type.detailTable +
                 " WHERE PNP_STATUS IN (:STATUS_LIST)" +
                 " AND SMS_STATUS IS NULL";
-        log.info(selectSql);
+        // log.info(selectSql);
         return providerService.getEntityManager().createNativeQuery(selectSql, type.detailClass)
                 .setParameter("STATUS_LIST", statusList)
                 .getResultList();
@@ -291,7 +329,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 " WHERE PNP_STATUS IN (:STATUS_LIST)" +
                 " AND PNP_DELIVERY_EXPIRE_TIME < :NOW" +
                 " AND SMS_STATUS IS NULL";
-        log.info(selectSql);
+        // log.info(selectSql);
         return providerService.getEntityManager().createNativeQuery(selectSql, type.detailClass)
                 .setParameter("STATUS_LIST", statusList)
                 .setParameter("NOW", new Date())
@@ -307,7 +345,7 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                     " SET STATUS=:NEW_STATUS," +
                     " MODIFY_TIME=:NOW" +
                     " WHERE STATUS=:OLD_STATUS";
-            log.info(updateSql);
+            // log.info(updateSql);
             i.addAndGet(providerService.getEntityManager().createNativeQuery(updateSql)
                     .setParameter("OLD_STATUS", PnpStatusEnum.SENDING.value)
                     .setParameter("NEW_STATUS", PnpStatusEnum.FTP_MAIN_SAVE.value)

@@ -18,8 +18,8 @@ public enum PNPFTPType {
     MING("ming", "3", "BCS_PNP_MAIN_MING", "BCS_PNP_DETAIL_MING"),
     UNICA("unica", "4", "BCS_PNP_MAIN_UNICA", "BCS_PNP_DETAIL_UNICA");
 
-    private String source;
-    private String value;
+	private String value;
+	public String source;
     private String mainTable;
     private String detailTable;
 

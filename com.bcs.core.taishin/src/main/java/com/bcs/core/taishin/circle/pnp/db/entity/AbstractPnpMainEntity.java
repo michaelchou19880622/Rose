@@ -14,7 +14,7 @@ public abstract class AbstractPnpMainEntity implements Serializable, Cloneable {
     public static final String FTP_MAIN_SAVE = "WAIT";
 
     public static final String SEND_TYPE_IMMEDIATE = "IMMEDIATE";
-    public static final String SEND_TYPE_SCHEDULE_TIME_EXPIRED = "SCH_EXPRED";
+    public static final String SEND_TYPE_SCHEDULE_TIME_EXPIRED = "SCH_EXPIRED";
     public static final String SEND_TYPE_DELAY = "DELAY";
     public static final String DATA_CONVERTER_STATUS_SCHEDULED = "SCHEDULED";
 

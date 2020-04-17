@@ -70,13 +70,16 @@ public class OracleService {
             String sql = getFindByEmployeeIdSQL(empId, oracleSchemaHr);
             try (ResultSet rs = connection.createStatement().executeQuery(sql)) {
                 while (rs.next()) {
-                    employee.setEmployeeId(empId);
-                    employee.setDepartmentId(trim(rs.getString(2)));
-                    employee.setPccCode(trim(rs.getString(3)) + trim(rs.getString(4)));
-                    employee.setDivisionName(trim(rs.getString(5)));
-                    employee.setDepartmentName(trim(rs.getString(6)));
-                    employee.setEasyName(trim(rs.getString(7)));
-                    employee.setGroupName(extractGroupName(employee));
+                	//離職日期是null and empty 才撈取資料
+                	if (StringUtils.isBlank(trim(rs.getString(8)))) {
+	                    employee.setEmployeeId(empId);
+	                    employee.setDepartmentId(trim(rs.getString(2)));
+	                    employee.setPccCode(trim(rs.getString(3)) + trim(rs.getString(4)));
+	                    employee.setDivisionName(trim(rs.getString(5)));
+	                    employee.setDepartmentName(trim(rs.getString(6)));
+	                    employee.setEasyName(trim(rs.getString(7)));                    
+	                    employee.setGroupName(extractGroupName(employee));
+                	}
                 }
                 log.info("TaiShin Employee: " + DataUtils.toPrettyJsonUseJackson(employee));
             } catch (Exception e) {
@@ -345,6 +348,7 @@ public class OracleService {
                         "     card_div, " +
                         "     card_dept, " +
                         "     dept_easy_nm " +
+                        "     quit_dt " +                        
                         " from " +
                         "     %s.hr_emp " +
                         " left outer join %s.hr_dept " +

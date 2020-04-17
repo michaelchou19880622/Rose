@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import java.util.Calendar;
 
 import java.util.List;
+import java.util.Date;
 
 /**
  * @author ???
@@ -28,6 +30,8 @@ public class MsgBotReceiveService {
      */
     private MsgBotReceiveRepositoryImpl msgBotReceiveRepositoryImpl;
 
+	private final Object lock = new Object();
+    
     @Autowired
     public MsgBotReceiveService(MsgBotReceiveRepository msgBotReceiveRepository, MsgBotReceiveRepositoryImpl msgBotReceiveRepositoryImpl) {
         this.msgBotReceiveRepository = msgBotReceiveRepository;
@@ -96,7 +100,21 @@ public class MsgBotReceiveService {
             String detailTable = PNPFTPType.getDetailTableNameByCode(source);
             log.info("Detail Table : {}, Detail Id: {}", detailTable, detailId);
             /* 更新Detail Table狀態 */
-            msgBotReceiveRepositoryImpl.updatePnpDetailStatus(detailTable, detailId);
+            final Date now = Calendar.getInstance().getTime();            
+            synchronized (lock) {           
+                if (source.equals(PNPFTPType.MITAKE.source)) {            	
+                	msgBotReceiveRepository.updatePnpMitakeDetailStatus(now, detailId);
+                }
+                else if (source.equals(PNPFTPType.MING.source)) {            	
+                	msgBotReceiveRepository.updatePnpMingDetailStatus(now, detailId);
+                }
+                else if (source.equals(PNPFTPType.EVERY8D.source)) {            	
+                	msgBotReceiveRepository.updatePnpEvery8DDetailStatus(now, detailId);
+                }
+                else if (source.equals(PNPFTPType.UNICA.source)) {            	
+                	msgBotReceiveRepository.updatePnpUnicaDetailStatus(now, detailId);
+                }                
+            }
             log.info("Update PNP Main and Detail Status Finish!!");
         } catch (Exception e) {
             log.error("Exception", e);

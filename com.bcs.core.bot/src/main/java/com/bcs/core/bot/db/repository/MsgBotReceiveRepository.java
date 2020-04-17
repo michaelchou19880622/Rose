@@ -5,9 +5,14 @@ import com.bcs.core.db.persistence.EntityRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.util.List;
+import java.util.Date;
 
 /**
  * The interface Msg bot receive repository.
@@ -119,4 +124,54 @@ public interface MsgBotReceiveRepository extends EntityRepository<MsgBotReceive,
      */
     @Query(value = "SELECT * FROM BCS_MSG_BOT_RECEIVE WHERE EVENT_TYPE = 'message' AND SOURCE_TYPE = 'user' AND RECEIVE_DAY >= ?1 AND RECEIVE_DAY < ?2", nativeQuery = true)
     List<MsgBotReceive> findByReceiveDay(String start, String end);
+    
+    
+    /**
+     * 更新PNP Mitake Detail Table 狀態
+     * 狀態更新為 PNP_COMPLETE並更新接收時間
+     *
+     * @param sendTime    Send Time
+     * @param detailId    Detail Id
+     */
+	@Transactional(isolation=Isolation.REPEATABLE_READ , rollbackFor = Exception.class, timeout = 30)
+	@Modifying(flushAutomatically = true)
+	@Query(value = "update BCS_PNP_DETAIL_MITAKE set PNP_STATUS = 'PNP_COMPLETE' , SEND_TIME = ?1 , MODIFY_TIME = ?1, PNP_DELIVERY_TIME = ?1 WHERE PNP_DETAIL_ID = ?2", nativeQuery = true)            
+	void updatePnpMitakeDetailStatus( Date sendTime, String detailId);    
+
+    /**
+     * 更新PNP Ming Detail Table 狀態
+     * 狀態更新為 PNP_COMPLETE並更新接收時間
+     *
+     * @param sendTime    Send Time
+     * @param detailId    Detail Id
+     */
+	@Transactional(isolation=Isolation.REPEATABLE_READ , rollbackFor = Exception.class, timeout = 30)
+	@Modifying(flushAutomatically = true)
+	@Query(value = "update BCS_PNP_DETAIL_MING set PNP_STATUS = 'PNP_COMPLETE' , SEND_TIME = ?1 , MODIFY_TIME = ?1, PNP_DELIVERY_TIME = ?1 WHERE PNP_DETAIL_ID = ?2", nativeQuery = true)            
+	void updatePnpMingDetailStatus( Date sendTime, String detailId);    
+
+    /**
+     * 更新PNP EVERY8D Detail Table 狀態
+     * 狀態更新為 PNP_COMPLETE並更新接收時間
+     *
+     * @param sendTime    Send Time
+     * @param detailId    Detail Id
+     */
+	@Transactional(isolation=Isolation.REPEATABLE_READ , rollbackFor = Exception.class, timeout = 30)
+	@Modifying(flushAutomatically = true)
+	@Query(value = "update BCS_PNP_DETAIL_EVERY8D set PNP_STATUS = 'PNP_COMPLETE' , SEND_TIME = ?1 , MODIFY_TIME = ?1, PNP_DELIVERY_TIME = ?1 WHERE PNP_DETAIL_ID = ?2", nativeQuery = true)            
+	void updatePnpEvery8DDetailStatus( Date sendTime, String detailId);    
+
+    /**
+     * 更新PNP UNICA Detail Table 狀態
+     * 狀態更新為 PNP_COMPLETE並更新接收時間
+     *
+     * @param sendTime    Send Time
+     * @param detailId    Detail Id
+     */
+	@Transactional(isolation=Isolation.REPEATABLE_READ , rollbackFor = Exception.class, timeout = 30)
+	@Modifying(flushAutomatically = true)
+	@Query(value = "update BCS_PNP_DETAIL_UNICA set PNP_STATUS = 'PNP_COMPLETE' , SEND_TIME = ?1 , MODIFY_TIME = ?1, PNP_DELIVERY_TIME = ?1 WHERE PNP_DETAIL_ID = ?2", nativeQuery = true)            
+	void updatePnpUnicaDetailStatus( Date sendTime, String detailId);    
+
 }

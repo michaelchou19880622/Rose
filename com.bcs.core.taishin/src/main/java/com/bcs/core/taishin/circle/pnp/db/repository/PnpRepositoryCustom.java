@@ -26,6 +26,16 @@ public interface PnpRepositoryCustom {
     int checkIsAllSent(PnpFtpSourceEnum type, long mainId);
 
     /**
+     * Count the datail PNP by Main ID.
+     *
+     * @param type   the type
+     * @param mainId the main id
+     * @return the int
+     */
+    int getDetailCountByMainId(PnpFtpSourceEnum type, long mainId);
+
+    
+    /**
      * Find all bc to pnp detail list.
      *
      * @param type     the type
@@ -47,6 +57,17 @@ public interface PnpRepositoryCustom {
     @Transactional(rollbackFor = Exception.class)
     @SuppressWarnings("unchecked")
     List<PnpDetail> findAllDetail(Long mainId, PnpFtpSourceEnum type);
+    
+    /**
+     * Find all detail list and update status.
+     *
+     * @param mainId the main id
+     * @param type   the type
+     * @return the list
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @SuppressWarnings("unchecked")
+    List<PnpDetail> findAllDetailAndUpdateStatus(Long mainId, PnpFtpSourceEnum type);
 
     /**
      * Find all main list.

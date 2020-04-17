@@ -20,7 +20,7 @@ public class SignatureValidationHelper {
 	
 	public static boolean signatureValidation(String receivingMsg, String ChannelId, String channelSignature){
 		
-		logger.info("receivingMsg = " + receivingMsg);
+		//logger.info("receivingMsg = " + receivingMsg);
 		logger.info("ChannelId = " + ChannelId);
 		
 		// Signature validation

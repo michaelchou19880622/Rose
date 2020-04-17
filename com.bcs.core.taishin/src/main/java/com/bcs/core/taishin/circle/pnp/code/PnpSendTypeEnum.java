@@ -11,7 +11,7 @@ public enum PnpSendTypeEnum {
      */
     IMMEDIATE("IMMEDIATE"),
     SCHEDULED("SCHEDULED"),
-    SCHEDULE_TIME_EXPIRED("SCH_EXPRED"),
+    SCHEDULE_TIME_EXPIRED("SCH_EXPIRED"),
     DELAY("DELAY");
 
     /**

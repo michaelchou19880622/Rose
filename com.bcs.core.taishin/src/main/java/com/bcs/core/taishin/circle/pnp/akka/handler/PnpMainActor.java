@@ -43,6 +43,7 @@ public class PnpMainActor extends UntypedActor {
     public void onReceive(Object object) {
         try {
             Thread.currentThread().setName("Actor-PNP-Main-" + Thread.currentThread().getId());
+            // log.info("PnpMainActor onReceive object : {}", object);
 
             if (object instanceof PnpMain) {
                 final PnpMain main = (PnpMain) object;
@@ -58,6 +59,7 @@ public class PnpMainActor extends UntypedActor {
 
     private void pushRoute(PnpMain main, PnpStageEnum stage, ActorRef someActor) {
         if (main != null && main.getPnpDetails() != null && CollectionUtils.isNotEmpty(main.getPnpDetails())) {
+            // log.info("PushRoute : {}, someActor : {}", stage, someActor);
             List<PnpDetail> detailList = main.getPnpDetails().stream()
                     .filter(detail -> {
                         if (detail.getProcStage() != null) {
@@ -78,7 +80,7 @@ public class PnpMainActor extends UntypedActor {
     private void tellActor(ActorRef someActor, PnpMain tellSomething) {
         final List<PnpDetail> detailList = tellSomething.getPnpDetails();
         final int buffer = getBuffer(detailList.size(), getMaxActorCount());
-        log.info("PnpMainActor onReceive details.size : {}", detailList.size());
+        // log.info("PnpMainActor onReceive details.size : {} : someActor: {}", detailList.size(), someActor);
 
         List<List<PnpDetail>> partitionList = ListUtils.partition(detailList, buffer);
         partitionList.forEach(list -> {

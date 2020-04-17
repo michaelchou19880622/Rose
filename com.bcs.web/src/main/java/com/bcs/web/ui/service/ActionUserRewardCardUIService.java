@@ -36,7 +36,6 @@ import com.bcs.core.upload.ImportDataFromExcel;
 @Service
 public class ActionUserRewardCardUIService {
 
-	public static final String GET_REWARD_CARD_FLAG = "GET_REWARD_CARD_FLAG";
 
 	private static Logger logger = Logger.getLogger(ActionUserRewardCardUIService.class);
 

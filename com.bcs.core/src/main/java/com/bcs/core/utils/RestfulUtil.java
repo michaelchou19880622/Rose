@@ -101,7 +101,7 @@ public class RestfulUtil {
             log.info("---------- Start to execute the request ----------");
 
             log.info("[RestUtil execute] Target url: " + url);
-            log.info("[RestUtil execute] Request body: " + DataUtils.toPrettyJsonUseJackson(httpEntity.getBody()));
+            // log.info("[RestUtil execute] Request body: " + DataUtils.toPrettyJsonUseJackson(httpEntity.getBody()));
 
             ResponseEntity<String> gatewayResponse = this.restTemplate.exchange(url, method, httpEntity, String.class);
 

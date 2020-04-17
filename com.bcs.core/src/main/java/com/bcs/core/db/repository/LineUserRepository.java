@@ -142,7 +142,7 @@ public interface LineUserRepository extends EntityRepository<LineUser, String>, 
      * @return the page
      */
     @Transactional(readOnly = true, timeout = 30)
-    @Query("select x.mid from LineUser x where x.status != 'SYSADD' and x.status = 'BLOCK' and x.status = 'BINDED' or x.status = 'UNBIND'")
+    @Query("select x.mid from LineUser x where x.status = 'BINDED' or x.status = 'UNBIND'")
     Page<String> findMIDAllActive(Pageable pageable);
 
     /**

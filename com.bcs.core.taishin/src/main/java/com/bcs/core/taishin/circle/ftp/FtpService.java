@@ -252,7 +252,9 @@ public class FtpService {
     private boolean loginFTP(FTPClient pFtpClient, FtpSetting setting) {
         try {
 
-            pFtpClient.setDefaultTimeout(5 * 60 * 1000);
+            pFtpClient.setConnectTimeout(30 * 1000);
+            pFtpClient.setDefaultTimeout(30 * 1000);
+            pFtpClient.setDataTimeout(30 * 1000);
             pFtpClient.connect(setting.getHost(), setting.getPort());
 
             // T 先以資源密碼系統取得的帳號密碼進行登入，登入失敗再以系統原本設定的帳號密碼登入系統
@@ -315,7 +317,7 @@ public class FtpService {
                 session = jsch.getSession(account, setting.getHost(), setting.getPort());
                 session.setPassword(password);
                 session.setConfig(sshConfig);
-                session.setTimeout(5 * 60 * 1000);
+                session.setTimeout(30 * 1000);
                 session.connect();
                 lStatus = session.isConnected();
                 log.info("1-1 session.isConnected() = {}", lStatus);
@@ -334,12 +336,13 @@ public class FtpService {
             if (session != null && session.isConnected()) {
                 session.disconnect();
             }
+            session = null;
             Map<String, String> trendPwMgmt = getTaishinFtpConnectionInfo(setting);
             log.info("loginFTP:" + trendPwMgmt.get("uid") + " PWD:" + trendPwMgmt.get("pwd"));
             session = jsch.getSession(trendPwMgmt.get("uid"), setting.getHost(), setting.getPort());
             session.setPassword(trendPwMgmt.get("pwd"));
             session.setConfig(sshConfig);
-            session.setTimeout(5 * 60 * 1000);
+            session.setTimeout(30 * 1000);
             session.connect();
             lStatus = session.isConnected();
             log.info("1-2 session.isConnected() = {}", lStatus);
@@ -355,7 +358,7 @@ public class FtpService {
             session = jsch.getSession("ACCOUNT", setting.getHost(), setting.getPort());
             session.setPassword("PASSWORD");
             session.setConfig(sshConfig);
-            session.setTimeout(5 * 60 * 1000);
+            session.setTimeout(30 * 1000);
             session.connect();
             lStatus = session.isConnected();
             log.info("1-3 session.isConnected() = {}", lStatus);
@@ -381,7 +384,9 @@ public class FtpService {
     public Map<String, byte[]> downloadMultipleFileInFTPForDev(String pDirectory, String extension, FtpSetting setting) {
         Map<String, byte[]> lReturnDataMap = new HashMap<>();
         FTPClient ftpClient = getFtpClient(setting);
-        ftpClient.setConnectTimeout(5 * 60 * 1000);
+        ftpClient.setConnectTimeout(30 * 1000);
+        ftpClient.setDefaultTimeout(30 * 1000);
+        ftpClient.setDataTimeout(30 * 1000);        
         try {
             ftpClient.connect(setting.getHost(), setting.getPort());
             ftpClient.login(setting.getAccount(), setting.getPassword());
@@ -402,13 +407,12 @@ public class FtpService {
                     lDataTemp.close();
                 }
             }
-
+            ftpClient.logout();
         } catch (Exception ex) {
             log.error("downloadMultipleFileInFTPForDev Error: " + ex.getMessage());
         } finally {
             try {
                 if (ftpClient.isConnected()) {
-                    ftpClient.logout();
                     ftpClient.disconnect();
                 }
             } catch (Exception ex) {
@@ -455,7 +459,9 @@ public class FtpService {
         Map<String, byte[]> lReturnDataMap = new HashMap<>();
         try {
             ftpClient = getFtpClient(setting);
-            ftpClient.setConnectTimeout(5 * 60 * 1000);
+            ftpClient.setConnectTimeout(30 * 1000);
+            ftpClient.setDefaultTimeout(30 * 1000);
+            ftpClient.setDataTimeout(30 * 1000);        
             if (loginFTP(ftpClient, setting)) {
                 ftpClient.changeWorkingDirectory(pDirectory);
                 ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
@@ -495,6 +501,7 @@ public class FtpService {
                 }
                 return lReturnDataMap;
             }
+            ftpClient.logout();            
         } catch (Exception e) {
             try {
                 if (ftpClient != null) {
@@ -539,7 +546,7 @@ public class FtpService {
                 return lReturnDataMap;
             }
             channelSftp = (ChannelSftp) session.openChannel("sftp");
-            channelSftp.connect(5 * 60 * 1000);  
+            channelSftp.connect(30 * 1000);  
             
             if (channelSftp.isConnected()) {
 				log.info("channelSftp.isConnected() = {}", channelSftp.isConnected());
@@ -618,6 +625,7 @@ public class FtpService {
 					channelSftp.disconnect();
 					log.info("channelSftp disconnected");
 				}
+                channelSftp = null;                				
 				if (session != null && session.isConnected()) {
 					session.disconnect();
 					log.info("session disconnected");
@@ -649,6 +657,7 @@ public class FtpService {
             session = jsch.getSession(setting.getAccount(), setting.getHost(), setting.getPort());
             session.setPassword(setting.getPassword());
             session.setConfig(sshConfig);
+            session.setTimeout(30 * 1000);            
             session.connect();
             if (session.isConnected()) {
                 channelSftp = (ChannelSftp) session.openChannel("sftp");
@@ -684,9 +693,11 @@ public class FtpService {
                 if (channelSftp != null && channelSftp.isConnected()) {
                     channelSftp.disconnect();
                 }
+                channelSftp = null;
                 if (session != null && session.isConnected()) {
                     session.disconnect();
                 }
+                session = null;
             } catch (Exception ex) {
                 log.error(" downloadMultipleFileInSFTPForDev Error: " + ex.getMessage());
             }
@@ -760,10 +771,13 @@ public class FtpService {
             try {
                 if (channelSftp != null && channelSftp.isConnected()) {
                     channelSftp.disconnect();
-                }
+                }                
+                channelSftp = null;
                 if (session != null && session.isConnected()) {
                     session.disconnect();
                 }
+                session = null;
+
             } catch (Exception ex) {
                 log.error("deleteFileInSFTP Error: " + ex.getMessage());
             }
@@ -786,7 +800,7 @@ public class FtpService {
             session = jsch.getSession(setting.getAccount(), setting.getHost(), setting.getPort());
             session.setPassword(setting.getPassword());
             session.setConfig(sshConfig);
-            session.setTimeout(5 * 60 * 1000);
+            session.setTimeout(30 * 1000);
             session.connect();
             if (session.isConnected()) {
                 log.info("Session is connected!!");
@@ -814,9 +828,11 @@ public class FtpService {
                 if (channelSFtp != null && channelSFtp.isConnected()) {
                     channelSFtp.disconnect();
                 }
+                channelSFtp = null;
                 if (session != null && session.isConnected()) {
                     session.disconnect();
                 }
+                session = null;
             } catch (Exception ex) {
                 log.error("deleteFileInSFTPForDev Error: " + ex.getMessage());
             }
@@ -831,7 +847,9 @@ public class FtpService {
      */
     private void deleteFileInFTPForDev(String pDirectory, String[] pFileNames, FtpSetting setting) {
         FTPClient ftpClient = getFtpClient(setting);
-        ftpClient.setConnectTimeout(5 * 60 * 1000);
+        ftpClient.setConnectTimeout(30 * 1000);
+        ftpClient.setDefaultTimeout(30 * 1000);
+        ftpClient.setDataTimeout(30 * 1000);        
         try {
             ftpClient.connect(setting.getHost(), setting.getPort());
             ftpClient.login(setting.getAccount(), setting.getPassword());
@@ -848,13 +866,12 @@ public class FtpService {
                     log.error(" deleteFileInFTPForDev remove fail: " + lFileName);
                 }
             }
-
+            ftpClient.logout();
         } catch (Exception ex) {
             log.error("deleteFileInFTPForDev Error: " + ex.getMessage());
         } finally {
             try {
                 if (ftpClient.isConnected()) {
-                    ftpClient.logout();
                     ftpClient.disconnect();
                 }
             } catch (Exception ex) {
@@ -874,7 +891,9 @@ public class FtpService {
         FTPClient ftpClient = null;
         try {
             ftpClient = getFtpClient(setting);
-            ftpClient.setConnectTimeout(5 * 60 * 1000);
+            ftpClient.setConnectTimeout(30 * 1000);
+            ftpClient.setDefaultTimeout(30 * 1000);
+            ftpClient.setDataTimeout(30 * 1000);        
             if (loginFTP(ftpClient, setting)) {
                 log.info("Ftp Connection success!!");
                 ftpClient.changeWorkingDirectory(pDirectory);
@@ -891,6 +910,7 @@ public class FtpService {
             } else {
                 log.info("Ftp Connection Fail!!");
             }
+            ftpClient.logout();            
         } catch (Exception e) {
             log.error("deleteFileInFTP Exception" + e.getMessage());
             try {

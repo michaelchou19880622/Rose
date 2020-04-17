@@ -34,7 +34,7 @@ import java.util.concurrent.ExecutionException;
 @Service
 public class InteractiveService {
     public static final String INTERACTIVE_SYNC = "INTERACTIVE_SYNC";
-    private static final String INIT_FLAG = "INIT_FLAG";
+    private final Object lock = new Object();
 
     @Autowired
     private MsgInteractiveMainService msgInteractiveMainService;
@@ -148,7 +148,7 @@ public class InteractiveService {
      * Load Keyword Map
      */
     public void loadKeywordMap() {
-        synchronized (INIT_FLAG) {
+		synchronized (lock) {
             autokeywordMap.clear();
             welcomeMap.clear();
             eventWelcomeMap.clear();
@@ -349,7 +349,7 @@ public class InteractiveService {
      */
     public Long getMatchBlackKeywordMsgId(String userStatus, String keyword) {
 
-        synchronized (INIT_FLAG) {
+        synchronized (lock) {
             Map<String, List<Long>> map = blackKeywordMap.get(userStatus);
 
             if (StringUtils.isNotBlank(keyword)) {
@@ -396,7 +396,7 @@ public class InteractiveService {
         log.info("keyword = " + keyword);
         log.info("MID = " + MID);
 
-        synchronized (INIT_FLAG) {
+		synchronized (lock) {
 
             log.info("indexSetting = " + indexSetting);
             // Different Index
@@ -531,7 +531,7 @@ public class InteractiveService {
      * @return
      */
     public MsgInteractiveMain getAutoResponse(String MID, String userStatus) {
-        synchronized (INIT_FLAG) {
+        synchronized (lock) {
 
             if (autokeywordMap != null && autokeywordMap.size() > 0 &&
                     autokeywordMap.get(userStatus) != null && autokeywordMap.get(userStatus).size() > 0) {
@@ -558,7 +558,7 @@ public class InteractiveService {
      * @return
      */
     public Long getWelcomeResponse() {
-        synchronized (INIT_FLAG) {
+        synchronized (lock) {
 
             if (welcomeMap != null && welcomeMap.size() > 0) {
                 return randomOneMsg(welcomeMap);
@@ -574,7 +574,7 @@ public class InteractiveService {
      * @return
      */
     public Long getEventWelcomeResponse(String userStatus) {
-        synchronized (INIT_FLAG) {
+		synchronized (lock) {
 
             if (eventWelcomeMap != null && eventWelcomeMap.size() > 0 &&
                     eventWelcomeMap.get(userStatus) != null && eventWelcomeMap.get(userStatus).size() > 0) {
@@ -592,7 +592,7 @@ public class InteractiveService {
      * @return
      */
     public List<MsgDetail> getMsgDetails(Long iMsgId) {
-        synchronized (INIT_FLAG) {
+		synchronized (lock) {
             List<MsgDetail> details = interactiveDetails.get(iMsgId);
             if (details != null) {
             } else {

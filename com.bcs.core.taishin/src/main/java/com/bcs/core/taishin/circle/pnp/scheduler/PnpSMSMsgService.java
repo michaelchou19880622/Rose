@@ -27,6 +27,7 @@ import com.bcs.core.taishin.circle.pnp.db.repository.PnpRepositoryCustom;
 import com.bcs.core.taishin.circle.pnp.ftp.PNPFtpService;
 import com.bcs.core.taishin.circle.pnp.ftp.PnpFtpSetting;
 import com.bcs.core.utils.DataUtils;
+import com.bcs.core.db.repository.EntityManagerControl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -78,6 +79,12 @@ public class PnpSMSMsgService {
     private PnpMainUnicaRepository pnpMainUnicaRepository;
     private PnpRepositoryCustom pnpRepositoryCustom;
 
+    /**
+     * EntityManagerControl for Persist Insert
+     */
+    @Autowired
+    private EntityManagerControl entityManagerControl;   
+
 
     @Autowired
     public PnpSMSMsgService(PNPFtpService pnpFtpService,
@@ -128,18 +135,24 @@ public class PnpSMSMsgService {
     private void sendSmsProcess(PnpFtpSourceEnum type) {
         try {
             log.info("Start Check Has BC Fail To SMS Data : {}", type);
+            
+	        // long start = System.currentTimeMillis();
+            // long end ;
+
             /* Find to sms data*/
             List<PnpDetail> detailList = new ArrayList<>();
+            
             detailList.addAll(getBcToSmsList(type));
             detailList.addAll(getPnpToSmsList(type));
             detailList.addAll(getPnpExpiredToSmsList(type));
 
             if (CollectionUtils.isEmpty(detailList)) {
-                log.info("{} does not found to sms data!!", type);
+//                log.info("{} does not found to sms data!!", type);
                 return;
             }
-
-            log.info("Detail list size is {}\nvalue:{}", detailList.size(), DataUtils.toPrettyJsonUseJackson(detailList));
+            
+//            log.info("Detail list size is {}\nvalue:{}", detailList.size(), DataUtils.toPrettyJsonUseJackson(detailList));
+            log.info("{} type detail list size is {}", type, detailList.size());
             /* Update Expired Status */
             Date now = new Date();
             for (PnpDetail detail : detailList) {
@@ -151,20 +164,41 @@ public class PnpSMSMsgService {
                 detail.setModifyTime(now);
             }
 
+            // log.info("Before updateDetailStatus()");               	
             List<PnpDetail> afterSaveList = updateDetailStatus(type, detailList);
+            //log.info("After updateDetailStatus()");  
+            // end = System.currentTimeMillis();
+            
             Map<String, InputStream> map = new HashMap<>();
+            // Map<Long, PnpMain> pnpMainMap = new HashMap<>();
+            //  PnpMain main = null;
+            // int i = 0;
             for (PnpDetail detail : afterSaveList) {
                 now = new Date();
                 detail.setModifyTime(now);
                 detail.setDetailScheduleTime(DataUtils.convDateToStr(now, "yyyy-MM-dd HH:mm:ss"));
-                log.info("Detail: {}", DataUtils.toPrettyJsonUseJackson(detail));
-
-                /* Find Main By Detail Id */
-                PnpMain main = pnpRepositoryCustom.findSingleMainById(type, detail.getPnpMainId());
+//                log.info("Detail: {}", DataUtils.toPrettyJsonUseJackson(detail));
+                log.info(String.format("Before Save Detail id:%s, Status:%s, PnPStatus:%s, BCStatus:%s, SMSStatus:%s ", detail.getPnpDetailId().toString(), detail.getStatus(), detail.getPnpStatus(), detail.getBcStatus(), detail.getSmsStatus()));
+            
+                /* Find Main By Detail Id -- Use Hash for Cache  */
+                 PnpMain main = pnpRepositoryCustom.findSingleMainById(type, detail.getPnpMainId());
+                 //TODO : 安排後續效能優化
+                /*
+//                if ((main = pnpMainMap.get(detail.getPnpMainId())) == null) { 
+//	                main = pnpRepositoryCustom.findSingleMainById(type, detail.getPnpMainId());
+//	                pnpMainMap.put(detail.getPnpMainId(), main);
+//                    log.info("Miss or Don't Hit Main id : {}, i : {} ", detail.getPnpMainId(), i );               	
+//                }
+//                else {
+//                    log.info("Hit Main id : {} , i : {}", detail.getPnpMainId(), i);               	
+//                }
+//                i++;
+                */
                 String smsFileName = changeFileName(main.getOrigFileName(), now);
                 main.setPnpDetails(Collections.singletonList(detail));
                 main.setSmsFileName(smsFileName);
                 main.setScheduleTime(DataUtils.convDateToStr(now, "yyyy-MM-dd HH:mm:ss"));
+//                pnpMainMap.put(detail.getPnpMainId(), main);
                 InputStream inputStream = getInputStream(type, Collections.singletonList(detail), main);
                 if (inputStream == null) {
                     log.error("InputStream is null!!");
@@ -172,19 +206,36 @@ public class PnpSMSMsgService {
                 }
                 map.put(smsFileName, inputStream);
             }
-
+            
             /* Send File To SMS FTP */
             uploadFileToSms(type, map);
-
+            // i = 0;
             for (PnpDetail detail : afterSaveList) {
-                PnpMain main = pnpRepositoryCustom.findSingleMainById(type, detail.getPnpMainId());
+            	 PnpMain main = pnpRepositoryCustom.findSingleMainById(type, detail.getPnpMainId());
+                /* Find Main By Detail Id -- Cache Policy*/
+            	
+                //TODO : 安排後續效能優化
+            	/*
+                if ((main = pnpMainMap.get(detail.getPnpMainId())) == null) { 
+	                main = pnpRepositoryCustom.findSingleMainById(type, detail.getPnpMainId());
+	                pnpMainMap.put(detail.getPnpMainId(), main);
+                    log.info("Not Hit Main id : {}, i : {} ", detail.getPnpMainId(), i );               	
+                }
+                else {
+                    log.info("Hit Main id : {} , i : {}", detail.getPnpMainId(), i);               	
+                } 
+                */     
+                // i++;                
                 String smsFileName = changeFileName(main.getOrigFileName(), now);
                 /* Save Main */
                 main.setProcStage(PnpStageEnum.SMS.value);
                 main.setSmsTime(now);
                 main.setModifyTime(now);
                 PnpMain afterSaveMain = saveMain(type, main);
-                log.info("After Save Main : {}", DataUtils.toPrettyJsonUseJackson(afterSaveMain));
+                //TODO : 安排後續效能優化
+//                pnpMainMap.put(detail.getPnpMainId(), main);
+//                log.info("After Save Main : {}", DataUtils.toPrettyJsonUseJackson(afterSaveMain));
+                log.info(String.format("After Save Main id:%s, Status:%s, ProcStage:%s, ModifyTime:%s ",afterSaveMain.getPnpMainId().toString(), afterSaveMain.getStatus(), afterSaveMain.getProcStage(), afterSaveMain.getModifyTime().toString()));                
 
                 /* Save Detail */
                 detail.setSmsFileName(smsFileName);
@@ -192,8 +243,15 @@ public class PnpSMSMsgService {
                 detail.setSmsTime(now);
                 detail.setModifyTime(now);
                 PnpDetail afterSaveDetail = saveDetail(type, detail);
-                log.info("After Save Detail : {}", DataUtils.toPrettyJsonUseJackson(afterSaveDetail));
+//              log.info("After Save Detail : {}", DataUtils.toPrettyJsonUseJackson(afterSaveDetail));
+                log.info(String.format("After Save Detail id:%s, Status:%s, PnPStatus:%s, BCStatus:%s, SMSStatus:%s ",afterSaveDetail.getPnpDetailId().toString(), afterSaveDetail.getStatus(), afterSaveDetail.getPnpStatus(), afterSaveDetail.getBcStatus(), afterSaveDetail.getSmsStatus()));                
             }
+            
+            // end = System.currentTimeMillis();
+            
+//            entityManagerControl.persistInsert(details);
+            // Cache Persist into DB.
+            
         } catch (Exception e) {
             log.error("Exception", e);
         }
@@ -396,7 +454,7 @@ public class PnpSMSMsgService {
         header.append(main.getValidityTime() + tag);
         header.append(main.getMsgType() + "\r\n");
 
-        log.info("Mitake Header: {}", DataUtils.toPrettyJsonUseJackson(header));
+        // log.info("Mitake Header: {}", DataUtils.toPrettyJsonUseJackson(header));
 
         /*
          * 三竹  body
@@ -416,7 +474,7 @@ public class PnpSMSMsgService {
             body.append(detail.getPhone() + tag);
             body.append(detail.getMsg() + "\r\n");
         }
-        log.info("Mitake Body: {}", DataUtils.toPrettyJsonUseJackson(header));
+        // log.info("Mitake Body: {}", DataUtils.toPrettyJsonUseJackson(header));
 
         return new ByteArrayInputStream((header.toString() + body.toString()).getBytes());
     }
@@ -449,7 +507,7 @@ public class PnpSMSMsgService {
         header.append(main.getMsgType() + tag);
         header.append(main.getBatchID() + "\r\n");
 
-        log.info("Every8d Header: {}", DataUtils.toPrettyJsonUseJackson(header));
+        // log.info("Every8d Header: {}", DataUtils.toPrettyJsonUseJackson(header));
 
         /*
          *   互動 body
@@ -480,7 +538,7 @@ public class PnpSMSMsgService {
             body.append(detail.getVariable1() + tag);
             body.append(detail.getVariable2() + "\r\n");
         }
-        log.info("Every8d body: {}", DataUtils.toPrettyJsonUseJackson(body));
+        // log.info("Every8d body: {}", DataUtils.toPrettyJsonUseJackson(body));
 
         return new ByteArrayInputStream((header.toString() + body.toString()).getBytes());
     }
@@ -513,7 +571,7 @@ public class PnpSMSMsgService {
         header.append(main.getMsgType() + tag);
         header.append(main.getBatchID() + "\r\n");
 
-        log.info("Unica Header: {}", DataUtils.toPrettyJsonUseJackson(header));
+        // log.info("Unica Header: {}", DataUtils.toPrettyJsonUseJackson(header));
 
         /*
          *   互動 body
@@ -544,7 +602,7 @@ public class PnpSMSMsgService {
             body.append(detail.getVariable1() + tag);
             body.append(detail.getVariable2() + "\r\n");
         }
-        log.info("Unica Body: {}", DataUtils.toPrettyJsonUseJackson(body));
+        // log.info("Unica Body: {}", DataUtils.toPrettyJsonUseJackson(body));
 
         return new ByteArrayInputStream((header.toString() + body.toString()).getBytes());
     }
@@ -571,7 +629,7 @@ public class PnpSMSMsgService {
             body.append(detail.getVariable2() + tag);
             body.append(detail.getKeepSecond() + "\r\n");
         }
-        log.info("Ming Body: {}", DataUtils.toPrettyJsonUseJackson(body));
+        // log.info("Ming Body: {}", DataUtils.toPrettyJsonUseJackson(body));
 
         return new ByteArrayInputStream((body.toString()).getBytes());
     }

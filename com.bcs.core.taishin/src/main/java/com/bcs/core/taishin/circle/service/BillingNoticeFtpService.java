@@ -257,7 +257,7 @@ public class BillingNoticeFtpService {
 
         // TemplateTitle => Details
         Map<String, List<BillingNoticeFtpDetail>> resultMap = parseDetail(fileContents);
-        log.info("File Content Map: {}", DataUtils.toPrettyJsonUseJackson(resultMap));
+        // log.info("File Content Map: {}", DataUtils.toPrettyJsonUseJackson(resultMap));
 
         List<BillingNoticeMain> mainList = new ArrayList<>();
         for (Map.Entry<String, List<BillingNoticeFtpDetail>> entry : resultMap.entrySet()) {

@@ -48,18 +48,18 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
     @Override
     @Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
     public Object[] updateStatus(String procApName, List<String> tempIds) {
-        log.info("[updateStatus] Process Ap Name: {}", procApName);
+        // log.info("[updateStatus] Process Ap Name: {}", procApName);
         log.info("[updateStatus] tempIds: {}", tempIds);
         
         try {
             Set<Long> allMainIds = new HashSet<>();
             
             /* 1. Find wait main set and update status to sending */
-            log.info("1. Find wait main set and update status to sending");
+            // log.info("1. Find wait main set and update status to sending");
             allMainIds.addAll(findWaitMainSet(procApName, tempIds));
             
             /* 2. Find retry main set and update status to sending */
-            log.info("2. Find retry main set and update status to sending");
+            // log.info("2. Find retry main set and update status to sending");
             allMainIds.addAll(findRetryMainSet(procApName, tempIds));
 
             /* Valid is empty */
@@ -187,7 +187,7 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
                     " AND TEMP_ID IN (:tempIds)" +
                     " ORDER BY CREAT_TIME DESC";
 
-            log.info("Wait String: {}", waitMainString);
+            // log.info("Wait String: {}", waitMainString);
             
             @SuppressWarnings("unchecked")
 			List<BigInteger> mainList = entityManager.createNativeQuery(waitMainString)
@@ -203,7 +203,7 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
             String updateString = "UPDATE BCS_BILLING_NOTICE_MAIN" +
                     " SET STATUS=:status, MODIFY_TIME=:modifyTime" +
                     " WHERE NOTICE_MAIN_ID IN (:ids)";
-            log.info("Update String: {}", updateString);
+            // log.info("Update String: {}", updateString);
 
             int modifyCount = entityManager.createNativeQuery(updateString)
                     .setParameter("modifyTime", new Date())
@@ -234,7 +234,7 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
                 " WHERE NOTICE_MAIN_ID IN (:IDS) " +
                 " AND STATUS IN (:STATUS_LIST)";
 
-        log.info(selectSql);
+        // log.info(selectSql);
 
         List<BigInteger> detailIdList = entityManager.createNativeQuery(selectSql)
                 .setParameter("STATUS_LIST", Arrays.asList(BillingNoticeMain.NOTICE_STATUS_WAIT, BillingNoticeMain.NOTICE_STATUS_RETRY))
@@ -248,7 +248,7 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
         String updateSql = "UPDATE BCS_BILLING_NOTICE_DETAIL" +
                 " SET STATUS=:NEW_STATUS, MODIFY_TIME=:MODIFY_TIME " +
                 " WHERE NOTICE_DETAIL_ID IN (:IDS)";
-        log.info(updateSql);
+        // log.info(updateSql);
         int i = entityManager.createNativeQuery(updateSql)
                 .setParameter("IDS", detailIdList)
                 .setParameter("MODIFY_TIME", new Date())
@@ -259,7 +259,7 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
         }
 
         String selectSql2 = "SELECT * FROM BCS_BILLING_NOTICE_DETAIL WHERE NOTICE_DETAIL_ID IN (:IDS)";
-        log.info(selectSql);
+        // log.info(selectSql);
         return entityManager.createNativeQuery(selectSql2, BillingNoticeDetail.class)
                 .setParameter("IDS", detailIdList)
                 .getResultList();
@@ -271,7 +271,7 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
         String updateSql = "UPDATE BCS_BILLING_NOTICE_DETAIL" +
                 " SET STATUS=:NEW_STATUS, MODIFY_TIME=:NOW" +
                 " WHERE STATUS=:OLD_STATUS";
-        log.info(updateSql);
+        // log.info(updateSql);
         int i = entityManager.createNativeQuery(updateSql)
                 .setParameter("OLD_STATUS", BillingNoticeMain.NOTICE_STATUS_SENDING)
                 .setParameter("NEW_STATUS", BillingNoticeMain.NOTICE_STATUS_WAIT)

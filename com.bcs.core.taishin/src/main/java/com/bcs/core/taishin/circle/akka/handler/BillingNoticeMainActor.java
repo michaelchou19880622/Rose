@@ -62,7 +62,12 @@ public class BillingNoticeMainActor extends UntypedActor {
         final int detailSize = details.size();
         final int maxActorCount = getMaxActorCount();
         final int buffer = getBuffer(detailSize, maxActorCount);
-        log.info("Detail: {}", DataUtils.toPrettyJsonUseJackson(details));
+//        log.info("Detail: {}", DataUtils.toPrettyJsonUseJackson(details));
+        
+        for (BillingNoticeDetail detail : details) {
+            log.info(String.format("BillingNoticeMainActor pushProcess details noticeDetailId : %s , noticeMainId : %s , UID : %s . status() : %s, text : %s", detail.getNoticeDetailId().toString(), detail.getNoticeMainId().toString(), detail.getUid(), detail.getStatus(), detail.getText()));              
+        }        
+        
         List<List<BillingNoticeDetail>> partitionList = ListUtils.partition(details, buffer);
         partitionList.forEach(list -> {
             log.info("To Akka Partition Size: {}", list.size());

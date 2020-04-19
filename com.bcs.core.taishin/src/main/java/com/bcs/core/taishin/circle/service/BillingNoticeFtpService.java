@@ -89,13 +89,13 @@ public class BillingNoticeFtpService {
     private void ftpProcess() {
         log.info("StartCircle....");
         boolean bigSwitch = CoreConfigReader.getBoolean(CONFIG_STR.BN_BIG_SWITCH, true, false);
-        log.info("bigSwitch = {}", bigSwitch);
+        // log.info("bigSwitch = {}", bigSwitch);
         
         String downloadSavePath = CoreConfigReader.getString(CONFIG_STR.BN_FTP_DOWNLOAD_SAVEFILEPATH, true, false);
-        log.info("downloadSavePath = {}", downloadSavePath);
+        // log.info("downloadSavePath = {}", downloadSavePath);
         
         String fileExtension = CoreConfigReader.getString(CONFIG_STR.BN_FTP_FILE_EXTENSION, true, false);
-        log.info("fileExtension = {}", fileExtension);
+        // log.info("fileExtension = {}", fileExtension);
 
         if (!bigSwitch) {
             return;
@@ -103,9 +103,9 @@ public class BillingNoticeFtpService {
 
         try {
             List<FtpSetting> ftpSettingList = ftpService.getFtpSettings();
-            log.info("ftpSettingList = {}", ftpSettingList);
+            // log.info("ftpSettingList = {}", ftpSettingList);
             
-            ftpSettingList.forEach(ftpSetting -> log.info("Ftp Path: {}", ftpSetting.getPath()));
+            // ftpSettingList.forEach(ftpSetting -> log.info("Ftp Path: {}", ftpSetting.getPath()));
             Map<String, byte[]> lReturnDataMap = downloadFtpFile(fileExtension, ftpSettingList);
             if (lReturnDataMap.isEmpty()) {
                 return;
@@ -196,7 +196,7 @@ public class BillingNoticeFtpService {
             if (StringUtils.isBlank(fileContents.get(i))) {
                 continue;
             }
-            log.info("fileContents" + fileContents);
+            // log.info("fileContents" + fileContents);
             String[] detailData = fileContents.get(i).split("\\|");
             switch (detailData.length) {
                 case 4:
@@ -213,7 +213,7 @@ public class BillingNoticeFtpService {
                     break;
             }
         }
-        log.info("details : " + details);
+        // log.info("details : " + details);
         Map<String, List<BillingNoticeFtpDetail>> resultMap = new HashMap<>();
 
         details.forEach(detail -> {
@@ -227,7 +227,7 @@ public class BillingNoticeFtpService {
                 resultMap.put(key, list);
             }
         });
-        log.info("BillingNoticeFtpDetail resultMap : " + resultMap);
+        // log.info("BillingNoticeFtpDetail resultMap : " + resultMap);
         return resultMap;
     }
 
@@ -342,13 +342,14 @@ public class BillingNoticeFtpService {
      * @param billingNoticeMain billingNoticeMain
      */
     private void saveDb(BillingNoticeMain billingNoticeMain) {
-        log.info("BillingNoticeFtpService billingNoticeMain = {}", billingNoticeMain);
+//        log.info("BillingNoticeFtpService billingNoticeMain = {}", billingNoticeMain);
     	
         List<BillingNoticeDetail> originalDetails = billingNoticeMain.getDetails();
-        log.info("BillingNoticeFtpService BillingNoticeDetail size: {}", originalDetails.size());
+//        log.info("BillingNoticeFtpService BillingNoticeDetail size: {}", originalDetails.size());
         
         billingNoticeMain.setProcApName(DataUtils.getRandomProcApName());
-        log.info("BillingNoticeFtpService billingNoticeMain.getProcApName() = {}", billingNoticeMain.getProcApName());
+//      log.info("BillingNoticeFtpService billingNoticeMain.getProcApName() = {}", billingNoticeMain.getProcApName());
+        log.info(String.format("BillingNoticeFtpService billingNoticeMain NoticeMainId : %s , status : %s , procApName : %s . OriginalDetails.size():%d", billingNoticeMain.getNoticeMainId(), billingNoticeMain.getStatus(), billingNoticeMain.getProcApName(), originalDetails.size()));              
         
         billingNoticeMain = billingNoticeMainRepository.save(billingNoticeMain);
         List<BillingNoticeDetail> detailList = new ArrayList<>();

@@ -262,8 +262,10 @@ public class BillingNoticeService {
             int retryCountLimit = DEFAULT_RETRY_COUNT;
             do {
                 i++;
-                log.info("This is count is {}", i);
-
+                if (i > 1) {
+                	// Only Log when counter >= 2.
+	                log.info("This is count is {}", i);
+                }
                 log.info("To Line Uid: {}", detail.getUid());
 
                 JSONObject requestBody = new JSONObject();
@@ -271,10 +273,17 @@ public class BillingNoticeService {
                 requestBody.put("messages", combineLineMessage(templateMsg, detail));
                 HttpEntity<String> httpEntity = new HttpEntity<>(requestBody.toString(), headers);
 
-                try {
-                    RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
-                    JSONObject result = restfulUtil.execute();
-                    log.info("Result: {}", result.toString());
+                try {     
+                    /* Production 才真正發送訊息 
+                     * 
+                     * 注意 : 不能使用isSystemTypeProduction() 進行判斷, 目前設定都是Develop mode.
+                     * 
+                     * */
+            		if(!CoreConfigReader.isPNPFtpTypeDevelop()){
+                        RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
+                        JSONObject result = restfulUtil.execute();
+                        log.info("Result: {}", result.toString());
+            		}                	
                     detail.setStatus(BillingNoticeMain.NOTICE_STATUS_COMPLETE);
                     detail.setSendTime(new Date());
                     log.info("Execute Success!!");
@@ -283,30 +292,21 @@ public class BillingNoticeService {
                     log.info("NOTICE_STATUS_RETRY NoticeDetailId:" + detail.getNoticeDetailId());
                     log.error("NOTICE_STATUS_RETRY KeyManagementException | NoSuchAlgorithmException: ", e1);
                     detail.setStatus(BillingNoticeMain.NOTICE_STATUS_RETRY);
-                    isDoRetry = i <= retryCountLimit;
+                    isDoRetry = i < retryCountLimit;
                     sleepProcess();
                 } catch (HttpClientErrorException he) {
-                    log.error("HttpClientErrorException:", he);
-                    JSONObject errorMessage = new JSONObject(he.getResponseBodyAsString());
-                    if (errorMessage.has("message")) {
-                        log.error("HttpClientErrorException StatusCode: {}", he.getStatusCode().toString());
-                        if (errorMessage.has("details")) {
-                            log.error("HttpClientErrorException Details: {}", errorMessage.getJSONArray("details").toString());
-                        }
-                    }
-                    isDoRetry = i <= retryCountLimit;
+                    log.error("HttpServerErrorException Error :", he);                    
+                    log.error("HttpServerErrorException Status code: " + he.getStatusCode().toString());
+                    log.error("HttpServerErrorException Response body: " + he.getResponseBodyAsString());
+                    detail.setStatus(BillingNoticeMain.NOTICE_STATUS_RETRY);                   
+                    isDoRetry = i < retryCountLimit;
                     sleepProcess();
                 } catch (HttpServerErrorException se) {
-                    log.error("HttpServerErrorException Error :", se);
-                    JSONObject errorMessage = new JSONObject(se.getResponseBodyAsString());
-                    if (errorMessage.has("message")) {
-                        log.error("HttpServerErrorException StatusCode: {}", se.getStatusCode().toString());
-                        if (errorMessage.has("details")) {
-                            log.error("HttpServerErrorException Details: {}", errorMessage.getJSONArray("details").toString());
-                        }
-                    }
+                    log.error("HttpServerErrorException Error :", se);                    
+                    log.error("HttpServerErrorException Status code: " + se.getStatusCode().toString());
+                    log.error("HttpServerErrorException Response body: " + se.getResponseBodyAsString());
                     detail.setStatus(BillingNoticeMain.NOTICE_STATUS_RETRY);
-                    isDoRetry = i <= retryCountLimit;
+                    isDoRetry = i < retryCountLimit;
                     sleepProcess();
                 } catch (NullPointerException ne) {
                     log.info("NoticeDetailId:" + detail.getNoticeDetailId());
@@ -316,8 +316,8 @@ public class BillingNoticeService {
                     log.info("NOTICE_STATUS_RETRY NoticeDetailId:" + detail.getNoticeDetailId());
                     log.error("NOTICE_STATUS_RETRY Exception:", e);
                     detail.setStatus(BillingNoticeMain.NOTICE_STATUS_RETRY);
-                    isDoRetry = i <= retryCountLimit;
-                    sleepProcess();
+                    isDoRetry = i < retryCountLimit;
+                    sleepProcess();                    
                 }
 
             } while (isDoRetry);
@@ -384,13 +384,13 @@ public class BillingNoticeService {
         JSONArray messagesArray = new JSONArray();
         messagesArray.put(message);
 
-        log.info("Message Array: {}", DataUtils.toPrettyJsonUseJackson(messagesArray));
+        // log.info("Message Array: {}", DataUtils.toPrettyJsonUseJackson(messagesArray));
         return messagesArray;
     }
 
     private JSONObject typeButtonProcess(BillingNoticeContentTemplateMsg templateMsg, BillingNoticeDetail detail) {
         String imageUrl = UriHelper.getCdnResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, templateMsg.getTemplateImageId());
-        log.info("imageUrl1: " + imageUrl);
+        // log.info("imageUrl1: " + imageUrl);
         JSONObject templateObject = new JSONObject();
         templateObject.put("type", templateMsg.getTemplateType());
         templateObject.put("thumbnailImageUrl", imageUrl);
@@ -427,7 +427,7 @@ public class BillingNoticeService {
         imageUrl = UriHelper.getCdnResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, templateMsg.getTemplateImageId());
         //imageUrl = UriHelper.getResourceUri(ContentResource.RESOURCE_TYPE_IMAGE, templateMsg.getTemplateImageId());
         //imageUrl = "https://images.unsplash.com/photo-1556228720-9b1e04f13f63";
-        log.info("imageUrl1: " + imageUrl);
+        // log.info("imageUrl1: " + imageUrl);
         columnObject.put("thumbnailImageUrl", imageUrl);
         columnObject.put("title", detail.getTitle());
         columnObject.put("text", detail.getText());

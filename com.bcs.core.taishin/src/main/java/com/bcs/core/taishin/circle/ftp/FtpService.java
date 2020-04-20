@@ -122,15 +122,15 @@ public class FtpService {
             ftpSetting.setServerHostName(serverHostName);
             ftpSetting.setServerHostNamePort(serverHostNamePort);
 
-            log.info("Before connect FtpSetting info: {}", DataUtils.toPrettyJsonUseJackson(ftpSetting));
+            // log.info("Before connect FtpSetting info: {}", DataUtils.toPrettyJsonUseJackson(ftpSetting));
 
             if (!CoreConfigReader.isBillingNoticeFtpTypeDevelop()) {
-                log.info("Use Production Environment!!");
+                //  log.info("Use Production Environment!!");
                 if (!validateFtpHostData(ftpSetting)) {
                     throw new RuntimeException("FTP setting error!");
                 }
             } else {
-                log.info("Use Develop Environment!!");
+                // log.info("Use Develop Environment!!");
                 if (!validateDevFtpHostData(ftpSetting)) {
                     throw new RuntimeException("FTP setting error!");
                 }
@@ -431,7 +431,7 @@ public class FtpService {
      * @return 下載的檔案內容
      */
     public Map<String, byte[]> downloadMultipleFileByType(String directory, String extension, FtpSetting setting) {
-        log.info(setting.getHost() + " setting getFileEncoding:" + setting.getFileEncoding());
+        // log.info(setting.getHost() + " setting getFileEncoding:" + setting.getFileEncoding());
         if ("sftp".equalsIgnoreCase(setting.getProtocol())) {
             if (CoreConfigReader.isBillingNoticeFtpTypeDevelop()) {
                 return downloadMultipleFileInSFTPForDev(directory, extension, setting);

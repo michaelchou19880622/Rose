@@ -297,15 +297,24 @@ public class PnpService {
                 continue;
             }
 
-            /* 發送訊息 */
-            final Object[] pushResult = pnpPushMessage(url, headers, detail, detail.getUid());
-            final boolean isSuccess = (boolean) pushResult[0];
-            final String httpStatusCode = (String) pushResult[1];
-            //FIXME : For Testing.
-//            final boolean isSuccess = true;
-//            final String httpStatusCode = "200";
-			
-            
+            /* Production 才真正發送訊息 
+             * 
+             * 注意 : 不能使用isSystemTypeProduction() 進行判斷, 目前設定都是Develop mode.
+             * 
+             * */
+            final boolean isSuccess ;
+            final String httpStatusCode ;
+    		if(CoreConfigReader.isPNPFtpTypeDevelop()){
+	            isSuccess = true;
+	            httpStatusCode = "200";			
+                log.info("PNP Development mode");
+    		}
+    		else {
+	            final Object[] pushResult = pnpPushMessage(url, headers, detail, detail.getUid());
+	            isSuccess = (boolean) pushResult[0];
+	            httpStatusCode = (String) pushResult[1];
+    		}            
+    		
             if (!isSuccess) {
                 switch (processFlow) {
                     case BC_SMS:
@@ -554,15 +563,25 @@ public class PnpService {
                 headers.set("X-Line-Delivery-Tag", deliveryTag);
                 log.info("X-Line-Delivery-Tag : " + deliveryTag);
 
-                /* 發送訊息 */
-                Object[] pushResult = pnpPushMessage(url, headers, detail, detail.getPhoneHash());
-                boolean isSuccess = (boolean) pushResult[0];
-                String httpStatusCode = (String) pushResult[1];
-                //FIXME : For Testing.
-//                boolean isSuccess = true;
-//                String httpStatusCode = "200";
-    			
-               
+                
+                /* Production 才真正發送訊息 
+                 * 
+                 * 注意 : 不能使用isSystemTypeProduction() 進行判斷, 目前設定都是Develop mode.
+                 * 
+                 * */
+                final boolean isSuccess ;
+                final String httpStatusCode ;
+        		if(CoreConfigReader.isPNPFtpTypeDevelop()){
+        			isSuccess = true;
+    	            httpStatusCode = "200";			
+                    log.info("PNP Development mode");
+        		}
+        		else {
+                    final Object[] pushResult = pnpPushMessage(url, headers, detail, detail.getPhoneHash());
+                    isSuccess = (boolean) pushResult[0];
+                    httpStatusCode = (String) pushResult[1];
+        		}            
+        		   		               
                 detail.setPnpHttpStatusCode(httpStatusCode);
 
                 Date pnpSendTime = new Date();

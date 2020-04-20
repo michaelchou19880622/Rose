@@ -79,7 +79,7 @@ public class BillingNoticeSendMsgService {
     private void sendProcess() {
         log.info("BillingNoticeSendMsgService startCircle.... ");
         boolean bigSwitch = CoreConfigReader.getBoolean(CONFIG_STR.BN_BIG_SWITCH, true, false);
-        log.info("帳務通知大開關: {}", bigSwitch);
+        // log.info("帳務通知大開關: {}", bigSwitch);
         if (!bigSwitch) {
             return;
         }
@@ -92,7 +92,8 @@ public class BillingNoticeSendMsgService {
             AtomicInteger i = new AtomicInteger();
             billingNoticeMainList.forEach(billingNoticeMain -> {
                 i.getAndIncrement();
-                log.info("To Akka BillingNoticeMain {}: {}", i, DataUtils.toPrettyJsonUseJackson(billingNoticeMain));
+                //log.info("To Akka BillingNoticeMain {}: {}", i, DataUtils.toPrettyJsonUseJackson(billingNoticeMain));
+                log.info(String.format("To Akka BillingNoticeMain i:%s: , billingNoticeMain NoticeMainId : %s status : %s ", i.toString(), billingNoticeMain.getNoticeMainId(), billingNoticeMain.getStatus()));              
             });
             billingNoticeMainList.forEach(billingNoticeMain -> billingNoticeAkkaService.tell(billingNoticeMain));
         } catch (Exception e) {
@@ -107,7 +108,7 @@ public class BillingNoticeSendMsgService {
     @SuppressWarnings("unchecked")
     public List<BillingNoticeMain> sendingBillingNoticeMain(String procApName) {
         List<String> templateIdList = billingNoticeService.findProductSwitchOnTemplateId();
-        log.info("templateIdList = {}", templateIdList);
+        // log.info("templateIdList = {}", templateIdList);
         
         if (templateIdList == null || templateIdList.isEmpty()) {
             log.info("Template Id List Is Empty!!");
@@ -122,8 +123,9 @@ public class BillingNoticeSendMsgService {
         log.info("allMainIdSet = {}", allMainIdSet);
         
         List<BillingNoticeDetail> allDetails = (List<BillingNoticeDetail>) returnArray[1];
-        log.info("allDetails = {}", allDetails);
+        // log.info("allDetails = {}", allDetails);
 
+        
         if (allMainIdSet.isEmpty()) {
             log.info("Main Id Set Is Empty!!");
             return Collections.emptyList();

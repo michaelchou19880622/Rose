@@ -347,7 +347,7 @@ public class OracleService {
                         "     acct_grp_cd, " +
                         "     card_div, " +
                         "     card_dept, " +
-                        "     dept_easy_nm " +
+                        "     dept_easy_nm, " +
                         "     quit_dt " +                        
                         " from " +
                         "     %s.hr_emp " +

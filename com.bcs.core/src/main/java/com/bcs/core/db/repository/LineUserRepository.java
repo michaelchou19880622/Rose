@@ -71,7 +71,7 @@ public interface LineUserRepository extends EntityRepository<LineUser, String>, 
      * @param mids the mids
      * @return the list
      */
-    @Query("select x.mid from LineUser x where x.mid in ( ?1 ) and (x.status = 'BINDED' or x.status = 'UNBIND')")
+    @Query("select x.mid from LineUser x where x.mid in ( ?1 ) and (x.status = 'BINDED' or (x.status = 'UNBIND' or x.status = 'SYSADD'))")
     List<String> findMidByMidInAndActive(List<String> mids);
 
     /**
@@ -92,7 +92,7 @@ public interface LineUserRepository extends EntityRepository<LineUser, String>, 
      * @return the long
      */
     @Transactional(readOnly = true, timeout = 30)
-    @Query(value = "SELECT COUNT(DISTINCT MID) FROM BCS_LINE_USER WHERE  STATUS = ?1 AND CREATE_TIME >= ?2 AND CREATE_TIME < ?3", nativeQuery = true)
+    @Query(value = "SELECT COUNT(DISTINCT MID) FROM BCS_LINE_USER WHERE STATUS = ?1 AND CREATE_TIME >= ?2 AND CREATE_TIME < ?3", nativeQuery = true)
     Long countByStatus(String status, String start, String end);
 
     /**
@@ -122,8 +122,19 @@ public interface LineUserRepository extends EntityRepository<LineUser, String>, 
      * @return the string
      */
     @Transactional(readOnly = true, timeout = 30)
-    @Query("select x.mid from LineUser x where x.status in ( ?1 ) and x.mid = (?2)")
+    @Query("select x.mid from LineUser x where x.status in ( ?1 ) and x.mid = (?3)")
     String checkMIDByStatus(String status, String mid);
+
+    /**
+     * Check mid by status string.
+     *
+     * @param status the status
+     * @param mid    the mid
+     * @return the string
+     */
+    @Transactional(readOnly = true, timeout = 30)
+    @Query("select x.mid from LineUser x where x.status in ( ?1, ?2 ) and x.mid = (?3)")
+    String checkMIDByStatus(String status, String status2, String mid);
 
     /**
      * Get mid by mobile.
@@ -142,7 +153,7 @@ public interface LineUserRepository extends EntityRepository<LineUser, String>, 
      * @return the page
      */
     @Transactional(readOnly = true, timeout = 30)
-    @Query("select x.mid from LineUser x where x.status = 'BINDED' or x.status = 'UNBIND'")
+    @Query("select x.mid from LineUser x where x.status = 'BINDED' or (x.status = 'UNBIND' or x.status = 'SYSADD')")
     Page<String> findMIDAllActive(Pageable pageable);
 
     /**
@@ -152,7 +163,7 @@ public interface LineUserRepository extends EntityRepository<LineUser, String>, 
      * @return the string
      */
     @Transactional(readOnly = true, timeout = 30)
-    @Query("select x.mid from LineUser x where (x.status = 'BINDED' or x.status = 'UNBIND') and x.mid = (?1)")
+    @Query("select x.mid from LineUser x where (x.status = 'BINDED' or (x.status = 'UNBIND' or x.status = 'SYSADD')) and x.mid = (?1)")
     String checkMIDAllActive(String mid);
 
     /**

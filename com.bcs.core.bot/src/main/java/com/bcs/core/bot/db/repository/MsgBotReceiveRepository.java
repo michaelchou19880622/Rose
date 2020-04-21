@@ -173,5 +173,14 @@ public interface MsgBotReceiveRepository extends EntityRepository<MsgBotReceive,
 	@Modifying(flushAutomatically = true)
 	@Query(value = "update BCS_PNP_DETAIL_UNICA set PNP_STATUS = 'PNP_COMPLETE' , SEND_TIME = ?1 , MODIFY_TIME = ?1, PNP_DELIVERY_TIME = ?1 WHERE PNP_DETAIL_ID = ?2", nativeQuery = true)            
 	void updatePnpUnicaDetailStatus( Date sendTime, String detailId);    
+	
+	/**
+     * Find top 1 by event_type and source id.
+     *
+     * @param eventType the user status
+     * @param sourceId   the pageable
+     * @return MsgBotReceive
+     */
+	List<MsgBotReceive> findTopByEventTypeAndSourceIdOrderBySourceId(String eventType, String sourceId);
 
 }

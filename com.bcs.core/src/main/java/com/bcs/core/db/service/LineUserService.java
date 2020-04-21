@@ -1,12 +1,8 @@
 package com.bcs.core.db.service;
 
-import com.bcs.core.api.service.LineFriendShipStatusService;
-import com.bcs.core.db.entity.LineUser;
-import com.bcs.core.db.entity.UserTraceLog;
-import com.bcs.core.db.repository.LineUserRepository;
-import com.bcs.core.enums.LOG_TARGET_ACTION_TYPE;
-import com.bcs.core.spring.ApplicationContextProvider;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -16,9 +12,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
+import com.bcs.core.db.entity.LineUser;
+import com.bcs.core.db.entity.UserTraceLog;
+import com.bcs.core.db.repository.LineUserRepository;
+import com.bcs.core.enums.LOG_TARGET_ACTION_TYPE;
 
 /**
  * The type Line user service.
@@ -32,7 +29,7 @@ public class LineUserService {
 
     @Autowired
     private LineUserRepository lineUserRepository;
-
+    
     @Autowired
     private UserTraceLogService userTraceLogService;
 
@@ -118,26 +115,10 @@ public class LineUserService {
     public LineUser findByMidAndCreateSysAdd(String mid) {
         LineUser lineUser = findByMid(mid);
         if (lineUser == null) {
-        	
-        	
             Date time = new Date();
             lineUser = new LineUser();
             lineUser.setMid(mid);
-
-        	// TODO: 增加防呆，先打LINE API檢查FriendStatus (false -> SYSADD; true -> UNBIND)
-            // Get FriendShip Status
-//			ObjectNode getFriendShipStatus = ApplicationContextProvider.getApplicationContext().getBean(LineFriendShipStatusService.class).getFriendShipStatusService(access_token);
-//			if (getFriendShipStatus != null 
-//					&& getFriendShipStatus.get("friendFlag") != null 
-//					&& StringUtils.isNotBlank(getFriendShipStatus.get("friendFlag").asText())) {
-//				
-//				boolean isFriend = getFriendShipStatus.get("friendFlag").asBoolean();
-//				
-//				lineUser.setStatus((isFriend)? LineUser.STATUS_UNBIND : LineUser.STATUS_SYS_ADD);
-//			}
-            
-            lineUser.setStatus(LineUser.STATUS_SYS_ADD); // 上面的防呆機制打開後，這行可以移除。
-            
+            lineUser.setStatus(LineUser.STATUS_SYS_ADD);
             lineUser.setIsBinded(LineUser.STATUS_UNBIND);
             lineUser.setModifyTime(time);
             lineUser.setCreateTime(time);
@@ -245,6 +226,20 @@ public class LineUserService {
 
         String result = lineUserRepository.checkMIDByStatus(status, mid);
         logger.debug("checkMIDByStatus:" + result);
+        return StringUtils.isBlank(result);
+    }
+
+    /**
+     * Check mid in status boolean.
+     *
+     * @param status the status
+     * @param mid    the mid
+     * @return the boolean
+     */
+    public Boolean checkMIDByStatus(String status, String status2, String mid) {
+
+        String result = lineUserRepository.checkMIDByStatus(status, status2, mid);
+        logger.info("checkMIDByStatus:" + result);
         return StringUtils.isBlank(result);
     }
 

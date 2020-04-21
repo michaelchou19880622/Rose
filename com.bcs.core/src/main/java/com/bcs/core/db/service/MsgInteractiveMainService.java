@@ -95,7 +95,7 @@ public class MsgInteractiveMainService {
 		try {
 			logger.info("dataCache = " + dataCache);
 			MsgInteractiveMain result = dataCache.get(iMsgId);
-			logger.info("result = " + result);
+			logger.info("dataCache result  = " + result);
 			if (notNull(result)) {
 				return result;
 			}
@@ -103,7 +103,7 @@ public class MsgInteractiveMainService {
 		}
 
 		MsgInteractiveMain result = msgInteractiveMainRepository.findOne(iMsgId);
-		logger.info("result = " + result);
+		logger.info("dataBase result = " + result);
 		if (result != null) {
 			dataCache.put(iMsgId, result);
 		}

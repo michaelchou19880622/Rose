@@ -111,6 +111,7 @@ public class ReceivingMsgHandlerMsgReceiveOp extends UntypedActor {
             lineUserService.save(user);
             lineUserService.saveLog(user, user.getMid(), LOG_TARGET_ACTION_TYPE.ACTION_Block, user.getMid());
         }
+        
         //call Taishin api通知user已封鎖
         lineUserStatusService.callLineUserStatusAPI(mid, LineUser.STATUS_BLOCK, now.getTime());
     }
@@ -122,20 +123,43 @@ public class ReceivingMsgHandlerMsgReceiveOp extends UntypedActor {
      * @param now now
      */
     private void newFriend(MsgBotReceive receive, String mid, Date now) {
+        log.info("---------- newFriend ----------");
         LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
         LineUser lineUser = lineUserService.findByMid(receive.getSourceId());
+        log.info("lineUser = {}", lineUser);
+        
         if (lineUser != null) {
+        	
             Date date = lineUser.getCreateTime();
             lineUser.setCreateTime(date == null ? now : date);
-            String isBind = lineUser.getIsBinded();
-            lineUser.setStatus(StringUtils.isBlank(isBind) ? LineUser.STATUS_UNBIND : isBind);
+            
+            String status = lineUser.getStatus();
+            log.info("status = {}", status);
+            
+            String isBinded = lineUser.getIsBinded();
+            log.info("isBinded = {}", isBinded);
+            
+            if (status.equals(LineUser.STATUS_SYS_ADD)) {
+            	// 如果 STATUS 狀態為 SYSADD，則更新為 UNBIND
+            	status = LineUser.STATUS_UNBIND;
+            } else {
+            	// 如果 STATUS 狀態不為 SYSADD，則檢查 ISBINDED 狀態是否為 UNBIND，若是，則更新為 UNBIND；否則更新為當前的 ISBINDED 狀態。
+            	status = (StringUtils.isBlank(isBinded) ? LineUser.STATUS_UNBIND : isBinded);
+			}
+
+            log.info("final status = {}", status);
+            
+            lineUser.setStatus(status);
             lineUser.setModifyTime(now);
+            log.info("[ LineUser UPDATE ] lineUser = {}", lineUser);
+            
             lineUserService.save(lineUser);
-            lineUserService.saveLog(lineUser, lineUser.getMid(), LOG_TARGET_ACTION_TYPE.ACTION_Unbind, lineUser.getMid());
         } else {
-            LineUser user = lineUserService.findByMidAndCreateUnbind(mid);
-            lineUserService.saveLog(user, user.getMid(), LOG_TARGET_ACTION_TYPE.ACTION_Unbind, user.getMid());
+        	lineUser = lineUserService.findByMidAndCreateUnbind(mid);
+            log.info("[ LineUser CREATE ] lineUser = {}", lineUser);
         }
+        
+        lineUserService.saveLog(lineUser, lineUser.getMid(), LOG_TARGET_ACTION_TYPE.ACTION_Unbind, lineUser.getMid());
     }
 
     /**

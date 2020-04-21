@@ -11,7 +11,7 @@ import com.bcs.core.utils.ErrorRecord;
 
 @Service
 public class InteractiveOtherRoleHandler {
-	
+
 	/** Logger */
 	private static Logger logger = Logger.getLogger(InteractiveOtherRoleHandler.class);
 
@@ -19,34 +19,32 @@ public class InteractiveOtherRoleHandler {
 	private GroupGenerateService groupGenerateService;
 	@Autowired
 	private SendGroupService sendGroupService;
-	
-	public  boolean checkMatchOtherRole(String MID, String otherRole){
+
+	public boolean checkMatchOtherRole(String MID, String otherRole) {
 
 		logger.info("MID = " + MID);
 		logger.info("otherRole = " + otherRole);
-		
-		if(StringUtils.isNotBlank(otherRole) && otherRole.startsWith("GROUPID")){
-			try{
+
+		if (StringUtils.isNotBlank(otherRole) && otherRole.startsWith("GROUPID")) {
+			try {
 				String groupIdStr = otherRole.substring("GROUPID".length());
 				logger.info("groupIdStr = " + groupIdStr);
-				
+
 				Long groupId = Long.parseLong(groupIdStr);
 				logger.info("groupId = " + groupId);
-				
-				if(groupId > 0){
+
+				if (groupId > 0) {
 					return groupGenerateService.checkMIDBySendGroupDetailGroupId(groupId, MID);
-				}
-				else{ 
-					// if groupID = -1, -2, -3 or -4, are the default send group. 
+				} else {
+					// if groupID = -1, -2, -3 or -4, are the default send group.
 					// Ref. DEFAULT_SEND_GROUP
 					return sendGroupService.checkMidExistDefaultGroup(groupId, MID);
 				}
-			}
-			catch(Exception e){
-	    		logger.error(ErrorRecord.recordError(e));
+			} catch (Exception e) {
+				logger.error(ErrorRecord.recordError(e));
 			}
 		}
-		
+
 		return false;
 	}
 }

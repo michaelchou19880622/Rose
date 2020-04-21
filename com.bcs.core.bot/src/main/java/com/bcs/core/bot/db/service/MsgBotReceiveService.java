@@ -121,4 +121,8 @@ public class MsgBotReceiveService {
             throw e;
         }
     }
+
+    public List<MsgBotReceive> findTopByEventTypeAndSourceIdOrderBySourceId(String eventType, String sourceId) {
+        return msgBotReceiveRepository.findTopByEventTypeAndSourceIdOrderBySourceId(eventType, sourceId);
+    }
 }

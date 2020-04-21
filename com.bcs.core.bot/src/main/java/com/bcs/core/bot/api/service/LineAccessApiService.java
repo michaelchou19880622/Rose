@@ -105,22 +105,79 @@ public class LineAccessApiService {
         }
     }
 
-
     private static LineMessagingService getService(String channelId, String channelName) {
+        log.info("getService");
+        
+        log.info("channelId = {}", channelId);
+        log.info("channelName = {}", channelName);
+        
         String channel = channelId + channelName;
-        log.info("Channel = " + channel);
+        log.info("channel = {}", channel);
 
         List<LineMessagingService> lineMessagingServices = lineMessagingServiceMap.get(channel);
         if (lineMessagingServices == null || lineMessagingServices.isEmpty()) {
             String channelToken = CoreConfigReader.getString(channelId, CONFIG_STR.CHANNEL_TOKEN.toString(), true);
             log.info("channelToken = " + channelToken);
 
-//			// Michael Test, need modify.
-//			channelToken = CoreConfigReader.getString(CONFIG_STR.Default.toString(), "ChannelToken", true);
-//			log.info("test channelToken = " + channelToken);
+//            final String serviceCode = CoreConfigReader.getString(channelName, CONFIG_STR.CHANNEL_SERVICE_CODE.toString(), true);
+//            log.info("serviceCode = " + serviceCode);
+
+            if (lineMessagingServices == null) {
+                lineMessagingServices = new ArrayList<>();
+                lineMessagingServiceMap.put(channel, lineMessagingServices);
+            }
+
+            if (lineMessagingServices.isEmpty()) {
+                for (int i = 0; i < 300; i++) {
+                    LineMessagingServiceBuilder builder = LineMessagingServiceBuilder.create(channelToken);
+
+                    Interceptor interceptor = new Interceptor() {
+                        @Override
+                        public okhttp3.Response intercept(Chain chain) throws IOException {
+                            Request request = chain.request().newBuilder().build();
+                            return chain.proceed(request);
+                        }
+                    };
+
+                    builder.addInterceptor(interceptor);
+                    builder.connectTimeout(300_000);
+                    builder.readTimeout(300_000);
+                    builder.writeTimeout(300_000);
+                    LineMessagingService lineMessagingService = builder.build();
+
+                    LineMessagingServiceBuilderBcs bcs = new LineMessagingServiceBuilderBcs();
+                    try {
+                        String proxyUrl = CoreConfigReader.getString(CONFIG_STR.TAISHIN_PROXY_URL.toString(), true);
+                        if (StringUtils.isNotBlank(proxyUrl)) {
+                            lineMessagingService = bcs.build(builder, true, proxyUrl);
+                        }
+                    } catch (Exception e) {
+                        log.error(ErrorRecord.recordError(e));
+                    }
+                    lineMessagingServices.add(lineMessagingService);
+                }
+            }
+        }
+
+        return randomOne(lineMessagingServices);
+    }
+    
+    private static LineMessagingService getServiceWithServiceCode(String channelId, String channelName) {
+        log.info("getServiceWithServiceCode");
+        
+        log.info("channelId = {}", channelId);
+        log.info("channelName = {}", channelName);
+    	
+        String channel = channelId + channelName;
+        log.info("Channel = {}", channel);
+
+        List<LineMessagingService> lineMessagingServices = lineMessagingServiceMap.get(channel);
+        if (lineMessagingServices == null || lineMessagingServices.isEmpty()) {
+            String channelToken = CoreConfigReader.getString(channelId, CONFIG_STR.CHANNEL_TOKEN.toString(), true);
+            log.info("channelToken = {}", channelToken);
 
             final String serviceCode = CoreConfigReader.getString(channelName, CONFIG_STR.CHANNEL_SERVICE_CODE.toString(), true);
-            log.info("serviceCode = " + serviceCode);
+            log.info("serviceCode = {}", serviceCode);
 
             if (lineMessagingServices == null) {
                 lineMessagingServices = new ArrayList<>();
@@ -181,6 +238,81 @@ public class LineAccessApiService {
     }
 
     public static Response<BotApiResponse> sendToLine(SendToBotModel sendToBotModel) throws Exception {
+        log.info("sendToBotModel:" + sendToBotModel);
+
+        String channelId = sendToBotModel.getChannelId();
+        String channelName = sendToBotModel.getChannelName();
+        log.info("ChannelId:" + channelId);
+        log.info("ChannelName:" + channelName);
+
+        if (channelName.equals(CONFIG_STR.IN_MANUAL_REPLY_BUT_NOT_SEND_MSG.toString())) {
+            throw new BcsNoticeException("使用者在真人客服無法推播");
+        }
+
+        if (SEND_TYPE.REPLY_MSG.equals(sendToBotModel.getSendType())) {
+
+            Date start = new Date();
+            int status = 0;
+
+            String postMsg = ObjectUtil.objectToJsonStr(sendToBotModel.getReplyMessage());
+            log.info("postMsg = " + postMsg);
+            try {
+                Response<BotApiResponse> response = getService(channelId, channelName)
+                        .replyMessage(sendToBotModel.getReplyMessage())
+                        .execute();
+                log.debug("{}", response.code());
+
+                status = response.code();
+
+                if (401 == status) {
+                    callVerifyAPIAndIssueToken(sendToBotModel.getChannelId(), true);
+                    clearData();
+                }
+
+                SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_LineApi, LOG_TARGET_ACTION_TYPE.ACTION_SendToLineApi, start, status, postMsg, status + "");
+                return response;
+            } catch (Exception e) {
+                String error = ErrorRecord.recordError(e, false);
+                log.error(error);
+                SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_LineApi, LOG_TARGET_ACTION_TYPE.ACTION_SendToLineApi, error, e.getMessage());
+                SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_LineApi, LOG_TARGET_ACTION_TYPE.ACTION_SendToLineApi_Error, start, status, postMsg, status + "");
+                throw e;
+            }
+        } else if (SEND_TYPE.PUSH_MSG.equals(sendToBotModel.getSendType())) {
+
+            Date start = new Date();
+            int status = 0;
+
+            String postMsg = ObjectUtil.objectToJsonStr(sendToBotModel.getPushMessage());
+            try {
+
+                Response<BotApiResponse> response = getService(channelId, channelName)
+                        .pushMessage(sendToBotModel.getPushMessage())
+                        .execute();
+                log.debug("{}", response.code());
+
+                status = response.code();
+
+                if (401 == status) {
+                    callVerifyAPIAndIssueToken(sendToBotModel.getChannelId(), true);
+                    clearData();
+                }
+
+                SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_LineApi, LOG_TARGET_ACTION_TYPE.ACTION_SendToLineApi, start, status, postMsg, status + "");
+                return response;
+            } catch (Exception e) {
+                String error = ErrorRecord.recordError(e, false);
+                log.error(error);
+                SystemLogUtil.saveLogError(LOG_TARGET_ACTION_TYPE.TARGET_LineApi, LOG_TARGET_ACTION_TYPE.ACTION_SendToLineApi, error, e.getMessage());
+                SystemLogUtil.timeCheck(LOG_TARGET_ACTION_TYPE.TARGET_LineApi, LOG_TARGET_ACTION_TYPE.ACTION_SendToLineApi_Error, start, status, postMsg, status + "");
+                throw e;
+            }
+        }
+
+        return null;
+    }
+    
+    public static Response<BotApiResponse> sendToLineWithServiceCode(SendToBotModel sendToBotModel) throws Exception {
         log.info("sendToBotModel:" + sendToBotModel);
 
         String channelId = sendToBotModel.getChannelId();

@@ -97,7 +97,7 @@ $(function(){
 	
 	var setExportButtonSource = function() {
 		if(hasData) {
-			var exportUrl = bcs.bcsContextPath + '/edit/exportToExcelForBNPushApiEffects?startDate=' + startDate + '&endDate=' + endDate;	
+			var exportUrl = encodeURI(bcs.bcsContextPath + '/edit/exportToExcelForBNPushApiEffects?startDate=' + startDate + '&endDate=' + endDate);	
 			$('.btn_add.exportToExcel').attr('href', exportUrl);
 		} else {
 			$('.btn_add.exportToExcel').attr('href', '#');
@@ -115,7 +115,7 @@ $(function(){
 		}
 		$.ajax({
 			type : 'GET',
-			url : bcs.bcsContextPath + '/edit/getBNEffectsList?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page
+			url : encodeURI(bcs.bcsContextPath + '/edit/getBNEffectsList?startDate=' + startDate + '&endDate=' + endDate + '&page=' + page)
 		}).success(function(response){
 			console.info("response = ", response);
 			
@@ -138,8 +138,8 @@ $(function(){
 					console.info('valueObj : ', valueObj);
 					
 					var encodeTitle = encodeURI(valueObj[1]);
-					var link = bcs.bcsContextPath + '/admin/reportBNEffectsDetailPage?date=' + valueObj[0] + '&templateName=' + valueObj[2] + '&sendType=' + valueObj[3]
-																				     +'&startDate=' + startDate + '&endDate=' + endDate + '&pages=' + page + '&bnType=' + valueObj[1];
+					var link = encodeURI(bcs.bcsContextPath + '/admin/reportBNEffectsDetailPage?date=' + valueObj[0] + '&templateName=' + valueObj[2] + '&sendType=' + valueObj[3]
+																				     +'&startDate=' + startDate + '&endDate=' + endDate + '&pages=' + page + '&bnType=' + valueObj[1]);
 					
 					rowDOM.find('.sendDate').html('<a>' + valueObj[0] + '</a>').end().find('a').attr('href', link);
 					rowDOM.find('.templateType').text(valueObj[1]);
@@ -179,7 +179,7 @@ $(function(){
 		$('.LyMain').block($.BCS.blockMsgRead);
 		$.ajax({
 			type : "GET",
-			url : bcs.bcsContextPath + '/edit/getBNEffectsTotalPages?startDate=' + startDate + '&endDate=' + endDate
+			url : encodeURI(bcs.bcsContextPath + '/edit/getBNEffectsTotalPages?startDate=' + startDate + '&endDate=' + endDate)
 		}).success(function(response){
 			console.info('msg1: ', response['msg']);
 			totalPages = parseInt(response['msg']);

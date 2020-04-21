@@ -174,12 +174,10 @@ public class LinePointReportExcelService {
 				createTimeCell.setCellStyle(cellStyle);
 				
 				// Combine Other Rows
-				row.createCell(1).setCellValue(detail.getOrderKey());
-				row.createCell(2).setCellValue(detail.getUid());
-				row.createCell(3).setCellValue(detail.getCustid());
-				row.createCell(4).setCellValue(detail.getAmount());
-				
-
+			    row.createCell(1).setCellValue(detail.getOrderKey() == null ? "" : detail.getOrderKey());
+			    row.createCell(2).setCellValue(detail.getUid() == null ? "" : detail.getUid());
+			    row.createCell(3).setCellValue(detail.getCustid() == null ? "" : detail.getCustid());
+			    row.createCell(4).setCellValue(detail.getAmount() == null ? 0 : detail.getAmount());
 				
 				if(detail.getDetailType().equals(LinePointDetail.DETAIL_TYPE_CANCEL_API) || 
 						detail.getDetailType().equals(LinePointDetail.DETAIL_TYPE_CANCEL_API)) {

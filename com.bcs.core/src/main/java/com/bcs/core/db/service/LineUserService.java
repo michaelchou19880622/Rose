@@ -1,9 +1,9 @@
 package com.bcs.core.db.service;
 
-import com.bcs.core.db.entity.LineUser;
-import com.bcs.core.db.entity.UserTraceLog;
-import com.bcs.core.db.repository.LineUserRepository;
-import com.bcs.core.enums.LOG_TARGET_ACTION_TYPE;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +12,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
+import com.bcs.core.db.entity.LineUser;
+import com.bcs.core.db.entity.UserTraceLog;
+import com.bcs.core.db.repository.LineUserRepository;
+import com.bcs.core.enums.LOG_TARGET_ACTION_TYPE;
 
 /**
  * The type Line user service.
@@ -28,7 +29,7 @@ public class LineUserService {
 
     @Autowired
     private LineUserRepository lineUserRepository;
-
+    
     @Autowired
     private UserTraceLogService userTraceLogService;
 
@@ -225,6 +226,20 @@ public class LineUserService {
 
         String result = lineUserRepository.checkMIDByStatus(status, mid);
         logger.debug("checkMIDByStatus:" + result);
+        return StringUtils.isBlank(result);
+    }
+
+    /**
+     * Check mid in status boolean.
+     *
+     * @param status the status
+     * @param mid    the mid
+     * @return the boolean
+     */
+    public Boolean checkMIDByStatus(String status, String status2, String mid) {
+
+        String result = lineUserRepository.checkMIDByStatus(status, status2, mid);
+        logger.info("checkMIDByStatus:" + result);
         return StringUtils.isBlank(result);
     }
 

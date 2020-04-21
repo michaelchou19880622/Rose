@@ -7,10 +7,18 @@ $(function(){
 	var page = 1, totalPages = 0;
 	var pages = $.urlParam("pages");
 	var firstFatch = true;
+
+	currentPage = page;
+
+	bnType = decodeURI(bnType);
+	console.info('bnType = ', bnType);
 	
 	$('.btn.prev').click(function(){
 		if(page > 1) {
 			page--;
+
+			currentPage = page;
+			
 			loadData();
 			// set pageAndTotalPage
 			//console.info(page + '/' + totalPages);
@@ -22,6 +30,9 @@ $(function(){
 	$('.btn.next').click(function(){
 		if(page < totalPages) {
 			page++;
+
+			currentPage = page;
+			
 			loadData();
 			// set pageAndTotalPage
 			console.info(page + '/' + totalPages);
@@ -45,8 +56,14 @@ $(function(){
 			
 			if (page > totalPages) {
 				alert("欲選取頁數大於總頁數");
+
+				$('#page').val(currentPage);
+				$('#TotalPages').text('/' + totalPages);
 			} else if (page == 0) {
 				alert("欲選取頁數不可為0");
+
+				$('#page').val(currentPage);
+				$('#TotalPages').text('/' + totalPages);
 			} else {
 				
 				loadData();
@@ -65,12 +82,19 @@ $(function(){
 		page = $('#page').val();
 		if(page > totalPages) {
 			alert("欲選取頁數大於總頁數")
+			
+			$('#page').val(currentPage);
+			$('#TotalPages').text('/' + totalPages);
 		}else if(page == 0){
 			alert("欲選取頁數不可為0")
+			
+			$('#page').val(currentPage);
+			$('#TotalPages').text('/' + totalPages);
 		}else{
 			loadData();
 			// set pageAndTotalPage
 			console.info(page + '/' + totalPages);
+			
 			$('#page').val(page);
 			$('#TotalPages').text('/' + totalPages);
 		}
@@ -87,11 +111,17 @@ $(function(){
 		sendType = $.urlParam("sendType");
 		bnType = $.urlParam("bnType");
 		
+		templateName = decodeURI(templateName);
+		bnType = decodeURI(bnType);
+		
+		console.info('initial templateName = ', templateName);
+		console.info('initial bnType = ', bnType);
+		
 		// set back button
 		$('.btn_add.back').attr('href', bcs.bcsContextPath + '/admin/reportBNEffectsPage?startDate=' + startDate + '&endDate=' + endDate + '&pages=' + pages);
 
 		// set ExportButton
-		var exportUrl = bcs.bcsContextPath + '/edit/exportToExcelForBNPushApiEffectsDetail?date=' + date + '&title=' + templateName + '&sendType=' + sendType + '&bnType=' + bnType;
+		var exportUrl = encodeURI(bcs.bcsContextPath + '/edit/exportToExcelForBNPushApiEffectsDetail?date=' + date + '&title=' + templateName + '&sendType=' + sendType + '&bnType=' + bnType);
 		$('.btn_add.exportToExcel').attr('href', exportUrl);
 		
 		// set table
@@ -110,7 +140,7 @@ $(function(){
 		
 		$.ajax({
 			type : "GET",
-			url : bcs.bcsContextPath + '/edit/getBNEffectsDetailList?date=' + date + '&templateName=' + templateName + '&sendType=' + sendType + '&page=' + page + '&bnType=' + bnType
+			url : encodeURI(bcs.bcsContextPath + '/edit/getBNEffectsDetailList?date=' + date + '&templateName=' + templateName + '&sendType=' + sendType + '&page=' + page + '&bnType=' + bnType)
 		}).success(function(response){
 			if(response.length === 0) {
 				$('<tr class="dataTemplate"><td colspan="6">此日期區間無任何資料</td></tr>').appendTo($('#tableBody'));
@@ -146,7 +176,7 @@ $(function(){
 		$('.LyMain').block($.BCS.blockMsgRead);
 		$.ajax({
 			type : "GET",
-			url : bcs.bcsContextPath + '/edit/getBNEffectsDetailTotalPages?date=' + date + '&templateName=' + templateName + '&sendType=' + sendType + '&bnType=' + bnType
+			url : encodeURI(bcs.bcsContextPath + '/edit/getBNEffectsDetailTotalPages?date=' + date + '&templateName=' + templateName + '&sendType=' + sendType + '&bnType=' + bnType)
 		}).success(function(response){
 			console.info('msg1: ', response['msg']);
 			totalPages = parseInt(response['msg']);

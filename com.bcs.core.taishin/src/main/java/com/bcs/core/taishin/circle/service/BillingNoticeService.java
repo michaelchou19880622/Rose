@@ -241,13 +241,13 @@ public class BillingNoticeService {
         log.info("Push Line Message!!");
         String url = CoreConfigReader.getString(CONFIG_STR.LINE_MESSAGE_PUSH_URL.toString());
         String accessToken = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_TOKEN.toString(), true);
-        String serviceCode = CoreConfigReader.getString(CONFIG_STR.AUTO_REPLY.toString(), CONFIG_STR.CHANNEL_SERVICE_CODE.toString(), true);
+//        String serviceCode = CoreConfigReader.getString(CONFIG_STR.AUTO_REPLY.toString(), CONFIG_STR.CHANNEL_SERVICE_CODE.toString(), true);
 
         /* Headers */
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
         headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-        headers.set(LINE_HEADER.HEADER_BOT_ServiceCode.toString(), serviceCode);
+//        headers.set(LINE_HEADER.HEADER_BOT_ServiceCode.toString(), serviceCode);
 
         BillingNoticeContentTemplateMsg templateMsg = billingNoticeMain.getTemplate();
 

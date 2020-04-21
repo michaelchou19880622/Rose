@@ -1,5 +1,7 @@
 package com.bcs.core.bot.receive.akka.handler;
 
+import static org.hamcrest.CoreMatchers.nullValue;
+
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -58,11 +60,30 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
             receive.setReferenceId(iMsgId.toString());
             LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
 
+            LineUser lineUser = null;
+            
             String mid = receive.getSourceId();
             log.debug("MID:" + mid);
+            
+            String eventType = receive.getEventType();
+            log.debug("eventType:" + eventType);
 
-            //FIXME Change find user method to sysAdd
-            LineUser lineUser = lineUserService.findByMidAndCreateSysAdd(mid);
+        	// 防呆機制 : 檢查 BCS_MSG_BOT_RECEIVE 是否該 UID 的紀錄且第一筆紀錄的 EVENT_TYPE = follow? 如果沒有則 STATUS 狀態寫 SYSADD，有則寫 UNBIND。
+            MsgBotReceiveService msgBotReceiveService = ApplicationContextProvider.getApplicationContext().getBean(MsgBotReceiveService.class);
+            List<MsgBotReceive> listMsgBotReceives = msgBotReceiveService.findTopByEventTypeAndSourceIdOrderBySourceId(MsgBotReceive.EVENT_TYPE_FOLLOW, mid);
+            
+            if (listMsgBotReceives.size() != 0) {
+            	MsgBotReceive msgBotReceive = listMsgBotReceives.get(0);
+            	
+            	if (MsgBotReceive.EVENT_TYPE_FOLLOW.equals(msgBotReceive.getEventType())) {
+                    lineUser = lineUserService.findByMidAndCreateUnbind(mid);
+            	} else {
+                    lineUser = lineUserService.findByMidAndCreateSysAdd(mid);
+				}
+            	
+            } else if (MsgBotReceive.EVENT_TYPE_MESSAGE.equals(eventType)) {
+                lineUser = lineUserService.findByMidAndCreateSysAdd(mid);
+			}
 
             // incrementCount CatchRecord Receive
             ApplicationContextProvider.getApplicationContext().getBean(CatchRecordReceive.class).incrementCount();
@@ -105,22 +126,45 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
         LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
         InteractiveService interactiveService = ApplicationContextProvider.getApplicationContext().getBean(InteractiveService.class);
         LiveChatProcessService liveChatService = ApplicationContextProvider.getApplicationContext().getBean(LiveChatProcessService.class);
-
+        MsgBotReceiveService msgBotReceiveService = ApplicationContextProvider.getApplicationContext().getBean(MsgBotReceiveService.class);
+        
         boolean recordText = CoreConfigReader.getBoolean(CONFIG_STR.RECORD_RECEIVE_AUTORESPONSE_TEXT, true);
 
         String mid = content.getSourceId();
         String text = content.getText();
         String replyToken = content.getReplyToken();
+        String eventType = content.getEventType();
 
         log.info("ChannelId:" + ChannelId);
         log.info("ApiType:" + ApiType);
         log.info("MID:" + mid);
+        log.info("eventType:" + eventType);
 
         Map<Long, List<MsgDetail>> result;
+        
+        LineUser lineUser = null;
 
         try {
-            //FIXME Change find user method to sysAdd
-            LineUser lineUser = lineUserService.findByMidAndCreateSysAdd(mid);
+			/* 
+			 * 增加防呆機制 : 
+			 * 在寫入BCS_LINE_USER之前，需要先檢查 BCS_MSG_BOT_RECEIVE 資料表，該 UID 在資料表中是否有紀錄? 且第一筆紀錄的 EVENT_TYPE = follow? 
+			 * 如果沒有則 STATUS 狀態寫 SYSADD，有則寫 UNBIND。 */
+            List<MsgBotReceive> listMsgBotReceives = msgBotReceiveService.findTopByEventTypeAndSourceIdOrderBySourceId(MsgBotReceive.EVENT_TYPE_FOLLOW, mid);
+            
+            if (listMsgBotReceives.size() != 0) {
+            	MsgBotReceive msgBotReceive = listMsgBotReceives.get(0);
+            	
+            	if (MsgBotReceive.EVENT_TYPE_FOLLOW.equals(msgBotReceive.getEventType())) {
+                    lineUser = lineUserService.findByMidAndCreateUnbind(mid);
+            	} else {
+                    lineUser = lineUserService.findByMidAndCreateSysAdd(mid);
+				}
+            	
+            } else if (MsgBotReceive.EVENT_TYPE_MESSAGE.equals(eventType)) {
+                lineUser = lineUserService.findByMidAndCreateSysAdd(mid);
+			}
+            
+//            LineUser lineUser = lineUserService.findByMidAndCreateSysAdd(mid);
             log.info("lineUser = " + lineUser);
 
             /* For keyword process condition */
@@ -133,7 +177,7 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
 
             log.info("User status for keyword process: " + userStatus);
 
-            if (MsgBotReceive.EVENT_TYPE_POSTBACK.equals(content.getEventType())) {
+            if (MsgBotReceive.EVENT_TYPE_POSTBACK.equals(eventType)) {
                 text = content.getPostbackData();
 
                 if (text.contains("action=")) {

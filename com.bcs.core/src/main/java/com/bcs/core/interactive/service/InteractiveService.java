@@ -451,10 +451,12 @@ public class InteractiveService {
                 log.info("main = " + main);
                 // Check Time
 
-                log.info("checkActiveTime(main, calendarNow) = " + checkActiveTime(main, calendarNow));
+                boolean isTimeActive = checkActiveTime(main, calendarNow);
+                log.info("isTimeActive = " + isTimeActive);
 
-                if (checkActiveTime(main, calendarNow)) {
+                if (isTimeActive) {
                     log.info("main.getOtherRole() = " + main.getOtherRole());
+                    
                     // Check Other Role
                     if (StringUtils.isNotBlank(main.getOtherRole())) {
 

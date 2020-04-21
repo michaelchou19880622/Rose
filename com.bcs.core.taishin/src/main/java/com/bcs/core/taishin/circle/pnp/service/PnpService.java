@@ -192,11 +192,13 @@ public class PnpService {
         String url = CoreConfigReader.getString(CONFIG_STR.LINE_MESSAGE_PUSH_URL.toString());
         String accessToken = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(),
                 CONFIG_STR.CHANNEL_TOKEN.toString(), true);
-        String serviceCode = CoreConfigReader.getString(CONFIG_STR.AUTO_REPLY.toString(),
-                CONFIG_STR.CHANNEL_SERVICE_CODE.toString(), true);
+//        String serviceCode = CoreConfigReader.getString(CONFIG_STR.AUTO_REPLY.toString(),
+//                CONFIG_STR.CHANNEL_SERVICE_CODE.toString(), true);
 
         /* 設定 request headers */
-        HttpHeaders headers = getLineApiHttpHeaders(accessToken, serviceCode);
+//        HttpHeaders headers = getLineApiHttpHeaders(accessToken, serviceCode);
+        HttpHeaders headers = getLineApiHttpHeaders(accessToken);
+        
         List<PnpDetail> details = pnpMain.getPnpDetails();
 
         log.info("Process Flow: {}", pnpMain.getProcFlow());
@@ -540,9 +542,10 @@ public class PnpService {
             String url = CoreConfigReader.getString(CONFIG_STR.LINE_PNP_PUSH_VERIFIED.toString());
             String accessToken = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(),
                     CONFIG_STR.CHANNEL_TOKEN.toString(), true);
-            String serviceCode = CoreConfigReader.getString(CONFIG_STR.AUTO_REPLY.toString(),
-                    CONFIG_STR.CHANNEL_SERVICE_CODE.toString(), true);
-            HttpHeaders headers = getLineApiHttpHeaders(accessToken, serviceCode);
+//            String serviceCode = CoreConfigReader.getString(CONFIG_STR.AUTO_REPLY.toString(),
+//                    CONFIG_STR.CHANNEL_SERVICE_CODE.toString(), true);
+//            HttpHeaders headers = getLineApiHttpHeaders(accessToken, serviceCode);
+            HttpHeaders headers = getLineApiHttpHeaders(accessToken);
 
             List<PnpDetail> details = pnpMain.getPnpDetails();
 
@@ -615,6 +618,19 @@ public class PnpService {
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
         headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
         headers.set(LINE_HEADER.HEADER_BOT_ServiceCode.toString(), serviceCode);
+        return headers;
+    }
+
+    /**
+     * 設定 request headers
+     *
+     * @see this#pushLineMessage(PnpMain, ActorRef, ActorRef) BC Push
+     * @see this#pushPnpMessage(PnpMain, ActorRef, ActorRef) PNP Push
+     **/
+    private HttpHeaders getLineApiHttpHeaders(String accessToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
         return headers;
     }
 

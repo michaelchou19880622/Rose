@@ -106,7 +106,7 @@ public class LiveChatProcessService {
 				messageList.add(new TextMessage(text, sender));
 			}
 
-			messageProcessService.replyMessage(channelId, replyToken, messageList, CONFIG_STR.AUTO_REPLY.toString());
+			messageProcessService.replyMessageWithServiceCode(channelId, replyToken, messageList, CONFIG_STR.AUTO_REPLY.toString());
 		} catch (Exception e) {
 			String error = ErrorRecord.recordError(e, false);
 			logger.error(error);
@@ -182,7 +182,7 @@ public class LiveChatProcessService {
 
 				this.giveUpSwitch(UID);
 
-				messageProcessService.replyTextMessage(channelId, CONFIG_STR.AUTO_REPLY.toString(), textList, replyToken);
+				messageProcessService.replyTextMessageWithServiceCode(channelId, CONFIG_STR.AUTO_REPLY.toString(), textList, replyToken);
 				break;
 
 			case "LeaveMessage":
@@ -213,12 +213,12 @@ public class LiveChatProcessService {
 			messageList.add(new TextMessage(LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.LEAVE_MESSAGE_INTRO.toString()), sender));
 			messageList.add(new TextMessage(LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.LEAVE_MESSAGE_START.toString()), sender));
 
-			messageProcessService.pushMessage(UID, messageList, CONFIG_STR.AUTO_REPLY.toString());
+			messageProcessService.pushMessageWithServiceCode(UID, messageList, CONFIG_STR.AUTO_REPLY.toString());
 			break;
 		case "giveUp":
 			this.giveUpWaiting(UID);
 
-			messageProcessService.pushTextMsgAsync(UID, LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.GIVEUP_MESSAGE.toString()), CONFIG_STR.AUTO_REPLY.toString());
+			messageProcessService.pushTextMsgAsyncWithServiceCode(UID, LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.GIVEUP_MESSAGE.toString()), CONFIG_STR.AUTO_REPLY.toString());
 			break;
 		}
 	}
@@ -266,7 +266,7 @@ public class LiveChatProcessService {
 					break;
 			}
 
-			messageProcessService.replyTextMessage(channelId, CONFIG_STR.AUTO_REPLY.toString(), textList, replyToken);
+			messageProcessService.replyTextMessageWithServiceCode(channelId, CONFIG_STR.AUTO_REPLY.toString(), textList, replyToken);
 		} else {
 			throw new LiveChatException("[LiveChatProcessService] User do not have permission to leave messages.");
 		}
@@ -284,7 +284,7 @@ public class LiveChatProcessService {
 		this.leaveMessageEventHandler(UID, "Switch", category);
 		this.giveUpSwitch(UID);
 
-		messageProcessService.replyTextMessage(channelId, CONFIG_STR.AUTO_REPLY.toString(), textList, replyToken);
+		messageProcessService.replyTextMessageWithServiceCode(channelId, CONFIG_STR.AUTO_REPLY.toString(), textList, replyToken);
 	}
 
 	public void leaveMessage(String channelId, String replyToken, UserLiveChat userLiveChat, String message)
@@ -299,7 +299,7 @@ public class LiveChatProcessService {
 
 		messageList.add(messageProcessService.generateConfirmMessage(message));
 
-		messageProcessService.replyMessage(channelId, replyToken, messageList, CONFIG_STR.AUTO_REPLY.toString());
+		messageProcessService.replyMessageWithServiceCode(channelId, replyToken, messageList, CONFIG_STR.AUTO_REPLY.toString());
 	}
 
 	private void keepWaiting(String UID) throws Exception {
@@ -311,7 +311,7 @@ public class LiveChatProcessService {
 			if (result.getError())
 				throw new LiveChatException("[LiveChatProcessService] Encounter error when keep waiting!");
 			else
-				messageProcessService.pushTextMsgAsync(UID, LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.WAITING_MESSAGE.toString()), CONFIG_STR.AUTO_REPLY.toString());
+				messageProcessService.pushTextMsgAsyncWithServiceCode(UID, LiveChatWordingUtil.getString(LIVE_CHAT_WORDING.WAITING_MESSAGE.toString()), CONFIG_STR.AUTO_REPLY.toString());
 		} else {
 			throw new LiveChatException("[LiveChatProcessService] User is not in waiting process!");
 		}

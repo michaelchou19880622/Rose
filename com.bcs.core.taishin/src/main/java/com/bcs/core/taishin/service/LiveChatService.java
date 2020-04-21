@@ -60,7 +60,7 @@ public class LiveChatService {
 
         message = receivedMessage.getText();
 
-        messageProcessService.pushTextMsgAsync(UID, message, channelName);
+        messageProcessService.pushTextMsgAsyncWithServiceCode(UID, message, channelName);
 
         this.saveLiveChatReplyRecord(receivedMessage, userLiveChat.getId(), false);
     }
@@ -102,7 +102,7 @@ public class LiveChatService {
             lineSwitchApiService.executeSwitch(CoreConfigReader.getString(autoReplyChannelName, "DestinationId", true), UID, "");
 
             if (message != null)
-                messageProcessService.pushTextMsgAsync(UID, message, CONFIG_STR.AUTO_REPLY.toString());
+                messageProcessService.pushTextMsgAsyncWithServiceCode(UID, message, CONFIG_STR.AUTO_REPLY.toString());
         }
     }
 

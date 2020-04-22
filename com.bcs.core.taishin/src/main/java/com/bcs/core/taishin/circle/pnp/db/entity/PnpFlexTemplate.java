@@ -245,7 +245,6 @@ public class PnpFlexTemplate extends AbstractBcsEntity implements Serializable {
                 "                        }" +
                 "                    ]" +
                 "                }" +
-                //ButtonArea
                 " buttonJsonArea " +
                 "            ]" +
                 "        }," +
@@ -285,6 +284,89 @@ public class PnpFlexTemplate extends AbstractBcsEntity implements Serializable {
                 "                \"separator\": false" +
                 "            }," +
                 "            \"footer\": {" +
+                "                \"separator\": true" +
+                "            }" +
+                "        }" +
+                "    }" +
+                "}";
+    }
+    
+
+
+    /**
+     * TODO 暫時放置於此的Template
+     * 未來有一個以上的Template可以搬移至Resource/template/flex/xxx.json
+     * 提供上傳刪除xxx.json檔案的功能
+     *
+     * @return Default Template
+     */
+    public static String fetchDefaultTemplateJsonForBC() {
+        return "{" +
+                "    \"type\": \"flex\"," +
+                "    \"altText\": \"This is a Flex Message\"," +
+                "    \"contents\": {" +
+                "        \"type\": \"bubble\"," +
+                "        \"header\": {" +
+                "            \"type\": \"box\"," +
+                "            \"layout\": \"vertical\"," +
+                "            \"position\": \"relative\"," +
+                "            \"spacing\": \"none\"," +
+                "            \"margin\": \"none\"," +
+                "            \"height\": \"50px\"," +
+                "            \"paddingAll\": \"12px\"," +
+                "            \"backgroundColor\": \"headerBackground\"," +
+                "            \"contents\": [" +
+                "                {" +
+                "                    \"type\": \"text\"," +
+                "                    \"align\": \"center\"," +
+                "                    \"position\": \"relative\"," +
+                "                    \"margin\": \"none\"," +
+                "                    \"gravity\": \"center\"," +
+                "                    \"wrap\": true," +
+                "                    \"size\": \"headerTextSize\"," +
+                "                    \"color\": \"headerTextColor\"," +
+                "                    \"text\": \"headerText\"," +
+                "                    \"weight\": \"headerTextWeight\"," +
+                "                    \"style\": \"headerTextStyle\"," +
+                "                    \"decoration\": \"headerTextDecoration\"" +
+                "                }" +
+                "            ]" +
+                "        }," +
+                "        \"hero\": {" +
+                "            \"type\": \"box\"," +
+                "            \"layout\": \"vertical\"," +
+                "            \"backgroundColor\": \"heroBackground\"," +
+                "            \"contents\": [" +
+                "                {" +
+                "                    \"type\": \"box\"," +
+                "                    \"layout\": \"vertical\"," +
+                "                    \"margin\": \"lg\"," +
+                "                    \"spacing\": \"sm\"," +
+                "                    \"paddingBottom\": \"15px\"," +
+                "                    \"paddingTop\": \"15px\"," +
+                "                    \"paddingStart\": \"15px\"," +
+                "                    \"paddingEnd\": \"15px\"," +
+                "                    \"height\": \"150px\"," +
+                "                    \"contents\": [" +
+                "                        {" +
+                "                            \"type\": \"text\"," +
+                "                            \"wrap\": true," +
+                "                            \"margin\": \"md\"," +
+                "                            \"gravity\": \"center\"," +
+                "                            \"text\": \"heroText\"," +
+                "                            \"size\": \"heroTextSize\"," +
+                "                            \"color\": \"heroTextColor\"," +
+                "                            \"weight\": \"heroTextWeight\"," +
+                "                            \"style\": \"heroTextStyle\"," +
+                "                            \"decoration\": \"heroTextDecoration\"," +
+                "                            \"offsetBottom\": \"8px\"" +
+                "                        }" +
+                "                    ]" +
+                "                }" +
+                "            ]" +
+                "        }," +
+                "        \"styles\": {" +
+                "            \"hero\": {" +
                 "                \"separator\": true" +
                 "            }" +
                 "        }" +

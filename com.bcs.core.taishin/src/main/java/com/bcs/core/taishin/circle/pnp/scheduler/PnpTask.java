@@ -34,10 +34,10 @@ public class PnpTask implements Job {
             PnpStageEnum stage = PnpStageEnum.findEnumByName(processStage);
             switch (stage) {
                 case BC:
-                    pnpService.pushLineMessage(pnpMain, null, null);
+                    pnpService.pushLineMessage(pnpMain, null, null, stage);
                     break;
                 case PNP:
-                    pnpService.pushPnpMessage(pnpMain, null, null);
+                    pnpService.pushPnpMessage(pnpMain, null, null, stage);
                     break;
                 default:
                     break;

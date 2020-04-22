@@ -3,6 +3,7 @@ package com.bcs.core.taishin.circle.pnp.akka.handler;
 import akka.actor.UntypedActor;
 import com.bcs.core.spring.ApplicationContextProvider;
 import com.bcs.core.taishin.circle.pnp.code.PnpSendTypeEnum;
+import com.bcs.core.taishin.circle.pnp.code.PnpStageEnum;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.pnp.scheduler.PnpTaskService;
 import com.bcs.core.taishin.circle.pnp.service.PnpService;
@@ -47,10 +48,10 @@ public class PnpPushMessageActor extends UntypedActor {
         switch (sendType) {
             case IMMEDIATE:
             case SCHEDULE_TIME_EXPIRED:
-                immediatePushMessage(pnpMain);
+                immediatePushMessage(pnpMain, PnpStageEnum.BC);
                 break;
             case DELAY:
-                checkScheduleTimeThenDoImmediateOrDelay(pnpMain);
+                checkScheduleTimeThenDoImmediateOrDelay(pnpMain, PnpStageEnum.BC);
                 break;
             default:
                 log.error("PnpPushMessageActor Type:" + pnpMain.getSendType() + " No Action");
@@ -64,10 +65,10 @@ public class PnpPushMessageActor extends UntypedActor {
      * @param pnpMain pnpMain
      * @throws SchedulerException SchedulerException
      */
-    private void checkScheduleTimeThenDoImmediateOrDelay(PnpMain pnpMain) throws SchedulerException {
+    private void checkScheduleTimeThenDoImmediateOrDelay(PnpMain pnpMain, PnpStageEnum pnpStageEnum) throws SchedulerException {
         Date scheduleTime = DataUtils.convStrToDate(pnpMain.getScheduleTime(), "yyyyMMddHHmmss");
         if (DataUtils.isPast(scheduleTime)) {
-            immediatePushMessage(pnpMain);
+            immediatePushMessage(pnpMain, pnpStageEnum);
         } else {
             delayPushMessage(pnpMain, scheduleTime);
         }
@@ -79,10 +80,10 @@ public class PnpPushMessageActor extends UntypedActor {
      *
      * @param pnpMain pnpMain
      */
-    private void immediatePushMessage(PnpMain pnpMain) {
+    private void immediatePushMessage(PnpMain pnpMain, PnpStageEnum pnpStageEnum) {
         log.info("BC Immediate Push Message");
         PnpService pnpService = ApplicationContextProvider.getApplicationContext().getBean(PnpService.class);
-        pnpService.pushLineMessage(pnpMain, this.getSender(), this.getSelf());
+        pnpService.pushLineMessage(pnpMain, this.getSender(), this.getSelf(), pnpStageEnum);
     }
 
     /**

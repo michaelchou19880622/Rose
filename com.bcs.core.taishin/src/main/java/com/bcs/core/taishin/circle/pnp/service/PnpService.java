@@ -187,7 +187,7 @@ public class PnpService {
      * @see com.bcs.core.taishin.circle.pnp.scheduler.PnpTask#execute 排程執行判斷為PNP
      */
     @SuppressWarnings("unchecked")
-    public void pushLineMessage(PnpMain pnpMain, ActorRef sendRef, ActorRef selfActorRef) {
+    public void pushLineMessage(PnpMain pnpMain, ActorRef sendRef, ActorRef selfActorRef, PnpStageEnum pnpStageEnum) {
 
         String url = CoreConfigReader.getString(CONFIG_STR.LINE_MESSAGE_PUSH_URL.toString());
         String accessToken = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(),
@@ -310,7 +310,7 @@ public class PnpService {
                 log.info("PNP Development mode");
     		}
     		else {
-	            final Object[] pushResult = pnpPushMessage(url, headers, detail, detail.getUid());
+	            final Object[] pushResult = pnpPushMessage(url, headers, detail, detail.getUid(), pnpStageEnum);
 	            isSuccess = (boolean) pushResult[0];
 	            httpStatusCode = (String) pushResult[1];
     		}            
@@ -537,7 +537,7 @@ public class PnpService {
      * @see com.bcs.core.taishin.circle.pnp.scheduler.PnpTask#execute 排程執行判斷為PNP
      */
     @SuppressWarnings("unchecked")
-    public void pushPnpMessage(PnpMain pnpMain, ActorRef sendRef, ActorRef selfActorRef) {
+    public void pushPnpMessage(PnpMain pnpMain, ActorRef sendRef, ActorRef selfActorRef, PnpStageEnum pnpStageEnum) {
         try {
             String url = CoreConfigReader.getString(CONFIG_STR.LINE_PNP_PUSH_VERIFIED.toString());
             String accessToken = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(),
@@ -577,7 +577,7 @@ public class PnpService {
                     log.info("PNP Development mode");
         		}
         		else {
-                    final Object[] pushResult = pnpPushMessage(url, headers, detail, detail.getPhoneHash());
+                    final Object[] pushResult = pnpPushMessage(url, headers, detail, detail.getPhoneHash(), pnpStageEnum);
                     isSuccess = (boolean) pushResult[0];
                     httpStatusCode = (String) pushResult[1];
         		}            
@@ -644,14 +644,14 @@ public class PnpService {
      * @return Object[]{sendSuccessFlag, httpStatusCode, errorMsg};
      * @see this#pushPnpMessage(PnpMain, ActorRef, ActorRef) PNP Push
      */
-    private Object[] pnpPushMessage(String url, HttpHeaders headers, PnpDetail detail, String to) {
+    private Object[] pnpPushMessage(String url, HttpHeaders headers, PnpDetail detail, String to, PnpStageEnum pnpStageEnum) {
         boolean sendSuccessFlag;
         String httpStatusCode = "";
         String errorMsg = "";
         JSONObject requestBody = new JSONObject();
 
         requestBody.put("to", to);
-        String message = combineLineFlexMessage(detail.getMsg(), detail.getFlexTemplateId());
+        String message = combineLineFlexMessage(detail.getMsg(), detail.getFlexTemplateId(), pnpStageEnum);
         if (message == null) {
             /* 舊有PNP純文字發送 */
             requestBody.put("messages", combineLineTextMessage(detail.getMsg()));
@@ -760,8 +760,8 @@ public class PnpService {
         return messageArray;
     }
 
-    private String combineLineFlexMessage(String msg, String templateId) {
-        // log.info("Msg : " + msg + "Template Id: " + templateId);
+    private String combineLineFlexMessage(String msg, String templateId, PnpStageEnum pnpStageEnum) {
+         log.info("Msg: " + msg + ", Template Id: " + templateId + ", PnpStageEnum: " + pnpStageEnum);
         long id;
         try {
             id = Long.parseLong(templateId);
@@ -769,39 +769,48 @@ public class PnpService {
             // TODO 採取預設樣板
             return null;
         }
+        
         String footerUrl = CoreConfigReader.getString("flex.ui.footer.link.url", true);
 
         PnpFlexTemplate pnpFlexTemplate = pnpFlexTemplateRepository.findOne(id);
-        String templateJson = PnpFlexTemplate.fetchDefaultTemplateJson()
-                .replace("headerBackground", pnpFlexTemplate.getHeaderBackground().trim())
-                .replace("headerTextSize", pnpFlexTemplate.getHeaderTextSize().trim())
-                .replace("headerTextColor", pnpFlexTemplate.getHeaderTextColor().trim())
-                .replace("headerTextWeight", pnpFlexTemplate.getHeaderTextWeight().trim())
-                .replace("headerTextStyle", pnpFlexTemplate.getHeaderTextStyle().trim())
-                .replace("headerTextDecoration", pnpFlexTemplate.getHeaderTextDecoration().trim())
-                .replace("headerText", pnpFlexTemplate.getHeaderText().trim())
-
-                .replace("heroBackground", pnpFlexTemplate.getHeroBackground().trim())
-                .replace("heroTextSize", pnpFlexTemplate.getHeroTextSize().trim())
-                .replace("heroTextColor", pnpFlexTemplate.getHeroTextColor().trim())
-                .replace("heroTextWeight", pnpFlexTemplate.getHeroTextWeight().trim())
-                .replace("heroTextStyle", pnpFlexTemplate.getHeroTextStyle().trim())
-                .replace("heroTextDecoration", pnpFlexTemplate.getHeroTextDecoration().trim())
-                .replace("heroText", msg.trim())
-
-                .replace("bodyDescTextSize", pnpFlexTemplate.getBodyDescTextSize().trim())
-                .replace("bodyDescTextColor", pnpFlexTemplate.getBodyDescTextColor().trim())
-                .replace("bodyDescTextWeight", pnpFlexTemplate.getBodyDescTextWeight().trim())
-                .replace("bodyDescTextStyle", pnpFlexTemplate.getBodyDescTextStyle().trim())
-                .replace("bodyDescTextDecoration", pnpFlexTemplate.getBodyDescTextDecoration().trim())
-                .replace("bodyBackground", pnpFlexTemplate.getBodyBackground().trim())
-                .replace("bodyDescText", pnpFlexTemplate.getBodyDescText().trim())
-
-                .replace("footerLinkText", pnpFlexTemplate.getFooterLinkText().trim())
-
-                .replaceAll("footerLinkUrl",
-                        "".equals(footerUrl) ? pnpFlexTemplate.getFooterLinkUrl() : footerUrl.trim());
-
+        
+        /*
+		 * 客戶要求，PNP發送BC的樣板訊息時，底下的『此通知在用戶簽約時所註冊之
+		 * 電話號碼和LINE上所註冊之電話號碼一致時發送。』和『收到此訊息的原因是?』
+		 * 要移除 ( 只有發送PNP訊息的時候才要加上 )。
+		 */
+        
+        // 依照當前PNP Stage判斷使用哪一個flex message template
+        String templateJson = (pnpStageEnum == PnpStageEnum.BC)? PnpFlexTemplate.fetchDefaultTemplateJsonForBC() : PnpFlexTemplate.fetchDefaultTemplateJson();
+//        String templateJson = PnpFlexTemplate.fetchDefaultTemplateJson()
+        
+        templateJson = templateJson.replace("headerBackground", pnpFlexTemplate.getHeaderBackground().trim())
+					               .replace("headerTextSize", pnpFlexTemplate.getHeaderTextSize().trim())
+					               .replace("headerTextColor", pnpFlexTemplate.getHeaderTextColor().trim())
+					               .replace("headerTextWeight", pnpFlexTemplate.getHeaderTextWeight().trim())
+					               .replace("headerTextStyle", pnpFlexTemplate.getHeaderTextStyle().trim())
+					               .replace("headerTextDecoration", pnpFlexTemplate.getHeaderTextDecoration().trim())
+					               .replace("headerText", pnpFlexTemplate.getHeaderText().trim())
+					               
+					               .replace("heroBackground", pnpFlexTemplate.getHeroBackground().trim())
+					               .replace("heroTextSize", pnpFlexTemplate.getHeroTextSize().trim())
+					               .replace("heroTextColor", pnpFlexTemplate.getHeroTextColor().trim())
+					               .replace("heroTextWeight", pnpFlexTemplate.getHeroTextWeight().trim())
+					               .replace("heroTextStyle", pnpFlexTemplate.getHeroTextStyle().trim())
+					               .replace("heroTextDecoration", pnpFlexTemplate.getHeroTextDecoration().trim())
+					               .replace("heroText", msg.trim())
+					               
+					               .replace("bodyDescTextSize", pnpFlexTemplate.getBodyDescTextSize().trim())
+					               .replace("bodyDescTextColor", pnpFlexTemplate.getBodyDescTextColor().trim())
+					               .replace("bodyDescTextWeight", pnpFlexTemplate.getBodyDescTextWeight().trim())
+					               .replace("bodyDescTextStyle", pnpFlexTemplate.getBodyDescTextStyle().trim())
+					               .replace("bodyDescTextDecoration", pnpFlexTemplate.getBodyDescTextDecoration().trim())
+					               .replace("bodyBackground", pnpFlexTemplate.getBodyBackground().trim())
+					               .replace("bodyDescText", pnpFlexTemplate.getBodyDescText().trim())
+								
+					               .replace("footerLinkText", pnpFlexTemplate.getFooterLinkText().trim())
+					               .replaceAll("footerLinkUrl", "".equals(footerUrl) ? pnpFlexTemplate.getFooterLinkUrl() : footerUrl.trim());
+        
         StringBuilder sb = new StringBuilder();
         String[] buttonTextArray = pnpFlexTemplate.getButtonText().split(",");
         String[] buttonUrlArray = pnpFlexTemplate.getButtonUrl().split(",");

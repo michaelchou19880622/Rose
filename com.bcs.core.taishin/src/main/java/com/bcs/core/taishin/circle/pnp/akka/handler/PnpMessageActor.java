@@ -3,6 +3,7 @@ package com.bcs.core.taishin.circle.pnp.akka.handler;
 import akka.actor.UntypedActor;
 import com.bcs.core.spring.ApplicationContextProvider;
 import com.bcs.core.taishin.circle.pnp.code.PnpSendTypeEnum;
+import com.bcs.core.taishin.circle.pnp.code.PnpStageEnum;
 import com.bcs.core.taishin.circle.pnp.db.entity.AbstractPnpMainEntity;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.pnp.scheduler.PnpTaskService;
@@ -101,7 +102,7 @@ public class PnpMessageActor extends UntypedActor {
     private void immediate(PnpMain pnpMain) {
         log.debug("PNP Immediate Push Message");
         PnpService pnpService = ApplicationContextProvider.getApplicationContext().getBean(PnpService.class);
-        pnpService.pushPnpMessage(pnpMain, this.getSender(), this.getSelf());
+        pnpService.pushPnpMessage(pnpMain, this.getSender(), this.getSelf(), PnpStageEnum.PNP);
     }
 
     /**

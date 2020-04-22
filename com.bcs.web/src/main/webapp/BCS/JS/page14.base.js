@@ -36,10 +36,10 @@ $(function(){
             var timeStr = $(v).find('.timeType').text();
             
 			if(keywordInput != '' && re.test(pushDate)){
-                if(!$(v).find('.mainKeyword a').text().includes(keywordInput) || timeStr.includes('未設定') || timeStr.includes('一天區間')){
+                if(!$(v).find('.mainKeyword a').text().indexOf(keywordInput) > 0 || timeStr.indexOf('未設定') > 0 || timeStr.indexOf('一天區間') > 0){
                 	$(v).attr('hidden', true);
                 }
-                if(timeStr.includes('時間區間')){
+                if(timeStr.indexOf('時間區間') > 0 ){
                     var pushMs = moment(pushDate).valueOf();
                     var startTime = moment(timeStr.substr(4,10)).valueOf();
                     var endTime = moment(timeStr.substr(20,10)).valueOf();
@@ -48,10 +48,10 @@ $(function(){
                     }
                 }
 			}else if(keywordInput == '' && re.test(pushDate)){
-				if(timeStr.includes('未設定') || timeStr.includes('一天區間')){
+				if(timeStr.indexOf('未設定') > 0 || timeStr.indexOf('一天區間') > 0){
                     $(v).attr('hidden', true);
                 }
-                if(timeStr.includes('時間區間')){
+                if(timeStr.indexOf('時間區間') > 0){
                     var pushMs = moment(pushDate).valueOf();
                     var startTime = moment(timeStr.substr(4,10)).valueOf();
                     var endTime = moment(timeStr.substr(20,10)).valueOf();
@@ -60,7 +60,7 @@ $(function(){
                     }
                 }
 			}else if(keywordInput != '' && !re.test(pushDate)){
-                if(!($(v).find('.mainKeyword a').text().includes(keywordInput))){
+                if(!($(v).find('.mainKeyword a').text().indexOf(keywordInput) > 0)){
                     $(v).attr('hidden', true);
                 }
             }else{

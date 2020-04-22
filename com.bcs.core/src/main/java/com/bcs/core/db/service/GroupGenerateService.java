@@ -33,6 +33,12 @@ public class GroupGenerateService {
 		return !StringUtils.isBlank(result);
     }
 
+    public Boolean checkMIDBySendGroupDetailGroupIdForKeywordResponse(Long groupId, String mid) throws Exception {
+        String result = groupGenerateRepository.checkMIDBySendGroupDetailGroupIdForKeywordResponse(groupId, mid);
+        log.info("checkMIDBySendGroupDetailGroupId:" + result);
+		return !StringUtils.isBlank(result);
+    }
+
     public List<String> findMIDBySendGroupDetail(List<SendGroupDetail> sendGroupDetails) throws Exception {
         log.debug("findMIDBySendGroupDetail");
         return groupGenerateRepository.findMIDBySendGroupDetail(sendGroupDetails);

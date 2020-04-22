@@ -59,6 +59,7 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
             Long iMsgId = (Long) map.get("iMsgId");
             receive.setReferenceId(iMsgId.toString());
             LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
+            MsgBotReceiveService msgBotReceiveService = ApplicationContextProvider.getApplicationContext().getBean(MsgBotReceiveService.class);
 
             LineUser lineUser = null;
             
@@ -68,8 +69,10 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
             String eventType = receive.getEventType();
             log.debug("eventType:" + eventType);
 
-        	// 防呆機制 : 檢查 BCS_MSG_BOT_RECEIVE 是否該 UID 的紀錄且第一筆紀錄的 EVENT_TYPE = follow? 如果沒有則 STATUS 狀態寫 SYSADD，有則寫 UNBIND。
-            MsgBotReceiveService msgBotReceiveService = ApplicationContextProvider.getApplicationContext().getBean(MsgBotReceiveService.class);
+            /* 
+			 * 增加防呆機制 : 
+			 * 在寫入BCS_LINE_USER之前，需要先檢查 BCS_MSG_BOT_RECEIVE 資料表，該 UID 在資料表中是否有紀錄? 且第一筆紀錄的 EVENT_TYPE = follow? 
+			 * 如果沒有則 STATUS 狀態寫 SYSADD，有則寫 UNBIND。 */
             List<MsgBotReceive> listMsgBotReceives = msgBotReceiveService.findTopByEventTypeAndSourceIdOrderBySourceId(MsgBotReceive.EVENT_TYPE_FOLLOW, mid);
             
             if (listMsgBotReceives.size() != 0) {

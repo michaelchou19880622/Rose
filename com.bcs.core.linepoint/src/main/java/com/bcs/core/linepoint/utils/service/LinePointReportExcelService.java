@@ -170,7 +170,8 @@ public class LinePointReportExcelService {
 				cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("YYYY-MM-DD HH:mm:ss"));
 				
 				Cell createTimeCell = row.createCell(0);
-				createTimeCell.setCellValue(detail.getSendTime());
+//				createTimeCell.setCellValue(detail.getSendTime());
+				createTimeCell.setCellValue(detail.getSendTime() == null ? "-" : detail.getSendTime().toString());
 				createTimeCell.setCellStyle(cellStyle);
 				
 				// Combine Other Rows
@@ -179,8 +180,7 @@ public class LinePointReportExcelService {
 			    row.createCell(3).setCellValue(detail.getCustid() == null ? "" : detail.getCustid());
 			    row.createCell(4).setCellValue(detail.getAmount() == null ? 0 : detail.getAmount());
 				
-				if(detail.getDetailType().equals(LinePointDetail.DETAIL_TYPE_CANCEL_API) || 
-						detail.getDetailType().equals(LinePointDetail.DETAIL_TYPE_CANCEL_API)) {
+				if(detail.getDetailType() != null && LinePointDetail.DETAIL_TYPE_CANCEL_API.equals(detail.getDetailType())) {
 					result = "取消" + result;
 				}
 				

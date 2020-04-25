@@ -15,7 +15,7 @@ import com.bcs.core.json.AbstractBcsEntity;
 @Entity
 @Table(name = "BCS_PUSH_MESSAGE_RECORD")
 @NamedNativeQuery(name = "getPushMessageEffects", query =
-	"SELECT " + 
+    "SELECT TOP 2147483647 " + 
 		"CASE " + 
 			"WHEN A.CREATE_TIME IS NULL THEN B.CREATE_TIME " + 
 			"ELSE A.CREATE_TIME " + 

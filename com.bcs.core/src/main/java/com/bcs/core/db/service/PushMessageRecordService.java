@@ -18,7 +18,9 @@ import org.springframework.stereotype.Service;
 
 import com.bcs.core.db.entity.PushMessageRecord;
 import com.bcs.core.db.repository.PushMessageRecordRepository;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class PushMessageRecordService {		
 	@PersistenceContext
@@ -48,12 +50,17 @@ public class PushMessageRecordService {
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-		
+
+        long start = System.currentTimeMillis();	        
+        long end;
 		Query query = entityManager.createNamedQuery("getPushMessageEffects").setParameter(1, startDate).setParameter(2, endDate);
-		
+
 		@SuppressWarnings("unchecked")
 		List<Object[]> resultList = query.getResultList();
-		
+        end = System.currentTimeMillis();	        
+        log.info("GetPushMessageEffects GetResultList() End  . Time duration : " + (end - start) + " milliseconds.");
+		        		
+	
 		for (Object[] o : resultList) {
 			Map<String, String> map = new HashMap<String, String>();
 			
@@ -66,7 +73,8 @@ public class PushMessageRecordService {
 			map.put("sendType", (o[6] == null) ? null : (o[6].toString().equals("IMMEDIATE")) ? "立即" : "預約");
 			result.add(map);
 		}
-		
+        end = System.currentTimeMillis();	        
+        log.info("GetPushMessageEffects() End . Time duration : " + (end - start) + " milliseconds.");
 		return result;
 	}
 }

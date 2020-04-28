@@ -36,10 +36,10 @@ $(function(){
             var timeStr = $(v).find('.timeType').text();
             
 			if(keywordInput != '' && re.test(pushDate)){
-                if(!$(v).find('.mainKeyword a').text().indexOf(keywordInput) > 0 || timeStr.indexOf('未設定') > 0 || timeStr.indexOf('一天區間') > 0){
+                if(!$(v).find('.mainKeyword a').text().indexOf(keywordInput) >= 0 || timeStr.indexOf('未設定') >= 0 || timeStr.indexOf('一天區間') >= 0){
                 	$(v).attr('hidden', true);
                 }
-                if(timeStr.indexOf('時間區間') > 0 ){
+                if(timeStr.indexOf('時間區間') >= 0 ){
                     var pushMs = moment(pushDate).valueOf();
                     var startTime = moment(timeStr.substr(4,10)).valueOf();
                     var endTime = moment(timeStr.substr(20,10)).valueOf();
@@ -48,10 +48,10 @@ $(function(){
                     }
                 }
 			}else if(keywordInput == '' && re.test(pushDate)){
-				if(timeStr.indexOf('未設定') > 0 || timeStr.indexOf('一天區間') > 0){
+				if(timeStr.indexOf('未設定') >= 0 || timeStr.indexOf('一天區間') >= 0){
                     $(v).attr('hidden', true);
                 }
-                if(timeStr.indexOf('時間區間') > 0){
+                if(timeStr.indexOf('時間區間') >= 0){
                     var pushMs = moment(pushDate).valueOf();
                     var startTime = moment(timeStr.substr(4,10)).valueOf();
                     var endTime = moment(timeStr.substr(20,10)).valueOf();
@@ -60,9 +60,20 @@ $(function(){
                     }
                 }
 			}else if(keywordInput != '' && !re.test(pushDate)){
-                if(!($(v).find('.mainKeyword a').text().indexOf(keywordInput) > 0)){
-                    $(v).attr('hidden', true);
-                }
+				var compareKeyword = '追加 : ';
+				var indexString = $(v).find('.mainKeyword a').text().indexOf(compareKeyword);
+				if(indexString > 0) {					
+	                if(!(($(v).find('.mainKeyword a').text().substring(0, indexString).indexOf(keywordInput)) >= 0 ||
+	                     ($(v).find('.mainKeyword a').text().substring(indexString + compareKeyword.length).indexOf(keywordInput)) >= 0)){
+	                    $(v).attr('hidden', true);
+	                }
+				}
+				else {
+					console.log('keyword4'+ $(v).find('.mainKeyword a').text()+ 'keywordInput'+ keywordInput);
+	                if(!($(v).find('.mainKeyword a').text().indexOf(keywordInput) >= 0)){
+	                    $(v).attr('hidden', true);
+	                }	
+				}
             }else{
                 $(v).attr('hidden', false);
             }

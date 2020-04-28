@@ -28,8 +28,8 @@ $(function(){
 	function initial() {
 		console.log('Push API 成效列表');
 		
-		clonedDOM = $('.dataTemplate').clone(true);
-		sumDOM = $('.sumTemplate').clone(true);
+//		clonedDOM = $('.dataTemplate').clone(true);
+//		sumDOM = $('.sumTemplate').clone(true);
 		$('.dataTemplate').remove();
 		$('.sumTemplate').remove();
 		startDate = moment(new Date()).format('YYYY-MM-DD');
@@ -90,9 +90,8 @@ $(function(){
 				    	  cellText = document.createTextNode(element.successCount);
 				      else if ( column == 6) 
 				    	  cellText = document.createTextNode(element.failCount);				      
-				      else if ( column == 7) { 				   
+				      else if ( column == 7)  				   
 				    	  cellText = document.createTextNode(parseInt(element.failCount, 10) +  parseInt(element.successCount, 10));				      
-				      }
 				      cell.appendChild(cellText);				      
 					  row.appendChild(cell);
 				    }

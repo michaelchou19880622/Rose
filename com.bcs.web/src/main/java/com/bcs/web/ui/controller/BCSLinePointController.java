@@ -243,6 +243,7 @@ public class BCSLinePointController extends BCSBaseController {
 
             //List<LinePointMain> result = new ArrayList<LinePointMain>();
             List<LinePointMain> list = this.linePointUIService.linePointMainFindBcsAndDate(startDate, endDate);
+            
             //FIXME Why query request can do update SQL?
             for (LinePointMain linePointMain : list) {
                 linePointUIService.updateLinePoint(linePointMain.getId().toString());
@@ -515,12 +516,15 @@ public class BCSLinePointController extends BCSBaseController {
             main.setSendType(serviceName);
 
             switch (role) {
-                case "ROLE_ADMIN":
-                case "ROLE_REPORT":
+                case "ROLE_ADMIN": //權限代碼 : 2888
+                case "ROLE_REPORT": //權限代碼 : 1688
                     result.add(main);
                     break;
-                case "ROLE_LINE_VERIFY":
-                case "ROLE_LINE_SEND":
+                case "ROLE_EDIT": //權限代碼 : 2788
+                case "ROLE_LINE_VERIFY": //權限代碼 : 2786
+                case "ROLE_LINE_SEND": //權限代碼 : 2787
+                case "ROLE_PNP_SEND_LINE_SEND": //權限代碼 : 2587
+                case "ROLE_PNP_SEND_LINE_VERIFY": //權限代碼 : 2586
                     TaishinEmployee employee = oracleService.findByEmployeeId(empId);
                     String department = main.getDepartmentFullName();
                     String[] departmentName = department.split(" ");

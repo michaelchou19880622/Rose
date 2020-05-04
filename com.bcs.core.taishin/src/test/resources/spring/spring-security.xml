@@ -22,25 +22,47 @@
 	<http pattern="/bcs/getLink/**" security="none"/>
     
 	<http auto-config="true">
-		<intercept-url pattern="/init/**" access="permitAll"/>
+        <!-- ====================== Permit All =========================-->
+		<intercept-url pattern="/init/**" access="permitAll" />
+	
 		<!-- Mobile Controller -->
-		<intercept-url pattern="/m/**" access="permitAll"/>
-
+		<intercept-url pattern="/m/**" access="permitAll" />
+	
 		<!-- 使用 Controller Tracing Click -->
-		<intercept-url pattern="/l/**" access="permitAll"/>
-		<intercept-url pattern="/c/**" access="permitAll"/>
-		<intercept-url pattern="/campaign/**" access="permitAll"/>
-		
-		<intercept-url pattern="/bcs/doLogin*" access="permitAll"/>
-		
-		<intercept-url pattern="/bcs/admin/**" access="hasRole('ROLE_ADMIN')" />
-		<intercept-url pattern="/bcs/edit/**" access="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN')" />
-		<intercept-url pattern="/bcs/market/**" access="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN', 'ROLE_MARKET')" />
-		<intercept-url pattern="/bcs/edit/**" access="hasAnyRole('ROLE_PNP_ADMIN', 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY')" />
-		<intercept-url pattern="/bcs/lpQuerier/**" access="hasAnyRole('ROLE_PNP_ADMIN', 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY', 'ROLE_REPORT')" />
+		<intercept-url pattern="/l/**" access="permitAll" />
+	
+		<intercept-url pattern="/c/**" access="permitAll" />
+	
+		<intercept-url pattern="/campaign/**" access="permitAll" />
+	
+		<intercept-url pattern="/bcs/doLogin*" access="permitAll" />
+        <!-- ====================== Permit All =========================-->
+
+        <!--管理者-->
+        <intercept-url pattern="/bcs/admin/**"
+                       	access="hasRole('ROLE_ADMIN')"/>
+        <!--編輯者-->
+        <intercept-url pattern="/bcs/edit/**" 
+                       	access="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_MARKET', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_REPORT', 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY')" />
+      
+        <!--行銷人員-->
+        <intercept-url pattern="/bcs/market/**"
+						access="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN', 'ROLE_MARKET' , 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_PNP_SEND_LINE_VERIFY')"/>
+	
+        <!--PNP 管理者-->
+        <intercept-url pattern="/bcs/pnpAdmin/**" 
+                       	access="hasAnyRole('ROLE_ADMIN', 'ROLE_PNP_ADMIN')" />
+                       
+        <!--PNP員工-->
+        <intercept-url pattern="/bcs/pnpEmployee/**"
+                       	access="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_MARKET', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_REPORT')" />
+	
+<!-- 		<intercept-url pattern="/bcs/lpQuerier/**"  -->
+<!-- 					   	access="hasAnyRole('ROLE_PNP_ADMIN', 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY', 'ROLE_REPORT')" /> -->
 
 		<!-- 此 pattern 要擺在最後面 -->
-		<intercept-url pattern="/**" access="authenticated"/>
+		<intercept-url pattern="/**" 
+						access="authenticated"/>
 		
 		<form-login login-page="/bcs/doLogin" username-parameter="tid"
 			password-parameter="tpasswd" 

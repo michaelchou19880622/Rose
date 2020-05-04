@@ -122,7 +122,18 @@ public class BCSLinePointController extends BCSBaseController {
                 throw new BcsNoticeException("員工編號不得為空值");
             }
 
-            TaishinEmployee taishinEmployee = oracleService.findByEmployeeId(empId);
+            TaishinEmployee taishinEmployee;
+            
+            String environment = CoreConfigReader.getString("environment");
+            log.info("environment = {}", environment);
+
+            if ("local".equals(environment) || "linux".equals(environment)) {
+            	taishinEmployee = oracleService.findByLocalEmployeeId(empId);
+            } else {
+            	taishinEmployee = oracleService.findByEmployeeId(empId);
+			}
+
+            log.info("taishinEmployee = {}", taishinEmployee);
 
             if (taishinEmployee == null || StringUtils.isBlank(taishinEmployee.getDivisionName())) {
                 throw new BcsNoticeException("查無此員工編號");
@@ -238,18 +249,22 @@ public class BCSLinePointController extends BCSBaseController {
             Date startDate = DataUtils.convStrToDate(startDateStr, "yyyy-MM-dd");
             Date endDate = DataUtils.convStrToDate(endDateStr, "yyyy-MM-dd");
             endDate = DateUtils.addDays(endDate, 1);
+            endDate = DateUtils.addSeconds(endDate, -1);
             log.info("startDate: {}", startDate);
             log.info("endDate  : {}", endDate);
 
             //List<LinePointMain> result = new ArrayList<LinePointMain>();
             List<LinePointMain> list = this.linePointUIService.linePointMainFindBcsAndDate(startDate, endDate);
+            
             //FIXME Why query request can do update SQL?
             for (LinePointMain linePointMain : list) {
                 linePointUIService.updateLinePoint(linePointMain.getId().toString());
             }
+            
             //FIXME Why query again from database?
             list = this.linePointUIService.linePointMainFindBcsAndDate(startDate, endDate);
             //log.info("list:" + list);
+            
             List<LinePointMain> result = competence(list, customUser);
 
 //		    result.addAll(list);
@@ -371,7 +386,10 @@ public class BCSLinePointController extends BCSBaseController {
                 throw new BcsNoticeException("此專案已發送");
             }
 
-            if ("ROLE_ADMIN".equals(customUser.getRole()) || "ROLE_LINE_VERIFY".equals(customUser.getRole())) {
+            if ("ROLE_ADMIN".equals(customUser.getRole())
+            		|| "ROLE_LINE_SEND".equals(customUser.getRole())  
+            		|| "ROLE_LINE_VERIFY".equals(customUser.getRole())
+            		|| "ROLE_PNP_SEND_LINE_VERIFY".equals(customUser.getRole())) {
                 if ((!"ROLE_ADMIN".equals(customUser.getRole())) && customUser.getAccount().equals(linePointMain.getModifyUser())) {
                     throw new BcsNoticeException("不可發送自己創專案的line Point");
                 }
@@ -452,7 +470,10 @@ public class BCSLinePointController extends BCSBaseController {
         try {
             LinePointMain linePointMain = linePointUIService.linePointMainFindOne(linePointMainId);
 
-            if ("ROLE_LINE_SEND".equals(customUser.getRole()) || "ROLE_LINE_VERIFY".equals(customUser.getRole())) {
+            if ("ROLE_LINE_SEND".equals(customUser.getRole()) 
+            		|| "ROLE_PNP_ADMIN".equals(customUser.getRole()) 
+            		|| "ROLE_LINE_VERIFY".equals(customUser.getRole()) 
+            		|| "ROLE_PNP_SEND_LINE_VERIFY".equals(customUser.getRole())) {
                 if (!customUser.getAccount().equals(linePointMain.getModifyUser())) {
                     throw new BcsNoticeException("沒有權限可以刪除此line Point專案");
                 }
@@ -504,7 +525,11 @@ public class BCSLinePointController extends BCSBaseController {
         List<LinePointMain> result = new ArrayList<>();
 
         String role = customUser.getRole();
+        log.info("role = {}", role);
+        
         String empId = customUser.getAccount();
+        log.info("empId = {}", empId);
+        
         // reset service name
         for (LinePointMain main : list) {
             String serviceName = "BCS";
@@ -521,7 +546,21 @@ public class BCSLinePointController extends BCSBaseController {
                     break;
                 case "ROLE_LINE_VERIFY":
                 case "ROLE_LINE_SEND":
-                    TaishinEmployee employee = oracleService.findByEmployeeId(empId);
+                case "ROLE_PNP_SEND_LINE_SEND":
+                case "ROLE_PNP_SEND_LINE_VERIFY":
+                    TaishinEmployee employee;
+                    
+                    String environment = CoreConfigReader.getString("environment");
+                    log.info("environment = {}", environment);
+                    
+                    if ("local".equals(environment) || "linux".equals(environment)) {
+                    	employee = oracleService.findByLocalEmployeeId(empId);
+                    } else {
+                    	employee = oracleService.findByEmployeeId(empId);
+        			}
+                    
+                    log.info("employee = {}", employee);
+                    
                     String department = main.getDepartmentFullName();
                     String[] departmentName = department.split(" ");
                     //Departmentname[0]; 處  DIVISION_NAME

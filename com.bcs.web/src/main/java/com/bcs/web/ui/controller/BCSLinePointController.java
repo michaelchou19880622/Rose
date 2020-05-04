@@ -544,10 +544,11 @@ public class BCSLinePointController extends BCSBaseController {
                 case "ROLE_REPORT":
                     result.add(main);
                     break;
-                case "ROLE_LINE_VERIFY":
-                case "ROLE_LINE_SEND":
-                case "ROLE_PNP_SEND_LINE_SEND":
-                case "ROLE_PNP_SEND_LINE_VERIFY":
+                case "ROLE_EDIT": //權限代碼 : 2788
+                case "ROLE_LINE_VERIFY": //權限代碼 : 2786
+                case "ROLE_LINE_SEND": //權限代碼 : 2787
+                case "ROLE_PNP_SEND_LINE_SEND": //權限代碼 : 2587
+                case "ROLE_PNP_SEND_LINE_VERIFY": //權限代碼 : 2586
                     TaishinEmployee employee;
                     
                     String environment = CoreConfigReader.getString("environment");

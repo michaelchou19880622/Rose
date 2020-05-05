@@ -85,7 +85,32 @@
         <!--lp Querier-->
         <!-- <intercept-url pattern="/bcs/lpQuerier/**" -->
                        <!-- access="hasAnyRole('ROLE_ADMIN', 'ROLE_LP_CREATOR', 'ROLE_LP_JUDGER', 'ROLE_LP_QUERIER')"/> -->
-
+				
+				
+				
+		<!-- LinePoint Roles Setup -->		
+				                       	
+		<!-- 建立發送專案(頁面)-->
+        <intercept-url pattern="/bcs/edit/linePointCreatePage" 
+                       	access="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_MARKET', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_LINE_VERIFY', 'ROLE_LINE_SEND')" />
+    	
+		<!-- 建立發送專案(儲存)-->
+        <intercept-url pattern="/bcs/edit/createLinePointMain" 
+                       	access="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_MARKET', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_LINE_VERIFY', 'ROLE_LINE_SEND')" />
+	
+		<!-- 發送專案列表(頁面)-->
+        <intercept-url pattern="/bcs/edit/createLinePointMain" 
+                       	access="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_MARKET', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_LINE_VERIFY', 'ROLE_LINE_SEND')" />
+	
+		<!-- 發送專案列表(發送)-->
+        <intercept-url pattern="/bcs/edit/createLinePointMain" 
+                       	access="hasAnyRole('ROLE_ADMIN', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_LINE_VERIFY')" />
+		
+	
+	
+	
+	
+	
         <!-- 要擺在最後面 -->
         <intercept-url pattern="/**" access="authenticated"/>
 

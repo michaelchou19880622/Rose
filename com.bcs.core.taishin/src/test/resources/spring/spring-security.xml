@@ -43,7 +43,16 @@
                        	access="hasRole('ROLE_ADMIN')"/>
         <!--編輯者-->
         <intercept-url pattern="/bcs/edit/**" 
-                       	access="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_MARKET', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_REPORT', 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY')" />
+                       	access="hasAnyRole('ROLE_ADMIN', 
+					                       	'ROLE_EDIT', 
+					                       	'ROLE_MARKET', 
+					                       	'ROLE_PNP_ADMIN', 
+					                       	'ROLE_PNP_SEND_LINE_VERIFY', 
+					                       	'ROLE_PNP_SEND_LINE_SEND', 
+					                       	'ROLE_LINE_VERIFY',
+					                       	'ROLE_LINE_SEND',
+					                       	'ROLE_REPORT' 
+					                       	)" />                   	
       
         <!--行銷人員-->
         <intercept-url pattern="/bcs/market/**"
@@ -59,6 +68,33 @@
 	
 <!-- 		<intercept-url pattern="/bcs/lpQuerier/**"  -->
 <!-- 					   	access="hasAnyRole('ROLE_PNP_ADMIN', 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY', 'ROLE_REPORT')" /> -->
+
+
+
+	    <!-- LinePoint 建立發送專案 -->
+        <intercept-url pattern="/bcs/edit/createLinePointMain" 
+                       	access="hasAnyRole('ROLE_ADMIN', 
+					                       	'ROLE_EDIT', 
+					                       	'ROLE_MARKET', 
+					                       	'ROLE_PNP_ADMIN', 
+					                       	'ROLE_PNP_SEND_LINE_VERIFY', 
+					                       	'ROLE_PNP_SEND_LINE_SEND', 
+					                       	'ROLE_LINE_VERIFY',
+					                       	'ROLE_LINE_SEND' 
+					                       	)" />
+					                       	
+		<!-- LinePoint 建立發送專案頁面 -->
+        <intercept-url pattern="/bcs/edit/linePointCreatePage" 
+                       	access="hasAnyRole('ROLE_ADMIN', 
+					                       	'ROLE_EDIT', 
+					                       	'ROLE_MARKET', 
+					                       	'ROLE_PNP_ADMIN', 
+					                       	'ROLE_PNP_SEND_LINE_VERIFY', 
+					                       	'ROLE_PNP_SEND_LINE_SEND', 
+					                       	'ROLE_LINE_VERIFY',
+					                       	'ROLE_LINE_SEND' 
+					                       	)" />
+
 
 		<!-- 此 pattern 要擺在最後面 -->
 		<intercept-url pattern="/**" 

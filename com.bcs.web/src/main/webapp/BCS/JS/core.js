@@ -135,7 +135,7 @@ $(function(){
       type: 'GET',
       url: bcs.bcsContextPath + "/edit/getAutocompleteContentFlagList?contentType=" + contentType,
     }).success(function(response){
-      console.info('response', response);
+//      console.info('response', response);
 
       for (var i = 0, size = response.length; i < size; i++) {
         autocompleteList.push(response[i]);

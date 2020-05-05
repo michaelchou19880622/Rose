@@ -1,5 +1,38 @@
 package com.bcs.web.ui.controller;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.json.JSONArray;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.bcs.core.db.entity.AdminUser;
 import com.bcs.core.db.service.LineUserService;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.exception.BcsNoticeException;
@@ -24,36 +57,8 @@ import com.bcs.web.aop.ControllerLog;
 import com.bcs.web.ui.service.LinePointUIService;
 import com.bcs.web.ui.service.SendGroupUIService;
 import com.bcs.web.ui.service.SendMsgUIService;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
-import org.json.JSONArray;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Controller
@@ -81,14 +86,14 @@ public class BCSLinePointController extends BCSBaseController {
 
     @ControllerLog(description = "建立 Line Point 活動")
     @GetMapping(value = "/edit/linePointCreatePage")
-    public String linePointCreatePage(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser) {
+    public String linePointCreatePage(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, Model model) {
         log.info("linePointCreatePage");
         return BcsPageEnum.LinePointCreatePage.toString();
     }
 
     @ControllerLog(description = "Line Point 活動列表")
     @GetMapping(value = "/edit/linePointListPage")
-    public String linePointListPage(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser) {
+    public String linePointListPage(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, Model model) {
         log.info("linePointListPage");
         return BcsPageEnum.LinePointListPage.toString();
     }
@@ -107,10 +112,24 @@ public class BCSLinePointController extends BCSBaseController {
     @PostMapping(value = "/edit/createLinePointMain", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<?> createLinePointMain(HttpServletRequest request, HttpServletResponse response,
-                                                 @CurrentUser CustomUser customUser, @RequestBody LinePointMain linePointMain) {
-        try {
+                                                 @CurrentUser CustomUser customUser, @RequestBody LinePointMain linePointMain, Model model) {
+    	log.info("[createLinePointMain]");
+    	
+        log.info("customUser.getAccount() = {}", customUser.getAccount());
+        log.info("customUser.getRole() = {}", customUser.getRole());
+        
+        model.addAttribute("access", true);
+        
+        if (customUser.getRole() != null) {
+        	if (customUser.getRole().equals(AdminUser.RoleCode.ROLE_REPORT.getRoleId())) {
+                model.addAttribute("access", false);
+        	}
+        }
+    	
+    	try {
+            
+            
             // Null Exception
-            log.info("[createLinePointMain]");
             if (linePointMain == null) {
                 throw new BcsNoticeException("LinePointMain is Null");
             }

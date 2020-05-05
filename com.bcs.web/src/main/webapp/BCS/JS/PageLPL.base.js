@@ -1,4 +1,14 @@
 $(function() {
+	console.info("bcs.user.role = ", bcs.user.role);
+
+	if (bcs.user.role == 'ROLE_REPORT') {
+		window.location.replace(bcs.bcsContextPath +'/index');
+		
+		alert('很抱歉，您的帳號無權限登入此頁面。');
+		
+		return;
+	}
+	
     var originalTr = {};
     var startDate = null, endDate = null;
 	$('.datepicker').datepicker({
@@ -59,10 +69,10 @@ $(function() {
             type: "GET",
             url: bcs.bcsContextPath + '/edit/findAllBcsLinePointMain?startDate=' + startDate + '&endDate=' + endDate
         }).success(function(response) {
-            console.info("response:", response);
+//            console.info("response:", response);
             $.each(response, function(i, o) {
                 var templateTr = originalTr.clone(true); //增加一行
-                console.info("templateTr:", templateTr);
+//                console.info("templateTr:", templateTr);
 
                 templateTr.find('#titleLink').html(o.title);
                 templateTr.find('#titleLink').attr('href', bcs.bcsContextPath + '/edit/linePointCreatePage?linePointMainId=' +
@@ -96,9 +106,9 @@ $(function() {
 		        // get date data
 		        var currentTime = moment(new Date()).add(120, 'seconds');
 		        var sendTimingTime = moment(o.sendTimingTime).format('YYYY-MM-DD HH:mm:ss');
-		        console.info('currentTime:', currentTime);
-		        console.info('sendStartTime:', sendTimingTime);
-		        console.info('isAfter:', currentTime.isAfter(sendTimingTime));
+//		        console.info('currentTime:', currentTime);
+//		        console.info('sendStartTime:', sendTimingTime);
+//		        console.info('isAfter:', currentTime.isAfter(sendTimingTime));
 
 		        // set status
 		        var statusCh = '';

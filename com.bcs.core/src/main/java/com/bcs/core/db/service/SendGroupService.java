@@ -147,25 +147,34 @@ public class SendGroupService {
         return null;
     }
 
+    public Boolean checkMidExistAndSysAddDefaultGroup(Long groupId, String mid) {
+
+        logger.info("groupId = " + groupId);
+
+        if (groupId.equals(DEFAULT_SEND_GROUP.ALL_USER.getGroupId())) { // groupId = -1
+            return lineUserService.checkMIDAllActiveAndSysAdd(mid);
+        } else if (groupId.equals(DEFAULT_SEND_GROUP.BINDED_USER.getGroupId())) {
+            return lineUserService.checkMIDByStatus(LineUser.STATUS_BINDED, mid);
+        } else if (groupId.equals(DEFAULT_SEND_GROUP.UNBIND_USER.getGroupId())) {
+//            return lineUserService.checkMIDByStatus(LineUser.STATUS_UNBIND, mid);
+            return lineUserService.checkMIDByStatus(LineUser.STATUS_UNBIND, LineUser.STATUS_SYS_ADD, mid);
+        }
+        return false;
+    }
+    
     public Boolean checkMidExistDefaultGroup(Long groupId, String mid) {
 
         logger.info("groupId = " + groupId);
 
         if (groupId.equals(DEFAULT_SEND_GROUP.ALL_USER.getGroupId())) { // groupId = -1
-            logger.info("@@@ 1-1");
             return lineUserService.checkMIDAllActive(mid);
         } else if (groupId.equals(DEFAULT_SEND_GROUP.BINDED_USER.getGroupId())) {
-            logger.info("@@@ 1-2");
             return lineUserService.checkMIDByStatus(LineUser.STATUS_BINDED, mid);
         } else if (groupId.equals(DEFAULT_SEND_GROUP.UNBIND_USER.getGroupId())) {
-            logger.info("@@@ 1-3");
-//            return lineUserService.checkMIDByStatus(LineUser.STATUS_UNBIND, mid);
-            return lineUserService.checkMIDByStatus(LineUser.STATUS_UNBIND, LineUser.STATUS_SYS_ADD, mid);
+            return lineUserService.checkMIDByStatus(LineUser.STATUS_UNBIND, mid);
         }
-
-        logger.info("@@@ 1-4");
         return false;
-    }
+    }    
 
     public Map<Long, SendGroup> findAllMap() {
         List<SendGroup> groups = sendGroupRepository.findAll();

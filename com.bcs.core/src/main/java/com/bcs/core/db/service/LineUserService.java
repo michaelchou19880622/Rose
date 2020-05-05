@@ -162,6 +162,19 @@ public class LineUserService {
     }
 
     /**
+     * Check mid all active and SYSADD boolean.
+     *
+     * @param mid the mid
+     * @return the boolean
+     */
+    public boolean checkMIDAllActiveAndSysAdd(String mid) {
+        String result = lineUserRepository.checkMIDAllActiveAndSysAdd(mid);
+        logger.info("checkMIDAllActiveAndSysAdd:" + result);
+        return StringUtils.isNotBlank(result);
+    }
+
+    
+    /**
      * Count all long.
      *
      * @return the long

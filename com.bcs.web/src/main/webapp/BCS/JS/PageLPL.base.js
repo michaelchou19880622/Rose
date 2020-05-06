@@ -181,11 +181,7 @@ $(function() {
 		        if(o.status == 'COMPLETE'){
 		        	templateTr.find('.btn_linepoint_delete').remove();
 		        }else{
-		        	if (bcs.user.role == 'ROLE_EDIT' 
-		        		|| bcs.user.role == 'ROLE_MARKET' 
-			        	|| bcs.user.role == 'ROLE_PNP_SEND_LINE_SEND' 
-			        	|| bcs.user.role == 'ROLE_LINE_SEND' 
-			        	|| bcs.user.role == 'ROLE_REPORT') {
+		        	if (bcs.user.role == 'ROLE_REPORT') {
 		        		templateTr.find('.btn_linepoint_delete').remove();
 		        	} else {
 		        		templateTr.find('.btn_linepoint_delete').val('刪除');

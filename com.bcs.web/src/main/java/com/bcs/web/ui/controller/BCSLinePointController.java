@@ -498,22 +498,7 @@ public class BCSLinePointController extends BCSBaseController {
         log.info("customUser.getRole() : " + customUser.getRole());
 
         try {
-//            LinePointMain linePointMain = linePointUIService.linePointMainFindOne(linePointMainId);
-//            if ("ROLE_LINE_SEND".equals(customUser.getRole()) 
-//            		|| "ROLE_PNP_ADMIN".equals(customUser.getRole()) 
-//            		|| "ROLE_LINE_VERIFY".equals(customUser.getRole()) 
-//            		|| "ROLE_PNP_SEND_LINE_VERIFY".equals(customUser.getRole())) {
-//                if (!customUser.getAccount().equals(linePointMain.getModifyUser())) {
-//                    throw new BcsNoticeException("沒有權限可以刪除此line Point專案");
-//                }
-//            } else if (!"ROLE_ADMIN".equals(customUser.getRole())) {
-//                throw new BcsNoticeException("沒有權限可以刪除此line Point專案");
-//            }
-            
-            if (!"ROLE_ADMIN".equals(customUser.getRole()) 
-            		&& !"ROLE_PNP_ADMIN".equals(customUser.getRole()) 
-            		&& !"ROLE_PNP_SEND_LINE_VERIFY".equals(customUser.getRole()) 
-            		&& !"ROLE_LINE_VERIFY".equals(customUser.getRole())) {
+            if ("ROLE_REPORT".equals(customUser.getRole())) {
                 throw new BcsNoticeException("沒有權限可以刪除此line Point專案");
             }
 

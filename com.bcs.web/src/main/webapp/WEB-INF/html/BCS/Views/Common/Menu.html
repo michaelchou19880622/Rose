@@ -64,7 +64,7 @@
             </li>
 
 
-            <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY')">
+            <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_MARKET', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY')">
                 <a href="" style="cursor: pointer;"><span>LINE POINTS發送</span></a>
                 <ul class="MdNonDisp subMenu" style="display:none">
                     <li th:classappend="${currentPage == 'PageLPC'} ? 'ExSelected'">

@@ -158,14 +158,18 @@ $(function() {
 	                 resultTr.find('.btn_copy').click(btn_cancle);
 	             }
 	             
-	             if(bcs.user.role == 'ROLE_REPORT' || bcs.user.role == 'ROLE_LINE_SEND'){
-	             	resultTr.find('.btn_copy').remove();
-	             }
+
+				// 按鈕(回收)
+				if (bcs.user.role == 'ROLE_EDIT' 
+					|| bcs.user.role == 'ROLE_MARKET' 
+					|| bcs.user.role == 'ROLE_PNP_SEND_LINE_SEND' 
+					|| bcs.user.role == 'ROLE_LINE_SEND'
+					|| bcs.user.role == 'ROLE_REPORT') {
+					resultTr.find('.btn_copy').remove();
+				}
+	             
              	$('.resultTable').append(resultTr);
 			 }
-             
-             
-             // Append to Table
              
 		 });
 	}

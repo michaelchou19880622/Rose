@@ -397,22 +397,32 @@ public class BCSLinePointController extends BCSBaseController {
     @ResponseBody
     public ResponseEntity<?> pressSendLinePointMain(HttpServletRequest request, HttpServletResponse response,
                                                     @CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
-        try {
+    	log.info("customUser.getRole() = {}", customUser.getRole());
+    	
+    	try {
             // get linePointMain
             log.info("[pressSendLinePointMain] linePointMainId:" + linePointMainId);
             LinePointMain linePointMain = linePointUIService.linePointMainFindOne(linePointMainId);
             if (linePointMain.getSendStartTime() != null) {
                 throw new BcsNoticeException("此專案已發送");
             }
-
-            if ("ROLE_ADMIN".equals(customUser.getRole())
-            		|| "ROLE_LINE_SEND".equals(customUser.getRole())  
-            		|| "ROLE_LINE_VERIFY".equals(customUser.getRole())
-            		|| "ROLE_PNP_SEND_LINE_VERIFY".equals(customUser.getRole())) {
-                if ((!"ROLE_ADMIN".equals(customUser.getRole())) && customUser.getAccount().equals(linePointMain.getModifyUser())) {
-                    throw new BcsNoticeException("不可發送自己創專案的line Point");
-                }
-            } else {
+            
+//            if ("ROLE_ADMIN".equals(customUser.getRole())
+//            		|| "ROLE_PNP_ADMIN".equals(customUser.getRole())
+//            		|| "ROLE_LINE_SEND".equals(customUser.getRole())  
+//            		|| "ROLE_LINE_VERIFY".equals(customUser.getRole())
+//            		|| "ROLE_PNP_SEND_LINE_VERIFY".equals(customUser.getRole())) {
+//                if ((!"ROLE_ADMIN".equals(customUser.getRole())) && customUser.getAccount().equals(linePointMain.getModifyUser())) {
+//                    throw new BcsNoticeException("不可發送自己創專案的line Point");
+//                }
+//            } else {
+//                throw new BcsNoticeException("沒有權限可以發送line Point");
+//            }
+            
+            if (!"ROLE_ADMIN".equals(customUser.getRole())
+            		&& !"ROLE_PNP_ADMIN".equals(customUser.getRole())
+            		&& !"ROLE_PNP_SEND_LINE_VERIFY".equals(customUser.getRole())  
+            		&& !"ROLE_LINE_VERIFY".equals(customUser.getRole())) {
                 throw new BcsNoticeException("沒有權限可以發送line Point");
             }
 
@@ -485,18 +495,25 @@ public class BCSLinePointController extends BCSBaseController {
                                                  @CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
         log.info("[deleteLinePointMain]");
         log.info("linePointMainId : " + linePointMainId);
+        log.info("customUser.getRole() : " + customUser.getRole());
 
         try {
-            LinePointMain linePointMain = linePointUIService.linePointMainFindOne(linePointMainId);
-
-            if ("ROLE_LINE_SEND".equals(customUser.getRole()) 
-            		|| "ROLE_PNP_ADMIN".equals(customUser.getRole()) 
-            		|| "ROLE_LINE_VERIFY".equals(customUser.getRole()) 
-            		|| "ROLE_PNP_SEND_LINE_VERIFY".equals(customUser.getRole())) {
-                if (!customUser.getAccount().equals(linePointMain.getModifyUser())) {
-                    throw new BcsNoticeException("沒有權限可以刪除此line Point專案");
-                }
-            } else if (!"ROLE_ADMIN".equals(customUser.getRole())) {
+//            LinePointMain linePointMain = linePointUIService.linePointMainFindOne(linePointMainId);
+//            if ("ROLE_LINE_SEND".equals(customUser.getRole()) 
+//            		|| "ROLE_PNP_ADMIN".equals(customUser.getRole()) 
+//            		|| "ROLE_LINE_VERIFY".equals(customUser.getRole()) 
+//            		|| "ROLE_PNP_SEND_LINE_VERIFY".equals(customUser.getRole())) {
+//                if (!customUser.getAccount().equals(linePointMain.getModifyUser())) {
+//                    throw new BcsNoticeException("沒有權限可以刪除此line Point專案");
+//                }
+//            } else if (!"ROLE_ADMIN".equals(customUser.getRole())) {
+//                throw new BcsNoticeException("沒有權限可以刪除此line Point專案");
+//            }
+            
+            if (!"ROLE_ADMIN".equals(customUser.getRole()) 
+            		&& !"ROLE_PNP_ADMIN".equals(customUser.getRole()) 
+            		&& !"ROLE_PNP_SEND_LINE_VERIFY".equals(customUser.getRole()) 
+            		&& !"ROLE_LINE_VERIFY".equals(customUser.getRole())) {
                 throw new BcsNoticeException("沒有權限可以刪除此line Point專案");
             }
 
@@ -560,49 +577,14 @@ public class BCSLinePointController extends BCSBaseController {
 
             switch (role) {
                 case "ROLE_ADMIN":
-                case "ROLE_REPORT":
-                    result.add(main);
-                    break;
-                case "ROLE_EDIT": //權限代碼 : 2788
+                case "ROLE_PNP_ADMIN":
+                case "ROLE_PNP_SEND_LINE_VERIFY": //權限代碼 : 2586
                 case "ROLE_LINE_VERIFY": //權限代碼 : 2786
+                case "ROLE_MARKET": //權限代碼 : 2688
+                case "ROLE_EDIT": //權限代碼 : 2788
                 case "ROLE_LINE_SEND": //權限代碼 : 2787
                 case "ROLE_PNP_SEND_LINE_SEND": //權限代碼 : 2587
-                case "ROLE_PNP_SEND_LINE_VERIFY": //權限代碼 : 2586
-                    TaishinEmployee employee;
-                    
-                    String environment = CoreConfigReader.getString("environment");
-                    log.info("environment = {}", environment);
-                    
-                    if ("local".equals(environment) || "linux".equals(environment)) {
-                    	employee = oracleService.findByLocalEmployeeId(empId);
-                    } else {
-                    	employee = oracleService.findByEmployeeId(empId);
-        			}
-                    
-                    log.info("employee = {}", employee);
-                    
-                    String department = main.getDepartmentFullName();
-                    String[] departmentName = department.split(" ");
-                    //Departmentname[0]; 處  DIVISION_NAME
-                    //Departmentname[1]; 部  DEPARTMENT_NAME
-                    //Departmentname[2]; 組  GROUP_NAME
-
-                    //判斷邏輯  如果登錄者有組 那只能看到同組 顧處部組全都要一樣，沒有組有部 那就是處跟部要一樣才可以，只有處 就是處一樣即可
-                    if (StringUtils.isNotBlank(employee.getGroupName())) {
-                        if (departmentName[0].equals(employee.getDivisionName()) && departmentName[1].equals(employee.getDepartmentName()) && departmentName[2].equals(employee.getGroupName())) {
-                            result.add(main);
-                        }
-                    } else if (StringUtils.isNotBlank(employee.getDepartmentName())) {
-                        if (departmentName[0].equals(employee.getDivisionName()) && departmentName[1].equals(employee.getDepartmentName())) {
-                            result.add(main);
-                        }
-                    } else if (StringUtils.isNotBlank(employee.getDivisionName())) {
-                        if (departmentName[0].equals(employee.getDivisionName())) {
-                            result.add(main);
-                        }
-                    } else {
-                        log.info("The user does not match any auth role!!");
-                    }
+                    result.add(main);
                     break;
                 default:
                     break;

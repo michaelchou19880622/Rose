@@ -120,6 +120,8 @@ public class BCSLinePointReportController extends BCSBaseController {
             startDate = sdf.parse(startDateStr);
             endDate = sdf.parse(endDateStr);
             endDate = DateUtils.addDays(endDate, 1);
+            endDate = DateUtils.addSeconds(endDate, -1);
+            
             log.info("startDate:" + startDate);
             log.info("endDate:" + endDate);
             log.info("title:" + title);
@@ -486,51 +488,66 @@ public class BCSLinePointReportController extends BCSBaseController {
                 serviceName = details.get(0).getServiceName();
             }
             main.setSendType(serviceName);
+            
+            switch (role) {
+				case "ROLE_ADMIN":
+                case "ROLE_REPORT":
+                    result.add(main);
+					break;
+                case "ROLE_EDIT": //權限代碼 : 2788
+                case "ROLE_MARKET": //權限代碼 : 2688
+                case "ROLE_PNP_ADMIN":
+                case "ROLE_PNP_SEND_LINE_VERIFY": //權限代碼 : 2586
+                case "ROLE_PNP_SEND_LINE_SEND": //權限代碼 : 2587
+                case "ROLE_LINE_VERIFY": //權限代碼 : 2786
+                case "ROLE_LINE_SEND": //權限代碼 : 2787
+                	TaishinEmployee employee;
+                    
+                    String environment = CoreConfigReader.getString("environment");
+                    log.info("environment = {}", environment);
+                    
+                    if ("local".equals(environment) || "linux".equals(environment)) {
+                    	employee = oracleService.findByLocalEmployeeId(empId);
+                    } else {
+                    	employee = oracleService.findByEmployeeId(empId);
+        			}
+                    
+                    log.info("employee = {}", employee);
 
-            if ("ROLE_ADMIN".equals(role) || "ROLE_REPORT".equals(role)) {
-                result.add(main);
-            } else if ("ROLE_LINE_SEND".equals(role) 
-            		|| "ROLE_LINE_VERIFY".equals(role)
-            		|| "ROLE_PNP_SEND_LINE_SEND".equals(role)
-            		|| "ROLE_PNP_SEND_LINE_VERIFY".equals(role)) {
-                TaishinEmployee employee;
-                
-                String environment = CoreConfigReader.getString("environment");
-                log.info("environment = " +  environment);
-                
-                if ("local".equals(environment) || "linux".equals(environment)) {
-                	employee = oracleService.findByLocalEmployeeId(empId);
-                } else {
-                	employee = oracleService.findByEmployeeId(empId);
-    			}
-                
-                log.info("employee = {}" +  employee);
 
+                    String Department = main.getDepartmentFullName();
+                    log.info("Department = {}", Department);
+                    
+                    String[] Departmentname = Department.split(" ");
+                    log.info("處 DIVISION_NAME = {}", Departmentname[0]);
+                    log.info("部 DEPARTMENT_NAME = {}", Departmentname[1]);
+                    log.info("組 GROUP_NAME = {}", Departmentname[2]);
+                    // Departmentname[0]; 處 DIVISION_NAME
+                    // Departmentname[1]; 部 DEPARTMENT_NAME
+                    // Departmentname[2]; 組 GROUP_NAME
 
-                String Department = main.getDepartmentFullName();
-                String[] Departmentname = Department.split(" ");
-                // Departmentname[0]; 處 DIVISION_NAME
-                // Departmentname[1]; 部 DEPARTMENT_NAME
-                // Departmentname[2]; 組 GROUP_NAME
-
-                // 判斷邏輯 如果登錄者有組 那只能看到同組 顧處部組全都要一樣，沒有組有部 那就是處跟部要一樣才可以，只有處 就是處一樣即可
-                if (StringUtils.isNotBlank(employee.getGroupName())) {
-                    if (Departmentname[0].equals(employee.getDivisionName())
-                            && Departmentname[1].equals(employee.getDepartmentName())
-                            && Departmentname[2].equals(employee.getGroupName())) {
-                        result.add(main);
+                    // 判斷邏輯 如果登錄者有組 那只能看到同組 顧處部組全都要一樣，沒有組有部 那就是處跟部要一樣才可以，只有處 就是處一樣即可
+                    if (StringUtils.isNotBlank(employee.getGroupName())) {
+                        if (Departmentname[0].equals(employee.getDivisionName())
+                                && Departmentname[1].equals(employee.getDepartmentName())
+                                && Departmentname[2].equals(employee.getGroupName())) {
+                            result.add(main);
+                        }
+                    } else if (StringUtils.isNotBlank(employee.getDepartmentName())) {
+                        if (Departmentname[0].equals(employee.getDivisionName())
+                                && Departmentname[1].equals(employee.getDepartmentName())) {
+                            result.add(main);
+                        }
+                    } else if (StringUtils.isNotBlank(employee.getDivisionName())) {
+                        if (Departmentname[0].equals(employee.getDivisionName())) {
+                            result.add(main);
+                        }
                     }
-                } else if (StringUtils.isNotBlank(employee.getDepartmentName())) {
-                    if (Departmentname[0].equals(employee.getDivisionName())
-                            && Departmentname[1].equals(employee.getDepartmentName())) {
-                        result.add(main);
-                    }
-                } else if (StringUtils.isNotBlank(employee.getDivisionName())) {
-                    if (Departmentname[0].equals(employee.getDivisionName())) {
-                        result.add(main);
-                    }
-                }
-            }
+					break;
+	
+				default:
+					break;
+			}
         }
         return result;
     }

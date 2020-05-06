@@ -11,7 +11,7 @@
 		<div th:replace="/BCS/Views/Common/Menu :: menu ('PageLPL')"></div>
 
         <!-- Right Content -->
-        <div class="LyMain" role="main" type="hidden">
+        <div id="LyMain" class="LyMain" role="main" style="display:none">
             <form>
                 <section>
                     <header class="ContentHead">
@@ -42,7 +42,7 @@
                         	<input class="btn_add" style="cursor: pointer;" type="button" value="建立專案">
                        	</div>
                     </div>
-					<div class="mainFrame alignLeft" id="mainFrameId">
+					<div class="mainFrame alignCenter" id="mainFrameId">
                         <table border="1" class="templateTable">
                             <colgroup>
                                 <col width="100">
@@ -88,8 +88,8 @@
 	                                <td class="successfulAmount"></td>
 	                                <td class="status"></td>
 	                                <td class="actions">
-	                                	<input class="btn_copy" style="cursor: pointer;" type="button" value="">
-	                                	<input class="btn_detele" style="cursor: pointer;" type="button" value="">
+	                                	<input class="btn_linepoint_send_and_cancel" style="cursor: pointer;" type="button" value="">
+	                                	<input class="btn_linepoint_delete" style="cursor: pointer;" type="button" value="">
 	                                </td>
 	                            </tr>
                             </tbody>

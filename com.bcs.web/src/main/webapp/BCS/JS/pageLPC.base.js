@@ -13,7 +13,7 @@ $(function(){
 		return;
 	}
 	
-	var LyMain = document.getElementsByClassName("LyMain");
+	var LyMain = document.getElementById("LyMain");
 	LyMain.style.display = 'block';
 	
 	//--------- Initialize --------- 

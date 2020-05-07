@@ -304,16 +304,16 @@ public class PnpService {
              * */
             final boolean isSuccess ;
             final String httpStatusCode ;
-    		if(CoreConfigReader.isPNPFtpTypeDevelop()){
-	            isSuccess = true;
-	            httpStatusCode = "200";			
-                log.info("PNP Development mode");
-    		}
-    		else {
+//    		if(CoreConfigReader.isPNPFtpTypeDevelop()){
+//	            isSuccess = true;
+//	            httpStatusCode = "200";			
+//                log.info("PNP Development mode");
+//    		}
+//    		else {
 	            final Object[] pushResult = pnpPushMessage(url, headers, detail, detail.getUid(), pnpStageEnum);
 	            isSuccess = (boolean) pushResult[0];
 	            httpStatusCode = (String) pushResult[1];
-    		}            
+//    		}            
     		
             if (!isSuccess) {
                 switch (processFlow) {
@@ -571,16 +571,17 @@ public class PnpService {
                  * */
                 final boolean isSuccess ;
                 final String httpStatusCode ;
-        		if(CoreConfigReader.isPNPFtpTypeDevelop()){
-        			isSuccess = true;
-    	            httpStatusCode = "200";			
-                    log.info("PNP Development mode");
-        		}
-        		else {
+                
+//        		if(CoreConfigReader.isPNPFtpTypeDevelop()){
+//        			isSuccess = true;
+//    	            httpStatusCode = "200";			
+//                    log.info("PNP Development mode");
+//        		}
+//        		else {
                     final Object[] pushResult = pnpPushMessage(url, headers, detail, detail.getPhoneHash(), pnpStageEnum);
                     isSuccess = (boolean) pushResult[0];
                     httpStatusCode = (String) pushResult[1];
-        		}            
+//        		}            
         		   		               
                 detail.setPnpHttpStatusCode(httpStatusCode);
 

@@ -156,7 +156,10 @@ $(function() {
 	             if(o.status=='SUCCESS'){
 	             	resultTr.find('.btn_copy').attr('detailId', o.detailId).css("background-color","red");
 	                 resultTr.find('.btn_copy').click(btn_cancle);
+	             }else{
+	                 resultTr.find('.btn_copy').click(func_cancel_fail);
 	             }
+	             
 	             
 
 				// 按鈕(回收)
@@ -219,15 +222,15 @@ $(function() {
 		
 		getMainList();
 		setExportButtonSource();
+		
 		//getDataList();// 这里写sleep之后需要去做的事情
 		
 	};
 	
-
-	
 	var btn_cancle = function(){
 		$('.LyMain').block($.BCS.blockMsgRead);
 		var detailId = $(this).attr('detailId');
+		console.info("cancel detailId : ", detailId);
 
 		$.ajax({
 			type : "GET",
@@ -243,6 +246,11 @@ $(function() {
 			$('.LyMain').unblock();
 		});
 	};
+	
+
+	var func_cancel_fail = function() {
+		alert("此訂單LinePoint點數尚未發送完畢或發送失敗，無法進行點數回收作業。");
+	}
 	
     initPage();
     

@@ -257,9 +257,17 @@ public class LineAccessApiService {
             String postMsg = ObjectUtil.objectToJsonStr(sendToBotModel.getReplyMessage());
             log.info("postMsg = " + postMsg);
             try {
-                Response<BotApiResponse> response = getService(channelId, channelName)
-                        .replyMessage(sendToBotModel.getReplyMessage())
-                        .execute();
+                Response<BotApiResponse> response;
+                
+                if (channelName.equals(CONFIG_STR.MANUAL_REPLY.toString()) || channelName.equals(CONFIG_STR.AUTO_REPLY.toString())) {
+                    response = getServiceWithServiceCode(channelId, channelName)
+                            .replyMessage(sendToBotModel.getReplyMessage())
+                            .execute();
+                } else {
+                    response = getService(channelId, channelName)
+                            .replyMessage(sendToBotModel.getReplyMessage())
+                            .execute();
+				}
                 log.debug("{}", response.code());
 
                 status = response.code();
@@ -286,9 +294,18 @@ public class LineAccessApiService {
             String postMsg = ObjectUtil.objectToJsonStr(sendToBotModel.getPushMessage());
             try {
 
-                Response<BotApiResponse> response = getService(channelId, channelName)
-                        .pushMessage(sendToBotModel.getPushMessage())
-                        .execute();
+                Response<BotApiResponse> response;
+                
+                if (channelName.equals(CONFIG_STR.MANUAL_REPLY.toString()) || channelName.equals(CONFIG_STR.AUTO_REPLY.toString())) {
+                    response = getServiceWithServiceCode(channelId, channelName)
+    	                        .pushMessage(sendToBotModel.getPushMessage())
+    	                        .execute();
+                } else {
+                    response = getService(channelId, channelName)
+    	                        .pushMessage(sendToBotModel.getPushMessage())
+    	                        .execute();
+				}
+                
                 log.debug("{}", response.code());
 
                 status = response.code();

@@ -882,6 +882,10 @@ div.time-picker li.selected {
     text-align: left;
 }
 
+.mainFrame.alignCenter td {
+    text-align: center;
+}
+
 .mainFrame .typeMenu {
     display: inline-block;
     text-align: center;
@@ -1138,3 +1142,20 @@ form label.error {
 form input.error {
     border: 1px solid red;
 }
+
+.btn_linepoint_send_and_cancel:hover, 
+.btn_linepoint_delete:hover {
+  background-color: #005AA9;
+  color: #FFFFFF
+}
+
+.btn_linepoint_send_and_cancel,
+.btn_linepoint_delete {
+    background: #ADADAD;
+    color: #FFFFFF;
+    padding: 5px 10px;
+    margin-bottom: 10px;
+    box-shadow: none;
+    border: 0;
+}
+

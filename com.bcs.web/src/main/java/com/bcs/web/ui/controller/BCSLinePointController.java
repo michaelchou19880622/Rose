@@ -1,5 +1,38 @@
 package com.bcs.web.ui.controller;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.json.JSONArray;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.bcs.core.db.entity.AdminUser;
 import com.bcs.core.db.service.LineUserService;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.exception.BcsNoticeException;
@@ -24,36 +57,8 @@ import com.bcs.web.aop.ControllerLog;
 import com.bcs.web.ui.service.LinePointUIService;
 import com.bcs.web.ui.service.SendGroupUIService;
 import com.bcs.web.ui.service.SendMsgUIService;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
-import org.json.JSONArray;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Controller
@@ -81,14 +86,14 @@ public class BCSLinePointController extends BCSBaseController {
 
     @ControllerLog(description = "建立 Line Point 活動")
     @GetMapping(value = "/edit/linePointCreatePage")
-    public String linePointCreatePage(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser) {
+    public String linePointCreatePage(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, Model model) {
         log.info("linePointCreatePage");
         return BcsPageEnum.LinePointCreatePage.toString();
     }
 
     @ControllerLog(description = "Line Point 活動列表")
     @GetMapping(value = "/edit/linePointListPage")
-    public String linePointListPage(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser) {
+    public String linePointListPage(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser, Model model) {
         log.info("linePointListPage");
         return BcsPageEnum.LinePointListPage.toString();
     }
@@ -107,10 +112,24 @@ public class BCSLinePointController extends BCSBaseController {
     @PostMapping(value = "/edit/createLinePointMain", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<?> createLinePointMain(HttpServletRequest request, HttpServletResponse response,
-                                                 @CurrentUser CustomUser customUser, @RequestBody LinePointMain linePointMain) {
-        try {
+                                                 @CurrentUser CustomUser customUser, @RequestBody LinePointMain linePointMain, Model model) {
+    	log.info("[createLinePointMain]");
+    	
+        log.info("customUser.getAccount() = {}", customUser.getAccount());
+        log.info("customUser.getRole() = {}", customUser.getRole());
+        
+        model.addAttribute("access", true);
+        
+        if (customUser.getRole() != null) {
+        	if (customUser.getRole().equals(AdminUser.RoleCode.ROLE_REPORT.getRoleId())) {
+                model.addAttribute("access", false);
+        	}
+        }
+    	
+    	try {
+            
+            
             // Null Exception
-            log.info("[createLinePointMain]");
             if (linePointMain == null) {
                 throw new BcsNoticeException("LinePointMain is Null");
             }
@@ -122,7 +141,18 @@ public class BCSLinePointController extends BCSBaseController {
                 throw new BcsNoticeException("員工編號不得為空值");
             }
 
-            TaishinEmployee taishinEmployee = oracleService.findByEmployeeId(empId);
+            TaishinEmployee taishinEmployee;
+            
+            String environment = CoreConfigReader.getString("environment");
+            log.info("environment = {}", environment);
+
+            if ("local".equals(environment) || "linux".equals(environment)) {
+            	taishinEmployee = oracleService.findByLocalEmployeeId(empId);
+            } else {
+            	taishinEmployee = oracleService.findByEmployeeId(empId);
+			}
+
+            log.info("taishinEmployee = {}", taishinEmployee);
 
             if (taishinEmployee == null || StringUtils.isBlank(taishinEmployee.getDivisionName())) {
                 throw new BcsNoticeException("查無此員工編號");
@@ -238,18 +268,22 @@ public class BCSLinePointController extends BCSBaseController {
             Date startDate = DataUtils.convStrToDate(startDateStr, "yyyy-MM-dd");
             Date endDate = DataUtils.convStrToDate(endDateStr, "yyyy-MM-dd");
             endDate = DateUtils.addDays(endDate, 1);
+            endDate = DateUtils.addSeconds(endDate, -1);
             log.info("startDate: {}", startDate);
             log.info("endDate  : {}", endDate);
 
             //List<LinePointMain> result = new ArrayList<LinePointMain>();
             List<LinePointMain> list = this.linePointUIService.linePointMainFindBcsAndDate(startDate, endDate);
+            
             //FIXME Why query request can do update SQL?
             for (LinePointMain linePointMain : list) {
                 linePointUIService.updateLinePoint(linePointMain.getId().toString());
             }
+            
             //FIXME Why query again from database?
             list = this.linePointUIService.linePointMainFindBcsAndDate(startDate, endDate);
             //log.info("list:" + list);
+            
             List<LinePointMain> result = competence(list, customUser);
 
 //		    result.addAll(list);
@@ -363,19 +397,32 @@ public class BCSLinePointController extends BCSBaseController {
     @ResponseBody
     public ResponseEntity<?> pressSendLinePointMain(HttpServletRequest request, HttpServletResponse response,
                                                     @CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
-        try {
+    	log.info("customUser.getRole() = {}", customUser.getRole());
+    	
+    	try {
             // get linePointMain
             log.info("[pressSendLinePointMain] linePointMainId:" + linePointMainId);
             LinePointMain linePointMain = linePointUIService.linePointMainFindOne(linePointMainId);
             if (linePointMain.getSendStartTime() != null) {
                 throw new BcsNoticeException("此專案已發送");
             }
-
-            if ("ROLE_ADMIN".equals(customUser.getRole()) || "ROLE_LINE_VERIFY".equals(customUser.getRole())) {
-                if ((!"ROLE_ADMIN".equals(customUser.getRole())) && customUser.getAccount().equals(linePointMain.getModifyUser())) {
-                    throw new BcsNoticeException("不可發送自己創專案的line Point");
-                }
-            } else {
+            
+//            if ("ROLE_ADMIN".equals(customUser.getRole())
+//            		|| "ROLE_PNP_ADMIN".equals(customUser.getRole())
+//            		|| "ROLE_LINE_SEND".equals(customUser.getRole())  
+//            		|| "ROLE_LINE_VERIFY".equals(customUser.getRole())
+//            		|| "ROLE_PNP_SEND_LINE_VERIFY".equals(customUser.getRole())) {
+//                if ((!"ROLE_ADMIN".equals(customUser.getRole())) && customUser.getAccount().equals(linePointMain.getModifyUser())) {
+//                    throw new BcsNoticeException("不可發送自己創專案的line Point");
+//                }
+//            } else {
+//                throw new BcsNoticeException("沒有權限可以發送line Point");
+//            }
+            
+            if (!"ROLE_ADMIN".equals(customUser.getRole())
+            		&& !"ROLE_PNP_ADMIN".equals(customUser.getRole())
+            		&& !"ROLE_PNP_SEND_LINE_VERIFY".equals(customUser.getRole())  
+            		&& !"ROLE_LINE_VERIFY".equals(customUser.getRole())) {
                 throw new BcsNoticeException("沒有權限可以發送line Point");
             }
 
@@ -448,15 +495,10 @@ public class BCSLinePointController extends BCSBaseController {
                                                  @CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
         log.info("[deleteLinePointMain]");
         log.info("linePointMainId : " + linePointMainId);
+        log.info("customUser.getRole() : " + customUser.getRole());
 
         try {
-            LinePointMain linePointMain = linePointUIService.linePointMainFindOne(linePointMainId);
-
-            if ("ROLE_LINE_SEND".equals(customUser.getRole()) || "ROLE_LINE_VERIFY".equals(customUser.getRole())) {
-                if (!customUser.getAccount().equals(linePointMain.getModifyUser())) {
-                    throw new BcsNoticeException("沒有權限可以刪除此line Point專案");
-                }
-            } else if (!"ROLE_ADMIN".equals(customUser.getRole())) {
+            if ("ROLE_REPORT".equals(customUser.getRole())) {
                 throw new BcsNoticeException("沒有權限可以刪除此line Point專案");
             }
 
@@ -504,7 +546,11 @@ public class BCSLinePointController extends BCSBaseController {
         List<LinePointMain> result = new ArrayList<>();
 
         String role = customUser.getRole();
+        log.info("role = {}", role);
+        
         String empId = customUser.getAccount();
+        log.info("empId = {}", empId);
+        
         // reset service name
         for (LinePointMain main : list) {
             String serviceName = "BCS";
@@ -516,34 +562,14 @@ public class BCSLinePointController extends BCSBaseController {
 
             switch (role) {
                 case "ROLE_ADMIN":
-                case "ROLE_REPORT":
+                case "ROLE_PNP_ADMIN":
+                case "ROLE_PNP_SEND_LINE_VERIFY": //權限代碼 : 2586
+                case "ROLE_LINE_VERIFY": //權限代碼 : 2786
+                case "ROLE_MARKET": //權限代碼 : 2688
+                case "ROLE_EDIT": //權限代碼 : 2788
+                case "ROLE_LINE_SEND": //權限代碼 : 2787
+                case "ROLE_PNP_SEND_LINE_SEND": //權限代碼 : 2587
                     result.add(main);
-                    break;
-                case "ROLE_LINE_VERIFY":
-                case "ROLE_LINE_SEND":
-                    TaishinEmployee employee = oracleService.findByEmployeeId(empId);
-                    String department = main.getDepartmentFullName();
-                    String[] departmentName = department.split(" ");
-                    //Departmentname[0]; 處  DIVISION_NAME
-                    //Departmentname[1]; 部  DEPARTMENT_NAME
-                    //Departmentname[2]; 組  GROUP_NAME
-
-                    //判斷邏輯  如果登錄者有組 那只能看到同組 顧處部組全都要一樣，沒有組有部 那就是處跟部要一樣才可以，只有處 就是處一樣即可
-                    if (StringUtils.isNotBlank(employee.getGroupName())) {
-                        if (departmentName[0].equals(employee.getDivisionName()) && departmentName[1].equals(employee.getDepartmentName()) && departmentName[2].equals(employee.getGroupName())) {
-                            result.add(main);
-                        }
-                    } else if (StringUtils.isNotBlank(employee.getDepartmentName())) {
-                        if (departmentName[0].equals(employee.getDivisionName()) && departmentName[1].equals(employee.getDepartmentName())) {
-                            result.add(main);
-                        }
-                    } else if (StringUtils.isNotBlank(employee.getDivisionName())) {
-                        if (departmentName[0].equals(employee.getDivisionName())) {
-                            result.add(main);
-                        }
-                    } else {
-                        log.info("The user does not match any auth role!!");
-                    }
                     break;
                 default:
                     break;

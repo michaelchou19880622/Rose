@@ -158,7 +158,7 @@ public class LiveChatProcessService {
 			ReplyMessage replyMessage = new ReplyMessage(replyToken, sendMsgList);
 			sendToBotModel.setReplyMessage(replyMessage);
 
-			LineAccessApiService.sendToLine(sendToBotModel);
+			LineAccessApiService.sendToLineWithServiceCode(sendToBotModel);
 		} catch (Exception e) {
 			String error = ErrorRecord.recordError(e, false);
 			logger.error(error);

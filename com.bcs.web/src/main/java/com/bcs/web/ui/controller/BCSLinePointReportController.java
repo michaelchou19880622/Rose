@@ -20,6 +20,9 @@ import com.bcs.core.web.ui.page.enums.BcsPageEnum;
 import com.bcs.web.aop.ControllerLog;
 import com.bcs.web.ui.service.LinePointUIService;
 import com.bcs.web.ui.service.LoadFileUIService;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
@@ -49,6 +52,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@Slf4j
 @Controller
 @RequestMapping("/bcs")
 public class BCSLinePointReportController extends BCSBaseController {
@@ -66,19 +70,19 @@ public class BCSLinePointReportController extends BCSBaseController {
     /**
      * Logger
      */
-    private static Logger logger = Logger.getLogger(BCSLinePointReportController.class);
+//    private static Logger logger = Logger.getLogger(BCSLinePointReportController.class);
 
     @ControllerLog(description = "Line Point 統計報表")
     @RequestMapping(method = RequestMethod.GET, value = "/edit/linePointStatisticsReportPage")
     public String linePointStatisticsReportPage(HttpServletRequest request, HttpServletResponse response) {
-        logger.info("linePointStatisticsReportPage");
+        log.info("linePointStatisticsReportPage");
         return BcsPageEnum.LinePointStatisticsReportPage.toString();
     }
 
     @ControllerLog(description = "Line Point 統計報表明細")
     @RequestMapping(method = RequestMethod.GET, value = "/edit/linePointStatisticsReportDetailPage")
     public String linePointStatisticsReportDetailPage(HttpServletRequest request, HttpServletResponse response) {
-        logger.info("linePointStatisticsReportPage");
+        log.info("linePointStatisticsReportPage");
         return BcsPageEnum.LinePointStatisticsReportDetailPage.toString();
     }
 
@@ -94,7 +98,7 @@ public class BCSLinePointReportController extends BCSBaseController {
                                                    @RequestParam(value = "title", required = false) String title,
                                                    @RequestParam(value = "page", required = true) Integer page) throws IOException {
         try {
-            logger.info("[getLPStatisticsReport]");
+            log.info("[getLPStatisticsReport]");
 
             // null translation
             if (StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) {
@@ -116,10 +120,12 @@ public class BCSLinePointReportController extends BCSBaseController {
             startDate = sdf.parse(startDateStr);
             endDate = sdf.parse(endDateStr);
             endDate = DateUtils.addDays(endDate, 1);
-            logger.info("startDate:" + startDate);
-            logger.info("endDate:" + endDate);
-            logger.info("title:" + title);
-            logger.info("modifyUser:" + modifyUser);
+            endDate = DateUtils.addSeconds(endDate, -1);
+            
+            log.info("startDate:" + startDate);
+            log.info("endDate:" + endDate);
+            log.info("title:" + title);
+            log.info("modifyUser:" + modifyUser);
 
             // get result list
             List<LinePointMain> result = new ArrayList();
@@ -133,7 +139,7 @@ public class BCSLinePointReportController extends BCSBaseController {
 
 
             List<Object[]> SuccessandFailCount = linePointDetailService.getSuccessandFailCount(startDate, endDate);
-            logger.info("SuccessandFailCount : " + SuccessandFailCount);
+            log.info("SuccessandFailCount : " + SuccessandFailCount);
             for (Object[] o : SuccessandFailCount) {
                 String mainId = o[0].toString();
                 String success = o[1].toString();
@@ -144,10 +150,10 @@ public class BCSLinePointReportController extends BCSBaseController {
                 } else {
                     successfulAmount = o[3].toString();
                 }
-                logger.info("mainId" + mainId);
-                logger.info("success" + success);
-                logger.info("fail" + fail);
-                logger.info("totleAmount" + successfulAmount);
+                log.info("mainId" + mainId);
+                log.info("success" + success);
+                log.info("fail" + fail);
+                log.info("totleAmount" + successfulAmount);
 
                 for (LinePointMain linePointMain : result) {
                     if (linePointMain.getId().toString().equals(mainId)) {
@@ -160,10 +166,10 @@ public class BCSLinePointReportController extends BCSBaseController {
                 }
             }
 
-            logger.info("result:" + ObjectUtil.objectToJsonStr(result));
+            log.info("result:" + ObjectUtil.objectToJsonStr(result));
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -177,7 +183,7 @@ public class BCSLinePointReportController extends BCSBaseController {
                                                              @RequestParam(value = "modifyUser", required = false) String modifyUser,
                                                              @RequestParam(value = "title", required = false) String title) throws IOException {
         try {
-            logger.info("[getLPStatisticsReportTotalPages]");
+            log.info("[getLPStatisticsReportTotalPages]");
 
             // null translation
             if (StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) {
@@ -198,10 +204,10 @@ public class BCSLinePointReportController extends BCSBaseController {
             startDate = sdf.parse(startDateStr);
             endDate = sdf.parse(endDateStr);
             endDate = DateUtils.addDays(endDate, 1);
-            logger.info("startDate:" + startDate);
-            logger.info("endDate:" + endDate);
-            logger.info("title:" + title);
-            logger.info("modifyUser:" + modifyUser);
+            log.info("startDate:" + startDate);
+            log.info("endDate:" + endDate);
+            log.info("title:" + title);
+            log.info("modifyUser:" + modifyUser);
 
             // calculate count
 
@@ -216,7 +222,7 @@ public class BCSLinePointReportController extends BCSBaseController {
 
             return new ResponseEntity<>("{\"result\": 1, \"msg\": \"" + count.toString() + "\"}", HttpStatus.OK);
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
             return new ResponseEntity<>("{\"result\": 0, \"msg\": \"" + e.getMessage() + "\"}",
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -227,8 +233,8 @@ public class BCSLinePointReportController extends BCSBaseController {
     public ResponseEntity<?> linePointCancelFromDetailId(HttpServletRequest request, HttpServletResponse response,
                                                          @CurrentUser CustomUser customUser, @RequestParam(value = "detailId", required = false) Long detailId)
             throws IOException {
-        logger.info("[linePointCancelFromDetailId]");
-        logger.info(" detailId : " + detailId);
+        log.info("[linePointCancelFromDetailId]");
+        log.info(" detailId : " + detailId);
         SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy/MM/dd");
         Date current = new Date();
         String message = customUser.getAccount() + " " + sdFormat.format(current) + " " + "收回點數";
@@ -240,14 +246,17 @@ public class BCSLinePointReportController extends BCSBaseController {
         LinePointMain linePointMain = linePointUIService.linePointMainFindOne(linePointDetail.getLinePointMainId());
         try {
             if (!"ROLE_ADMIN".equals(customUser.getRole())) {
-                if (!"ROLE_LINE_VERIFY".equals(customUser.getRole())) {
+                if (!"ROLE_LINE_VERIFY".equals(customUser.getRole())
+            		|| !"ROLE_LINE_SEND".equals(customUser.getRole())  
+            		|| !"ROLE_PNP_SEND_LINE_SEND".equals(customUser.getRole()) 
+            		|| !"ROLE_PNP_SEND_LINE_VERIFY".equals(customUser.getRole())) {
                     throw new BcsNoticeException("只有管理者或是發送人員才可收回點數");
                 } else if (!customUser.getAccount().equals(linePointMain.getSendUser())) {
                     throw new BcsNoticeException("只有管理者或是發送人員才可收回點數");
                 }
             }
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
             if (e instanceof BcsNoticeException) {
                 return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
             } else {
@@ -292,24 +301,24 @@ public class BCSLinePointReportController extends BCSBaseController {
                 linePointDetail.setStatus(LinePointDetail.STATUS_FAIL);
                 linePointDetail.setCancelTime(new Date());
                 linePointDetailService.save(linePointDetail);
-                logger.info(" linePointDetail save: " + linePointDetail);
+                log.info(" linePointDetail save: " + linePointDetail);
 
                 linePointMain.setSuccessfulCount(linePointMain.getSuccessfulCount() - 1L);
                 linePointMain.setFailedCount(linePointMain.getFailedCount() + 1L);
                 linePointMain.setSuccessfulAmount(linePointMain.getSuccessfulAmount() - linePointDetail.getAmount());
                 linePointMainService.save(linePointMain);
-                logger.info(" linePointMain save: " + linePointMain);
+                log.info(" linePointMain save: " + linePointMain);
 
             } catch (HttpClientErrorException e) {
-                logger.info("[LinePointApi] Status code: " + e.getStatusCode());
-                logger.info("[LinePointApi]  Response body: " + e.getResponseBodyAsString());
+                log.info("[LinePointApi] Status code: " + e.getStatusCode());
+                log.info("[LinePointApi]  Response body: " + e.getResponseBodyAsString());
 
                 return new ResponseEntity<>(e.getResponseBodyAsString(), HttpStatus.INTERNAL_SERVER_ERROR); // e.getStatusCode()
             }
 
             return new ResponseEntity<>("", HttpStatus.OK);
         } catch (Exception e) {
-            logger.info("e:" + e.toString());
+            log.info("e:" + e.toString());
             if (e instanceof IllegalArgumentException)
                 return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"" + e.getMessage() + "\"}",
                         HttpStatus.BAD_REQUEST);
@@ -332,7 +341,7 @@ public class BCSLinePointReportController extends BCSBaseController {
                                            @RequestParam(value = "modifyUser", required = false) String modifyUser,
                                            @RequestParam(value = "title", required = false) String title) throws IOException {
         try {
-            logger.info("[exportLPStatisticsReportExcel]");
+            log.info("[exportLPStatisticsReportExcel]");
 
             // null translation
             if (StringUtils.isBlank(startDateStr) || startDateStr.equals("null")) {
@@ -354,10 +363,10 @@ public class BCSLinePointReportController extends BCSBaseController {
             startDate = sdf.parse(startDateStr);
             endDate = sdf.parse(endDateStr);
             endDate = DateUtils.addDays(endDate, 1);
-            logger.info("startDate:" + startDate);
-            logger.info("endDate:" + endDate);
-            logger.info("title:" + title);
-            logger.info("modifyUser:" + modifyUser);
+            log.info("startDate:" + startDate);
+            log.info("endDate:" + endDate);
+            log.info("title:" + title);
+            log.info("modifyUser:" + modifyUser);
 
             // set file path
             String filePath = CoreConfigReader.getString("file.path");
@@ -377,13 +386,13 @@ public class BCSLinePointReportController extends BCSBaseController {
             List<LinePointMain> mains = linePointMainService.findByTitleAndModifyUserAndSendDate(startDate, endDate,
                     modifyUser, title);
             List<LinePointMain> result = competence(mains, customUser);
-            logger.info("LinePointMain : " + mains);
+            log.info("LinePointMain : " + mains);
 
             linePointReportExcelService.exportExcel_LinePointStatisticsReport(filePathAndName, result);
             LoadFileUIService.loadFileToResponse(filePath, fileName, response);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
     }
 
@@ -395,7 +404,7 @@ public class BCSLinePointReportController extends BCSBaseController {
             , @RequestParam String startDateStr, @RequestParam String endDateStr) throws IOException {
         try {
             try {
-                logger.info("[findLinePointDetailByMainId] linePointMainId:" + linePointMainId);
+                log.info("[findLinePointDetailByMainId] linePointMainId:" + linePointMainId);
 
 
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -403,18 +412,18 @@ public class BCSLinePointReportController extends BCSBaseController {
                 startDate = sdf.parse(startDateStr);
                 endDate = sdf.parse(endDateStr);
                 endDate = DateUtils.addDays(endDate, 1);
-                logger.info("startDate:" + startDate);
-                logger.info("endDate:" + endDate);
+                log.info("startDate:" + startDate);
+                log.info("endDate:" + endDate);
 
                 // get Details
                 List<LinePointDetail> linePointDetails = linePointUIService.findByLinePointMainIdAndSendDate(linePointMainId, startDate, endDate);
-                logger.info("linePointDetails:" + linePointDetails);
+                log.info("linePointDetails:" + linePointDetails);
                 return new ResponseEntity<>(linePointDetails, HttpStatus.OK);
             } catch (Exception e) {
                 throw new BcsNoticeException(e.getMessage());
             }
         } catch (Exception e) {
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
             if (e instanceof BcsNoticeException) {
                 return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
             } else {
@@ -432,15 +441,15 @@ public class BCSLinePointReportController extends BCSBaseController {
                                                  @CurrentUser CustomUser customUser, @RequestParam Long linePointMainId
             , @RequestParam String startDateStr, @RequestParam String endDateStr) throws IOException {
         try {
-            logger.info("[getLPStatisticsReportDetailExcel]");
+            log.info("[getLPStatisticsReportDetailExcel]");
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             Date startDate = null, endDate = null;
             startDate = sdf.parse(startDateStr);
             endDate = sdf.parse(endDateStr);
             endDate = DateUtils.addDays(endDate, 1);
-            logger.info("startDate:" + startDate);
-            logger.info("endDate:" + endDate);
+            log.info("startDate:" + startDate);
+            log.info("endDate:" + endDate);
 
 
             // set file path
@@ -461,7 +470,7 @@ public class BCSLinePointReportController extends BCSBaseController {
             LoadFileUIService.loadFileToResponse(filePath, fileName, response);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error(ErrorRecord.recordError(e));
+            log.error(ErrorRecord.recordError(e));
         }
     }
 
@@ -479,42 +488,66 @@ public class BCSLinePointReportController extends BCSBaseController {
                 serviceName = details.get(0).getServiceName();
             }
             main.setSendType(serviceName);
+            
+            switch (role) {
+				case "ROLE_ADMIN":
+                case "ROLE_REPORT":
+                    result.add(main);
+					break;
+                case "ROLE_EDIT": //權限代碼 : 2788
+                case "ROLE_MARKET": //權限代碼 : 2688
+                case "ROLE_PNP_ADMIN":
+                case "ROLE_PNP_SEND_LINE_VERIFY": //權限代碼 : 2586
+                case "ROLE_PNP_SEND_LINE_SEND": //權限代碼 : 2587
+                case "ROLE_LINE_VERIFY": //權限代碼 : 2786
+                case "ROLE_LINE_SEND": //權限代碼 : 2787
+                	TaishinEmployee employee;
+                    
+                    String environment = CoreConfigReader.getString("environment");
+                    log.info("environment = {}", environment);
+                    
+                    if ("local".equals(environment) || "linux".equals(environment)) {
+                    	employee = oracleService.findByLocalEmployeeId(empId);
+                    } else {
+                    	employee = oracleService.findByEmployeeId(empId);
+        			}
+                    
+                    log.info("employee = {}", employee);
 
-            if ("ROLE_ADMIN".equals(role) || "ROLE_REPORT".equals(role)) {
-                result.add(main);
-            } else if ("ROLE_LINE_SEND".equals(role) || "ROLE_LINE_VERIFY".equals(role)) {
-                TaishinEmployee employee = oracleService.findByEmployeeId(empId);
-                // logger.info("employee : " + employee);
 
-//				TaishinEmployee employee = new TaishinEmployee();
-//
-//				employee.setDivisionName("XTREME");
-//				employee.setDepartmentName("LINEBC");
+                    String Department = main.getDepartmentFullName();
+                    log.info("Department = {}", Department);
+                    
+                    String[] Departmentname = Department.split(" ");
+                    log.info("處 DIVISION_NAME = {}", Departmentname[0]);
+                    log.info("部 DEPARTMENT_NAME = {}", Departmentname[1]);
+                    log.info("組 GROUP_NAME = {}", Departmentname[2]);
+                    // Departmentname[0]; 處 DIVISION_NAME
+                    // Departmentname[1]; 部 DEPARTMENT_NAME
+                    // Departmentname[2]; 組 GROUP_NAME
 
-                String Department = main.getDepartmentFullName();
-                String[] Departmentname = Department.split(" ");
-                // Departmentname[0]; 處 DIVISION_NAME
-                // Departmentname[1]; 部 DEPARTMENT_NAME
-                // Departmentname[2]; 組 GROUP_NAME
-
-                // 判斷邏輯 如果登錄者有組 那只能看到同組 顧處部組全都要一樣，沒有組有部 那就是處跟部要一樣才可以，只有處 就是處一樣即可
-                if (StringUtils.isNotBlank(employee.getGroupName())) {
-                    if (Departmentname[0].equals(employee.getDivisionName())
-                            && Departmentname[1].equals(employee.getDepartmentName())
-                            && Departmentname[2].equals(employee.getGroupName())) {
-                        result.add(main);
+                    // 判斷邏輯 如果登錄者有組 那只能看到同組 顧處部組全都要一樣，沒有組有部 那就是處跟部要一樣才可以，只有處 就是處一樣即可
+                    if (StringUtils.isNotBlank(employee.getGroupName())) {
+                        if (Departmentname[0].equals(employee.getDivisionName())
+                                && Departmentname[1].equals(employee.getDepartmentName())
+                                && Departmentname[2].equals(employee.getGroupName())) {
+                            result.add(main);
+                        }
+                    } else if (StringUtils.isNotBlank(employee.getDepartmentName())) {
+                        if (Departmentname[0].equals(employee.getDivisionName())
+                                && Departmentname[1].equals(employee.getDepartmentName())) {
+                            result.add(main);
+                        }
+                    } else if (StringUtils.isNotBlank(employee.getDivisionName())) {
+                        if (Departmentname[0].equals(employee.getDivisionName())) {
+                            result.add(main);
+                        }
                     }
-                } else if (StringUtils.isNotBlank(employee.getDepartmentName())) {
-                    if (Departmentname[0].equals(employee.getDivisionName())
-                            && Departmentname[1].equals(employee.getDepartmentName())) {
-                        result.add(main);
-                    }
-                } else if (StringUtils.isNotBlank(employee.getDivisionName())) {
-                    if (Departmentname[0].equals(employee.getDivisionName())) {
-                        result.add(main);
-                    }
-                }
-            }
+					break;
+	
+				default:
+					break;
+			}
         }
         return result;
     }
@@ -539,7 +572,7 @@ public class BCSLinePointReportController extends BCSBaseController {
 //            }
 //            exportToExcelForLinePointPushApiEffects.exportExcel(filePath, fileName);
 //        } catch (Exception e) {
-//            logger.error(ErrorRecord.recordError(e));
+//            log.error(ErrorRecord.recordError(e));
 //        }
 //
 //        try {
@@ -570,7 +603,7 @@ public class BCSLinePointReportController extends BCSBaseController {
 //            }
 //            exportToExcelForLinePointPushApiEffects.exportExcel(filePath, fileName, mainId, status);
 //        } catch (Exception e) {
-//            logger.error(ErrorRecord.recordError(e));
+//            log.error(ErrorRecord.recordError(e));
 //        }
 //
 //        try {

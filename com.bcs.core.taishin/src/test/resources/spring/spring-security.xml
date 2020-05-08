@@ -22,25 +22,70 @@
 	<http pattern="/bcs/getLink/**" security="none"/>
     
 	<http auto-config="true">
-		<intercept-url pattern="/init/**" access="permitAll"/>
-		<!-- Mobile Controller -->
-		<intercept-url pattern="/m/**" access="permitAll"/>
+        <!-- ====================== Permit All =========================-->
+        <!-- InitController -->
+        <intercept-url pattern="/init/**" access="permitAll"/>
+        
+        <!-- MobileCouponViewController -->
+        <intercept-url pattern="/m/**" access="permitAll"/>
+        
+        <!-- BCSTracingController -->
+        <intercept-url pattern="/l/**" access="permitAll"/>
+        
+        <!-- MobileMgmClickTracingController -->
+        <intercept-url pattern="/c/**" access="permitAll"/>
+        
+        <!--VIPNightController, MobileVIPNightTracingController-->
+        <intercept-url pattern="/campaign/**" access="permitAll"/>
+        
+        <!--BCSIndexController.doLoginGet()-->
+        <intercept-url pattern="/bcs/doLogin*" access="permitAll"/>
+        
+        <!-- ====================== Permit All =========================-->
 
-		<!-- 使用 Controller Tracing Click -->
-		<intercept-url pattern="/l/**" access="permitAll"/>
-		<intercept-url pattern="/c/**" access="permitAll"/>
-		<intercept-url pattern="/campaign/**" access="permitAll"/>
-		
-		<intercept-url pattern="/bcs/doLogin*" access="permitAll"/>
-		
-		<intercept-url pattern="/bcs/admin/**" access="hasRole('ROLE_ADMIN')" />
-		<intercept-url pattern="/bcs/edit/**" access="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN')" />
-		<intercept-url pattern="/bcs/market/**" access="hasAnyRole('ROLE_EDIT', 'ROLE_ADMIN', 'ROLE_MARKET')" />
-		<intercept-url pattern="/bcs/edit/**" access="hasAnyRole('ROLE_PNP_ADMIN', 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY')" />
-		<intercept-url pattern="/bcs/lpQuerier/**" access="hasAnyRole('ROLE_PNP_ADMIN', 'ROLE_LINE_SEND', 'ROLE_LINE_VERIFY', 'ROLE_REPORT')" />
+
+        <!--管理者-->
+        <intercept-url pattern="/bcs/admin/**"
+                       access="hasRole('ROLE_ADMIN')"/>
+        <!--編輯者-->
+        <intercept-url pattern="/bcs/edit/**" 
+                       access="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_MARKET', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_LINE_VERIFY', 'ROLE_LINE_SEND')" />
+
+        <!--行銷人員-->
+        <intercept-url pattern="/bcs/market/**"
+						access="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_MARKET', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_LINE_VERIFY', 'ROLE_LINE_SEND')"/>
+
+        <!--PNP 管理者-->
+        <intercept-url pattern="/bcs/pnpAdmin/**" 
+                       access="hasAnyRole('ROLE_ADMIN', 'ROLE_PNP_ADMIN')" />
+
+        <!--PNP員工-->
+        <intercept-url pattern="/bcs/pnpEmployee/**"
+                       access="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_MARKET', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_REPORT')" />
+				
+				
+		<!-- LinePoint Roles Setup -->		
+				                       	
+		<!-- 建立發送專案(頁面)-->
+        <intercept-url pattern="/bcs/edit/linePointCreatePage" 
+                       	access="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_MARKET', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_LINE_VERIFY', 'ROLE_LINE_SEND')" />
+    	
+		<!-- 建立發送專案(儲存)-->
+        <intercept-url pattern="/bcs/edit/createLinePointMain" 
+                       	access="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_MARKET', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_LINE_VERIFY', 'ROLE_LINE_SEND')" />
+	
+		<!-- 發送專案列表(頁面)-->
+        <intercept-url pattern="/bcs/edit/createLinePointMain" 
+                       	access="hasAnyRole('ROLE_ADMIN', 'ROLE_EDIT', 'ROLE_MARKET', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_PNP_SEND_LINE_SEND', 'ROLE_LINE_VERIFY', 'ROLE_LINE_SEND')" />
+	
+		<!-- 發送專案列表(發送)-->
+        <intercept-url pattern="/bcs/edit/createLinePointMain" 
+                       	access="hasAnyRole('ROLE_ADMIN', 'ROLE_PNP_ADMIN', 'ROLE_PNP_SEND_LINE_VERIFY', 'ROLE_LINE_VERIFY')" />
+
 
 		<!-- 此 pattern 要擺在最後面 -->
-		<intercept-url pattern="/**" access="authenticated"/>
+		<intercept-url pattern="/**" 
+						access="authenticated"/>
 		
 		<form-login login-page="/bcs/doLogin" username-parameter="tid"
 			password-parameter="tpasswd" 

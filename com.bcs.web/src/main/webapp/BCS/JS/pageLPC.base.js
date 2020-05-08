@@ -2,6 +2,20 @@
  *
  */
 $(function(){
+
+	console.info("bcs.user.role = ", bcs.user.role);
+
+	if (bcs.user.role == 'ROLE_REPORT') {
+		window.location.replace(bcs.bcsContextPath +'/index');
+		
+		alert('很抱歉，您的帳號無權限登入此頁面。');
+		
+		return;
+	}
+	
+	var LyMain = document.getElementById("LyMain");
+	LyMain.style.display = 'block';
+	
 	//--------- Initialize --------- 
 	//假如重整 就把已經填好的值放回去
 	if($.urlParam("title")){
@@ -864,7 +878,8 @@ $(function(){
 			//alert('儲存成功');
 	 		//windowReplace();
 		}).fail(function(response){
-			console.info(response);
+			console.info('response = ', response);
+			console.info('response.status = ', response.status);
 			$.FailResponse(response);
 			$('.LyMain').unblock();
 			windowReplace();
@@ -1187,7 +1202,7 @@ $(function(){
 			type : "GET",
 			url : bcs.bcsContextPath + '/market/getSendGroupCondition'
 		}).success(function(response){
-			console.info('market_getSendGroupCondition:', response);
+//			console.info('market_getSendGroupCondition:', response);
 			sendGroupCondition = response;
 			
 			$.each(sendGroupCondition, function(queryFieldId, queryFieldObject){

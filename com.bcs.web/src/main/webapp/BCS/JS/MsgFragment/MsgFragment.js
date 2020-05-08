@@ -18,7 +18,7 @@ $(function(){
 		});
 
 		$('.MsgPlace .MsgFrame').remove();
-		console.info('MsgFrameTemplate', MsgFrameTemplate);
+//		console.info('MsgFrameTemplate', MsgFrameTemplate);
 	};
 
 	initMsgTemplate();
@@ -647,7 +647,7 @@ $(function(){
 			var richMsgTr = richMsgTrTemplate.clone(true);
 
 			var valueObj = response[key];
-			console.info('valueObj', valueObj);
+//			console.info('valueObj', valueObj);
 
 			richMsgTr.find('.richMsgId').val(key);
 			richMsgTr.find('.richMsgTitle').html(valueObj[0]);
@@ -796,8 +796,8 @@ $(function(){
 		for(key in response){
 			var templateMsgTr = templateMsgTrTemplate.clone(true);
 			content = "";
-			console.info('key templateId: ', key);
-			console.info('valueObj : ', valueObj);
+//			console.info('key templateId: ', key);
+//			console.info('valueObj : ', valueObj);
 			var valueObj = response[key];
 			
 			var templateType = valueObj[4];

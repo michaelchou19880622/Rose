@@ -14,6 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static org.hamcrest.CoreMatchers.nullValue;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -45,6 +47,18 @@ public class OracleService {
 
     public void save(TaishinEmployee employeeRecord) {
         taishinEmployeeRepository.save(employeeRecord);
+    }
+    
+    public TaishinEmployee findByLocalEmployeeId(String empId) throws Exception {
+    	log.info("[findByLocalEmployeeId] EMP_ID = {}", empId);
+        if (empId == null || empId.trim().isEmpty()) {
+            throw new BcsNoticeException("The Employee ID is blank!");
+        }
+        
+        TaishinEmployee taishinEmployee = taishinEmployeeRepository.findByEmployeeId(empId);
+    	log.info("[findByLocalEmployeeId] taishinEmployee = {}", taishinEmployee);
+        
+        return taishinEmployee;
     }
 
     /**

@@ -1,4 +1,6 @@
 $(function() {
+	console.info("bcs.user.role = ", bcs.user.role);
+
 	// ---- Global Variables ----
 	// input data
 	var modifyUserInput = "";

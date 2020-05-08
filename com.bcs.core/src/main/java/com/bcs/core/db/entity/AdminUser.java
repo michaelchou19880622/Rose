@@ -24,19 +24,36 @@ public class AdminUser extends AbstractBcsEntity {
 
     @Getter
     public enum RoleCode {
-        /**
-         * Role Code
-         */
+    	
+    	// 2888
         ROLE_ADMIN("ROLE_ADMIN", "管理者", "manager", "2888"),
+        
+        // 2688
+        ROLE_MARKET("ROLE_MARKET", "行銷人員", "marketing", "2688"),
+        
+        // 2788
         ROLE_EDIT("ROLE_EDIT", "編輯人員", "editor", "2788"),
-        ROLE_MARKET("ROLE_MARKET", "行銷人員", "marketing", "5788"),
+        
+        // 1688, 1688, 1689, 1690, 1691, 1692
+        ROLE_REPORT("ROLE_REPORT", "報表查詢人員", "report", "1688"),
+        
+        // 2588
         ROLE_PNP_ADMIN("ROLE_PNP_ADMIN", "PNP管理者", "pnp_manager", "2588"),
+        
+        // 2587
         ROLE_PNP_SEND_LINE_SEND("ROLE_PNP_SEND_LINE_SEND", "PNP發送暨LINE點發送者", "pnp_send_line_send", "2587"),
+        
+        // 2586
         ROLE_PNP_SEND_LINE_VERIFY("ROLE_PNP_SEND_LINE_VERIFY", "PNP發送暨LINE點審核者", "pnp_send_line_verify", "2586"),
-        ROLE_REPORT("ROLE_REPORT", "報表查詢人員", "report", "2688"),
+        
+        // 2787
         ROLE_LINE_SEND("ROLE_LINE_SEND", "LINE點發送者", "line_send", "2787"),
+        
+        // 2786
         ROLE_LINE_VERIFY("ROLE_LINE_VERIFY", "LINE點審核者", "line_verify", "2786"),
-        ROLE_CUSTOMER_SERVICE("ROLE_CUSTOMER_SERVICE", "客服人員", "customer_service", "1692"),
+
+        // 1692
+        ROLE_CUSTOMER_SERVICE("ROLE_CUSTOMER_SERVICE", "客服人員", "customer_service", "1692")
         ;
 
         private String roleId;

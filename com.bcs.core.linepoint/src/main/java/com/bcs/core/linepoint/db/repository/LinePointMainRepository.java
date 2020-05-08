@@ -44,7 +44,7 @@ public interface LinePointMainRepository extends EntityRepository<LinePointMain,
     @Transactional(timeout = 30)
     @Query(value = " update BCS_LINE_POINT_MAIN  " 
  			+      " set SUCCESSFUL_COUNT = (select count(*)  from BCS_LINE_POINT_DETAIL  where LINE_POINT_MAIN_ID = ?1 and status = 'SUCCESS'), "
-			+      " SUCCESSFUL_AMOUNT = (select sum(AMOUNT)  from BCS_LINE_POINT_DETAIL  where LINE_POINT_MAIN_ID = ?1 and status = 'SUCCESS'), "
+			+      " SUCCESSFUL_AMOUNT = (select ISNULL(sum(AMOUNT),0)  from BCS_LINE_POINT_DETAIL  where LINE_POINT_MAIN_ID = ?1 and status = 'SUCCESS'), "
  			+      " FAILED_COUNT = (select count(*) from BCS_LINE_POINT_DETAIL where  LINE_POINT_MAIN_ID = ?1 and status = 'FAIL' ) "
 			+      " where ID = ?1 and status = 'COMPLETE' ", nativeQuery = true)	
 	public void updateLinePoint(String LinePointMainId);

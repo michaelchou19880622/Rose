@@ -119,9 +119,6 @@ public class LineAccessApiService {
             String channelToken = CoreConfigReader.getString(channelId, CONFIG_STR.CHANNEL_TOKEN.toString(), true);
             log.info("channelToken = " + channelToken);
 
-//            final String serviceCode = CoreConfigReader.getString(channelName, CONFIG_STR.CHANNEL_SERVICE_CODE.toString(), true);
-//            log.info("serviceCode = " + serviceCode);
-
             if (lineMessagingServices == null) {
                 lineMessagingServices = new ArrayList<>();
                 lineMessagingServiceMap.put(channel, lineMessagingServices);
@@ -238,12 +235,14 @@ public class LineAccessApiService {
     }
 
     public static Response<BotApiResponse> sendToLine(SendToBotModel sendToBotModel) throws Exception {
-        log.info("sendToBotModel:" + sendToBotModel);
+        log.info("sendToLine");
+		log.info("sendToBotModel = {}", sendToBotModel);
+		log.info("sendToBotModel.getSendType() = {}", sendToBotModel.getSendType());
 
         String channelId = sendToBotModel.getChannelId();
         String channelName = sendToBotModel.getChannelName();
-        log.info("ChannelId:" + channelId);
-        log.info("ChannelName:" + channelName);
+		log.info("channelId = {}", channelId);
+		log.info("channelName = {}", channelName);
 
         if (channelName.equals(CONFIG_STR.IN_MANUAL_REPLY_BUT_NOT_SEND_MSG.toString())) {
             throw new BcsNoticeException("使用者在真人客服無法推播");
@@ -255,7 +254,8 @@ public class LineAccessApiService {
             int status = 0;
 
             String postMsg = ObjectUtil.objectToJsonStr(sendToBotModel.getReplyMessage());
-            log.info("postMsg = " + postMsg);
+            log.info("postMsg = {}", postMsg);
+            
             try {
                 Response<BotApiResponse> response;
                 
@@ -268,9 +268,10 @@ public class LineAccessApiService {
                             .replyMessage(sendToBotModel.getReplyMessage())
                             .execute();
 				}
-                log.debug("{}", response.code());
+                log.info("response = {}", response);
 
                 status = response.code();
+                log.info("status = {}", status);
 
                 if (401 == status) {
                     callVerifyAPIAndIssueToken(sendToBotModel.getChannelId(), true);
@@ -292,6 +293,8 @@ public class LineAccessApiService {
             int status = 0;
 
             String postMsg = ObjectUtil.objectToJsonStr(sendToBotModel.getPushMessage());
+			log.info("postMsg : {}", postMsg);
+            
             try {
 
                 Response<BotApiResponse> response;
@@ -305,10 +308,10 @@ public class LineAccessApiService {
     	                        .pushMessage(sendToBotModel.getPushMessage())
     	                        .execute();
 				}
-                
-                log.debug("{}", response.code());
+                log.info("response = {}", response);
 
                 status = response.code();
+                log.info("status = {}", status);
 
                 if (401 == status) {
                     callVerifyAPIAndIssueToken(sendToBotModel.getChannelId(), true);
@@ -330,12 +333,14 @@ public class LineAccessApiService {
     }
     
     public static Response<BotApiResponse> sendToLineWithServiceCode(SendToBotModel sendToBotModel) throws Exception {
-        log.info("sendToBotModel:" + sendToBotModel);
+        log.info("sendToLineWithServiceCode");
+		log.info("sendToBotModel = {}", sendToBotModel);
+		log.info("sendToBotModel.getSendType() = {}", sendToBotModel.getSendType());
 
         String channelId = sendToBotModel.getChannelId();
         String channelName = sendToBotModel.getChannelName();
-        log.info("ChannelId:" + channelId);
-        log.info("ChannelName:" + channelName);
+        log.info("ChannelId = {}", channelId);
+        log.info("ChannelName = {}", channelName);
 
         if (channelName.equals(CONFIG_STR.IN_MANUAL_REPLY_BUT_NOT_SEND_MSG.toString())) {
             throw new BcsNoticeException("使用者在真人客服無法推播");
@@ -348,13 +353,23 @@ public class LineAccessApiService {
 
             String postMsg = ObjectUtil.objectToJsonStr(sendToBotModel.getReplyMessage());
             log.info("postMsg = " + postMsg);
+            
             try {
-                Response<BotApiResponse> response = getService(channelId, channelName)
-                        .replyMessage(sendToBotModel.getReplyMessage())
-                        .execute();
-                log.debug("{}", response.code());
+                Response<BotApiResponse> response;
+                
+                if (channelName.equals(CONFIG_STR.MANUAL_REPLY.toString()) || channelName.equals(CONFIG_STR.AUTO_REPLY.toString())) {
+                    response = getServiceWithServiceCode(channelId, channelName)
+                            .replyMessage(sendToBotModel.getReplyMessage())
+                            .execute();
+                } else {
+                    response = getService(channelId, channelName)
+                            .replyMessage(sendToBotModel.getReplyMessage())
+                            .execute();
+				}
+                log.info("response = {}", response);
 
                 status = response.code();
+                log.info("status = {}", status);
 
                 if (401 == status) {
                     callVerifyAPIAndIssueToken(sendToBotModel.getChannelId(), true);
@@ -378,12 +393,21 @@ public class LineAccessApiService {
             String postMsg = ObjectUtil.objectToJsonStr(sendToBotModel.getPushMessage());
             try {
 
-                Response<BotApiResponse> response = getService(channelId, channelName)
-                        .pushMessage(sendToBotModel.getPushMessage())
-                        .execute();
-                log.debug("{}", response.code());
+                Response<BotApiResponse> response;
+                
+                if (channelName.equals(CONFIG_STR.MANUAL_REPLY.toString()) || channelName.equals(CONFIG_STR.AUTO_REPLY.toString())) {
+                    response = getServiceWithServiceCode(channelId, channelName)
+    	                        .pushMessage(sendToBotModel.getPushMessage())
+    	                        .execute();
+                } else {
+                    response = getService(channelId, channelName)
+    	                        .pushMessage(sendToBotModel.getPushMessage())
+    	                        .execute();
+				}
+                log.info("response = {}", response);
 
                 status = response.code();
+                log.info("status = {}", status);
 
                 if (401 == status) {
                     callVerifyAPIAndIssueToken(sendToBotModel.getChannelId(), true);

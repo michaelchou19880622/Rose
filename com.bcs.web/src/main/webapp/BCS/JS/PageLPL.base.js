@@ -251,6 +251,7 @@ $(function() {
             }
 
             // send
+    		$('.LyMain').block($.BCS.LinePoint_blockMsgProgressing);
             $.ajax({
                 type: "POST",
                 url: bcs.bcsContextPath + '/edit/pressSendLinePointMain?linePointMainId=' + linePointMainId
@@ -258,10 +259,13 @@ $(function() {
                 console.info(response);
                 alert("執行成功");
                 window.location.replace(bcs.bcsContextPath + '/edit/linePointListPage');
+            	$('.LyMain').unblock();
             }).fail(function(response) {
                 console.info(response);
                 $.FailResponse(response);
+            	$('.LyMain').unblock();
             }).done(function() {
+            	$('.LyMain').unblock();
             });
 
 		}).fail(function(response){
@@ -283,7 +287,9 @@ $(function() {
         if (!r) {
         	return;
         }
-
+        
+        
+		$('.LyMain').block($.BCS.LinePoint_blockMsgDeleting);
         $.ajax({
             type: "POST",
             url: bcs.bcsContextPath + '/edit/deleteLinePointMain?linePointMainId=' + linePointMainId
@@ -291,10 +297,13 @@ $(function() {
             console.info(response);
             alert("刪除成功");
             window.location.replace(bcs.bcsContextPath + '/edit/linePointListPage');
+        	$('.LyMain').unblock();
         }).fail(function(response) {
             console.info(response);
             $.FailResponse(response);
+        	$('.LyMain').unblock();
         }).done(function() {
+        	$('.LyMain').unblock();
         });
 
     }

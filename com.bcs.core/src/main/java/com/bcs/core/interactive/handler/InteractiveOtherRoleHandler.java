@@ -38,7 +38,7 @@ public class InteractiveOtherRoleHandler {
 				} else {
 					// if groupID = -1, -2, -3 or -4, are the default send group.
 					// Ref. DEFAULT_SEND_GROUP
-					return sendGroupService.checkMidExistDefaultGroup(groupId, MID);
+					return sendGroupService.checkMidExistAndSysAddDefaultGroup(groupId, MID);
 				}
 			} catch (Exception e) {
 				logger.error(ErrorRecord.recordError(e));

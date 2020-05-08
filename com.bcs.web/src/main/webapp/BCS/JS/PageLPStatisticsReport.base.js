@@ -222,4 +222,6 @@ $(function() {
 	};
 
     initPage();
+    
+	document.getElementById("btn_search").click();
 });

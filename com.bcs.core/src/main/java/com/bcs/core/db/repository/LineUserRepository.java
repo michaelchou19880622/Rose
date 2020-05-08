@@ -71,7 +71,7 @@ public interface LineUserRepository extends EntityRepository<LineUser, String>, 
      * @param mids the mids
      * @return the list
      */
-    @Query("select x.mid from LineUser x where x.mid in ( ?1 ) and (x.status = 'BINDED' or (x.status = 'UNBIND' or x.status = 'SYSADD'))")
+    @Query("select x.mid from LineUser x where x.mid in ( ?1 ) and (x.status = 'BINDED' or x.status = 'UNBIND')")
     List<String> findMidByMidInAndActive(List<String> mids);
 
     /**
@@ -153,7 +153,7 @@ public interface LineUserRepository extends EntityRepository<LineUser, String>, 
      * @return the page
      */
     @Transactional(readOnly = true, timeout = 30)
-    @Query("select x.mid from LineUser x where x.status = 'BINDED' or (x.status = 'UNBIND' or x.status = 'SYSADD')")
+    @Query("select x.mid from LineUser x where x.status = 'BINDED' or x.status = 'UNBIND'")
     Page<String> findMIDAllActive(Pageable pageable);
 
     /**
@@ -163,8 +163,20 @@ public interface LineUserRepository extends EntityRepository<LineUser, String>, 
      * @return the string
      */
     @Transactional(readOnly = true, timeout = 30)
-    @Query("select x.mid from LineUser x where (x.status = 'BINDED' or (x.status = 'UNBIND' or x.status = 'SYSADD')) and x.mid = (?1)")
+    @Query("select x.mid from LineUser x where (x.status = 'BINDED' or x.status = 'UNBIND') and x.mid = (?1)")
     String checkMIDAllActive(String mid);
+
+    
+    /**
+     * Check mid all active and SYSADD string.
+     *
+     * @param mid the mid
+     * @return the string
+     */
+    @Transactional(readOnly = true, timeout = 30)
+    @Query("select x.mid from LineUser x where (x.status = 'BINDED' or (x.status = 'UNBIND' or x.status = 'SYSADD')) and x.mid = (?1)")
+    String checkMIDAllActiveAndSysAdd(String mid);
+    
 
     /**
      * Find by create time list.

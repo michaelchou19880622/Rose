@@ -352,7 +352,7 @@ public class LineAccessApiService {
             int status = 0;
 
             String postMsg = ObjectUtil.objectToJsonStr(sendToBotModel.getReplyMessage());
-            log.info("postMsg = " + postMsg);
+            log.info("postMsg = {}", postMsg);
             
             try {
                 Response<BotApiResponse> response;
@@ -391,6 +391,8 @@ public class LineAccessApiService {
             int status = 0;
 
             String postMsg = ObjectUtil.objectToJsonStr(sendToBotModel.getPushMessage());
+            log.info("postMsg = {}", postMsg);
+            
             try {
 
                 Response<BotApiResponse> response;

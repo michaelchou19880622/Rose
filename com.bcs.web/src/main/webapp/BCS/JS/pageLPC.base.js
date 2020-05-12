@@ -1284,13 +1284,13 @@ $(function(){
     	if($.urlParam('linePointMainId')){
     		$('.LyMain').block($.BCS.blockMsgUpload);
     		linePointMainId = $.urlParam('linePointMainId');
-    		console.info("linePointMainId:", $.urlParam('linePointMainId'));
+//    		console.info("linePointMainId:", $.urlParam('linePointMainId'));
     		// get LinePointMain
             $.ajax({
                 type: 'POST',
                 url: bcs.bcsContextPath + '/edit/findOneLinePointMainByMainId?linePointMainId=' + linePointMainId,
             }).success(function(o) {
-                console.info('findOneLinePointMainByMainId response:', o);
+//                console.info('findOneLinePointMainByMainId response:', o);
                 
                 $('#title').val(o.title);
                 $('#pccCode').val(o.pccCode);
@@ -1322,10 +1322,10 @@ $(function(){
                 	$('.sendTimeType')[1].click();
                 	// set schedule Time
                 	var scheduleTime = o.sendTimingTime;
-    				console.info('scheduleTime', scheduleTime);
+//    				console.info('scheduleTime', scheduleTime);
     				if(scheduleTime){
     					var splits = scheduleTime.split(' ');
-    					console.info('splits', splits);
+//    					console.info('splits', splits);
 
     					$('#delaySelect .datepicker').val(splits[0]);
 
@@ -1349,7 +1349,7 @@ $(function(){
                 var sendAmountType = o.sendAmountType;
                 if(sendAmountType=="UNIVERSAL"){
                 	$('.sendAmountType')[0].click();
-                	console.info('o.amount:', o.amount);
+//                	console.info('o.amount:', o.amount);
                 	$('#amount').val(o.amount);
                 }else{
                 	$('.sendAmountType')[1].click();
@@ -1359,9 +1359,9 @@ $(function(){
 		        // get date data
 		        var currentTime = moment();
 		        var sendTimingTime = moment(o.sendTimingTime).format('YYYY-MM-DD HH:mm:ss');
-		        console.info('currentTime:', currentTime);
-		        console.info('sendTimingTime:', sendTimingTime);
-		        console.info('isAfter:', currentTime.isAfter(sendTimingTime));
+//		        console.info('currentTime:', currentTime);
+//		        console.info('sendTimingTime:', sendTimingTime);
+//		        console.info('isAfter:', currentTime.isAfter(sendTimingTime));
 		        
                 // hide Send Group Create Button
                 if(o.status == 'COMPLETE'){
@@ -1444,8 +1444,8 @@ $(function(){
 				// 回寫 發送群組
 				for(key in response.SendGroup){
 					var groupTitle = response.SendGroup[key];
-					console.info('groupId', key);
-					console.info('groupTitle', groupTitle);
+//					console.info('groupId', key);
+//					console.info('groupTitle', groupTitle);
 
 					var sendGroup = $('<option value=""></option>');
 					sendGroup.val(key);

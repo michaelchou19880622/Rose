@@ -157,7 +157,7 @@ $(function() {
 		        }
 		        
 		        var btnText = templateTr.find('.btn_linepoint_send_and_cancel').val();
-		        console.info("btnText = ", btnText);
+//		        console.info("btnText = ", btnText);
 
 		        // 按鈕(發送,取消)
 		        if (bcs.user.role == 'ROLE_EDIT' 

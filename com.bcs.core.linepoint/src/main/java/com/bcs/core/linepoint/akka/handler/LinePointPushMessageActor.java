@@ -2,9 +2,11 @@ package com.bcs.core.linepoint.akka.handler;
 
 import akka.actor.UntypedActor;
 import com.bcs.core.bot.scheduler.handler.ExecuteSendMsgTask;
+import com.bcs.core.db.entity.LineUser;
 import com.bcs.core.db.entity.MsgDetail;
 import com.bcs.core.db.entity.MsgMain;
 import com.bcs.core.db.entity.MsgSendMain;
+import com.bcs.core.db.service.LineUserService;
 import com.bcs.core.db.service.MsgDetailService;
 import com.bcs.core.db.service.MsgMainService;
 import com.bcs.core.db.service.MsgSendMainService;
@@ -24,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -49,7 +52,7 @@ public class LinePointPushMessageActor extends UntypedActor {
     //	final static int TARGET_INDEX_OF_SLEEP = 10;
     private static final int DEFAULT_SLEEP_TIME = 5_000;
     private static final int DEFAULT_RETRY_COUNT = 3;
-
+    
     /**
      * @see LinePointPushMasterActor#onReceive
      */
@@ -92,10 +95,17 @@ public class LinePointPushMessageActor extends UntypedActor {
             detail.setTriggerTime(pushApiModel.getTriggerTime());
             detail.setDetailType(LinePointDetail.DETAIL_TYPE_ISSUE_BCS);
             
-            final String detailUID = detail.getUid();
-            log.info("detailUID is: {}", detailUID);
+            final String memberUid = detail.getUid();
+            log.info("memberUid = {}", memberUid);
             
             // 檢查uid狀態，若在發送LINE POINTS時客戶已封鎖台新LINE就不發送，但是要列入發送失敗的紀錄中，失敗原因要記錄為「客戶已封鎖」
+
+            LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
+            LineUser lineUser = lineUserService.findByMid(memberUid);
+            log.info("lineUser = {}", lineUser);
+            
+            boolean isStatusBlock = lineUser.getStatus().equals(LineUser.STATUS_BLOCK)? true : false;
+            log.info("isStatusBlock = {}", isStatusBlock);
             
             final String orderKey = getOrderKey(pushApiModel, detail);
             requestBody.put("amount", detail.getAmount());

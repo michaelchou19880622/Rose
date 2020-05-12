@@ -55,6 +55,13 @@ public class OracleService {
             throw new BcsNoticeException("The Employee ID is blank!");
         }
         
+        // For Local and SIT 測試使用
+        if (!empId.startsWith("LDAP")) {
+        	empId = "TEST_EMPLOYEE";
+        }
+        
+    	log.info("Final empId = {}", empId);
+        
         TaishinEmployee taishinEmployee = taishinEmployeeRepository.findByEmployeeId(empId);
     	log.info("[findByLocalEmployeeId] taishinEmployee = {}", taishinEmployee);
     	

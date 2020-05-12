@@ -57,6 +57,12 @@ public class OracleService {
         
         TaishinEmployee taishinEmployee = taishinEmployeeRepository.findByEmployeeId(empId);
     	log.info("[findByLocalEmployeeId] taishinEmployee = {}", taishinEmployee);
+    	
+    	if (taishinEmployee != null) {
+    		if (taishinEmployee.getEasyName().equalsIgnoreCase("quit")) {
+    			throw new BcsNoticeException(String.format("編號%s員工已離職，故無法進行資料查詢及任何操作!!", empId));
+    		}
+    	}
         
         return taishinEmployee;
     }
@@ -78,6 +84,7 @@ public class OracleService {
         final String password = connectionSettingArray[2];
         final String oracleDatabaseSourceUrl = connectionSettingArray[4];
         final String oracleSchemaHr = connectionSettingArray[5];
+        boolean isEmployeeQuit = false;
 
         TaishinEmployee employee = new TaishinEmployee();
         try (Connection connection = getOracleConnection(user, password, oracleDatabaseSourceUrl)) {
@@ -93,7 +100,9 @@ public class OracleService {
 	                    employee.setDepartmentName(trim(rs.getString(6)));
 	                    employee.setEasyName(trim(rs.getString(7)));                    
 	                    employee.setGroupName(extractGroupName(employee));
-                	}
+                	} else {
+                		isEmployeeQuit = true;
+					}
                 }
                 log.info("TaiShin Employee: " + DataUtils.toPrettyJsonUseJackson(employee));
             } catch (Exception e) {
@@ -102,7 +111,11 @@ public class OracleService {
                 throw new BcsNoticeException("查無此員工編號!!");
             }
         }
-
+        
+        if (isEmployeeQuit) {
+            throw new BcsNoticeException(String.format("編號%s員工已離職，無法進行此操作!!", empId));
+        }
+        
         if (employee.getEmployeeId() == null
                 || employee.getEmployeeId().trim().isEmpty()
                 || employee.getDivisionName() == null

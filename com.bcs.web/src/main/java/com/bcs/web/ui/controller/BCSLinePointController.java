@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.security.auth.login.AccountException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -127,8 +128,6 @@ public class BCSLinePointController extends BCSBaseController {
         }
     	
     	try {
-            
-            
             // Null Exception
             if (linePointMain == null) {
                 throw new BcsNoticeException("LinePointMain is Null");
@@ -153,10 +152,6 @@ public class BCSLinePointController extends BCSBaseController {
 			}
 
             log.info("taishinEmployee = {}", taishinEmployee);
-
-            if (taishinEmployee == null || StringUtils.isBlank(taishinEmployee.getDivisionName())) {
-                throw new BcsNoticeException("查無此員工編號");
-            }
 
             // get Department Full Name
             String departmentFullName = taishinEmployee.getDivisionName() + " " +
@@ -254,8 +249,31 @@ public class BCSLinePointController extends BCSBaseController {
     public ResponseEntity<?> findAllBcsLinePointMain(HttpServletRequest request, HttpServletResponse response, @CurrentUser CustomUser customUser,
                                                      @RequestParam(value = "startDate", required = false) String startDateStr,
                                                      @RequestParam(value = "endDate", required = false) String endDateStr) throws IOException {
-        try {
-            log.info("[findAllBcsLinePointMain]");
+    	log.info("[findAllBcsLinePointMain]");
+    	
+        log.info("customUser.getAccount() = {}", customUser.getAccount());
+        log.info("customUser.getRole() = {}", customUser.getRole());
+    	
+    	try {
+            // get Oracle Account Information
+            String empId = customUser.getAccount().toUpperCase();
+            log.info("empId:" + empId);
+            if (StringUtils.isBlank(empId)) {
+                throw new BcsNoticeException("員工編號不得為空值");
+            }
+
+            TaishinEmployee taishinEmployee;
+            
+            String environment = CoreConfigReader.getString("environment");
+            log.info("environment = {}", environment);
+
+            if ("local".equals(environment) || "linux".equals(environment)) {
+            	taishinEmployee = oracleService.findByLocalEmployeeId(empId);
+            } else {
+            	taishinEmployee = oracleService.findByEmployeeId(empId);
+			}
+
+            log.info("taishinEmployee = {}", taishinEmployee);
 
             if (StringUtils.isBlank(startDateStr) || "null".equals(startDateStr)) {
                 startDateStr = "1911-01-01";
@@ -397,33 +415,42 @@ public class BCSLinePointController extends BCSBaseController {
     @ResponseBody
     public ResponseEntity<?> pressSendLinePointMain(HttpServletRequest request, HttpServletResponse response,
                                                     @CurrentUser CustomUser customUser, @RequestParam Long linePointMainId) throws IOException {
+    	log.info("customUser.getAccount() = {}", customUser.getAccount());
     	log.info("customUser.getRole() = {}", customUser.getRole());
     	
     	try {
-            // get linePointMain
-            log.info("[pressSendLinePointMain] linePointMainId:" + linePointMainId);
-            LinePointMain linePointMain = linePointUIService.linePointMainFindOne(linePointMainId);
-            if (linePointMain.getSendStartTime() != null) {
-                throw new BcsNoticeException("此專案已發送");
-            }
-            
-//            if ("ROLE_ADMIN".equals(customUser.getRole())
-//            		|| "ROLE_PNP_ADMIN".equals(customUser.getRole())
-//            		|| "ROLE_LINE_SEND".equals(customUser.getRole())  
-//            		|| "ROLE_LINE_VERIFY".equals(customUser.getRole())
-//            		|| "ROLE_PNP_SEND_LINE_VERIFY".equals(customUser.getRole())) {
-//                if ((!"ROLE_ADMIN".equals(customUser.getRole())) && customUser.getAccount().equals(linePointMain.getModifyUser())) {
-//                    throw new BcsNoticeException("不可發送自己創專案的line Point");
-//                }
-//            } else {
-//                throw new BcsNoticeException("沒有權限可以發送line Point");
-//            }
-            
             if (!"ROLE_ADMIN".equals(customUser.getRole())
             		&& !"ROLE_PNP_ADMIN".equals(customUser.getRole())
             		&& !"ROLE_PNP_SEND_LINE_VERIFY".equals(customUser.getRole())  
             		&& !"ROLE_LINE_VERIFY".equals(customUser.getRole())) {
                 throw new BcsNoticeException("沒有權限可以發送line Point");
+            }
+            
+            // get Oracle Account Information
+            String empId = customUser.getAccount().toUpperCase();
+            log.info("empId:" + empId);
+            if (StringUtils.isBlank(empId)) {
+                throw new BcsNoticeException("員工編號不得為空值");
+            }
+            
+            TaishinEmployee taishinEmployee;
+            
+            String environment = CoreConfigReader.getString("environment");
+            log.info("environment = {}", environment);
+
+            if ("local".equals(environment) || "linux".equals(environment)) {
+            	taishinEmployee = oracleService.findByLocalEmployeeId(empId);
+            } else {
+            	taishinEmployee = oracleService.findByEmployeeId(empId);
+			}
+
+            log.info("taishinEmployee = {}", taishinEmployee);
+
+            // get linePointMain
+            log.info("[pressSendLinePointMain] linePointMainId:" + linePointMainId);
+            LinePointMain linePointMain = linePointUIService.linePointMainFindOne(linePointMainId);
+            if (linePointMain.getSendStartTime() != null) {
+                throw new BcsNoticeException("此專案已發送");
             }
 
 

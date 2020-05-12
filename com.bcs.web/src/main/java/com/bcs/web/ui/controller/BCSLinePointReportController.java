@@ -247,9 +247,9 @@ public class BCSLinePointReportController extends BCSBaseController {
         try {
             if (!"ROLE_ADMIN".equals(customUser.getRole())) {
                 if (!"ROLE_LINE_VERIFY".equals(customUser.getRole())
-            		|| !"ROLE_LINE_SEND".equals(customUser.getRole())  
-            		|| !"ROLE_PNP_SEND_LINE_SEND".equals(customUser.getRole()) 
-            		|| !"ROLE_PNP_SEND_LINE_VERIFY".equals(customUser.getRole())) {
+            		&& !"ROLE_LINE_SEND".equals(customUser.getRole())  
+            		&& !"ROLE_PNP_SEND_LINE_SEND".equals(customUser.getRole()) 
+            		&& !"ROLE_PNP_SEND_LINE_VERIFY".equals(customUser.getRole())) {
                     throw new BcsNoticeException("只有管理者或是發送人員才可收回點數");
                 } else if (!customUser.getAccount().equals(linePointMain.getSendUser())) {
                     throw new BcsNoticeException("只有管理者或是發送人員才可收回點數");
@@ -513,7 +513,6 @@ public class BCSLinePointReportController extends BCSBaseController {
         			}
                     
                     log.info("employee = {}", employee);
-
 
                     String Department = main.getDepartmentFullName();
                     log.info("Department = {}", Department);

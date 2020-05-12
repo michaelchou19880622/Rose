@@ -366,10 +366,8 @@ public class MessageProcessService {
 		}
 	}
 	
-	
-
-
 	public void replyTextMessageWithServiceCode(String channelId, String channelName, List<String> textList, String replyToken) throws Exception {
+		logger.info("replyTextMessageWithServiceCode");
 		List<Message> sendMsgList = new ArrayList<Message>();
 		Message message = null;
 		Sender sender = switchIconService.generateSenderModel(CONFIG_STR.AUTO_REPLY.toString());
@@ -393,7 +391,7 @@ public class MessageProcessService {
 	}
 
 	public void pushTextMsgAsyncWithServiceCode(String UID, String text,String channelName) throws Exception {
-		logger.info("pushTextMsgAsync");
+		logger.info("pushTextMsgAsyncWithServiceCode");
 
 		MsgDetail sendMsgDetail = new MsgDetail();
 
@@ -414,6 +412,7 @@ public class MessageProcessService {
 	}
 
 	public void pushMessageWithServiceCode(String UID, List<Message> messageList, String channelName) throws Exception {
+		logger.info("pushMessageWithServiceCode");
 		SendToBotModel sendToBotModel = new SendToBotModel();
 
 		sendToBotModel.setChannelId(CONFIG_STR.DEFAULT.toString());
@@ -427,6 +426,7 @@ public class MessageProcessService {
 	}
 
 	public void replyMessageWithServiceCode(String channelId, String replyToken, List<Message> messageList, String channelName) throws Exception {
+		logger.info("replyMessageWithServiceCode");
 		SendToBotModel sendToBotModel = new SendToBotModel();
 
 		sendToBotModel.setChannelId(channelId);

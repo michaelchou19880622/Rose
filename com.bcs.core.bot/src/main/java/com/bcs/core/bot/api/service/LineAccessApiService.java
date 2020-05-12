@@ -69,6 +69,15 @@ public class LineAccessApiService {
         checkTokenTimer.scheduleWithFixedDelay(this::checkTokenProcess, 150, 43_200, TimeUnit.SECONDS);
     }
 
+    @PreDestroy
+    public void cleanUp() {
+        log.info("[DESTROY] LineAccessApiService cleaning up...");
+
+        flushTimer.shutdown();
+        checkTokenTimer.shutdown();
+        log.info("[DESTROY] LineAccessApiService destroyed.");
+    }
+
     private void checkTokenProcess() {
         try {
             List<Object[]> channels = ApplicationContextProvider.getApplicationContext().getBean(SystemConfigService.class).findLikeConfigId("%.ChannelId");
@@ -222,6 +231,8 @@ public class LineAccessApiService {
         log.debug("randomOne Size:" + lineMessagingServices.size());
 
         int index = new Random().nextInt(lineMessagingServices.size());
+        log.debug("Get Random One, index = " + index);
+		
         return lineMessagingServices.get(index);
     }
 
@@ -342,10 +353,16 @@ public class LineAccessApiService {
         log.info("ChannelId = {}", channelId);
         log.info("ChannelName = {}", channelName);
 
+        boolean isUsingServiceCode = false;
+        if (channelName.equals(CONFIG_STR.MANUAL_REPLY.toString()) || channelName.equals(CONFIG_STR.AUTO_REPLY.toString())) {
+        	isUsingServiceCode = true;
+        }
+        log.info("isUsingServiceCode = {}", isUsingServiceCode);
+        
         if (channelName.equals(CONFIG_STR.IN_MANUAL_REPLY_BUT_NOT_SEND_MSG.toString())) {
             throw new BcsNoticeException("使用者在真人客服無法推播");
         }
-
+        
         if (SEND_TYPE.REPLY_MSG.equals(sendToBotModel.getSendType())) {
 
             Date start = new Date();
@@ -357,7 +374,7 @@ public class LineAccessApiService {
             try {
                 Response<BotApiResponse> response;
                 
-                if (channelName.equals(CONFIG_STR.MANUAL_REPLY.toString()) || channelName.equals(CONFIG_STR.AUTO_REPLY.toString())) {
+                if (isUsingServiceCode) {
                     response = getServiceWithServiceCode(channelId, channelName)
                             .replyMessage(sendToBotModel.getReplyMessage())
                             .execute();
@@ -396,8 +413,8 @@ public class LineAccessApiService {
             try {
 
                 Response<BotApiResponse> response;
-                
-                if (channelName.equals(CONFIG_STR.MANUAL_REPLY.toString()) || channelName.equals(CONFIG_STR.AUTO_REPLY.toString())) {
+
+                if (isUsingServiceCode) {
                     response = getServiceWithServiceCode(channelId, channelName)
     	                        .pushMessage(sendToBotModel.getPushMessage())
     	                        .execute();
@@ -438,10 +455,8 @@ public class LineAccessApiService {
 
         try {
 
-            Response<ResponseBody> response = getService(channelId, channelName)
-                    .getMessageContent(msgId)
-                    .execute();
-            log.debug("{}", response.code());
+			Response<ResponseBody> response = getService(channelId, channelName).getMessageContent(msgId).execute();
+            log.debug("response.code() = {}", response.code());
 
             status = response.code();
 
@@ -517,14 +532,5 @@ public class LineAccessApiService {
         }
 
         return false;
-    }
-
-    @PreDestroy
-    public void cleanUp() {
-        log.info("[DESTROY] LineAccessApiService cleaning up...");
-
-        flushTimer.shutdown();
-        checkTokenTimer.shutdown();
-        log.info("[DESTROY] LineAccessApiService destroyed.");
     }
 }

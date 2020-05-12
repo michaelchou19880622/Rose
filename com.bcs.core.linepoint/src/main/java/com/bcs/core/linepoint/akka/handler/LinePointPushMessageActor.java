@@ -87,9 +87,16 @@ public class LinePointPushMessageActor extends UntypedActor {
             log.info("DetailId is: {}", detailId);
 
             final Long applicationTime = System.currentTimeMillis();
+            
             LinePointDetail detail = linePointDetailService.findOne(detailId);
             detail.setTriggerTime(pushApiModel.getTriggerTime());
             detail.setDetailType(LinePointDetail.DETAIL_TYPE_ISSUE_BCS);
+            
+            final String detailUID = detail.getUid();
+            log.info("detailUID is: {}", detailUID);
+            
+            // 檢查uid狀態，若在發送LINE POINTS時客戶已封鎖台新LINE就不發送，但是要列入發送失敗的紀錄中，失敗原因要記錄為「客戶已封鎖」
+            
             final String orderKey = getOrderKey(pushApiModel, detail);
             requestBody.put("amount", detail.getAmount());
             requestBody.put("memberId", detail.getUid());

@@ -240,7 +240,6 @@ textarea:focus {
 
 
 /* 子選項 */
-
 .CHBtnSet {
     text-align: left;
     margin: 15px 0 14px;
@@ -1157,5 +1156,61 @@ form input.error {
     margin-bottom: 10px;
     box-shadow: none;
     border: 0;
+}
+
+
+/* 下拉式選單-自定義選項 */
+.option {
+	position: relative;
+	display: inline-block;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	min-width: 90px;
+	background: white url(../images/ico_mdFRM03Select.png) no-repeat right
+		center;
+	border: 1px solid #ced2dc;
+	border-radius: 0;
+	padding: 9px 24px 8px 9px;
+}
+
+.option .optionLabel {
+	font-size: 13px;
+	color: #a1a7b5;
+}
+
+.option .optionSelect {
+	display: block;
+	position: absolute;
+	top: 7px;
+	left: 10px;
+	width: 100%;
+	opacity: 0;
+}
+
+.optionPageSize {
+	position: relative;
+	display: inline-block;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	min-width: 60px;
+	background: white url(../images/ico_mdFRM03Select.png) no-repeat right center;
+	border: 1px solid #ced2dc;
+	border-radius: 0;
+	margin-left: 10px;
+	padding: 3px 24px 3px 9px;
+}
+
+.optionPageSize .optionLabelPageSize {
+	font-size: 13px;
+	color: #a1a7b5;
+}
+
+.optionPageSize .optionSelectPageSize {
+	display: block;
+	position: absolute;
+	top: 7px;
+	left: 10px;
+	width: 100%;
+	opacity: 0;
 }
 

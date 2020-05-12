@@ -140,7 +140,6 @@ $(function() {
 	             resultTr.find('.custId').html(o.custid);
 	             resultTr.find('.amount').html(o.amount);
 	             resultTr.find('.responseStatus').html(responseStatus);
-	
 			        
 	             if (o.status=='FAIL') {
 	            	 try {
@@ -153,14 +152,20 @@ $(function() {
 			              resultTr.find('.message').html('-');
 			        }
 	             
-	             if(o.status=='SUCCESS'){
-	             	resultTr.find('.btn_copy').attr('detailId', o.detailId).css("background-color","red");
-	                 resultTr.find('.btn_copy').click(btn_cancle);
-	             }else{
-	                 resultTr.find('.btn_copy').click(func_cancel_fail);
-	             }
+
+	 			console.info('o.status = ', o.status);
+	 			console.info('o.cancelTime = ', o.cancelTime);
 	             
-	             
+	            if (o.status=='SUCCESS'){
+	            	resultTr.find('.btn_copy').attr('detailId', o.detailId).css("background-color","red");
+	            	resultTr.find('.btn_copy').click(btn_cancle);
+	            } else {
+	            	if (o.cancelTime != null) {
+	            		resultTr.find('.btn_copy').click(func_cancel_already);
+	            	} else {
+	            		resultTr.find('.btn_copy').click(func_cancel_fail);
+	            	}
+	            }
 
 				// 按鈕(回收)
 				if (bcs.user.role == 'ROLE_EDIT' 
@@ -250,6 +255,10 @@ $(function() {
 
 	var func_cancel_fail = function() {
 		alert("此訂單LinePoint點數尚未發送完畢或發送失敗，無法進行點數回收作業。");
+	}
+
+	var func_cancel_already = function() {
+		alert("此訂單LinePoint點數已被回收，無法再次進行回收作業。");
 	}
 	
     initPage();

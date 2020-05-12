@@ -59,9 +59,9 @@ $(function() {
             $('#titleText').html('專案名稱：' + o.title);
             $('#serialIdText').html('Campaign：' + o.serialId);
             //$('#totalCountText').html('發送總點數：' + linePointSuccessAmount);
-            $('#modifyUserText').html('建立人員：' + o.modifyUser);
+            $('#modifyUserText').html('發送人員：' + o.modifyUser);
             modifyUser = o.modifyUser;
-            $('#departmentFullNameText').html('建立人員單位：' + o.departmentFullName);
+            $('#departmentFullNameText').html('發送人員單位：' + o.departmentFullName);
             $('#pccCodeText').html('PCC：' + o.pccCode);
             getDataList(); // 做完再做表格  不然有時會抓不到modifyUser
         }).fail(function(response) {
@@ -141,22 +141,21 @@ $(function() {
 	             resultTr.find('.amount').html(o.amount);
 	             resultTr.find('.responseStatus').html(responseStatus);
 			        
-	             if (o.status=='FAIL') {
-	            	 try {
-	                     var obj=JSON.parse(o.message);
-	                     resultTr.find('.message').html(obj.message);
-	                 } catch(e) {
+	            if (o.status=='FAIL') {
+	            	try {
+	            		var obj=JSON.parse(o.message);
+	            		resultTr.find('.message').html(obj.message);
+	            	} catch(e) {
 	                     resultTr.find('.message').html(o.message);
-	                 }
-			        }else{
-			              resultTr.find('.message').html('-');
-			        }
-	             
+	            	}
+	            } else {
+	            	resultTr.find('.message').html('-');
+	            }
 
 	 			console.info('o.status = ', o.status);
 	 			console.info('o.cancelTime = ', o.cancelTime);
 	             
-	            if (o.status=='SUCCESS'){
+	            if (o.status=='SUCCESS') {
 	            	resultTr.find('.btn_copy').attr('detailId', o.detailId).css("background-color","red");
 	            	resultTr.find('.btn_copy').click(btn_cancle);
 	            } else {

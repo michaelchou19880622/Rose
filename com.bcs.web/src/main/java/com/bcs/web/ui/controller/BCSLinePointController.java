@@ -305,7 +305,7 @@ public class BCSLinePointController extends BCSBaseController {
             List<LinePointMain> result = competence(list, customUser);
 
 //		    result.addAll(list);
-            log.info("result:" + ObjectUtil.objectToJsonStr(result));
+//            log.info("result:" + ObjectUtil.objectToJsonStr(result));
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             log.error(ErrorRecord.recordError(e));

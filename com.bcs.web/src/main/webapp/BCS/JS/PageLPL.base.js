@@ -72,14 +72,18 @@ $(function() {
             type: "GET",
             url: bcs.bcsContextPath + '/edit/findAllBcsLinePointMain?startDate=' + startDate + '&endDate=' + endDate
         }).success(function(response) {
-//            console.info("response:", response);
+            console.info("response = ", response);
             $.each(response, function(i, o) {
                 var templateTr = originalTr.clone(true); //增加一行
 //                console.info("templateTr:", templateTr);
 
                 templateTr.find('#titleLink').html(o.title);
-                templateTr.find('#titleLink').attr('href', bcs.bcsContextPath + '/edit/linePointCreatePage?linePointMainId=' +
-                		o.id + '&sendGroupId=' + o.linePointSendGroupId + '&msgId=' + o.appendMessageId +'&actionType=Edit');
+                templateTr.find('#titleLink').attr('href', bcs.bcsContextPath + '/edit/linePointCreatePage?' 
+													                		  + 'linePointMainId=' + o.id 
+													                		  + '&sendGroupId=' + o.linePointSendGroupId 
+													                		  + '&msgId=' + o.appendMessageId 
+													                		  + '&actionType=Edit'
+													                		  + '&sendTimeType=' + o.sendTimingType);
 		        if (o.modifyTime) {
 		              templateTr.find('.modifyTime').html(moment(o.modifyTime).format('YYYY-MM-DD'));
 		        }else{

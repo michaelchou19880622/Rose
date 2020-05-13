@@ -179,17 +179,22 @@ public class BCSLinePointController extends BCSBaseController {
     public ResponseEntity<?> createLinePointDetailList(HttpServletRequest request, HttpServletResponse response,
                                                        @CurrentUser CustomUser customUser, @RequestBody List<LinePointDetail> linePointDetail) throws IOException {
         log.info("[createLinePointDetailList]");
+        
+        log.info("linePointDetail = {}", linePointDetail);
+        
         try {
             if (linePointDetail == null) {
-
                 throw new Exception("linePointDetail is Null");
             }
 
             Long linePointMainId = linePointDetail.get(0).getLinePointMainId();
-            log.info("delete linePointDetail from linePointMainId :" + linePointMainId);
+            log.info("linePointMainId :" + linePointMainId);
+            
+            // TODO : 不知道為什麼要先做刪除??? 待確認是否因為考慮到update和create都是同一個method???
             linePointDetailService.deleteFromLinePointMainId(linePointMainId);
-            log.info("linePointDetail : " + linePointDetail);
+            
             List<LinePointDetail> result = linePointUIService.saveLinePointDetailListFromUI(linePointDetail, customUser.getAccount());
+           
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             log.error(ErrorRecord.recordError(e));
@@ -482,6 +487,7 @@ public class BCSLinePointController extends BCSBaseController {
                     int i = 1;
                     for (LinePointDetail linePointDetail : linePointDetails) {
                         log.info("Total LinePointDetail Detail " + i + ": " + DataUtils.toPrettyJsonUseJackson(linePointDetail));
+                        
                         //FIXME 這裡會過濾掉Fail的Detail Object
                         if (!"FAIL".equals(linePointDetail.getStatus())) {
                             detailIds.put(linePointDetail.getDetailId());

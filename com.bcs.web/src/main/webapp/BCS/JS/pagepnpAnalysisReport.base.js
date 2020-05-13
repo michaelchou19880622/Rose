@@ -70,6 +70,7 @@ $(function() {
 
 	$('#exportBtn').click(
 			function() {
+
 				// setExportButtonSource();
 				if (hasData) {
 					var type = isCreateTime ? 'createTime' : 'orderTime';
@@ -116,7 +117,7 @@ $(function() {
 			alert('請填寫結束日期！');
 			return false;
 		}
-		if (!moment(startDate).add(31, 'days').isAfter(moment(endDate))) {
+		if (!moment(startDate).add(183, 'days').isAfter(moment(endDate))) {
 			alert('起始日期與結束日期之間不可相隔超過一個月！');
 			return false;
 		}
@@ -153,9 +154,10 @@ $(function() {
 			firstFetch = false;
 			fetchListCountAndChange();
 		}
-		var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPDetailReport';
+		// var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPDetailReport';
+		var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPStsRptDetail';
 
-		console.info('getUrl', getUrl);
+		console.info('getUrl detail', getUrl);
 
 		$.ajax({
 			type : 'POST',
@@ -169,9 +171,10 @@ $(function() {
 				page : page,
 				account : document.getElementById('accountInput').value,
 				pccCode : document.getElementById('pccCodeInput').value,
-				sourceSystem : document.getElementById('sourceSystemInput').value,
+				sourceSystem : null, // document.getElementById('sourceSystemInput').value,
 				employeeId : null,
-				phone : document.getElementById('phoneNumber').value
+				phone : document.getElementById('phoneNumber').value,
+				pageCount : document.getElementById('pageCount').value
 			})
 		}).success(function(response) {
 			console.info('response:', response);
@@ -182,35 +185,41 @@ $(function() {
 				var list = originalTr.clone(true);
 
 				list.find('.no').html(i);
-				list.find('.sourceSystem').html(obj.sourceSystem);
-				list.find('.account').html(obj.account);
-				list.find('.pathway').html(obj.processFlow);
-				list.find('.proc_stage').html(obj.processStage);
-				list.find('.pnpContent').html(obj.message);
-				list.find('.customerCellPhoneNumber').html(obj.phone);
-				var bcStatus = '';
-				if (obj.bcHttpStatusCode !== null && obj.bcHttpStatusCode.trim() !== '') {
-					bcStatus = obj.bcStatus + ' [' + obj.bcHttpStatusCode + ']';
-				} else {
-					bcStatus = obj.bcStatus;
-				}
-				list.find('.bcStatusCode').html(bcStatus);
-				var pnpStatus = '';
-				if (obj.pnpHttpStatusCode !== null && obj.pnpHttpStatusCode.trim() !== '') {
-					pnpStatus = obj.pnpStatus + ' [' + obj.pnpHttpStatusCode + ']';
-				} else {
-					pnpStatus = obj.pnpStatus;
-				}
-				list.find('.pnpStatusCode').html(pnpStatus);
-				list.find('.smsStatusCode').html(obj.smsStatus);
-				list.find('.accountPccCode').html(obj.pccCode);
-				if (obj.scheduleTime !== null) {
-					list.find('.schedule_time').html(moment(obj.scheduleTime).format('YYYY-MM-DD HH:mm:ss'));
-				}
-				list.find('.resendBtn').click(function() {
-					resendSms(obj.detailId, obj.ftpSource);
-				});
-
+				list.find('.send_date').html(obj.send_date);
+				list.find('.total').html(obj.total);
+				list.find('.bc_total').html(obj.total);
+				list.find('.bc_ok').html(obj.bc_ok);
+				list.find('.bc_no').html(obj.bc_no);
+				list.find('.bc_rate').html(obj.bc_rate);
+				list.find('.pnp_total').html(obj.pnp_total);
+				list.find('.pnp_ok').html(obj.pnp_ok);
+				list.find('.pnp_no').html(obj.pnp_no);
+				list.find('.pnp_rate').html(obj.pnp_rate);
+				list.find('.sms_total').html(obj.sms_total);
+				list.find('.sms_ok').html(obj.sms_ok);
+				list.find('.sms_no').html(obj.sms_no);
+				list.find('.sms_rate').html(obj.sms_rate);
+				/*
+				 * list.find('.pathway').html(obj.processFlow);
+				 * list.find('.proc_stage').html(obj.processStage);
+				 * list.find('.pnpContent').html(obj.message);
+				 * list.find('.customerCellPhoneNumber').html(obj.phone); var
+				 * bcStatus = ''; if (obj.bcHttpStatusCode !== null &&
+				 * obj.bcHttpStatusCode.trim() !== '') { bcStatus = obj.bcStatus + ' [' +
+				 * obj.bcHttpStatusCode + ']'; } else { bcStatus = obj.bcStatus; }
+				 * list.find('.bcStatusCode').html(bcStatus); var pnpStatus =
+				 * ''; if (obj.pnpHttpStatusCode !== null &&
+				 * obj.pnpHttpStatusCode.trim() !== '') { pnpStatus =
+				 * obj.pnpStatus + ' [' + obj.pnpHttpStatusCode + ']'; } else {
+				 * pnpStatus = obj.pnpStatus; }
+				 * list.find('.pnpStatusCode').html(pnpStatus);
+				 * list.find('.smsStatusCode').html(obj.smsStatus);
+				 * list.find('.accountPccCode').html(obj.pccCode); if
+				 * (obj.scheduleTime !== null) {
+				 * list.find('.schedule_time').html(moment(obj.scheduleTime).format('YYYY-MM-DD
+				 * HH:mm:ss')); } list.find('.resendBtn').click(function() {
+				 * resendSms(obj.detailId, obj.ftpSource); });
+				 */
 				$('#resultTable').append(list);
 				i++;
 			});
@@ -233,9 +242,9 @@ $(function() {
 		// get Total
 		$('.LyMain').block($.BCS.blockMsgRead);
 
-		var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPDetailReportTotalPages';
+		var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPStsRptSummary';
 
-		console.info('getUrl', getUrl);
+		console.info('getUrl summary', getUrl);
 
 		$.ajax({
 			type : 'POST',
@@ -249,9 +258,10 @@ $(function() {
 				page : page,
 				account : document.getElementById('accountInput').value,
 				pccCode : document.getElementById('pccCodeInput').value,
-				sourceSystem : document.getElementById('sourceSystemInput').value,
+				sourceSystem : null, // document.getElementById('sourceSystemInput').value,
 				employeeId : null,
-				phone : document.getElementById('phoneNumber').value
+				phone : document.getElementById('phoneNumber').value,
+				pageCount : document.getElementById('pageCount').value
 			})
 		}).success(function(response) {
 			console.log(response);
@@ -284,7 +294,7 @@ $(function() {
 		endDate = moment(new Date()).format('YYYY-MM-DD');
 		$('#startDate').val(startDate);
 		$('#endDate').val(endDate);
-		getPnpStatusMap();
+		// getPnpStatusMap();
 	};
 
 	initPage();

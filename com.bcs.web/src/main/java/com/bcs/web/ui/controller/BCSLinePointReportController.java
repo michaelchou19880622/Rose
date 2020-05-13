@@ -132,11 +132,10 @@ public class BCSLinePointReportController extends BCSBaseController {
 //			List<LinePointMain> list = linePointUIService.getLinePointStatisticsReport(startDate, endDate, modifyUser,
 //					title, page);
 
-            List<LinePointMain> list = linePointMainService.findByTitleAndModifyUserAndSendDate(startDate, endDate,
-                    modifyUser, title);
+            List<LinePointMain> list = linePointMainService.findByTitleAndModifyUserAndSendDate(startDate, endDate, modifyUser, title);
+            
             // 權限後拿到的資料顯示在
             result = competence(list, customUser);
-
 
             List<Object[]> SuccessandFailCount = linePointDetailService.getSuccessandFailCount(startDate, endDate);
             log.info("SuccessandFailCount : " + SuccessandFailCount);
@@ -161,10 +160,15 @@ public class BCSLinePointReportController extends BCSBaseController {
                         linePointMain.setFailedCount(Long.parseLong(fail));
                         linePointMain.setTotalCount(Long.parseLong(success) + Long.parseLong(fail));
                         linePointMain.setSuccessfulAmount(Long.parseLong(successfulAmount));
-                        break;
+                        linePointMainService.save(linePointMain);
                     }
                 }
             }
+            
+            // 更新LinePointMain後 要重新再撈一次資料，不然資料會和DB的對不上...
+            list = linePointMainService.findByTitleAndModifyUserAndSendDate(startDate, endDate, modifyUser, title);
+            
+            result = competence(list, customUser);
 
             log.info("result:" + ObjectUtil.objectToJsonStr(result));
             return new ResponseEntity<>(result, HttpStatus.OK);

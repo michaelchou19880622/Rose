@@ -28,6 +28,8 @@ $(function(){
 		$('#serialId').val($.urlParam("serialId"));
 	}
 	if($.urlParam("sendTimeType")){
+		console.info("sendTimeType = ", $.urlParam("sendTimeType"))
+		
 		$('[name="sendTimeType"][value="' + $.urlParam("sendTimeType") + '"]').prop("checked",true);
 		$('[name="sendTimeType"][value="' + $.urlParam("sendTimeType") + '"]').click();
 		
@@ -446,6 +448,10 @@ $(function(){
     	outTotalAmount = outSum;
     	TrimmedCount = uids.length;
     	TrimmedTotalAmount = sum;
+    	
+    	console.info('TrimmedCount = ', TrimmedCount);
+    	console.info('outCount = ', outCount);
+    	
         // export to global variables & front-end
     	var doCheckFollowage = $('[name="doCheckFollowage"]:checked').val();
     	if(doCheckFollowage == 'true'){
@@ -1100,11 +1106,13 @@ $(function(){
         postData.totalAmount = totalAmount;
         postData.successfulCount = 0;
         postData.successfulAmount = 0;
-        if(!doCheckFollowage){
-        	 postData.failedCount = 0;
-        }else{
-        	postData.failedCount = outCount;
-        }
+   	 	postData.failedCount = 0;
+       
+//   	 	if(!doCheckFollowage){
+//        	 postData.failedCount = 0;
+//        }else{
+//        	postData.failedCount = outCount;
+//        }
         
         console.info('postData', postData);
         linePointMainId = $.urlParam("linePointMainId");
@@ -1137,6 +1145,9 @@ $(function(){
     // Save:LinePointDetail
     function linePointDetailSave(){
     	console.info('linePointDetailSave');
+    	console.info('TrimmedCount = ', TrimmedCount);
+    	console.info('outCount = ', outCount);
+    	
 //    	var detail = {};
     	var detailList = [];
     	for (var i = 0; i < TrimmedCount; i++) {
@@ -1157,10 +1168,12 @@ $(function(){
         		detail.custid = outCustIds[i];
         		detail.amount = outPts[i];
         		detail.uid = outUids[i];
-        		if(doCheckFollowage == 'true'){
-        			detail.status = 'FAIL';
-        			detail.message = '非會員';
-        		}
+        		
+        		// 如果要在建立專案匯入名單的時候就做檢核開啟，就把下面打開
+//        		if(doCheckFollowage == 'true'){
+//        			detail.status = 'FAIL';
+//        			detail.message = '客戶已封鎖';
+//        		}
         		detail.isMember = 0;
         		detailList.push(detail);
             }
@@ -1423,6 +1436,8 @@ $(function(){
 		var serialId = "";
 		var msgId = $.urlParam("msgId");
 		var msgSendId = $.urlParam("msgSendId");
+		console.info('msgSendId = ', msgSendId);
+		
 		// Load Back Send Message Data
 		if(msgId || msgSendId){
 			var getDataUrl = bcs.bcsContextPath +'/edit/getSendMsg';
@@ -1563,6 +1578,7 @@ $(function(){
     sendingMsgLoadDataFunc();
     initLinePointMain();
     //當匯入的UID有誤的時候會重整介面，為保留以填寫的資料，會判斷是修改還是新增的 然後放回原本的地方。
+    
     function windowReplace(){
     	
     	if($.urlParam("actionType")){

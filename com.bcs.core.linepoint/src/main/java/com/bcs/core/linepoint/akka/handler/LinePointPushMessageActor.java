@@ -108,11 +108,20 @@ public class LinePointPushMessageActor extends UntypedActor {
 
             final String orderKey = getOrderKey(pushApiModel, detail);
             
-            if (isStatusBlock) {
-                detail.setMessage("客戶已封鎖");
-                detail.setStatus(LinePointDetail.STATUS_FAIL);
+            if (linePointMain.getDoCheckFollowage()) {
+                if (isStatusBlock) {
+                    detail.setMessage("客戶已封鎖");
+                    detail.setStatus(LinePointDetail.STATUS_FAIL);
+                    detail.setIsMember(0L);
 
-                linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
+                    linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
+                } else {
+                    requestBody.put("amount", detail.getAmount());
+                    requestBody.put("memberId", detail.getUid());
+                    requestBody.put("orderKey", orderKey);
+                    requestBody.put("applicationTime", applicationTime);
+                    sendProcess(url, linePointMain, headers, requestBody, detail);
+    			}
             } else {
                 requestBody.put("amount", detail.getAmount());
                 requestBody.put("memberId", detail.getUid());

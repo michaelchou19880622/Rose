@@ -121,9 +121,11 @@
                 <package.environment>prod-be-oa</package.environment>
                 <rp.build.warname>taishinoa</rp.build.warname>
                 <maven.war.webxml>src/main/resources/prod-be-oa/web/web.xml</maven.war.webxml>
-                <aa>
-                    %regex[WEB-INF/lib/(?!log4j.*\.jar)(?!slf4j.*\.jar)(?!logging.*\.jar)(?!com.bcs.*\.jar).*\.jar]
-                </aa>
+                
+                <aa>WEB-INF/lib/*pwd.jar, WEB-INF/lib/*TSIB.jar</aa>
+<!--                 <aa> -->
+<!--                     %regex[WEB-INF/lib/(?!log4j.*\.jar)(?!slf4j.*\.jar)(?!logging.*\.jar)(?!com.bcs.*\.jar).*\.jar] -->
+<!--                 </aa> -->
             </properties>
         </profile>
         <profile>
@@ -135,9 +137,10 @@
                 <package.environment>prod-be-oaapi</package.environment>
                 <rp.build.warname>taishinoaapi</rp.build.warname>
                 <maven.war.webxml>src/main/resources/prod-be-oaapi/web/web.xml</maven.war.webxml>
-                <aa>
-                    %regex[WEB-INF/lib/(?!log4j.*\.jar)(?!slf4j.*\.jar)(?!logging.*\.jar)(?!com.bcs.*\.jar).*\.jar]
-                </aa>
+                <aa>WEB-INF/lib/*pwd.jar, WEB-INF/lib/*TSIB.jar</aa>
+<!--                 <aa> -->
+<!--                     %regex[WEB-INF/lib/(?!log4j.*\.jar)(?!slf4j.*\.jar)(?!logging.*\.jar)(?!com.bcs.*\.jar).*\.jar] -->
+<!--                 </aa> -->
             </properties>
         </profile>
         <profile>
@@ -149,9 +152,10 @@
                 <package.environment>prod-ap-oa</package.environment>
                 <rp.build.warname>taishinoa</rp.build.warname>
                 <maven.war.webxml>src/main/resources/prod-ap-oa/web/web.xml</maven.war.webxml>
-                <aa>
-                    %regex[WEB-INF/lib/(?!log4j.*\.jar)(?!slf4j.*\.jar)(?!logging.*\.jar)(?!com.bcs.*\.jar).*\.jar]
-                </aa>
+                <aa>WEB-INF/lib/*pwd.jar, WEB-INF/lib/*TSIB.jar</aa>
+<!--                 <aa> -->
+<!--                     %regex[WEB-INF/lib/(?!log4j.*\.jar)(?!slf4j.*\.jar)(?!logging.*\.jar)(?!com.bcs.*\.jar).*\.jar] -->
+<!--                 </aa> -->
             </properties>
         </profile>
         <profile>
@@ -163,9 +167,10 @@
                 <package.environment>prod-ap-oaapi</package.environment>
                 <rp.build.warname>taishinoaapi</rp.build.warname>
                 <maven.war.webxml>src/main/resources/prod-ap-oaapi/web/web.xml</maven.war.webxml>
-                <aa>
-                    %regex[WEB-INF/lib/(?!log4j.*\.jar)(?!slf4j.*\.jar)(?!logging.*\.jar)(?!com.bcs.*\.jar).*\.jar]
-                </aa>
+                <aa>WEB-INF/lib/*pwd.jar, WEB-INF/lib/*TSIB.jar</aa>
+<!--                 <aa> -->
+<!--                     %regex[WEB-INF/lib/(?!log4j.*\.jar)(?!slf4j.*\.jar)(?!logging.*\.jar)(?!com.bcs.*\.jar).*\.jar] -->
+<!--                 </aa> -->
             </properties>
         </profile>
         <profile>

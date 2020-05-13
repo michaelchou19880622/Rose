@@ -94,32 +94,41 @@ public class LinePointPushMessageActor extends UntypedActor {
             LinePointDetail detail = linePointDetailService.findOne(detailId);
             detail.setTriggerTime(pushApiModel.getTriggerTime());
             detail.setDetailType(LinePointDetail.DETAIL_TYPE_ISSUE_BCS);
-            
+
+            // 檢查uid狀態，若在發送LINE POINTS時客戶已封鎖台新LINE就不發送，但是要列入發送失敗的紀錄中，失敗原因要記錄為「客戶已封鎖」
             final String memberUid = detail.getUid();
             log.info("memberUid = {}", memberUid);
             
-            // 檢查uid狀態，若在發送LINE POINTS時客戶已封鎖台新LINE就不發送，但是要列入發送失敗的紀錄中，失敗原因要記錄為「客戶已封鎖」
-
             LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
             LineUser lineUser = lineUserService.findByMid(memberUid);
             log.info("lineUser = {}", lineUser);
             
             boolean isStatusBlock = lineUser.getStatus().equals(LineUser.STATUS_BLOCK)? true : false;
             log.info("isStatusBlock = {}", isStatusBlock);
-            
-            final String orderKey = getOrderKey(pushApiModel, detail);
-            requestBody.put("amount", detail.getAmount());
-            requestBody.put("memberId", detail.getUid());
-            requestBody.put("orderKey", orderKey);
-            requestBody.put("applicationTime", applicationTime);
-            sendProcess(url, linePointMain, headers, requestBody, detail);
 
+            final String orderKey = getOrderKey(pushApiModel, detail);
+            
+            if (isStatusBlock) {
+                detail.setMessage("客戶已封鎖");
+                detail.setStatus(LinePointDetail.STATUS_FAIL);
+
+                linePointMain.setFailedCount(linePointMain.getFailedCount() + 1);
+            } else {
+                requestBody.put("amount", detail.getAmount());
+                requestBody.put("memberId", detail.getUid());
+                requestBody.put("orderKey", orderKey);
+                requestBody.put("applicationTime", applicationTime);
+                sendProcess(url, linePointMain, headers, requestBody, detail);
+			}
+            
             detail.setOrderKey(orderKey);
             detail.setApplicationTime(applicationTime);
             detail.setSendTime(new Date());
 
             log.info("After Send Process Detail: {}", detail.toString());
+            
             linePointDetailService.save(detail);
+            
             //FIXME CAL
             linePointMainService.save(linePointMain);
 
@@ -137,6 +146,7 @@ public class LinePointPushMessageActor extends UntypedActor {
         int retryCountLimit = count < 0 ? DEFAULT_RETRY_COUNT : count;
         boolean isDoRetry;
         int i = 0;
+        
         do {
             try {
                 i++;

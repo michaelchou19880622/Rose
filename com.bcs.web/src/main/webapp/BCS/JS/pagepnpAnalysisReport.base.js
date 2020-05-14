@@ -7,6 +7,11 @@ $(function() {
 
 	var originalTr;
 	var originalTable;
+	
+	var totalPageSize = document.getElementById('totalPageSize');
+	var currentPageIndex = document.getElementById('currentPageIndex');
+	
+	var valTotalPageSize = 0;
 
 	// result data
 	var hasData = false;
@@ -20,8 +25,15 @@ $(function() {
 		if (condition) {
 			page = actionName === 'next' ? ++page : --page;
 			console.log('Currency Page Number is ' + page);
-			loadData();
-			$('#pageAndTotalPages').text(page + '/' + totalPages);
+//			loadData();
+
+			currentPageIndex.innerText = page;
+			totalPageSize.innerText = totalPages;
+			
+			console.info('currentPageIndex = ', currentPageIndex.innerText);
+			console.info('totalPageSize = ', totalPageSize.innerText);
+			
+//			$('#pageAndTotalPages').text(page + '/' + );
 		}
 	};
 
@@ -49,11 +61,11 @@ $(function() {
 		changeMonth : true
 	});
 
-	$('#backBtn').click(function() {
+	$('#btn_PreviousPage').click(function() {
 		pageBtnHandler(page > 1, 'back');
 	});
 
-	$('#nextBtn').click(function() {
+	$('#btn_NextPage').click(function() {
 		pageBtnHandler(page < totalPages, 'next');
 	});
 
@@ -68,26 +80,25 @@ $(function() {
 		}
 	});
 
-	$('#exportBtn').click(
-			function() {
-				// setExportButtonSource();
-				if (hasData) {
-					var type = isCreateTime ? 'createTime' : 'orderTime';
-					var getUrl = bcs.bcsContextPath + '/pnpEmployee/exportPNPDetailReportExcel' + '?startDate=' + startDate + '&endDate=' + endDate + '&isPageable=false' + '&page=' + page
-							+ '&account=' + document.getElementById('accountInput').value + '&pccCode=' + document.getElementById('pccCodeInput').value + '&sourceSystem='
-							+ document.getElementById('sourceSystemInput').value + '&phone=' + document.getElementById('phoneNumber').value + '&dateType=' + type;
-					console.info('getUrl: ' + getUrl);
-					window.location.href = getUrl;
-				}
+	$('#exportBtn').click(function() {
+		// setExportButtonSource();
+		if (hasData) {
+			var type = isCreateTime ? 'createTime' : 'orderTime';
+			var getUrl = bcs.bcsContextPath + '/pnpEmployee/exportPNPDetailReportExcel' + '?startDate=' + startDate + '&endDate=' + endDate + '&isPageable=false' + '&page=' + page
+					+ '&account=' + document.getElementById('accountInput').value + '&pccCode=' + document.getElementById('pccCodeInput').value + '&sourceSystem='
+					+ document.getElementById('sourceSystemInput').value + '&phone=' + document.getElementById('phoneNumber').value + '&dateType=' + type;
+			console.info('getUrl: ' + getUrl);
+			window.location.href = getUrl;
+		}
 
-			});
+	});
 
 	$('#isCreateTimeBtn').click(function() {
 		if (isOrderTime) {
 			var createTimeBtn = document.getElementById('isCreateTimeBtn');
-			createTimeBtn.className = 'btn2 btn-style-pressed'
+			createTimeBtn.className = 'customBtn_Pressed'
 			var orderTimeBtn = document.getElementById('isOrderTimeBtn');
-			orderTimeBtn.className = 'btn2 btn-style'
+			orderTimeBtn.className = 'customBtn'
 			isCreateTime = true;
 			isOrderTime = false;
 		}
@@ -96,9 +107,9 @@ $(function() {
 	$('#isOrderTimeBtn').click(function() {
 		if (isCreateTime) {
 			var createTimeBtn = document.getElementById('isCreateTimeBtn');
-			createTimeBtn.className = 'btn2 btn-style'
+			createTimeBtn.className = 'customBtn'
 			var orderTimeBtn = document.getElementById('isOrderTimeBtn');
-			orderTimeBtn.className = 'btn2 btn-style-pressed'
+			orderTimeBtn.className = 'customBtn_Pressed'
 			isCreateTime = false;
 			isOrderTime = true;
 		}
@@ -116,7 +127,7 @@ $(function() {
 			alert('請填寫結束日期！');
 			return false;
 		}
-		if (!moment(startDate).add(31, 'days').isAfter(moment(endDate))) {
+		if (!moment(startDate).add(183, 'days').isAfter(moment(endDate))) {
 			alert('起始日期與結束日期之間不可相隔超過一個月！');
 			return false;
 		}
@@ -153,9 +164,10 @@ $(function() {
 			firstFetch = false;
 			fetchListCountAndChange();
 		}
-		var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPDetailReport';
+		// var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPDetailReport';
+		var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPStsRptDetail';
 
-		console.info('getUrl', getUrl);
+		console.info('getUrl detail', getUrl);
 
 		$.ajax({
 			type : 'POST',
@@ -169,9 +181,10 @@ $(function() {
 				page : page,
 				account : document.getElementById('accountInput').value,
 				pccCode : document.getElementById('pccCodeInput').value,
-				sourceSystem : document.getElementById('sourceSystemInput').value,
+				sourceSystem : null, // document.getElementById('sourceSystemInput').value,
 				employeeId : null,
-				phone : document.getElementById('phoneNumber').value
+				phone : document.getElementById('phoneNumber').value,
+				pageCount : document.getElementById('pageCount').value
 			})
 		}).success(function(response) {
 			console.info('response:', response);
@@ -180,37 +193,43 @@ $(function() {
 			response.forEach(function(obj) {
 				console.log('i = ' + i);
 				var list = originalTr.clone(true);
-
-				list.find('.no').html(i);
-				list.find('.sourceSystem').html(obj.sourceSystem);
-				list.find('.account').html(obj.account);
-				list.find('.pathway').html(obj.processFlow);
-				list.find('.proc_stage').html(obj.processStage);
-				list.find('.pnpContent').html(obj.message);
-				list.find('.customerCellPhoneNumber').html(obj.phone);
-				var bcStatus = '';
-				if (obj.bcHttpStatusCode !== null && obj.bcHttpStatusCode.trim() !== '') {
-					bcStatus = obj.bcStatus + ' [' + obj.bcHttpStatusCode + ']';
-				} else {
-					bcStatus = obj.bcStatus;
-				}
-				list.find('.bcStatusCode').html(bcStatus);
-				var pnpStatus = '';
-				if (obj.pnpHttpStatusCode !== null && obj.pnpHttpStatusCode.trim() !== '') {
-					pnpStatus = obj.pnpStatus + ' [' + obj.pnpHttpStatusCode + ']';
-				} else {
-					pnpStatus = obj.pnpStatus;
-				}
-				list.find('.pnpStatusCode').html(pnpStatus);
-				list.find('.smsStatusCode').html(obj.smsStatus);
-				list.find('.accountPccCode').html(obj.pccCode);
-				if (obj.scheduleTime !== null) {
-					list.find('.schedule_time').html(moment(obj.scheduleTime).format('YYYY-MM-DD HH:mm:ss'));
-				}
-				list.find('.resendBtn').click(function() {
-					resendSms(obj.detailId, obj.ftpSource);
-				});
-
+				
+				list.find('.send_date').html(obj.send_date);
+				list.find('.total').html(obj.total);
+				list.find('.sms_total').html(obj.sms_total);
+				list.find('.sms_ok').html(obj.sms_ok);
+				list.find('.sms_no').html(obj.sms_no);
+				list.find('.sms_point').html(obj.sms_point);
+				list.find('.sms_rate').html(obj.sms_rate);
+				list.find('.pnp_total').html(obj.pnp_total);
+				list.find('.pnp_ok').html(obj.pnp_ok);
+				list.find('.pnp_no').html(obj.pnp_no);
+				list.find('.pnp_rate').html(obj.pnp_rate);
+				list.find('.bc_total').html(obj.total);
+				list.find('.bc_ok').html(obj.bc_ok);
+				list.find('.bc_no').html(obj.bc_no);
+				list.find('.bc_rate').html(obj.bc_rate);
+				/*
+				 * list.find('.pathway').html(obj.processFlow);
+				 * list.find('.proc_stage').html(obj.processStage);
+				 * list.find('.pnpContent').html(obj.message);
+				 * list.find('.customerCellPhoneNumber').html(obj.phone); var
+				 * bcStatus = ''; if (obj.bcHttpStatusCode !== null &&
+				 * obj.bcHttpStatusCode.trim() !== '') { bcStatus = obj.bcStatus + ' [' +
+				 * obj.bcHttpStatusCode + ']'; } else { bcStatus = obj.bcStatus; }
+				 * list.find('.bcStatusCode').html(bcStatus); var pnpStatus =
+				 * ''; if (obj.pnpHttpStatusCode !== null &&
+				 * obj.pnpHttpStatusCode.trim() !== '') { pnpStatus =
+				 * obj.pnpStatus + ' [' + obj.pnpHttpStatusCode + ']'; } else {
+				 * pnpStatus = obj.pnpStatus; }
+				 * list.find('.pnpStatusCode').html(pnpStatus);
+				 * list.find('.smsStatusCode').html(obj.smsStatus);
+				 * list.find('.accountPccCode').html(obj.pccCode); if
+				 * (obj.scheduleTime !== null) {
+				 * list.find('.schedule_time').html(moment(obj.scheduleTime).format('YYYY-MM-DD
+				 * HH:mm:ss')); } list.find('.resendBtn').click(function() {
+				 * resendSms(obj.detailId, obj.ftpSource); });
+				 */
 				$('#resultTable').append(list);
 				i++;
 			});
@@ -233,9 +252,9 @@ $(function() {
 		// get Total
 		$('.LyMain').block($.BCS.blockMsgRead);
 
-		var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPDetailReportTotalPages';
+		var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPStsRptSummary';
 
-		console.info('getUrl', getUrl);
+		console.info('getUrl summary', getUrl);
 
 		$.ajax({
 			type : 'POST',
@@ -249,9 +268,10 @@ $(function() {
 				page : page,
 				account : document.getElementById('accountInput').value,
 				pccCode : document.getElementById('pccCodeInput').value,
-				sourceSystem : document.getElementById('sourceSystemInput').value,
+				sourceSystem : null, // document.getElementById('sourceSystemInput').value,
 				employeeId : null,
-				phone : document.getElementById('phoneNumber').value
+				phone : null,
+				pageCount : document.getElementById('pageCount').value
 			})
 		}).success(function(response) {
 			console.log(response);
@@ -284,7 +304,7 @@ $(function() {
 		endDate = moment(new Date()).format('YYYY-MM-DD');
 		$('#startDate').val(startDate);
 		$('#endDate').val(endDate);
-		getPnpStatusMap();
+		// getPnpStatusMap();
 	};
 
 	initPage();

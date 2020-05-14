@@ -106,9 +106,9 @@ public class LinePointReportExcelService {
 			// first row
 			Row row = sheet.createRow(0);
 			row.createCell(0).setCellValue("專案名稱");
-			row.createCell(1).setCellValue("建立日期");
-			row.createCell(2).setCellValue("建立人員");
-			row.createCell(3).setCellValue("建立人員單位");
+			row.createCell(1).setCellValue("發送日期");
+			row.createCell(2).setCellValue("發送人員");
+			row.createCell(3).setCellValue("發送人員單位");
 			row.createCell(4).setCellValue("PCC");
 			row.createCell(5).setCellValue("Service name");
 			row.createCell(6).setCellValue("Campaign Code");

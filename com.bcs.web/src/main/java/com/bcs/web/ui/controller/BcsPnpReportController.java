@@ -8,6 +8,9 @@ import com.bcs.core.taishin.circle.pnp.code.PnpFtpSourceEnum;
 import com.bcs.core.taishin.circle.pnp.code.PnpStatusEnum;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailReport;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailReportParam;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptDetail;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptParam;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptSummary;
 import com.bcs.core.taishin.circle.pnp.db.service.PnpReportService;
 import com.bcs.core.taishin.circle.pnp.scheduler.PnpSMSMsgService;
 import com.bcs.core.utils.DataUtils;
@@ -101,6 +104,50 @@ public class BcsPnpReportController {
         log.info("isSuccess : {}", isSuccess);
         return new ResponseEntity<>(isSuccess, HttpStatus.OK);
     }
+    
+    /**
+     * Gets pnp summary report pages.
+     * @Author Ean
+     * @param customUser the custom user
+     * @return the pnp summary report pages
+     */
+    @WebServiceLog
+    @PostMapping(value = "/getPNPStsRptSummary", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> getPNPStsRptSummary(@CurrentUser final CustomUser customUser,
+                                                 @RequestBody final PnpStsRptParam param) {
+        try {
+            param.setEmployeeId(customUser.getAccount().toUpperCase());
+            final List<PnpStsRptSummary> result = pnpReportService.getPnpStsRptSummaryList(customUser, param);
+            log.info(DataUtils.toPrettyJsonUseJackson(result));
+            log.info("Total date count for summary:" + result.get(0).getDate_count());
+            long totalPage = (long) Math.ceil(result.get(0).getDate_count() / Double.valueOf(param.getPageCount()));
+            //long totalPage = 10;
+            return new ResponseEntity<>(totalPage, HttpStatus.OK);
+
+        } catch (final Exception e) {
+            log.error("Exception", e);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @WebServiceLog
+    @PostMapping(value = "/getPNPStsRptDetail", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> getPNPStsRptDetail(@CurrentUser final CustomUser customUser,
+                                                @RequestBody final PnpStsRptParam param) {
+        try {
+            param.setEmployeeId(customUser.getAccount().toUpperCase());
+            final List<PnpStsRptDetail> result = pnpReportService.getPnpStsRptDetailList(customUser, param);
+            log.info(DataUtils.toPrettyJsonUseJackson(result));
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (final Exception e) {
+            log.error("Exception", e);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 
     @WebServiceLog
     @PostMapping(value = "/getPNPAnalysisReport", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -157,6 +204,82 @@ public class BcsPnpReportController {
             log.error("Exception", e);
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+    
+    @WebServiceLog(action = "Download")
+    @GetMapping("/exportPNPStsReportExcel")
+    @ResponseBody
+    public void exportPnpStsReportExcel(final HttpServletResponse response,
+                                        @CurrentUser final CustomUser customUser,
+                                        @RequestBody final PnpStsRptParam param) {
+        try {
+            param.setEmployeeId(customUser.getAccount().toUpperCase());
+
+            final List<PnpStsRptDetail> reportList = pnpReportService.getPnpStsRptDetailList(customUser, param);
+            final ExportExcelBuilder builder = ExportExcelBuilder.createWorkBook().setSheetName("TestSheet1");
+
+            final List<Map<Integer, String>> allMapList = new LinkedList<>();
+            allMapList.add(getStsHeaderMap(29));
+            reportList.forEach(r -> allMapList.add(getStsBodyMap(r, 29)));
+            allMapList.forEach(rowDate -> builder.createRow(allMapList.indexOf(rowDate)).setRowValue(rowDate));
+
+            builder.setAllColumnAutoWidth().setOutputPath(CoreConfigReader.getString("file.path"))
+                    .setOutputFileName(String.format("PNPStsRptDetail_%s.xlsx",
+                            DataUtils.formatDateToString(new Date(), "yyyy-MM-dd-HHmmss")));
+            log.info("Builder: {}", DataUtils.toPrettyJsonUseJackson(builder));
+            final ExportService exportService = new ExportService();
+            exportService.exportExcel(response, builder);
+        } catch (final Exception e) {
+            log.error("Exception", e);
+        }
+
+    }
+
+    private Map<Integer, String> getStsBodyMap(final PnpStsRptDetail r, final int columnSize) {
+        final Map<Integer, String> row = new LinkedHashMap<>(columnSize);
+
+        row.put(0, r.getSend_date());
+        row.put(1, Long.toString(r.getTotal()));
+
+        row.put(2, Long.toString(r.getBc_total()));
+        row.put(3, Long.toString(r.getBc_ok()));
+        row.put(4, Long.toString(r.getBc_no()));
+        row.put(5, r.getBc_rate());
+
+        row.put(6, Long.toString(r.getPnp_total()));
+        row.put(7, Long.toString(r.getPnp_ok()));
+        row.put(8, Long.toString(r.getPnp_no()));
+        row.put(9, r.getPnp_rate());
+
+        row.put(10, Long.toString(r.getSms_total()));
+        row.put(11, Long.toString(r.getSms_ok()));
+        row.put(12, Long.toString(r.getSms_no()));
+        row.put(13, r.getSms_rate());
+
+        return row;
+    }
+
+
+    private Map<Integer, String> getStsHeaderMap(final int columnSize) {
+        final Map<Integer, String> row = new LinkedHashMap<>(columnSize);
+        row.put(0, "發送日期");
+        row.put(1, "總通數");
+        row.put(2, "BC通路總通數");
+        row.put(3, "BC成功通數");
+        row.put(4, "BC失敗通數");
+        row.put(5, "BC成功率");
+
+        row.put(6, "PNP通路總通數");
+        row.put(7, "PNP成功通數");
+        row.put(8, "PNP失敗通數");
+        row.put(9, "PNP成功率");
+
+        row.put(10, "SMS通路總通數");
+        row.put(11, "SMS成功通數");
+        row.put(12, "SMS失敗通數");
+        row.put(13, "SMS成功率");
+
+        return row;
     }
 
     @WebServiceLog(action = "Download")

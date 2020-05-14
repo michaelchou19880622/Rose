@@ -9,22 +9,26 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.persistence.StoredProcedureQuery;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
 
 import com.bcs.core.db.service.EntityManagerProviderService;
+import com.bcs.core.taishin.circle.db.service.OracleService;
 import com.bcs.core.taishin.circle.pnp.code.PnpFtpSourceEnum;
 import com.bcs.core.taishin.circle.pnp.code.PnpProcessFlowEnum;
 import com.bcs.core.taishin.circle.pnp.code.PnpStatusEnum;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailReport;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailReportParam;
-import com.bcs.core.taishin.circle.db.service.OracleService;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptDetail;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptParam;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptSummary;
 import com.bcs.core.utils.DataUtils;
-
 import com.bcs.core.web.security.CurrentUser;
 import com.bcs.core.web.security.CustomUser;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -47,6 +51,117 @@ public class PnpReportService {
     @Autowired
     public PnpReportService(OracleService oracleService) {
         this.oracleService = oracleService;
+    }
+    
+    /**
+     * Pnp Statistical Report Summary List
+     *
+     * @return PnpStsRptSummary List
+     */
+    @SuppressWarnings("unchecked")
+    public List<PnpStsRptSummary> getPnpStsRptSummaryList(@CurrentUser CustomUser customUser, final PnpStsRptParam pnpStsRptParam) {
+
+        pnpStsRptParam.setRole(customUser.getRole());
+        EntityManager entityManager = entityManagerProvider.getEntityManager();
+
+        StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("getPNPStsRptSummary");
+
+        Date startDate = pnpStsRptParam.getStartDate();
+        String str_startDate = DataUtils.formatDateToString(startDate, "yyyy-MM-dd");
+        Date endDate = pnpStsRptParam.getEndDate();
+        String str_endDate = DataUtils.formatDateToString(endDate, "yyyy-MM-dd");
+
+        query.setParameter("start_date",str_startDate);
+        query.setParameter("end_date",str_endDate);
+        query.setParameter("account", pnpStsRptParam.getAccount());
+        query.setParameter("pcccode", pnpStsRptParam.getPccCode());
+
+        log.info("start_date:" + str_startDate);
+        log.info("end_date:" + str_endDate);
+        log.info("account:" + pnpStsRptParam.getAccount());
+        log.info("pcccode:" + pnpStsRptParam.getPccCode());
+
+        List<PnpStsRptSummary> pnpStsRptSummaryList = query.getResultList();
+
+        if (pnpStsRptSummaryList.isEmpty()) {
+            log.info("pnpStsRptSummaryList List is Empty!!");
+            return Collections.emptyList();
+        } else
+            log.info("pnpStsRptSummaryList is not emtpy:" + DataUtils.toPrettyJsonUseJackson(pnpStsRptSummaryList));
+
+        return pnpStsRptSummaryList;
+    }
+
+    /**
+     * Pnp Statistical Report Detail List
+     *
+     * @return PnpStsRptDetail List
+     */
+    @SuppressWarnings("unchecked")
+    public List<PnpStsRptDetail> getPnpStsRptDetailList(@CurrentUser CustomUser customUser, final PnpStsRptParam pnpStsRptParam) {
+
+        pnpStsRptParam.setRole(customUser.getRole());
+        EntityManager entityManager = entityManagerProvider.getEntityManager();
+
+        Date startDate = pnpStsRptParam.getStartDate();
+        String str_startDate = DataUtils.formatDateToString(startDate, "yyyy-MM-dd");
+        Date endDate = pnpStsRptParam.getEndDate();
+        String str_endDate = DataUtils.formatDateToString(endDate, "yyyy-MM-dd");
+
+        // === call sp way 2 ====
+        StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("getPNPStsRptDetail");
+        query.setParameter("show_page", pnpStsRptParam.getPage());
+        query.setParameter("page_count",Integer.valueOf(pnpStsRptParam.getPageCount()));
+        query.setParameter("start_date",str_startDate);
+        query.setParameter("end_date",str_endDate);
+        query.setParameter("account", pnpStsRptParam.getAccount());
+        query.setParameter("pcccode", pnpStsRptParam.getPccCode());
+
+        log.info("show_page:" + pnpStsRptParam.getPage());
+        log.info("page_count:" + pnpStsRptParam.getPageCount());
+        log.info("start_date:" + str_startDate);
+        log.info("end_date:" + str_endDate);
+        log.info("account:" + pnpStsRptParam.getAccount());
+
+/*
+        // === call sp way 1 ====
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("usp_getPNPStsRptDetail");
+
+        query.registerStoredProcedureParameter("show_page", Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("page_count", Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("start_date", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("end_date", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("account", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("pcccode", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("total_page", Integer.class, ParameterMode.OUT);
+        query.setParameter("show_page", 1);
+        query.setParameter("page_count",10);
+        query.setParameter("start_date","null");
+        query.setParameter("end_date","null");
+        query.setParameter("account","null");
+        query.setParameter("pcccode","null");
+        query.execute();
+*/
+        query.execute();
+        int total_page = (Integer) query.getOutputParameterValue("total_page");
+        log.info("total_page: " + total_page);
+        List<PnpStsRptDetail> pnpStsRptDetailList = query.getResultList();
+
+        if (pnpStsRptDetailList.isEmpty()) {
+            log.info("pnpStsRptDetailList List is Empty!!");
+            return Collections.emptyList();
+        } else
+            log.info("pnpStsRptDetailList is not emtpy:" + DataUtils.toPrettyJsonUseJackson(pnpStsRptDetailList));
+
+        return pnpStsRptDetailList;
+    }
+
+
+    private StringBuilder getPnpStsRptSql(final PnpStsRptParam pnpStsRptParam) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("EXEC usp_getPNPStsRptSummary");
+        return sb;
     }
 
     /**

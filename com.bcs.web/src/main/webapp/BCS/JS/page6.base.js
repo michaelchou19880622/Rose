@@ -475,42 +475,43 @@ $(function(){
 	                img.onload = function() {
 		                if (img.width >= 1041 || img.height >= 2081) {
 	                		alert("尺寸不正確 " + img.width + "*" + img.height);
-	                        return false;
+	                		return false;
+		                } else {
+		                	if(input.files[0].size < 1048576) {
+		    		    		var fileName = input.files[0].name;
+		    		    		console.info("fileName : " + fileName);
+		    		    		var form_data = new FormData();
+		    		    		
+		    		    		form_data.append("filePart",input.files[0]);
+		    		
+		    		    		$('.LyMain').block($.BCS.blockMsgUpload);
+		    		    		$.ajax({
+		    		                type: 'POST',
+		    		                url: bcs.bcsContextPath + "/edit/createResource?resourceType=IMAGE",
+		    		                cache: false,
+		    		                contentType: false,
+		    		                processData: false,
+		    		                data: form_data
+		    		    		}).success(function(response){
+		    		            	console.info(response);
+		    		            	alert("上傳成功!");
+		    		            	$('.imgId').val(response.resourceId);
+		    		            	$('.mdFRM03Img').find('img').attr('src', bcs.bcsContextPath + '/getResource/IMAGE/' + response.resourceId);
+		    		            	originalImgWidth = response.resourceWidth;
+		    		            	originalImgHeight = response.resourceHeight;
+		    		            	setImgHeightAndWidth(response.resourceId, originalImgWidth, originalImgHeight)
+		    		    		}).fail(function(response){
+		    		    			console.info(response);
+		    		    			$.FailResponse(response);
+		    		    			$('.LyMain').unblock();
+		    		    		}).done(function(){
+		    		    			$('.LyMain').unblock();
+		    		    		});
+		    	    		} else {
+		    	    			alert("圖片大小不可大於 1MB！");
+		    	    		}
 		                }
 	                }
-	    		if(input.files[0].size < 1048576) {
-		    		var fileName = input.files[0].name;
-		    		console.info("fileName : " + fileName);
-		    		var form_data = new FormData();
-		    		
-		    		form_data.append("filePart",input.files[0]);
-		
-		    		$('.LyMain').block($.BCS.blockMsgUpload);
-		    		$.ajax({
-		                type: 'POST',
-		                url: bcs.bcsContextPath + "/edit/createResource?resourceType=IMAGE",
-		                cache: false,
-		                contentType: false,
-		                processData: false,
-		                data: form_data
-		    		}).success(function(response){
-		            	console.info(response);
-		            	alert("上傳成功!");
-		            	$('.imgId').val(response.resourceId);
-		            	$('.mdFRM03Img').find('img').attr('src', bcs.bcsContextPath + '/getResource/IMAGE/' + response.resourceId);
-		            	originalImgWidth = response.resourceWidth;
-		            	originalImgHeight = response.resourceHeight;
-		            	setImgHeightAndWidth(response.resourceId, originalImgWidth, originalImgHeight)
-		    		}).fail(function(response){
-		    			console.info(response);
-		    			$.FailResponse(response);
-		    			$('.LyMain').unblock();
-		    		}).done(function(){
-		    			$('.LyMain').unblock();
-		    		});
-	    		} else {
-	    			alert("圖片大小不可大於 1MB！");
-	    		}
 	        } 
     	} 
 	});

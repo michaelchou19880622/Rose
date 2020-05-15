@@ -27,6 +27,7 @@ $(function() {
 	var isCreateTime = true, isOrderTime = false;
 	var page = 1, totalPages = 0;
 	var pnpStatusMap = {};
+	var isChangePage = false;
 	
 	/* 更新每頁顯示數量下拉選單 */
 	var func_optionSelectChanged = function(){
@@ -40,30 +41,24 @@ $(function() {
 		
 		firstFetch = true;
 		
+		page = 1;
+		
 		loadData();
 	};
 
 	$('.optionSelectPageSize').change(func_optionSelectChanged);
 
+	/* 上/下頁按鈕 */
 	var pageBtnHandler = function(condition, actionName) {
 		if (condition) {
-			if (actionName === 'next') {
-				page = ++page;
-			} else if (actionName === 'back'){
-				page = --page;
-			}
-			
-//			page = actionName === 'next' ?  : 
+			page = actionName === 'next' ? ++page : --page;
 			console.log('Currency Page Number is ' + page);
 			
 			currentPageIndex.innerText = page;
 			
+			isChangePage = true;
+			
 			loadData();
-
-//			currentPageIndex.innerText = page;
-//			totalPageSize.innerText = totalPages;
-//			console.info('currentPageIndex = ', currentPageIndex.innerText);
-//			console.info('totalPageSize = ', totalPageSize.innerText);
 		}
 	};
 
@@ -177,85 +172,87 @@ $(function() {
 	var loadData = function() {
 		console.info('firstFetch:', firstFetch);
 		
-		if (firstFetch) {
+		if (firstFetch || isChangePage) {
 			$('.LyMain').block($.BCS.blockMsgRead);
-			fetchListCountAndChange();
-		} else {
-			if (!firstFetch) {
-				$('.LyMain').block($.BCS.blockMsgRead);
+			isChangePage = false;
+		}
+		
+		var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPStsRptDetail';
+		console.info('getUrl detail', getUrl);
+
+		$.ajax({
+			type : 'POST',
+			url : getUrl,
+			contentType : 'application/json;charset=UTF-8',
+			data : JSON.stringify({
+				dateType : selectedSearchType,
+				startDate : startDate,
+				endDate : endDate,
+				isPageable : true,
+				page : page,
+				account : document.getElementById('accountInput').value,
+				pccCode : document.getElementById('pccCodeInput').value,
+				sourceSystem : null,
+				employeeId : null,
+				phone : null,
+				pageCount : perPageSize
+			})
+		}).done(function(response) {
+//			console.info('response:', response);
+//			console.log('response:', JSON.stringify(response));
+			
+			$('.dataTemplate').remove();
+			$('#noDataTxt').remove();
+			if (response.length == 0) {
+				$('#tableBodySummary').remove();
+				$('#tableBody').append('<tr id="noDataTxt"><td colspan="15"><span style="color:red">查無資料</span></td></tr>');
+				return false;
 			}
 			
-			// var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPDetailReport';
-			var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPStsRptDetail';
-			console.info('getUrl detail', getUrl);
-
-			$.ajax({
-				type : 'POST',
-				url : getUrl,
-				contentType : 'application/json;charset=UTF-8',
-				data : JSON.stringify({
-					dateType : selectedSearchType,
-					startDate : startDate,
-					endDate : endDate,
-					isPageable : true,
-					page : page,
-					account : document.getElementById('accountInput').value,
-					pccCode : document.getElementById('pccCodeInput').value,
-					sourceSystem : null, // document.getElementById('sourceSystemInput').value,
-					employeeId : null,
-					phone : null,//document.getElementById('phoneNumber').value,
-					pageCount : perPageSize //document.getElementById('pageCount').value
-				})
-			}).success(function(response) {
-//				console.info('response:', response);
-//				console.log('response:', JSON.stringify(response));
+			var i = 1;
+			response.forEach(function(obj) {
+				var list = originalTr.clone(true);
 				
-				$('.dataTemplate').remove();
-				$('#noDataTxt').remove();
-				if (response.length == 0) {
-					$('#tableBodySummary').remove();
-					$('#tableBody').append('<tr id="noDataTxt"><td colspan="15"><span style="color:red">查無資料</span></td></tr>');
-					return false;
-				}
-				
-				var i = 1;
-				response.forEach(function(obj) {
-					var list = originalTr.clone(true);
-					
-					list.find('.send_date').html(obj.send_date);
-					list.find('.total').html(obj.total);
-					list.find('.sms_total').html(obj.sms_total);
-					list.find('.sms_ok').html(obj.sms_ok);
-					list.find('.sms_no').html(obj.sms_no);
-					list.find('.sms_point').html(obj.sms_point);
-					list.find('.sms_rate').html(obj.sms_rate);
-					list.find('.pnp_total').html(obj.pnp_total);
-					list.find('.pnp_ok').html(obj.pnp_ok);
-					list.find('.pnp_no').html(obj.pnp_no);
-					list.find('.pnp_rate').html(obj.pnp_rate);
-					list.find('.bc_total').html(obj.total);
-					list.find('.bc_ok').html(obj.bc_ok);
-					list.find('.bc_no').html(obj.bc_no);
-					list.find('.bc_rate').html(obj.bc_rate);
-					$('#tableBody').append(list);
-					i++;
-				});
-				
-				hasData = i > 0;
-				console.log('Has data : ' + hasData);
-				// setExportButtonSource();
-			}).fail(function(response) {
-				console.info(response);
-				$.FailResponse(response);
-				$('.LyMain').unblock();
-			}).done(function() {
-				$('.LyMain').unblock();
+				list.find('.send_date').html(obj.send_date);
+				list.find('.total').html(obj.total);
+				list.find('.sms_total').html(obj.sms_total);
+				list.find('.sms_ok').html(obj.sms_ok);
+				list.find('.sms_no').html(obj.sms_no);
+				list.find('.sms_point').html(obj.sms_point);
+				list.find('.sms_rate').html(obj.sms_rate);
+				list.find('.pnp_total').html(obj.pnp_total);
+				list.find('.pnp_ok').html(obj.pnp_ok);
+				list.find('.pnp_no').html(obj.pnp_no);
+				list.find('.pnp_rate').html(obj.pnp_rate);
+				list.find('.bc_total').html(obj.total);
+				list.find('.bc_ok').html(obj.bc_ok);
+				list.find('.bc_no').html(obj.bc_no);
+				list.find('.bc_rate').html(obj.bc_rate);
+				$('#tableBody').append(list);
+				i++;
 			});
-		}
+			
+			hasData = i > 0;
+			console.log('Has data : ' + hasData);
+			
+			if (firstFetch) {
+				fetchListCountAndChange();
+			} else {
+				$('.LyMain').unblock();
+			}
+			
+			// setExportButtonSource();
+		}).fail(function(response) {
+			console.info(response);
+			$.FailResponse(response);
+			$('.LyMain').unblock();
+		});
 	};
 
 	/* 取得分頁總數並變更畫面 */
 	var fetchListCountAndChange = function() {
+		firstFetch = false;
+		
 		var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPStsRptSummary';
 		console.info('getUrl summary = ', getUrl);
 
@@ -271,12 +268,12 @@ $(function() {
 				page : page,
 				account : document.getElementById('accountInput').value,
 				pccCode : document.getElementById('pccCodeInput').value,
-				sourceSystem : null, // document.getElementById('sourceSystemInput').value,
+				sourceSystem : null,
 				employeeId : null,
 				phone : null,
-				pageCount : perPageSize //document.getElementById('pageCount').value
+				pageCount : perPageSize
 			})
-		}).success(function(response) {
+		}).done(function(response) {
 			console.info('fetchListCountAndChange = ', response);
 
 			$('.dataTemplateSummary').remove();
@@ -316,24 +313,11 @@ $(function() {
 				totalPageSize.innerText = totalPages;
 			}
 			
-			if (page > totalPages) {
-				page = totalPages;
-				currentPageIndex.innerText = page;
-				
-//				firstFetch = true
-				
-				loadData();
-				
-				return;
-			}
-			
+			$('.LyMain').unblock();
 			
 		}).fail(function(response) {
 			console.log(response);
 			$.FailResponse(response);
-		}).done(function() {
-			firstFetch = false
-			loadData();
 		});
 	};
 

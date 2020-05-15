@@ -58,14 +58,14 @@ import java.io.Serializable;
 
 public class PnpStsRptSummary implements Serializable  {
 
-	// 以"天" 彙總後的資料數 
-    @Column(name = "DATE_COUNT")
-    private long date_count;
-
 	// 發送日期
     @Id
     @Column(name = "SEND_DATE")
     private String send_date;
+
+	// 以"天" 彙總後的資料數 
+    @Column(name = "DATE_COUNT")
+    private long date_count;
 
     // 總通數
     @Column(name = "TOTAL")

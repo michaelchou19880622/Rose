@@ -8,8 +8,15 @@ $(function() {
 	var originalTr;
 	var originalTable;
 	
+	var listSummary;
+	
 	var totalPageSize = document.getElementById('totalPageSize');
 	var currentPageIndex = document.getElementById('currentPageIndex');
+	var perPageSize = $(this).find('option:selected').text();
+	console.info('perPageSize = ', perPageSize);
+	
+	var selectedSearchType = $('[name="searchType"]:checked').val();
+	console.info('default selectedSearchType = ', selectedSearchType);
 	
 	var valTotalPageSize = 0;
 
@@ -20,20 +27,43 @@ $(function() {
 	var isCreateTime = true, isOrderTime = false;
 	var page = 1, totalPages = 0;
 	var pnpStatusMap = {};
+	
+	/* 更新每頁顯示數量下拉選單 */
+	var func_optionSelectChanged = function(){
+		var selectValue = $(this).find('option:selected').text();
+		
+		$(this).closest('.optionPageSize').find('.optionLabelPageSize').html(selectValue);
+		
+		perPageSize = selectValue;
+		console.info("perPageSize = ", perPageSize);
+		console.info("currentPageIndex.innerText = ", currentPageIndex.innerText);
+		
+		firstFetch = true;
+		
+		loadData();
+	};
+
+	$('.optionSelectPageSize').change(func_optionSelectChanged);
 
 	var pageBtnHandler = function(condition, actionName) {
 		if (condition) {
-			page = actionName === 'next' ? ++page : --page;
+			if (actionName === 'next') {
+				page = ++page;
+			} else if (actionName === 'back'){
+				page = --page;
+			}
+			
+//			page = actionName === 'next' ?  : 
 			console.log('Currency Page Number is ' + page);
-//			loadData();
-
+			
 			currentPageIndex.innerText = page;
-			totalPageSize.innerText = totalPages;
 			
-			console.info('currentPageIndex = ', currentPageIndex.innerText);
-			console.info('totalPageSize = ', totalPageSize.innerText);
-			
-//			$('#pageAndTotalPages').text(page + '/' + );
+			loadData();
+
+//			currentPageIndex.innerText = page;
+//			totalPageSize.innerText = totalPages;
+//			console.info('currentPageIndex = ', currentPageIndex.innerText);
+//			console.info('totalPageSize = ', totalPageSize.innerText);
 		}
 	};
 
@@ -73,9 +103,15 @@ $(function() {
 	$('#searchBtn').click(function() {
 		if (dataValidate()) {
 			cleanList();
+			
 			page = 1;
+			
 			startDate = $('#startDate').val();
+			console.info('startDate = ', startDate);
+			
 			endDate = $('#endDate').val();
+			console.info('endDate = ', endDate);
+			
 			loadData();
 		}
 	});
@@ -92,29 +128,12 @@ $(function() {
 		}
 
 	});
-
-	$('#isCreateTimeBtn').click(function() {
-		if (isOrderTime) {
-			var createTimeBtn = document.getElementById('isCreateTimeBtn');
-			createTimeBtn.className = 'customBtn_Pressed'
-			var orderTimeBtn = document.getElementById('isOrderTimeBtn');
-			orderTimeBtn.className = 'customBtn'
-			isCreateTime = true;
-			isOrderTime = false;
-		}
-	})
-
-	$('#isOrderTimeBtn').click(function() {
-		if (isCreateTime) {
-			var createTimeBtn = document.getElementById('isCreateTimeBtn');
-			createTimeBtn.className = 'customBtn'
-			var orderTimeBtn = document.getElementById('isOrderTimeBtn');
-			orderTimeBtn.className = 'customBtn_Pressed'
-			isCreateTime = false;
-			isOrderTime = true;
-		}
-	})
-	// -------------------Event----------------------
+	
+	// 發送類型
+	$('[name="searchType"]').click(function() {
+		selectedSearchType = $('[name="searchType"]:checked').val();
+		console.info('selectedSearchType = ', selectedSearchType);
+	});
 
 	var dataValidate = function() {
 		startDate = $('#startDate').val();
@@ -128,7 +147,7 @@ $(function() {
 			return false;
 		}
 		if (!moment(startDate).add(183, 'days').isAfter(moment(endDate))) {
-			alert('起始日期與結束日期之間不可相隔超過一個月！');
+			alert('起始日期與結束日期之間不可相隔超過6個月！');
 			return false;
 		}
 		if (moment(startDate).isAfter(moment(endDate))) {
@@ -156,112 +175,96 @@ $(function() {
 	// ---- Initialize Page & Load Data ----
 	// get List Data
 	var loadData = function() {
-		$('.LyMain').block($.BCS.blockMsgRead);
-		cleanList();
-
 		console.info('firstFetch:', firstFetch);
+		
 		if (firstFetch) {
-			firstFetch = false;
+			$('.LyMain').block($.BCS.blockMsgRead);
 			fetchListCountAndChange();
-		}
-		// var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPDetailReport';
-		var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPStsRptDetail';
+		} else {
+			if (!firstFetch) {
+				$('.LyMain').block($.BCS.blockMsgRead);
+			}
+			
+			// var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPDetailReport';
+			var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPStsRptDetail';
+			console.info('getUrl detail', getUrl);
 
-		console.info('getUrl detail', getUrl);
-
-		$.ajax({
-			type : 'POST',
-			url : getUrl,
-			contentType : 'application/json',
-			data : JSON.stringify({
-				dateType : isCreateTime ? 'createTime' : 'orderTime',
-				startDate : startDate,
-				endDate : endDate,
-				isPageable : true,
-				page : page,
-				account : document.getElementById('accountInput').value,
-				pccCode : document.getElementById('pccCodeInput').value,
-				sourceSystem : null, // document.getElementById('sourceSystemInput').value,
-				employeeId : null,
-				phone : document.getElementById('phoneNumber').value,
-				pageCount : document.getElementById('pageCount').value
-			})
-		}).success(function(response) {
-			console.info('response:', response);
-			console.log('response:', JSON.stringify(response));
-			var i = 1;
-			response.forEach(function(obj) {
-				console.log('i = ' + i);
-				var list = originalTr.clone(true);
+			$.ajax({
+				type : 'POST',
+				url : getUrl,
+				contentType : 'application/json;charset=UTF-8',
+				data : JSON.stringify({
+					dateType : selectedSearchType,
+					startDate : startDate,
+					endDate : endDate,
+					isPageable : true,
+					page : page,
+					account : document.getElementById('accountInput').value,
+					pccCode : document.getElementById('pccCodeInput').value,
+					sourceSystem : null, // document.getElementById('sourceSystemInput').value,
+					employeeId : null,
+					phone : null,//document.getElementById('phoneNumber').value,
+					pageCount : perPageSize //document.getElementById('pageCount').value
+				})
+			}).success(function(response) {
+//				console.info('response:', response);
+//				console.log('response:', JSON.stringify(response));
 				
-				list.find('.send_date').html(obj.send_date);
-				list.find('.total').html(obj.total);
-				list.find('.sms_total').html(obj.sms_total);
-				list.find('.sms_ok').html(obj.sms_ok);
-				list.find('.sms_no').html(obj.sms_no);
-				list.find('.sms_point').html(obj.sms_point);
-				list.find('.sms_rate').html(obj.sms_rate);
-				list.find('.pnp_total').html(obj.pnp_total);
-				list.find('.pnp_ok').html(obj.pnp_ok);
-				list.find('.pnp_no').html(obj.pnp_no);
-				list.find('.pnp_rate').html(obj.pnp_rate);
-				list.find('.bc_total').html(obj.total);
-				list.find('.bc_ok').html(obj.bc_ok);
-				list.find('.bc_no').html(obj.bc_no);
-				list.find('.bc_rate').html(obj.bc_rate);
-				/*
-				 * list.find('.pathway').html(obj.processFlow);
-				 * list.find('.proc_stage').html(obj.processStage);
-				 * list.find('.pnpContent').html(obj.message);
-				 * list.find('.customerCellPhoneNumber').html(obj.phone); var
-				 * bcStatus = ''; if (obj.bcHttpStatusCode !== null &&
-				 * obj.bcHttpStatusCode.trim() !== '') { bcStatus = obj.bcStatus + ' [' +
-				 * obj.bcHttpStatusCode + ']'; } else { bcStatus = obj.bcStatus; }
-				 * list.find('.bcStatusCode').html(bcStatus); var pnpStatus =
-				 * ''; if (obj.pnpHttpStatusCode !== null &&
-				 * obj.pnpHttpStatusCode.trim() !== '') { pnpStatus =
-				 * obj.pnpStatus + ' [' + obj.pnpHttpStatusCode + ']'; } else {
-				 * pnpStatus = obj.pnpStatus; }
-				 * list.find('.pnpStatusCode').html(pnpStatus);
-				 * list.find('.smsStatusCode').html(obj.smsStatus);
-				 * list.find('.accountPccCode').html(obj.pccCode); if
-				 * (obj.scheduleTime !== null) {
-				 * list.find('.schedule_time').html(moment(obj.scheduleTime).format('YYYY-MM-DD
-				 * HH:mm:ss')); } list.find('.resendBtn').click(function() {
-				 * resendSms(obj.detailId, obj.ftpSource); });
-				 */
-				$('#resultTable').append(list);
-				i++;
+				$('.dataTemplate').remove();
+				$('#noDataTxt').remove();
+				if (response.length == 0) {
+					$('#tableBodySummary').remove();
+					$('#tableBody').append('<tr id="noDataTxt"><td colspan="15"><span style="color:red">查無資料</span></td></tr>');
+					return false;
+				}
+				
+				var i = 1;
+				response.forEach(function(obj) {
+					var list = originalTr.clone(true);
+					
+					list.find('.send_date').html(obj.send_date);
+					list.find('.total').html(obj.total);
+					list.find('.sms_total').html(obj.sms_total);
+					list.find('.sms_ok').html(obj.sms_ok);
+					list.find('.sms_no').html(obj.sms_no);
+					list.find('.sms_point').html(obj.sms_point);
+					list.find('.sms_rate').html(obj.sms_rate);
+					list.find('.pnp_total').html(obj.pnp_total);
+					list.find('.pnp_ok').html(obj.pnp_ok);
+					list.find('.pnp_no').html(obj.pnp_no);
+					list.find('.pnp_rate').html(obj.pnp_rate);
+					list.find('.bc_total').html(obj.total);
+					list.find('.bc_ok').html(obj.bc_ok);
+					list.find('.bc_no').html(obj.bc_no);
+					list.find('.bc_rate').html(obj.bc_rate);
+					$('#tableBody').append(list);
+					i++;
+				});
+				
+				hasData = i > 0;
+				console.log('Has data : ' + hasData);
+				// setExportButtonSource();
+			}).fail(function(response) {
+				console.info(response);
+				$.FailResponse(response);
+				$('.LyMain').unblock();
+			}).done(function() {
+				$('.LyMain').unblock();
 			});
-
-			hasData = i > 0;
-			console.log('Has data : ' + hasData);
-
-			// setExportButtonSource();
-		}).fail(function(response) {
-			console.info(response);
-			$.FailResponse(response);
-			$('.LyMain').unblock();
-		}).done(function() {
-			$('.LyMain').unblock();
-		});
+		}
 	};
 
 	/* 取得分頁總數並變更畫面 */
 	var fetchListCountAndChange = function() {
-		// get Total
-		$('.LyMain').block($.BCS.blockMsgRead);
-
 		var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPStsRptSummary';
-
-		console.info('getUrl summary', getUrl);
+		console.info('getUrl summary = ', getUrl);
 
 		$.ajax({
 			type : 'POST',
 			url : getUrl,
-			contentType : 'application/json',
+			contentType : 'application/json;charset=UTF-8',
 			data : JSON.stringify({
-				dateType : isCreateTime ? 'createTime' : 'orderTime',
+				dateType : selectedSearchType,
 				startDate : startDate,
 				endDate : endDate,
 				isPageable : false,
@@ -271,40 +274,93 @@ $(function() {
 				sourceSystem : null, // document.getElementById('sourceSystemInput').value,
 				employeeId : null,
 				phone : null,
-				pageCount : document.getElementById('pageCount').value
+				pageCount : perPageSize //document.getElementById('pageCount').value
 			})
 		}).success(function(response) {
-			console.log(response);
-			totalPages = parseInt(response);
-			console.info('totalPages1: ', totalPages);
-			page = 1;
-			console.info(page + '/' + totalPages);
-			$('#pageAndTotalPages').text(page + '/' + totalPages);
+			console.info('fetchListCountAndChange = ', response);
+
+			$('.dataTemplateSummary').remove();
+			
+			response.forEach(function(obj) {
+				listSummary = originalTrSummary.clone(true);
+				listSummary.find('.send_date').html(obj.send_date);
+				listSummary.find('.total').html(obj.total);
+				listSummary.find('.sms_total').html(obj.sms_total);
+				listSummary.find('.sms_ok').html(obj.sms_ok);
+				listSummary.find('.sms_no').html(obj.sms_no);
+				listSummary.find('.sms_point').html(obj.sms_point);
+				listSummary.find('.sms_rate').html(obj.sms_rate);
+				listSummary.find('.pnp_total').html(obj.pnp_total);
+				listSummary.find('.pnp_ok').html(obj.pnp_ok);
+				listSummary.find('.pnp_no').html(obj.pnp_no);
+				listSummary.find('.pnp_rate').html(obj.pnp_rate);
+				listSummary.find('.bc_total').html(obj.total);
+				listSummary.find('.bc_ok').html(obj.bc_ok);
+				listSummary.find('.bc_no').html(obj.bc_no);
+				listSummary.find('.bc_rate').html(obj.bc_rate);
+				
+				totalPages = parseInt(Math.ceil(obj.date_count/perPageSize));
+				console.info('1-1 totalPages = ', totalPages);
+			});
+
+			$('#tableBodySummary').append(listSummary);
+
+			console.info('page = ', page);
+			console.info('1-2 totalPages = ', totalPages);
+
+			if (totalPages == 0) {
+				currentPageIndex.innerText = '-';
+				totalPageSize.innerText = '-';
+			} else {
+				currentPageIndex.innerText = page;
+				totalPageSize.innerText = totalPages;
+			}
+			
+			if (page > totalPages) {
+				page = totalPages;
+				currentPageIndex.innerText = page;
+				
+//				firstFetch = true
+				
+				loadData();
+				
+				return;
+			}
+			
+			
 		}).fail(function(response) {
 			console.log(response);
 			$.FailResponse(response);
-			$('.LyMain').unblock();
 		}).done(function() {
-			$('.LyMain').unblock();
+			firstFetch = false
+			loadData();
 		});
 	};
 
 	var cleanList = function() {
-		$('.resultList').remove();
+		$('.dataTemplate').remove();
+		$('.dataTemplateSummary').remove();
+		$('.tableBody').remove();
+		$('.tableBodySmmary').remove();
 		console.log('Result List Remove!!');
 	};
 
 	// initialize Page
 	var initPage = function() {
-		originalTr = $('.resultList').clone(true);
+		originalTr = $('.dataTemplate').clone(true);
+		originalTable = $('#tableBody').clone(true);
+
+		originalTrSummary = $('.dataTemplateSummary').clone(true);
+		originalTableSummary = $('#tableBodySummary').clone(true);
+		
 		cleanList();
-		originalTable = $('#resultTable').clone(true);
 		// startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
 		startDate = moment(new Date()).format('YYYY-MM-DD');
 		endDate = moment(new Date()).format('YYYY-MM-DD');
 		$('#startDate').val(startDate);
 		$('#endDate').val(endDate);
 		// getPnpStatusMap();
+		
 	};
 
 	initPage();

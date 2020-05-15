@@ -46,7 +46,7 @@ import java.util.Map;
  * @author ???
  * @author Alan
  */
-@Slf4j(topic = "PnpRecorder")
+@Slf4j//(topic = "PnpRecorder")
 @Controller
 @RequestMapping("/bcs/pnpEmployee")
 public class BcsPnpReportController {
@@ -89,10 +89,10 @@ public class BcsPnpReportController {
     @WebServiceLog
     @PostMapping(value = "/resend/sms", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public ResponseEntity<?> reSendSms(@CurrentUser final CustomUser customUser,
-                                       HttpServletRequest request,
-                                       @RequestParam(required = false) String detailId,
-                                       @RequestParam(required = false) String ftpSourceName) {
+    public ResponseEntity<?> reSendSms(HttpServletRequest request, HttpServletResponse response,
+    									@CurrentUser final CustomUser customUser,
+    									@RequestParam(required = false) String detailId,
+    									@RequestParam(required = false) String ftpSourceName) {
         request.getParameter("detailId");
         log.info("DetailId : {}, ftpSourceName : {}", detailId, ftpSourceName);
         if (detailId == null || StringUtils.isBlank(ftpSourceName)) {
@@ -114,16 +114,18 @@ public class BcsPnpReportController {
     @WebServiceLog
     @PostMapping(value = "/getPNPStsRptSummary", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public ResponseEntity<?> getPNPStsRptSummary(@CurrentUser final CustomUser customUser,
-                                                 @RequestBody final PnpStsRptParam param) {
+    public ResponseEntity<?> getPNPStsRptSummary(HttpServletRequest request, HttpServletResponse response,
+    		@CurrentUser final CustomUser customUser, @RequestBody final PnpStsRptParam param) {
+
         try {
             param.setEmployeeId(customUser.getAccount().toUpperCase());
             final List<PnpStsRptSummary> result = pnpReportService.getPnpStsRptSummaryList(customUser, param);
+        	log.info("result = {}", result);
             log.info(DataUtils.toPrettyJsonUseJackson(result));
-            log.info("Total date count for summary:" + result.get(0).getDate_count());
-            long totalPage = (long) Math.ceil(result.get(0).getDate_count() / Double.valueOf(param.getPageCount()));
+//            log.info("Total date count for summary:" + result.get(0).getDate_count());
+//            long totalPage = (long) Math.ceil(result.get(0).getDate_count() / Double.valueOf(param.getPageCount()));
             //long totalPage = 10;
-            return new ResponseEntity<>(totalPage, HttpStatus.OK);
+            return new ResponseEntity<>(result, HttpStatus.OK);
 
         } catch (final Exception e) {
             log.error("Exception", e);
@@ -134,8 +136,15 @@ public class BcsPnpReportController {
     @WebServiceLog
     @PostMapping(value = "/getPNPStsRptDetail", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public ResponseEntity<?> getPNPStsRptDetail(@CurrentUser final CustomUser customUser,
-                                                @RequestBody final PnpStsRptParam param) {
+    public ResponseEntity<?> getPNPStsRptDetail(HttpServletRequest request, HttpServletResponse response,
+    		@CurrentUser final CustomUser customUser, @RequestBody final PnpStsRptParam param) {
+
+    	log.info("param.getStartDate() = {}", param.getStartDate());
+    	log.info("param.getEndDate() = {}", param.getEndDate());
+    	log.info("param.getDateType() = {}", param.getDateType());
+    	log.info("param.getPage() = {}", param.getPage());
+    	log.info("param.getPageCount() = {}", param.getPageCount());
+    	
         try {
             param.setEmployeeId(customUser.getAccount().toUpperCase());
             final List<PnpStsRptDetail> result = pnpReportService.getPnpStsRptDetailList(customUser, param);
@@ -152,8 +161,8 @@ public class BcsPnpReportController {
     @WebServiceLog
     @PostMapping(value = "/getPNPAnalysisReport", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public ResponseEntity<?> getPnpAnalysisReport(@CurrentUser final CustomUser customUser,
-                                                  @RequestBody final PnpDetailReportParam param) {
+    public ResponseEntity<?> getPnpAnalysisReport(HttpServletRequest request, HttpServletResponse response,
+    		@CurrentUser final CustomUser customUser, @RequestBody final PnpDetailReportParam param) {
         try {
             param.setEmployeeId(customUser.getAccount().toUpperCase());
             final List<PnpDetailReport> result = pnpReportService.getPnpDetailReportList(customUser, param);
@@ -169,8 +178,8 @@ public class BcsPnpReportController {
     @WebServiceLog
     @PostMapping(value = "/getPNPDetailReport", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public ResponseEntity<?> getPnpDetailReport(@CurrentUser final CustomUser customUser,
-                                                @RequestBody final PnpDetailReportParam param) {
+    public ResponseEntity<?> getPnpDetailReport(HttpServletRequest request, HttpServletResponse response,
+    		@CurrentUser final CustomUser customUser, @RequestBody final PnpDetailReportParam param) {
         try {
             param.setEmployeeId(customUser.getAccount().toUpperCase());
             final List<PnpDetailReport> result = pnpReportService.getPnpDetailReportList(customUser, param);
@@ -191,8 +200,8 @@ public class BcsPnpReportController {
     @WebServiceLog
     @PostMapping(value = "/getPNPDetailReportTotalPages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public ResponseEntity<?> getPnpDetailReportTotalPages(@CurrentUser final CustomUser customUser,
-                                                          @RequestBody final PnpDetailReportParam param) {
+    public ResponseEntity<?> getPnpDetailReportTotalPages(HttpServletRequest request, HttpServletResponse response,
+    		@CurrentUser final CustomUser customUser, @RequestBody final PnpDetailReportParam param) {
         try {
             param.setEmployeeId(customUser.getAccount().toUpperCase());
             final List<PnpDetailReport> result = pnpReportService.getPnpDetailReportList(customUser, param);
@@ -209,7 +218,7 @@ public class BcsPnpReportController {
     @WebServiceLog(action = "Download")
     @GetMapping("/exportPNPStsReportExcel")
     @ResponseBody
-    public void exportPnpStsReportExcel(final HttpServletResponse response,
+    public void exportPnpStsReportExcel(HttpServletRequest request, HttpServletResponse response,
                                         @CurrentUser final CustomUser customUser,
                                         @RequestBody final PnpStsRptParam param) {
         try {
@@ -285,12 +294,12 @@ public class BcsPnpReportController {
     @WebServiceLog(action = "Download")
     @GetMapping("/exportPNPDetailReportExcel")
     @ResponseBody
-    public void exportPnpDetailReportExcel(final HttpServletResponse response, @CurrentUser final CustomUser customUser,
-                                           @RequestParam(required = false) final String startDate, @RequestParam(required = false) final String endDate,
-                                           @RequestParam(required = false) final boolean isPageable, @RequestParam(required = false) final Integer page,
-                                           @RequestParam(required = false) final String account, @RequestParam(required = false) final String pccCode,
-                                           @RequestParam(required = false) final String sourceSystem, @RequestParam(required = false) final String employeeId,
-                                           @RequestParam(required = false) final String phone, @RequestParam(required = false) final String dateType) {
+    public void exportPnpDetailReportExcel(HttpServletRequest request, HttpServletResponse response, @CurrentUser final CustomUser customUser,
+								@RequestParam(required = false) final String startDate, @RequestParam(required = false) final String endDate,
+								@RequestParam(required = false) final boolean isPageable, @RequestParam(required = false) final Integer page,
+								@RequestParam(required = false) final String account, @RequestParam(required = false) final String pccCode,
+								@RequestParam(required = false) final String sourceSystem, @RequestParam(required = false) final String employeeId,
+								@RequestParam(required = false) final String phone, @RequestParam(required = false) final String dateType) {
         try {
             final PnpDetailReportParam pnpDetailReportParam = new PnpDetailReportParam(
                     dateType, DataUtils.convStrToDate(startDate, "yyyy-MM-dd"), DataUtils.convStrToDate(endDate, "yyyy-MM-dd"),

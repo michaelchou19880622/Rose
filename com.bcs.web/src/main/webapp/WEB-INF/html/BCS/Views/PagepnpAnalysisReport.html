@@ -40,14 +40,78 @@
 									<input type="text" class="datepicker" id="endDate" placeholder="YYYY-MM-DD" />
 								</div>
 								
-								<input style="margin-left:10px;" id="isCreateTime" type="radio" name="groupType" value="isCreateTime" CHECKED>建立時間
-								<input style="margin-left:8px;" id="isOrderTime" type="radio" name="groupType" value="isOrderTime">預約時間
+								<input style="margin-left:10px; display:none" id="isCreateTime" type="radio" name="searchType" value="createTime" CHECKED>
+<!-- 								建立時間 -->
+								<input style="margin-left:8px; display:none" id="isOrderTime" type="radio" name="searchType" value="orderTime">
+<!-- 								預約時間 -->
 								<input class="customBtn" id="exportBtn" style="float:right; cursor: pointer;" type="button" value="匯出EXCEL">
 								<input class="customBtn" id="searchBtn" style="float:right; margin-right:10px; cursor: pointer;" type="button" value="查詢">
 							</div>
 						</div>
 					</div>
+					
+                   	<div>
+						<label style="display: inline-block; width: 80px; font-weight: bold; color:blue;" class="param-label">資料彙總：</label> 
+					</div>
+					<div class="mainFrame">
+						<table border="1" id="tableBodySummary">
+							<colgroup>
+								<col width="72">
+								<col width="72">
+								<col width="72">
+								<col width="72">
+								<col width="72">
+								<col width="72">
+								<col width="72">
+								<col width="72">
+								<col width="72">
+								<col width="72">
+								<col width="72">
+								<col width="72">
+								<col width="72">
+								<col width="72">
+								<col width="72">
+							</colgroup>
+							<tr>
+								<th class="td10" style="font-size:10px;">發送日期</th>
+								<th class="td10" style="font-size:10px;">總通數</th>
+								<th class="td10" style="font-size:10px;">BC<br>通路總通數</th>
+								<th class="td10" style="font-size:10px;">BC<br>成功通數</th>
+								<th class="td10" style="font-size:10px;">BC<br>失敗通數</th>
+								<th class="td10" style="font-size:10px;">BC<br>成功率</th>
+								<th class="td10" style="font-size:10px;">PNP<br>通路總通數</th>
+								<th class="td10" style="font-size:10px;">PNP<br>成功通數</th>
+								<th class="td10" style="font-size:10px;">PNP<br>失敗通數</th>
+								<th class="td10" style="font-size:10px;">PNP<br>成功率</th>
+								<th class="td10" style="font-size:10px;">SMS<br>通路總通數</th>
+								<th class="td10" style="font-size:10px;">SMS<br>成功通數</th>
+								<th class="td10" style="font-size:10px;">SMS<br>失敗通數</th>
+								<th class="td10" style="font-size:10px;">SMS<br>成功率</th>
+								<th class="td10" style="font-size:10px; color:red;">SMS<br>成功點數</th>
+							</tr>
+							<tr id="dataTemplateTotalRow" class="dataTemplateSummary">
+								<td rowspan="1" style="background-color:#ffffd5;" class="td1 send_date"></td>
+								<td rowspan="1" style="background-color:#ffffd5;" class="td1 total"></td>
+								<td rowspan="1" style="background-color:#ffffd5;" class="td1 bc_total"></td>
+								<td rowspan="1" style="background-color:#ffffd5;" class="td1 bc_ok"></td>
+								<td rowspan="1" style="background-color:#ffffd5;" class="td1 bc_no"></td>
+								<td rowspan="1" style="background-color:#ffffd5;" class="td1 bc_rate"></td>
+								<td rowspan="1" style="background-color:#ffffd5;" class="td1 pnp_total"></td>
+								<td rowspan="1" style="background-color:#ffffd5;" class="td1 pnp_ok"></td>
+								<td rowspan="1" style="background-color:#ffffd5;" class="td1 pnp_no"></td>
+								<td rowspan="1" style="background-color:#ffffd5;" class="td1 pnp_rate"></td>
+								<td rowspan="1" style="background-color:#ffffd5;" class="td1 sms_total"></td>
+								<td rowspan="1" style="background-color:#ffffd5;" class="td1 sms_ok"></td>
+								<td rowspan="1" style="background-color:#ffffd5;" class="td1 sms_no"></td>
+								<td rowspan="1" style="background-color:#ffffd5;" class="td1 sms_rate"></td>
+								<td rowspan="1" style="background-color:#ffffd5; color:red;" class="td1 sms_point"></td>
+							</tr>
+						</table>
+					</div>
 				
+                   	<div>
+						<label style="display: inline-block; width: 80px; font-weight: bold; color:blue;" class="param-label">資料明細：</label> 
+					</div>
 					<div class="mainFrame">
 						<table border="1" id="tableBody">
 							<colgroup>
@@ -87,19 +151,19 @@
 							<tr class="dataTemplate">
 								<td rowspan="1" class="td1 send_date"></td>
 								<td rowspan="1" class="td1 total"></td>
-								<td rowspan="1" class="td1 sms_total"></td>
-								<td rowspan="1" class="td1 sms_ok"></td>
-								<td rowspan="1" class="td1 sms_no"></td>
-								<td rowspan="1" class="td1 sms_point"></td>
-								<td rowspan="1" class="td1 sms_rate"></td>
+								<td rowspan="1" class="td1 bc_total"></td>
+								<td rowspan="1" class="td1 bc_ok"></td>
+								<td rowspan="1" class="td1 bc_no"></td>
+								<td rowspan="1" class="td1 bc_rate"></td>
 								<td rowspan="1" class="td1 pnp_total"></td>
 								<td rowspan="1" class="td1 pnp_ok"></td>
 								<td rowspan="1" class="td1 pnp_no"></td>
 								<td rowspan="1" class="td1 pnp_rate"></td>
-								<td rowspan="1" class="td1 bc_total"></td>
-								<td rowspan="1" class="td1 bc_ok"></td>
-								<td rowspan="1" class="td1 bc_no"></td>
-								<td rowspan="1" class="td1 bc_rate" style="color:red;"></td>
+								<td rowspan="1" class="td1 sms_total"></td>
+								<td rowspan="1" class="td1 sms_ok"></td>
+								<td rowspan="1" class="td1 sms_no"></td>
+								<td rowspan="1" class="td1 sms_rate"></td>
+								<td rowspan="1" class="td1 sms_point" style="color:red;"></td>
 							</tr>
 						</table>
 					</div>

@@ -100,7 +100,10 @@ public class PnpReportService {
     @SuppressWarnings("unchecked")
     public List<PnpStsRptDetail> getPnpStsRptDetailList(@CurrentUser CustomUser customUser, final PnpStsRptParam pnpStsRptParam) {
 
+    	log.info("pnpStsRptParam = {}", pnpStsRptParam);
+    	
         pnpStsRptParam.setRole(customUser.getRole());
+        
         EntityManager entityManager = entityManagerProvider.getEntityManager();
 
         Date startDate = pnpStsRptParam.getStartDate();
@@ -143,8 +146,10 @@ public class PnpReportService {
         query.execute();
 */
         query.execute();
-        int total_page = (Integer) query.getOutputParameterValue("total_page");
-        log.info("total_page: " + total_page);
+        
+//        int total_page = (Integer) query.getOutputParameterValue("total_page");
+//        log.info("total_page: " + total_page);
+        
         List<PnpStsRptDetail> pnpStsRptDetailList = query.getResultList();
 
         if (pnpStsRptDetailList.isEmpty()) {

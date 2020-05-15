@@ -34,14 +34,13 @@ $(function() {
 		var selectValue = $(this).find('option:selected').text();
 		
 		$(this).closest('.optionPageSize').find('.optionLabelPageSize').html(selectValue);
-		
+
+		page = 1;
 		perPageSize = selectValue;
 		console.info("perPageSize = ", perPageSize);
 		console.info("currentPageIndex.innerText = ", currentPageIndex.innerText);
 		
 		firstFetch = true;
-		
-		page = 1;
 		
 		loadData();
 	};
@@ -204,8 +203,11 @@ $(function() {
 			$('.dataTemplate').remove();
 			$('#noDataTxt').remove();
 			if (response.length == 0) {
-				$('#tableBodySummary').remove();
+				$('#dataTemplateSummary').remove();
 				$('#tableBody').append('<tr id="noDataTxt"><td colspan="15"><span style="color:red">查無資料</span></td></tr>');
+				currentPageIndex.innerText = '-';
+				totalPageSize.innerText = '-';
+				$('.LyMain').unblock();
 				return false;
 			}
 			
@@ -318,6 +320,7 @@ $(function() {
 		}).fail(function(response) {
 			console.log(response);
 			$.FailResponse(response);
+			$('.LyMain').unblock();
 		});
 	};
 

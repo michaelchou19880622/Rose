@@ -4,6 +4,8 @@
 
 $(function() {
 	// ---- Global Variables ----
+	
+	var isSearchData = false;
 
 	var originalTr;
 	var originalTable;
@@ -13,10 +15,10 @@ $(function() {
 	var totalPageSize = document.getElementById('totalPageSize');
 	var currentPageIndex = document.getElementById('currentPageIndex');
 	var perPageSize = $(this).find('option:selected').text();
-	console.info('perPageSize = ', perPageSize);
+//	console.info('perPageSize = ', perPageSize);
 	
 	var selectedSearchType = $('[name="searchType"]:checked').val();
-	console.info('default selectedSearchType = ', selectedSearchType);
+//	console.info('default selectedSearchType = ', selectedSearchType);
 	
 	var valTotalPageSize = 0;
 
@@ -28,6 +30,7 @@ $(function() {
 	var page = 1, totalPages = 0;
 	var pnpStatusMap = {};
 	var isChangePage = false;
+	var totalDateCount = 0;
 	
 	/* 更新每頁顯示數量下拉選單 */
 	var func_optionSelectChanged = function(){
@@ -95,32 +98,63 @@ $(function() {
 
 	// do Search
 	$('#searchBtn').click(function() {
+		
+		isSearchData = true;
+		
 		if (dataValidate()) {
 			cleanList();
 			
 			page = 1;
 			
 			startDate = $('#startDate').val();
-			console.info('startDate = ', startDate);
+//			console.info('startDate = ', startDate);
 			
 			endDate = $('#endDate').val();
-			console.info('endDate = ', endDate);
+//			console.info('endDate = ', endDate);
 			
 			loadData();
 		}
 	});
 
 	$('#exportBtn').click(function() {
-		// setExportButtonSource();
-		if (hasData) {
-			var type = isCreateTime ? 'createTime' : 'orderTime';
-			var getUrl = bcs.bcsContextPath + '/pnpEmployee/exportPNPDetailReportExcel' + '?startDate=' + startDate + '&endDate=' + endDate + '&isPageable=false' + '&page=' + page
-					+ '&account=' + document.getElementById('accountInput').value + '&pccCode=' + document.getElementById('pccCodeInput').value + '&sourceSystem='
-					+ document.getElementById('sourceSystemInput').value + '&phone=' + document.getElementById('phoneNumber').value + '&dateType=' + type;
-			console.info('getUrl: ' + getUrl);
-			window.location.href = getUrl;
-		}
 
+		$('.LyMain').block($.BCS.blockMsgRead);
+		
+		console.log('Has data : ', hasData);
+		
+		if (!hasData) {
+			
+			if (!isSearchData) {
+				alert("很抱歉，您尚未進行資料查詢，無法匯出資料！\n請先進行資料查詢，謝謝。")
+			} else {
+				alert("目前無資料可匯出！\n請重新進行查詢，謝謝。")
+			}
+			
+			$('.LyMain').unblock();
+			return;
+		}
+		
+		var type = isCreateTime ? 'createTime' : 'orderTime';
+		
+		var getUrl = bcs.bcsContextPath + '/pnpEmployee/exportPNPStsReportExcel?'
+										+ 'dateType=' + selectedSearchType 
+										+ '&startDate=' + startDate 
+										+ '&endDate=' + endDate 
+										+ '&isPageable=false' 
+										+ '&page=1'
+										+ '&account=' + document.getElementById('accountInput').value 
+										+ '&pccCode=' + document.getElementById('pccCodeInput').value 
+										+ '&sourceSystem=' + ''
+										+ '&employeeId=' + ''
+										+ '&phone=' + ''
+										+ '&pageCount=' + totalDateCount;
+		
+		getUrl = encodeURI(getUrl);
+//		console.info('getUrl: ' + getUrl);
+		
+		window.location.href = getUrl;
+
+		$('.LyMain').unblock();
 	});
 	
 	// 發送類型
@@ -136,24 +170,30 @@ $(function() {
 			alert('請填寫起始日期！');
 			return false;
 		}
+		
 		if (!endDate) {
 			alert('請填寫結束日期！');
 			return false;
 		}
-		if (!moment(startDate).add(183, 'days').isAfter(moment(endDate))) {
+		
+		if (!moment(startDate).add(184, 'days').isAfter(moment(endDate))) {
 			alert('起始日期與結束日期之間不可相隔超過6個月！');
 			return false;
 		}
+		
 		if (moment(startDate).isAfter(moment(endDate))) {
 			alert('起始日期不可大於結束日期！');
 			return false;
 		}
+		
 		firstFetch = true;
 		return true;
 	};
 
 	// do Download
 	var setExportButtonSource = function() {
+		console.log('Has data : ', hasData);
+		
 		if (hasData) {
 			var getUrl = bcs.bcsContextPath + '/pnpEmployee/exportPNPDetailReportExcel' + '?startDate=' + startDate + '&endDate=' + endDate + '&isPageable=false' + '&page=' + page + '&account='
 					+ document.getElementById('accountInput').value + '&pccCode=' + document.getElementById('pccCodeInput').value + '&sourceSystem='
@@ -169,7 +209,7 @@ $(function() {
 	// ---- Initialize Page & Load Data ----
 	// get List Data
 	var loadData = function() {
-		console.info('firstFetch:', firstFetch);
+//		console.info('firstFetch:', firstFetch);
 		
 		if (firstFetch || isChangePage) {
 			$('.LyMain').block($.BCS.blockMsgRead);
@@ -177,7 +217,7 @@ $(function() {
 		}
 		
 		var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPStsRptDetail';
-		console.info('getUrl detail', getUrl);
+//		console.info('getUrl detail', getUrl);
 
 		$.ajax({
 			type : 'POST',
@@ -235,7 +275,7 @@ $(function() {
 			});
 			
 			hasData = i > 0;
-			console.log('Has data : ' + hasData);
+//			console.log('Has data : ' + hasData);
 			
 			if (firstFetch) {
 				fetchListCountAndChange();
@@ -256,7 +296,7 @@ $(function() {
 		firstFetch = false;
 		
 		var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPStsRptSummary';
-		console.info('getUrl summary = ', getUrl);
+//		console.info('getUrl summary = ', getUrl);
 
 		$.ajax({
 			type : 'POST',
@@ -276,13 +316,18 @@ $(function() {
 				pageCount : perPageSize
 			})
 		}).done(function(response) {
-			console.info('fetchListCountAndChange = ', response);
+//			console.info('fetchListCountAndChange = ', response);
 
 			$('.dataTemplateSummary').remove();
 			
 			response.forEach(function(obj) {
+				
+				totalDateCount = obj.date_count;
+				
+				totalPages = parseInt(Math.ceil(totalDateCount/perPageSize));
+				
 				listSummary = originalTrSummary.clone(true);
-				listSummary.find('.send_date').html(obj.send_date);
+				listSummary.find('.send_date').html(totalDateCount);
 				listSummary.find('.total').html(obj.total);
 				listSummary.find('.sms_total').html(obj.sms_total);
 				listSummary.find('.sms_ok').html(obj.sms_ok);
@@ -297,15 +342,9 @@ $(function() {
 				listSummary.find('.bc_ok').html(obj.bc_ok);
 				listSummary.find('.bc_no').html(obj.bc_no);
 				listSummary.find('.bc_rate').html(obj.bc_rate);
-				
-				totalPages = parseInt(Math.ceil(obj.date_count/perPageSize));
-				console.info('1-1 totalPages = ', totalPages);
 			});
 
 			$('#tableBodySummary').append(listSummary);
-
-			console.info('page = ', page);
-			console.info('1-2 totalPages = ', totalPages);
 
 			if (totalPages == 0) {
 				currentPageIndex.innerText = '-';
@@ -329,7 +368,7 @@ $(function() {
 		$('.dataTemplateSummary').remove();
 		$('.tableBody').remove();
 		$('.tableBodySmmary').remove();
-		console.log('Result List Remove!!');
+//		console.log('Result List Remove!!');
 	};
 
 	// initialize Page

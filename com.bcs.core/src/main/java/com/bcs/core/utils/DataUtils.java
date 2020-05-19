@@ -75,6 +75,7 @@ public class DataUtils {
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
             return mapper.writeValueAsString(jsonObject);
         } catch (Exception e) {
+        	log.info("Exception = {}", e);
             return "";
         }
     }

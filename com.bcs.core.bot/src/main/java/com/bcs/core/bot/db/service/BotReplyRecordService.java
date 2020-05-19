@@ -29,6 +29,10 @@ public class BotReplyRecordService {
 	public BotReplyRecord save(BotReplyRecord record) {
 		return botReplyRecordRepository.save(record);
 	}
+	
+	public BotReplyRecord findByReplyToken(String replyToken) {
+		return botReplyRecordRepository.findByReplyToken(replyToken);
+	}
 
 	/*
 	 * ===== 以轉接客服的時間點為基準，拿前 24 小時則對話紀錄 =====

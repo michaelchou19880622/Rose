@@ -213,10 +213,20 @@ public class SendingMsgService {
             List<Message> messageList = MsgGeneratorFactory.validateMessagesWichMessage(details, mid, replaceParam);
 
             SendToBotModel sendToBotModel = new SendToBotModel();
-
             sendToBotModel.setChannelId(channelId);
             sendToBotModel.setSendType(SEND_TYPE.REPLY_MSG);
-            sendToBotModel.setChannelName(CONFIG_STR.AUTO_REPLY.toString());
+
+			/*
+			 * 判斷如果為BC的關鍵字 ( iMsgId > 0L 並且 msgInteractiveMain != null ) 
+			 * 則帶channel name = DEFAULT、否則帶channel name = AUTO_REPLY 給 sendToLine(...) 
+			 * sendToLine(...) 會再依照 channel name 進行判斷， 決定是否需要帶 serviceCode
+			 */
+			if (iMsgId > 0L && msgInteractiveMain != null) {
+				sendToBotModel.setChannelName(CONFIG_STR.DEFAULT.toString());
+			} else {
+				// 目前基本上不會需要設定AUTO_REPLY，但未安排人力及時間進行全面盤查，先暫時保留。
+				sendToBotModel.setChannelName(CONFIG_STR.AUTO_REPLY.toString());
+			}
 
             String codeError = "";
 
@@ -246,6 +256,7 @@ public class SendingMsgService {
                 }
             }
 
+            
             if (retryCount == 0) {
                 // Update 關鍵字回應 記數
                 msgInteractiveMainService.increaseSendCountByMsgInteractiveId(iMsgId);
@@ -253,7 +264,8 @@ public class SendingMsgService {
             }
         }
     }
-
+    
+    
     public void sendMatchMessage(Long iMsgId, String channelId, String mid, String apiType, String targetId) throws Exception {
         this.sendMatchMessage(iMsgId, channelId, mid, apiType, targetId, 0);
     }

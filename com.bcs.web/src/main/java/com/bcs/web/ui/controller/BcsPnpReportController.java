@@ -33,6 +33,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+
+import java.io.Console;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -218,58 +222,166 @@ public class BcsPnpReportController {
     @WebServiceLog(action = "Download")
     @GetMapping("/exportPNPStsReportExcel")
     @ResponseBody
-    public void exportPnpStsReportExcel(HttpServletRequest request, HttpServletResponse response,
-                                        @CurrentUser final CustomUser customUser,
-                                        @RequestBody final PnpStsRptParam param) {
+    public void exportPNPStsReportExcel(HttpServletRequest request, HttpServletResponse response, @CurrentUser final CustomUser customUser,
+    									@RequestParam String dateType,
+                                        @RequestParam String startDate, 
+                                        @RequestParam String endDate,
+        								@RequestParam boolean isPageable, 
+        								@RequestParam Integer page,
+        								@RequestParam String account, 
+        								@RequestParam String pccCode,
+        								@RequestParam String sourceSystem, 
+        								@RequestParam String employeeId,
+        								@RequestParam String phone,
+        								@RequestParam String pageCount) {
+    	
+    	log.info("dateType = {}", dateType);
+    	log.info("startDate = {}", DataUtils.convStrToDate(startDate, "yyyy-MM-dd"));
+    	log.info("endDate = {}", DataUtils.convStrToDate(endDate, "yyyy-MM-dd"));
+    	log.info("isPageable = {}", isPageable);
+    	log.info("page = {}", page);
+    	log.info("account = {}", account);
+    	log.info("pccCode = {}", pccCode);
+    	log.info("sourceSystem = {}", sourceSystem);
+    	log.info("employeeId = {}", employeeId);
+    	log.info("phone = {}", phone);
+    	log.info("pageCount = {}", pageCount);
+    	
         try {
-            param.setEmployeeId(customUser.getAccount().toUpperCase());
+        	PnpStsRptParam param = new PnpStsRptParam();
+        	param.setDateType(dateType);
+        	param.setStartDate(DataUtils.convStrToDate(startDate, "yyyy-MM-dd"));
+        	param.setEndDate(DataUtils.convStrToDate(endDate, "yyyy-MM-dd"));
+        	param.setPageable(isPageable);
+        	param.setPage(page);
+        	param.setAccount(account);
+        	param.setPccCode(pccCode);
+        	param.setSourceSystem(sourceSystem);
+        	param.setEmployeeId(employeeId);
+        	param.setPhone(phone);
+        	param.setPageCount(pageCount);
+        	param.setEmployeeId(customUser.getAccount().toUpperCase());
 
-            final List<PnpStsRptDetail> reportList = pnpReportService.getPnpStsRptDetailList(customUser, param);
-            final ExportExcelBuilder builder = ExportExcelBuilder.createWorkBook().setSheetName("TestSheet1");
+            final ExportExcelBuilder builder = ExportExcelBuilder.createWorkBook().setSheetName("PNPStatisticsReport");
 
             final List<Map<Integer, String>> allMapList = new LinkedList<>();
-            allMapList.add(getStsHeaderMap(29));
-            reportList.forEach(r -> allMapList.add(getStsBodyMap(r, 29)));
-            allMapList.forEach(rowDate -> builder.createRow(allMapList.indexOf(rowDate)).setRowValue(rowDate));
+            final Map<Integer, String> emptyRow = new LinkedHashMap<>(15);
+            emptyRow.put(0, " ");
+            emptyRow.put(1, " ");
+            emptyRow.put(2, " ");
+            emptyRow.put(3, " ");
+            emptyRow.put(4, " ");
+            emptyRow.put(5, " ");
+            emptyRow.put(6, " ");
+            emptyRow.put(7, " ");
+            emptyRow.put(8, " ");
+            emptyRow.put(9, " ");
+            emptyRow.put(10, " ");
+            emptyRow.put(11, " ");
+            emptyRow.put(12, " ");
+            emptyRow.put(13, " ");
+            emptyRow.put(14, " ");
+            
+            
+            // Summary
+            final List<PnpStsRptSummary> summaryReportList = pnpReportService.getPnpStsRptSummaryList(customUser, param);
+            allMapList.add(getStsSummaryHeaderMap(15));
+            summaryReportList.forEach(r -> allMapList.add(getStsSummaryBodyMap(r, 15)));
+            allMapList.add(emptyRow);
 
-            builder.setAllColumnAutoWidth().setOutputPath(CoreConfigReader.getString("file.path"))
-                    .setOutputFileName(String.format("PNPStsRptDetail_%s.xlsx",
-                            DataUtils.formatDateToString(new Date(), "yyyy-MM-dd-HHmmss")));
+            // Detail
+            final List<PnpStsRptDetail> detailReportList = pnpReportService.getPnpStsRptDetailList(customUser, param);
+            allMapList.add(getStsDetailHeaderMap(15));
+            detailReportList.forEach(r -> allMapList.add(getStsBodyMap(r, 15)));
+            
+            allMapList.forEach(rowData -> builder.createRow(allMapList.indexOf(rowData)).setRowValue(rowData));
+
+            builder.setAllColumnAutoWidth()
+            	   .setOutputPath(CoreConfigReader.getString("file.path"))
+                   .setOutputFileName(String.format("PNPStsRptDetail_%s.xlsx", DataUtils.formatDateToString(new Date(), "yyyy-MM-dd-HHmmss")));
             log.info("Builder: {}", DataUtils.toPrettyJsonUseJackson(builder));
+            
             final ExportService exportService = new ExportService();
             exportService.exportExcel(response, builder);
+            
         } catch (final Exception e) {
             log.error("Exception", e);
         }
-
     }
 
-    private Map<Integer, String> getStsBodyMap(final PnpStsRptDetail r, final int columnSize) {
+    private Map<Integer, String> getStsSummaryBodyMap(final PnpStsRptSummary pnpStsRptSummary, final int columnSize) {
         final Map<Integer, String> row = new LinkedHashMap<>(columnSize);
 
-        row.put(0, r.getSend_date());
-        row.put(1, Long.toString(r.getTotal()));
+        row.put(0, String.valueOf(pnpStsRptSummary.getDate_count()));
+        row.put(1, String.valueOf(pnpStsRptSummary.getTotal()));
 
-        row.put(2, Long.toString(r.getBc_total()));
-        row.put(3, Long.toString(r.getBc_ok()));
-        row.put(4, Long.toString(r.getBc_no()));
-        row.put(5, r.getBc_rate());
+        row.put(2, String.valueOf(pnpStsRptSummary.getBc_total()));
+        row.put(3, String.valueOf(pnpStsRptSummary.getBc_ok()));
+        row.put(4, String.valueOf(pnpStsRptSummary.getBc_no()));
+        row.put(5, String.valueOf(pnpStsRptSummary.getBc_rate()));
 
-        row.put(6, Long.toString(r.getPnp_total()));
-        row.put(7, Long.toString(r.getPnp_ok()));
-        row.put(8, Long.toString(r.getPnp_no()));
-        row.put(9, r.getPnp_rate());
+        row.put(6, String.valueOf(pnpStsRptSummary.getPnp_total()));
+        row.put(7, String.valueOf(pnpStsRptSummary.getPnp_ok()));
+        row.put(8, String.valueOf(pnpStsRptSummary.getPnp_no()));
+        row.put(9, String.valueOf(pnpStsRptSummary.getPnp_rate()));
 
-        row.put(10, Long.toString(r.getSms_total()));
-        row.put(11, Long.toString(r.getSms_ok()));
-        row.put(12, Long.toString(r.getSms_no()));
-        row.put(13, r.getSms_rate());
+        row.put(10, String.valueOf(pnpStsRptSummary.getSms_total()));
+        row.put(11, String.valueOf(pnpStsRptSummary.getSms_ok()));
+        row.put(12, String.valueOf(pnpStsRptSummary.getSms_no()));
+        row.put(13, String.valueOf(pnpStsRptSummary.getSms_rate()));
+        row.put(14, String.valueOf(pnpStsRptSummary.getSms_point()));
+
+        return row;
+    }
+    
+    private Map<Integer, String> getStsBodyMap(final PnpStsRptDetail pnpStsRptDetail, final int columnSize) {
+        final Map<Integer, String> row = new LinkedHashMap<>(columnSize);
+
+        row.put(0, String.valueOf(pnpStsRptDetail.getSend_date()));
+        row.put(1, String.valueOf(pnpStsRptDetail.getTotal()));
+
+        row.put(2, String.valueOf(pnpStsRptDetail.getBc_total()));
+        row.put(3, String.valueOf(pnpStsRptDetail.getBc_ok()));
+        row.put(4, String.valueOf(pnpStsRptDetail.getBc_no()));
+        row.put(5, String.valueOf(pnpStsRptDetail.getBc_rate()));
+
+        row.put(6, String.valueOf(pnpStsRptDetail.getPnp_total()));
+        row.put(7, String.valueOf(pnpStsRptDetail.getPnp_ok()));
+        row.put(8, String.valueOf(pnpStsRptDetail.getPnp_no()));
+        row.put(9, String.valueOf(pnpStsRptDetail.getPnp_rate()));
+
+        row.put(10, String.valueOf(pnpStsRptDetail.getSms_total()));
+        row.put(11, String.valueOf(pnpStsRptDetail.getSms_ok()));
+        row.put(12, String.valueOf(pnpStsRptDetail.getSms_no()));
+        row.put(13, String.valueOf(pnpStsRptDetail.getSms_rate()));
+        row.put(14, String.valueOf(pnpStsRptDetail.getSms_point()));
+
+        return row;
+    }
+    
+    private Map<Integer, String> getStsSummaryHeaderMap(final int columnSize) {
+        final Map<Integer, String> row = new LinkedHashMap<>(columnSize);
+        row.put(0, "發送天數(總計)");
+        row.put(1, "總通數");
+        row.put(2, "BC通路總通數");
+        row.put(3, "BC成功通數");
+        row.put(4, "BC失敗通數");
+        row.put(5, "BC成功率");
+        row.put(6, "PNP通路總通數");
+        row.put(7, "PNP成功通數");
+        row.put(8, "PNP失敗通數");
+        row.put(9, "PNP成功率");
+        row.put(10, "SMS通路總通數");
+        row.put(11, "SMS成功通數");
+        row.put(12, "SMS失敗通數");
+        row.put(13, "SMS成功率");
+        row.put(14, "SMS成功點數");
 
         return row;
     }
 
 
-    private Map<Integer, String> getStsHeaderMap(final int columnSize) {
+    private Map<Integer, String> getStsDetailHeaderMap(final int columnSize) {
         final Map<Integer, String> row = new LinkedHashMap<>(columnSize);
         row.put(0, "發送日期");
         row.put(1, "總通數");
@@ -277,16 +389,15 @@ public class BcsPnpReportController {
         row.put(3, "BC成功通數");
         row.put(4, "BC失敗通數");
         row.put(5, "BC成功率");
-
         row.put(6, "PNP通路總通數");
         row.put(7, "PNP成功通數");
         row.put(8, "PNP失敗通數");
         row.put(9, "PNP成功率");
-
         row.put(10, "SMS通路總通數");
         row.put(11, "SMS成功通數");
         row.put(12, "SMS失敗通數");
         row.put(13, "SMS成功率");
+        row.put(14, "SMS成功點數");
 
         return row;
     }

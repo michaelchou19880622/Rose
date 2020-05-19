@@ -244,7 +244,7 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
                         List<MsgDetail> details = result.get(iMsgId);
 
                         if (recordText) {
-                            log.debug("Match Keyword:" + text + ",iMsgId:" + iMsgId);
+                            log.info("Match Keyword:" + text + ", iMsgId:" + iMsgId);
                         }
 
                         log.info("@@@@@@@@@@@@@@@@@@@ SendingMsgService @@@@@@@@@@@@@@@@@@@");

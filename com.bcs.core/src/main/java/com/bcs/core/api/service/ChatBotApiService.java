@@ -30,7 +30,7 @@ public class ChatBotApiService {
 	@Autowired
 	public LineProfileService lineProfileService;
 	
-	public JSONObject sendMessage(String UID, String question, LocationModel location ,String msgType) throws Exception {
+	public JSONObject sendMessage(String UID, String question, LocationModel location ,String msgType, String replyToken) throws Exception {
 		String url = CoreConfigReader.getString(CONFIG_STR.GATEWAY_API_URL.toString(), true);
 		String gatewaySecret = CoreConfigReader.getString(CONFIG_STR.GATEWAY_API_SECRET.toString(), true);
 		String channel = CoreConfigReader.getString(CONFIG_STR.GATEWAY_CHANNEL.toString(), true);
@@ -46,6 +46,7 @@ public class ChatBotApiService {
 		/* 設定 request body */
 		JSONObject requestBody = new JSONObject();
 		requestBody.put("id", UID);
+		requestBody.put("replyToken", replyToken);
 		requestBody.put("q", question);
 		requestBody.put("nickname", nickname);
 		requestBody.put("ch", channel);
@@ -72,8 +73,8 @@ public class ChatBotApiService {
 		return responseObject;
 	}
 	
-	public JSONObject sendMessage(String UID, LocationModel location) throws Exception {
-		return this.sendMessage(UID, location.getAddress(), location, "location");
+	public JSONObject sendMessage(String UID, LocationModel location, String replyToken) throws Exception {
+		return this.sendMessage(UID, location.getAddress(), location, "location", replyToken);
 	}
 	
 	private String generateSignature(String key, String data) throws NoSuchAlgorithmException, UnsupportedEncodingException, InvalidKeyException {

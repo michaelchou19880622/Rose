@@ -58,7 +58,7 @@ public class MessageTransmitService {
             question = StringUtils.isBlank(question)? "":question;
             logger.info(">>> transmitToBOT.question: " + question);
 
-			JSONObject responseObject = chatBotApiService.sendMessage(UID, question, null, msgType);
+			JSONObject responseObject = chatBotApiService.sendMessage(UID, question, null, msgType, replyToken);
 			UserLiveChat userLiveChat = userLiveChatService.findByUIDAndNotFinishAndNotDiscrad(UID);
 
 			if(!responseObject.has("line"))
@@ -136,7 +136,7 @@ public class MessageTransmitService {
 	public void transmitToBOT(String ChannelId, String UID, String replyToken, LocationModel location) throws Exception {
 		JSONObject replyMessageObject = new JSONObject();
 		JSONArray messageList = new JSONArray();
-		JSONObject responseObject = chatBotApiService.sendMessage(UID, location);
+		JSONObject responseObject = chatBotApiService.sendMessage(UID, location, replyToken);
 
 		if(!responseObject.has("line"))
 			throw new Exception("[Transmit to BOT] Encounter some errors when comuniacting with BOT!");

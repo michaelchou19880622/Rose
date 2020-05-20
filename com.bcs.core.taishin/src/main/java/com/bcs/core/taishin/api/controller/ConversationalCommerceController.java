@@ -177,16 +177,20 @@ public class ConversationalCommerceController {
             String replyToken = requestBody.getString("replyToken");
             log.info("replyToken = {}", replyToken);
 
-            /* 檢查 BOT_REPLY_RECORD 是否有此 replyToken 對應的紀錄? */
-            BotReplyRecordService botReplyRecordService = ApplicationContextProvider.getApplicationContext().getBean(BotReplyRecordService.class);
-            BotReplyRecord botReplyRecord = botReplyRecordService.findByReplyToken(replyToken);
-            log.info("botReplyRecord = {}", botReplyRecord);
+//            /* 檢查 BOT_REPLY_RECORD 是否有此 replyToken 對應的紀錄? */
+//            BotReplyRecordService botReplyRecordService = ApplicationContextProvider.getApplicationContext().getBean(BotReplyRecordService.class);
+//            BotReplyRecord botReplyRecord = botReplyRecordService.findByReplyToken(replyToken);
+//            log.info("botReplyRecord = {}", botReplyRecord);
+//            
+//            if (StringUtils.isBlank(replyToken)) {
+//            	return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"invalid reply token\"}", HttpStatus.UNAUTHORIZED);
+//            } else if (botReplyRecord == null) {
+//            	return new ResponseEntity<>(String.format("{\"error\": \"true\", \"message\": \"can not find the bot reply record with this reply token : %s\"}", replyToken), HttpStatus.UNAUTHORIZED);
+//			}
             
             if (StringUtils.isBlank(replyToken)) {
             	return new ResponseEntity<>("{\"error\": \"true\", \"message\": \"invalid reply token\"}", HttpStatus.UNAUTHORIZED);
-            } else if (botReplyRecord == null) {
-            	return new ResponseEntity<>(String.format("{\"error\": \"true\", \"message\": \"can not find the bot reply record with this reply token : %s\"}", replyToken), HttpStatus.UNAUTHORIZED);
-			}
+            } 
             
             String url = CoreConfigReader.getString(CONFIG_STR.LINE_MESSAGE_REPLY_URL.toString());
 

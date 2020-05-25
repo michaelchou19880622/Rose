@@ -1078,6 +1078,14 @@ public class LoadFtpPnpDataTask {
             for (List<PnpDetailUnica> detailList : detailsPartitionList) {
                 pnpDetailUnicaRepository.save(detailList);
             }
+
+            for (List<PnpDetailUnica> detailList : detailsPartitionList) {
+                for (PnpDetailUnica tmpDetail: detailList) {
+                    tmpDetail.setVariable1("U" + tmpDetail.getPnpDetailId().toString());
+                    log.info("PNP Main ID: {} , Variable1:U{} ", pnpMainUnica.getPnpMainId(), tmpDetail.getPnpDetailId().toString());
+                }
+                pnpDetailUnicaRepository.save(detailList);
+            }
             log.info("Update Status : {}, PNP Main ID: {}" ,PnpStatusEnum.FTP_DETAIL_SAVE.value , pnpMainUnica.getPnpMainId());            
         }
     }
@@ -1109,6 +1117,14 @@ public class LoadFtpPnpDataTask {
         if (!details.isEmpty()) {
             List<List<PnpDetailEvery8d>> detailsPartitionList = Lists.partition(details, CircleEntityManagerControl.batchSize);
             for (List<PnpDetailEvery8d> detailList : detailsPartitionList) {
+                pnpDetailEvery8dRepository.save(detailList);
+            }
+
+            for (List<PnpDetailEvery8d> detailList : detailsPartitionList) {
+                for (PnpDetailEvery8d tmpDetail: detailList) {
+                    tmpDetail.setVariable1("E" + tmpDetail.getPnpDetailId().toString());
+                    log.info("PNP Main ID: {} , Variable1:E{} ", pnpMainEvery8d.getPnpMainId(), tmpDetail.getPnpDetailId().toString());
+                }
                 pnpDetailEvery8dRepository.save(detailList);
             }
             log.info("Update Status : {}, PNP Main ID: {}" ,PnpStatusEnum.FTP_DETAIL_SAVE.value , pnpMainEvery8d.getPnpMainId());                        

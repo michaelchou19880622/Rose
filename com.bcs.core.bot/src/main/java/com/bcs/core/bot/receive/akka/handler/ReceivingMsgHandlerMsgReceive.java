@@ -92,24 +92,6 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
             ApplicationContextProvider.getApplicationContext().getBean(CatchRecordReceive.class).incrementCount();
 
             try {
-            	if (lineUser != null) {
-
-        			log.info("BEFORE CHECK STATUS : lineUser = {}", lineUser);
-            		
-    				/* Check is lineUser's status equal to BLOCK?  */
-    				if (lineUser.getStatus().equals(LineUser.STATUS_BLOCK)) {
-    					String isBindedStatus = lineUser.getIsBinded();
-    					log.info("isBindedStatus = {}", isBindedStatus);
-    					
-    					lineUser.setStatus(isBindedStatus);
-    					lineUserService.save(lineUser);
-    					
-    					lineUser = lineUserService.findByMid(mid);
-    				}
-    				
-    				log.info("AFTER CHECK STATUS : lineUser = {}", lineUser);
-            	}
-            	
                 String userStatus = lineUser.getStatus();
 
                 // Set User Status
@@ -191,6 +173,23 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
             /* For keyword process condition */
             String userStatus = LineUser.STATUS_UNBIND;
             if (lineUser != null) {
+
+    			log.info("BEFORE CHECK STATUS : lineUser = {}", lineUser);
+        		
+				/* Check is lineUser's status equal to BLOCK?  */
+				if (lineUser.getStatus().equals(LineUser.STATUS_BLOCK)) {
+					String isBindedStatus = lineUser.getIsBinded();
+					log.info("isBindedStatus = {}", isBindedStatus);
+					
+					lineUser.setStatus(isBindedStatus);
+					lineUserService.save(lineUser);
+					
+					lineUser = lineUserService.findByMid(mid);
+				}
+				
+				log.info("AFTER CHECK STATUS : lineUser = {}", lineUser);
+            	
+            	
                 userStatus = LineUser.STATUS_SYS_ADD.equals(lineUser.getStatus())
                         ? LineUser.STATUS_UNBIND
                         : lineUser.getStatus();

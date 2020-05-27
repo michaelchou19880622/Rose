@@ -71,7 +71,7 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
 
             /* 
 			 * 增加防呆機制 : 
-			 * 在寫入BCS_LINE_USER之前，需要先檢查 BCS_MSG_BOT_RECEIVE 資料表，該 UID 在資料表中是否有紀錄? 且第一筆紀錄的 EVENT_TYPE = follow? 
+			 * 在寫入BCS_LINE_USER之前，需要先檢查 BCS_MSG_BOT_RECEIVE 資料表，該 UID 在資料表中是否有EVENT_TYPE = follow的紀錄? 
 			 * 如果沒有則 STATUS 狀態寫 SYSADD，有則寫 UNBIND。 */
             List<MsgBotReceive> listMsgBotReceives = msgBotReceiveService.findTopByEventTypeAndSourceIdOrderBySourceId(MsgBotReceive.EVENT_TYPE_FOLLOW, mid);
             
@@ -87,7 +87,7 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
             } else if (MsgBotReceive.EVENT_TYPE_MESSAGE.equals(eventType)) {
                 lineUser = lineUserService.findByMidAndCreateSysAdd(mid);
 			}
-
+            
             // incrementCount CatchRecord Receive
             ApplicationContextProvider.getApplicationContext().getBean(CatchRecordReceive.class).incrementCount();
 
@@ -173,6 +173,23 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
             /* For keyword process condition */
             String userStatus = LineUser.STATUS_UNBIND;
             if (lineUser != null) {
+
+    			log.info("BEFORE CHECK STATUS : lineUser = {}", lineUser);
+        		
+				/* Check is lineUser's status equal to BLOCK?  */
+				if (lineUser.getStatus().equals(LineUser.STATUS_BLOCK)) {
+					String isBindedStatus = lineUser.getIsBinded();
+					log.info("isBindedStatus = {}", isBindedStatus);
+					
+					lineUser.setStatus(isBindedStatus);
+					lineUserService.save(lineUser);
+					
+					lineUser = lineUserService.findByMid(mid);
+				}
+				
+				log.info("AFTER CHECK STATUS : lineUser = {}", lineUser);
+            	
+            	
                 userStatus = LineUser.STATUS_SYS_ADD.equals(lineUser.getStatus())
                         ? LineUser.STATUS_UNBIND
                         : lineUser.getStatus();

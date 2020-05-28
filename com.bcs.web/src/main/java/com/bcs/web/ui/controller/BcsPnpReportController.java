@@ -538,4 +538,11 @@ public class BcsPnpReportController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    
+    @WebServiceLog
+    @GetMapping("/pnpExcludeSendingListPage")
+    public String pnpExcludeSendingListPage() {
+        log.info("pnpExcludeSendingListPage");
+        return BcsPageEnum.PNP_EXCLUDE_SENDING_LIST_PAGE.toString();
+    }
 }

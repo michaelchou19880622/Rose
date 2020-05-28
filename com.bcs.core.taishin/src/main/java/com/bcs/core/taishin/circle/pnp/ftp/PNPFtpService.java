@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -57,7 +56,7 @@ public class PNPFtpService {
             PnpFtpSetting pnpFtpSetting = PnpFtpSetting.build(type);
 
             /* 如果不是開發環境則進行資源密碼系統取得帳號密碼 */
-            if (!CoreConfigReader.isPNPFtpTypeDevelop()) {
+            if (!CoreConfigReader.isPNPFtpTypeDevelop() && !("linux").equals(CoreConfigReader.getString("environment"))) {
                 pnpFtpSetting = useTrendPwMgmt(pnpFtpSetting, type);
             }
             ftpSettings.put(type.id, pnpFtpSetting);

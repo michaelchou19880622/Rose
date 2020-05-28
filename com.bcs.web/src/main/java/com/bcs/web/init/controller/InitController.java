@@ -183,7 +183,7 @@ public class InitController {
     private void loadInteractiveMap() {
         try {
             initLog("LOAD INTERACTIVE MAP");
-//            interactiveService.loadInteractiveMap();
+            interactiveService.loadInteractiveMap();
         } catch (Exception e) {
             log.error(ErrorRecord.recordError(e));
         }

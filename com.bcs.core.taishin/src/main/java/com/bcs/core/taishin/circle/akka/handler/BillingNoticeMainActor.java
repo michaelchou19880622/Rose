@@ -35,12 +35,16 @@ public class BillingNoticeMainActor extends UntypedActor {
     @Override
     public void onReceive(final Object object) {
         Thread.currentThread().setName("Actor-BN-Main-" + Thread.currentThread().getId());
-        log.info("Main Actor Receive!!");
         try {
             if (object instanceof BillingNoticeMain) {
+            	log.info("Received a BN sending job and routing it");
                 pushRoute((BillingNoticeMain) object);
             }
+            else {
+            	log.info("Ignored an unexpected BN sending job");
+            }
         } catch (Exception e) {
+        	log.info("An exception detected during processing the BN sending job!");
             log.error("Exception", e);
         }
     }
@@ -62,15 +66,14 @@ public class BillingNoticeMainActor extends UntypedActor {
         final int detailSize = details.size();
         final int maxActorCount = getMaxActorCount();
         final int buffer = getBuffer(detailSize, maxActorCount);
-//        log.info("Detail: {}", DataUtils.toPrettyJsonUseJackson(details));
         
         for (BillingNoticeDetail detail : details) {
-            log.info(String.format("BillingNoticeMainActor pushProcess details noticeDetailId : %s , noticeMainId : %s , UID : %s . status() : %s, text : %s", detail.getNoticeDetailId().toString(), detail.getNoticeMainId().toString(), detail.getUid(), detail.getStatus(), detail.getText()));              
+            log.info(String.format("BN push details, noticeDetailId=%s noticeMainId=%s UID=%s status=%s text=%s", detail.getNoticeDetailId().toString(), detail.getNoticeMainId().toString(), detail.getUid(), detail.getStatus(), detail.getText()));
         }        
         
         List<List<BillingNoticeDetail>> partitionList = ListUtils.partition(details, buffer);
         partitionList.forEach(list -> {
-            log.info("To Akka Partition Size: {}", list.size());
+            log.info("To Akka, noticeMainId={} partitionSize={}", object.getNoticeMainId(), list.size());
             BillingNoticeMain billingNoticeMainClone = ObjectUtils.clone(object);
             billingNoticeMainClone.setDetails(list);
             toPushActor(billingNoticeMainClone);
@@ -95,18 +98,18 @@ public class BillingNoticeMainActor extends UntypedActor {
         return detailSize / maxActorCount + 1;
     }
 
-    private void toPushActor(BillingNoticeMain billingNoticeMainClone) {
-        log.info("To PushActor!!");
-        pushMessageRouterActor.tell(billingNoticeMainClone, this.getSelf());
+    private void toPushActor(BillingNoticeMain object) {
+        log.info("To PushActor, noticeMainId={}", object.getNoticeMainId());
+        pushMessageRouterActor.tell(object, this.getSelf());
     }
 
     private void toExpiredActor(BillingNoticeMain object) {
-        log.info("To ExpireActor!!");
+        log.info("To ExpireActor, noticeMainId={}", object.getNoticeMainId());
         expireRouterActor.tell(object, this.getSelf());
     }
 
     private void toCurfewActor(BillingNoticeMain object) {
-        log.info("To CurfewActor!!");
+        log.info("To CurfewActor, noticeMainId={}", object.getNoticeMainId());
         curfewActor.tell(object, this.getSelf());
     }
 }

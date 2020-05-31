@@ -150,10 +150,17 @@ public class BillingNoticeService {
      */
     public void updateMainAndDetailStatus(BillingNoticeMain billingNoticeMain, String status) {
         List<BillingNoticeDetail> details = billingNoticeMain.getDetails();
+        List<BillingNoticeDetail> detailList = new ArrayList<>();
+        
         for (BillingNoticeDetail detail : details) {
             detail.setStatus(status);
-            billingNoticeDetailRepository.save(detail);
+            /* 效能優化 ： 組裝detailList , 一次儲存 */
+            detailList.add(detail);            
         }
+        /* Update detail */
+        if (!detailList.isEmpty()) {
+            billingNoticeDetailRepository.save(detailList);
+        }        
         billingNoticeMainRepository.updateBillingNoticeMainStatus(status, new Date(), billingNoticeMain.getNoticeMainId());
     }
 
@@ -245,6 +252,8 @@ public class BillingNoticeService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
         headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+        List<BillingNoticeDetail> detailList = new ArrayList<>();
+
         for (BillingNoticeDetail detail : billingNoticeMain.getDetails()) {
             boolean isDoRetry;
             int i = 0;
@@ -311,9 +320,12 @@ public class BillingNoticeService {
             if (!BillingNoticeMain.NOTICE_STATUS_COMPLETE.equals(detail.getStatus())) {
                 detail.setStatus(BillingNoticeMain.NOTICE_STATUS_FAIL);
             }
-
-            /* Update detail */
-            billingNoticeDetailRepository.save(detail);
+            /* 效能優化 ： 組裝detailList , 一次儲存 */
+            detailList.add(detail);
+        }
+        /* Update detail */
+        if (!detailList.isEmpty()) {
+        	billingNoticeDetailRepository.save(detailList);
         }
         billingNoticeMainRepository.updateBillingNoticeMainStatus(BillingNoticeMain.NOTICE_STATUS_COMPLETE, new Date(), billingNoticeMain.getNoticeMainId());
         log.info("Finished a Line Push message successfully, noticeMainId=" + billingNoticeMain.getNoticeMainId());

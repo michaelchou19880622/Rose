@@ -274,11 +274,14 @@ public class BillingNoticeService {
                      * 注意 : 不能使用isSystemTypeProduction() 進行判斷, 目前設定都是Develop mode.
                      * 
                      * */
-            		if(!CoreConfigReader.isPNPFtpTypeDevelop()){
+                	
+                	// 判斷非Develop模式且為prod環境，才可以發送至LINE。
+            		if(!CoreConfigReader.isBillingNoticeFtpTypeDevelop() && "prod".equals(CoreConfigReader.getString("environment"))){
                         RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
                         JSONObject result = restfulUtil.execute();
                         log.info("Result: {}", result.toString());
             		}
+            		
                     detail.setStatus(BillingNoticeMain.NOTICE_STATUS_COMPLETE);
                     detail.setSendTime(new Date());
                     log.info("Sent a detail successfully");

@@ -327,7 +327,7 @@ public class BillingNoticeFtpService {
     	try {
             List<BillingNoticeDetail> originalDetails = billingNoticeMain.getDetails();
             billingNoticeMain.setProcApName(DataUtils.getRandomProcApName());
-            log.info(String.format("Inserting data to DB, filename=%s status=%s, procApName=%s detailSize=%d", billingNoticeMain.getOrigFileName(), billingNoticeMain.getStatus(), billingNoticeMain.getProcApName(), originalDetails.size()));              
+            log.info(String.format("Inserting data to DB, filename=%s status=%s procApName=%s detailSize=%d", billingNoticeMain.getOrigFileName(), billingNoticeMain.getStatus(), billingNoticeMain.getProcApName(), originalDetails.size()));              
             billingNoticeMain = billingNoticeMainRepository.save(billingNoticeMain);
             List<BillingNoticeDetail> detailList = new ArrayList<>();
             for (BillingNoticeDetail detail : originalDetails) {

@@ -13,19 +13,12 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author ???
- * @author Alan
  * @see com.bcs.core.bot.akka.service.AkkaBotService
- * @see com.bcs.core.taishin.circle.pnp.akka.CircleAkkaBotService
  */
 @Slf4j
 public class ReceivingMsgHandlerMaster extends UntypedActor {
-
     public final static AtomicLong taskCount = new AtomicLong(0L);
     public static Date updateDate;
-
-    /**
-     * Event Type(PNP Delivery)
-     */
     private final ActorRef routerEventTypeActor;
     private final ActorRef routerMsgReceiveActor;
 
@@ -41,37 +34,28 @@ public class ReceivingMsgHandlerMaster extends UntypedActor {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void onReceive(Object message) throws Exception {
         try {
             Thread.currentThread().setName("Actor-Receive-Msg-Master-" + Thread.currentThread().getId());
             if (message instanceof ReceivedModelOriginal) {
-                step1(message);
+            	log.info("Received an Original message and telling the EventType router");
+                routerEventTypeActor.tell(message, getSelf());
             } else if (message instanceof Map) {
-                step2(message);
+            	@SuppressWarnings("unchecked")
+				Map<String, Object> map = (Map<String, Object>) message;
+                String target = (String) map.get("Target");
+
+                if (MsgBotReceive.EVENT_TYPE_MESSAGE.equals(target) || MsgBotReceive.EVENT_TYPE_POSTBACK.equals(target)) {
+                	log.info("Received an MESSAGE or POSTBACK message and telling the MsgReceive router");
+                	routerMsgReceiveActor.tell(message, getSelf());
+                } else if (MsgBotReceive.EVENT_TYPE_FOLLOW.equals(target) || MsgBotReceive.EVENT_TYPE_UNFOLLOW.equals(target)) {
+                	log.info("Received an FOLLOW or UNFOLLOW message and telling the MsgReceiveOp router");
+                    routerMsgReceiveOpActor.tell(message, getSelf());
+                }
             }
         } catch (Exception e) {
+        	log.info("An exception detected dering processing a message");
             log.error("Exception", e);
         }
     }
-
-    private void step1(Object message) {
-        log.info("-------onReceive Step1-------");
-        routerEventTypeActor.tell(message, getSelf());
-    }
-
-    @SuppressWarnings("unchecked")
-    private void step2(Object message) {
-        log.info("-------onReceive Step2-------");
-
-        Map<String, Object> map = (Map<String, Object>) message;
-        String target = (String) map.get("Target");
-
-        if (MsgBotReceive.EVENT_TYPE_MESSAGE.equals(target) || MsgBotReceive.EVENT_TYPE_POSTBACK.equals(target)) {
-            routerMsgReceiveActor.tell(message, getSelf());
-        } else if (MsgBotReceive.EVENT_TYPE_FOLLOW.equals(target) || MsgBotReceive.EVENT_TYPE_UNFOLLOW.equals(target)) {
-            routerMsgReceiveOpActor.tell(message, getSelf());
-        }
-    }
-
 }

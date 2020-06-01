@@ -324,13 +324,15 @@ public class PnpSMSMsgService {
         InputStream inputStream = null;
         switch (type) {
             case MING:
-                inputStream = smsMingInputStream(detailList);
+//                inputStream = smsMingInputStream(detailList);
+                inputStream = smsUnifmtInputStream(type, main, detailList);
                 break;
             case UNICA:
                 inputStream = smsUnicaInputStream(main, detailList);
                 break;
             case MITAKE:
-                inputStream = smsMitakeInputStream(main, detailList);
+//                inputStream = smsMitakeInputStream(main, detailList);
+                inputStream = smsUnifmtInputStream(type, main, detailList);
                 break;
             case EVERY8D:
                 inputStream = smsEvery8dInputStream(main, detailList);
@@ -634,6 +636,92 @@ public class PnpSMSMsgService {
         return new ByteArrayInputStream((body.toString()).getBytes());
     }
 
+    /**
+     * Every8d 通用專換格式，依據type 取得對應欄位值進行轉換
+     *
+     * @param detailList detailList
+     * @return InputStream
+     * @apiNote 流水號;;手機號碼;;簡訊內容;;預約時間;;批次帳號;;批次帳號;;0;;1;;有效秒數
+     */
+    private InputStream smsUnifmtInputStream(PnpFtpSourceEnum type, PnpMain m, List<PnpDetail> detailList) {
+        PnpMainEvery8d main = (PnpMainEvery8d) m;
+        String tag = "&";
+        /*
+         * 互動 header
+         * 名稱          屬性       長度      Null?    說明
+         * Subject      NVARCHAR   200      Y        簡訊主旨
+         * UserID       CHAR                N        批次使用者帳號，必須存在於互動簡訊系統中且為啟用
+         * Password     CHAR                Y        使用者密碼(可不填)
+         * OrderTime                                 預約發送時間（YYYYMMDDhhmmss），預約發送時間必須大於系統時間，否則不予傳送。未填入代表立即傳送。
+         * ExpireTime                                (暫未開放，請填入空值)重傳間隔。手機端於時限內，未收訊成功時，則重傳簡訊。
+         * MsgType                                   宵禁延遲發送旗標，此旗標為1時，則不受系統所設定之宵禁條件所約束，此旗標為0時，則受到系統設定宵禁條件所約束，該筆簡訊則自動轉為預約簡訊，預約時間為宵禁結束之時間點。(上班日 AM 9:00~PM19:00)
+         * BatchID      char        36      Y        簡訊平台保留欄位，請勿填入資料
+         */
+        //來源資料HEADER
+        StringBuilder header = new StringBuilder();
+        header.append(main.getSubject() + tag);
+        header.append(main.getUserID() + "_L" + tag);
+        header.append(main.getPassword() + tag);
+        header.append(DataUtils.convDateToStr(new Date(), "yyyyMMddHHmmss") + tag);
+        header.append(main.getExprieTime() + tag);
+        header.append(main.getMsgType() + tag);
+        header.append(main.getBatchID() + "\r\n");
+
+        // log.info("Every8d Header: {}", DataUtils.toPrettyJsonUseJackson(header));
+
+        /*
+         *   互動 body
+         *   名稱          屬性        長度    Null?   說明
+         *   SN           char        15     N       名單流水號-每批名單中之流水號。每批名單中之流水號不可重覆寫入odcpn.CMM_SMS_FB [VAR1]
+         *   DestName     char        36     Y       收件者名稱。接收者名稱，可放置客戶姓名，任何可供補助辯識之資訊，發報結果將此欄位一起回寫至發報檔中。長度限制為50碼。DestName
+         *   Mobile       char        20     N       收訊人手機號碼，長度為20碼以內。(格式為0933******或+886933******)DestNo
+         *   Content      nvarchar    756    N       簡訊訊息內容，純英文長度為756字，中英混合或純中文最長為333字。MsgData
+         *   PID          char        11     Y       身份字號
+         *   CampaignID   varchar     28     Y       行銷活動代碼(可為空值)
+         *   SegmentID    varchar     10     Y       客群代號(可為空值)
+         *   ProgramID    varchar     20     Y       階段代號(可為空值)
+         *   Variable1    varchar     15     Y       擴充欄位1(可為空值)
+         *   Variable2    varchar     15     Y       擴充欄位2(可為空值)
+         */
+
+        StringBuilder body = new StringBuilder();
+        for (PnpDetail d : detailList) {
+            PnpDetailEvery8d detail;
+            switch (type) {
+                case MING:
+                    detail = ((PnpDetailMing) d).getEvery8dObj();
+                    body.append(detail.getSn() + tag);
+                    body.append(detail.getDestName() + tag);
+                    body.append(detail.getPhone() + tag);
+                    body.append(detail.getMsg() + tag);
+                    body.append(detail.getPid() + tag);
+                    body.append(detail.getCampaignId() + tag);
+                    body.append(detail.getSegmentId() + tag);
+                    body.append(detail.getProgramId() + tag);
+                    body.append(detail.getVariable1() + tag);
+                    body.append(detail.getVariable2() + "\r\n");
+                    break;
+                case MITAKE:
+                    detail = ((PnpDetailMitake) d).getEvery8dObj();
+                    body.append(detail.getSn() + tag);
+                    body.append(detail.getDestName() + tag);
+                    body.append(detail.getPhone() + tag);
+                    body.append(detail.getMsg() + tag);
+                    body.append(detail.getPid() + tag);
+                    body.append(detail.getCampaignId() + tag);
+                    body.append(detail.getSegmentId() + tag);
+                    body.append(detail.getProgramId() + tag);
+                    body.append(detail.getVariable1() + tag);
+                    body.append(detail.getVariable2() + "\r\n");
+                    break;
+                default:
+            }
+        }
+        // log.info("Every8d body: {}", DataUtils.toPrettyJsonUseJackson(body));
+
+        return new ByteArrayInputStream((header.toString() + body.toString()).getBytes());
+    }
+
 
     /**
      * Upload File To SMS
@@ -649,6 +737,7 @@ public class PnpSMSMsgService {
         }
         try {
             pnpFtpService.uploadFileByType(targetStreamMap, setting.getUploadPath(), setting);
+
         } catch (Exception e) {
             log.error("Exception", e);
         }

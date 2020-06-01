@@ -82,7 +82,7 @@ $(function() {
 	};
 	
 
-	$('.createBtn').click(func_showCreateCancelPopupModel);
+	$('#createBtn').click(func_showCreateCancelPopupModel);
 	
 	
 	/* 更新每頁顯示數量下拉選單 */

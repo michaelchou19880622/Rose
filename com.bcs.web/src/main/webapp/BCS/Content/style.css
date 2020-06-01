@@ -1500,7 +1500,8 @@ thead tr th {
 	margin: auto;
 	padding: 20px;
 	border: 2px solid #fff;
-	width: 60%;
+	width: 25%;
+	height: 350px;
 	text-align: center;
 	color: blue;
 	font-size: 16px;

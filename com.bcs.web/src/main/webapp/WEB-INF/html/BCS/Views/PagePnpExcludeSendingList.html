@@ -115,9 +115,25 @@
 			<!-- The Image Model -->
 			<div class="model" id="myModel">
 				<!-- Model content -->
-				<div class="image-model-content">
-					<img id="model_image1"/>&nbsp;
-					<img id="model_image2"/>
+				<div class="model-content">
+					<div>
+						<label style="display: inline-block; padding-top: 50px; text-alignet: center;" class="param-label">請輸入以下資訊</label> 
+					</div>
+					<div>
+						<label style="display: inline-block; width: 80px; padding-top: 40px;" class="param-label">手機門號：</label> 
+						<input class="customSearchInput" type="text" id="accountInput" name="accountInput" value="" maxlength="30" />
+                   	</div>
+					<div>
+						<label style="display: inline-block; width: 80px; padding-top: 15px;" class="param-label">原　　因：</label> 
+						<input class="customSearchInput" type="text" id="pccCodeInput" name="pccCodeInput" value="" maxlength="20" />
+                   		<textarea cols="50" rows="5">
+							輸入你想要寫的內容...
+						</textarea>
+					</div>
+					<div>
+						<input class="customBtn" id="searchBtn" style="float:center; width: 120px; cursor: pointer; margin-top: 50px;" type="button" value="確認">
+						<input class="customBtn" id="searchBtn" style="float:center; width: 120px; cursor: pointer;" type="button" value="取消">
+                   	</div>
 				</div>
 			</div>
 			

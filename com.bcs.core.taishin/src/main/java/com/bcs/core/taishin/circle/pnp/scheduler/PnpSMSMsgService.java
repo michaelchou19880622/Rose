@@ -644,7 +644,7 @@ public class PnpSMSMsgService {
      * @apiNote 流水號;;手機號碼;;簡訊內容;;預約時間;;批次帳號;;批次帳號;;0;;1;;有效秒數
      */
     private InputStream smsUnifmtInputStream(PnpFtpSourceEnum type, PnpMain m, List<PnpDetail> detailList) {
-        PnpMainEvery8d main = (PnpMainEvery8d) m;
+        //PnpMainEvery8d main; = (PnpMainEvery8d) m;
         String tag = "&";
         /*
          * 互動 header
@@ -659,13 +659,34 @@ public class PnpSMSMsgService {
          */
         //來源資料HEADER
         StringBuilder header = new StringBuilder();
-        header.append(main.getSubject() + tag);
-        header.append(main.getUserID() + "_L" + tag);
-        header.append(main.getPassword() + tag);
-        header.append(DataUtils.convDateToStr(new Date(), "yyyyMMddHHmmss") + tag);
-        header.append(main.getExprieTime() + tag);
-        header.append(main.getMsgType() + tag);
-        header.append(main.getBatchID() + "\r\n");
+        switch (type) {
+            case MING:
+                for (PnpDetail d : detailList) {
+                    PnpDetailMing detail = (PnpDetailMing) d;
+                    header.append("" + tag);
+                    header.append(detail.getAccount1() + "_L" + tag);
+                    header.append("" + tag);
+                    header.append(DataUtils.convDateToStr(new Date(), "yyyyMMddHHmmss") + tag);
+                    header.append("" + tag);
+                    header.append("1" + tag);
+                    header.append("" + "\r\n");
+                }
+                break;
+            case MITAKE:
+                PnpMainMitake main = (PnpMainMitake) m;
+                header.append("" + tag);
+                header.append(main.getUsername() + "_L" + tag);
+                header.append(main.getUserPassword() + tag);
+                header.append(DataUtils.convDateToStr(new Date(), "yyyyMMddHHmmss") + tag);
+                header.append("" + tag);
+                header.append(main.getMsgType() + tag);
+                header.append("" + "\r\n");
+                break;
+            default:
+        }
+
+
+
 
         // log.info("Every8d Header: {}", DataUtils.toPrettyJsonUseJackson(header));
 

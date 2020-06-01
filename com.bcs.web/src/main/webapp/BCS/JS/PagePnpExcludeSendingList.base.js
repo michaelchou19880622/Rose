@@ -12,6 +12,8 @@ $(function() {
 	
 	var listSummary;
 	
+	var eleCreateBtn = document.getElementById("createBtn");
+	
 	var totalPageSize = document.getElementById('totalPageSize');
 	var currentPageIndex = document.getElementById('currentPageIndex');
 	var perPageSize = $(this).find('option:selected').text();
@@ -40,8 +42,48 @@ $(function() {
 	    }
 	   
 	    return str;
-
 	}
+
+
+	/* 彈出視窗 Image Model */
+	var model = document.getElementById("myModel");
+
+	/* When the user clicks anywhere outside of the model, close the model */
+	window.onclick = function(event) {
+		if (event.target == model) {
+			model.style.display = "none";
+		}
+	}
+	
+	window.addEventListener('click', function(e) {   
+		if (event.target == model && document.getElementById('myModel').contains(e.target)){
+			model.style.display = "none";
+		}
+	});
+
+	/* When the user click 'ESC', close the model */
+	$(document).keyup(function(e) {
+		// Some browsers support 'which'(IE) others support 'keyCode' (Chrome...etc)
+		var keycode = (e.keyCode ? e.keyCode : e.which);
+		
+		if (keycode == 27) {
+			if (model.style.display === "block") {
+				model.style.display = "none";
+			}
+		}
+	});
+	
+	/* Defined the popup model for URL */
+	var func_showCreateCancelPopupModel = function() {
+//		modelImage1.src = $(this).attr('img1');
+//		modelImage2.src = $(this).attr('img2');
+
+		model.style.display = "block";
+	};
+	
+
+	$('.createBtn').click(func_showCreateCancelPopupModel);
+	
 	
 	/* 更新每頁顯示數量下拉選單 */
 	var func_optionSelectChanged = function(){

@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.dao.QueryTimeoutException;
 
 import javax.annotation.PreDestroy;
 import java.io.File;
@@ -364,9 +365,34 @@ public class BillingNoticeFtpService {
             billingNoticeDetailRepository.updateStatusByMainId(status, now, mainId);
             /* !!Second update main to wait. Because Ap discover data with main status */
             billingNoticeMainRepository.updateBillingNoticeMainStatus(status, now, mainId);
-    	} catch (Exception e) {
-    		log.info("An exception detected during updating data objects from DB (WAIT)");
+       	} catch (QueryTimeoutException e) {
+    		log.info("A QueryTimeoutException mainID:{} detected during updating data objects from DB (WAIT)", billingNoticeMain.getNoticeMainId());
+            log.error("QueryTimeoutException", e);
+            
+            BillingNoticeContentTemplateMsg template = billingNoticeContentTemplateMsgRepository.findOne(billingNoticeMain.getTempId());
+            Long mainId = billingNoticeMain.getNoticeMainId();
+            String status = BillingNoticeMain.NOTICE_STATUS_WAIT;
+            // 流程開關
+            if (!template.isProductSwitch()) {
+                status = BillingNoticeMain.NOTICE_STATUS_RETRY;
+            }
+            Date now = new Date();    		
+            /* 確保 billingNoticeDetailRepository.updateStatusByMainId發生exception 時, Main Table status能可以更新*/
+    		billingNoticeMainRepository.updateBillingNoticeMainStatus(status, now, mainId);
+        } catch (Exception e) {
+    		log.info("An exception mainID:{} detected during updating data objects from DB (WAIT)", billingNoticeMain.getNoticeMainId());
             log.error("Exception", e);
+            
+            BillingNoticeContentTemplateMsg template = billingNoticeContentTemplateMsgRepository.findOne(billingNoticeMain.getTempId());
+            Long mainId = billingNoticeMain.getNoticeMainId();
+            String status = BillingNoticeMain.NOTICE_STATUS_WAIT;
+            // 流程開關
+            if (!template.isProductSwitch()) {
+                status = BillingNoticeMain.NOTICE_STATUS_RETRY;
+            }
+            Date now = new Date();    		
+            /* 確保 billingNoticeDetailRepository.updateStatusByMainId發生exception 時, Main Table status能可以更新*/
+    		billingNoticeMainRepository.updateBillingNoticeMainStatus(status, now, mainId);
         }
     }
 

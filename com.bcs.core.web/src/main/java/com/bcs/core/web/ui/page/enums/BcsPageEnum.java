@@ -155,6 +155,7 @@ public enum BcsPageEnum {
     
     // PNP BlackList
     PNP_EXCLUDE_SENDING_LIST_PAGE("/BCS/Views/PagePnpExcludeSendingList"),
+    PNP_EXCLUDE_SENDING_LIST_HISTORY_PAGE("/BCS/Views/PagePnpExcludeSendingListHistory"),
 
     //Game
     GameCreatePage("/BCS/Views/PageG1"),

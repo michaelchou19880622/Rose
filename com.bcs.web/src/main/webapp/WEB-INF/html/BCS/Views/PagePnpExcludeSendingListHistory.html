@@ -1,37 +1,41 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
 	xmlns:sec="http://www.springframework.org/security/tags"
-	th:with="strList = ${ {'/BCS/JS/pagepnpAnalysisReport.base.js'} }">
-<head th:replace="/BCS/Views/Common/Head :: head ('PNP Analysis Report Page', ${strList})"></head>
+	th:with="strList = ${ {'/BCS/JS/PagePnpExcludeSendingList.base.js'} }">
+<head th:replace="/BCS/Views/Common/Head :: head ('PNP Exclude Sending List History Page', ${strList})"></head>
 <body>
 	<header th:replace="/BCS/Views/Common/Header :: header"></header>
 	
 	<div class="LyContents">
-		<div th:replace="/BCS/Views/Common/Menu :: menu ('PagepnpAnalysisReport')"></div>
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('PagePnpExcludeSendingListHistory')"></div>
 		
 		<div class="LyMain" role="main" style="padding-right: 20px; padding-left: 20px;">
 			<form>
 				<section>
 					<header class="ContentHead">
-						<h3 class="CHTtl">PNP分析報表</h3>
+						<h3 class="CHTtl">排除發送名單歷程列表</h3>
 					</header>
 					
 					<div class="CHBtnSet">
 						<div class="CHLeft" style="width:100%;">
 	                    	<div>
-								<label style="display: inline-block; width: 80px;" class="param-label">發送帳號：</label> 
+								<label style="display: inline-block; width: 80px;" class="param-label">手機門號：</label> 
 								<input class="customSearchInput" type="text" id="accountInput" name="accountInput" value="" maxlength="30" />
-								<label style="display: inline-block; width: 80px; padding-left:10px" class="param-label">PCC-CODE：</label> 
+								<label style="display: inline-block; width: 80px; padding-left:10px" class="param-label">異動人員：</label> 
 								<input class="customSearchInput" type="text" id="pccCodeInput" name="pccCodeInput" value="" maxlength="20" />
-								
-<!-- 								<button style="padding-left:5px" class="btn2 btn-style-pressed" id="isCreateTimeBtn">建立時間</button> -->
-<!-- 								<button class="btn2 btn-style" id="isOrderTimeBtn">預約時間</button> -->
-<!-- 								<input class="customBtn_Pressed" id="isCreateTimeBtn" style="padding-left:10px; cursor: pointer;" type="button" value="建立時間"> -->
-<!-- 								<input class="customBtn" id="isOrderTimeBtn" style="cursor: pointer;" type="button" value="預約時間"> -->
-								
+								<label style="display: inline-block; width: 80px; padding-left:10px" class="param-label">狀　　態：</label> 
+                                <div class="optionGuestLabel queryValueComponentSelectList">
+                                    <div class="optionLabelGuestLabel">全部</div>
+                                    <select class="optionSelectGuestLabel queryValue" name="queryValue">
+                                        <option selected="selected" value="全部">全部</option>
+                                        <option value="排除中">排除中</option>
+                                        <option value="取消排除">取消排除</option>
+                                    </select>
+                                </div>
+								<input class="customBtn" id="searchBtn" style="float:right; width: 120px; cursor: pointer;" type="button" value="查詢">
 	                    	</div>
 							<div class="paramGroup" style="margin-top:8px;">
-								<label style="display: inline-block; width: 80px;" class="param-label">日期區間：</label>
+								<label style="display: inline-block; width: 80px;" class="param-label">更新時間：</label>
 		                    	<div class="option date">
 									<input type="text" class="datepicker" id="startDate" placeholder="YYYY-MM-DD" />
 								</div>
@@ -40,130 +44,48 @@
 									<input type="text" class="datepicker" id="endDate" placeholder="YYYY-MM-DD" />
 								</div>
 								
-								<input style="margin-left:10px; display:none" id="isCreateTime" type="radio" name="searchType" value="createTime" CHECKED>
-<!-- 								建立時間 -->
-								<input style="margin-left:8px; display:none" id="isOrderTime" type="radio" name="searchType" value="orderTime">
-<!-- 								預約時間 -->
-								<input class="customBtn" id="exportBtn" style="float:right; cursor: pointer;" type="button" value="匯出EXCEL">
-								<input class="customBtn" id="searchBtn" style="float:right; margin-right:10px; cursor: pointer;" type="button" value="查詢">
+								<label style="display: inline-block; width: 80px; padding-left:10px" class="param-label">客群標籤：</label> 
+<!-- 								<input class="customSearchInput" type="text" id="pccCodeInput" name="pccCodeInput" value="" maxlength="20" /> -->
+                                <div class="optionGuestLabel queryValueComponentSelectList">
+                                    <div class="optionLabelGuestLabel">請選擇</div>
+                                    <select class="optionSelectGuestLabel queryValue" name="queryValue">
+                                        <option value="">請選擇</option>
+                                    </select>
+                                </div>
+								
+								<input class="customBtn" id="exportBtn" style="float:right; width: 120px; cursor: pointer;" type="button" value="匯出">
 							</div>
 						</div>
 					</div>
 					
-                   	<div>
-						<label style="display: inline-block; width: 80px; font-weight: bold; color:blue;" class="param-label">資料彙總：</label> 
-					</div>
-					<div class="mainFrame">
-						<table border="1" id="tableBodySummary">
-							<colgroup>
-								<col width="80">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-							</colgroup>
-							<tr>
-								<th class="td10" style="font-size:10px;">發送天數<br>(總計)</th>
-								<th class="td10" style="font-size:10px;">總通數</th>
-								<th class="td10" style="font-size:10px;">BC<br>通路總通數</th>
-								<th class="td10" style="font-size:10px;">BC<br>成功通數</th>
-								<th class="td10" style="font-size:10px;">BC<br>失敗通數</th>
-								<th class="td10" style="font-size:10px;">BC<br>成功率</th>
-								<th class="td10" style="font-size:10px;">PNP<br>通路總通數</th>
-								<th class="td10" style="font-size:10px;">PNP<br>成功通數</th>
-								<th class="td10" style="font-size:10px;">PNP<br>失敗通數</th>
-								<th class="td10" style="font-size:10px;">PNP<br>成功率</th>
-								<th class="td10" style="font-size:10px;">SMS<br>通路總通數</th>
-								<th class="td10" style="font-size:10px;">SMS<br>成功通數</th>
-								<th class="td10" style="font-size:10px;">SMS<br>失敗通數</th>
-								<th class="td10" style="font-size:10px;">SMS<br>成功率</th>
-								<th class="td10" style="font-size:10px; color:red;">SMS<br>成功點數</th>
-							</tr>
-							<tr id="dataTemplateTotalRow" class="dataTemplateSummary">
-								<td rowspan="1" style="background-color:#ffffd5; font-size:10px;" class="td1 send_date"></td>
-								<td rowspan="1" style="background-color:#ffffd5; font-size:10px;" class="td1 total"></td>
-								<td rowspan="1" style="background-color:#ffffd5; font-size:10px;" class="td1 bc_total"></td>
-								<td rowspan="1" style="background-color:#ffffd5; font-size:10px;" class="td1 bc_ok"></td>
-								<td rowspan="1" style="background-color:#ffffd5; font-size:10px;" class="td1 bc_no"></td>
-								<td rowspan="1" style="background-color:#ffffd5; font-size:10px;" class="td1 bc_rate"></td>
-								<td rowspan="1" style="background-color:#ffffd5; font-size:10px;" class="td1 pnp_total"></td>
-								<td rowspan="1" style="background-color:#ffffd5; font-size:10px;" class="td1 pnp_ok"></td>
-								<td rowspan="1" style="background-color:#ffffd5; font-size:10px;" class="td1 pnp_no"></td>
-								<td rowspan="1" style="background-color:#ffffd5; font-size:10px;" class="td1 pnp_rate"></td>
-								<td rowspan="1" style="background-color:#ffffd5; font-size:10px;" class="td1 sms_total"></td>
-								<td rowspan="1" style="background-color:#ffffd5; font-size:10px;" class="td1 sms_ok"></td>
-								<td rowspan="1" style="background-color:#ffffd5; font-size:10px;" class="td1 sms_no"></td>
-								<td rowspan="1" style="background-color:#ffffd5; font-size:10px;" class="td1 sms_rate"></td>
-								<td rowspan="1" style="background-color:#ffffd5; font-size:10px; color:red;" class="td1 sms_point"></td>
-							</tr>
-						</table>
-					</div>
-				
-                   	<div>
-						<label style="display: inline-block; width: 80px; font-weight: bold; color:blue;" class="param-label">資料明細：</label> 
-					</div>
-					<div class="mainFrame">
+					<div class="mainFrame alignLeft">
 						<table border="1" id="tableBody">
 							<colgroup>
-								<col width="80">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
-								<col width="71">
+								<col width="60">  <!-- 手機門號 -->
+								<col width="130">  <!-- LINE UID -->
+								<col width="100">  <!-- 原因 -->
+								<col width="90">  <!-- 更新時間 -->
+								<col width="50">  <!-- 狀態 -->
+								<col width="50">  <!-- 客群標籤 -->
+								<col width="50">  <!-- 異動人員 -->
 							</colgroup>
-							<tr>
-								<th class="td10" style="font-size:10px;">發送日期</th>
-								<th class="td10" style="font-size:10px;">總通數</th>
-								<th class="td10" style="font-size:10px;">BC<br>通路總通數</th>
-								<th class="td10" style="font-size:10px;">BC<br>成功通數</th>
-								<th class="td10" style="font-size:10px;">BC<br>失敗通數</th>
-								<th class="td10" style="font-size:10px;">BC<br>成功率</th>
-								<th class="td10" style="font-size:10px;">PNP<br>通路總通數</th>
-								<th class="td10" style="font-size:10px;">PNP<br>成功通數</th>
-								<th class="td10" style="font-size:10px;">PNP<br>失敗通數</th>
-								<th class="td10" style="font-size:10px;">PNP<br>成功率</th>
-								<th class="td10" style="font-size:10px;">SMS<br>通路總通數</th>
-								<th class="td10" style="font-size:10px;">SMS<br>成功通數</th>
-								<th class="td10" style="font-size:10px;">SMS<br>失敗通數</th>
-								<th class="td10" style="font-size:10px;">SMS<br>成功率</th>
-								<th class="td10" style="font-size:10px; color:red;">SMS<br>成功點數</th>
+							<tr align="left" >
+								<th class="td10" style="font-size:11px;">手機門號</th>
+								<th class="td10" style="font-size:11px;">LINE UID</th>
+								<th class="td10" style="font-size:11px;">原因</th>
+								<th class="td10" style="font-size:11px;">更新時間</th>
+								<th class="td10" style="font-size:11px;">狀態</th>
+								<th class="td10" style="font-size:11px;">客群標籤</th>
+								<th class="td10" style="font-size:11px;">異動人員</th>
 							</tr>
 							<tr class="dataTemplate">
-								<td rowspan="1" style="font-size:10px;" class="td1 send_date"></td>
-								<td rowspan="1" style="font-size:10px;" class="td1 total"></td>
-								<td rowspan="1" style="font-size:10px;" class="td1 bc_total"></td>
-								<td rowspan="1" style="font-size:10px;" class="td1 bc_ok"></td>
-								<td rowspan="1" style="font-size:10px;" class="td1 bc_no"></td>
-								<td rowspan="1" style="font-size:10px;" class="td1 bc_rate"></td>
-								<td rowspan="1" style="font-size:10px;" class="td1 pnp_total"></td>
-								<td rowspan="1" style="font-size:10px;" class="td1 pnp_ok"></td>
-								<td rowspan="1" style="font-size:10px;" class="td1 pnp_no"></td>
-								<td rowspan="1" style="font-size:10px;" class="td1 pnp_rate"></td>
-								<td rowspan="1" style="font-size:10px;" class="td1 sms_total"></td>
-								<td rowspan="1" style="font-size:10px;" class="td1 sms_ok"></td>
-								<td rowspan="1" style="font-size:10px;" class="td1 sms_no"></td>
-								<td rowspan="1" style="font-size:10px;" class="td1 sms_rate"></td>
-								<td rowspan="1" style="font-size:10px; color:red;" class="td1 sms_point"></td>
+								<td rowspan="1" style="font-size:11px;" class="td1 mobileNum"></td>
+								<td rowspan="1" style="font-size:11px;" class="td1 lineUID"></td>
+								<td rowspan="1" style="font-size:11px;" class="td1 reason"></td>
+								<td rowspan="1" style="font-size:11px;" class="td1 updateTime"></td>
+								<td rowspan="1" style="font-size:11px;" class="td1 status"></td>
+								<td rowspan="1" style="font-size:11px;" class="td1 guestLabel"></td>
+								<td rowspan="1" style="font-size:11px;" class="td1 modifier"></td>
 							</tr>
 						</table>
 					</div>

@@ -329,6 +329,15 @@ textarea:focus {
     vertical-align: middle;
 }
 
+.mainFrame.alignLeft table td {
+    padding: 12px 10px 11px;
+    border: 1px solid #e2e5eb;
+    background: #fff;
+    word-break: break-word;
+	text-align: left;
+    vertical-align: middle;
+}
+
 .mainFrame table td>input[type='text'] {
     display: block;
     width: 100%;
@@ -1438,3 +1447,32 @@ thead tr th {
 	background: #07F;
 }
 
+
+/* PNP客群標籤下拉式選單 */
+.optionGuestLabel {
+    position: relative;
+    display: inline-block;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    min-width: 90px;
+    width: 276px;
+    background: white url(../images/ico_mdFRM03Select.png) no-repeat right center;
+    border: 1px solid #ced2dc;
+    border-radius: 0;
+    padding: 9px 24px 8px 9px;
+}
+
+.optionGuestLabel .optionLabelGuestLabel {
+    font-size: 12px;
+    color: #a1a7b5;
+}
+
+.optionGuestLabel .optionSelectGuestLabel {
+    display: block;
+    position: absolute;
+    top: 7px;
+    left: 10px;
+    width: 100%;
+    opacity: 0;
+    font-size: 14px;
+}

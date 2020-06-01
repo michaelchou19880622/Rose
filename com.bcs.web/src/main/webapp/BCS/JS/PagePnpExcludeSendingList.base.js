@@ -32,6 +32,17 @@ $(function() {
 	var isChangePage = false;
 	var totalDateCount = 0;
 	
+	function pad(number, length) {
+		   
+	    var str = '' + number;
+	    while (str.length < length) {
+	        str = '0' + str;
+	    }
+	   
+	    return str;
+
+	}
+	
 	/* 更新每頁顯示數量下拉選單 */
 	var func_optionSelectChanged = function(){
 		var selectValue = $(this).find('option:selected').text();
@@ -63,11 +74,11 @@ $(function() {
 			loadData();
 		}
 	};
-
-	var getPnpStatusMap = function() {
+	
+	var setupGuestLabelMap = function() {
 		$.ajax({
 			type : 'GET',
-			url : bcs.bcsContextPath + '/pnpEmployee/getPnpStatusEnum',
+			url : bcs.bcsContextPath + '/pnpEmployee/getGuestLabelMap',
 			contentType : 'application/json'
 		}).success(function(response) {
 			console.log(response);
@@ -77,7 +88,7 @@ $(function() {
 		}).fail(function(response) {
 			console.log(response);
 		}).done(function(response) {
-			console.log('Fetch PnpStatusMap done!!');
+			console.log('getGuestLabelMap done!!');
 		});
 	};
 
@@ -98,22 +109,36 @@ $(function() {
 
 	// do Search
 	$('#searchBtn').click(function() {
+		// For Test
+		for (testIdx = 0; testIdx < 5; testIdx++) {
+			var list = originalTr.clone(true);
+			
+			list.find('.mobileNum').html('0912' + pad(Math.floor(Math.random() * 999999), 6));
+			list.find('.lineUID').html('Utesttestlineuid000000' + pad(Math.floor(Math.random() * 999999), 6));
+			list.find('.reason').html('第 ' + pad(Math.floor(Math.random() * 999999), 6) + ' 號奧客...');
+			list.find('.updateTime').html('2020-05-27 13:55:40');
+			list.find('.status').html('排除中');
+			list.find('.guestLabel').html('24');
+			list.find('.modifier').html('1000' + pad(Math.floor(Math.random() * 999), 3));
+			$('#tableBody').append(list);
+		};
 		
-		isSearchData = true;
 		
-		if (dataValidate()) {
-			cleanList();
-			
-			page = 1;
-			
-			startDate = $('#startDate').val();
-//			console.info('startDate = ', startDate);
-			
-			endDate = $('#endDate').val();
-//			console.info('endDate = ', endDate);
-			
-			loadData();
-		}
+//		isSearchData = true;
+//		
+//		if (dataValidate()) {
+//			cleanList();
+//			
+//			page = 1;
+//			
+//			startDate = $('#startDate').val();
+////			console.info('startDate = ', startDate);
+//			
+//			endDate = $('#endDate').val();
+////			console.info('endDate = ', endDate);
+//			
+//			loadData();
+//		}
 	});
 
 	$('#exportBtn').click(function() {
@@ -157,21 +182,19 @@ $(function() {
 		$('.LyMain').unblock();
 	});
 	
-	// 發送類型
-	$('[name="searchType"]').click(function() {
-		selectedSearchType = $('[name="searchType"]:checked').val();
-		console.info('selectedSearchType = ', selectedSearchType);
-	});
-
 	var dataValidate = function() {
 		startDate = $('#startDate').val();
 		endDate = $('#endDate').val();
-		if (!startDate) {
+		
+		console.info('startDate = ', startDate);
+		console.info('endDate = ', endDate);
+		
+		if (!startDate || startDate == 'YYYY-MM-DD') {
 			alert('請填寫起始日期！');
 			return false;
 		}
 		
-		if (!endDate) {
+		if (!endDate || endDate == 'YYYY-MM-DD') {
 			alert('請填寫結束日期！');
 			return false;
 		}
@@ -190,14 +213,20 @@ $(function() {
 		return true;
 	};
 
-	// do Download
 	var setExportButtonSource = function() {
 		console.log('Has data : ', hasData);
 		
 		if (hasData) {
-			var getUrl = bcs.bcsContextPath + '/pnpEmployee/exportPNPDetailReportExcel' + '?startDate=' + startDate + '&endDate=' + endDate + '&isPageable=false' + '&page=' + page + '&account='
-					+ document.getElementById('accountInput').value + '&pccCode=' + document.getElementById('pccCodeInput').value + '&sourceSystem='
-					+ document.getElementById('sourceSystemInput').value + '&phone=' + document.getElementById('phoneNumber').value + '&dateType=' + isCreateTime ? 'createTime' : 'orderTime';
+			var getUrl = bcs.bcsContextPath + '/pnpEmployee/exportPNPDetailReportExcel' 
+											+ '?startDate=' + startDate 
+											+ '&endDate=' + endDate 
+											+ '&isPageable=false' 
+											+ '&page=' + page 
+											+ '&account=' + document.getElementById('accountInput').value 
+											+ '&pccCode=' + document.getElementById('pccCodeInput').value 
+											+ '&sourceSystem=' + document.getElementById('sourceSystemInput').value 
+											+ '&phone=' + document.getElementById('phoneNumber').value 
+											+ '&dateType=' + ((isCreateTime) ? 'createTime' : 'orderTime');
 			console.info('getUrl', getUrl);
 
 			$('.btn_add.exportToExcel').attr('href', getUrl);
@@ -216,12 +245,9 @@ $(function() {
 			isChangePage = false;
 		}
 		
-		var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPStsRptDetail';
-//		console.info('getUrl detail', getUrl);
-
 		$.ajax({
 			type : 'POST',
-			url : getUrl,
+			url : bcs.bcsContextPath + '/pnpEmployee/getPNPStsRptDetail',
 			contentType : 'application/json;charset=UTF-8',
 			data : JSON.stringify({
 				dateType : selectedSearchType,
@@ -244,7 +270,7 @@ $(function() {
 			$('#noDataTxt').remove();
 			if (response.length == 0) {
 				$('#dataTemplateSummary').remove();
-				$('#tableBody').append('<tr id="noDataTxt"><td colspan="15"><span style="color:red">查無資料</span></td></tr>');
+				$('#tableBody').append('<tr id="noDataTxt"><td colspan="8"><span style="color:red">查無資料</span></td></tr>');
 				currentPageIndex.innerText = '-';
 				totalPageSize.innerText = '-';
 				$('.LyMain').unblock();
@@ -255,21 +281,13 @@ $(function() {
 			response.forEach(function(obj) {
 				var list = originalTr.clone(true);
 				
-				list.find('.send_date').html(obj.send_date);
-				list.find('.total').html(obj.total);
-				list.find('.sms_total').html(obj.sms_total);
-				list.find('.sms_ok').html(obj.sms_ok);
-				list.find('.sms_no').html(obj.sms_no);
-				list.find('.sms_point').html(obj.sms_point);
-				list.find('.sms_rate').html(obj.sms_rate);
-				list.find('.pnp_total').html(obj.pnp_total);
-				list.find('.pnp_ok').html(obj.pnp_ok);
-				list.find('.pnp_no').html(obj.pnp_no);
-				list.find('.pnp_rate').html(obj.pnp_rate);
-				list.find('.bc_total').html(obj.total);
-				list.find('.bc_ok').html(obj.bc_ok);
-				list.find('.bc_no').html(obj.bc_no);
-				list.find('.bc_rate').html(obj.bc_rate);
+				list.find('.mobileNum').html(obj.mobileNum);
+				list.find('.lineUID').html(obj.lineUID);
+				list.find('.reason').html(obj.reason);
+				list.find('.updateTime').html(obj.updateTime);
+				list.find('.status').html(obj.status);
+				list.find('.guestLabel').html(obj.guestLabel);
+				list.find('.modifier').html(obj.modifier);
 				$('#tableBody').append(list);
 				i++;
 			});
@@ -286,78 +304,6 @@ $(function() {
 			// setExportButtonSource();
 		}).fail(function(response) {
 			console.info(response);
-			$.FailResponse(response);
-			$('.LyMain').unblock();
-		});
-	};
-
-	/* 取得分頁總數並變更畫面 */
-	var fetchListCountAndChange = function() {
-		firstFetch = false;
-		
-		var getUrl = bcs.bcsContextPath + '/pnpEmployee/getPNPStsRptSummary';
-//		console.info('getUrl summary = ', getUrl);
-
-		$.ajax({
-			type : 'POST',
-			url : getUrl,
-			contentType : 'application/json;charset=UTF-8',
-			data : JSON.stringify({
-				dateType : selectedSearchType,
-				startDate : startDate,
-				endDate : endDate,
-				isPageable : false,
-				page : page,
-				account : document.getElementById('accountInput').value,
-				pccCode : document.getElementById('pccCodeInput').value,
-				sourceSystem : null,
-				employeeId : null,
-				phone : null,
-				pageCount : perPageSize
-			})
-		}).done(function(response) {
-//			console.info('fetchListCountAndChange = ', response);
-
-			$('.dataTemplateSummary').remove();
-			
-			response.forEach(function(obj) {
-				
-				totalDateCount = obj.date_count;
-				
-				totalPages = parseInt(Math.ceil(totalDateCount/perPageSize));
-				
-				listSummary = originalTrSummary.clone(true);
-				listSummary.find('.send_date').html(totalDateCount);
-				listSummary.find('.total').html(obj.total);
-				listSummary.find('.sms_total').html(obj.sms_total);
-				listSummary.find('.sms_ok').html(obj.sms_ok);
-				listSummary.find('.sms_no').html(obj.sms_no);
-				listSummary.find('.sms_point').html(obj.sms_point);
-				listSummary.find('.sms_rate').html(obj.sms_rate);
-				listSummary.find('.pnp_total').html(obj.pnp_total);
-				listSummary.find('.pnp_ok').html(obj.pnp_ok);
-				listSummary.find('.pnp_no').html(obj.pnp_no);
-				listSummary.find('.pnp_rate').html(obj.pnp_rate);
-				listSummary.find('.bc_total').html(obj.total);
-				listSummary.find('.bc_ok').html(obj.bc_ok);
-				listSummary.find('.bc_no').html(obj.bc_no);
-				listSummary.find('.bc_rate').html(obj.bc_rate);
-			});
-
-			$('#tableBodySummary').append(listSummary);
-
-			if (totalPages == 0) {
-				currentPageIndex.innerText = '-';
-				totalPageSize.innerText = '-';
-			} else {
-				currentPageIndex.innerText = page;
-				totalPageSize.innerText = totalPages;
-			}
-			
-			$('.LyMain').unblock();
-			
-		}).fail(function(response) {
-			console.log(response);
 			$.FailResponse(response);
 			$('.LyMain').unblock();
 		});
@@ -381,10 +327,10 @@ $(function() {
 		
 		cleanList();
 		// startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
-		startDate = moment(new Date()).format('YYYY-MM-DD');
-		endDate = moment(new Date()).format('YYYY-MM-DD');
-		$('#startDate').val(startDate);
-		$('#endDate').val(endDate);
+//		startDate = moment(new Date()).format('YYYY-MM-DD');
+//		endDate = moment(new Date()).format('YYYY-MM-DD');
+		$('#startDate').val('YYYY-MM-DD');
+		$('#endDate').val('YYYY-MM-DD');
 		// getPnpStatusMap();
 		
 	};

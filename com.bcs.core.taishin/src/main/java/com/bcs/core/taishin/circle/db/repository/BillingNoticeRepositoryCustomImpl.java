@@ -209,7 +209,7 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
                            " WHERE NOTICE_MAIN_ID IN (:IDS) " +
                            " AND STATUS IN (:STATUS_LIST)";
         List<BigInteger> detailIdList = entityManager.createNativeQuery(selectSql)
-                .setParameter("STATUS_LIST", Arrays.asList(BillingNoticeMain.NOTICE_STATUS_WAIT, BillingNoticeMain.NOTICE_STATUS_RETRY))
+                .setParameter("STATUS_LIST", Arrays.asList(BillingNoticeMain.NOTICE_STATUS_DRAFT, BillingNoticeMain.NOTICE_STATUS_WAIT, BillingNoticeMain.NOTICE_STATUS_RETRY))
                 .setParameter("IDS", mainIds)
                 .getResultList();
 

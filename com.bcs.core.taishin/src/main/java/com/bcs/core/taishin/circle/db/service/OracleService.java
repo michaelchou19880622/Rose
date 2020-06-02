@@ -119,9 +119,9 @@ public class OracleService {
             }
         }
         
-        if (isEmployeeQuit) {
-            throw new BcsNoticeException(String.format("編號%s員工已離職，無法進行此操作!!", empId));
-        }
+//        if (isEmployeeQuit) {
+//            throw new BcsNoticeException(String.format("編號%s員工已離職，無法進行此操作!!", empId));
+//        }
         
         if (employee.getEmployeeId() == null
                 || employee.getEmployeeId().trim().isEmpty()

@@ -705,33 +705,33 @@ public class PnpSMSMsgService {
 
         StringBuilder body = new StringBuilder();
         for (PnpDetail d : detailList) {
-            PnpDetailEvery8d detail;
             switch (type) {
                 case MING:
-                    detail = ((PnpDetailMing) d).getEvery8dObj();
+                    PnpDetailMing detail = (PnpDetailMing) d;
                     body.append(detail.getSn() + tag);
-                    body.append(detail.getDestName() + tag);
+                    body.append("" + tag);
                     body.append(detail.getPhone() + tag);
                     body.append(detail.getMsg() + tag);
-                    body.append(detail.getPid() + tag);
-                    body.append(detail.getCampaignId() + tag);
-                    body.append(detail.getSegmentId() + tag);
-                    body.append(detail.getProgramId() + tag);
+                    body.append("" + tag);
+                    body.append("" + tag);
+                    body.append("" + tag);
+                    body.append("" + tag);
                     body.append(detail.getVariable1() + tag);
                     body.append(detail.getVariable2() + "\r\n");
                     break;
                 case MITAKE:
-                    detail = ((PnpDetailMitake) d).getEvery8dObj();
-                    body.append(detail.getSn() + tag);
-                    body.append(detail.getDestName() + tag);
-                    body.append(detail.getPhone() + tag);
-                    body.append(detail.getMsg() + tag);
-                    body.append(detail.getPid() + tag);
-                    body.append(detail.getCampaignId() + tag);
-                    body.append(detail.getSegmentId() + tag);
-                    body.append(detail.getProgramId() + tag);
-                    body.append(detail.getVariable1() + tag);
-                    body.append(detail.getVariable2() + "\r\n");
+                    PnpDetailMitake detailMitake = (PnpDetailMitake) d;
+
+                    body.append(detailMitake.getDestCategory() + tag);
+                    body.append(""+ tag);
+                    body.append(detailMitake.getPhone() + tag);
+                    body.append(detailMitake.getMsg() + tag);
+                    body.append("" + tag);
+                    body.append("" + tag);
+                    body.append("" + tag);
+                    body.append("" + tag);
+                    body.append(detailMitake.getVariable1() + tag);
+                    body.append(detailMitake.getVariable2() + "\r\n");
                     break;
                 default:
             }

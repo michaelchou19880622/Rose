@@ -61,10 +61,4 @@ public class PnpDetailMitake extends PnpDetail {
      */
     @Column(name = "VARIABLE2", columnDefinition = "nvarchar(15)")
     private String variable2;
-
-
-    /* SMS 輸出格式轉換為Every8d 用的暫存物件 */
-    @Transient
-    private PnpDetailEvery8d every8dObj;
-
 }

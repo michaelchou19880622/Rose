@@ -661,16 +661,14 @@ public class PnpSMSMsgService {
         StringBuilder header = new StringBuilder();
         switch (type) {
             case MING:
-                for (PnpDetail d : detailList) {
-                    PnpDetailMing detail = (PnpDetailMing) d;
-                    header.append("" + tag);
-                    header.append(detail.getAccount1() + "_L" + tag);
-                    header.append("" + tag);
-                    header.append(DataUtils.convDateToStr(new Date(), "yyyyMMddHHmmss") + tag);
-                    header.append("" + tag);
-                    header.append("1" + tag);
-                    header.append("" + "\r\n");
-                }
+                PnpDetailMing detail = (PnpDetailMing) detailList.get(0);
+                header.append("" + tag);
+                header.append(detail.getAccount1() + "_L" + tag);
+                header.append("" + tag);
+                header.append(DataUtils.convDateToStr(new Date(), "yyyyMMddHHmmss") + tag);
+                header.append("" + tag);
+                header.append("1" + tag);
+                header.append("" + "\r\n");
                 break;
             case MITAKE:
                 PnpMainMitake main = (PnpMainMitake) m;

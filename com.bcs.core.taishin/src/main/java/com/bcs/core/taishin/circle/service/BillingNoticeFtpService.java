@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.dao.QueryTimeoutException;
 
 import javax.annotation.PreDestroy;
 import java.io.File;
@@ -33,20 +34,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j(topic = "BNRecorder")
 @Service
 public class BillingNoticeFtpService {
-
     private BillingNoticeMainRepository billingNoticeMainRepository;
     private BillingNoticeDetailRepository billingNoticeDetailRepository;
     private BillingNoticeContentTemplateMsgRepository billingNoticeContentTemplateMsgRepository;
-    //    private ServerInfoService serverInfoService;
+    public final static AtomicLong scheduleTaskcount = new AtomicLong(0L);
     private static FtpService ftpService = new FtpService();
     private ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1,
             new BasicThreadFactory.Builder()
@@ -61,12 +61,10 @@ public class BillingNoticeFtpService {
             BillingNoticeMainRepository billingNoticeMainRepository,
             BillingNoticeDetailRepository billingNoticeDetailRepository,
             BillingNoticeContentTemplateMsgRepository billingNoticeContentTemplateMsgRepository
-//            ServerInfoService serverInfoService
     ) {
         this.billingNoticeMainRepository = billingNoticeMainRepository;
         this.billingNoticeDetailRepository = billingNoticeDetailRepository;
         this.billingNoticeContentTemplateMsgRepository = billingNoticeContentTemplateMsgRepository;
-//        this.serverInfoService = serverInfoService;
     }
 
     /**
@@ -79,7 +77,14 @@ public class BillingNoticeFtpService {
             log.error("BillingNoticeFtpService TimeUnit error :" + time + unit);
             return;
         }
-        scheduledFuture = scheduler.scheduleWithFixedDelay(this::ftpProcess, 0, time, TimeUnit.valueOf(unit));
+        try {
+        	log.info("Starting a scheduled FTP task for BN service, unit={} time={}", unit, time);
+            scheduledFuture = scheduler.scheduleWithFixedDelay(this::ftpProcess, 0, time, TimeUnit.valueOf(unit));
+            log.info("Started the scheduled FTP task for BN service successfully!");
+        } catch (Exception e) {
+        	log.info("An exception detected during starting the scheduled FTP task for BN service!");
+            log.error("Error: ", e);
+        }
     }
 
 
@@ -87,32 +92,27 @@ public class BillingNoticeFtpService {
      * 執行流程
      */
     private void ftpProcess() {
-        log.info("StartCircle....");
+    	scheduleTaskcount.addAndGet(1L);
+        log.info("Started a new FTP task for BN service, scheduleTaskCount=" + scheduleTaskcount.get());
         boolean bigSwitch = CoreConfigReader.getBoolean(CONFIG_STR.BN_BIG_SWITCH, true, false);
-        // log.info("bigSwitch = {}", bigSwitch);
-        
-        String downloadSavePath = CoreConfigReader.getString(CONFIG_STR.BN_FTP_DOWNLOAD_SAVEFILEPATH, true, false);
-        // log.info("downloadSavePath = {}", downloadSavePath);
-        
-        String fileExtension = CoreConfigReader.getString(CONFIG_STR.BN_FTP_FILE_EXTENSION, true, false);
-        // log.info("fileExtension = {}", fileExtension);
-
         if (!bigSwitch) {
-            return;
+        	return;
         }
-
         try {
+        	String downloadSavePath = CoreConfigReader.getString(CONFIG_STR.BN_FTP_DOWNLOAD_SAVEFILEPATH, true, false);
+            String fileExtension = CoreConfigReader.getString(CONFIG_STR.BN_FTP_FILE_EXTENSION, true, false);
             List<FtpSetting> ftpSettingList = ftpService.getFtpSettings();
-            // log.info("ftpSettingList = {}", ftpSettingList);
-            
-            // ftpSettingList.forEach(ftpSetting -> log.info("Ftp Path: {}", ftpSetting.getPath()));
             Map<String, byte[]> lReturnDataMap = downloadFtpFile(fileExtension, ftpSettingList);
             if (lReturnDataMap.isEmpty()) {
-                return;
+            	log.info("Finished the task due to no files at this time, scheduleTaskCount=" + scheduleTaskcount.get());
             }
-            saveObjToDb(parseDataToObj(downloadSavePath, lReturnDataMap, ftpSettingList));
-            removeFtpFileProcess(lReturnDataMap, ftpSettingList);
+            else {
+                saveObjToDb(parseDataToObj(downloadSavePath, lReturnDataMap, ftpSettingList));
+                removeFtpFileProcess(lReturnDataMap, ftpSettingList);
+                log.info("Finished the task successfully, scheduleTaskCount=" + scheduleTaskcount.get());
+            }
         } catch (Exception e) {
+        	log.info("An exception detected during processing the FTP task!");
             log.error("Error: ", e);
         }
     }
@@ -131,14 +131,12 @@ public class BillingNoticeFtpService {
             i++;
             ftpSetting.clearFileNames();
 
-            if (StringUtils.isBlank(ftpSetting.getAccount())
-                    || StringUtils.isBlank(ftpSetting.getPassword())) {
+            if (StringUtils.isBlank(ftpSetting.getAccount()) || StringUtils.isBlank(ftpSetting.getPassword())) {
                 log.error("FTP {} account or password is blank!!", i);
                 continue;
             }
             Map<String, byte[]> returnDataMap = ftpService.downloadMultipleFileByType(ftpSetting.getPath(), fileExtension, ftpSetting);
             map.putAll(returnDataMap);
-
             returnDataMap.keySet().forEach(ftpSetting::addFileNames);
         }
         return map;
@@ -150,17 +148,16 @@ public class BillingNoticeFtpService {
             final String fileName = entry.getKey();
             final String encoding = StandardCharsets.UTF_8.name();
             ftpSettingList.stream().filter(ftpSetting -> ftpSetting.containsFileName(fileName)).forEach(ftpSetting ->
-                    log.info("{} containsFileName encoding: {}", fileName, ftpSetting.getFileEncoding())
+                log.info("Detected a file, filename={} encoding={}", fileName, ftpSetting.getFileEncoding())
             );
-            log.info("{} encoding: {}", fileName, encoding);
             final byte[] fileData = lReturnDataMap.get(fileName);
-            log.info("File: {}{}{}", new Object[]{downloadSavePath, File.separator, fileName});
-
+            log.info("Parsing a file, filename={}{}{}", new Object[]{downloadSavePath, File.separator, fileName});
             final File targetFile = new File(downloadSavePath + File.separator + fileName);
             FileUtils.writeByteArrayToFile(targetFile, fileData);
             try (InputStream targetStream = new FileInputStream(targetFile)) {
                 List<String> fileContents = IOUtils.readLines(targetStream, encoding);
                 List<BillingNoticeMain> billingNoticeMains = parseFtpFile(fileName, fileContents);
+                log.info("Parsed the file successfully, filename={} jobSize={}", fileName, billingNoticeMains.size());
                 mainList.addAll(billingNoticeMains);
             }
         }
@@ -196,7 +193,6 @@ public class BillingNoticeFtpService {
             if (StringUtils.isBlank(fileContents.get(i))) {
                 continue;
             }
-            // log.info("fileContents" + fileContents);
             String[] detailData = fileContents.get(i).split("\\|");
             switch (detailData.length) {
                 case 4:
@@ -209,11 +205,10 @@ public class BillingNoticeFtpService {
                     details.add(detail);
                     break;
                 default:
-                    log.error("parseFtpFile error Data:" + Arrays.toString(detailData));
+                    log.error("an Error detected during parsing FTP data detail, data=" + Arrays.toString(detailData));
                     break;
             }
         }
-        // log.info("details : " + details);
         Map<String, List<BillingNoticeFtpDetail>> resultMap = new HashMap<>();
 
         details.forEach(detail -> {
@@ -227,7 +222,6 @@ public class BillingNoticeFtpService {
                 resultMap.put(key, list);
             }
         });
-        // log.info("BillingNoticeFtpDetail resultMap : " + resultMap);
         return resultMap;
     }
 
@@ -238,51 +232,40 @@ public class BillingNoticeFtpService {
      * @param fileContents fileContents
      */
     private List<BillingNoticeMain> parseFtpFile(String origFileName, List<String> fileContents) {
-        log.info("Parse Ftp File Start!!");
-
-        if (fileContents.isEmpty()) {
-            log.info("File Content is Empty!!");
-            return Collections.emptyList();
-        }
-
-        /* Header */
-        String header = fileContents.get(0);
-        if (!validateHeader(header)) {
-            log.info("Header Valid Fail!!");
-            return Collections.emptyList();
-        }
-
-        String[] splitHeaderData = header.split("\\|");
-        log.info("Header Content Array: {}", DataUtils.toPrettyJsonUseJackson(splitHeaderData));
-
-        // TemplateTitle => Details
-        Map<String, List<BillingNoticeFtpDetail>> resultMap = parseDetail(fileContents);
-        // log.info("File Content Map: {}", DataUtils.toPrettyJsonUseJackson(resultMap));
-
-        List<BillingNoticeMain> mainList = new ArrayList<>();
-        for (Map.Entry<String, List<BillingNoticeFtpDetail>> entry : resultMap.entrySet()) {
-            BillingNoticeContentTemplateMsg template = getBillingNoticeTemplate(entry.getKey());
-
-            if (template == null) {
-                log.error("Template Doesn't exist!! [{}]", entry.getKey());
+    	List<BillingNoticeMain> mainList = new ArrayList<>();
+    	try {
+            if (fileContents.isEmpty()) {
+            	log.info("Ignored an empty file due to no content, filename={}", origFileName);
                 return Collections.emptyList();
             }
+            /* Header */
+            String header = fileContents.get(0);
+            if (!validateHeader(header)) {
+                log.info("Ignored an file due to an invalid header, filename={}", origFileName);
+                return Collections.emptyList();
+            }
+            String[] splitHeaderData = header.split("\\|");
+            log.info("Header Content Array: {}", DataUtils.toPrettyJsonUseJackson(splitHeaderData));
+            // TemplateTitle => Details
+            Map<String, List<BillingNoticeFtpDetail>> resultMap = parseDetail(fileContents);
+            for (Map.Entry<String, List<BillingNoticeFtpDetail>> entry : resultMap.entrySet()) {
+                BillingNoticeContentTemplateMsg template = getBillingNoticeTemplate(entry.getKey());
 
-            /* Main */
-            BillingNoticeMain main = setMain(
-                    origFileName,
-                    mainList.size(),
-                    splitHeaderData[0],
-                    splitHeaderData[1],
-                    splitHeaderData[2],
-                    template
-            );
-
-            /* Detail */
-            List<BillingNoticeDetail> detailList = new ArrayList<>();
-            resultMap.get(entry.getKey()).forEach(ftpDetail -> detailList.add(setDetail(main, ftpDetail)));
-            main.setDetails(detailList);
-            mainList.add(main);
+                if (template == null) {
+                	log.info("Ignored an empty file due to no template set, filename={} key={}", origFileName, entry.getKey());
+                    return Collections.emptyList();
+                }
+                /* Main */
+                BillingNoticeMain main = setMain(origFileName, mainList.size(), splitHeaderData[0], splitHeaderData[1], splitHeaderData[2], template);
+                /* Detail */
+                List<BillingNoticeDetail> detailList = new ArrayList<>();
+                resultMap.get(entry.getKey()).forEach(ftpDetail -> detailList.add(setDetail(main, ftpDetail)));
+                main.setDetails(detailList);
+                mainList.add(main);
+            }
+    	} catch (Exception e) {
+        	log.info("An exception detected during parsing an FTP file, filename={}", origFileName);
+            log.error("Error: ", e);
         }
         return mainList;
     }
@@ -342,23 +325,22 @@ public class BillingNoticeFtpService {
      * @param billingNoticeMain billingNoticeMain
      */
     private void saveDb(BillingNoticeMain billingNoticeMain) {
-//        log.info("BillingNoticeFtpService billingNoticeMain = {}", billingNoticeMain);
-    	
-        List<BillingNoticeDetail> originalDetails = billingNoticeMain.getDetails();
-//        log.info("BillingNoticeFtpService BillingNoticeDetail size: {}", originalDetails.size());
-        
-        billingNoticeMain.setProcApName(DataUtils.getRandomProcApName());
-//      log.info("BillingNoticeFtpService billingNoticeMain.getProcApName() = {}", billingNoticeMain.getProcApName());
-        log.info(String.format("BillingNoticeFtpService billingNoticeMain NoticeMainId : %s , status : %s , procApName : %s . OriginalDetails.size():%d", billingNoticeMain.getNoticeMainId(), billingNoticeMain.getStatus(), billingNoticeMain.getProcApName(), originalDetails.size()));              
-        
-        billingNoticeMain = billingNoticeMainRepository.save(billingNoticeMain);
-        List<BillingNoticeDetail> detailList = new ArrayList<>();
-        for (BillingNoticeDetail detail : originalDetails) {
-            detail.setNoticeMainId(billingNoticeMain.getNoticeMainId());
-            detailList.add(detail);
-        }
-        if (!detailList.isEmpty()) {
-            billingNoticeDetailRepository.save(detailList);
+    	try {
+            List<BillingNoticeDetail> originalDetails = billingNoticeMain.getDetails();
+            billingNoticeMain.setProcApName(DataUtils.getRandomProcApName());
+            log.info(String.format("Inserting data to DB, filename=%s status=%s procApName=%s detailSize=%d", billingNoticeMain.getOrigFileName(), billingNoticeMain.getStatus(), billingNoticeMain.getProcApName(), originalDetails.size()));              
+            billingNoticeMain = billingNoticeMainRepository.save(billingNoticeMain);
+            List<BillingNoticeDetail> detailList = new ArrayList<>();
+            for (BillingNoticeDetail detail : originalDetails) {
+                detail.setNoticeMainId(billingNoticeMain.getNoticeMainId());
+                detailList.add(detail);
+            }
+            if (!detailList.isEmpty()) {
+                billingNoticeDetailRepository.save(detailList);
+            }
+    	} catch (Exception e) {
+    		log.info("An exception detected during saving data objects to DB (DRAFT)");
+            log.error("Exception", e);
         }
     }
 
@@ -369,20 +351,49 @@ public class BillingNoticeFtpService {
      * @param billingNoticeMain billingNoticeMain
      */
     private void updateStatus(BillingNoticeMain billingNoticeMain) {
-        BillingNoticeContentTemplateMsg template = billingNoticeContentTemplateMsgRepository.findOne(billingNoticeMain.getTempId());
-        Long mainId = billingNoticeMain.getNoticeMainId();
-        String status = BillingNoticeMain.NOTICE_STATUS_WAIT;
-        // 流程開關
-        if (!template.isProductSwitch()) {
-            status = BillingNoticeMain.NOTICE_STATUS_RETRY;
-            log.info("Curfew NOTICE_STATUS_RETRY mainId:" + mainId);
+    	try {
+            BillingNoticeContentTemplateMsg template = billingNoticeContentTemplateMsgRepository.findOne(billingNoticeMain.getTempId());
+            Long mainId = billingNoticeMain.getNoticeMainId();
+            String status = BillingNoticeMain.NOTICE_STATUS_WAIT;
+            // 流程開關
+            if (!template.isProductSwitch()) {
+                status = BillingNoticeMain.NOTICE_STATUS_RETRY;
+                log.info("Curfew NOTICE_STATUS_RETRY mainId:" + mainId);
+            }
+            Date now = new Date();
+            /* !!Priority update detail to wait */
+            billingNoticeDetailRepository.updateStatusByMainId(status, now, mainId);
+            /* !!Second update main to wait. Because Ap discover data with main status */
+            billingNoticeMainRepository.updateBillingNoticeMainStatus(status, now, mainId);
+       	} catch (QueryTimeoutException e) {
+    		log.info("A QueryTimeoutException mainID:{} detected during updating data objects from DB (WAIT)", billingNoticeMain.getNoticeMainId());
+            log.error("QueryTimeoutException", e);
+            
+            BillingNoticeContentTemplateMsg template = billingNoticeContentTemplateMsgRepository.findOne(billingNoticeMain.getTempId());
+            Long mainId = billingNoticeMain.getNoticeMainId();
+            String status = BillingNoticeMain.NOTICE_STATUS_WAIT;
+            // 流程開關
+            if (!template.isProductSwitch()) {
+                status = BillingNoticeMain.NOTICE_STATUS_RETRY;
+            }
+            Date now = new Date();    		
+            /* 確保 billingNoticeDetailRepository.updateStatusByMainId發生exception 時, Main Table status能可以更新*/
+    		billingNoticeMainRepository.updateBillingNoticeMainStatus(status, now, mainId);
+        } catch (Exception e) {
+    		log.info("An exception mainID:{} detected during updating data objects from DB (WAIT)", billingNoticeMain.getNoticeMainId());
+            log.error("Exception", e);
+            
+            BillingNoticeContentTemplateMsg template = billingNoticeContentTemplateMsgRepository.findOne(billingNoticeMain.getTempId());
+            Long mainId = billingNoticeMain.getNoticeMainId();
+            String status = BillingNoticeMain.NOTICE_STATUS_WAIT;
+            // 流程開關
+            if (!template.isProductSwitch()) {
+                status = BillingNoticeMain.NOTICE_STATUS_RETRY;
+            }
+            Date now = new Date();    		
+            /* 確保 billingNoticeDetailRepository.updateStatusByMainId發生exception 時, Main Table status能可以更新*/
+    		billingNoticeMainRepository.updateBillingNoticeMainStatus(status, now, mainId);
         }
-        Date now = new Date();
-
-        /* !!Priority update detail to wait */
-        billingNoticeDetailRepository.updateStatusByMainId(status, now, mainId);
-        /* !!Second update main to wait. Because Ap discover data with main status */
-        billingNoticeMainRepository.updateBillingNoticeMainStatus(status, now, mainId);
     }
 
     /**

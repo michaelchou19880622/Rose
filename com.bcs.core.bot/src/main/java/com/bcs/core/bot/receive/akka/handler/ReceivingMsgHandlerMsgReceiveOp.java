@@ -34,12 +34,17 @@ public class ReceivingMsgHandlerMsgReceiveOp extends UntypedActor {
     @Override
     public void onReceive(Object message) {
         log.info("-------Get Operation Save-------");
-        if (message instanceof Map) {
-            mapProcess(message);
+        try {
+            if (message instanceof Map) {
+                mapProcess(message);
+            }
+            ReceivingMsgHandlerMaster.taskCount.addAndGet(-1L);
+            ReceivingMsgHandlerMaster.updateDate = Calendar.getInstance().getTime();
+            log.info("-------Get Operation Save End-------");
+        } catch (Exception e) {
+        	log.info("An exception detected dering processing a message");
+            log.error("Exception", e);
         }
-        ReceivingMsgHandlerMaster.taskCount.addAndGet(-1L);
-        ReceivingMsgHandlerMaster.updateDate = Calendar.getInstance().getTime();
-        log.info("-------Get Operation Save End-------");
     }
 
     /**
@@ -47,7 +52,7 @@ public class ReceivingMsgHandlerMsgReceiveOp extends UntypedActor {
      * @param message message map
      */
     @SuppressWarnings("unchecked")
-    private void mapProcess(Object message) {
+    private void mapProcess(Object message) throws Exception {
         Map<String, Object> map = (Map<String, Object>)message;
         MsgBotReceive receive = (MsgBotReceive) map.get("Content");
         receive.setReferenceId(Objects.toString(map.get("iMsgId")));
@@ -85,7 +90,7 @@ public class ReceivingMsgHandlerMsgReceiveOp extends UntypedActor {
      * @param mid mid
      * @param now now
      */
-    private void blockFriend(MsgBotReceive receive, String mid, Date now) {
+    private void blockFriend(MsgBotReceive receive, String mid, Date now) throws Exception {
         LineUserStatusService lineUserStatusService = ApplicationContextProvider.getApplicationContext().getBean(LineUserStatusService.class);
         LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
         LineUser lineUser = lineUserService.findByMid(receive.getSourceId());
@@ -122,7 +127,7 @@ public class ReceivingMsgHandlerMsgReceiveOp extends UntypedActor {
      * @param mid mid
      * @param now now
      */
-    private void newFriend(MsgBotReceive receive, String mid, Date now) {
+    private void newFriend(MsgBotReceive receive, String mid, Date now) throws Exception {
         log.info("---------- newFriend ----------");
         LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
         LineUser lineUser = lineUserService.findByMid(receive.getSourceId());

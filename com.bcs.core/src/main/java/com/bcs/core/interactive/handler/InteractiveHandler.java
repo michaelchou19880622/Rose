@@ -32,7 +32,6 @@ public class InteractiveHandler {
 	protected LoadingCache<String, Long> linkJoin;
 
 	public InteractiveHandler(){
-
 		linkJoin = CacheBuilder.newBuilder()
 				.concurrencyLevel(1)
 				.expireAfterAccess(30, TimeUnit.MINUTES)
@@ -60,36 +59,26 @@ public class InteractiveHandler {
 	}
 
 	public Map<Long, List<MsgDetail>> checkJoinInteractive(String MID, String keyword) throws Exception{
-		logger.info("checkJoinInteractive");
 		Long iMsgId = linkJoin.get(MID);
-		logger.info("iMsgId = " + iMsgId);
-
+		logger.info("Checked keyword message by UID, UID=" + MID + " iMsgId=" + iMsgId);
 		if(iMsgId > 0L){
-			logger.debug("Interactive Detail Create Step 2");
 			Map<Long, List<MsgDetail>> result = new HashMap<Long, List<MsgDetail>>();
 			List<MsgDetail> list = new ArrayList<MsgDetail>();
 			List<MsgDetail> details = interactiveService.getMsgDetails(iMsgId);
-
 			for(MsgDetail detail : details){
 				if(MsgGeneratorExtend.MSG_TYPE_INTERACTIVE_LINK.equals(detail.getMsgType())){
-
 					MsgDetail set = (MsgDetail)detail.clone();
 					set.setText(keyword);
-
 					list.add(set);
 				}
 			}
-
 			linkJoin.put(MID, 0L);
-
 			if(list.size() > 0){
-				logger.debug("Interactive Detail Create Step 2 Success");
 				result.put(iMsgId, list);
-
 				return result;
 			}
 		}
-
+		logger.info("No message detail found, UID=" + MID + " iMsgId = " + iMsgId);
 		return null;
 	}
 

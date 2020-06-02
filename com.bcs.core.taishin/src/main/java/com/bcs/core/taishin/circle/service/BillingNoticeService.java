@@ -4,7 +4,6 @@ import akka.actor.ActorRef;
 import com.bcs.core.db.entity.ContentResource;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.enums.EMAIL_CONFIG;
-import com.bcs.core.enums.LINE_HEADER;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.resource.UriHelper;
 import com.bcs.core.taishin.circle.db.entity.BillingNoticeContentTemplateMsg;
@@ -67,10 +66,6 @@ public class BillingNoticeService {
     private BillingNoticeContentTemplateMsgRepository billingNoticeContentTemplateMsgRepository;
     @Autowired
     private BillingNoticeContentTemplateMsgActionRepository billingNoticeContentTemplateMsgActionRepository;
-    @Autowired
-    private BillingNoticeAkkaService billingNoticeAkkaService;
-    @Autowired
-    private BillingNoticeService billingNoticeService;
 
     /**
      * 找尋開啟的templateId
@@ -155,10 +150,17 @@ public class BillingNoticeService {
      */
     public void updateMainAndDetailStatus(BillingNoticeMain billingNoticeMain, String status) {
         List<BillingNoticeDetail> details = billingNoticeMain.getDetails();
+        List<BillingNoticeDetail> detailList = new ArrayList<>();
+        
         for (BillingNoticeDetail detail : details) {
             detail.setStatus(status);
-            billingNoticeDetailRepository.save(detail);
+            /* 效能優化 ： 組裝detailList , 一次儲存 */
+            detailList.add(detail);            
         }
+        /* Update detail */
+        if (!detailList.isEmpty()) {
+            billingNoticeDetailRepository.save(detailList);
+        }        
         billingNoticeMainRepository.updateBillingNoticeMainStatus(status, new Date(), billingNoticeMain.getNoticeMainId());
     }
 
@@ -238,55 +240,51 @@ public class BillingNoticeService {
     }
 
     public void pushLineMessage(BillingNoticeMain billingNoticeMain, ActorRef sendRef, ActorRef selfActorRef) {
-        log.info("Push Line Message!!");
+        log.info("Sending a Line Push message, noticeMainId=" + billingNoticeMain.getNoticeMainId());
+        BillingNoticeContentTemplateMsg templateMsg = billingNoticeMain.getTemplate();
+        if (templateMsg == null) {
+        	log.info("Ignored a Line Push sending due to no template, noticeMainId=" + billingNoticeMain.getNoticeMainId());
+            return;
+        }
         String url = CoreConfigReader.getString(CONFIG_STR.LINE_MESSAGE_PUSH_URL.toString());
         String accessToken = CoreConfigReader.getString(CONFIG_STR.DEFAULT.toString(), CONFIG_STR.CHANNEL_TOKEN.toString(), true);
-//        String serviceCode = CoreConfigReader.getString(CONFIG_STR.AUTO_REPLY.toString(), CONFIG_STR.CHANNEL_SERVICE_CODE.toString(), true);
-
         /* Headers */
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
         headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-//        headers.set(LINE_HEADER.HEADER_BOT_ServiceCode.toString(), serviceCode);
-
-        BillingNoticeContentTemplateMsg templateMsg = billingNoticeMain.getTemplate();
-
-        if (templateMsg == null) {
-            log.error("Template Error: BillingNoticeContentTemplateMsg or BillingNoticeContentTemplateMsgAction is empty");
-            return;
-        }
+        List<BillingNoticeDetail> detailList = new ArrayList<>();
 
         for (BillingNoticeDetail detail : billingNoticeMain.getDetails()) {
             boolean isDoRetry;
             int i = 0;
             int retryCountLimit = DEFAULT_RETRY_COUNT;
+            log.info("Sending a detail to Line, Uid={}", detail.getUid());
             do {
                 i++;
                 if (i > 1) {
-                	// Only Log when counter >= 2.
-	                log.info("This is count is {}", i);
+                	log.info("Retrying to send the detail to Line, retryCount={}", i);
                 }
-                log.info("To Line Uid: {}", detail.getUid());
-
                 JSONObject requestBody = new JSONObject();
                 requestBody.put("to", detail.getUid());
                 requestBody.put("messages", combineLineMessage(templateMsg, detail));
                 HttpEntity<String> httpEntity = new HttpEntity<>(requestBody.toString(), headers);
-
                 try {     
                     /* Production 才真正發送訊息 
                      * 
                      * 注意 : 不能使用isSystemTypeProduction() 進行判斷, 目前設定都是Develop mode.
                      * 
                      * */
-            		if(!CoreConfigReader.isPNPFtpTypeDevelop()){
+                	
+                	// 判斷非Develop模式且為prod環境，才可以發送至LINE。
+            		if(!CoreConfigReader.isBillingNoticeFtpTypeDevelop() && "prod".equals(CoreConfigReader.getString("environment"))){
                         RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
                         JSONObject result = restfulUtil.execute();
                         log.info("Result: {}", result.toString());
-            		}                	
+            		}
+            		
                     detail.setStatus(BillingNoticeMain.NOTICE_STATUS_COMPLETE);
                     detail.setSendTime(new Date());
-                    log.info("Execute Success!!");
+                    log.info("Sent a detail successfully");
                     isDoRetry = false;
                 } catch (KeyManagementException | NoSuchAlgorithmException e1) {
                     log.info("NOTICE_STATUS_RETRY NoticeDetailId:" + detail.getNoticeDetailId());
@@ -325,15 +323,15 @@ public class BillingNoticeService {
             if (!BillingNoticeMain.NOTICE_STATUS_COMPLETE.equals(detail.getStatus())) {
                 detail.setStatus(BillingNoticeMain.NOTICE_STATUS_FAIL);
             }
-
-            /* Update detail */
-            billingNoticeDetailRepository.save(detail);
+            /* 效能優化 ： 組裝detailList , 一次儲存 */
+            detailList.add(detail);
         }
-        
-        // TODO:再檢查一次Detail
-        
-        log.info("Complete Main is [{}]", billingNoticeMain.getNoticeMainId());
+        /* Update detail */
+        if (!detailList.isEmpty()) {
+        	billingNoticeDetailRepository.save(detailList);
+        }
         billingNoticeMainRepository.updateBillingNoticeMainStatus(BillingNoticeMain.NOTICE_STATUS_COMPLETE, new Date(), billingNoticeMain.getNoticeMainId());
+        log.info("Finished a Line Push message successfully, noticeMainId=" + billingNoticeMain.getNoticeMainId());
     }
 
 

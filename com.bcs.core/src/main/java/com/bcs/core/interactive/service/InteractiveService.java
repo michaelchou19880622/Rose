@@ -105,9 +105,7 @@ public class InteractiveService {
     }
 
     public InteractiveService() {
-
         flushTimer.schedule(new CustomTask(), 120000, 30000);
-
         indexSetting = this.indexSetting();
     }
 
@@ -303,32 +301,27 @@ public class InteractiveService {
      * @throws ExecutionException
      */
     public Map<Long, List<MsgDetail>> getMatchKeyword(String MID, String userStatus, String keyword) throws Exception {
-
-        log.info("getMatchKeyword:" + MID + "-userStatus:" + userStatus + "-keyword:" + keyword);
+        log.info("Finding a match keyword, UID=" + MID + " userStatus=" + userStatus + " keyword=" + keyword);
         Map<Long, List<MsgDetail>> result = interactiveHandler.checkJoinInteractive(MID, keyword);
         if (result != null && result.size() > 0) {
-            log.info("checkJoinInteractive Success");
+            log.info("Found a auto-reply keyword by UID");
             return result;
         } else {
             result = new HashMap<Long, List<MsgDetail>>();
         }
-
         // MatchBlackKeyword
         Long iMsgIdBlack = getMatchBlackKeywordMsgId(userStatus, keyword);
-        log.info("iMsgIdBlack = " + iMsgIdBlack);
         if (iMsgIdBlack != null) {
+        	log.info("Found a black keywoard, iMsgIdBlack=" + iMsgIdBlack);
             return null;
         }
-
         MsgInteractiveMain main = getMatchKeywordMain(userStatus, keyword, MID);
-        log.info("main = " + main);
         if (main == null) {
+        	log.info("No interactive keywoard found");
             return null;
         }
-
         List<MsgDetail> details = getMsgDetails(main.getiMsgId());
-        log.info("details = " + details);
-
+        log.info("Found an interactive keywoard, main=" + main + " details=" + details);
         /* 針對活動流程判斷 */
         if (MsgInteractiveMain.INTERACTIVE_TYPE_CAMPAIGN.equals(main.getInteractiveType())) {
             details = campaignFlowHandler.startFlow(MID, main);
@@ -336,7 +329,6 @@ public class InteractiveService {
             details = interactiveHandler.checkIsInteractive(MID, main, details);
         }
         result.put(main.getiMsgId(), details);
-
         return result;
     }
 
@@ -369,13 +361,10 @@ public class InteractiveService {
 
     private List<Long> indexSetting() {
         List<Long> result = new ArrayList<Long>();
-
         for (long i = 1; i < MsgInteractiveMain.indexLimit + 1; i++) {
             result.add(i);
         }
-
         result.add(-1L);
-
         return result;
     }
 
@@ -388,38 +377,24 @@ public class InteractiveService {
      * @return
      */
     private MsgInteractiveMain getMatchKeywordMain(String userStatus, String keyword, String MID) {
-
-        log.info("getMatchKeywordMain");
-        log.info("keywordMap = " + keywordMap);
-
-        log.info("userStatus = " + userStatus);
-        log.info("keyword = " + keyword);
-        log.info("MID = " + MID);
-
-		synchronized (lock) {
-
-            log.info("indexSetting = " + indexSetting);
+        log.info("Finding a keyword from map, UID=" + MID + " userStatus=" + userStatus + " keyword=" + keyword + "indexSetting=" + indexSetting + " map=" + keywordMap);
+        synchronized (lock) {
             // Different Index
             for (Long index : indexSetting) {
-                log.info("index = " + index);
                 Map<String, Map<String, List<Long>>> indexMap = keywordMap.get(index);
-                log.info("indexMap = " + indexMap);
+                log.info("index=" + index + " indexMap=" + indexMap);
                 if (indexMap != null) {
                     Map<String, List<Long>> map = indexMap.get(userStatus);
                     log.info("map = " + map);
-
                     if (StringUtils.isNotBlank(keyword)) {
                         keyword = keyword.toLowerCase();
-                        log.info("keyword = " + keyword);
-
                         if (map != null) {
-
                             // Keyword
                             List<Long> list = map.get(keyword);
-                            log.info("list = " + list);
+                            log.info("list=" + list);
                             if (list != null && list.size() > 0) {
                                 MsgInteractiveMain main = checkMatch(list, MID);
-                                log.info("main = " + main);
+                                log.info("main=" + main);
                                 if (main != null) {
                                     return main;
                                 }
@@ -429,11 +404,9 @@ public class InteractiveService {
                 }
             }
 
-            if (autokeywordMap != null && autokeywordMap.size() > 0 &&
-                    autokeywordMap.get(userStatus) != null && autokeywordMap.get(userStatus).size() > 0) {
+            if (autokeywordMap != null && autokeywordMap.size() > 0 && autokeywordMap.get(userStatus) != null && autokeywordMap.get(userStatus).size() > 0) {
                 return checkMatch(autokeywordMap.get(userStatus), MID);
             }
-
             return null;
         }
     }

@@ -58,7 +58,6 @@ public class AkkaBotService {
 
     private ActorRef randomMaster(List<ActorRef> masters) {
         log.debug("randomMaster Size:" + masters.size());
-
         int index = new Random().nextInt(masters.size());
         return masters.get(index);
     }

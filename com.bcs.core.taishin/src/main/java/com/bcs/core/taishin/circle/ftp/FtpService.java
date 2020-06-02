@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.resource.CoreConfigReader;
-import com.bcs.core.utils.DataUtils;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
@@ -431,7 +430,6 @@ public class FtpService {
      * @return 下載的檔案內容
      */
     public Map<String, byte[]> downloadMultipleFileByType(String directory, String extension, FtpSetting setting) {
-        // log.info(setting.getHost() + " setting getFileEncoding:" + setting.getFileEncoding());
         if ("sftp".equalsIgnoreCase(setting.getProtocol())) {
             if (CoreConfigReader.isBillingNoticeFtpTypeDevelop()) {
                 return downloadMultipleFileInSFTPForDev(directory, extension, setting);
@@ -859,7 +857,7 @@ public class FtpService {
             ftpClient.setControlEncoding(setting.getFileEncoding());
             ftpClient.changeWorkingDirectory(pDirectory);
             for (String lFileName : pFileNames) {
-                log.info("Delete File Name is : {}", lFileName);
+                log.info("Deleting an FTP file, filename={}", lFileName);
                 boolean success = ftpClient.deleteFile(lFileName);
                 setting.removeFileNames(lFileName);
                 if (!success) {

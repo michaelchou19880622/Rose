@@ -18,22 +18,22 @@ import java.util.Date;
  */
 @Slf4j(topic = "BNRecorder")
 public class BillingNoticePushMessageActor extends UntypedActor {
-
     @Override
     public void onReceive(Object object) {
         Thread.currentThread().setName("Actor-BN-Push-" + Thread.currentThread().getId());
-        log.info("Push Actor Receive!!");
         try {
             BillingNoticeMain billingNoticeMain = (BillingNoticeMain) object;
             switch (billingNoticeMain.getSendType()) {
                 case BillingNoticeMain.SENDING_MSG_TYPE_IMMEDIATE:
+                	log.info("Received an immediate BN request, noticeMainId=" + billingNoticeMain.getNoticeMainId());
                     immediate(billingNoticeMain);
                     break;
                 case BillingNoticeMain.SENDING_MSG_TYPE_DELAY:
+                	log.info("Received a delayed BN request, noticeMainId=" + billingNoticeMain.getNoticeMainId());
                     delay(billingNoticeMain);
                     break;
                 default:
-                    log.error("BillingNoticePushMessageActor Type:" + billingNoticeMain.getSendType() + " no Action");
+                	log.info("Ignored an unexpected BN request, type=" + billingNoticeMain.getSendType());
             }
         } catch (Exception e) {
             log.error("Exception", e);
@@ -46,12 +46,10 @@ public class BillingNoticePushMessageActor extends UntypedActor {
             immediate(billingNoticeMain);
             return;
         }
-        log.info("Delay!!");
         ApplicationContextProvider.getApplicationContext().getBean(BillingNoticeTaskService.class).startTask(billingNoticeMain, scheduleTime);
     }
 
     private void immediate(BillingNoticeMain billingNoticeMain) {
-        log.info("Immediate!!");
         ApplicationContextProvider.getApplicationContext().getBean(BillingNoticeService.class).pushLineMessage(billingNoticeMain, this.getSender(), this.getSelf());
     }
 }

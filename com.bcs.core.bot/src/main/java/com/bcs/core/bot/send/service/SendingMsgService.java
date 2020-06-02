@@ -179,20 +179,9 @@ public class SendingMsgService {
     }
 
     public void sendMatchMessage(String replyToken, Long iMsgId, List<MsgDetail> details, String channelId, String mid, String apiType, String targetId, int retryCount) throws Exception {
-
-        log.info("replyToken = " + replyToken);
-        log.info("iMsgId = " + iMsgId);
-        log.info("details = " + details);
-        log.info("channelId = " + channelId);
-        log.info("mid = " + mid);
-        log.info("apiType = " + apiType);
-        log.info("targetId = " + targetId);
-        log.info("retryCount = " + retryCount);
-
+        log.info("replyToken=" + replyToken + " iMsgId=" + iMsgId + " channelId=" + channelId + " UID=" + mid + " apiType=" + apiType + " targetId=" + targetId + " retryCount=" + retryCount + " details=" + details);
         if (details != null && !details.isEmpty()) {
-
             MsgInteractiveMain msgInteractiveMain = null;
-
             if (iMsgId != null) {
                 msgInteractiveMain = msgInteractiveMainService.findOne(iMsgId);
                 log.info("msgInteractiveMain = " + msgInteractiveMain);
@@ -201,7 +190,6 @@ public class SendingMsgService {
             Map<String, String> replaceParam = null;
 
             if (msgInteractiveMain != null) {
-
                 if (StringUtils.isNotBlank(msgInteractiveMain.getSerialId())) {
                     replaceParam = serialSettingService.getSerialSettingReplaceParam(msgInteractiveMain.getSerialId(), mid);
                     if (replaceParam == null) {
@@ -211,7 +199,6 @@ public class SendingMsgService {
             }
 
             List<Message> messageList = MsgGeneratorFactory.validateMessagesWichMessage(details, mid, replaceParam);
-
             SendToBotModel sendToBotModel = new SendToBotModel();
             sendToBotModel.setChannelId(channelId);
             sendToBotModel.setSendType(SEND_TYPE.REPLY_MSG);
@@ -251,20 +238,15 @@ public class SendingMsgService {
                 log.error(ErrorRecord.recordError(e));
                 if (retryCount < 5 && StringUtils.isBlank(codeError)) {
                     this.sendMatchMessage(replyToken, iMsgId, details, channelId, mid, apiType, targetId, retryCount + 1);
-                } else {
-                    // Call Line Fail >= 5
                 }
             }
-
             
             if (retryCount == 0) {
                 // Update 關鍵字回應 記數
                 msgInteractiveMainService.increaseSendCountByMsgInteractiveId(iMsgId);
-//				ApplicationContextProvider.getApplicationContext().getBean(AkkaCoreService.class).recordMsgs(new MsgInteractiveRecord(iMsgId));
             }
         }
     }
-    
     
     public void sendMatchMessage(Long iMsgId, String channelId, String mid, String apiType, String targetId) throws Exception {
         this.sendMatchMessage(iMsgId, channelId, mid, apiType, targetId, 0);

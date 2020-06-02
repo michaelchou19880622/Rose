@@ -56,12 +56,12 @@ public class LineBotApiController {
     @WebServiceLog
     @PostMapping(value = "/bot/api/receiving/{channelId}/{channelName}", consumes = MediaType.APPLICATION_JSON_VALUE + "; charset=UTF-8")
     public void lineBotApiReceiving(@RequestBody String receivingMsg, @PathVariable String channelId, @PathVariable String channelName, HttpServletRequest request, HttpServletResponse response) {
-        log.info("LineBotApi Receiving start!!");
         Date start = new Date();
         try {
-            log.info("Receiving Message: {}", DataUtils.toPrettyJsonUseJackson(receivingMsg));
+            log.info("Received a LineBotApi Message: {}", DataUtils.toPrettyJsonUseJackson(receivingMsg));
             String channelSignature = request.getHeader(LINE_HEADER.HEADER_BOT_ChannelSignature.toString());
             if (signatureValidIsFail(receivingMsg, channelName, response, start, channelSignature)) {
+            	responseProcess(receivingMsg, response, start, "Signature Valid Fail!!", 470, "470");
                 return;
             }
             akkaBotService.receivingMsgs(new ReceivedModelOriginal(receivingMsg, channelId, channelName, channelSignature, API_TYPE.BOT));
@@ -83,7 +83,6 @@ public class LineBotApiController {
         if (CoreConfigReader.getBoolean(CONFIG_STR.SYSTEM_CHECK_SIGNATURE)) {
             boolean validIsFail = !SignatureValidationHelper.signatureValidation(receivingMsg, channelName, channelSignature);
             if (validIsFail) {
-                responseProcess(receivingMsg, response, start, "Signature Valid Fail!!", 470, "470");
                 return true;
             }
         }

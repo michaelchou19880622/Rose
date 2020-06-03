@@ -115,7 +115,7 @@ public class LineAccessApiService {
     }
 
     private static LineMessagingService getService(String channelId, String channelName) {
-        log.debug("getService");
+        log.info("getService");
         
         log.debug("channelId = {}", channelId);
         log.debug("channelName = {}", channelName);
@@ -169,7 +169,7 @@ public class LineAccessApiService {
     }
     
     private static LineMessagingService getServiceWithServiceCode(String channelId, String channelName) {
-        log.debug("getServiceWithServiceCode");
+        log.info("getServiceWithServiceCode");
         
         log.debug("channelId = {}", channelId);
         log.debug("channelName = {}", channelName);
@@ -246,7 +246,7 @@ public class LineAccessApiService {
     }
 
     public static Response<BotApiResponse> sendToLine(SendToBotModel sendToBotModel) throws Exception {
-        log.debug("sendToLine");
+        log.info("sendToLine");
 		log.debug("sendToBotModel = {}", sendToBotModel);
 		log.debug("sendToBotModel.getSendType() = {}", sendToBotModel.getSendType());
 
@@ -344,7 +344,7 @@ public class LineAccessApiService {
     }
     
     public static Response<BotApiResponse> sendToLineWithServiceCode(SendToBotModel sendToBotModel) throws Exception {
-        log.debug("sendToLineWithServiceCode");
+        log.info("sendToLineWithServiceCode");
 		log.debug("sendToBotModel = {}", sendToBotModel);
 		log.debug("sendToBotModel.getSendType() = {}", sendToBotModel.getSendType());
 
@@ -481,7 +481,7 @@ public class LineAccessApiService {
 
         LineTokenApiService lineTokenApiService = ApplicationContextProvider.getApplicationContext().getBean(LineTokenApiService.class);
         ObjectNode callVerifyResult = lineTokenApiService.callVerifyAPI(accessToken);
-        log.debug("callVerifyResult:" + callVerifyResult);
+        log.info("callVerifyResult:" + callVerifyResult);
 
         JsonNode expiresIn = callVerifyResult.get("expires_in");
 
@@ -516,7 +516,7 @@ public class LineAccessApiService {
         LineTokenApiService lineTokenApiService = ApplicationContextProvider.getApplicationContext().getBean(LineTokenApiService.class);
         SystemConfigService systemConfigService = ApplicationContextProvider.getApplicationContext().getBean(SystemConfigService.class);
         ObjectNode callRefreshingResult = lineTokenApiService.callRefreshingAPI(clientId, clientSecret);
-        log.debug("callRefreshingResult:" + callRefreshingResult);
+        log.info("callRefreshingResult:" + callRefreshingResult);
 
         JsonNode accessToken = callRefreshingResult.get("access_token");
 

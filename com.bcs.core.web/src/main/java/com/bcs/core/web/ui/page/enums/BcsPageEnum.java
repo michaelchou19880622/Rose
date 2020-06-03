@@ -152,6 +152,10 @@ public enum BcsPageEnum {
     // PNP Report
     PNP_DETAIL_REPORT_PAGE("/BCS/Views/PagepnpDetailReport"),
     PNP_ANALYSIS_REPORT_PAGE("/BCS/Views/PagepnpAnalysisReport"),
+    
+    // PNP BlackList
+    PNP_EXCLUDE_SENDING_LIST_PAGE("/BCS/Views/PagePnpExcludeSendingList"),
+    PNP_EXCLUDE_SENDING_LIST_HISTORY_PAGE("/BCS/Views/PagePnpExcludeSendingListHistory"),
 
     //Game
     GameCreatePage("/BCS/Views/PageG1"),

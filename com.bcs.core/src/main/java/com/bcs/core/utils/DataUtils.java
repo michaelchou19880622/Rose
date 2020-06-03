@@ -69,6 +69,10 @@ public class DataUtils {
      */
     public static String toPrettyJsonUseJackson(String jsonString) {
         try {
+        	if (jsonString == null || jsonString.length() == 0) {
+        		return null;
+        	}
+        	
             ObjectMapper mapper = new ObjectMapper();
             Object jsonObject = mapper.readValue(jsonString, Object.class);
 

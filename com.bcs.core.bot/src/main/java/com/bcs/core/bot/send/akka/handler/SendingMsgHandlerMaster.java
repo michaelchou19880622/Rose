@@ -44,14 +44,14 @@ public class SendingMsgHandlerMaster extends UntypedActor {
 
 	@Override
 	public void onReceive(Object message) throws Exception {
-		log.info("SendingMsgHandlerMaster onReceive");
+		log.debug("SendingMsgHandlerMaster onReceive");
 
 		if (message instanceof AsyncSendingModel) {
-			log.info("message instanceof AsyncSendingModel");
+			log.debug("message instanceof AsyncSendingModel");
 			
 			AsyncSendingModel msg = (AsyncSendingModel)message;
-			log.info("msg = {}", msg);
-			log.info("msg.getMidList() = {}", msg.getMidList());
+			log.debug("msg = {}", msg);
+			log.debug("msg.getMidList() = {}", msg.getMidList());
 			
 			if(msg != null && msg.getMidList() != null){
 
@@ -60,11 +60,11 @@ public class SendingMsgHandlerMaster extends UntypedActor {
 					sendMids.add(mid);
 
 					if (sendMids.size() % pageSize == 0) {
-						log.info("sendMids.size() = {}", sendMids.size());
+						log.debug("sendMids.size() = {}", sendMids.size());
 
 						// Handle : Sending
 						AsyncSendingModel model = new AsyncSendingModel(sendMids, msg.getChannelId(), msg.getMsgGenerators(), msg.getApiType(), msg.getUpdateMsgId());
-						log.info("1-1 model = {}", model);
+						log.debug("1-1 model = {}", model);
 						
 						routerActor.tell(model, getSelf());
 						taskCount.addAndGet(sendMids.size());
@@ -73,11 +73,11 @@ public class SendingMsgHandlerMaster extends UntypedActor {
 				}
 
 				if (sendMids.size() > 0) {
-					log.info("sendMids.size() = {}", sendMids.size());
+					log.debug("sendMids.size() = {}", sendMids.size());
 					
 					// Handle : Sending Else
 					AsyncSendingModel model = new AsyncSendingModel(sendMids, msg.getChannelId(), msg.getMsgGenerators(), msg.getApiType(), msg.getUpdateMsgId());
-					log.info("1-2 model = {}", model);
+					log.debug("1-2 model = {}", model);
 					
 					routerActor.tell(model, getSelf());
 					taskCount.addAndGet(sendMids.size());
@@ -90,11 +90,11 @@ public class SendingMsgHandlerMaster extends UntypedActor {
 			}
 		}
 		else if (message instanceof AsyncSendingModelError) {
-			log.info("message instanceof AsyncSendingModelError");
+			log.debug("message instanceof AsyncSendingModelError");
 			
 			AsyncSendingModelError msg = (AsyncSendingModelError)message;
-			log.info("msg = {}", msg);
-			log.info("msg.msg.retryTimeAdd() = {}", msg.retryTimeAdd());
+			log.debug("msg = {}", msg);
+			log.debug("msg.msg.retryTimeAdd() = {}", msg.retryTimeAdd());
 			
 			// Retry
 			if(msg.retryTimeAdd() < 5){
@@ -109,11 +109,11 @@ public class SendingMsgHandlerMaster extends UntypedActor {
 			}
 		}
 		else if (message instanceof AsyncSendingModelSuccess) {
-			log.info("message instanceof AsyncSendingModelSuccess");
+			log.debug("message instanceof AsyncSendingModelSuccess");
 			
 			AsyncSendingModelSuccess success = (AsyncSendingModelSuccess) message;
-			log.info("success = {}", success);
-			log.info("success.getMids().size() = {}", success.getMids().size());
+			log.debug("success = {}", success);
+			log.debug("success.getMids().size() = {}", success.getMids().size());
 
 			if(success != null && success.getMids().size() > 0){
 				// Setting Check Task Count
@@ -130,11 +130,11 @@ public class SendingMsgHandlerMaster extends UntypedActor {
 			}
 		}
 		else if(message instanceof AsyncEsnSendingModel) {
-			log.info("message instanceof AsyncEsnSendingModel");
+			log.debug("message instanceof AsyncEsnSendingModel");
 			
 		    AsyncEsnSendingModel msg = (AsyncEsnSendingModel)message;
-			log.info("msg = {}", msg);
-			log.info("msg.getEsnDetails() = {}", msg.getEsnDetails());
+			log.debug("msg = {}", msg);
+			log.debug("msg.getEsnDetails() = {}", msg.getEsnDetails());
 
 		    List<ContentEsnDetail> esnDetails = new ArrayList<>();
 		    
@@ -158,11 +158,11 @@ public class SendingMsgHandlerMaster extends UntypedActor {
 		    }
 		}
 		else if(message instanceof AsyncEsnSendingModelError) {
-			log.info("message instanceof AsyncEsnSendingModelError");
+			log.debug("message instanceof AsyncEsnSendingModelError");
 			
 		    AsyncEsnSendingModelError error = (AsyncEsnSendingModelError)message;
-			log.info("error = {}", error);
-			log.info("error.retryTimeAdd() = {}", error.retryTimeAdd());
+			log.debug("error = {}", error);
+			log.debug("error.retryTimeAdd() = {}", error.retryTimeAdd());
 
 		    if(error.retryTimeAdd() < 5){
                 routerActor.tell(message, getSelf());
@@ -181,23 +181,23 @@ public class SendingMsgHandlerMaster extends UntypedActor {
             }
 		}
 		else if(message instanceof AsyncEsnSendingModelSuccess) {
-			log.info("message instanceof AsyncEsnSendingModelSuccess");
+			log.debug("message instanceof AsyncEsnSendingModelSuccess");
 			
 		    AsyncEsnSendingModelSuccess success = (AsyncEsnSendingModelSuccess)message;
-			log.info("success = {}", success);
+			log.debug("success = {}", success);
 
 		    ApplicationContextProvider.getApplicationContext().getBean(ContentEsnDetailService.class).updateStatusAndSendTimeByDetailIds(ContentEsnDetail.STATUS_FINISH, success.getDate(), success.getSuccessDetailIds());
 		}
 	}
 
 	private void saveMsgSendLog(AsyncSendingModelError msg){
-		log.info("---------- saveMsgSendLog ----------");
+		log.debug("---------- saveMsgSendLog ----------");
 		
-		log.info("AsyncSendingModelError msg = {}", msg);
+		log.debug("AsyncSendingModelError msg = {}", msg);
 
 		try{
 			List<String> mids = msg.getMids();
-			log.info("mids = {}", mids);
+			log.debug("mids = {}", mids);
 			
 			for (String mid : mids) {
 				MsgSendRecord msgSend = new MsgSendRecord();
@@ -213,7 +213,7 @@ public class SendingMsgHandlerMaster extends UntypedActor {
 //				ApplicationContextProvider.getApplicationContext().getBean(AkkaCoreService.class).recordMsgs(msgSend);
 			}
 
-			log.info("---------- saveMsgSendLog completed ----------");
+			log.debug("---------- saveMsgSendLog completed ----------");
 		}
 		catch(Exception e){
 			log.error(ErrorRecord.recordError(e));
@@ -221,9 +221,9 @@ public class SendingMsgHandlerMaster extends UntypedActor {
 	}
 
 	private void saveMsgSendLog(AsyncSendingModelSuccess success){
-		log.info("---------- saveMsgSendLog ----------");
+		log.debug("---------- saveMsgSendLog ----------");
 		
-		log.info("AsyncSendingModelSuccess success = {}", success);
+		log.debug("AsyncSendingModelSuccess success = {}", success);
 
 		try{
 			List<String[]> mids = success.getMids();
@@ -242,7 +242,7 @@ public class SendingMsgHandlerMaster extends UntypedActor {
 //				ApplicationContextProvider.getApplicationContext().getBean(AkkaCoreService.class).recordMsgs(msgSend);
 			}
 
-			log.info("---------- saveMsgSendLog completed ----------");
+			log.debug("---------- saveMsgSendLog completed ----------");
 		}
 		catch(Exception e){
 			log.error(ErrorRecord.recordError(e));

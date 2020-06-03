@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.springframework.org/security/tags"
+	th:with="strList = ${ {'/BCS/JS/PagePnpExcludeSendingList.base.js'} }">
+<head th:replace="/BCS/Views/Common/Head :: head ('PNP Exclude Sending List Page', ${strList})"></head>
+<body>
+	<header th:replace="/BCS/Views/Common/Header :: header"></header>
+	
+	<div class="LyContents">
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('PagePnpExcludeSendingList')"></div>
+		
+		<div class="LyMain" role="main" style="padding-right: 20px; padding-left: 20px;">
+			<form>
+				<section>
+					<header class="ContentHead">
+						<h3 class="CHTtl">排除發送中名單列表</h3>
+					</header>
+					
+					<div class="CHBtnSet">
+						<div class="CHLeft" style="width:100%;">
+	                    	<div>
+								<label style="display: inline-block; width: 80px;" class="param-label">手機門號：</label> 
+								<input class="customSearchInput" type="text" id="accountInput" name="accountInput" value="" maxlength="30" />
+								<label style="display: inline-block; width: 80px; padding-left:10px" class="param-label">異動人員：</label> 
+								<input class="customSearchInput" type="text" id="pccCodeInput" name="pccCodeInput" value="" maxlength="20" />
+								<input class="customBtn" id="searchBtn" style="float:right; width: 120px; cursor: pointer;" type="button" value="查詢">
+	                    	</div>
+							<div class="paramGroup" style="margin-top:8px;">
+								<label style="display: inline-block; width: 80px;" class="param-label">更新時間：</label>
+		                    	<div class="option date">
+									<input type="text" class="datepicker" id="startDate" placeholder="YYYY-MM-DD" />
+								</div>
+		                       	<span>~</span>
+		                       	<div class="option date">
+									<input type="text" class="datepicker" id="endDate" placeholder="YYYY-MM-DD" />
+								</div>
+								
+								<label style="display: inline-block; width: 80px; padding-left:10px" class="param-label">客群標籤：</label> 
+<!-- 								<input class="customSearchInput" type="text" id="pccCodeInput" name="pccCodeInput" value="" maxlength="20" /> -->
+                                <div class="optionGuestLabel queryValueComponentSelectList">
+                                    <div class="optionLabelGuestLabel">請選擇</div>
+                                    <select class="optionSelectGuestLabel queryValue" name="queryValue">
+                                        <option value="">請選擇</option>
+                                    </select>
+                                </div>
+								
+								<input class="customBtn" id="exportBtn" style="float:right; width: 120px; cursor: pointer;" type="button" value="匯出">
+								<input class="customBtn" id="createBtn" style="float:right; width: 120px; cursor: pointer; margin-right: 10px;" type="button" value="建立">
+							</div>
+						</div>
+					</div>
+					
+					<div class="mainFrame alignLeft">
+						<table border="1" id="tableBody">
+							<colgroup>
+								<col width="60">  <!-- 手機門號 -->
+								<col width="150">  <!-- LINE UID -->
+								<col width="150">  <!-- 原因 -->
+								<col width="80">  <!-- 更新時間 -->
+								<col width="50">  <!-- 狀態 -->
+								<col width="50">  <!-- 客群標籤 -->
+								<col width="50">  <!-- 異動人員 -->
+								<col width="50">  <!-- 功能 -->
+							</colgroup>
+							<tr align="left" >
+								<th class="td10" style="font-size:11px;">手機門號</th>
+								<th class="td10" style="font-size:11px;">LINE UID</th>
+								<th class="td10" style="font-size:11px;">原因</th>
+								<th class="td10" style="font-size:11px;">更新時間</th>
+								<th class="td10" style="font-size:11px;">狀態</th>
+								<th class="td10" style="font-size:11px;">客群標籤</th>
+								<th class="td10" style="font-size:11px;">異動人員</th>
+								<th class="td10" style="font-size:11px;">功能</th>
+							</tr>
+							<tr class="dataTemplate">
+								<td rowspan="1" style="font-size:11px;" class="td1 mobileNum"></td>
+								<td rowspan="1" style="font-size:11px;" class="td1 lineUID"></td>
+								<td rowspan="1" style="font-size:11px;" class="td1 reason"></td>
+								<td rowspan="1" style="font-size:11px;" class="td1 updateTime"></td>
+								<td rowspan="1" style="font-size:11px;" class="td1 status"></td>
+								<td rowspan="1" style="font-size:11px;" class="td1 guestLabel"></td>
+								<td rowspan="1" style="font-size:11px;" class="td1 modifier"></td>
+                                <td>
+                                    <input class="btn_delete" style="cursor: pointer;" type="button" value="取消">
+                                </td>
+							</tr>
+						</table>
+					</div>
+					<div class="CHBtnSet">
+						<div class="CHLeft">
+							<input id="btn_PreviousPage" type="button" value="<" style="cursor: pointer;"> 
+								<label style="padding: 0px 5px 0px 5px; font-weight: bold; color: black;">第</label> 
+								<label id="currentPageIndex" style="padding: 0px 5px 0px 5px; font-weight: bold; color: black;">-</label> 
+								<label style="padding: 0px 5px 0px 5px; font-weight: bold; color: black;">/</label> 
+								<label id="totalPageSize" style="padding: 0px 5px 0px 5px; font-weight: bold; color: black;">-</label> 
+								<label style="padding: 0px 5px 0px 5px; font-weight: bold; color: black;">頁</label> 
+							<input id="btn_NextPage" type="button" value=">" style="cursor: pointer;">
+						</div>
+						<div class="CHRight">
+							<label style="padding: 0px 0px 0px 5px; font-weight: bold; color: black;">每頁顯示資料筆數</label>
+							<div class="optionPageSize">
+								<div class="optionLabelPageSize">10</div>
+								<select id="keywordSelector" class="optionSelectPageSize" name="">
+									<option value="5">5</option>
+									<option value="10" selected>10</option>
+									<option value="15">15</option>
+									<option value="20">20</option>
+								</select>
+							</div>
+						</div>
+					</div>
+				</section>
+			</form>
+			
+			<!-- The Image Model -->
+			<div class="model" id="myModel">
+				<!-- Model content -->
+				<div class="model-content">
+					<div>
+						<label style="display: inline-block; padding-top: 50px; text-alignet: center;" class="param-label">請輸入以下資訊</label> 
+					</div>
+					<div>
+						<label style="display: inline-block; width: 80px; padding-top: 40px;" class="param-label">手機門號：</label> 
+						<input class="customSearchInput" type="text" id="accountInput" name="accountInput" value="" maxlength="30" />
+                   	</div>
+					<div>
+						<label style="display: inline-block; width: 80px; padding-top: 15px;" class="param-label">原　　因：</label> 
+						<input class="customSearchInput" type="text" id="pccCodeInput" name="pccCodeInput" value="" maxlength="20" />
+                   		<textarea cols="50" rows="5">
+							輸入你想要寫的內容...
+						</textarea>
+					</div>
+					<div>
+						<input class="customBtn" id="searchBtn" style="float:center; width: 120px; cursor: pointer; margin-top: 50px;" type="button" value="確認">
+						<input class="customBtn" id="searchBtn" style="float:center; width: 120px; cursor: pointer;" type="button" value="取消">
+                   	</div>
+				</div>
+			</div>
+			
+		</div>
+	</div>
+</body>
+
+</html>

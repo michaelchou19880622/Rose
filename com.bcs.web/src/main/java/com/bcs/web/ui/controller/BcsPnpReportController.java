@@ -538,4 +538,20 @@ public class BcsPnpReportController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    
+    // PNP黑名單管理 - 排除發送中名單列表
+    @WebServiceLog
+    @GetMapping("/pnpExcludeSendingListPage")
+    public String pnpExcludeSendingListPage() {
+        log.info("pnpExcludeSendingListPage");
+        return BcsPageEnum.PNP_EXCLUDE_SENDING_LIST_PAGE.toString();
+    }
+    
+    // PNP黑名單管理 - 排除發送名單歷程列表
+    @WebServiceLog
+    @GetMapping("/pnpExcludeSendingListHistoryPage")
+    public String pnpExcludeSendingListHistoryPage() {
+        log.info("pnpExcludeSendingListHistoryPage");
+        return BcsPageEnum.PNP_EXCLUDE_SENDING_LIST_HISTORY_PAGE.toString();
+    }
 }

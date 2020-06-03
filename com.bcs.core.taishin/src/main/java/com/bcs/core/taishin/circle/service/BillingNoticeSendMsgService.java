@@ -26,11 +26,12 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j(topic = "BNRecorder")
 @Service
 public class BillingNoticeSendMsgService {
-
+	public final static AtomicLong scheduleTaskcount = new AtomicLong(0L);
     private BillingNoticeService billingNoticeService;
     private BillingNoticeAkkaService billingNoticeAkkaService;
     private BillingNoticeRepositoryCustom billingNoticeRepositoryCustom;
@@ -66,37 +67,36 @@ public class BillingNoticeSendMsgService {
         String unit = CoreConfigReader.getString(CONFIG_STR.BN_SCHEDULE_UNIT, true, false);
         int time = CoreConfigReader.getInteger(CONFIG_STR.BN_SEND_SCHEDULE_TIME, true, false);
 
-        log.info("startCircle : unit = {} time = {}", unit, time);
-        
+        log.info("Starting a scheduled task for BN sending service, unit={} time={}", unit, time);
         if (time == -1) {
             log.error(" BillingNoticeSendMsgService TimeUnit error :" + time + unit);
             return;
         }
         scheduledFuture = scheduler.scheduleWithFixedDelay(this::sendProcess, 0, time, TimeUnit.valueOf(unit));
-
+        log.info("Started the scheduled task for BN sending service successfully!");
     }
 
     private void sendProcess() {
-        log.info("BillingNoticeSendMsgService startCircle.... ");
+    	scheduleTaskcount.addAndGet(1L);
+        log.info("Started a new task to send BN messages, scheduleTaskCount=" + scheduleTaskcount.get());
         boolean bigSwitch = CoreConfigReader.getBoolean(CONFIG_STR.BN_BIG_SWITCH, true, false);
-        // log.info("帳務通知大開關: {}", bigSwitch);
         if (!bigSwitch) {
             return;
         }
         try {
             List<BillingNoticeMain> billingNoticeMainList = sendingBillingNoticeMain(DataUtils.getProcApName());
             if (billingNoticeMainList.isEmpty()) {
-                log.info("Main List is Empty!!");
-                return;
+            	log.info("Finished the task due to no jobs at this time, scheduleTaskCount=" + scheduleTaskcount.get());
             }
-            AtomicInteger i = new AtomicInteger();
-            billingNoticeMainList.forEach(billingNoticeMain -> {
-                i.getAndIncrement();
-                //log.info("To Akka BillingNoticeMain {}: {}", i, DataUtils.toPrettyJsonUseJackson(billingNoticeMain));
-                log.info(String.format("To Akka BillingNoticeMain i:%s: , billingNoticeMain NoticeMainId : %s status : %s ", i.toString(), billingNoticeMain.getNoticeMainId(), billingNoticeMain.getStatus()));              
-            });
-            billingNoticeMainList.forEach(billingNoticeMain -> billingNoticeAkkaService.tell(billingNoticeMain));
+            else {
+                billingNoticeMainList.forEach(billingNoticeMain -> {
+                    log.info("Telling Akka a job, noticeMainId={} status={}", billingNoticeMain.getNoticeMainId(), billingNoticeMain.getStatus());              
+                });
+                billingNoticeMainList.forEach(billingNoticeMain -> billingNoticeAkkaService.tell(billingNoticeMain));
+                log.info("Submitted all of BN sending requests successfully, scheduleTaskCount=" + scheduleTaskcount.get() + " jobSize=" + billingNoticeMainList.size());
+            }
         } catch (Exception e) {
+        	log.info("An exception detected during processing the sending task for BN service!");
             log.error("Exception", e);
         }
     }
@@ -107,63 +107,49 @@ public class BillingNoticeSendMsgService {
      */
     @SuppressWarnings("unchecked")
     public List<BillingNoticeMain> sendingBillingNoticeMain(String procApName) {
-        List<String> templateIdList = billingNoticeService.findProductSwitchOnTemplateId();
-        // log.info("templateIdList = {}", templateIdList);
-        
-        if (templateIdList == null || templateIdList.isEmpty()) {
-            log.info("Template Id List Is Empty!!");
-            return Collections.emptyList();
-        }
-        
-        log.info("Start find wait and retry main!!");
-        
-        // 更新狀態
-        Object[] returnArray = billingNoticeRepositoryCustom.updateStatus(procApName, templateIdList);
-        Set<Long> allMainIdSet = (Set<Long>) returnArray[0];
-        log.info("allMainIdSet = {}", allMainIdSet);
-        
-        List<BillingNoticeDetail> allDetails = (List<BillingNoticeDetail>) returnArray[1];
-        // log.info("allDetails = {}", allDetails);
+    	List<BillingNoticeMain> billingNoticeMainList = new ArrayList<>();
 
-        
-        if (allMainIdSet.isEmpty()) {
-            log.info("Main Id Set Is Empty!!");
-            return Collections.emptyList();
-        }
-
-        List<BillingNoticeMain> billingNoticeMainList = new ArrayList<>();
-        
-        //組裝資料
-        for (Long mainId : allMainIdSet) {
-            BillingNoticeMain bnMain = billingNoticeMainRepository.findOne(mainId);
-            log.info("NoticeMainId = {}, Original File Name = {}", bnMain.getNoticeMainId(), bnMain.getOrigFileName());
-            
-            List<BillingNoticeDetail> details = new ArrayList<>();
-            
-            for (BillingNoticeDetail detail : allDetails) {
-                if (detail.getNoticeMainId().longValue() == mainId.longValue()) {
-                    details.add(detail);
+    	try {
+    		log.info("Inquiring BN jobs whose status is WAIT or RETRY, procApName={}", procApName);
+            List<String> templateIdList = billingNoticeService.findProductSwitchOnTemplateId();
+            if (templateIdList == null || templateIdList.isEmpty()) {
+            	log.info("Skipped the jobs due to no enabled template found");
+                return Collections.emptyList();
+            }
+            // 更新狀態
+            Object[] returnArray = billingNoticeRepositoryCustom.updateStatus(procApName, templateIdList);
+            Set<Long> allMainIdSet = (Set<Long>) returnArray[0];
+            log.info("allMainIdSet={}", allMainIdSet);
+            List<BillingNoticeDetail> allDetails = (List<BillingNoticeDetail>) returnArray[1];
+            if (allMainIdSet.isEmpty()) {
+                return Collections.emptyList();
+            }
+            //組裝資料
+            for (Long mainId : allMainIdSet) {
+                BillingNoticeMain bnMain = billingNoticeMainRepository.findOne(mainId);
+                log.info("noticeMainId={}, originalFileName={}", bnMain.getNoticeMainId(), bnMain.getOrigFileName());
+                List<BillingNoticeDetail> details = new ArrayList<>();
+                for (BillingNoticeDetail detail : allDetails) {
+                    if (detail.getNoticeMainId().longValue() == mainId.longValue()) {
+                        details.add(detail);
+                    }
                 }
+                bnMain.setDetails(details);
+                BillingNoticeContentTemplateMsg template = billingNoticeContentTemplateMsgRepository.findOne(bnMain.getTempId());
+                if (template == null) {
+                    log.error("BillingNoticeContentTemplateMsg :" + bnMain.getTempId() + " is null");
+                    continue;
+                }
+                bnMain.setTemplate(template);
+                List<BillingNoticeContentTemplateMsgAction> actions = billingNoticeContentTemplateMsgActionRepository.findNotDeletedTemplateId(template.getTemplateId());
+                bnMain.setTemplateActions(actions);
+                billingNoticeMainList.add(bnMain);
             }
-            
-            bnMain.setDetails(details);
-            
-            BillingNoticeContentTemplateMsg template = billingNoticeContentTemplateMsgRepository.findOne(bnMain.getTempId());
-            if (template == null) {
-                log.error("BillingNoticeContentTemplateMsg :" + bnMain.getTempId() + " is null");
-                continue;
-            }
-            
-            bnMain.setTemplate(template);
-            
-            List<BillingNoticeContentTemplateMsgAction> actions = billingNoticeContentTemplateMsgActionRepository.findNotDeletedTemplateId(template.getTemplateId());
-            bnMain.setTemplateActions(actions);
-            billingNoticeMainList.add(bnMain);
+    	} catch (Exception e) {
+            log.error("Exception", e);
         }
-        
         return billingNoticeMainList;
     }
-
 
     /**
      * Stop Schedule : Wait for Executing Jobs to Finish
@@ -179,7 +165,5 @@ public class BillingNoticeSendMsgService {
             log.info(" BillingNoticeSendMsgService shutdown....");
             scheduler.shutdown();
         }
-
     }
-
 }

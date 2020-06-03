@@ -84,15 +84,15 @@ public class LineAccessApiService {
             if (channels != null && !channels.isEmpty()) {
                 for (Object[] channel : channels) {
                     String configId = (String) channel[0];
-                    log.info("callVerifyAPIAndIssueToken configId:" + configId);
+                    log.debug("callVerifyAPIAndIssueToken configId:" + configId);
 
                     if (StringUtils.isNotBlank(configId)) {
                         String[] split = configId.split("\\.");
                         if (split.length == 2) {
                             String channelId = split[0];
                             ObjectNode node = LineAccessApiService.callVerifyAPIAndIssueToken(channelId, true);
-                            log.info("callVerifyAPIAndIssueToken:" + channelId + ", isReIssue: " + node.get("isReIssue"));
-                            log.info("callVerifyAPIAndIssueToken:" + ObjectUtil.objectToJsonStr(node));
+                            log.debug("callVerifyAPIAndIssueToken:" + channelId + ", isReIssue: " + node.get("isReIssue"));
+                            log.debug("callVerifyAPIAndIssueToken:" + ObjectUtil.objectToJsonStr(node));
                         }
                     }
                 }
@@ -117,16 +117,16 @@ public class LineAccessApiService {
     private static LineMessagingService getService(String channelId, String channelName) {
         log.info("getService");
         
-        log.info("channelId = {}", channelId);
-        log.info("channelName = {}", channelName);
+        log.debug("channelId = {}", channelId);
+        log.debug("channelName = {}", channelName);
         
         String channel = channelId + channelName;
-        log.info("channel = {}", channel);
+        log.debug("channel = {}", channel);
 
         List<LineMessagingService> lineMessagingServices = lineMessagingServiceMap.get(channel);
         if (lineMessagingServices == null || lineMessagingServices.isEmpty()) {
             String channelToken = CoreConfigReader.getString(channelId, CONFIG_STR.CHANNEL_TOKEN.toString(), true);
-            log.info("channelToken = " + channelToken);
+            log.debug("channelToken = " + channelToken);
 
             if (lineMessagingServices == null) {
                 lineMessagingServices = new ArrayList<>();
@@ -171,19 +171,19 @@ public class LineAccessApiService {
     private static LineMessagingService getServiceWithServiceCode(String channelId, String channelName) {
         log.info("getServiceWithServiceCode");
         
-        log.info("channelId = {}", channelId);
-        log.info("channelName = {}", channelName);
+        log.debug("channelId = {}", channelId);
+        log.debug("channelName = {}", channelName);
     	
         String channel = channelId + channelName;
-        log.info("Channel = {}", channel);
+        log.debug("Channel = {}", channel);
 
         List<LineMessagingService> lineMessagingServices = lineMessagingServiceMap.get(channel);
         if (lineMessagingServices == null || lineMessagingServices.isEmpty()) {
             String channelToken = CoreConfigReader.getString(channelId, CONFIG_STR.CHANNEL_TOKEN.toString(), true);
-            log.info("channelToken = {}", channelToken);
+            log.debug("channelToken = {}", channelToken);
 
             final String serviceCode = CoreConfigReader.getString(channelName, CONFIG_STR.CHANNEL_SERVICE_CODE.toString(), true);
-            log.info("serviceCode = {}", serviceCode);
+            log.debug("serviceCode = {}", serviceCode);
 
             if (lineMessagingServices == null) {
                 lineMessagingServices = new ArrayList<>();
@@ -247,13 +247,13 @@ public class LineAccessApiService {
 
     public static Response<BotApiResponse> sendToLine(SendToBotModel sendToBotModel) throws Exception {
         log.info("sendToLine");
-		log.info("sendToBotModel = {}", sendToBotModel);
-		log.info("sendToBotModel.getSendType() = {}", sendToBotModel.getSendType());
+		log.debug("sendToBotModel = {}", sendToBotModel);
+		log.debug("sendToBotModel.getSendType() = {}", sendToBotModel.getSendType());
 
         String channelId = sendToBotModel.getChannelId();
         String channelName = sendToBotModel.getChannelName();
-		log.info("channelId = {}", channelId);
-		log.info("channelName = {}", channelName);
+		log.debug("channelId = {}", channelId);
+		log.debug("channelName = {}", channelName);
 
         if (channelName.equals(CONFIG_STR.IN_MANUAL_REPLY_BUT_NOT_SEND_MSG.toString())) {
             throw new BcsNoticeException("使用者在真人客服無法推播");
@@ -265,7 +265,7 @@ public class LineAccessApiService {
             int status = 0;
 
             String postMsg = ObjectUtil.objectToJsonStr(sendToBotModel.getReplyMessage());
-            log.info("postMsg = {}", postMsg);
+            log.debug("postMsg = {}", postMsg);
             
             try {
                 Response<BotApiResponse> response;
@@ -279,10 +279,10 @@ public class LineAccessApiService {
                             .replyMessage(sendToBotModel.getReplyMessage())
                             .execute();
 				}
-                log.info("response = {}", response);
+                log.debug("response = {}", response);
 
                 status = response.code();
-                log.info("status = {}", status);
+                log.debug("status = {}", status);
 
                 if (401 == status) {
                     callVerifyAPIAndIssueToken(sendToBotModel.getChannelId(), true);
@@ -304,7 +304,7 @@ public class LineAccessApiService {
             int status = 0;
 
             String postMsg = ObjectUtil.objectToJsonStr(sendToBotModel.getPushMessage());
-			log.info("postMsg : {}", postMsg);
+			log.debug("postMsg : {}", postMsg);
             
             try {
 
@@ -319,10 +319,10 @@ public class LineAccessApiService {
     	                        .pushMessage(sendToBotModel.getPushMessage())
     	                        .execute();
 				}
-                log.info("response = {}", response);
+                log.debug("response = {}", response);
 
                 status = response.code();
-                log.info("status = {}", status);
+                log.debug("status = {}", status);
 
                 if (401 == status) {
                     callVerifyAPIAndIssueToken(sendToBotModel.getChannelId(), true);
@@ -345,19 +345,19 @@ public class LineAccessApiService {
     
     public static Response<BotApiResponse> sendToLineWithServiceCode(SendToBotModel sendToBotModel) throws Exception {
         log.info("sendToLineWithServiceCode");
-		log.info("sendToBotModel = {}", sendToBotModel);
-		log.info("sendToBotModel.getSendType() = {}", sendToBotModel.getSendType());
+		log.debug("sendToBotModel = {}", sendToBotModel);
+		log.debug("sendToBotModel.getSendType() = {}", sendToBotModel.getSendType());
 
         String channelId = sendToBotModel.getChannelId();
         String channelName = sendToBotModel.getChannelName();
-        log.info("ChannelId = {}", channelId);
-        log.info("ChannelName = {}", channelName);
+        log.debug("ChannelId = {}", channelId);
+        log.debug("ChannelName = {}", channelName);
 
         boolean isUsingServiceCode = false;
         if (channelName.equals(CONFIG_STR.MANUAL_REPLY.toString()) || channelName.equals(CONFIG_STR.AUTO_REPLY.toString())) {
         	isUsingServiceCode = true;
         }
-        log.info("isUsingServiceCode = {}", isUsingServiceCode);
+        log.debug("isUsingServiceCode = {}", isUsingServiceCode);
         
         if (channelName.equals(CONFIG_STR.IN_MANUAL_REPLY_BUT_NOT_SEND_MSG.toString())) {
             throw new BcsNoticeException("使用者在真人客服無法推播");
@@ -369,7 +369,7 @@ public class LineAccessApiService {
             int status = 0;
 
             String postMsg = ObjectUtil.objectToJsonStr(sendToBotModel.getReplyMessage());
-            log.info("postMsg = {}", postMsg);
+            log.debug("postMsg = {}", postMsg);
             
             try {
                 Response<BotApiResponse> response;
@@ -383,10 +383,10 @@ public class LineAccessApiService {
                             .replyMessage(sendToBotModel.getReplyMessage())
                             .execute();
 				}
-                log.info("response = {}", response);
+                log.debug("response = {}", response);
 
                 status = response.code();
-                log.info("status = {}", status);
+                log.debug("status = {}", status);
 
                 if (401 == status) {
                     callVerifyAPIAndIssueToken(sendToBotModel.getChannelId(), true);
@@ -408,7 +408,7 @@ public class LineAccessApiService {
             int status = 0;
 
             String postMsg = ObjectUtil.objectToJsonStr(sendToBotModel.getPushMessage());
-            log.info("postMsg = {}", postMsg);
+            log.debug("postMsg = {}", postMsg);
             
             try {
 
@@ -423,10 +423,10 @@ public class LineAccessApiService {
     	                        .pushMessage(sendToBotModel.getPushMessage())
     	                        .execute();
 				}
-                log.info("response = {}", response);
+                log.debug("response = {}", response);
 
                 status = response.code();
-                log.info("status = {}", status);
+                log.debug("status = {}", status);
 
                 if (401 == status) {
                     callVerifyAPIAndIssueToken(sendToBotModel.getChannelId(), true);

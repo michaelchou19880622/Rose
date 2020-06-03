@@ -37,17 +37,17 @@ public class LineWebLoginApiService {
     public ObjectNode callRetrievingAPI(String client_id, String client_secret, String code, String redirect_uri) throws Exception {
         Date start = new Date();
 
-        log.info("start = ", start);
-        log.info("client_id = ", client_id);
-        log.info("client_secret = ", client_secret);
-        log.info("code = ", code);
-        log.info("redirect_uri = ", redirect_uri);
+        log.debug("start = ", start);
+        log.debug("client_id = ", client_id);
+        log.debug("client_secret = ", client_secret);
+        log.debug("code = ", code);
+        log.debug("redirect_uri = ", redirect_uri);
         
         return this.callRetrievingAPI(start, client_id, client_secret, code, redirect_uri, 0);
     }
 
     public ObjectNode callRetrievingAPI(Date start, String client_id, String client_secret, String code, String redirect_uri, int retryCount) throws Exception {
-        logger.info("callRetrievingAPI");
+        logger.debug("callRetrievingAPI");
 
         int status = 0;
         try (CloseableHttpClient httpClient = HttpClientUtil.getSingleInstance()) {
@@ -58,21 +58,21 @@ public class LineWebLoginApiService {
             list.add("client_secret=" + client_secret);
             list.add("code=" + code);
             list.add("redirect_uri=" + URLEncoder.encode(redirect_uri, "UTF-8"));
-            log.info("list = ", list);
+            log.debug("list = ", list);
             
             String postMsg = StringUtils.join(list.toArray(), "&");
-            log.info("postMsg = ", postMsg);
+            log.debug("postMsg = ", postMsg);
 
             StringEntity entity = new StringEntity(postMsg, "UTF-8");
             entity.setContentType("application/x-www-form-urlencoded");
 
             // init Request
             HttpPost requestPost = new HttpPost(CoreConfigReader.getString(CONFIG_STR.LINE_OAUTH_URL_ACCESSTOKEN_V2_1));
-            logger.info("URI : " + requestPost.getURI());
+            logger.debug("URI : " + requestPost.getURI());
             requestPost.setEntity(entity);
 
             // print requestPost
-            logger.info("postMsg : " + postMsg);
+            logger.debug("postMsg : " + postMsg);
 
             // execute Call
             HttpResponse clientResponse = httpClient.execute(requestPost);
@@ -85,7 +85,7 @@ public class LineWebLoginApiService {
 
                 result += InputStreamUtil.getInputStr(clientResponse.getEntity().getContent());
             }
-            logger.info("clientResponse result : " + result);
+            logger.debug("clientResponse result : " + result);
 
             requestPost.releaseConnection();
 

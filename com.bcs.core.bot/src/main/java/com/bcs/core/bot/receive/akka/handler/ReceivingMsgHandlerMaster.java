@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -38,8 +39,9 @@ public class ReceivingMsgHandlerMaster extends UntypedActor {
         try {
             Thread.currentThread().setName("Actor-Receive-Msg-Master-" + Thread.currentThread().getId());
             if (message instanceof ReceivedModelOriginal) {
-            	log.info("Received an Original message and telling the EventType router");
-                routerEventTypeActor.tell(message, getSelf());
+            	ReceivedModelOriginal original = (ReceivedModelOriginal) message;
+            	log.info("Received an Original message and telling the EventType router, keywordTID=" + original.getTid());
+               	routerEventTypeActor.tell(message, getSelf());
             } else if (message instanceof Map) {
             	@SuppressWarnings("unchecked")
 				Map<String, Object> map = (Map<String, Object>) message;

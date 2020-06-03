@@ -28,8 +28,8 @@ public class ReceivingMsgHandlerEventType extends UntypedActor {
         try {
         	Thread.currentThread().setName("Actor-Receive-Msg-Event-" + Thread.currentThread().getId());
             if (message instanceof ReceivedModelOriginal) {
-            	log.info("Received an Original message");
-                ReceivedModelOriginal original = (ReceivedModelOriginal) message;
+            	ReceivedModelOriginal original = (ReceivedModelOriginal) message;
+            	log.info("Received an Original message, keywordTID=" + original.getTid());
                 List<MsgBotReceive> list = MsgBotReceiveParser.parseMessage(original.getReceivingMsg(), original.getChannelId());
                 if (!list.isEmpty()) {
                     int count = 0;

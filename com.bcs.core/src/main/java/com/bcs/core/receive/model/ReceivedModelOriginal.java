@@ -14,14 +14,16 @@ public class ReceivedModelOriginal extends AbstractBcsEntity{
 	private String channelSignature;
 	private API_TYPE apiType;
 	private Date start;
+	private String tid;
 	
-	public ReceivedModelOriginal(String receivingMsg, String ChannelId,String ChannelName, String channelSignature, API_TYPE apiType){
+	public ReceivedModelOriginal(String receivingMsg, String ChannelId, String ChannelName, String channelSignature, API_TYPE apiType, String tid){
 		this.receivingMsg = receivingMsg;
 		this.ChannelId = ChannelId;
 		this.channelSignature = channelSignature;
 		this.apiType = apiType;
 		this.ChannelName = ChannelName;
 		this.setStart(new Date());
+		this.tid = tid;
 	}
 
 	public String getReceivingMsg() {
@@ -56,4 +58,11 @@ public class ReceivedModelOriginal extends AbstractBcsEntity{
 		ChannelName = channelName;
 	}
 	
+	public String getTid() {
+		return tid;
+	}
+
+	public void setTid(String tid) {
+		this.tid = tid;
+	}
 }

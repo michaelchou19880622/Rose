@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
+import java.util.Random;
 
 
 /**
@@ -58,14 +59,15 @@ public class LineBotApiController {
     public void lineBotApiReceiving(@RequestBody String receivingMsg, @PathVariable String channelId, @PathVariable String channelName, HttpServletRequest request, HttpServletResponse response) {
         Date start = new Date();
         try {
-            log.info("Received a LineBotApi Message: {}", DataUtils.toPrettyJsonUseJackson(receivingMsg));
+        	String tid = "" + new Random().nextInt(1000000000);
+            log.info("Received a LineBotApi Message, keywordTID={} msg={}", tid, DataUtils.toPrettyJsonUseJackson(receivingMsg));
             String channelSignature = request.getHeader(LINE_HEADER.HEADER_BOT_ChannelSignature.toString());
             if (signatureValidIsFail(receivingMsg, channelName, response, start, channelSignature)) {
             	responseProcess(receivingMsg, response, start, "Signature Valid Fail!!", 470, "470");
                 return;
             }
-            akkaBotService.receivingMsgs(new ReceivedModelOriginal(receivingMsg, channelId, channelName, channelSignature, API_TYPE.BOT));
             responseProcess(receivingMsg, response, start, "LineBotApi Receiving finish!!", 200, "200");
+            akkaBotService.receivingMsgs(new ReceivedModelOriginal(receivingMsg, channelId, channelName, channelSignature, API_TYPE.BOT, tid));
             return;
         } catch (Exception e) {
             log.error(ErrorRecord.recordError(e));

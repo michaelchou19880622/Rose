@@ -4,10 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 
 /**
@@ -65,4 +62,8 @@ public class PnpDetailMing extends PnpDetail {
     @Column(name = "KEEP_SECOND", columnDefinition = "nvarchar(15)")
     private String keepSecond;
     /* ------------------------- 來源資料原生欄位 --------------------------*/
+
+    /* SMS 輸出格式轉換為Every8d 用的暫存物件 */
+    @Transient
+    private PnpDetailEvery8d every8dObj;
 }

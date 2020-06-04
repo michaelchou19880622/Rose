@@ -253,7 +253,7 @@ public class LineUserService {
 
         String result = lineUserRepository.checkMIDByStatus(status, status2, mid);
         logger.info("checkMIDByStatus:" + result);
-        return StringUtils.isBlank(result);
+        return StringUtils.isNotBlank(result);
     }
 
     /**

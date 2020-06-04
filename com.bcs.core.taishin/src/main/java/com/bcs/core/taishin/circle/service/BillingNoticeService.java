@@ -269,16 +269,19 @@ public class BillingNoticeService {
                 requestBody.put("messages", combineLineMessage(templateMsg, detail));
                 HttpEntity<String> httpEntity = new HttpEntity<>(requestBody.toString(), headers);
                 try {     
-                    /* Production 才真正發送訊息 
-                     * 
-                     * 注意 : 不能使用isSystemTypeProduction() 進行判斷, 目前設定都是Develop mode.
-                     * 
-                     * */
-            		if(!CoreConfigReader.isPNPFtpTypeDevelop()){
-                        RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
-                        JSONObject result = restfulUtil.execute();
-                        log.info("Result: {}", result.toString());
-            		}
+                	
+                	/* 依照 setting.properties 的 .switch.send.line.message 參數決定是否發送Line Message?
+                	 * true	= 發送
+                	 * false = 不發送 
+                	 *  */
+                	boolean isSendLineMessage = CoreConfigReader.isSwitchSendLineMessage();
+					log.info("isSendLineMessage =  {}", isSendLineMessage);
+                	
+					if (isSendLineMessage) {
+						RestfulUtil restfulUtil = new RestfulUtil(HttpMethod.POST, url, httpEntity);
+						JSONObject result = restfulUtil.execute();
+						log.info("Result: {}", result.toString());
+					}
                     detail.setStatus(BillingNoticeMain.NOTICE_STATUS_COMPLETE);
                     detail.setSendTime(new Date());
                     log.info("Sent a detail successfully");

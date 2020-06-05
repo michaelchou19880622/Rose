@@ -111,17 +111,21 @@ public class InitController {
         registerServer();
         loadScheduleFromDb();
         loadInteractiveMap();
-        billingNoticeRepositoryCustom.restoreNotSendDetail();
-        billingNoticeFtpServiceStartCircle();
-        billingNoticeSendMsgServiceStartCircle();
-        pnpRepositoryCustom.restoreNotSendDetail();
-        loadFtpPnpDataTaskStartCircle();
-        pnpMsgServiceStartCircle();
-        pnpSmsMsgServiceStartCircle();
-        linePointSchedulerServiceStartCircle();
-        threadStart();
-        liveChatTaskServiceCheckUserStatus();
-        cleanSystemLogTask();
+        
+        /* For Local 測試，不執行下列的schedule service */
+        if (!"local".equals(CoreConfigReader.getString("environment"))) {
+            billingNoticeRepositoryCustom.restoreNotSendDetail();
+            billingNoticeFtpServiceStartCircle();
+            billingNoticeSendMsgServiceStartCircle();
+            pnpRepositoryCustom.restoreNotSendDetail();
+            loadFtpPnpDataTaskStartCircle();
+            pnpMsgServiceStartCircle();
+            pnpSmsMsgServiceStartCircle();
+            linePointSchedulerServiceStartCircle();
+            threadStart();
+            liveChatTaskServiceCheckUserStatus();
+            cleanSystemLogTask();
+        }
     }
 
 //    private void registerServerInfo() {

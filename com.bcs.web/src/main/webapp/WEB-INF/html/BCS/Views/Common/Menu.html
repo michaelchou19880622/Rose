@@ -327,6 +327,23 @@
                 </ul>
             </li>
 
+            <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_PNP_ADMIN')">
+                <a href="" style="cursor: pointer;"><span>PNP黑名單管理</span></a>
+                <ul class="MdNonDisp subMenu" style="display:none">
+                    <li th:classappend="${currentPage == 'PagePnpExcludeSendingList'} ? 'ExSelected'">
+                        <a th:href="@{/bcs/pnpEmployee/pnpExcludeSendingListPage}"><span>排除發送中名單列表</span></a>
+                    </li>
+                    <li th:classappend="${currentPage == 'PagePnpExcludeSendingListHistory'} ? 'ExSelected'">
+                        <a th:href="@{/bcs/pnpEmployee/pnpExcludeSendingListHistoryPage}"><span>排除發送名單歷程列表</span></a>
+                    </li>
+<!--                     <li th:classappend="${currentPage == 'PagepnpUAL'} ? 'ExSelected'"> -->
+<!--                         <a th:href="@{/bcs/pnpAdmin/pnpUnicaAccountListPage}"><span>新增/取消排除發送名單</span></a> -->
+<!--                     </li> -->
+                </ul>
+            </li>
+            
+            
+
 <!--             <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_PNP_ADMIN')"> -->
 <!--                 <a href="" style="cursor: pointer;"><span>PNP監控管理</span></a> -->
 <!--                 <ul class="MdNonDisp subMenu" style="display:none"> -->

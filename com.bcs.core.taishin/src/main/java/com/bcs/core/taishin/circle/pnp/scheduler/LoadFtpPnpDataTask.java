@@ -1211,7 +1211,7 @@ public class LoadFtpPnpDataTask {
         final Date now = Calendar.getInstance().getTime();
         pnpDetailMitakeRepository.updateStatusByMainId(status, now, mainId);
         pnpMainMitakeRepository.updatePnpMainMitakeStatus(status, now, mainId);
-        log.info("Update Status : {} , PNP Main ID: {}" + status , mainId);            
+        log.info("Update Status : {} , PNP Main ID: {}", status , mainId);
     }
 
     /**
@@ -1227,7 +1227,7 @@ public class LoadFtpPnpDataTask {
         final Date now = Calendar.getInstance().getTime();
         pnpDetailEvery8dRepository.updateStatusByMainId(status, now, mainId);
         pnpMainEvery8dRepository.updatePnpMainEvery8dStatus(status, now, mainId);
-        log.info("Update Status : {} , PNP Main ID: {}" + status , mainId);            
+        log.info("Update Status : {} , PNP Main ID: {}", status , mainId);
     }
 
     /**
@@ -1243,7 +1243,7 @@ public class LoadFtpPnpDataTask {
         final Date now = Calendar.getInstance().getTime();
         pnpDetailUnicaRepository.updateStatusByMainId(status, now, mainId);
         pnpMainUnicaRepository.updatePnpMainUnicaStatus(status, now, mainId);
-        log.info("Update Status : {} , PNP Main ID: {}" + status , mainId);            
+        log.info("Update Status : {} , PNP Main ID: {}", status , mainId);
     }
 
     /**
@@ -1259,7 +1259,7 @@ public class LoadFtpPnpDataTask {
         final Date now = Calendar.getInstance().getTime();
         pnpDetailMingRepository.updateStatusByMainId(status, now, mainId);
         pnpMainMingRepository.updatePnpMainMingStatus(status, now, mainId);
-        log.info("Update Status : {} , PNP Main ID: {}" + status , mainId);            
+        log.info("Update Status : {} , PNP Main ID: {}", status , mainId);
     }
 
     /*================================================================================*/

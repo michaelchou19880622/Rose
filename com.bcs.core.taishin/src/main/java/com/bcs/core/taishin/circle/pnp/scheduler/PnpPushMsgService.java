@@ -104,15 +104,16 @@ public class PnpPushMsgService {
                 /* 1.Find all main */
                 List<PnpMain> allMainList = pnpRepositoryCustom.findAllMain(procApName, type);
                 if (allMainList.isEmpty()) {
-                    return;
+                    log.info("{}:{} allMainList is empty!!", procApName, type);
+                    continue;
                 }
-
+                log.info("type:{}, detailTable:{} forEach operation", type, type.detailTable);
                 allMainList.forEach(main -> {
                     /* 2.Find all detail by main id */
 //                    int detailCount = pnpRepositoryCustom.getDetailCountByMainId(type, main.getPnpMainId());
                     List<PnpDetail> allDetailList = pnpRepositoryCustom.findAllDetail(main.getPnpMainId(), type);
                     int detailCount = allDetailList.size();
-                    log.info(String.format("detain Count : %s, detail Table : %s,  main id: %s", detailCount, type.detailTable,  main.getPnpMainId().toString()));
+                    log.info(String.format("detail Count : %s, detail Table : %s,  main id: %s", detailCount, type.detailTable,  main.getPnpMainId().toString()));
                     
                     if (detailCount > 0) {
 	                    List<PnpDetail> allDetailListAndUpdate = pnpRepositoryCustom.findAllDetailAndUpdateStatus(main.getPnpMainId(), type);

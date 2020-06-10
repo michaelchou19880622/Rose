@@ -107,7 +107,7 @@ public class InitController {
     public void init() {
         log.info("HostName: {}, IP: {}", DataUtils.getProcApName(), DataUtils.getProcApIp());
 //        registerServerInfo();
-
+        
         registerServer();
         loadScheduleFromDb();
         loadInteractiveMap();

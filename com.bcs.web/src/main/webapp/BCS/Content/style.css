@@ -329,6 +329,15 @@ textarea:focus {
     vertical-align: middle;
 }
 
+.mainFrame.alignLeft table td {
+    padding: 12px 10px 11px;
+    border: 1px solid #e2e5eb;
+    background: #fff;
+    word-break: break-word;
+	text-align: left;
+    vertical-align: middle;
+}
+
 .mainFrame table td>input[type='text'] {
     display: block;
     width: 100%;
@@ -1436,5 +1445,93 @@ thead tr th {
 .btn-style-pressed {
 	color: #FFF;
 	background: #07F;
+}
+
+
+/* PNP客群標籤下拉式選單 */
+.optionGuestLabel {
+    position: relative;
+    display: inline-block;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    min-width: 90px;
+    width: 276px;
+    background: white url(../images/ico_mdFRM03Select.png) no-repeat right center;
+    border: 1px solid #ced2dc;
+    border-radius: 0;
+    padding: 9px 24px 8px 9px;
+}
+
+.optionGuestLabel .optionLabelGuestLabel {
+    font-size: 12px;
+    color: #a1a7b5;
+}
+
+.optionGuestLabel .optionSelectGuestLabel {
+    display: block;
+    position: absolute;
+    top: 7px;
+    left: 10px;
+    width: 100%;
+    opacity: 0;
+    font-size: 14px;
+}
+
+/* Pnp Exclud */
+/* The Modal (background) */
+.model {
+	display: none; /* Hidden by default */
+	position: fixed; /* Stay in place */
+	z-index: 1; /* Sit on top */
+	padding-top: 200px; /* Location of the box */
+	top: 0;
+	left: 0;
+	width: 100%; /* Full width */
+	height: 100%; /* Full height */
+	overflow: auto; /* Enable scroll if needed */
+	background-color: rgb(0, 0, 0); /* Fallback color */
+	background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+	border: 1px solid #fff;
+}
+
+/* URL Modal Content */
+.model-content {
+	background-color: #fefefe;
+	margin: auto;
+	padding: 20px;
+	border: 2px solid #fff;
+	width: 25%;
+	height: 350px;
+	text-align: center;
+	color: blue;
+	font-size: 16px;
+	font-weight: bold;
+	-webkit-border-radius: 15px;
+	-moz-border-radius: 15px;
+	-o-border-radius: 15px;
+	-ms-border-radius: 15px;
+	-moz-box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
+	-webkit-box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
+	box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
+}
+
+/* Image Modal Content */
+.image-model-content {
+	background-color: #fefefe;
+	margin: auto;
+	padding: 20px;
+	border: 2px solid #fff;
+	width: 80%;
+	text-align: center;
+	color: blue;
+	font-size: 16px;
+	font-weight: bold;
+	-webkit-border-radius: 15px;
+	-moz-border-radius: 15px;
+	-o-border-radius: 15px;
+	-ms-border-radius: 15px;
+	-moz-box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
+	-webkit-box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
+	box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
 }
 

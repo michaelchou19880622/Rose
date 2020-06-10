@@ -4,10 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.List;
 
 
 /**
@@ -53,5 +51,14 @@ public class PnpDetailMitake extends PnpDetail {
 
     /* ------------------------- 來源資料原生欄位 --------------------------*/
 
-
+    /**
+     * For Every8d sms extend column
+     */
+    @Column(name = "VARIABLE1", columnDefinition = "nvarchar(15)")
+    private String variable1;
+    /**
+     * For Every8d sms extend column
+     */
+    @Column(name = "VARIABLE2", columnDefinition = "nvarchar(15)")
+    private String variable2;
 }

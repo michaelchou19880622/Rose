@@ -13,8 +13,11 @@ public enum CONFIG_STR {
     SYSTEM_ID("system.id"),
     SYSTEM_TYPE_IS_API("system.is.api"),
     IS_MAIN_SYSTEM("is.main.system"),
-
-
+    
+    /* BN、PNP 是否發送Line Message的設定 */
+    SWITCH_SEND_LINE_MESSAGE("switch.send.line.message"),
+    
+    
     SYSTEM_COUPON_USE_TIME("system.coupon.record.useTime"),
     SYSTEM_REWARD_CARD_USE_TIME("system.rewardcard.record.useTime"),
 

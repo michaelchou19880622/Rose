@@ -116,6 +116,23 @@ public class CoreConfigReader {
 		}
 		return false;
 	}
+	
+	/**
+	 *  BN, PNP 是否發送LINE MESSAGE的設定
+	 * @return
+	 */
+	public static boolean isSwitchSendLineMessage() {
+		
+		return getBoolean(CONFIG_STR.SWITCH_SEND_LINE_MESSAGE);
+		
+//		String switchSendLineMessage = getString(CONFIG_STR.SWITCH_SEND_LINE_MESSAGE);
+//		
+//		if ("false".equals(switchSendLineMessage)) {
+//			return false;
+//		}
+//		
+//		return false;
+	}
 
 	/**
 	 * Get the value of the key from properties

@@ -1169,7 +1169,12 @@ public class PNPFtpService {
                 
                 try {
     				if (targetStreamSet.getKey() != null) {
-    					ftpClient.storeFile(targetStreamSet.getKey(), targetStreamSet.getValue());
+    				    boolean storeFileIsOK = false;
+                        storeFileIsOK = ftpClient.storeFile(targetStreamSet.getKey(), targetStreamSet.getValue());
+                        if (storeFileIsOK) {
+                            log.info("FileName :{} is stored ok, put OK file in remote ftp server", targetStreamSet.getKey());
+                            ftpClient.storeFile(targetStreamSet.getKey() + ".ok", targetStreamSet.getValue());
+                        }
     				}
     				targetStreamSet.getValue().close();
                 } catch (IOException e) {
@@ -1234,7 +1239,9 @@ public class PNPFtpService {
 			for(Map.Entry<String, InputStream> targetStreamSet : targetStreamMap.entrySet()){
                 try {
     				if (targetStreamSet.getKey() != null) {
-    					channelSftp.put(targetStreamSet.getValue(), new String(targetStreamSet.getKey().getBytes(), setting.getFileEncoding()));    					
+                        channelSftp.put(targetStreamSet.getValue(), new String(targetStreamSet.getKey().getBytes(), setting.getFileEncoding()));
+                        log.info("FileName :{} is put ok, put OK file in remote ftp server", targetStreamSet.getKey());
+                        channelSftp.put(targetStreamSet.getValue(), new String(targetStreamSet.getKey().getBytes(), setting.getFileEncoding()) + ".ok");
     				}
     				targetStreamSet.getValue().close();
                 } catch (IOException e) {

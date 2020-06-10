@@ -297,23 +297,24 @@ public class PnpService {
                 continue;
             }
 
-            /* Production 才真正發送訊息 
-             * 
-             * 注意 : 不能使用isSystemTypeProduction() 進行判斷, 目前設定都是Develop mode.
-             * 
-             * */
             final boolean isSuccess ;
             final String httpStatusCode ;
-//    		if(CoreConfigReader.isPNPFtpTypeDevelop()){
-//	            isSuccess = true;
-//	            httpStatusCode = "200";			
-//                log.info("PNP Development mode");
-//    		}
-//    		else {
+            
+            /* 依照 setting.properties 的 .switch.send.line.message 參數決定是否發送Line Message?
+        	 * true	= 發送
+        	 * false = 不發送 
+        	 *  */
+            boolean isSendLineMessage = CoreConfigReader.isSwitchSendLineMessage();
+			log.info("isSendLineMessage =  {}", isSendLineMessage);
+        	
+			if (isSendLineMessage) {
 	            final Object[] pushResult = pnpPushMessage(url, headers, detail, detail.getUid(), pnpStageEnum);
 	            isSuccess = (boolean) pushResult[0];
 	            httpStatusCode = (String) pushResult[1];
-//    		}            
+    		} else {
+    			isSuccess = true;
+    			httpStatusCode = "200";
+			}
     		
             if (!isSuccess) {
                 switch (processFlow) {

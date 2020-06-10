@@ -494,22 +494,6 @@ public class LoadFtpPnpDataTask {
                 detail.setKeepSecond(detailData[8]);
                 detail.setFlexTemplateId(flexTemplateId);
 
-                /* 產生後續轉換Every8d 所需要的前置資料處理 */
-                /*
-                 * 0.SN 序號
-                 * 1.DestName 收件者名稱
-                 * 2.DestNo 收訊人手機號碼，長度為20碼以內(格式為0933******或+886933******)
-                 * 3.Msg 簡訊訊息內容
-                 * 8.Variable1 擴充欄位1(Ming 開頭為M)
-                 * 9.Variable2 擴充欄位2(可為空值)
-                 */
-
-                PnpDetailEvery8d pnpDetailEvery8d = detail.getEvery8dObj();
-                pnpDetailEvery8d.setSn(detailData[0]);
-                pnpDetailEvery8d.setDestName(detailData[1]);
-                pnpDetailEvery8d.setMsg(detailData[2]);
-                pnpDetailEvery8d.setVariable1("M");
-
                 LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
                 String mid = lineUserService.getMidByMobile(detail.getPhone());
                 detail.setUid(mid);
@@ -555,22 +539,6 @@ public class LoadFtpPnpDataTask {
                     detail.setMsg(detailData[3]);
                     detail.setFlexTemplateId(flexTemplateId);
                     detail.setDetailScheduleTime(scheduleTime);
-
-                    /* 產生後續轉換Every8d 所需要的前置資料處理 */
-                    /*
-                     * 0.SN 序號
-                     * 1.DestName 收件者名稱
-                     * 2.DestNo 收訊人手機號碼，長度為20碼以內(格式為0933******或+886933******)
-                     * 3.Msg 簡訊訊息內容
-                     * 8.Variable1 擴充欄位1(Mitake 開頭為K)
-                     * 9.Variable2 擴充欄位2(可為空值)
-                     */
-
-                    PnpDetailEvery8d pnpDetailEvery8d = detail.getEvery8dObj();
-                    pnpDetailEvery8d.setSn(detailData[0]);
-                    pnpDetailEvery8d.setDestName(detailData[2]);
-                    pnpDetailEvery8d.setMsg(detailData[3]);
-                    pnpDetailEvery8d.setVariable1("K");
 
                     /* 優化成先把所有門號存在List中, 一次全部Query. */
                     // LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
@@ -1086,9 +1054,7 @@ public class LoadFtpPnpDataTask {
             PnpDetailEvery8d detail;
             for (List<PnpDetailMitake> detailList : detailsPartitionList) {
                 for (PnpDetailMitake tmpDetail : detailList) {
-                    detail = tmpDetail.getEvery8dObj();
                     tmpDetail.setVariable1("K" + tmpDetail.getPnpDetailId().toString());
-                    detail.setVariable1(tmpDetail.getVariable1());
                     log.info("PNP Main ID: {} , Variable1:K{} ", pnpMainMitake.getPnpMainId(), tmpDetail.getPnpDetailId().toString());
                 }
                 pnpDetailMitakeRepository.save(detailList);
@@ -1219,9 +1185,7 @@ public class LoadFtpPnpDataTask {
 
             for (List<PnpDetailMing> detailList : detailsPartitionList) {
                 for (PnpDetailMing tmpDetail : detailList) {
-                    detail = tmpDetail.getEvery8dObj();
                     tmpDetail.setVariable1("M" + tmpDetail.getPnpDetailId().toString());
-                    detail.setVariable1(tmpDetail.getVariable1());
                     log.info("PNP Main ID: {} , Variable1:M{} ", pnpMainMing.getPnpMainId(), tmpDetail.getPnpDetailId().toString());
                 }
                 pnpDetailMingRepository.save(detailList);

@@ -96,7 +96,8 @@ public class SendingMsgHandlerSend extends UntypedActor {
 						PushMessage pushMessage = new PushMessage(mid, messageList);
 						sendToBotModel.setPushMessage(pushMessage);
 
-						String channelName = inprogressMids.get(mid) != null ? CONFIG_STR.IN_MANUAL_REPLY_BUT_NOT_SEND_MSG.toString() : CONFIG_STR.AUTO_REPLY.toString();
+//						String channelName = inprogressMids.get(mid) != null ? CONFIG_STR.IN_MANUAL_REPLY_BUT_NOT_SEND_MSG.toString() : CONFIG_STR.AUTO_REPLY.toString();
+						String channelName = CONFIG_STR.DEFAULT.toString();	
 						sendToBotModel.setChannelName(channelName);
 
 						Response<BotApiResponse> response = LineAccessApiService.sendToLine(sendToBotModel);
@@ -173,7 +174,8 @@ public class SendingMsgHandlerSend extends UntypedActor {
 						PushMessage pushMessage = new PushMessage(mid, messageList);
 						sendToBotModel.setPushMessage(pushMessage);
 
-						String channelName = inprogressMids.get(mid) != null ? CONFIG_STR.IN_MANUAL_REPLY_BUT_NOT_SEND_MSG.toString() : CONFIG_STR.AUTO_REPLY.toString();
+//						String channelName = inprogressMids.get(mid) != null ? CONFIG_STR.IN_MANUAL_REPLY_BUT_NOT_SEND_MSG.toString() : CONFIG_STR.AUTO_REPLY.toString();
+						String channelName = CONFIG_STR.DEFAULT.toString();	
 						sendToBotModel.setChannelName(channelName);
 
 						Response<BotApiResponse> response= LineAccessApiService.sendToLine(sendToBotModel);
@@ -226,7 +228,8 @@ public class SendingMsgHandlerSend extends UntypedActor {
                         PushMessage pushMessage = new PushMessage(esnDetail.getUid(), messageList);
                         sendToBotModel.setPushMessage(pushMessage);
 
-                        String channelName = inprogressMids.get(esnDetail.getUid()) != null ? CONFIG_STR.IN_MANUAL_REPLY_BUT_NOT_SEND_MSG.toString() : CONFIG_STR.AUTO_REPLY.toString();
+//                        String channelName = inprogressMids.get(esnDetail.getUid()) != null ? CONFIG_STR.IN_MANUAL_REPLY_BUT_NOT_SEND_MSG.toString() : CONFIG_STR.AUTO_REPLY.toString();
+						String channelName = CONFIG_STR.DEFAULT.toString();	
 						sendToBotModel.setChannelName(channelName);
 
                         Response<BotApiResponse> response = LineAccessApiService.sendToLine(sendToBotModel);
@@ -280,7 +283,8 @@ public class SendingMsgHandlerSend extends UntypedActor {
                         PushMessage pushMessage = new PushMessage(esnDetail.getUid(), messageList);
                         sendToBotModel.setPushMessage(pushMessage);
 
-                        String channelName = inprogressMids.get(esnDetail.getUid()) != null ? CONFIG_STR.IN_MANUAL_REPLY_BUT_NOT_SEND_MSG.toString() : CONFIG_STR.AUTO_REPLY.toString();
+//                        String channelName = inprogressMids.get(esnDetail.getUid()) != null ? CONFIG_STR.IN_MANUAL_REPLY_BUT_NOT_SEND_MSG.toString() : CONFIG_STR.AUTO_REPLY.toString();
+						String channelName = CONFIG_STR.DEFAULT.toString();                  
 						sendToBotModel.setChannelName(channelName);
 
                         Response<BotApiResponse> response = LineAccessApiService.sendToLine(sendToBotModel);

@@ -1172,8 +1172,8 @@ public class PNPFtpService {
     				    boolean storeFileIsOK = false;
                         storeFileIsOK = ftpClient.storeFile(targetStreamSet.getKey(), targetStreamSet.getValue());
                         if (storeFileIsOK) {
-                            log.info("FileName :{} is stored ok, put *.ok file in remote ftp server", targetStreamSet.getKey());
-                            ftpClient.storeFile(targetStreamSet.getKey() + "*.ok", null);
+                            log.info("FileName :{} is stored ok, put OK file in remote ftp server", targetStreamSet.getKey());
+                            ftpClient.storeFile(targetStreamSet.getKey() + ".ok", targetStreamSet.getValue());
                         }
     				}
     				targetStreamSet.getValue().close();
@@ -1240,8 +1240,8 @@ public class PNPFtpService {
                 try {
     				if (targetStreamSet.getKey() != null) {
                         channelSftp.put(targetStreamSet.getValue(), new String(targetStreamSet.getKey().getBytes(), setting.getFileEncoding()));
-                        log.info("FileName :{} is put ok, put *.ok file in remote ftp server", targetStreamSet.getKey());
-                        channelSftp.put((InputStream) null, new String(targetStreamSet.getKey().getBytes(), setting.getFileEncoding()) + ".ok");
+                        log.info("FileName :{} is put ok, put OK file in remote ftp server", targetStreamSet.getKey());
+                        channelSftp.put(targetStreamSet.getValue(), new String(targetStreamSet.getKey().getBytes(), setting.getFileEncoding()) + ".ok");
     				}
     				targetStreamSet.getValue().close();
                 } catch (IOException e) {

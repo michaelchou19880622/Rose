@@ -117,7 +117,7 @@ public class ReceivingMsgHandlerMsgReceive extends UntypedActor {
         InteractiveService interactiveService = ApplicationContextProvider.getApplicationContext().getBean(InteractiveService.class);
         LiveChatProcessService liveChatService = ApplicationContextProvider.getApplicationContext().getBean(LiveChatProcessService.class);
         MsgBotReceiveService msgBotReceiveService = ApplicationContextProvider.getApplicationContext().getBean(MsgBotReceiveService.class);
-        boolean recordText = CoreConfigReader.getBoolean(CONFIG_STR.RECORD_RECEIVE_AUTORESPONSE_TEXT, true);
+        //boolean recordText = CoreConfigReader.getBoolean(CONFIG_STR.RECORD_RECEIVE_AUTORESPONSE_TEXT, true);
         String mid = content.getSourceId();
         String text = content.getText();
         String replyToken = content.getReplyToken();

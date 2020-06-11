@@ -1,4 +1,4 @@
-package com.bcs.core.taishin.circle.pnp.db.sp;
+package com.bcs.core.taishin.circle.pnp.db.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;

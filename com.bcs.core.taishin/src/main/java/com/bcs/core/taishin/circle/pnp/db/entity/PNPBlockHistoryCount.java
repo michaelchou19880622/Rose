@@ -1,17 +1,15 @@
-package com.bcs.core.taishin.circle.pnp.db.sp;
+package com.bcs.core.taishin.circle.pnp.db.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.Date;
 
 /**
- * @ClassName PNPBlockSendList
- * @Description 取得啟用中的黑名單列表
+ * @ClassName PNPBlockHistoryCount
+ * @Description TODO
  * @Author ean
- * @Date 2020/6/4 下午 01:33
+ * @Date 2020/6/10 下午 02:51
  * @Version 1.0
  **/
 
@@ -21,22 +19,10 @@ import java.util.Date;
 @NamedStoredProcedureQueries(
         {
                 @NamedStoredProcedureQuery(
-                        name = "qryPNPBlockSendList",
-                        procedureName = "usp_qryPNPBlockSendList",
-                        resultClasses = {PNPBlockSendList.class},
+                        name = "getPNPBlockHistoryCount",
+                        procedureName = "usp_getPNPBlockHistoryCount",
+                        resultClasses = {PNPBlockHistoryCount.class},
                         parameters = {
-                                // 指定查詢頁數，"1"
-                                @StoredProcedureParameter(
-                                        name = "show_page",
-                                        type = Integer.class,
-                                        mode = ParameterMode.IN
-                                ),
-                                // 指定查詢每頁詳細筆數，"10"
-                                @StoredProcedureParameter(
-                                        name = "page_count",
-                                        type = Integer.class,
-                                        mode = ParameterMode.IN
-                                ),
                                 // 日期條件區間開始，不指定填NULL，YYYYMMDD
                                 @StoredProcedureParameter(
                                         name = "start_date",
@@ -66,35 +52,20 @@ import java.util.Date;
                                         name = "group_tag",
                                         type = String.class,
                                         mode = ParameterMode.IN
+                                ),
+                                // 設定狀態 0:移除 1:啟用
+                                @StoredProcedureParameter(
+                                        name = "block_enable",
+                                        type = Integer.class,
+                                        mode = ParameterMode.IN
                                 )
                         }
                 )
         }
 )
-public class PNPBlockSendList {
+public class PNPBlockHistoryCount {
 
-    // MOBILE, S.UID, MODIFY_REASON, S.MODIFY_TIME, BLOCK_ENABLE, GROUP_TAG, INSERT_USER
-
-    @Column(name = "PHONE", columnDefinition = "VARCHAR(15)")
-    private String phone;
-
-    @Column(name = "UID", columnDefinition = "CHAR(35)")
-    private String uid;
-
-    @Column(name = "MODIFY_REASON", columnDefinition = "NVARCHAR(64)")
-    private String modifyReason;
-
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "GMT+8")
-    @Column(name = "MODIFY_TIME")
-    private Date modifyTime;
-
-    @Column(name = "BLOCK_ENABLE", columnDefinition = "TINYINT")
-    private short blockEnable;
-
-    @Column(name = "GROUP_TAG", columnDefinition = "NCHAR(8)")
-    private String groupTag;
-
-    @Column(name = "INSERT_USER", columnDefinition = "NVARCHAR(32)")
-    private String insertUser;
-
+    // 明細資料筆數
+    @Column(name = "CNT")
+    private Long count;
 }

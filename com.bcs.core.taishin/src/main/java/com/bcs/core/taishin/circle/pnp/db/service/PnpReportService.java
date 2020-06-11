@@ -12,9 +12,9 @@ import javax.persistence.Query;
 import javax.persistence.StoredProcedureQuery;
 
 import com.bcs.core.taishin.circle.pnp.db.entity.*;
-import com.bcs.core.taishin.circle.pnp.db.sp.PNPBlockSendCount;
-import com.bcs.core.taishin.circle.pnp.db.sp.PNPBlockSendList;
-import com.bcs.core.taishin.circle.pnp.db.sp.PNPUpdateBlockSend;
+import com.bcs.core.taishin.circle.pnp.db.entity.PNPBlockSendCount;
+import com.bcs.core.taishin.circle.pnp.db.entity.PNPBlockSendList;
+import com.bcs.core.taishin.circle.pnp.db.entity.PNPUpdateBlockSend;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;

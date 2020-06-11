@@ -1,6 +1,5 @@
-package com.bcs.core.taishin.circle.pnp.db.sp;
+package com.bcs.core.taishin.circle.pnp.db.entity;
 
-import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptSummary;
 import lombok.Getter;
 import lombok.Setter;
 

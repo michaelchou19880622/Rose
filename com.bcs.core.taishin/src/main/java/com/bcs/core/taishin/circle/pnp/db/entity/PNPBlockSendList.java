@@ -74,6 +74,7 @@ import java.util.Date;
 public class PNPBlockSendList {
 
     // MOBILE, S.UID, MODIFY_REASON, S.MODIFY_TIME, BLOCK_ENABLE, GROUP_TAG, INSERT_USER
+    @Id
 
     @Column(name = "PHONE", columnDefinition = "VARCHAR(15)")
     private String phone;

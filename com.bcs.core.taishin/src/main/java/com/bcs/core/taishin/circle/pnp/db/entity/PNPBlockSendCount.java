@@ -60,6 +60,7 @@ import javax.persistence.*;
 
 public class PNPBlockSendCount {
 
+    @Id
     // 明細資料筆數
     @Column(name = "CNT")
     private Long count;

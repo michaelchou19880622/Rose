@@ -71,6 +71,8 @@ import javax.persistence.*;
         }
 )
 public class PNPUpdateBlockSend {
+
+    @Id
     @Column(name = "HISTORY_REF_ID")
     private long historyRefId;
 }

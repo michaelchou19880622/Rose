@@ -11,6 +11,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.StoredProcedureQuery;
 
+import com.bcs.core.taishin.circle.pnp.db.entity.*;
+import com.bcs.core.taishin.circle.pnp.db.sp.PNPBlockSendCount;
+import com.bcs.core.taishin.circle.pnp.db.sp.PNPBlockSendList;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -21,11 +24,6 @@ import com.bcs.core.taishin.circle.db.service.OracleService;
 import com.bcs.core.taishin.circle.pnp.code.PnpFtpSourceEnum;
 import com.bcs.core.taishin.circle.pnp.code.PnpProcessFlowEnum;
 import com.bcs.core.taishin.circle.pnp.code.PnpStatusEnum;
-import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailReport;
-import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailReportParam;
-import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptDetail;
-import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptParam;
-import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptSummary;
 import com.bcs.core.utils.DataUtils;
 import com.bcs.core.web.security.CurrentUser;
 import com.bcs.core.web.security.CustomUser;
@@ -513,4 +511,158 @@ public class PnpReportService {
         }
         return processFlowEnum.uiText;
     }
+
+    /**
+     * Pnp Block Send Detail List
+     *
+     * @return PnpBlockSend List
+     */
+    @SuppressWarnings("unchecked")
+    public List<PNPBlockSendList> qryPnpBlockSendList(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
+
+        log.info("pnpSendBlockParam = {}", pnpSendBlockParam);
+
+        pnpSendBlockParam.setRole(customUser.getRole());
+
+        EntityManager entityManager = entityManagerProvider.getEntityManager();
+
+        Date startDate = pnpSendBlockParam.getStartDate();
+        String str_startDate = DataUtils.formatDateToString(startDate, "yyyy-MM-dd");
+        Date endDate = pnpSendBlockParam.getEndDate();
+        String str_endDate = DataUtils.formatDateToString(endDate, "yyyy-MM-dd");
+
+        StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("qryPNPBlockSendList");
+        query.setParameter("show_page", pnpSendBlockParam.getPage());
+        query.setParameter("page_count",pnpSendBlockParam.getPageCount());
+        query.setParameter("start_date",str_startDate);
+        query.setParameter("end_date",str_endDate);
+        query.setParameter("mobile",pnpSendBlockParam.getMobile());
+        query.setParameter("insert_user",pnpSendBlockParam.getInsertUser());
+        query.setParameter("group_tag",pnpSendBlockParam.getGroupTag());
+
+        List<PNPBlockSendList> pnpBlockSendList = query.getResultList();
+
+        if (pnpBlockSendList.isEmpty()) {
+            log.info("pnpBlockSendList List is Empty!!");
+            return Collections.emptyList();
+        } else
+            log.info("pnpBlockSendList is not emtpy:" + DataUtils.toPrettyJsonUseJackson(pnpBlockSendList));
+
+        return pnpBlockSendList;
+    }
+
+    /**
+     * Pnp Block Send Count
+     *
+     * @return PnpBlockSendCount
+     */
+    @SuppressWarnings("unchecked")
+    public long getPnpBlockSendCount(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
+
+        log.info("pnpSendBlockParam = {}", pnpSendBlockParam);
+
+        pnpSendBlockParam.setRole(customUser.getRole());
+
+        EntityManager entityManager = entityManagerProvider.getEntityManager();
+
+        Date startDate = pnpSendBlockParam.getStartDate();
+        String str_startDate = DataUtils.formatDateToString(startDate, "yyyy-MM-dd");
+        Date endDate = pnpSendBlockParam.getEndDate();
+        String str_endDate = DataUtils.formatDateToString(endDate, "yyyy-MM-dd");
+
+        StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("getPNPBlockSendCount");
+        query.setParameter("start_date",str_startDate);
+        query.setParameter("end_date",str_endDate);
+        query.setParameter("mobile",pnpSendBlockParam.getMobile());
+        query.setParameter("insert_user",pnpSendBlockParam.getInsertUser());
+        query.setParameter("group_tag",pnpSendBlockParam.getGroupTag());
+
+        List<PNPBlockSendCount> pnpBlockSendCount = query.getResultList();
+
+        if (pnpBlockSendCount.isEmpty()) {
+            log.info("getPNPBlockSendCount List is Empty!!");
+            return 0;
+        } else
+            log.info("getPNPBlockSendCount List is not emtpy:" + DataUtils.toPrettyJsonUseJackson(pnpBlockSendCount));
+
+        return pnpBlockSendCount.get(0).getCount();
+    }
+
+    /**
+     * Pnp Block History Detail List
+     *
+     * @return PnpBlockHistory List
+     */
+    @SuppressWarnings("unchecked")
+    public List<PNPBlockSendList> qryPnpBlockHistoryList(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
+
+        log.info("pnpSendBlockParam = {}", pnpSendBlockParam);
+
+        pnpSendBlockParam.setRole(customUser.getRole());
+
+        EntityManager entityManager = entityManagerProvider.getEntityManager();
+
+        Date startDate = pnpSendBlockParam.getStartDate();
+        String str_startDate = DataUtils.formatDateToString(startDate, "yyyy-MM-dd");
+        Date endDate = pnpSendBlockParam.getEndDate();
+        String str_endDate = DataUtils.formatDateToString(endDate, "yyyy-MM-dd");
+
+        StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("qryPNPBlockSendList");
+        query.setParameter("show_page", pnpSendBlockParam.getPage());
+        query.setParameter("page_count",pnpSendBlockParam.getPageCount());
+        query.setParameter("start_date",str_startDate);
+        query.setParameter("end_date",str_endDate);
+        query.setParameter("mobile",pnpSendBlockParam.getMobile());
+        query.setParameter("insert_user",pnpSendBlockParam.getInsertUser());
+        query.setParameter("group_tag",pnpSendBlockParam.getGroupTag());
+
+        List<PNPBlockSendList> pnpBlockSendList = query.getResultList();
+
+        if (pnpBlockSendList.isEmpty()) {
+            log.info("pnpBlockHistoryList List is Empty!!");
+            return Collections.emptyList();
+        } else
+            log.info("pnpBlockHistoryList is not emtpy:" + DataUtils.toPrettyJsonUseJackson(pnpBlockSendList));
+
+        return pnpBlockSendList;
+    }
+
+    /**
+     * Pnp Bolck History Detail List
+     *
+     * @return PnpBlockHistoryCount
+     */
+    @SuppressWarnings("unchecked")
+    public long getPnpBlockHistoryCount(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
+
+        log.info("pnpSendBlockParam = {}", pnpSendBlockParam);
+
+        pnpSendBlockParam.setRole(customUser.getRole());
+
+        EntityManager entityManager = entityManagerProvider.getEntityManager();
+
+        Date startDate = pnpSendBlockParam.getStartDate();
+        String str_startDate = DataUtils.formatDateToString(startDate, "yyyy-MM-dd");
+        Date endDate = pnpSendBlockParam.getEndDate();
+        String str_endDate = DataUtils.formatDateToString(endDate, "yyyy-MM-dd");
+
+        StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("getPNPBlockSendCount");
+        query.setParameter("start_date",str_startDate);
+        query.setParameter("end_date",str_endDate);
+        query.setParameter("mobile",pnpSendBlockParam.getMobile());
+        query.setParameter("insert_user",pnpSendBlockParam.getInsertUser());
+        query.setParameter("group_tag",pnpSendBlockParam.getGroupTag());
+
+        List<PNPBlockSendCount> pnpBlockSendCount = query.getResultList();
+
+        if (pnpBlockSendCount.isEmpty()) {
+            log.info("getPNPBlockHistoryCount List is Empty!!");
+            return 0;
+        } else
+            log.info("getPNPBlockHistoryCount List is not emtpy:" + DataUtils.toPrettyJsonUseJackson(pnpBlockSendCount));
+
+        return pnpBlockSendCount.get(0).getCount();
+    }
+
+
 }

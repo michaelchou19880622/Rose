@@ -1,23 +1,15 @@
 package com.bcs.web.ui.controller;
 
-import com.bcs.core.aspect.annotation.WebServiceLog;
-import com.bcs.core.report.builder.ExportExcelBuilder;
-import com.bcs.core.report.service.ExportService;
-import com.bcs.core.resource.CoreConfigReader;
-import com.bcs.core.taishin.circle.pnp.code.PnpFtpSourceEnum;
-import com.bcs.core.taishin.circle.pnp.code.PnpStatusEnum;
-import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailReport;
-import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailReportParam;
-import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptDetail;
-import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptParam;
-import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptSummary;
-import com.bcs.core.taishin.circle.pnp.db.service.PnpReportService;
-import com.bcs.core.taishin.circle.pnp.scheduler.PnpSMSMsgService;
-import com.bcs.core.utils.DataUtils;
-import com.bcs.core.web.security.CurrentUser;
-import com.bcs.core.web.security.CustomUser;
-import com.bcs.core.web.ui.page.enums.BcsPageEnum;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,18 +23,27 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.bcs.core.aspect.annotation.WebServiceLog;
+import com.bcs.core.report.builder.ExportExcelBuilder;
+import com.bcs.core.report.service.ExportService;
+import com.bcs.core.resource.CoreConfigReader;
+import com.bcs.core.taishin.circle.pnp.code.PnpFtpSourceEnum;
+import com.bcs.core.taishin.circle.pnp.code.PnpStatusEnum;
+import com.bcs.core.taishin.circle.pnp.db.entity.PNPBlockSendList;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailReport;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailReportParam;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpSendBlockParam;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptDetail;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptParam;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptSummary;
+import com.bcs.core.taishin.circle.pnp.db.service.PnpReportService;
+import com.bcs.core.taishin.circle.pnp.scheduler.PnpSMSMsgService;
+import com.bcs.core.utils.DataUtils;
+import com.bcs.core.web.security.CurrentUser;
+import com.bcs.core.web.security.CustomUser;
+import com.bcs.core.web.ui.page.enums.BcsPageEnum;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
-
-import java.io.Console;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Bcs pnp report controller.
@@ -554,4 +555,24 @@ public class BcsPnpReportController {
         log.info("pnpExcludeSendingListHistoryPage");
         return BcsPageEnum.PNP_EXCLUDE_SENDING_LIST_HISTORY_PAGE.toString();
     }
+    
+	@WebServiceLog
+	@PostMapping(value = "/getPnpExcludeSendingList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> getPnpExcludeSendingList(HttpServletRequest request, HttpServletResponse response, 
+														@CurrentUser final CustomUser customUser,
+														@RequestBody final PnpSendBlockParam pnpSendBlockParam) {
+		log.info("getPnpExcludeSendingList");
+		
+		try {
+			log.info("pnpSendBlockParam = {}", pnpSendBlockParam);
+			
+			final List<PNPBlockSendList> result = pnpReportService.qryPnpBlockSendList(customUser, pnpSendBlockParam);
+			log.info(DataUtils.toPrettyJsonUseJackson(result));
+			return new ResponseEntity<>(result, HttpStatus.OK);
+		} catch (final Exception e) {
+			log.error("Exception", e);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 }

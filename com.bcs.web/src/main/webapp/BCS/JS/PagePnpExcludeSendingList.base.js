@@ -16,8 +16,8 @@ $(function() {
 	
 	var totalPageSize = document.getElementById('totalPageSize');
 	var currentPageIndex = document.getElementById('currentPageIndex');
-	var perPageSize = $(this).find('option:selected').text();
-//	console.info('perPageSize = ', perPageSize);
+	var perPageSize = $(this).find('#perPageSizeSelector option:selected').val();
+	console.info('perPageSize = ', perPageSize);
 	
 	var selectedSearchType = $('[name="searchType"]:checked').val();
 //	console.info('default selectedSearchType = ', selectedSearchType);
@@ -151,19 +151,76 @@ $(function() {
 
 	// do Search
 	$('#searchBtn').click(function() {
-		// For Test
-		for (testIdx = 0; testIdx < 5; testIdx++) {
-			var list = originalTr.clone(true);
+
+		$('.LyMain').block($.BCS.blockMsgRead);
+		$.ajax({
+			type : 'POST',
+			url : bcs.bcsContextPath + '/pnpEmployee/getPnpExcludeSendingList',
+			contentType : 'application/json;charset=UTF-8',
+			data : JSON.stringify({
+				startDate : startDate,
+				endDate : endDate,
+				isPageable : true,
+				page : page,
+				pageCount : perPageSize,
+				mobile : "",
+				insertUser : null,
+				groupTag : null
+			})
+		}).done(function(response) {
+			console.info('response:', response);
+//			console.log('response:', JSON.stringify(response));
 			
-			list.find('.mobileNum').html('0912' + pad(Math.floor(Math.random() * 999999), 6));
-			list.find('.lineUID').html('Utesttestlineuid000000' + pad(Math.floor(Math.random() * 999999), 6));
-			list.find('.reason').html('第 ' + pad(Math.floor(Math.random() * 999999), 6) + ' 號奧客...');
-			list.find('.updateTime').html('2020-05-27 13:55:40');
-			list.find('.status').html('排除中');
-			list.find('.guestLabel').html('24');
-			list.find('.modifier').html('1000' + pad(Math.floor(Math.random() * 999), 3));
-			$('#tableBody').append(list);
-		};
+			$('.dataTemplate').remove();
+			$('#noDataTxt').remove();
+			
+			if (response.length == 0) {
+				$('#dataTemplateSummary').remove();
+				$('#tableBody').append('<tr id="noDataTxt"><td colspan="8"><span style="color:red">查無資料</span></td></tr>');
+				currentPageIndex.innerText = '-';
+				totalPageSize.innerText = '-';
+				$('.LyMain').unblock();
+				return false;
+			}
+			
+			var i = 1;
+			response.forEach(function(obj) {
+				var list = originalTr.clone(true);
+				
+				list.find('.mobileNum').html(obj.phone);
+				list.find('.lineUID').html(obj.uid);
+				list.find('.reason').html(obj.modifyReason);
+				list.find('.updateTime').html(obj.modifyTime);
+				list.find('.status').html(obj.blockEnable);
+				list.find('.guestLabel').html(obj.groupTag);
+				list.find('.modifier').html(obj.insertUser);
+				
+				$('#tableBody').append(list);
+				
+				i++;
+			});
+			
+			console.info('i = ', i);
+			
+		}).fail(function(response) {
+			console.info(response);
+			$.FailResponse(response);
+			$('.LyMain').unblock();
+		});
+		
+		// For Test
+//		for (testIdx = 0; testIdx < 5; testIdx++) {
+//			var list = originalTr.clone(true);
+//			
+//			list.find('.mobileNum').html('0912' + pad(Math.floor(Math.random() * 999999), 6));
+//			list.find('.lineUID').html('Utesttestlineuid000000' + pad(Math.floor(Math.random() * 999999), 6));
+//			list.find('.reason').html('第 ' + pad(Math.floor(Math.random() * 999999), 6) + ' 號奧客...');
+//			list.find('.updateTime').html('2020-05-27 13:55:40');
+//			list.find('.status').html('排除中');
+//			list.find('.guestLabel').html('24');
+//			list.find('.modifier').html('1000' + pad(Math.floor(Math.random() * 999), 3));
+//			$('#tableBody').append(list);
+//		};
 		
 		
 //		isSearchData = true;
@@ -310,6 +367,7 @@ $(function() {
 			
 			$('.dataTemplate').remove();
 			$('#noDataTxt').remove();
+			
 			if (response.length == 0) {
 				$('#dataTemplateSummary').remove();
 				$('#tableBody').append('<tr id="noDataTxt"><td colspan="8"><span style="color:red">查無資料</span></td></tr>');
@@ -343,7 +401,6 @@ $(function() {
 				$('.LyMain').unblock();
 			}
 			
-			// setExportButtonSource();
 		}).fail(function(response) {
 			console.info(response);
 			$.FailResponse(response);

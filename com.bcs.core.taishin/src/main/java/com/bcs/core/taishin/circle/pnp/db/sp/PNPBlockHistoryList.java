@@ -1,5 +1,6 @@
 package com.bcs.core.taishin.circle.pnp.db.sp;
 
+import com.bcs.core.taishin.circle.pnp.db.entity.PNPBlockSendList;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;

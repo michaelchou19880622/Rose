@@ -1,11 +1,19 @@
-package com.bcs.core.taishin.circle.pnp.db.sp;
+package com.bcs.core.taishin.circle.pnp.db.entity;
+
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.NamedStoredProcedureQueries;
+import javax.persistence.NamedStoredProcedureQuery;
+import javax.persistence.ParameterMode;
+import javax.persistence.StoredProcedureParameter;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.Getter;
 import lombok.Setter;
-
-import javax.persistence.*;
-import java.util.Date;
 
 /**
  * @ClassName PNPBlockSendList
@@ -18,6 +26,7 @@ import java.util.Date;
 @Getter
 @Setter
 @Entity
+
 @NamedStoredProcedureQueries(
         {
                 @NamedStoredProcedureQuery(
@@ -75,7 +84,8 @@ public class PNPBlockSendList {
 
     // MOBILE, S.UID, MODIFY_REASON, S.MODIFY_TIME, BLOCK_ENABLE, GROUP_TAG, INSERT_USER
 
-    @Column(name = "PHONE", columnDefinition = "VARCHAR(15)")
+	@Id
+	@Column(name = "PHONE", columnDefinition = "VARCHAR(15)")
     private String phone;
 
     @Column(name = "UID", columnDefinition = "CHAR(35)")

@@ -564,12 +564,44 @@ public class BcsPnpReportController {
 														@RequestBody final PnpSendBlockParam pnpSendBlockParam) {
 		log.info("getPnpExcludeSendingList");
 		
-		try {
-			log.info("pnpSendBlockParam = {}", pnpSendBlockParam);
+		try { 
+			log.info("1-1 pnpSendBlockParam.getPage() = {}", pnpSendBlockParam.getPage());
+	        log.info("1-2 pnpSendBlockParam.getPageCount() = {}", pnpSendBlockParam.getPageCount());
+	        log.info("1-3 pnpSendBlockParam.getStartDate() = {}", pnpSendBlockParam.getStartDate());
+	        log.info("1-4 pnpSendBlockParam.getEndDate() = {}", pnpSendBlockParam.getEndDate());
+	        log.info("1-5 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
+	        log.info("1-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
+	        log.info("1-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
 			
 			final List<PNPBlockSendList> result = pnpReportService.qryPnpBlockSendList(customUser, pnpSendBlockParam);
 			log.info(DataUtils.toPrettyJsonUseJackson(result));
 			return new ResponseEntity<>(result, HttpStatus.OK);
+		} catch (final Exception e) {
+			log.error("Exception", e);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@WebServiceLog
+	@PostMapping(value = "/getPnpBlockSendCount", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> getPnpBlockSendCount(HttpServletRequest request, HttpServletResponse response, 
+														@CurrentUser final CustomUser customUser,
+														@RequestBody final PnpSendBlockParam pnpSendBlockParam) {
+		log.info("getPnpExcludeSendingList");
+		
+		try { 
+			log.info("1-1 pnpSendBlockParam.getPage() = {}", pnpSendBlockParam.getPage());
+	        log.info("1-2 pnpSendBlockParam.getPageCount() = {}", pnpSendBlockParam.getPageCount());
+	        log.info("1-3 pnpSendBlockParam.getStartDate() = {}", pnpSendBlockParam.getStartDate());
+	        log.info("1-4 pnpSendBlockParam.getEndDate() = {}", pnpSendBlockParam.getEndDate());
+	        log.info("1-5 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
+	        log.info("1-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
+	        log.info("1-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
+			
+			final Long pnpBlockSendCount = pnpReportService.getPnpBlockSendCount(customUser, pnpSendBlockParam);
+			log.info("pnpBlockSendCount = {}", pnpBlockSendCount);
+			return new ResponseEntity<>(pnpBlockSendCount, HttpStatus.OK);
 		} catch (final Exception e) {
 			log.error("Exception", e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

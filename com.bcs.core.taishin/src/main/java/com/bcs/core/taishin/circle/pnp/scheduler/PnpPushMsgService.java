@@ -19,6 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
+
+import static org.hamcrest.CoreMatchers.containsString;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -104,7 +107,7 @@ public class PnpPushMsgService {
                 /* 1.Find all main */
                 List<PnpMain> allMainList = pnpRepositoryCustom.findAllMain(procApName, type);
                 if (allMainList.isEmpty()) {
-                    return;
+                    continue;
                 }
 
                 allMainList.forEach(main -> {

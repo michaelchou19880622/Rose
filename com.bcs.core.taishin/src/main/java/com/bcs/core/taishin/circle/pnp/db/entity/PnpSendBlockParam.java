@@ -26,5 +26,8 @@ public class PnpSendBlockParam {
     private String mobile;
     private String insertUser;
     private String groupTag;
+    private String insertDate;
+    private String insertTime;
+    private int blockEnable = 1;
 
 }

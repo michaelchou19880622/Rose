@@ -12,8 +12,9 @@ import javax.persistence.Query;
 import javax.persistence.StoredProcedureQuery;
 
 import com.bcs.core.taishin.circle.pnp.db.entity.*;
-import com.bcs.core.taishin.circle.pnp.db.sp.PNPBlockSendCount;
-
+import com.bcs.core.taishin.circle.pnp.db.entity.PNPBlockSendCount;
+import com.bcs.core.taishin.circle.pnp.db.entity.PNPBlockSendList;
+import com.bcs.core.taishin.circle.pnp.db.entity.PNPUpdateBlockSend;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -615,6 +616,7 @@ public class PnpReportService {
         query.setParameter("mobile",pnpSendBlockParam.getMobile());
         query.setParameter("insert_user",pnpSendBlockParam.getInsertUser());
         query.setParameter("group_tag",pnpSendBlockParam.getGroupTag());
+        query.setParameter("block_enable",pnpSendBlockParam.getBlockEnable());
 
         List<PNPBlockSendList> pnpBlockSendList = query.getResultList();
 
@@ -652,6 +654,7 @@ public class PnpReportService {
         query.setParameter("mobile",pnpSendBlockParam.getMobile());
         query.setParameter("insert_user",pnpSendBlockParam.getInsertUser());
         query.setParameter("group_tag",pnpSendBlockParam.getGroupTag());
+        query.setParameter("block_enable",pnpSendBlockParam.getBlockEnable());
 
         List<PNPBlockSendCount> pnpBlockSendCount = query.getResultList();
 
@@ -663,6 +666,40 @@ public class PnpReportService {
 
         return pnpBlockSendCount.get(0).getCount();
     }
+
+    /**
+     * Update Pnp BlockSend Table and History Table
+     *
+     * @return PnpBlockHistory Ref_Id
+     */
+    @SuppressWarnings("unchecked")
+    public long updPnpBlockSend(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
+
+        log.info("pnpSendBlockParam = {}", pnpSendBlockParam);
+
+        pnpSendBlockParam.setRole(customUser.getRole());
+
+        EntityManager entityManager = entityManagerProvider.getEntityManager();
+
+        StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("updatePNPBlockSend");
+        query.setParameter("mobile", pnpSendBlockParam.getMobile());
+        query.setParameter("block_enable",pnpSendBlockParam.getPageCount());
+        query.setParameter("mobile",pnpSendBlockParam.getMobile());
+        query.setParameter("insert_user",pnpSendBlockParam.getInsertUser());
+        query.setParameter("group_tag",pnpSendBlockParam.getGroupTag());
+        query.setParameter("block_enable",pnpSendBlockParam.getBlockEnable());
+
+        List<PNPUpdateBlockSend> pnpUpdateBlockSend = query.getResultList();
+
+        if (pnpUpdateBlockSend.isEmpty()) {
+            log.info("updPnpBlockSend List is Empty!!");
+            return 0;
+        } else
+            log.info("updPnpBlockSend is not emtpy:" + DataUtils.toPrettyJsonUseJackson(pnpUpdateBlockSend));
+
+        return pnpUpdateBlockSend.get(0).getHistoryRefId();
+    }
+
 
 
 }

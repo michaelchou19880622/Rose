@@ -1,4 +1,4 @@
-package com.bcs.core.taishin.circle.pnp.db.sp;
+package com.bcs.core.taishin.circle.pnp.db.entity;
 
 import com.bcs.core.taishin.circle.pnp.db.entity.PNPBlockSendList;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -70,7 +70,7 @@ import java.util.Date;
                                 ),
                                 // 設定狀態 0:移除 1:啟用
                                 @StoredProcedureParameter(
-                                        name = "lock_enable",
+                                        name = "block_enable",
                                         type = Integer.class,
                                         mode = ParameterMode.IN
                                 )
@@ -80,6 +80,7 @@ import java.util.Date;
 )
 public class PNPBlockHistoryList {
 
+    @Id
     // MOBILE, S.UID, MODIFY_REASON, S.MODIFY_TIME, BLOCK_ENABLE, GROUP_TAG, INSERT_USER
 
     @Column(name = "PHONE", columnDefinition = "VARCHAR(15)")

@@ -1,6 +1,5 @@
-package com.bcs.core.taishin.circle.pnp.db.sp;
+package com.bcs.core.taishin.circle.pnp.db.entity;
 
-import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptSummary;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -61,6 +60,7 @@ import javax.persistence.*;
 
 public class PNPBlockSendCount {
 
+    @Id
     // 明細資料筆數
     @Column(name = "CNT")
     private Long count;

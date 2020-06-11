@@ -69,7 +69,7 @@ import java.util.Date;
                                 ),
                                 // 設定狀態 0:移除 1:啟用
                                 @StoredProcedureParameter(
-                                        name = "lock_enable",
+                                        name = "block_enable",
                                         type = Integer.class,
                                         mode = ParameterMode.IN
                                 )

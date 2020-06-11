@@ -6,10 +6,10 @@ import lombok.Setter;
 import javax.persistence.*;
 
 /**
- * @ClassName PNPBlockHistoryCount
- * @Description TODO
+ * @ClassName PNPUpdateBlockSend
+ * @Description 異動啟用中名單並寫入歷史紀錄當中
  * @Author ean
- * @Date 2020/6/10 下午 02:51
+ * @Date 2020/6/11 下午 01:31
  * @Version 1.0
  **/
 
@@ -19,25 +19,25 @@ import javax.persistence.*;
 @NamedStoredProcedureQueries(
         {
                 @NamedStoredProcedureQuery(
-                        name = "getPNPBlockHistoryCount",
-                        procedureName = "usp_getPNPBlockHistoryCount",
-                        resultClasses = {PNPBlockHistoryCount.class},
+                        name = "updatePNPBlockSend",
+                        procedureName = "usp_updatePNPBlock",
+                        resultClasses = {PNPUpdateBlockSend.class},
                         parameters = {
-                                // 日期條件區間開始，不指定填NULL，YYYYMMDD
-                                @StoredProcedureParameter(
-                                        name = "start_date",
-                                        type = String.class,
-                                        mode = ParameterMode.IN
-                                ),
-                                // 日期條件區間結束，不指定填NULL，YYYYMMDD
-                                @StoredProcedureParameter(
-                                        name = "end_date",
-                                        type = String.class,
-                                        mode = ParameterMode.IN
-                                ),
                                 // 手機門號，不指定填空白字串，"0912345678"
                                 @StoredProcedureParameter(
                                         name = "mobile",
+                                        type = String.class,
+                                        mode = ParameterMode.IN
+                                ),
+                                // 設定狀態 0:移除 1:啟用
+                                @StoredProcedureParameter(
+                                        name = "block_enable",
+                                        type = Integer.class,
+                                        mode = ParameterMode.IN
+                                ),
+                                // 客群標籤，不指定填空白字串，"24"
+                                @StoredProcedureParameter(
+                                        name = "group_tag",
                                         type = String.class,
                                         mode = ParameterMode.IN
                                 ),
@@ -47,25 +47,30 @@ import javax.persistence.*;
                                         type = String.class,
                                         mode = ParameterMode.IN
                                 ),
-                                // 客群標籤，不指定填空白字串，"24"
+                                // 寫入日期，YYYYMMDD
                                 @StoredProcedureParameter(
-                                        name = "group_tag",
+                                        name = "insert_date",
                                         type = String.class,
                                         mode = ParameterMode.IN
                                 ),
-                                // 設定狀態 0:移除 1:啟用
+                                // 寫入時間，HH:mm:ss.SSS
                                 @StoredProcedureParameter(
-                                        name = "block_enable",
-                                        type = Integer.class,
+                                        name = "insert_time",
+                                        type = String.class,
+                                        mode = ParameterMode.IN
+                                ),
+                                // 異動原因，
+                                @StoredProcedureParameter(
+                                        name = "modify_reason",
+                                        type = String.class,
                                         mode = ParameterMode.IN
                                 )
+
                         }
                 )
         }
 )
-public class PNPBlockHistoryCount {
-
-    // 明細資料筆數
-    @Column(name = "CNT")
-    private Long count;
+public class PNPUpdateBlockSend {
+    @Column(name = "HISTORY_REF_ID")
+    private long historyRefId;
 }

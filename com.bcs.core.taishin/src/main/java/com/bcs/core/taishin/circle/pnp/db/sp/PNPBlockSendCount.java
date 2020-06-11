@@ -22,7 +22,7 @@ import javax.persistence.*;
                 @NamedStoredProcedureQuery(
                         name = "getPNPBlockSendCount",
                         procedureName = "usp_getPNPBlockSendCount",
-                        resultClasses = {GetPNPBlockSendCount.class},
+                        resultClasses = {PNPBlockSendCount.class},
                         parameters = {
                                 // 日期條件區間開始，不指定填NULL，YYYYMMDD
                                 @StoredProcedureParameter(

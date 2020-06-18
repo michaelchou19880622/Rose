@@ -20,9 +20,9 @@
 						<div class="CHLeft" style="width:100%;">
 	                    	<div>
 								<label style="display: inline-block; width: 80px;" class="param-label">手機門號：</label> 
-								<input class="customSearchInput" type="text" id="accountInput" name="accountInput" value="" maxlength="30" />
+								<input class="customSearchInput" type="text" id="mobileInput" name="mobileInput" value="" maxlength="30" />
 								<label style="display: inline-block; width: 80px; padding-left:10px" class="param-label">異動人員：</label> 
-								<input class="customSearchInput" type="text" id="pccCodeInput" name="pccCodeInput" value="" maxlength="20" />
+								<input class="customSearchInput" type="text" id="insertUserInput" name="insertUserInput" value="" maxlength="20" />
 								<input class="customBtn" id="searchBtn" style="float:right; width: 120px; cursor: pointer;" type="button" value="查詢">
 	                    	</div>
 							<div class="paramGroup" style="margin-top:8px;">
@@ -39,8 +39,8 @@
 <!-- 								<input class="customSearchInput" type="text" id="pccCodeInput" name="pccCodeInput" value="" maxlength="20" /> -->
                                 <div class="optionGuestLabel queryValueComponentSelectList">
                                     <div class="optionLabelGuestLabel">請選擇</div>
-                                    <select class="optionSelectGuestLabel queryValue" name="queryValue">
-                                        <option value="">請選擇</option>
+                                    <select id="guestLabelSelector" class="optionSelectGuestLabel queryValue" name="queryValue">
+                                        <option value="請選擇" selected>請選擇</option>
                                     </select>
                                 </div>
 								

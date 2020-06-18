@@ -591,13 +591,13 @@ public class BcsPnpReportController {
 		log.info("getPnpExcludeSendingList");
 		
 		try { 
-			log.info("1-1 pnpSendBlockParam.getPage() = {}", pnpSendBlockParam.getPage());
-	        log.info("1-2 pnpSendBlockParam.getPageCount() = {}", pnpSendBlockParam.getPageCount());
-	        log.info("1-3 pnpSendBlockParam.getStartDate() = {}", pnpSendBlockParam.getStartDate());
-	        log.info("1-4 pnpSendBlockParam.getEndDate() = {}", pnpSendBlockParam.getEndDate());
-	        log.info("1-5 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
-	        log.info("1-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
-	        log.info("1-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
+			log.debug("1-1 pnpSendBlockParam.getPage() = {}", pnpSendBlockParam.getPage());
+	        log.debug("1-2 pnpSendBlockParam.getPageCount() = {}", pnpSendBlockParam.getPageCount());
+	        log.debug("1-3 pnpSendBlockParam.getStartDate() = {}", pnpSendBlockParam.getStartDate());
+	        log.debug("1-4 pnpSendBlockParam.getEndDate() = {}", pnpSendBlockParam.getEndDate());
+	        log.debug("1-5 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
+	        log.debug("1-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
+	        log.debug("1-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
 			
 			final Long pnpBlockSendCount = pnpReportService.getPnpBlockSendCount(customUser, pnpSendBlockParam);
 			log.info("pnpBlockSendCount = {}", pnpBlockSendCount);

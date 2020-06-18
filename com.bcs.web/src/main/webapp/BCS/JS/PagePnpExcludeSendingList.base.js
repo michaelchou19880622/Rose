@@ -19,6 +19,9 @@ $(function() {
 	var perPageSize = $(this).find('#perPageSizeSelector option:selected').val();
 	console.info('perPageSize = ', perPageSize);
 	
+	var eleGroupTag = $(this).find('#guestLabelSelector option:selected');
+	console.info('eleGroupTag.val() = ', eleGroupTag.val());
+	
 	var selectedSearchType = $('[name="searchType"]:checked').val();
 //	console.info('default selectedSearchType = ', selectedSearchType);
 	
@@ -27,8 +30,15 @@ $(function() {
 	// result data
 	var hasData = false;
 	var firstFetch = true;
-	var startDate = null, endDate = null;
+	
+	var startDate = "";
+	var endDate = "";
+	var mobile = "";
+	var insertUser = "";
+	var groupTag = "";
+	
 	var isCreateTime = true, isOrderTime = false;
+	
 	var page = 1, totalPages = 0;
 	var pnpStatusMap = {};
 	var isChangePage = false;
@@ -151,15 +161,37 @@ $(function() {
 
 	// do Search
 	$('#searchBtn').click(function() {
+		
+		startDate = $('#startDate').val();
+		endDate = $('#endDate').val();
+		mobile = $('#mobileInput').val();
+		insertUser = $('#insertUserInput').val();
+		groupTag = eleGroupTag.val();
+		
+		if (!startDate || startDate == 'YYYY-MM-DD') {
+			startDate = "";
+		}
+	
+		if (!endDate || endDate == 'YYYY-MM-DD') {
+			endDate = "";
+		}
+		
+		console.info('startDate = ', startDate);
+		console.info('endDate = ', endDate);
+		console.info('mobile = ', mobile);
+		console.info('insertUser = ', insertUser);
+		console.info('groupTag = ', groupTag);
 
 		$('.LyMain').block($.BCS.blockMsgRead);
+		
+		// Get PNP Black List Count
 		$.ajax({
 			type : 'POST',
 			url : bcs.bcsContextPath + '/pnpEmployee/getPnpBlockSendCount',
 			contentType : 'application/json;charset=UTF-8',
 			data : JSON.stringify({
-				startDate : "",
-				endDate : "",
+				startDate : startDate,
+				endDate : endDate,
 				mobile : "",
 				insertUser : "",
 				groupTag : ""
@@ -167,6 +199,10 @@ $(function() {
 			
 		}).done(function(response) {
 			console.info('response:', response);
+			
+			
+
+			$('.LyMain').unblock();
 		}).fail(function(response) {
 			console.info(response);
 			$.FailResponse(response);
@@ -303,36 +339,36 @@ $(function() {
 		$('.LyMain').unblock();
 	});
 	
-	var dataValidate = function() {
-		startDate = $('#startDate').val();
-		endDate = $('#endDate').val();
-		
-		console.info('startDate = ', startDate);
-		console.info('endDate = ', endDate);
-		
-		if (!startDate || startDate == 'YYYY-MM-DD') {
-			alert('請填寫起始日期！');
-			return false;
-		}
-		
-		if (!endDate || endDate == 'YYYY-MM-DD') {
-			alert('請填寫結束日期！');
-			return false;
-		}
-		
-		if (!moment(startDate).add(184, 'days').isAfter(moment(endDate))) {
-			alert('起始日期與結束日期之間不可相隔超過6個月！');
-			return false;
-		}
-		
-		if (moment(startDate).isAfter(moment(endDate))) {
-			alert('起始日期不可大於結束日期！');
-			return false;
-		}
-		
-		firstFetch = true;
-		return true;
-	};
+//	var dataValidate = function() {
+//		startDate = $('#startDate').val();
+//		endDate = $('#endDate').val();
+//		
+//		console.info('startDate = ', startDate);
+//		console.info('endDate = ', endDate);
+//		
+//		if (!startDate || startDate == 'YYYY-MM-DD') {
+//			alert('請填寫起始日期！');
+//			return false;
+//		}
+//		
+//		if (!endDate || endDate == 'YYYY-MM-DD') {
+//			alert('請填寫結束日期！');
+//			return false;
+//		}
+//		
+//		if (!moment(startDate).add(184, 'days').isAfter(moment(endDate))) {
+//			alert('起始日期與結束日期之間不可相隔超過6個月！');
+//			return false;
+//		}
+//		
+//		if (moment(startDate).isAfter(moment(endDate))) {
+//			alert('起始日期不可大於結束日期！');
+//			return false;
+//		}
+//		
+//		firstFetch = true;
+//		return true;
+//	};
 
 	var setExportButtonSource = function() {
 		console.log('Has data : ', hasData);

@@ -86,11 +86,11 @@ public class PNPBlockSendList {
     private String modifyReason;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "GMT+8")
-    @Column(name = "MODIFY_TIME")
-    private Date modifyTime;
+    @Column(name = "CREATE_TIME")
+    private Date createTime;
 
     @Column(name = "BLOCK_ENABLE", columnDefinition = "TINYINT")
-    private short blockEnable;
+    private Short blockEnable;
 
     @Column(name = "GROUP_TAG", columnDefinition = "NCHAR(8)")
     private String groupTag;

@@ -13,19 +13,25 @@ $(function() {
 	var listSummary;
 	
 	var eleCreateBtn = document.getElementById("createBtn");
+	var eleTotalPageSize = document.getElementById('totalPageSize');
+	var eleCurrentPageIndex = document.getElementById('currentPageIndex');
 	
-	var totalPageSize = document.getElementById('totalPageSize');
-	var currentPageIndex = document.getElementById('currentPageIndex');
-	var perPageSize = $(this).find('#perPageSizeSelector option:selected').val();
-	console.info('perPageSize = ', perPageSize);
+	var valPerPageSize = $(this).find('#perPageSizeSelector option:selected').val();
+	
+	var valCurrentPageIndex;
 	
 	var eleGroupTag = $(this).find('#guestLabelSelector option:selected');
-	console.info('eleGroupTag.val() = ', eleGroupTag.val());
 	
-	var selectedSearchType = $('[name="searchType"]:checked').val();
+	var valSelectedSearchType = $('[name="searchType"]:checked').val();
 //	console.info('default selectedSearchType = ', selectedSearchType);
 	
 	var valTotalPageSize = 0;
+	
+	var valStartDate;
+	var valEndDate;
+	var valMobile;
+	var valInsertUser;
+	var valGroupTag;
 
 	// result data
 	var hasData = false;
@@ -85,9 +91,6 @@ $(function() {
 	
 	/* Defined the popup model for URL */
 	var func_showCreateCancelPopupModel = function() {
-//		modelImage1.src = $(this).attr('img1');
-//		modelImage2.src = $(this).attr('img2');
-
 		model.style.display = "block";
 	};
 	
@@ -162,25 +165,33 @@ $(function() {
 	// do Search
 	$('#searchBtn').click(function() {
 		
-		startDate = $('#startDate').val();
-		endDate = $('#endDate').val();
-		mobile = $('#mobileInput').val();
-		insertUser = $('#insertUserInput').val();
-		groupTag = eleGroupTag.val();
+		valStartDate = $('#startDate').val();
+		valEndDate = $('#endDate').val();
+		valMobile = $('#mobileInput').val();
+		valInsertUser = $('#insertUserInput').val();
+		valGroupTag = eleGroupTag.val();
 		
-		if (!startDate || startDate == 'YYYY-MM-DD') {
-			startDate = "";
+		if (!valStartDate || valStartDate == 'YYYY-MM-DD') {
+			valStartDate = "";
 		}
 	
-		if (!endDate || endDate == 'YYYY-MM-DD') {
-			endDate = "";
+		if (!valEndDate || valEndDate == 'YYYY-MM-DD') {
+			valEndDate = "";
 		}
 		
-		console.info('startDate = ', startDate);
-		console.info('endDate = ', endDate);
-		console.info('mobile = ', mobile);
-		console.info('insertUser = ', insertUser);
-		console.info('groupTag = ', groupTag);
+		if (valStartDate == "" && valEndDate != "") {
+			valStartDate = valEndDate;
+		}
+		else if (valEndDate == "" && valStartDate != "") {
+			valEndDate = valStartDate;
+		}
+		
+		if (!valGroupTag || valGroupTag == '請選擇') {
+			valGroupTag = "";
+		}
+
+		console.info('valStartDate = ', valStartDate);
+		console.info('valEndDate = ', valEndDate);
 
 		$('.LyMain').block($.BCS.blockMsgRead);
 		
@@ -190,22 +201,49 @@ $(function() {
 			url : bcs.bcsContextPath + '/pnpEmployee/getPnpBlockSendCount',
 			contentType : 'application/json;charset=UTF-8',
 			data : JSON.stringify({
-				startDate : startDate,
-				endDate : endDate,
-				mobile : "",
-				insertUser : "",
-				groupTag : ""
+				startDate : valStartDate,
+				endDate : valEndDate,
+				mobile : valMobile,
+				insertUser : valInsertUser,
+				groupTag : valGroupTag
 			})
 			
 		}).done(function(response) {
 			console.info('response:', response);
 			
-			
+			var blockSendCount = response;
+			console.info('blockSendCount = ', blockSendCount);
 
-			$('.LyMain').unblock();
+			$('.dataTemplate').remove();
+			$('#noDataTxt').remove();
+			
+			if (blockSendCount > 0) {
+				valCurrentPageIndex = 1;
+				valTotalPageSize = Math.ceil(blockSendCount / valPerPageSize);
+
+				eleCurrentPageIndex.innerText = valCurrentPageIndex;
+				eleTotalPageSize.innerText = valTotalPageSize;
+				
+				document.getElementById("mainFrame").className = "mainFrame alignLeft"; 
+				
+				loadData();
+			} else {
+				document.getElementById("mainFrame").className = "mainFrame"; 
+				
+				$('#tableBody').append('<tr align="center" id="noDataTxt"><td colspan="8"><span style="color:red; text-align: center;">查無資料</span></td></tr>');
+
+				eleCurrentPageIndex.innerText = '-';
+				eleTotalPageSize.innerText = '-';
+
+				$('.LyMain').unblock();
+			}
 		}).fail(function(response) {
 			console.info(response);
 			$.FailResponse(response);
+			
+			$('.dataTemplate').remove();
+			$('#noDataTxt').remove();
+			
 			$('.LyMain').unblock();
 		});
 		
@@ -392,46 +430,30 @@ $(function() {
 		}
 	};
 
-	// ---- Initialize Page & Load Data ----
-	// get List Data
 	var loadData = function() {
-//		console.info('firstFetch:', firstFetch);
+
+		console.info('valStartDate = ', valStartDate);
+		console.info('valEndDate = ', valEndDate);
 		
-		if (firstFetch || isChangePage) {
-			$('.LyMain').block($.BCS.blockMsgRead);
-			isChangePage = false;
-		}
-		
+		// Get PNP Black List
 		$.ajax({
 			type : 'POST',
-			url : bcs.bcsContextPath + '/pnpEmployee/getPNPStsRptDetail',
+			url : bcs.bcsContextPath + '/pnpEmployee/getPnpExcludeSendingList',
 			contentType : 'application/json;charset=UTF-8',
 			data : JSON.stringify({
-				dateType : selectedSearchType,
-				startDate : startDate,
-				endDate : endDate,
-				isPageable : true,
-				page : page,
-				account : document.getElementById('accountInput').value,
-				pccCode : document.getElementById('pccCodeInput').value,
-				sourceSystem : null,
-				employeeId : null,
-				phone : null,
-				pageCount : perPageSize
+				page : valCurrentPageIndex,
+				pageCount : valPerPageSize,
+				startDate : valStartDate,
+				endDate : valEndDate,
+				mobile : valMobile,
+				insertUser : valInsertUser,
+				groupTag : valGroupTag
 			})
 		}).done(function(response) {
-//			console.info('response:', response);
-//			console.log('response:', JSON.stringify(response));
-			
-			$('.dataTemplate').remove();
-			$('#noDataTxt').remove();
+			console.info('response = ', response);
+			console.log('JSON.stringify(response) = ', JSON.stringify(response));
 			
 			if (response.length == 0) {
-				$('#dataTemplateSummary').remove();
-				$('#tableBody').append('<tr id="noDataTxt"><td colspan="8"><span style="color:red">查無資料</span></td></tr>');
-				currentPageIndex.innerText = '-';
-				totalPageSize.innerText = '-';
-				$('.LyMain').unblock();
 				return false;
 			}
 			
@@ -439,25 +461,22 @@ $(function() {
 			response.forEach(function(obj) {
 				var list = originalTr.clone(true);
 				
-				list.find('.mobileNum').html(obj.mobileNum);
-				list.find('.lineUID').html(obj.lineUID);
-				list.find('.reason').html(obj.reason);
-				list.find('.updateTime').html(obj.updateTime);
-				list.find('.status').html(obj.status);
-				list.find('.guestLabel').html(obj.guestLabel);
-				list.find('.modifier').html(obj.modifier);
+				list.find('.mobileNum').html(obj.phone);
+				list.find('.lineUID').html(obj.uid);
+				list.find('.reason').html(obj.modifyReason);
+				list.find('.updateTime').html(obj.createTime);
+				list.find('.status').html(obj.blockEnable);
+				list.find('.guestLabel').html(obj.groupTag);
+				list.find('.modifier').html(obj.insertUser);
+				
 				$('#tableBody').append(list);
+				
 				i++;
 			});
 			
-			hasData = i > 0;
-//			console.log('Has data : ' + hasData);
+			console.info('i = ', i);
 			
-			if (firstFetch) {
-				fetchListCountAndChange();
-			} else {
-				$('.LyMain').unblock();
-			}
+			$('.LyMain').unblock();
 			
 		}).fail(function(response) {
 			console.info(response);
@@ -483,12 +502,17 @@ $(function() {
 		originalTableSummary = $('#tableBodySummary').clone(true);
 		
 		cleanList();
-		// startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
-//		startDate = moment(new Date()).format('YYYY-MM-DD');
-//		endDate = moment(new Date()).format('YYYY-MM-DD');
+		
 		$('#startDate').val('YYYY-MM-DD');
 		$('#endDate').val('YYYY-MM-DD');
-		// getPnpStatusMap();
+		
+//		startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
+//		startDate = moment(new Date()).format('YYYY-MM-DD');
+//		endDate = moment(new Date()).format('YYYY-MM-DD');
+//		console.info('initPage : startDate = ', startDate);
+//		console.info('initPage : endDate = ', endDate);
+//		$('#startDate').val(startDate);
+//		$('#endDate').val(endDate);
 		
 	};
 

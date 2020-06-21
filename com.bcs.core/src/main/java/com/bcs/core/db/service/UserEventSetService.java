@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 import com.bcs.core.db.entity.UserEventSet;
 import com.bcs.core.db.repository.UserEventSetRepository;
 
@@ -16,6 +18,10 @@ public class UserEventSetService {
 	
 	public void save(UserEventSet userEventSet){
 		userEventSetRepository.save(userEventSet);
+	}
+	
+	public void save(List<UserEventSet> userEventSetList){
+		userEventSetRepository.save(userEventSetList);
 	}
 	
 	public Page<UserEventSet> findAll(Pageable pageable){

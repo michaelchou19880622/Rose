@@ -149,7 +149,7 @@ public class SendGroupUIService {
             midSet = importMidFromText.importData(filePart.getInputStream());
         }
 
-        log.info("Mids: " + DataUtils.toPrettyJsonUseJackson(midSet));
+//        log.info("Mids: " + DataUtils.toPrettyJsonUseJackson(midSet));
 
         if (midSet == null) {
             throw new BcsNoticeException("上傳格式錯誤");
@@ -171,9 +171,9 @@ public class SendGroupUIService {
 
                 /* 每一千筆處理一次 */
                 if (i % 1000 == 0) {
-                    log.info(">1000 checkList size:{}", checkList.size());
+//                    log.info(">1000 checkList size:{}", checkList.size());
                     List<String> lista = lineUserService.findMidByMidInAndActive(checkList);
-                    log.info("findMid List Result Size:{}", lista.size());
+//                    log.info("findMid List Result Size:{}", lista.size());
                     existMids.addAll(lista);
                     checkList.clear();
                 }
@@ -199,6 +199,8 @@ public class SendGroupUIService {
 
         try {
             curSaveIndex = 0;
+            int i = 0;
+            List<UserEventSet> userEventSetList = new ArrayList<>();
             for (String mid : existMids) {
                 UserEventSet userEventSet = new UserEventSet();
                 userEventSet.setTarget(EVENT_TARGET_ACTION_TYPE.EVENT_SEND_GROUP.toString());
@@ -208,9 +210,25 @@ public class SendGroupUIService {
                 userEventSet.setContent(fileName);
                 userEventSet.setSetTime(modifyTime);
                 userEventSet.setModifyUser(modifyUser);
-                log.info("userEventSet1:" + userEventSet);
-                userEventSetService.save(userEventSet);
+//                log.info("userEventSet1:" + userEventSet);
+                /* 效能優化 ： 組裝userEventSetList , 一次儲存 */
+                userEventSetList.add(userEventSet);
+                i ++;
+                /* 每一千筆處理一次 */
+                if (i % 1000 == 0) {
+                    log.info("userEventSetList size:" + userEventSetList.size());
+//                    log.info("userEventSetList:" + userEventSetList);
+                	userEventSetService.save(userEventSetList);
+                	userEventSetList.clear();
+                }                
             }
+            /* Update userEventSet */
+            if (!userEventSetList.isEmpty()) {
+                log.info("userEventSetList size:" + userEventSetList.size());
+//                log.info("userEventSetList:" + userEventSetList);
+            	userEventSetService.save(userEventSetList);
+            	userEventSetList.clear();
+            }        
         } catch (Exception e) {
             if (e.getMessage().contains("transaction timeout expired")) {
                 transactionTimeoutRetry += 1;
@@ -262,7 +280,7 @@ public class SendGroupUIService {
                 userEventSet.setContent(fileName);
                 userEventSet.setSetTime(modifyTime);
                 userEventSet.setModifyUser(modifyUser);
-                log.info("userEventSet1:" + userEventSet);
+//                log.info("userEventSet1:" + userEventSet);
                 userEventSetService.save(userEventSet);
             }
 
@@ -326,6 +344,8 @@ public class SendGroupUIService {
 
         try {
             curSaveIndex = 0;
+            int i = 0;
+            List<UserEventSet> userEventSetList = new ArrayList<>();
             for (String mid : list) {
                 UserEventSet userEventSet = new UserEventSet();
                 userEventSet.setTarget(EVENT_TARGET_ACTION_TYPE.EVENT_SEND_GROUP.toString());
@@ -335,11 +355,25 @@ public class SendGroupUIService {
                 userEventSet.setContent(fileName);
                 userEventSet.setSetTime(modifyTime);
                 userEventSet.setModifyUser(modifyUser);
-
-                log.info("userEventSet1:" + userEventSet);
-
-                userEventSetService.save(userEventSet);
+//                log.info("userEventSet1:" + userEventSet);
+                /* 效能優化 ： 組裝userEventSetList , 一次儲存 */
+                userEventSetList.add(userEventSet);
+                i ++;
+                /* 每一千筆處理一次 */
+                if (i % 1000 == 0) {
+                    log.info("userEventSetList size:" + userEventSetList.size());
+//                    log.info("userEventSetList:" + userEventSetList);
+                	userEventSetService.save(userEventSetList);
+                	userEventSetList.clear();
+                }                
             }
+            /* Update userEventSet */
+            if (!userEventSetList.isEmpty()) {
+                log.info("userEventSetList size:" + userEventSetList.size());
+//                log.info("userEventSetList:" + userEventSetList);
+            	userEventSetService.save(userEventSetList);
+            	userEventSetList.clear();
+            }                  
         } catch (Exception e) {
             if (e.getMessage().contains("transaction timeout expired")) {
                 transactionTimeoutRetry += 1;

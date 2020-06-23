@@ -47,13 +47,13 @@ import javax.persistence.*;
                                         type = String.class,
                                         mode = ParameterMode.IN
                                 ),
-                                // 寫入日期，YYYYMMDD
+                                // 寫入日期，YYYY-MM-DD
                                 @StoredProcedureParameter(
                                         name = "insert_date",
                                         type = String.class,
                                         mode = ParameterMode.IN
                                 ),
-                                // 寫入時間，HH:mm:ss.SSS
+                                // 寫入時間，HH:mm:ss
                                 @StoredProcedureParameter(
                                         name = "insert_time",
                                         type = String.class,

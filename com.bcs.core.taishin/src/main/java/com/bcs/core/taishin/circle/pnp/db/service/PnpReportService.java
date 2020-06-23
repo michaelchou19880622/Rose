@@ -734,6 +734,30 @@ public class PnpReportService {
         return pnpUpdateBlockSend.get(0).getHistoryRefId();
     }
 
+    /**
+    *
+    * Query PNP BLOCK HISTORY*
+    *
+    * @return GROUP_TAG LIST
+    * */
+
+    @SuppressWarnings("unchecked")
+    public List<PNPBlockGTag> qryPNPBlockGTagList(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
+
+        log.info("pnpSendBlockParam = {}", pnpSendBlockParam);
+        pnpSendBlockParam.setRole(customUser.getRole());
+        EntityManager entityManager = entityManagerProvider.getEntityManager();
+
+        StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("getPNPStsRptSummary");
+
+        List<PNPBlockGTag> pnpBlockGTagList = query.getResultList();
+
+        return pnpBlockGTagList;
+
+    }
+
+
+
 
 
 }

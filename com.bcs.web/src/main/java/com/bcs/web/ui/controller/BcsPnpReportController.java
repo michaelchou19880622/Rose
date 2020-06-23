@@ -1,5 +1,7 @@
 package com.bcs.web.ui.controller;
 
+import static org.hamcrest.CoreMatchers.not;
+
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
@@ -671,4 +673,76 @@ public class BcsPnpReportController {
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+	
+	@WebServiceLog(action = "Download")
+    @GetMapping("/exportPNPBlockListReportExcel")
+    @ResponseBody
+    public void exportPNPBlockListReportExcel(HttpServletRequest request, HttpServletResponse response, @CurrentUser final CustomUser customUser, 
+    			@RequestParam(required = false) final String startDate, @RequestParam(required = false) String endDate,
+				@RequestParam(required = false) final String mobile, @RequestParam(required = false) final String insertUser,
+				@RequestParam(required = false) final String groupTag) {
+		
+		log.info("exportPNPBlockListReportExcel");
+		
+		try { 
+	        
+	        final PnpSendBlockParam pnpSendBlockParam = new PnpSendBlockParam();
+	        pnpSendBlockParam.setStartDate(DataUtils.convStrToDate(startDate, "yyyy-MM-dd"));
+	        pnpSendBlockParam.setEndDate(DataUtils.convStrToDate(endDate, "yyyy-MM-dd"));
+	        pnpSendBlockParam.setMobile(mobile);
+	        pnpSendBlockParam.setInsertUser(insertUser);
+	        pnpSendBlockParam.setGroupTag(groupTag);
+	        pnpSendBlockParam.setRole(customUser.getRole());
+			
+	        log.info("1-1 pnpSendBlockParam.getStartDate() = {}", pnpSendBlockParam.getStartDate());
+	        log.info("1-2 pnpSendBlockParam.getEndDate() = {}", pnpSendBlockParam.getEndDate());
+	        log.info("1-3 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
+	        log.info("1-4 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
+	        log.info("1-5 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
+			
+			final List<PNPBlockSendList> result = pnpReportService.qryPnpBlockSendList(customUser, pnpSendBlockParam);
+			log.info(DataUtils.toPrettyJsonUseJackson(result));
+			
+			final ExportExcelBuilder builder = ExportExcelBuilder.createWorkBook().setSheetName("PNPBlockSendList");
+
+            final List<Map<Integer, String>> allMapList = new LinkedList<>();
+            allMapList.add(getPnpBlockHeaderMap(7));
+            result.forEach(r -> allMapList.add(getPnpBlockBodyMap(r, 7)));
+            allMapList.forEach(rowData -> builder.createRow(allMapList.indexOf(rowData)).setRowValue(rowData));
+
+            builder.setAllColumnAutoWidth().setOutputPath(CoreConfigReader.getString("file.path"))
+                    .setOutputFileName(String.format("PNPBlockSendListReport_%s.xlsx", DataUtils.formatDateToString(new Date(), "yyyy-MM-dd-HHmmss")));
+            log.info("Builder: {}", DataUtils.toPrettyJsonUseJackson(builder));
+            
+            final ExportService exportService = new ExportService();
+            exportService.exportExcel(response, builder);
+		} catch (final Exception e) {
+			log.error("Exception", e);
+		}
+    }
+	
+
+    private Map<Integer, String> getPnpBlockHeaderMap(final int columnSize) {
+        final Map<Integer, String> row = new LinkedHashMap<>(columnSize);
+        row.put(0, "手機門號");
+        row.put(1, "LINE UID");
+        row.put(2, "原因");
+        row.put(3, "更新時間");
+        row.put(4, "狀態");
+        row.put(5, "客群標籤");
+        row.put(6, "異動人員");
+        return row;
+    }
+	
+    private Map<Integer, String> getPnpBlockBodyMap(final PNPBlockSendList r, final int columnSize) {
+        final Map<Integer, String> row = new LinkedHashMap<>(columnSize);
+        row.put(0, r.getPhone());
+        row.put(1, r.getUid());
+        row.put(2, r.getModifyReason());
+        row.put(3, DataUtils.convDateToStr(r.getCreateTime(), "yyyy-MM-dd HH:mm:ss.sss"));
+        row.put(4, (r.getBlockEnable() == 1)? "排除中" : "取消排除");
+        row.put(5, r.getGroupTag());
+        row.put(6, r.getInsertUser());
+        return row;
+    }
 }

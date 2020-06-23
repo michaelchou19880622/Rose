@@ -1,17 +1,14 @@
 /**
- * Pnp analysis report
+ * Pnp Block List Page
  */
 
 $(function() {
 	// ---- Global Variables ----
-	
 	var isSearchData = false;
 
 	var originalTr;
 	var originalTable;
 	
-	var listSummary;
-
 	var eleModelBtnOK = document.getElementById("btn_OK");
 	var eleModelBtnCancel = document.getElementById('btn_Cancel');
 	
@@ -28,10 +25,7 @@ $(function() {
 	
 	var valCurrentPageIndex;
 	
-//	var eleGroupTag = $(this).find('#pnpBlockTagSelector option:selected');
-	
 	var valSelectedSearchType = $('[name="searchType"]:checked').val();
-//	console.info('default selectedSearchType = ', selectedSearchType);
 	
 	var valTotalPageSize = 0;
 	
@@ -44,9 +38,7 @@ $(function() {
 	var valMobileInput;
 	var valModifyReasonInput;
 
-	// result data
 	var hasData = false;
-	var firstFetch = true;
 	
 	var startDate = "";
 	var endDate = "";
@@ -56,56 +48,11 @@ $(function() {
 	
 	var blockSetType;
 	
-	var isCreateTime = true, isOrderTime = false;
-	
-	var page = 1, totalPages = 0;
-	var pnpStatusMap = {};
 	var isChangePage = false;
-	var totalDateCount = 0;
 	
-	function pad(number, length) {
-		   
-	    var str = '' + number;
-	    while (str.length < length) {
-	        str = '0' + str;
-	    }
-	   
-	    return str;
-	}
-
-
 	/* 彈出視窗 Image Model */
 	var model = document.getElementById("myModel");
 
-	/* When the user clicks anywhere outside of the model, close the model */
-//	window.onclick = function(event) {
-//		if (event.target == model) {
-//			model.style.display = "none";
-//		}
-//	}
-	
-//	window.addEventListener('click', function(e) {   
-//		if (event.target == model && document.getElementById('myModel').contains(e.target)){
-//			model.style.display = "none";
-//		}
-//	});
-
-//	/* When the user click 'ESC', close the model */
-//	$(document).keyup(function(e) {
-//		// Some browsers support 'which'(IE) others support 'keyCode' (Chrome...etc)
-//		var keycode = (e.keyCode ? e.keyCode : e.which);
-//		
-//		if (keycode == 27) {
-//			if (model.style.display === "block") {
-//
-//				eleDialogMobileInput.value = "";
-//				eleDialogMobileInput.readOnly = false;
-//				
-//				eleDialogModifyReasonInput.value = "";
-//			}
-//		}
-//	});
-	
 	/* Defined the popup model for URL */
 	var func_showCreatePopupModel = function() {
 		model.style.display = "block";
@@ -170,14 +117,13 @@ $(function() {
 		
 		$(this).closest('.optionPageSize').find('.optionLabelPageSize').html(selectValue);
 
-		page = 1;
-		perPageSize = selectValue;
-		console.info("perPageSize = ", perPageSize);
-		console.info("currentPageIndex.innerText = ", currentPageIndex.innerText);
+		valCurrentPageIndex = 1;
+		valPerPageSize = selectValue;
 		
-		firstFetch = true;
+		console.info("valCurrentPageIndex = ", valCurrentPageIndex);
+		console.info("valPerPageSize = ", valPerPageSize);
 		
-		loadData();
+		document.getElementById("searchBtn").click();
 	};
 
 	$('.optionSelectPageSize').change(func_optionSelectChanged);
@@ -185,13 +131,13 @@ $(function() {
 	/* 上/下頁按鈕 */
 	var pageBtnHandler = function(condition, actionName) {
 		if (condition) {
-			page = actionName === 'next' ? ++page : --page;
-			console.log('Currency Page Number is ' + page);
+			valCurrentPageIndex = (actionName === 'next')? ++valCurrentPageIndex : --valCurrentPageIndex;
+			console.log('Currency Page Number is ' + valCurrentPageIndex);
 			
-			currentPageIndex.innerText = page;
-			
-			isChangePage = true;
-			
+			currentPageIndex.innerText = valCurrentPageIndex;
+
+//			document.getElementById("searchBtn").click();
+
 			loadData();
 		}
 	};
@@ -204,11 +150,16 @@ $(function() {
 	});
 
 	$('#btn_PreviousPage').click(function() {
-		pageBtnHandler(page > 1, 'back');
+		console.info('btn_PreviousPage');
+		console.info('valCurrentPageIndex = ', valCurrentPageIndex);
+		pageBtnHandler(valCurrentPageIndex > 1, 'back');
 	});
 
 	$('#btn_NextPage').click(function() {
-		pageBtnHandler(page < totalPages, 'next');
+		console.info('btn_NextPage');
+		console.info('valCurrentPageIndex = ', valCurrentPageIndex);
+		console.info('valTotalPageSize = ', valTotalPageSize);
+		pageBtnHandler(valCurrentPageIndex < valTotalPageSize, 'next');
 	});
 
 	// do Search
@@ -243,17 +194,17 @@ $(function() {
 			valGroupTag = " ";
 		}
 
-		console.info('valStartDate = ', valStartDate);
-		console.info('valEndDate = ', valEndDate);
-		console.info('valMobile = ', valMobile);
-		console.info('valInsertUser = ', valInsertUser);
-		console.info('valGroupTag = ', valGroupTag);
+//		console.info('valStartDate = ', valStartDate);
+//		console.info('valEndDate = ', valEndDate);
+//		console.info('valMobile = ', valMobile);
+//		console.info('valInsertUser = ', valInsertUser);
+//		console.info('valGroupTag = ', valGroupTag);
 
 		if (!dataValidate()) {
 			return false;
 		}
 		
-		$('.LyMain').block($.BCS.blockMsgRead);
+		$('.LyMain').block($.BCS.PnpBlock_dataLoading);
 		
 		// Get PNP Black List Count
 		$.ajax({
@@ -269,10 +220,12 @@ $(function() {
 			})
 			
 		}).done(function(response) {
-			console.info('response:', response);
+//			console.info('response:', response);
+			
+			isSearchData = true;
 			
 			var blockSendCount = response;
-			console.info('blockSendCount = ', blockSendCount);
+//			console.info('blockSendCount = ', blockSendCount);
 
 			$('.dataTemplate').remove();
 			$('#noDataTxt').remove();
@@ -312,10 +265,9 @@ $(function() {
 
 		$('.LyMain').block($.BCS.blockMsgRead);
 		
-		console.log('Has data : ', hasData);
+//		console.log('Has data : ', hasData);
 		
 		if (!hasData) {
-			
 			if (!isSearchData) {
 				alert("很抱歉，您尚未進行資料查詢，無法匯出資料！\n請先進行資料查詢，謝謝。")
 			} else {
@@ -326,23 +278,15 @@ $(function() {
 			return;
 		}
 		
-		var type = isCreateTime ? 'createTime' : 'orderTime';
-		
-		var getUrl = bcs.bcsContextPath + '/pnpEmployee/exportPNPStsReportExcel?'
-										+ 'dateType=' + selectedSearchType 
-										+ '&startDate=' + startDate 
-										+ '&endDate=' + endDate 
-										+ '&isPageable=false' 
-										+ '&page=1'
-										+ '&account=' + document.getElementById('accountInput').value 
-										+ '&pccCode=' + document.getElementById('pccCodeInput').value 
-										+ '&sourceSystem=' + ''
-										+ '&employeeId=' + ''
-										+ '&phone=' + ''
-										+ '&pageCount=' + totalDateCount;
+		var getUrl = bcs.bcsContextPath + '/pnpEmployee/exportPNPBlockListReportExcel?'
+										+ 'startDate=' + valStartDate 
+										+ '&endDate=' + valEndDate 
+										+ '&mobile=' + valMobile
+										+ '&insertUser=' + valInsertUser 
+										+ '&groupTag=' + valGroupTag;
 		
 		getUrl = encodeURI(getUrl);
-//		console.info('getUrl: ' + getUrl);
+//		console.info('getUrl = ', getUrl);
 		
 		window.location.href = getUrl;
 
@@ -352,25 +296,6 @@ $(function() {
 	var dataValidate = function() {
 		startDate = $('#startDate').val();
 		endDate = $('#endDate').val();
-		
-//		console.info('startDate = ', startDate);
-//		console.info('endDate = ', endDate);
-		
-//		if (!startDate || startDate == 'YYYY-MM-DD') {
-//			alert('請填寫起始日期！');
-//			return false;
-//		}
-//		
-//		if (!endDate || endDate == 'YYYY-MM-DD') {
-//			alert('請填寫結束日期！');
-//			return false;
-//		}
-//		
-//		if (!moment(startDate).add(184, 'days').isAfter(moment(endDate))) {
-//			alert('起始日期與結束日期之間不可相隔超過6個月！');
-//			return false;
-//		}
-
 		
 		if (moment(startDate).isAfter(moment(endDate))) {
 			alert('更新時間設定異常 ( 起始時間不可大於結束時間 )');
@@ -392,34 +317,12 @@ $(function() {
 		return true;
 	}
 
-	var setExportButtonSource = function() {
-		console.log('Has data : ', hasData);
-		
-		if (hasData) {
-			var getUrl = bcs.bcsContextPath + '/pnpEmployee/exportPNPDetailReportExcel' 
-											+ '?startDate=' + startDate 
-											+ '&endDate=' + endDate 
-											+ '&isPageable=false' 
-											+ '&page=' + page 
-											+ '&account=' + document.getElementById('accountInput').value 
-											+ '&pccCode=' + document.getElementById('pccCodeInput').value 
-											+ '&sourceSystem=' + document.getElementById('sourceSystemInput').value 
-											+ '&phone=' + document.getElementById('phoneNumber').value 
-											+ '&dateType=' + ((isCreateTime) ? 'createTime' : 'orderTime');
-			console.info('getUrl', getUrl);
-
-			$('.btn_add.exportToExcel').attr('href', getUrl);
-		} else {
-			$('.btn_add.exportToExcel').attr('href', '#');
-		}
-	};
-
 	var loadData = function() {
 		
 		cleanList();
 
-		console.info('valStartDate = ', valStartDate);
-		console.info('valEndDate = ', valEndDate);
+//		console.info('valStartDate = ', valStartDate);
+//		console.info('valEndDate = ', valEndDate);
 		
 		// Get PNP Black List
 		$.ajax({
@@ -436,8 +339,8 @@ $(function() {
 				groupTag : valGroupTag
 			})
 		}).done(function(response) {
-			console.info('response = ', response);
-			console.log('JSON.stringify(response) = ', JSON.stringify(response));
+//			console.info('response = ', response);
+//			console.log('JSON.stringify(response) = ', JSON.stringify(response));
 			
 			if (response.length == 0) {
 				return false;
@@ -451,7 +354,10 @@ $(function() {
 				list.find('.lineUID').html(obj.uid);
 				list.find('.reason').html(obj.modifyReason);
 				list.find('.updateTime').html(obj.createTime);
-				list.find('.status').html(obj.blockEnable);
+				
+				var blockStatus = (obj.blockEnable == 1)? "排除中" : "取消排除";
+				
+				list.find('.status').html(blockStatus);
 				list.find('.guestLabel').html(obj.groupTag);
 				list.find('.modifier').html(obj.insertUser);
 
@@ -464,7 +370,11 @@ $(function() {
 				i++;
 			});
 			
-			console.info('i = ', i);
+			if (i > 0) {
+				hasData = true;
+			}
+			
+//			console.info('i = ', i);
 			
 			$('.LyMain').unblock();
 			
@@ -522,8 +432,8 @@ $(function() {
             alert("已將用戶電話號碼 " + valMobileInput + alertString);
             
     		model.style.display = "none";
-    		
-    		loadData();
+
+    		document.getElementById("searchBtn").click();
             
         	$('.LyMain').unblock();
         }).fail(function(response) {
@@ -540,7 +450,6 @@ $(function() {
 		$('.dataTemplateSummary').remove();
 		$('.tableBody').remove();
 		$('.tableBodySmmary').remove();
-//		console.log('Result List Remove!!');
 	};
 
 	// initialize Page
@@ -586,15 +495,15 @@ $(function() {
 				inActive : 1
 			})
 		}).done(function(response) {
-			console.info('response = ', response);
-			console.log('JSON.stringify(response) = ', JSON.stringify(response));
+//			console.info('response = ', response);
+//			console.log('JSON.stringify(response) = ', JSON.stringify(response));
 			
 			if (response.length == 0) {
 				return false;
 			}
 			
 			$.each(response, function(i, o){		
-				console.info('qryPNPBlockGTagList : o = ', JSON.stringify(o));
+//				console.info('qryPNPBlockGTagList : o = ', JSON.stringify(o));
 				
 				if (o.groupTag == "" || o.groupTag == null || o.groupTag == " ") {
 					return true;
@@ -607,31 +516,6 @@ $(function() {
 			});
 
 			$('.optionSelectGuestLabel').change(func_optionPnpBlockTagSelectChanged);
-			
-//			$('#pnpBlockTagSelector').val(selectedValue);
-			
-//			var i = 1;
-//			response.forEach(function(obj) {
-//				var list = originalTr.clone(true);
-//				
-//				list.find('.mobileNum').html(obj.phone);
-//				list.find('.lineUID').html(obj.uid);
-//				list.find('.reason').html(obj.modifyReason);
-//				list.find('.updateTime').html(obj.createTime);
-//				list.find('.status').html(obj.blockEnable);
-//				list.find('.guestLabel').html(obj.groupTag);
-//				list.find('.modifier').html(obj.insertUser);
-//
-//				/* Setup Button Delete */
-//				list.find('.btn_delete').attr('mobile', obj.phone);
-//				list.find('.btn_delete').click(func_showCancelPopupModel);
-//				
-//				$('#tableBody').append(list);
-//				
-//				i++;
-//			});
-//			
-//			console.info('i = ', i);
 			
 			$('.LyMain').unblock();
 			

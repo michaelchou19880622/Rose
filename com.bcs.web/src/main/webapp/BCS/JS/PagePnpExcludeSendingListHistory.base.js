@@ -176,7 +176,7 @@ $(function() {
 				
 				document.getElementById("mainFrame").className = "mainFrame alignLeft"; 
 				
-//				loadData();
+				loadData();
 			} else {
 				document.getElementById("mainFrame").className = "mainFrame"; 
 				
@@ -252,7 +252,7 @@ $(function() {
 		// Get PNP Black List
 		$.ajax({
 			type : 'POST',
-			url : bcs.bcsContextPath + '/pnpEmployee/getPnpExcludeSendingList',
+			url : bcs.bcsContextPath + '/pnpEmployee/getPnpExcludeSendingHistoryList',
 			contentType : 'application/json;charset=UTF-8',
 			data : JSON.stringify({
 				page : valCurrentPageIndex,
@@ -264,8 +264,8 @@ $(function() {
 				groupTag : valGroupTag
 			})
 		}).done(function(response) {
-//			console.info('response = ', response);
-//			console.log('JSON.stringify(response) = ', JSON.stringify(response));
+			console.info('response = ', response);
+			console.log('JSON.stringify(response) = ', JSON.stringify(response));
 			
 			if (response.length == 0) {
 				return false;
@@ -275,10 +275,10 @@ $(function() {
 			response.forEach(function(obj) {
 				var list = originalTr.clone(true);
 				
-				list.find('.mobileNum').html(obj.phone);
+				list.find('.mobileNum').html(obj.mobile);
 				list.find('.lineUID').html(obj.uid);
 				list.find('.reason').html(obj.modifyReason);
-				list.find('.updateTime').html(obj.createTime);
+				list.find('.updateTime').html(obj.modifyDateTime);
 				
 				var blockStatus = (obj.blockEnable == 1)? "排除中" : "取消排除";
 				

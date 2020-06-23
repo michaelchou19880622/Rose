@@ -31,6 +31,7 @@ import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.circle.pnp.code.PnpFtpSourceEnum;
 import com.bcs.core.taishin.circle.pnp.code.PnpStatusEnum;
 import com.bcs.core.taishin.circle.pnp.db.entity.PNPBlockGTag;
+import com.bcs.core.taishin.circle.pnp.db.entity.PNPBlockHistoryList;
 import com.bcs.core.taishin.circle.pnp.db.entity.PNPBlockSendList;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailReport;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailReportParam;
@@ -558,6 +559,7 @@ public class BcsPnpReportController {
         return BcsPageEnum.PNP_EXCLUDE_SENDING_LIST_HISTORY_PAGE.toString();
     }
     
+	/* 取得排除發送名單列表 */
 	@WebServiceLog
 	@PostMapping(value = "/getPnpExcludeSendingList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	@ResponseBody
@@ -745,8 +747,6 @@ public class BcsPnpReportController {
         row.put(6, r.getInsertUser());
         return row;
     }
-    
-
 
 	/* 取得排除發送名單歷程記錄總數 */
 	@WebServiceLog
@@ -775,4 +775,35 @@ public class BcsPnpReportController {
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+	
+	/* 取得排除發送名單歷程列表 */
+	@WebServiceLog
+	@PostMapping(value = "/getPnpExcludeSendingHistoryList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> getPnpExcludeSendingHistoryList(HttpServletRequest request, HttpServletResponse response, 
+														@CurrentUser final CustomUser customUser,
+														@RequestBody final PnpSendBlockParam pnpSendBlockParam) {
+		log.info("getPnpExcludeSendingList");
+		
+		try { 
+			log.info("1-1 pnpSendBlockParam.getPage() = {}", pnpSendBlockParam.getPage());
+	        log.info("1-2 pnpSendBlockParam.getPageCount() = {}", pnpSendBlockParam.getPageCount());
+	        log.info("1-3 pnpSendBlockParam.getStartDate() = {}", pnpSendBlockParam.getStartDate());
+	        log.info("1-4 pnpSendBlockParam.getEndDate() = {}", pnpSendBlockParam.getEndDate());
+	        log.info("1-5 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
+	        log.info("1-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
+	        log.info("1-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
+	        log.info("1-8 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
+			
+			final List<PNPBlockHistoryList> result = pnpReportService.qryPnpBlockHistoryList(customUser, pnpSendBlockParam);
+			log.info(DataUtils.toPrettyJsonUseJackson(result));
+			return new ResponseEntity<>(result, HttpStatus.OK);
+		} catch (final Exception e) {
+			log.error("Exception", e);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	
+	
 }

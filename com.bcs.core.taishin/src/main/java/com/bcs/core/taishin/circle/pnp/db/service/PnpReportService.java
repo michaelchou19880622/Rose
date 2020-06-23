@@ -618,20 +618,29 @@ public class PnpReportService {
      * @return PnpBlockHistory List
      */
     @SuppressWarnings("unchecked")
-    public List<PNPBlockSendList> qryPnpBlockHistoryList(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
+    public List<PNPBlockHistoryList> qryPnpBlockHistoryList(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
 
         log.info("pnpSendBlockParam = {}", pnpSendBlockParam);
+        
+		log.debug("2-1 pnpSendBlockParam.getPage() = {}", pnpSendBlockParam.getPage());
+        log.debug("2-2 pnpSendBlockParam.getPageCount() = {}", pnpSendBlockParam.getPageCount());
+        log.debug("2-3 pnpSendBlockParam.getStartDate() = {}", pnpSendBlockParam.getStartDate());
+        log.debug("2-4 pnpSendBlockParam.getEndDate() = {}", pnpSendBlockParam.getEndDate());
+        log.debug("2-5 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
+        log.debug("2-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
+        log.debug("2-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
+        log.debug("2-8 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
 
         pnpSendBlockParam.setRole(customUser.getRole());
 
         EntityManager entityManager = entityManagerProvider.getEntityManager();
 
         Date startDate = pnpSendBlockParam.getStartDate();
-        String str_startDate = DataUtils.formatDateToString(startDate, "yyyy-MM-dd");
+        String str_startDate = (startDate == null)? "" : DataUtils.formatDateToString(startDate, "yyyy-MM-dd");
         Date endDate = pnpSendBlockParam.getEndDate();
-        String str_endDate = DataUtils.formatDateToString(endDate, "yyyy-MM-dd");
+        String str_endDate = (endDate == null)? "" : DataUtils.formatDateToString(endDate, "yyyy-MM-dd");
 
-        StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("qryPNPBlockSendList");
+        StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("qryPNPBlockHistoryList");
         query.setParameter("show_page", pnpSendBlockParam.getPage());
         query.setParameter("page_count",pnpSendBlockParam.getPageCount());
         query.setParameter("start_date",str_startDate);
@@ -641,15 +650,15 @@ public class PnpReportService {
         query.setParameter("group_tag",pnpSendBlockParam.getGroupTag());
         query.setParameter("block_enable",pnpSendBlockParam.getBlockEnable());
 
-        List<PNPBlockSendList> pnpBlockSendList = query.getResultList();
+        List<PNPBlockHistoryList> pnpBlockHistoryList = query.getResultList();
 
-        if (pnpBlockSendList.isEmpty()) {
+        if (pnpBlockHistoryList.isEmpty()) {
             log.info("pnpBlockHistoryList List is Empty!!");
             return Collections.emptyList();
         } else
-            log.info("pnpBlockHistoryList is not emtpy:" + DataUtils.toPrettyJsonUseJackson(pnpBlockSendList));
+            log.info("pnpBlockHistoryList is not emtpy:" + DataUtils.toPrettyJsonUseJackson(pnpBlockHistoryList));
 
-        return pnpBlockSendList;
+        return pnpBlockHistoryList;
     }
 
     /**
@@ -679,15 +688,15 @@ public class PnpReportService {
 		query.setParameter("group_tag", pnpSendBlockParam.getGroupTag());
 		query.setParameter("block_enable", pnpSendBlockParam.getBlockEnable());
 
-        List<PNPBlockSendCount> pnpBlockSendCount = query.getResultList();
+        List<PNPBlockHistoryCount> pnpBlockHistoryCount = query.getResultList();
 
-        if (pnpBlockSendCount.isEmpty()) {
+        if (pnpBlockHistoryCount.isEmpty()) {
             log.info("getPNPBlockHistoryCount List is Empty!!");
             return 0;
         } else
-            log.info("getPNPBlockHistoryCount List is not emtpy:" + DataUtils.toPrettyJsonUseJackson(pnpBlockSendCount));
+            log.info("getPNPBlockHistoryCount List is not emtpy:" + DataUtils.toPrettyJsonUseJackson(pnpBlockHistoryCount));
 
-        return pnpBlockSendCount.get(0).getCount();
+        return pnpBlockHistoryCount.get(0).getCount();
     }
 
     /**

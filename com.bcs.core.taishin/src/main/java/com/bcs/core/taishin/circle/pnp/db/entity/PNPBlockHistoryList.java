@@ -24,7 +24,7 @@ import java.util.Date;
                 @NamedStoredProcedureQuery(
                         name = "qryPNPBlockHistoryList",
                         procedureName = "usp_qryPNPBlockHistoryList",
-                        resultClasses = {PNPBlockSendList.class},
+                        resultClasses = {PNPBlockHistoryList.class},
                         parameters = {
                                 // 指定查詢頁數，"1"
                                 @StoredProcedureParameter(
@@ -83,8 +83,8 @@ public class PNPBlockHistoryList {
     @Id
     // MOBILE, S.UID, MODIFY_REASON, S.MODIFY_TIME, BLOCK_ENABLE, GROUP_TAG, INSERT_USER
 
-    @Column(name = "PHONE", columnDefinition = "VARCHAR(15)")
-    private String phone;
+    @Column(name = "MOBILE", columnDefinition = "VARCHAR(15)")
+    private String mobile;
 
     @Column(name = "UID", columnDefinition = "CHAR(35)")
     private String uid;
@@ -93,8 +93,8 @@ public class PNPBlockHistoryList {
     private String modifyReason;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "GMT+8")
-    @Column(name = "MODIFY_TIME")
-    private Date modifyTime;
+    @Column(name = "MODIFY_DATETIME")
+    private Date modifyDateTime;
 
     @Column(name = "BLOCK_ENABLE", columnDefinition = "TINYINT")
     private short blockEnable;

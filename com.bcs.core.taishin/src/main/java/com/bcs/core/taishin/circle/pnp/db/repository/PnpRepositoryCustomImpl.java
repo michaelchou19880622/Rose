@@ -150,19 +150,19 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 .getResultList();
 
         if (detailIdList.isEmpty()) {
-            log.info("Detail id list is empty by mainId is {}", mainId);
+            log.info("Detail id list is empty by main id: {}", mainId);
             return Collections.emptyList();
         }
 //        log.info("Detail id list size: {}\n" +
 //               "value: {}", detailIdList.size(), DataUtils.toPrettyJsonUseJackson(detailIdList));
-        log.info("Detail id list size: {}" + detailIdList.size());
+        log.info("Detail id list size: {}", detailIdList.size());
         		
         String updateSql = "UPDATE " + detailTable +
                 " SET STATUS=:NEW_STATUS," +
                 " MODIFY_TIME=:MODIFY_TIME" +
                 " WHERE PNP_DETAIL_ID IN(:IDS)" +
                 " AND STATUS IN (:STATUS_LIST)";
-        log.info(updateSql);
+        // log.info(updateSql);
 
         int i = providerService.getEntityManager().createNativeQuery(updateSql)
                 .setParameter("NEW_STATUS", PnpStatusEnum.SENDING.value)
@@ -171,10 +171,10 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 .setParameter("STATUS_LIST", Arrays.asList(PnpStatusEnum.FTP_DETAIL_SAVE.value, PnpStatusEnum.FTP_MAIN_SAVE.value, PnpStatusEnum.PROCESS.value))
                 .executeUpdate();
         if (i > 0) {
-            log.info("Updated [WAIT] and [PROCESS] to [SENDING]!! {}", i);
+            log.info("Updated detail, [WAIT] and [PROCESS] to [SENDING] count: {}", i);
         }
         String selectSql = "SELECT * FROM " + detailTable + " WHERE PNP_DETAIL_ID IN (:ids)";
-        log.info(selectSql);
+        // log.info(selectSql);
 
         return providerService.getEntityManager().createNativeQuery(selectSql, type.detailClass)
                 .setParameter("ids", detailIdList)
@@ -189,6 +189,12 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     @SuppressWarnings("unchecked")
     @Transactional(rollbackFor = Exception.class)
     public List<PnpMain> findAllMain(String procApName, PnpFtpSourceEnum type) {
+
+        String expiredCheckSql = "EXEC usp_batchCheckPNPExpiredDetail '" + type + "'";
+        log.info("checking {} pnp detail table expired data start ...", type);
+        providerService.getEntityManager().createNativeQuery(expiredCheckSql);
+        log.info("checking {} pnp detail table expired data end ...", type);
+
     	
         String waitMainString = "SELECT TOP 100 PNP_MAIN_ID FROM " + type.mainTable +
                 " WHERE STATUS NOT IN (:STATUS_LIST)" +
@@ -203,11 +209,11 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 .getResultList();
 
         if (mainList == null || mainList.isEmpty()) {
-            log.info("Main list is empty!!");
+            //log.info("{} Main list is empty!!", type.mainTable);
             return Collections.emptyList();
         }
 
-        log.info("Main id list: {}", DataUtils.toPrettyJsonUseJackson(mainList));
+        log.info("{} Main id list: {}", type.english, DataUtils.toPrettyJsonUseJackson(mainList));
 
         String updateSql = " UPDATE " + type.mainTable +
                 " SET STATUS=:NEW_STATUS, MODIFY_TIME=:MODIFY_TIME " +
@@ -222,10 +228,10 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
                 .executeUpdate();
 
         if (i > 0) {
-            log.info("Update Main Status: [WAIT] to [BC][SENDING]: {}", i);
+            log.info("{} Update main status, [WAIT] to [SENDING] count: {}", type.english, i);
         }
         else {
-            log.info("No Need to Update Main Status.");        	
+            log.info("{} No need to update main status.", type.english);
         }
         String selectSql = "SELECT * FROM " + type.mainTable + " WHERE PNP_MAIN_ID IN (:ids)";
 

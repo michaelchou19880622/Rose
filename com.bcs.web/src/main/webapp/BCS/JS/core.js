@@ -271,6 +271,9 @@ $(function(){
   $.BCS.LinePoint_blockMsgDeleting = { "message" : "資料刪除中...."};
   $.BCS.LinePoint_blockMsgProgressing = { "message" : "處理中...."};
 
+  $.BCS.PnpBlock_dataUpdateing = { "message" : "資料更新中...."};
+  $.BCS.PnpBlock_loadTagList = { "message" : "客群標籤資料載入中...."};
+
   $.BCS.formatNumber = function(number, size){
 
     if(number){

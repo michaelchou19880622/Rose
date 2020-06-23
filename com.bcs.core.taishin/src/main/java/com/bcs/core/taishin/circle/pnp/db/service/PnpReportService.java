@@ -742,13 +742,10 @@ public class PnpReportService {
     * */
 
     @SuppressWarnings("unchecked")
-    public List<PNPBlockGTag> qryPNPBlockGTagList(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
-
-        log.info("pnpSendBlockParam = {}", pnpSendBlockParam);
-        pnpSendBlockParam.setRole(customUser.getRole());
+    public List<PNPBlockGTag> qryPNPBlockGTagList(@CurrentUser CustomUser customUser) {
         EntityManager entityManager = entityManagerProvider.getEntityManager();
 
-        StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("getPNPStsRptSummary");
+        StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("qryPNPBlockGTag");
 
         List<PNPBlockGTag> pnpBlockGTagList = query.getResultList();
 

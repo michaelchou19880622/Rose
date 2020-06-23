@@ -22,11 +22,13 @@ $(function() {
 	var eleDialogMobileInput = document.getElementById('dialogMobileInput');
 	var eleDialogModifyReasonInput = document.getElementById('dialogModifyReasonInput');
 	
+	var elePnpBlockTagSelector = document.getElementById("pnpBlockTagSelector");
+	
 	var valPerPageSize = $(this).find('#perPageSizeSelector option:selected').val();
 	
 	var valCurrentPageIndex;
 	
-	var eleGroupTag = $(this).find('#guestLabelSelector option:selected');
+//	var eleGroupTag = $(this).find('#pnpBlockTagSelector option:selected');
 	
 	var valSelectedSearchType = $('[name="searchType"]:checked').val();
 //	console.info('default selectedSearchType = ', selectedSearchType);
@@ -233,7 +235,7 @@ $(function() {
 		valEndDate = $('#endDate').val();
 		valMobile = $('#mobileInput').val();
 		valInsertUser = $('#insertUserInput').val();
-		valGroupTag = eleGroupTag.val();
+		valGroupTag = elePnpBlockTagSelector.options[elePnpBlockTagSelector.selectedIndex].value;
 		
 		if (!valStartDate || valStartDate == 'YYYY-MM-DD') {
 			valStartDate = "";
@@ -253,14 +255,21 @@ $(function() {
 		if (!valGroupTag || valGroupTag == '請選擇') {
 			valGroupTag = "";
 		}
-
-//		console.info('valStartDate = ', valStartDate);
-//		console.info('valEndDate = ', valEndDate);
 		
+		if (!valGroupTag || valGroupTag == "未設定標籤") {
+			valGroupTag = " ";
+		}
+
+		console.info('valStartDate = ', valStartDate);
+		console.info('valEndDate = ', valEndDate);
+		console.info('valMobile = ', valMobile);
+		console.info('valInsertUser = ', valInsertUser);
+		console.info('valGroupTag = ', valGroupTag);
+
 		if (!dataValidate()) {
 			return false;
 		}
-
+		
 		$('.LyMain').block($.BCS.blockMsgRead);
 		
 		// Get PNP Black List Count
@@ -423,6 +432,8 @@ $(function() {
 	};
 
 	var loadData = function() {
+		
+		cleanList();
 
 		console.info('valStartDate = ', valStartDate);
 		console.info('valEndDate = ', valEndDate);
@@ -507,7 +518,7 @@ $(function() {
 		var userAccount = bcs.user.account;
 		console.info('userAccount = ', userAccount);
         
-		$('.LyMain').block($.BCS.LinePoint_blockMsgDeleting);
+		$('.LyMain').block($.BCS.PnpBlock_dataUpdateing);
 		$.ajax({
 			type : 'POST',
 			url : bcs.bcsContextPath + '/pnpEmployee/updPnpBlockSend',
@@ -527,9 +538,9 @@ $(function() {
             var alertString = (blockSetType == 'create')? " 新增至排除發送名單" : " 從排除發送名單中移除";
             alert("已將用戶電話號碼 " + valMobileInput + alertString);
             
-            
-            
     		model.style.display = "none";
+    		
+    		loadData();
             
         	$('.LyMain').unblock();
         }).fail(function(response) {
@@ -559,9 +570,9 @@ $(function() {
 		
 		cleanList();
 		
-//		$('#startDate').val('YYYY-MM-DD');
-//		$('#endDate').val('YYYY-MM-DD');
+		loadAndSetBlockTagList();
 		
+		/* 設定預設的開始及結束時間 */
 //		startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
 //		startDate = moment(new Date()).format('YYYY-MM-DD');
 //		endDate = moment(new Date()).format('YYYY-MM-DD');
@@ -569,7 +580,80 @@ $(function() {
 //		console.info('initPage : endDate = ', endDate);
 //		$('#startDate').val(startDate);
 //		$('#endDate').val(endDate);
+	};
+
+	/* 更新客群標籤下拉選單 */
+	var func_optionPnpBlockTagSelectChanged = function(){
+		var selectValue = $(this).find('option:selected').text();
 		
+		$(this).closest('.optionGuestLabel').find('.optionLabelGuestLabel').html(selectValue);
+	};
+	
+	/* 載入PNP排除發送名單客群標籤列表 */
+	var loadAndSetBlockTagList = function() {
+
+		$('.LyMain').block($.BCS.PnpBlock_loadTagList);
+		
+		// Get PNP Block Tag List
+		$.ajax({
+			type : 'GET',
+			url : bcs.bcsContextPath + '/pnpEmployee/qryPNPBlockGTagList',
+			contentType : 'application/json;charset=UTF-8',
+		}).done(function(response) {
+			console.info('response = ', response);
+			console.log('JSON.stringify(response) = ', JSON.stringify(response));
+			
+			if (response.length == 0) {
+				return false;
+			}
+			
+			$.each(response, function(i, o){		
+				console.info('qryPNPBlockGTagList : o = ', JSON.stringify(o));
+				
+				if (o.groupTag == "" || o.groupTag == null || o.groupTag == " ") {
+					return true;
+				}
+				
+				var opt = document.createElement('option');
+				opt.innerHTML = o.groupTag;
+				
+				elePnpBlockTagSelector.appendChild(opt);
+			});
+
+			$('.optionSelectGuestLabel').change(func_optionPnpBlockTagSelectChanged);
+			
+//			$('#pnpBlockTagSelector').val(selectedValue);
+			
+//			var i = 1;
+//			response.forEach(function(obj) {
+//				var list = originalTr.clone(true);
+//				
+//				list.find('.mobileNum').html(obj.phone);
+//				list.find('.lineUID').html(obj.uid);
+//				list.find('.reason').html(obj.modifyReason);
+//				list.find('.updateTime').html(obj.createTime);
+//				list.find('.status').html(obj.blockEnable);
+//				list.find('.guestLabel').html(obj.groupTag);
+//				list.find('.modifier').html(obj.insertUser);
+//
+//				/* Setup Button Delete */
+//				list.find('.btn_delete').attr('mobile', obj.phone);
+//				list.find('.btn_delete').click(func_showCancelPopupModel);
+//				
+//				$('#tableBody').append(list);
+//				
+//				i++;
+//			});
+//			
+//			console.info('i = ', i);
+			
+			$('.LyMain').unblock();
+			
+		}).fail(function(response) {
+			console.info(response);
+			$.FailResponse(response);
+			$('.LyMain').unblock();
+		});
 	};
 
 	initPage();

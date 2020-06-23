@@ -38,9 +38,10 @@
 								<label style="display: inline-block; width: 80px; padding-left:10px" class="param-label">客群標籤：</label> 
 <!-- 								<input class="customSearchInput" type="text" id="pccCodeInput" name="pccCodeInput" value="" maxlength="20" /> -->
                                 <div class="optionGuestLabel queryValueComponentSelectList">
-                                    <div class="optionLabelGuestLabel">請選擇</div>
-                                    <select id="guestLabelSelector" class="optionSelectGuestLabel queryValue" name="queryValue">
-                                        <option value="請選擇" selected>請選擇</option>
+                                    <div class="optionLabelGuestLabel">全部</div>
+                                    <select id="pnpBlockTagSelector" class="optionSelectGuestLabel queryValue" name="queryValue">
+                                        <option value="*" selected>全部</option>
+                                        <option value="" >未設定標籤</option>
                                     </select>
                                 </div>
 								
@@ -81,7 +82,7 @@
 								<td rowspan="1" style="font-size:11px;" class="td1 guestLabel"></td>
 								<td rowspan="1" style="font-size:11px;" class="td1 modifier"></td>
                                 <td>
-                                    <input class="btn_delete" id="cancelBtn" style="cursor: pointer;" type="button" value="取消">
+                                    <input class="btn_delete" style="cursor: pointer;" type="button" value="取消">
                                 </td>
 							</tr>
 						</table>

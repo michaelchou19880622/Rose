@@ -1,5 +1,6 @@
 package com.bcs.web.ui.controller;
 
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -29,6 +30,7 @@ import com.bcs.core.report.service.ExportService;
 import com.bcs.core.resource.CoreConfigReader;
 import com.bcs.core.taishin.circle.pnp.code.PnpFtpSourceEnum;
 import com.bcs.core.taishin.circle.pnp.code.PnpStatusEnum;
+import com.bcs.core.taishin.circle.pnp.db.entity.PNPBlockGTag;
 import com.bcs.core.taishin.circle.pnp.db.entity.PNPBlockSendList;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailReport;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailReportParam;
@@ -582,7 +584,8 @@ public class BcsPnpReportController {
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
+	/* 取得排除發送名單總數 */
 	@WebServiceLog
 	@PostMapping(value = "/getPnpBlockSendCount", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	@ResponseBody
@@ -602,7 +605,7 @@ public class BcsPnpReportController {
 	        log.debug("1-8 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
 			
 			final Long pnpBlockSendCount = pnpReportService.getPnpBlockSendCount(customUser, pnpSendBlockParam);
-			log.info("pnpBlockSendCount = {}", pnpBlockSendCount);
+			log.debug("pnpBlockSendCount = {}", pnpBlockSendCount);
 			return new ResponseEntity<>(pnpBlockSendCount, HttpStatus.OK);
 		} catch (final Exception e) {
 			log.error("Exception", e);
@@ -610,6 +613,7 @@ public class BcsPnpReportController {
 		}
 	}
 	
+	/* 新增/取消排除發送名單狀態 */
 	@WebServiceLog
 	@PostMapping(value = "/updPnpBlockSend", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	@ResponseBody
@@ -619,17 +623,42 @@ public class BcsPnpReportController {
 		log.info("updPnpBlockSend");
 		
 		try { 
-	        log.info("1-1 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
-	        log.info("1-2 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
-	        log.info("1-3 pnpSendBlockParam.getInsertDate() = {}", pnpSendBlockParam.getInsertDate());
-	        log.info("1-4 pnpSendBlockParam.getInsertTime() = {}", pnpSendBlockParam.getInsertTime());
-	        log.info("1-5 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
-	        log.info("1-6 pnpSendBlockParam.getBlockEnable() = {}", pnpSendBlockParam.getBlockEnable());
-	        log.info("1-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
+	        log.debug("1-1 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
+	        log.debug("1-2 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
+	        log.debug("1-3 pnpSendBlockParam.getInsertDate() = {}", pnpSendBlockParam.getInsertDate());
+	        log.debug("1-4 pnpSendBlockParam.getInsertTime() = {}", pnpSendBlockParam.getInsertTime());
+	        log.debug("1-5 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
+	        log.debug("1-6 pnpSendBlockParam.getBlockEnable() = {}", pnpSendBlockParam.getBlockEnable());
+	        log.debug("1-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
 			
 			final Long historyRefId = pnpReportService.updPnpBlockSend(customUser, pnpSendBlockParam);
-			log.info("historyRefId = {}", historyRefId);
+			log.debug("historyRefId = {}", historyRefId);
 			return new ResponseEntity<>(historyRefId, HttpStatus.OK);
+		} catch (final Exception e) {
+			log.error("Exception = {}", e);
+			
+			if (e instanceof SQLException) {
+				log.error("SQLException = {}", e);
+				
+				return new ResponseEntity<>("duplicate key", HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+			
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	/* 取得客群標籤列表 */
+	@WebServiceLog
+	@GetMapping(value = "/qryPNPBlockGTagList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> qryPNPBlockGTagList(HttpServletRequest request, HttpServletResponse response, 
+														@CurrentUser final CustomUser customUser) {
+		log.info("qryPNPBlockGTagList");
+		
+		try { 
+			final List<PNPBlockGTag> lstPnpBlockGTags = pnpReportService.qryPNPBlockGTagList(customUser);
+			log.info("lstPnpBlockGTags = {}", lstPnpBlockGTags);
+			return new ResponseEntity<>(lstPnpBlockGTags, HttpStatus.OK);
 		} catch (final Exception e) {
 			log.error("Exception", e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

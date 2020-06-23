@@ -24,24 +24,24 @@
 								<label style="display: inline-block; width: 80px; padding-left:10px" class="param-label">異動人員：</label> 
 								<input class="customSearchInput" type="text" id="pccCodeInput" name="pccCodeInput" value="" maxlength="20" />
 								<label style="display: inline-block; width: 80px; padding-left:10px" class="param-label">狀　　態：</label> 
-                                <div class="optionGuestLabel queryValueComponentSelectList">
-                                    <div class="optionLabelGuestLabel">全部</div>
-                                    <select class="optionSelectGuestLabel queryValue" name="queryValue">
+                                <div class="optionStatus queryValueComponentSelectList">
+                                    <div class="optionLabelStatus">全部</div>
+                                    <select class="optionSelectStatus queryValue" name="queryValue">
                                         <option selected="selected" value="全部">全部</option>
                                         <option value="排除中">排除中</option>
                                         <option value="取消排除">取消排除</option>
                                     </select>
                                 </div>
-								<input class="customBtn" id="searchBtn" style="float:right; width: 120px; cursor: pointer;" type="button" value="查詢">
+								<input class="customBtn" id="searchBtn" style="float:right; width: 90px; cursor: pointer;" type="button" value="查詢">
 	                    	</div>
 							<div class="paramGroup" style="margin-top:8px;">
 								<label style="display: inline-block; width: 80px;" class="param-label">更新時間：</label>
-		                    	<div class="option date">
-									<input type="text" class="datepicker" id="startDate" placeholder="YYYY-MM-DD" />
+		                    	<div class="option pnpDate">
+									<input type="text" class="datepicker" id="startDate" placeholder="YYYY-MM-DD" style="font-size:10px;"/>
 								</div>
 		                       	<span>~</span>
-		                       	<div class="option date">
-									<input type="text" class="datepicker" id="endDate" placeholder="YYYY-MM-DD" />
+		                       	<div class="option pnpDate">
+									<input type="text" class="datepicker" id="endDate" placeholder="YYYY-MM-DD" style="font-size:10px;" />
 								</div>
 								
 								<label style="display: inline-block; width: 80px; padding-left:10px" class="param-label">客群標籤：</label> 
@@ -53,7 +53,7 @@
                                     </select>
                                 </div>
 								
-								<input class="customBtn" id="exportBtn" style="float:right; width: 120px; cursor: pointer;" type="button" value="匯出">
+								<input class="customBtn" id="exportBtn" style="float:right; width: 90px; cursor: pointer;" type="button" value="匯出">
 							</div>
 						</div>
 					</div>

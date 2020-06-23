@@ -572,6 +572,7 @@ public class BcsPnpReportController {
 	        log.info("1-5 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
 	        log.info("1-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
 	        log.info("1-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
+	        log.info("1-8 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
 			
 			final List<PNPBlockSendList> result = pnpReportService.qryPnpBlockSendList(customUser, pnpSendBlockParam);
 			log.info(DataUtils.toPrettyJsonUseJackson(result));
@@ -598,10 +599,37 @@ public class BcsPnpReportController {
 	        log.debug("1-5 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
 	        log.debug("1-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
 	        log.debug("1-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
+	        log.debug("1-8 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
 			
 			final Long pnpBlockSendCount = pnpReportService.getPnpBlockSendCount(customUser, pnpSendBlockParam);
 			log.info("pnpBlockSendCount = {}", pnpBlockSendCount);
 			return new ResponseEntity<>(pnpBlockSendCount, HttpStatus.OK);
+		} catch (final Exception e) {
+			log.error("Exception", e);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@WebServiceLog
+	@PostMapping(value = "/updPnpBlockSend", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> updPnpBlockSend(HttpServletRequest request, HttpServletResponse response, 
+														@CurrentUser final CustomUser customUser,
+														@RequestBody final PnpSendBlockParam pnpSendBlockParam) {
+		log.info("updPnpBlockSend");
+		
+		try { 
+	        log.info("1-1 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
+	        log.info("1-2 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
+	        log.info("1-3 pnpSendBlockParam.getInsertDate() = {}", pnpSendBlockParam.getInsertDate());
+	        log.info("1-4 pnpSendBlockParam.getInsertTime() = {}", pnpSendBlockParam.getInsertTime());
+	        log.info("1-5 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
+	        log.info("1-6 pnpSendBlockParam.getBlockEnable() = {}", pnpSendBlockParam.getBlockEnable());
+	        log.info("1-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
+			
+			final Long historyRefId = pnpReportService.updPnpBlockSend(customUser, pnpSendBlockParam);
+			log.info("historyRefId = {}", historyRefId);
+			return new ResponseEntity<>(historyRefId, HttpStatus.OK);
 		} catch (final Exception e) {
 			log.error("Exception", e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

@@ -23,16 +23,16 @@
 								<input class="customSearchInput" type="text" id="mobileInput" name="mobileInput" value="" maxlength="30" />
 								<label style="display: inline-block; width: 80px; padding-left:10px" class="param-label">異動人員：</label> 
 								<input class="customSearchInput" type="text" id="insertUserInput" name="insertUserInput" value="" maxlength="20" />
-								<input class="customBtn" id="searchBtn" style="float:right; width: 120px; cursor: pointer;" type="button" value="查詢">
+								<input class="customBtn" id="searchBtn" style="float:right; width: 90px; cursor: pointer;" type="button" value="查詢">
 	                    	</div>
 							<div class="paramGroup" style="margin-top:8px;">
 								<label style="display: inline-block; width: 80px;" class="param-label">更新時間：</label>
-		                    	<div class="option date">
-									<input type="text" class="datepicker" id="startDate" placeholder="YYYY-MM-DD" />
+		                    	<div class="option pnpDate">
+									<input type="text" class="datepicker" id="startDate" placeholder="YYYY-MM-DD" style="font-size:10px;"/>
 								</div>
 		                       	<span>~</span>
-		                       	<div class="option date">
-									<input type="text" class="datepicker" id="endDate" placeholder="YYYY-MM-DD" />
+		                       	<div class="option pnpDate">
+									<input type="text" class="datepicker" id="endDate" placeholder="YYYY-MM-DD" style="font-size:10px;"/>
 								</div>
 								
 								<label style="display: inline-block; width: 80px; padding-left:10px" class="param-label">客群標籤：</label> 
@@ -44,8 +44,8 @@
                                     </select>
                                 </div>
 								
-								<input class="customBtn" id="exportBtn" style="float:right; width: 120px; cursor: pointer;" type="button" value="匯出">
-								<input class="customBtn" id="createBtn" style="float:right; width: 120px; cursor: pointer; margin-right: 10px;" type="button" value="建立">
+								<input class="customBtn" id="exportBtn" style="float:right; width: 90px; cursor: pointer;" type="button" value="匯出">
+								<input class="customBtn" id="createBtn" style="float:right; width: 90px; cursor: pointer; margin-right: 10px;" type="button" value="建立">
 							</div>
 						</div>
 					</div>
@@ -81,7 +81,7 @@
 								<td rowspan="1" style="font-size:11px;" class="td1 guestLabel"></td>
 								<td rowspan="1" style="font-size:11px;" class="td1 modifier"></td>
                                 <td>
-                                    <input class="btn_delete" style="cursor: pointer;" type="button" value="取消">
+                                    <input class="btn_delete" id="cancelBtn" style="cursor: pointer;" type="button" value="取消">
                                 </td>
 							</tr>
 						</table>
@@ -117,22 +117,20 @@
 				<!-- Model content -->
 				<div class="model-content">
 					<div>
-						<label style="display: inline-block; padding-top: 50px; text-alignet: center;" class="param-label">請輸入以下資訊</label> 
+						<label style="display: inline-block; padding-top: 30px; text-alignet: center;" class="param-label">請輸入以下資訊</label> 
 					</div>
 					<div>
-						<label style="display: inline-block; width: 80px; padding-top: 40px;" class="param-label">手機門號：</label> 
-						<input class="customSearchInput" type="text" id="dialogMobileInput" name="dialogMobileInput" value="" maxlength="30" />
+						<label style="display: inline-block; width: 90px; padding-top: 40px;" class="param-label"><span style="color: red">*</span>手機門號：</label> 
+						<input class="customModalSearchInput" type="text" id="dialogMobileInput" name="dialogMobileInput" value="" maxlength="30" />
                    	</div>
+                   	<br>
 					<div>
-						<label style="display: inline-block; width: 80px; padding-top: 15px;" class="param-label">原　　因：</label> 
-						<input class="customSearchInput" type="text" id="dialogReasonInput" name="dialogReasonInput" value="" maxlength="20" />
-                   		<textarea cols="50" rows="5">
-							輸入你想要寫的內容...
-						</textarea>
+						<label style="display: inline-block; width: 90px; padding-top: 15px;" class="param-label"><span style="color: red">*</span>原　　因：</label> 
+                   		<textarea name="dialogModifyReasonInput" id="dialogModifyReasonInput" maxlength="200"></textarea>
 					</div>
 					<div>
-						<input class="customBtn" id="searchBtn" style="float:center; width: 120px; cursor: pointer; margin-top: 50px;" type="button" value="確認">
-						<input class="customBtn" id="searchBtn" style="float:center; width: 120px; cursor: pointer;" type="button" value="取消">
+						<input class="customBtn" id="btn_OK" style="float:center; width: 120px; cursor: pointer; margin-top: 20px;" type="button" value="確認">
+						<input class="customBtn" id="btn_Cancel" style="float:center; width: 120px; cursor: pointer; margin-left: 20px;" type="button" value="取消">
                    	</div>
 				</div>
 			</div>

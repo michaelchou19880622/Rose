@@ -28,6 +28,7 @@ public class PnpSendBlockParam {
     private String groupTag;
     private String insertDate;
     private String insertTime;
+    private String modify_reason;
     private int blockEnable = 1;
 
 }

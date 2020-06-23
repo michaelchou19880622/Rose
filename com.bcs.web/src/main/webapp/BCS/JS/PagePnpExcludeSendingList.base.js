@@ -11,10 +11,16 @@ $(function() {
 	var originalTable;
 	
 	var listSummary;
+
+	var eleModelBtnOK = document.getElementById("btn_OK");
+	var eleModelBtnCancel = document.getElementById('btn_Cancel');
 	
 	var eleCreateBtn = document.getElementById("createBtn");
 	var eleTotalPageSize = document.getElementById('totalPageSize');
 	var eleCurrentPageIndex = document.getElementById('currentPageIndex');
+
+	var eleDialogMobileInput = document.getElementById('dialogMobileInput');
+	var eleDialogModifyReasonInput = document.getElementById('dialogModifyReasonInput');
 	
 	var valPerPageSize = $(this).find('#perPageSizeSelector option:selected').val();
 	
@@ -32,6 +38,9 @@ $(function() {
 	var valMobile;
 	var valInsertUser;
 	var valGroupTag;
+	
+	var valMobileInput;
+	var valModifyReasonInput;
 
 	// result data
 	var hasData = false;
@@ -42,6 +51,8 @@ $(function() {
 	var mobile = "";
 	var insertUser = "";
 	var groupTag = "";
+	
+	var blockSetType;
 	
 	var isCreateTime = true, isOrderTime = false;
 	
@@ -65,37 +76,90 @@ $(function() {
 	var model = document.getElementById("myModel");
 
 	/* When the user clicks anywhere outside of the model, close the model */
-	window.onclick = function(event) {
-		if (event.target == model) {
-			model.style.display = "none";
-		}
-	}
+//	window.onclick = function(event) {
+//		if (event.target == model) {
+//			model.style.display = "none";
+//		}
+//	}
 	
-	window.addEventListener('click', function(e) {   
-		if (event.target == model && document.getElementById('myModel').contains(e.target)){
-			model.style.display = "none";
-		}
-	});
+//	window.addEventListener('click', function(e) {   
+//		if (event.target == model && document.getElementById('myModel').contains(e.target)){
+//			model.style.display = "none";
+//		}
+//	});
 
-	/* When the user click 'ESC', close the model */
-	$(document).keyup(function(e) {
-		// Some browsers support 'which'(IE) others support 'keyCode' (Chrome...etc)
-		var keycode = (e.keyCode ? e.keyCode : e.which);
-		
-		if (keycode == 27) {
-			if (model.style.display === "block") {
-				model.style.display = "none";
-			}
-		}
-	});
+//	/* When the user click 'ESC', close the model */
+//	$(document).keyup(function(e) {
+//		// Some browsers support 'which'(IE) others support 'keyCode' (Chrome...etc)
+//		var keycode = (e.keyCode ? e.keyCode : e.which);
+//		
+//		if (keycode == 27) {
+//			if (model.style.display === "block") {
+//
+//				eleDialogMobileInput.value = "";
+//				eleDialogMobileInput.readOnly = false;
+//				
+//				eleDialogModifyReasonInput.value = "";
+//			}
+//		}
+//	});
 	
 	/* Defined the popup model for URL */
-	var func_showCreateCancelPopupModel = function() {
+	var func_showCreatePopupModel = function() {
 		model.style.display = "block";
+
+		eleDialogMobileInput.value = "";
+		eleDialogMobileInput.readOnly = false;
+		
+		eleDialogModifyReasonInput.value = "";
+		
+		blockSetType = 'create';
 	};
 	
+	var func_showCancelPopupModel = function() {
+		model.style.display = "block";
+		
+		paramMobile = $(this).attr('mobile');
+		console.info('paramMobile = ', paramMobile);
+		
+		eleDialogMobileInput.value = paramMobile;
+		eleDialogMobileInput.readOnly = true;
+		
+		eleDialogModifyReasonInput.value = "";
+		
+		blockSetType = 'cancel';
+	};
+	
+	$(document).on("click", "#createBtn", func_showCreatePopupModel);
+	
+	$(document).on("click", "#btn_OK", function(event){
+		console.info('btn_OK click');
 
-	$('#createBtn').click(func_showCreateCancelPopupModel);
+		console.info('blockSetType = ', blockSetType);
+		
+		valMobileInput = $("#myModel #dialogMobileInput").val().trim();
+		console.info('valMobileInput = ', valMobileInput);
+
+		valModifyReasonInput = $('#myModel #dialogModifyReasonInput').val().trim();
+		console.info('valModifyReasonInput = ', valModifyReasonInput);
+		
+		if (!modelDataValidate()) {
+			var aaa = alert("手機門號及原因皆為必填欄位，不得為空!\n請再次確認是否已填寫正確?");
+			return false;
+		}
+		
+		fun_updateExcludeUser();
+	});
+	
+	$(document).on("click", "#btn_Cancel", function(event){
+
+		eleDialogMobileInput.value = "";
+		eleDialogMobileInput.readOnly = false;
+		
+		eleDialogModifyReasonInput.value = "";
+		
+		model.style.display = "none";
+	});
 	
 	
 	/* 更新每頁顯示數量下拉選單 */
@@ -190,8 +254,12 @@ $(function() {
 			valGroupTag = "";
 		}
 
-		console.info('valStartDate = ', valStartDate);
-		console.info('valEndDate = ', valEndDate);
+//		console.info('valStartDate = ', valStartDate);
+//		console.info('valEndDate = ', valEndDate);
+		
+		if (!dataValidate()) {
+			return false;
+		}
 
 		$('.LyMain').block($.BCS.blockMsgRead);
 		
@@ -246,94 +314,6 @@ $(function() {
 			
 			$('.LyMain').unblock();
 		});
-		
-		
-		
-//		$.ajax({
-//			type : 'POST',
-//			url : bcs.bcsContextPath + '/pnpEmployee/getPnpExcludeSendingList',
-//			contentType : 'application/json;charset=UTF-8',
-//			data : JSON.stringify({
-//				page : page,
-//				pageCount : 10,
-//				startDate : "",
-//				endDate : "",
-//				mobile : "",
-//				insertUser : "",
-//				groupTag : ""
-//			})
-//			
-//		}).done(function(response) {
-//			console.info('response:', response);
-////			console.log('response:', JSON.stringify(response));
-//			
-//			$('.dataTemplate').remove();
-//			$('#noDataTxt').remove();
-//			
-//			if (response.length == 0) {
-//				$('#dataTemplateSummary').remove();
-//				$('#tableBody').append('<tr id="noDataTxt"><td colspan="8"><span style="color:red">查無資料</span></td></tr>');
-//				currentPageIndex.innerText = '-';
-//				totalPageSize.innerText = '-';
-//				$('.LyMain').unblock();
-//				return false;
-//			}
-//			
-//			var i = 1;
-//			response.forEach(function(obj) {
-//				var list = originalTr.clone(true);
-//				
-//				list.find('.mobileNum').html(obj.phone);
-//				list.find('.lineUID').html(obj.uid);
-//				list.find('.reason').html(obj.modifyReason);
-//				list.find('.updateTime').html(obj.modifyTime);
-//				list.find('.status').html(obj.blockEnable);
-//				list.find('.guestLabel').html(obj.groupTag);
-//				list.find('.modifier').html(obj.insertUser);
-//				
-//				$('#tableBody').append(list);
-//				
-//				i++;
-//			});
-//			
-//			console.info('i = ', i);
-//			
-//		}).fail(function(response) {
-//			console.info(response);
-//			$.FailResponse(response);
-//			$('.LyMain').unblock();
-//		});
-		
-		// For Test
-//		for (testIdx = 0; testIdx < 5; testIdx++) {
-//			var list = originalTr.clone(true);
-//			
-//			list.find('.mobileNum').html('0912' + pad(Math.floor(Math.random() * 999999), 6));
-//			list.find('.lineUID').html('Utesttestlineuid000000' + pad(Math.floor(Math.random() * 999999), 6));
-//			list.find('.reason').html('第 ' + pad(Math.floor(Math.random() * 999999), 6) + ' 號奧客...');
-//			list.find('.updateTime').html('2020-05-27 13:55:40');
-//			list.find('.status').html('排除中');
-//			list.find('.guestLabel').html('24');
-//			list.find('.modifier').html('1000' + pad(Math.floor(Math.random() * 999), 3));
-//			$('#tableBody').append(list);
-//		};
-		
-		
-//		isSearchData = true;
-//		
-//		if (dataValidate()) {
-//			cleanList();
-//			
-//			page = 1;
-//			
-//			startDate = $('#startDate').val();
-////			console.info('startDate = ', startDate);
-//			
-//			endDate = $('#endDate').val();
-////			console.info('endDate = ', endDate);
-//			
-//			loadData();
-//		}
 	});
 
 	$('#exportBtn').click(function() {
@@ -377,13 +357,13 @@ $(function() {
 		$('.LyMain').unblock();
 	});
 	
-//	var dataValidate = function() {
-//		startDate = $('#startDate').val();
-//		endDate = $('#endDate').val();
-//		
+	var dataValidate = function() {
+		startDate = $('#startDate').val();
+		endDate = $('#endDate').val();
+		
 //		console.info('startDate = ', startDate);
 //		console.info('endDate = ', endDate);
-//		
+		
 //		if (!startDate || startDate == 'YYYY-MM-DD') {
 //			alert('請填寫起始日期！');
 //			return false;
@@ -398,15 +378,27 @@ $(function() {
 //			alert('起始日期與結束日期之間不可相隔超過6個月！');
 //			return false;
 //		}
-//		
-//		if (moment(startDate).isAfter(moment(endDate))) {
-//			alert('起始日期不可大於結束日期！');
-//			return false;
-//		}
-//		
-//		firstFetch = true;
-//		return true;
-//	};
+
+		
+		if (moment(startDate).isAfter(moment(endDate))) {
+			alert('更新時間設定異常 ( 起始時間不可大於結束時間 )');
+			return false;
+		}
+
+		return true;
+	};
+	
+	var modelDataValidate = function() {
+		if (!valMobileInput || valMobileInput == "") {
+			return false;
+		}
+		
+		if (!valModifyReasonInput || valModifyReasonInput == "") {
+			return false;
+		}
+		
+		return true;
+	}
 
 	var setExportButtonSource = function() {
 		console.log('Has data : ', hasData);
@@ -468,6 +460,10 @@ $(function() {
 				list.find('.status').html(obj.blockEnable);
 				list.find('.guestLabel').html(obj.groupTag);
 				list.find('.modifier').html(obj.insertUser);
+
+				/* Setup Button Delete */
+				list.find('.btn_delete').attr('mobile', obj.phone);
+				list.find('.btn_delete').click(func_showCancelPopupModel);
 				
 				$('#tableBody').append(list);
 				
@@ -484,6 +480,66 @@ $(function() {
 			$('.LyMain').unblock();
 		});
 	};
+	
+	var fun_updateExcludeUser =  function() {
+		console.info('mobile = ', valMobileInput);
+		console.info('modifyReason = ', valModifyReasonInput);
+		console.info('blockSetType = ', blockSetType);
+        
+        var valBlockEnable = (blockSetType == 'create')? 1 : 0;
+		console.info('valBlockEnable = ', valBlockEnable);
+		
+		var confirmString = (blockSetType == 'create')? '請再次確認建立排除發送名單之電話號碼與原因是否正確?' : '請再次確認取消排除發送名單之電話號碼與原因是否正確?';
+		
+        var r = confirm(confirmString);
+        if (!r) {
+        	return;
+        }
+        
+        var currentDateTime = new Date();
+        var currentDate = currentDateTime.getFullYear() + '-' + (currentDateTime.getMonth() + 1) + '-'+currentDateTime.getDate();
+        var currentTime = currentDateTime.getHours() + ":" + currentDateTime.getMinutes() + ":" + currentDateTime.getSeconds();
+
+		console.info('currentDateTime = ', currentDateTime);
+		console.info('currentDate = ', currentDate);
+		console.info('currentTime = ', currentTime);
+		
+		var userAccount = bcs.user.account;
+		console.info('userAccount = ', userAccount);
+        
+		$('.LyMain').block($.BCS.LinePoint_blockMsgDeleting);
+		$.ajax({
+			type : 'POST',
+			url : bcs.bcsContextPath + '/pnpEmployee/updPnpBlockSend',
+			contentType : 'application/json;charset=UTF-8',
+			data : JSON.stringify({
+				mobile : valMobileInput,
+				blockEnable : valBlockEnable,
+				groupTag : "",
+				insertUser : userAccount,
+				insertDate : currentDate,
+				insertTime : currentTime,
+				modify_reason : valModifyReasonInput
+			})
+        }).success(function(response) {
+            console.info(response);
+            
+            var alertString = (blockSetType == 'create')? " 新增至排除發送名單" : " 從排除發送名單中移除";
+            alert("已將用戶電話號碼 " + valMobileInput + alertString);
+            
+            
+            
+    		model.style.display = "none";
+            
+        	$('.LyMain').unblock();
+        }).fail(function(response) {
+            console.info(response);
+            $.FailResponse(response);
+        	$('.LyMain').unblock();
+        }).done(function() {
+        	$('.LyMain').unblock();
+        });
+    }
 
 	var cleanList = function() {
 		$('.dataTemplate').remove();
@@ -503,8 +559,8 @@ $(function() {
 		
 		cleanList();
 		
-		$('#startDate').val('YYYY-MM-DD');
-		$('#endDate').val('YYYY-MM-DD');
+//		$('#startDate').val('YYYY-MM-DD');
+//		$('#endDate').val('YYYY-MM-DD');
 		
 //		startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
 //		startDate = moment(new Date()).format('YYYY-MM-DD');

@@ -528,6 +528,7 @@ public class PnpReportService {
         log.info("2-5 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
         log.info("2-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
         log.info("2-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
+        log.info("2-8 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
 
         pnpSendBlockParam.setRole(customUser.getRole());
 
@@ -578,6 +579,7 @@ public class PnpReportService {
         log.debug("2-5 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
         log.debug("2-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
         log.debug("2-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
+        log.debug("2-8 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
 
         log.debug("customUser.getRole() = {}", customUser.getRole());
         pnpSendBlockParam.setRole(customUser.getRole());
@@ -699,6 +701,14 @@ public class PnpReportService {
     public long updPnpBlockSend(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
 
         log.info("pnpSendBlockParam = {}", pnpSendBlockParam);
+        
+        log.info("2-1 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
+        log.info("2-2 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
+        log.info("2-3 pnpSendBlockParam.getInsertDate() = {}", pnpSendBlockParam.getInsertDate());
+        log.info("2-4 pnpSendBlockParam.getInsertTime() = {}", pnpSendBlockParam.getInsertTime());
+        log.info("2-5 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
+        log.info("2-6 pnpSendBlockParam.getBlockEnable() = {}", pnpSendBlockParam.getBlockEnable());
+        log.info("2-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
 
         pnpSendBlockParam.setRole(customUser.getRole());
 
@@ -706,11 +716,12 @@ public class PnpReportService {
 
         StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("updatePNPBlockSend");
         query.setParameter("mobile", pnpSendBlockParam.getMobile());
-        query.setParameter("block_enable",pnpSendBlockParam.getPageCount());
-        query.setParameter("mobile",pnpSendBlockParam.getMobile());
+        query.setParameter("block_enable",pnpSendBlockParam.getBlockEnable());
         query.setParameter("insert_user",pnpSendBlockParam.getInsertUser());
         query.setParameter("group_tag",pnpSendBlockParam.getGroupTag());
-        query.setParameter("block_enable",pnpSendBlockParam.getBlockEnable());
+        query.setParameter("insert_date",pnpSendBlockParam.getInsertDate());
+        query.setParameter("insert_time",pnpSendBlockParam.getInsertTime());
+        query.setParameter("modify_reason",pnpSendBlockParam.getModify_reason());
 
         List<PNPUpdateBlockSend> pnpUpdateBlockSend = query.getResultList();
 

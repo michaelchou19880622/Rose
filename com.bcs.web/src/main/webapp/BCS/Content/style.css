@@ -403,7 +403,6 @@ textarea:focus {
 
 
 /* 下拉式選單-自定義選項 */
-
 .option {
     position: relative;
     display: inline-block;
@@ -446,6 +445,16 @@ textarea:focus {
 
 .schedule {
     margin-left: 2em;
+}
+
+.option.pnpDate {
+    width: 110px;
+    background: white url(../images/ico_mdFRM01Date.png) no-repeat 85px center;
+}
+
+.option.pnpDate>input {
+    border: 0;
+    width: 70px;
 }
 
 
@@ -1263,7 +1272,7 @@ form input.error {
 	border: 1px solid #ced2db;
 	position: relative;
 	display: inline-block;
-	width: 276px;
+	width: 236px;
 	height: 36px;
 	font-size: 14px;
 	line-height: 1.42857143;
@@ -1455,11 +1464,11 @@ thead tr th {
     -moz-box-sizing: border-box;
     box-sizing: border-box;
     min-width: 90px;
-    width: 276px;
+    width: 236px;
     background: white url(../images/ico_mdFRM03Select.png) no-repeat right center;
     border: 1px solid #ced2dc;
     border-radius: 0;
-    padding: 9px 24px 8px 9px;
+    padding: 8px 24px 8px 9px;
 }
 
 .optionGuestLabel .optionLabelGuestLabel {
@@ -1474,7 +1483,36 @@ thead tr th {
     left: 10px;
     width: 100%;
     opacity: 0;
-    font-size: 14px;
+    font-size: 12px;
+}
+
+/* PNP狀態下拉式選單 */
+.optionStatus {
+    position: relative;
+    display: inline-block;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    min-width: 90px;
+    width: 236px;
+    background: white url(../images/ico_mdFRM03Select.png) no-repeat right center;
+    border: 1px solid #ced2dc;
+    border-radius: 0;
+    padding: 8px 24px 8px 9px;
+}
+
+.optionStatus .optionLabelStatus {
+    font-size: 12px;
+    color: #a1a7b5;
+}
+
+.optionStatus .optionSelectStatus {
+    display: block;
+    position: absolute;
+    top: 7px;
+    left: 10px;
+    width: 100%;
+    opacity: 0;
+    font-size: 12px;
 }
 
 /* Pnp Exclud */
@@ -1500,10 +1538,10 @@ thead tr th {
 	margin: auto;
 	padding: 20px;
 	border: 2px solid #fff;
-	width: 25%;
-	height: 350px;
+	width: 35%;
+	height: 400px;
 	text-align: center;
-	color: blue;
+	color: #000000;
 	font-size: 16px;
 	font-weight: bold;
 	-webkit-border-radius: 15px;
@@ -1533,5 +1571,39 @@ thead tr th {
 	-moz-box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
 	-webkit-box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
 	box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
+}
+
+textarea#dialogModifyReasonInput {
+	box-shadow: none;
+	padding: 10px 10px;
+	box-sizing: border-box;
+	background: #fff;
+	border: 1px solid #ced2db;
+	display: inline-block;
+	width: 300px;
+	height: 200px;
+	font-size: 14px;
+	line-height: 1.42857143;
+	color: #555;
+	vertical-align: top;
+}
+
+textarea[name=dialogModifyReasonInput] {
+  resize: none;
+}
+
+.customModalSearchInput {
+	box-shadow: none;
+	padding: 10px 10px;
+	box-sizing: border-box;
+	background: #fff;
+	border: 1px solid #ced2db;
+	position: relative;
+	display: inline-block;
+	width: 300px;
+	height: 36px;
+	font-size: 14px;
+	line-height: 1.42857143;
+	color: #555;
 }
 

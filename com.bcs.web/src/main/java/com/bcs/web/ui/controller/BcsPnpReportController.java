@@ -1,7 +1,5 @@
 package com.bcs.web.ui.controller;
 
-import static org.hamcrest.CoreMatchers.not;
-
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
@@ -594,20 +592,20 @@ public class BcsPnpReportController {
 	public ResponseEntity<?> getPnpBlockSendCount(HttpServletRequest request, HttpServletResponse response, 
 														@CurrentUser final CustomUser customUser,
 														@RequestBody final PnpSendBlockParam pnpSendBlockParam) {
-		log.info("getPnpExcludeSendingList");
+		log.info("getPnpBlockSendCount");
 		
 		try { 
-			log.debug("1-1 pnpSendBlockParam.getPage() = {}", pnpSendBlockParam.getPage());
-	        log.debug("1-2 pnpSendBlockParam.getPageCount() = {}", pnpSendBlockParam.getPageCount());
-	        log.debug("1-3 pnpSendBlockParam.getStartDate() = {}", pnpSendBlockParam.getStartDate());
-	        log.debug("1-4 pnpSendBlockParam.getEndDate() = {}", pnpSendBlockParam.getEndDate());
-	        log.debug("1-5 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
-	        log.debug("1-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
-	        log.debug("1-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
-	        log.debug("1-8 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
+			log.info("1-1 pnpSendBlockParam.getPage() = {}", pnpSendBlockParam.getPage());
+	        log.info("1-2 pnpSendBlockParam.getPageCount() = {}", pnpSendBlockParam.getPageCount());
+	        log.info("1-3 pnpSendBlockParam.getStartDate() = {}", pnpSendBlockParam.getStartDate());
+	        log.info("1-4 pnpSendBlockParam.getEndDate() = {}", pnpSendBlockParam.getEndDate());
+	        log.info("1-5 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
+	        log.info("1-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
+	        log.info("1-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
+	        log.info("1-8 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
 			
 			final Long pnpBlockSendCount = pnpReportService.getPnpBlockSendCount(customUser, pnpSendBlockParam);
-			log.debug("pnpBlockSendCount = {}", pnpBlockSendCount);
+			log.info("pnpBlockSendCount = {}", pnpBlockSendCount);
 			return new ResponseEntity<>(pnpBlockSendCount, HttpStatus.OK);
 		} catch (final Exception e) {
 			log.error("Exception", e);
@@ -674,6 +672,7 @@ public class BcsPnpReportController {
 		}
 	}
 	
+	/* 匯出排除發送中名單列表EXCEL */
 	@WebServiceLog(action = "Download")
     @GetMapping("/exportPNPBlockListReportExcel")
     @ResponseBody
@@ -721,7 +720,7 @@ public class BcsPnpReportController {
 		}
     }
 	
-
+	/* 設定排除發送中名單列表EXCEL HEADER */
     private Map<Integer, String> getPnpBlockHeaderMap(final int columnSize) {
         final Map<Integer, String> row = new LinkedHashMap<>(columnSize);
         row.put(0, "手機門號");
@@ -733,7 +732,8 @@ public class BcsPnpReportController {
         row.put(6, "異動人員");
         return row;
     }
-	
+
+	/* 設定排除發送中名單列表EXCEL BODY */
     private Map<Integer, String> getPnpBlockBodyMap(final PNPBlockSendList r, final int columnSize) {
         final Map<Integer, String> row = new LinkedHashMap<>(columnSize);
         row.put(0, r.getPhone());
@@ -745,4 +745,34 @@ public class BcsPnpReportController {
         row.put(6, r.getInsertUser());
         return row;
     }
+    
+
+
+	/* 取得排除發送名單歷程記錄總數 */
+	@WebServiceLog
+	@PostMapping(value = "/getPnpBlockHistoryCount", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> getPnpBlockHistoryCount(HttpServletRequest request, HttpServletResponse response, 
+														@CurrentUser final CustomUser customUser,
+														@RequestBody final PnpSendBlockParam pnpSendBlockParam) {
+		log.info("getPnpBlockHistoryCount");
+		
+		try { 
+			log.info("1-1 pnpSendBlockParam.getPage() = {}", pnpSendBlockParam.getPage());
+	        log.info("1-2 pnpSendBlockParam.getPageCount() = {}", pnpSendBlockParam.getPageCount());
+	        log.info("1-3 pnpSendBlockParam.getStartDate() = {}", pnpSendBlockParam.getStartDate());
+	        log.info("1-4 pnpSendBlockParam.getEndDate() = {}", pnpSendBlockParam.getEndDate());
+	        log.info("1-5 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
+	        log.info("1-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
+	        log.info("1-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
+	        log.info("1-8 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
+			
+			final Long pnpBlockHistoryCount = pnpReportService.getPnpBlockHistoryCount(customUser, pnpSendBlockParam);
+			log.info("pnpBlockHistoryCount = {}", pnpBlockHistoryCount);
+			return new ResponseEntity<>(pnpBlockHistoryCount, HttpStatus.OK);
+		} catch (final Exception e) {
+			log.error("Exception", e);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 }

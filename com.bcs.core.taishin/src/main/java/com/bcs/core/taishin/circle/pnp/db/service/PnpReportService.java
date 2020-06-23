@@ -667,17 +667,17 @@ public class PnpReportService {
         EntityManager entityManager = entityManagerProvider.getEntityManager();
 
         Date startDate = pnpSendBlockParam.getStartDate();
-        String str_startDate = DataUtils.formatDateToString(startDate, "yyyy-MM-dd");
+        String str_startDate = (startDate == null)? "" : DataUtils.formatDateToString(startDate, "yyyy-MM-dd");
         Date endDate = pnpSendBlockParam.getEndDate();
-        String str_endDate = DataUtils.formatDateToString(endDate, "yyyy-MM-dd");
+        String str_endDate = (endDate == null)? "" : DataUtils.formatDateToString(endDate, "yyyy-MM-dd");
 
-        StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("getPNPBlockSendCount");
-        query.setParameter("start_date",str_startDate);
-        query.setParameter("end_date",str_endDate);
-        query.setParameter("mobile",pnpSendBlockParam.getMobile());
-        query.setParameter("insert_user",pnpSendBlockParam.getInsertUser());
-        query.setParameter("group_tag",pnpSendBlockParam.getGroupTag());
-        query.setParameter("block_enable",pnpSendBlockParam.getBlockEnable());
+        StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("getPNPBlockHistoryCount");
+		query.setParameter("start_date", str_startDate);
+		query.setParameter("end_date", str_endDate);
+		query.setParameter("mobile", pnpSendBlockParam.getMobile());
+		query.setParameter("insert_user", pnpSendBlockParam.getInsertUser());
+		query.setParameter("group_tag", pnpSendBlockParam.getGroupTag());
+		query.setParameter("block_enable", pnpSendBlockParam.getBlockEnable());
 
         List<PNPBlockSendCount> pnpBlockSendCount = query.getResultList();
 

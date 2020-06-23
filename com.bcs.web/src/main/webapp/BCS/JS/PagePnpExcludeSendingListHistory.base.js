@@ -48,67 +48,6 @@ $(function() {
 	
 	var isChangePage = false;
 	
-	/* 彈出視窗 Image Model */
-	var model = document.getElementById("myModel");
-
-	/* Defined the popup model for URL */
-	var func_showCreatePopupModel = function() {
-		model.style.display = "block";
-
-		eleDialogMobileInput.value = "";
-		eleDialogMobileInput.readOnly = false;
-		
-		eleDialogModifyReasonInput.value = "";
-		
-		blockSetType = 'create';
-	};
-	
-	var func_showCancelPopupModel = function() {
-		model.style.display = "block";
-		
-		paramMobile = $(this).attr('mobile');
-		console.info('paramMobile = ', paramMobile);
-		
-		eleDialogMobileInput.value = paramMobile;
-		eleDialogMobileInput.readOnly = true;
-		
-		eleDialogModifyReasonInput.value = "";
-		
-		blockSetType = 'cancel';
-	};
-	
-	$(document).on("click", "#createBtn", func_showCreatePopupModel);
-	
-	$(document).on("click", "#btn_OK", function(event){
-		console.info('btn_OK click');
-
-		console.info('blockSetType = ', blockSetType);
-		
-		valMobileInput = $("#myModel #dialogMobileInput").val().trim();
-		console.info('valMobileInput = ', valMobileInput);
-
-		valModifyReasonInput = $('#myModel #dialogModifyReasonInput').val().trim();
-		console.info('valModifyReasonInput = ', valModifyReasonInput);
-		
-		if (!modelDataValidate()) {
-			var aaa = alert("手機門號及原因皆為必填欄位，不得為空!\n請再次確認是否已填寫正確?");
-			return false;
-		}
-		
-		fun_updateExcludeUser();
-	});
-	
-	$(document).on("click", "#btn_Cancel", function(event){
-
-		eleDialogMobileInput.value = "";
-		eleDialogMobileInput.readOnly = false;
-		
-		eleDialogModifyReasonInput.value = "";
-		
-		model.style.display = "none";
-	});
-	
-	
 	/* 更新每頁顯示數量下拉選單 */
 	var func_optionSelectChanged = function(){
 		var selectValue = $(this).find('option:selected').text();
@@ -192,11 +131,11 @@ $(function() {
 			valGroupTag = " ";
 		}
 
-//		console.info('valStartDate = ', valStartDate);
-//		console.info('valEndDate = ', valEndDate);
-//		console.info('valMobile = ', valMobile);
-//		console.info('valInsertUser = ', valInsertUser);
-//		console.info('valGroupTag = ', valGroupTag);
+		console.info('valStartDate = ', valStartDate);
+		console.info('valEndDate = ', valEndDate);
+		console.info('valMobile = ', valMobile);
+		console.info('valInsertUser = ', valInsertUser);
+		console.info('valGroupTag = ', valGroupTag);
 
 		if (!dataValidate()) {
 			return false;
@@ -207,7 +146,7 @@ $(function() {
 		// Get PNP Black List Count
 		$.ajax({
 			type : 'POST',
-			url : bcs.bcsContextPath + '/pnpEmployee/getPnpBlockSendCount',
+			url : bcs.bcsContextPath + '/pnpEmployee/getPnpBlockHistoryCount',
 			contentType : 'application/json;charset=UTF-8',
 			data : JSON.stringify({
 				startDate : valStartDate,
@@ -218,26 +157,26 @@ $(function() {
 			})
 			
 		}).done(function(response) {
-//			console.info('response:', response);
+			console.info('response:', response);
 			
 			isSearchData = true;
 			
-			var blockSendCount = response;
-//			console.info('blockSendCount = ', blockSendCount);
+			var blockSendHistoryCount = response;
+			console.info('blockSendHistoryCount = ', blockSendHistoryCount);
 
 			$('.dataTemplate').remove();
 			$('#noDataTxt').remove();
 			
-			if (blockSendCount > 0) {
+			if (blockSendHistoryCount > 0) {
 				valCurrentPageIndex = 1;
-				valTotalPageSize = Math.ceil(blockSendCount / valPerPageSize);
+				valTotalPageSize = Math.ceil(blockSendHistoryCount / valPerPageSize);
 
 				eleCurrentPageIndex.innerText = valCurrentPageIndex;
 				eleTotalPageSize.innerText = valTotalPageSize;
 				
 				document.getElementById("mainFrame").className = "mainFrame alignLeft"; 
 				
-				loadData();
+//				loadData();
 			} else {
 				document.getElementById("mainFrame").className = "mainFrame"; 
 				
@@ -303,18 +242,6 @@ $(function() {
 		return true;
 	};
 	
-	var modelDataValidate = function() {
-		if (!valMobileInput || valMobileInput == "") {
-			return false;
-		}
-		
-		if (!valModifyReasonInput || valModifyReasonInput == "") {
-			return false;
-		}
-		
-		return true;
-	}
-
 	var loadData = function() {
 		
 		cleanList();
@@ -358,10 +285,6 @@ $(function() {
 				list.find('.status').html(blockStatus);
 				list.find('.guestLabel').html(obj.groupTag);
 				list.find('.modifier').html(obj.insertUser);
-
-				/* Setup Button Delete */
-				list.find('.btn_delete').attr('mobile', obj.phone);
-				list.find('.btn_delete').click(func_showCancelPopupModel);
 				
 				$('#tableBody').append(list);
 				
@@ -383,66 +306,6 @@ $(function() {
 		});
 	};
 	
-	var fun_updateExcludeUser =  function() {
-		console.info('mobile = ', valMobileInput);
-		console.info('modifyReason = ', valModifyReasonInput);
-		console.info('blockSetType = ', blockSetType);
-        
-        var valBlockEnable = (blockSetType == 'create')? 1 : 0;
-		console.info('valBlockEnable = ', valBlockEnable);
-		
-		var confirmString = (blockSetType == 'create')? '請再次確認建立排除發送名單之電話號碼與原因是否正確?' : '請再次確認取消排除發送名單之電話號碼與原因是否正確?';
-		
-        var r = confirm(confirmString);
-        if (!r) {
-        	return;
-        }
-        
-        var currentDateTime = new Date();
-        var currentDate = currentDateTime.getFullYear() + '-' + (currentDateTime.getMonth() + 1) + '-'+currentDateTime.getDate();
-        var currentTime = currentDateTime.getHours() + ":" + currentDateTime.getMinutes() + ":" + currentDateTime.getSeconds();
-
-		console.info('currentDateTime = ', currentDateTime);
-		console.info('currentDate = ', currentDate);
-		console.info('currentTime = ', currentTime);
-		
-		var userAccount = bcs.user.account;
-		console.info('userAccount = ', userAccount);
-        
-		$('.LyMain').block($.BCS.PnpBlock_dataUpdateing);
-		$.ajax({
-			type : 'POST',
-			url : bcs.bcsContextPath + '/pnpEmployee/updPnpBlockSend',
-			contentType : 'application/json;charset=UTF-8',
-			data : JSON.stringify({
-				mobile : valMobileInput,
-				blockEnable : valBlockEnable,
-				groupTag : "",
-				insertUser : userAccount,
-				insertDate : currentDate,
-				insertTime : currentTime,
-				modify_reason : valModifyReasonInput
-			})
-        }).success(function(response) {
-            console.info(response);
-            
-            var alertString = (blockSetType == 'create')? " 新增至排除發送名單" : " 從排除發送名單中移除";
-            alert("已將用戶電話號碼 " + valMobileInput + alertString);
-            
-    		model.style.display = "none";
-
-    		document.getElementById("searchBtn").click();
-            
-        	$('.LyMain').unblock();
-        }).fail(function(response) {
-            console.info(response);
-            $.FailResponse(response);
-        	$('.LyMain').unblock();
-        }).done(function() {
-        	$('.LyMain').unblock();
-        });
-    }
-
 	var cleanList = function() {
 		$('.dataTemplate').remove();
 		$('.tableBody').remove();
@@ -485,10 +348,10 @@ $(function() {
 			url : bcs.bcsContextPath + '/pnpEmployee/qryPNPBlockGTagList',
 			contentType : 'application/json;charset=UTF-8',
 			data : JSON.stringify({
-				inActive : 1
+				inActive : 0
 			})
 		}).done(function(response) {
-//			console.info('response = ', response);
+			console.info('response = ', response);
 //			console.log('JSON.stringify(response) = ', JSON.stringify(response));
 			
 			if (response.length == 0) {
@@ -496,7 +359,7 @@ $(function() {
 			}
 			
 			$.each(response, function(i, o){		
-//				console.info('qryPNPBlockGTagList : o = ', JSON.stringify(o));
+				console.info('qryPNPBlockGTagList : o = ', JSON.stringify(o));
 				
 				if (o.groupTag == "" || o.groupTag == null || o.groupTag == " ") {
 					return true;

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
 	xmlns:sec="http://www.springframework.org/security/tags"
-	th:with="strList = ${ {'/BCS/JS/PagePnpExcludeSendingList.base.js'} }">
+	th:with="strList = ${ {'/BCS/JS/PagePnpExcludeSendingListHistory.base.js'} }">
 <head th:replace="/BCS/Views/Common/Head :: head ('PNP Exclude Sending List History Page', ${strList})"></head>
 <body>
 	<header th:replace="/BCS/Views/Common/Header :: header"></header>
@@ -20,9 +20,9 @@
 						<div class="CHLeft" style="width:100%;">
 	                    	<div>
 								<label style="display: inline-block; width: 80px;" class="param-label">手機門號：</label> 
-								<input class="customSearchInput" type="text" id="accountInput" name="accountInput" value="" maxlength="30" />
+								<input class="customSearchInput" type="text" id="mobileInput" name="accountInput" value="" maxlength="30" />
 								<label style="display: inline-block; width: 80px; padding-left:10px" class="param-label">異動人員：</label> 
-								<input class="customSearchInput" type="text" id="pccCodeInput" name="pccCodeInput" value="" maxlength="20" />
+								<input class="customSearchInput" type="text" id="insertUserInput" name="pccCodeInput" value="" maxlength="20" />
 								<label style="display: inline-block; width: 80px; padding-left:10px" class="param-label">狀　　態：</label> 
                                 <div class="optionStatus queryValueComponentSelectList">
                                     <div class="optionLabelStatus">全部</div>
@@ -45,11 +45,11 @@
 								</div>
 								
 								<label style="display: inline-block; width: 80px; padding-left:10px" class="param-label">客群標籤：</label> 
-<!-- 								<input class="customSearchInput" type="text" id="pccCodeInput" name="pccCodeInput" value="" maxlength="20" /> -->
                                 <div class="optionGuestLabel queryValueComponentSelectList">
-                                    <div class="optionLabelGuestLabel">請選擇</div>
-                                    <select class="optionSelectGuestLabel queryValue" name="queryValue">
-                                        <option value="">請選擇</option>
+                                    <div class="optionLabelGuestLabel">全部</div>
+                                    <select id="pnpBlockTagSelector" class="optionSelectGuestLabel queryValue" name="queryValue">
+                                        <option value="*" selected>全部</option>
+                                        <option value="" >未設定標籤</option>
                                     </select>
                                 </div>
 								

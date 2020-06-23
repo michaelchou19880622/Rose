@@ -196,23 +196,6 @@ $(function() {
 		}
 	};
 	
-	var setupGuestLabelMap = function() {
-		$.ajax({
-			type : 'GET',
-			url : bcs.bcsContextPath + '/pnpEmployee/getGuestLabelMap',
-			contentType : 'application/json'
-		}).success(function(response) {
-			console.log(response);
-			if (response !== null) {
-				pnpStatusMap = response;
-			}
-		}).fail(function(response) {
-			console.log(response);
-		}).done(function(response) {
-			console.log('getGuestLabelMap done!!');
-		});
-	};
-
 	// -------------------Event----------------------
 	$('.datepicker').datepicker({
 		maxDate : 0,
@@ -596,9 +579,12 @@ $(function() {
 		
 		// Get PNP Block Tag List
 		$.ajax({
-			type : 'GET',
+			type : 'POST',
 			url : bcs.bcsContextPath + '/pnpEmployee/qryPNPBlockGTagList',
 			contentType : 'application/json;charset=UTF-8',
+			data : JSON.stringify({
+				inActive : 1
+			})
 		}).done(function(response) {
 			console.info('response = ', response);
 			console.log('JSON.stringify(response) = ', JSON.stringify(response));

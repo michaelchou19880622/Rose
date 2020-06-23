@@ -30,5 +30,6 @@ public class PnpSendBlockParam {
     private String insertTime;
     private String modify_reason;
     private int blockEnable = 1;
+    private Integer inActive;
 
 }

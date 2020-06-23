@@ -12,9 +12,7 @@ import javax.persistence.Query;
 import javax.persistence.StoredProcedureQuery;
 
 import com.bcs.core.taishin.circle.pnp.db.entity.*;
-import com.bcs.core.taishin.circle.pnp.db.entity.PNPBlockSendCount;
-import com.bcs.core.taishin.circle.pnp.db.entity.PNPBlockSendList;
-import com.bcs.core.taishin.circle.pnp.db.entity.PNPUpdateBlockSend;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -742,10 +740,15 @@ public class PnpReportService {
     * */
 
     @SuppressWarnings("unchecked")
-    public List<PNPBlockGTag> qryPNPBlockGTagList(@CurrentUser CustomUser customUser) {
-        EntityManager entityManager = entityManagerProvider.getEntityManager();
+    public List<PNPBlockGTag> qryPNPBlockGTagList(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
+        log.info("pnpSendBlockParam = {}", pnpSendBlockParam);
+        
+        log.info("2-1 pnpSendBlockParam.getInActive() = {}", pnpSendBlockParam.getInActive());
+    	
+    	EntityManager entityManager = entityManagerProvider.getEntityManager();
 
         StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("qryPNPBlockGTag");
+        query.setParameter("in_active", pnpSendBlockParam.getInActive());
 
         List<PNPBlockGTag> pnpBlockGTagList = query.getResultList();
 

@@ -640,7 +640,9 @@ public class BcsPnpReportController {
 			if (e instanceof SQLException) {
 				log.error("SQLException = {}", e);
 				
-				return new ResponseEntity<>("duplicate key", HttpStatus.INTERNAL_SERVER_ERROR);
+				if (e.toString().contains("duplicate key")) {
+					return new ResponseEntity<>("duplicate key", HttpStatus.INTERNAL_SERVER_ERROR);
+				}
 			}
 			
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -649,14 +651,19 @@ public class BcsPnpReportController {
 	
 	/* 取得客群標籤列表 */
 	@WebServiceLog
-	@GetMapping(value = "/qryPNPBlockGTagList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@PostMapping(value = "/qryPNPBlockGTagList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	@ResponseBody
 	public ResponseEntity<?> qryPNPBlockGTagList(HttpServletRequest request, HttpServletResponse response, 
-														@CurrentUser final CustomUser customUser) {
+														@CurrentUser final CustomUser customUser,
+														@RequestBody final PnpSendBlockParam pnpSendBlockParam) {
 		log.info("qryPNPBlockGTagList");
+
+        log.info("pnpSendBlockParam = {}", pnpSendBlockParam);
+        
+        log.info("1-1 pnpSendBlockParam.getInActive() = {}", pnpSendBlockParam.getInActive());
 		
 		try { 
-			final List<PNPBlockGTag> lstPnpBlockGTags = pnpReportService.qryPNPBlockGTagList(customUser);
+			final List<PNPBlockGTag> lstPnpBlockGTags = pnpReportService.qryPNPBlockGTagList(customUser, pnpSendBlockParam);
 			log.info("lstPnpBlockGTags = {}", lstPnpBlockGTags);
 			return new ResponseEntity<>(lstPnpBlockGTags, HttpStatus.OK);
 		} catch (final Exception e) {

@@ -24,6 +24,12 @@ import javax.persistence.*;
                         procedureName = "usp_qryPNPBlockGTag",
                         resultClasses = {PNPBlockGTag.class},
                         parameters = {
+                        		// 篩選的客群標籤來源 (0 = 歷程紀錄, 1 = 作用中)
+                                @StoredProcedureParameter(
+                                        name = "in_active",
+                                        type = Integer.class,
+                                        mode = ParameterMode.IN
+                                )
                         }
                 )
         }

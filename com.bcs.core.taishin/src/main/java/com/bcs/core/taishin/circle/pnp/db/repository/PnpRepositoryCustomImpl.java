@@ -192,7 +192,8 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
 
         String expiredCheckSql = "EXEC usp_batchCheckPNPExpiredDetail '" + type + "'";
         log.info("checking {} pnp detail table expired data start ...", type);
-        providerService.getEntityManager().createNativeQuery(expiredCheckSql);
+        providerService.getEntityManager().createNativeQuery(expiredCheckSql)
+        .executeUpdate();
         log.info("checking {} pnp detail table expired data end ...", type);
 
     	

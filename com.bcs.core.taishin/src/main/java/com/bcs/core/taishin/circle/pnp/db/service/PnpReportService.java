@@ -518,7 +518,8 @@ public class PnpReportService {
      */
     @SuppressWarnings("unchecked")
     public List<PNPBlockSendList> qryPnpBlockSendList(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
-
+        log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
+        
 		log.info("2-1 pnpSendBlockParam.getPage() = {}", pnpSendBlockParam.getPage());
         log.info("2-2 pnpSendBlockParam.getPageCount() = {}", pnpSendBlockParam.getPageCount());
         log.info("2-3 pnpSendBlockParam.getStartDate() = {}", pnpSendBlockParam.getStartDate());
@@ -568,7 +569,7 @@ public class PnpReportService {
      */
     @SuppressWarnings("unchecked")
     public long getPnpBlockSendCount(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
-        log.info("pnpSendBlockParam = {}", pnpSendBlockParam);
+        log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
         
 		log.debug("2-1 pnpSendBlockParam.getPage() = {}", pnpSendBlockParam.getPage());
         log.debug("2-2 pnpSendBlockParam.getPageCount() = {}", pnpSendBlockParam.getPageCount());
@@ -620,7 +621,7 @@ public class PnpReportService {
     @SuppressWarnings("unchecked")
     public List<PNPBlockHistoryList> qryPnpBlockHistoryList(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
 
-        log.info("pnpSendBlockParam = {}", pnpSendBlockParam);
+        log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
         
 		log.debug("2-1 pnpSendBlockParam.getPage() = {}", pnpSendBlockParam.getPage());
         log.debug("2-2 pnpSendBlockParam.getPageCount() = {}", pnpSendBlockParam.getPageCount());
@@ -629,7 +630,7 @@ public class PnpReportService {
         log.debug("2-5 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
         log.debug("2-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
         log.debug("2-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
-        log.debug("2-8 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
+        log.debug("2-8 pnpSendBlockParam.getBlockEnable() = {}", pnpSendBlockParam.getBlockEnable());
 
         pnpSendBlockParam.setRole(customUser.getRole());
 
@@ -669,7 +670,14 @@ public class PnpReportService {
     @SuppressWarnings("unchecked")
     public long getPnpBlockHistoryCount(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
 
-        log.info("pnpSendBlockParam = {}", pnpSendBlockParam);
+        log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
+        
+        log.info("2-1 pnpSendBlockParam.getStartDate() = {}", pnpSendBlockParam.getStartDate());
+        log.info("2-2 pnpSendBlockParam.getEndDate() = {}", pnpSendBlockParam.getEndDate());
+        log.info("2-3 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
+        log.info("2-4 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
+        log.info("2-5 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
+        log.info("2-6 pnpSendBlockParam.getBlockEnable() = {}", pnpSendBlockParam.getBlockEnable());
 
         pnpSendBlockParam.setRole(customUser.getRole());
 
@@ -707,7 +715,7 @@ public class PnpReportService {
     @SuppressWarnings("unchecked")
     public long updPnpBlockSend(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
 
-        log.info("pnpSendBlockParam = {}", pnpSendBlockParam);
+        log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
         
         log.info("2-1 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
         log.info("2-2 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
@@ -750,7 +758,7 @@ public class PnpReportService {
 
     @SuppressWarnings("unchecked")
     public List<PNPBlockGTag> qryPNPBlockGTagList(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
-        log.info("pnpSendBlockParam = {}", pnpSendBlockParam);
+        log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
         
         log.info("2-1 pnpSendBlockParam.getInActive() = {}", pnpSendBlockParam.getInActive());
     	

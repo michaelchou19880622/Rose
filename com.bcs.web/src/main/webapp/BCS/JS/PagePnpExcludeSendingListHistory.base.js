@@ -19,7 +19,10 @@ $(function() {
 	var eleDialogMobileInput = document.getElementById('dialogMobileInput');
 	var eleDialogModifyReasonInput = document.getElementById('dialogModifyReasonInput');
 	
-	var elePnpBlockTagSelector = document.getElementById("pnpBlockTagSelector");
+	var elePnpBlockTagSelector = document.getElementById('pnpBlockTagSelector');
+	var elePnpBlockStatusSelector = document.getElementById('pnpBlockStatusSelector');
+	
+	console.info('init valBlockEnable = ', $(this).find('#pnpBlockStatusSelector option:selected').val());
 	
 	var valPerPageSize = $(this).find('#perPageSizeSelector option:selected').val();
 	
@@ -32,19 +35,12 @@ $(function() {
 	var valMobile;
 	var valInsertUser;
 	var valGroupTag;
+	var valBlockEnable;
 	
 	var valMobileInput;
 	var valModifyReasonInput;
 
 	var hasData = false;
-	
-	var startDate = "";
-	var endDate = "";
-	var mobile = "";
-	var insertUser = "";
-	var groupTag = "";
-	
-	var blockSetType;
 	
 	var isChangePage = false;
 	
@@ -106,7 +102,11 @@ $(function() {
 		valEndDate = $('#endDate').val();
 		valMobile = $('#mobileInput').val();
 		valInsertUser = $('#insertUserInput').val();
-		valGroupTag = elePnpBlockTagSelector.options[elePnpBlockTagSelector.selectedIndex].value;
+//		valGroupTag = elePnpBlockTagSelector.options[elePnpBlockTagSelector.selectedIndex].value;
+//		valBlockEnable = elePnpBlockStatusSelector.options[elePnpBlockStatusSelector.selectedIndex].value;
+		
+		valGroupTag = $(this).find('#pnpBlockTagSelector option:selected').val();
+		valBlockEnable = $(this).find('#pnpBlockStatusSelector option:selected').val();
 		
 		if (!valStartDate || valStartDate == 'YYYY-MM-DD') {
 			valStartDate = "";
@@ -123,11 +123,11 @@ $(function() {
 			valEndDate = valStartDate;
 		}
 		
-		if (!valGroupTag || valGroupTag == '請選擇') {
-			valGroupTag = "";
-		}
-		
 		if (!valGroupTag || valGroupTag == "未設定標籤") {
+			valGroupTag = " ";
+		}
+
+		if (!valBlockEnable || valBlockEnable == "全部") {
 			valGroupTag = " ";
 		}
 
@@ -136,6 +136,7 @@ $(function() {
 		console.info('valMobile = ', valMobile);
 		console.info('valInsertUser = ', valInsertUser);
 		console.info('valGroupTag = ', valGroupTag);
+		console.info('valBlockEnable = ', valBlockEnable);
 
 		if (!dataValidate()) {
 			return false;
@@ -153,7 +154,8 @@ $(function() {
 				endDate : valEndDate,
 				mobile : valMobile,
 				insertUser : valInsertUser,
-				groupTag : valGroupTag
+				groupTag : valGroupTag,
+				blockEnable : valBlockEnable
 			})
 			
 		}).done(function(response) {
@@ -180,7 +182,7 @@ $(function() {
 			} else {
 				document.getElementById("mainFrame").className = "mainFrame"; 
 				
-				$('#tableBody').append('<tr align="center" id="noDataTxt"><td colspan="8"><span style="color:red; text-align: center;">查無資料</span></td></tr>');
+				$('#tableBody').append('<tr align="center" id="noDataTxt"><td colspan="7"><span style="color:red; text-align: center;">查無資料</span></td></tr>');
 
 				eleCurrentPageIndex.innerText = '-';
 				eleTotalPageSize.innerText = '-';
@@ -202,8 +204,6 @@ $(function() {
 
 		$('.LyMain').block($.BCS.blockMsgRead);
 		
-//		console.log('Has data : ', hasData);
-		
 		if (!hasData) {
 			if (!isSearchData) {
 				alert("很抱歉，您尚未進行資料查詢，無法匯出資料！\n請先進行資料查詢，謝謝。")
@@ -220,7 +220,8 @@ $(function() {
 										+ '&endDate=' + valEndDate 
 										+ '&mobile=' + valMobile
 										+ '&insertUser=' + valInsertUser 
-										+ '&groupTag=' + valGroupTag;
+										+ '&groupTag=' + valGroupTag
+										+ '&blockEnable' + valBlockEnable;
 		
 		getUrl = encodeURI(getUrl);
 //		console.info('getUrl = ', getUrl);
@@ -231,10 +232,10 @@ $(function() {
 	});
 	
 	var dataValidate = function() {
-		startDate = $('#startDate').val();
-		endDate = $('#endDate').val();
+		valStartDate = $('#startDate').val();
+		valEndDate = $('#endDate').val();
 		
-		if (moment(startDate).isAfter(moment(endDate))) {
+		if (moment(valStartDate).isAfter(moment(valEndDate))) {
 			alert('更新時間設定異常 ( 起始時間不可大於結束時間 )');
 			return false;
 		}
@@ -246,9 +247,6 @@ $(function() {
 		
 		cleanList();
 
-//		console.info('valStartDate = ', valStartDate);
-//		console.info('valEndDate = ', valEndDate);
-		
 		// Get PNP Black List
 		$.ajax({
 			type : 'POST',
@@ -261,11 +259,12 @@ $(function() {
 				endDate : valEndDate,
 				mobile : valMobile,
 				insertUser : valInsertUser,
-				groupTag : valGroupTag
+				groupTag : valGroupTag,
+				blockEnable : valBlockEnable
 			})
 		}).done(function(response) {
 			console.info('response = ', response);
-			console.log('JSON.stringify(response) = ', JSON.stringify(response));
+//			console.log('JSON.stringify(response) = ', JSON.stringify(response));
 			
 			if (response.length == 0) {
 				return false;
@@ -321,21 +320,33 @@ $(function() {
 		loadAndSetBlockTagList();
 		
 		/* 設定預設的開始及結束時間 */
-//		startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
-//		startDate = moment(new Date()).format('YYYY-MM-DD');
-//		endDate = moment(new Date()).format('YYYY-MM-DD');
-//		console.info('initPage : startDate = ', startDate);
-//		console.info('initPage : endDate = ', endDate);
-//		$('#startDate').val(startDate);
-//		$('#endDate').val(endDate);
+//		valStartDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
+//		
+//		valStartDate = moment(new Date()).format('YYYY-MM-DD');
+//		valEndDate = moment(new Date()).format('YYYY-MM-DD');
+//		console.info('initPage : valStartDate = ', valStartDate);
+//		console.info('initPage : valEndDate = ', valEndDate);
+//		$('#startDate').val(valStartDate);
+//		$('#endDate').val(valEndDate);
 	};
 
 	/* 更新客群標籤下拉選單 */
 	var func_optionPnpBlockTagSelectChanged = function(){
 		var selectValue = $(this).find('option:selected').text();
+		console.info('func_optionPnpBlockTagSelectChanged selectValue = ', selectValue);
 		
 		$(this).closest('.optionGuestLabel').find('.optionLabelGuestLabel').html(selectValue);
 	};
+	
+	/* 更新狀態下拉選單 */
+	var func_optionPnpBlockStatusSelectChanged = function(){
+		var selectValue = $(this).find('option:selected').text();
+		console.info('func_optionPnpBlockStatusSelectChanged selectValue = ', selectValue);
+		
+		$(this).closest('.optionStatus').find('.optionLabelStatus').html(selectValue);
+	};
+
+	$('.optionSelectStatus').change(func_optionPnpBlockStatusSelectChanged);
 	
 	/* 載入PNP排除發送名單客群標籤列表 */
 	var loadAndSetBlockTagList = function() {
@@ -351,7 +362,7 @@ $(function() {
 				inActive : 0
 			})
 		}).done(function(response) {
-			console.info('response = ', response);
+//			console.info('response = ', response);
 //			console.log('JSON.stringify(response) = ', JSON.stringify(response));
 			
 			if (response.length == 0) {
@@ -359,7 +370,7 @@ $(function() {
 			}
 			
 			$.each(response, function(i, o){		
-				console.info('qryPNPBlockGTagList : o = ', JSON.stringify(o));
+//				console.info('qryPNPBlockGTagList : o = ', JSON.stringify(o));
 				
 				if (o.groupTag == "" || o.groupTag == null || o.groupTag == " ") {
 					return true;

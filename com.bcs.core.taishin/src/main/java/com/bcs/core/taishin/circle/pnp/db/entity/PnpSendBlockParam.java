@@ -29,7 +29,14 @@ public class PnpSendBlockParam {
     private String insertDate;
     private String insertTime;
     private String modify_reason;
-    private int blockEnable = 1;
+    private Integer blockEnable;
     private Integer inActive;
+    
+	@Override
+	public String toString() {
+		return "PnpSendBlockParam [startDate=" + startDate + ", endDate=" + endDate + ", role=" + role + ", page=" + page + ", pageCount=" + pageCount + ", mobile=" + mobile + ", insertUser="
+				+ insertUser + ", groupTag=" + groupTag + ", insertDate=" + insertDate + ", insertTime=" + insertTime + ", modify_reason=" + modify_reason + ", blockEnable=" + blockEnable
+				+ ", inActive=" + inActive + "]";
+	}
 
 }

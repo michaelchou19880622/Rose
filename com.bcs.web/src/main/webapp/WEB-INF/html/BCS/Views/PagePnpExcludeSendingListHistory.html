@@ -26,12 +26,13 @@
 								<label style="display: inline-block; width: 80px; padding-left:10px" class="param-label">狀　　態：</label> 
                                 <div class="optionStatus queryValueComponentSelectList">
                                     <div class="optionLabelStatus">全部</div>
-                                    <select class="optionSelectStatus queryValue" name="queryValue">
-                                        <option selected="selected" value="全部">全部</option>
-                                        <option value="排除中">排除中</option>
-                                        <option value="取消排除">取消排除</option>
+                                    <select id="pnpBlockStatusSelector" class="optionSelectStatus queryValue" name="queryValue">
+                                        <option value="" selected>全部</option>
+                                        <option value="1">排除中</option>
+                                        <option value="0">取消排除</option>
                                     </select>
                                 </div>
+                                
 								<input class="customBtn" id="searchBtn" style="float:right; width: 90px; cursor: pointer;" type="button" value="查詢">
 	                    	</div>
 							<div class="paramGroup" style="margin-top:8px;">

@@ -313,7 +313,7 @@ public class SendGroupUIService {
         }
 
         List<String> list = new ArrayList<>(mids);
-        log.info("list:" + list);
+//        log.info("list:" + list);
 //        List<String> existMids = new ArrayList<>();
 //			// Check MID Exist by Part
 //			List<String> check = new ArrayList<String>();

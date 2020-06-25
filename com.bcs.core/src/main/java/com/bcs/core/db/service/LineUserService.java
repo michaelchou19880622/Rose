@@ -157,7 +157,7 @@ public class LineUserService {
      */
     public boolean checkMIDAllActive(String mid) {
         String result = lineUserRepository.checkMIDAllActive(mid);
-        logger.info("checkMIDAllActive:" + result);
+//        logger.info("checkMIDAllActive:" + result);
         return StringUtils.isNotBlank(result);
     }
 

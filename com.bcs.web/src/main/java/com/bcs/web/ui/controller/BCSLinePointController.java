@@ -339,15 +339,50 @@ public class BCSLinePointController extends BCSBaseController {
         try {
             log.info("[checkActiveUids]");
             List<Integer> removeIndexs = new ArrayList();
-            //改寫 這邊  這邊csv太大筆   會掛掉
-            for (int i = 0; i < uids.size(); i++) {
-                boolean isActive = lineUserService.checkMIDAllActive(uids.get(i));
-                log.info("i=" + i + ", uid=" + uids.get(i) + ", isActive=" + isActive);
-                if (!isActive) {
-                    removeIndexs.add(i);
+            /* 優化效能 : 先一千筆比對一次, 發現有NonActive狀態的, 才單筆比對*/
+            int i = 1;
+            List<String> checkList = new ArrayList<>();
+            for (String mid : uids) {
+                checkList.add(mid.trim());
+
+                /* 每一千筆處理一次 */
+                if (i % 1000 == 0) {
+//                    log.info(">1000 checkList size:{}", checkList.size());
+                    List<String> listActive = lineUserService.findMidByMidInAndActive(checkList);
+//                    log.info("findMid List Result Size:{}", listActive.size());
+                    if (listActive.size() < checkList.size()) {
+                        for (int j = 0; j < checkList.size(); j++) {
+                            boolean isActive = lineUserService.checkMIDAllActive(checkList.get(j));
+                            if (!isActive) {
+                            	int index = i-checkList.size()+j;  
+//                                log.info("index" + index + ", checkList=" + checkList.get(j) + ", isActive=" + isActive);
+                                removeIndexs.add(index);
+                            }
+                        }
+                    }
+                    checkList.clear();
                 }
+                i++;
             }
-            log.info("removeIndexs:" + ObjectUtil.objectToJsonStr(removeIndexs));
+            /* 處理未滿一千的 */
+            if (!checkList.isEmpty()) {
+ //               log.info(">1000 checkList size:{}", checkList.size());
+                List<String> listActive = lineUserService.findMidByMidInAndActive(checkList);
+ //               log.info("findMid List Result Size:{}", listActive.size());
+                if (listActive.size() < checkList.size()) {
+                    for (int j = 0; j < checkList.size(); j++) {
+                        boolean isActive = lineUserService.checkMIDAllActive(checkList.get(j));
+                        if (!isActive) {
+                        	/* index從0開始, 需要多減1 */
+                        	int index = i-checkList.size()+j-1;
+//                            log.info("index" + index + ", checkList=" + checkList.get(j) + ", isActive=" + isActive);
+                            removeIndexs.add(index);
+                        }
+                    }
+                }
+                checkList.clear();
+            }            
+            log.info("removeIndexs :" + ObjectUtil.objectToJsonStr(removeIndexs));
             return new ResponseEntity<>(removeIndexs, HttpStatus.OK);
         } catch (Exception e) {
             log.error(ErrorRecord.recordError(e));

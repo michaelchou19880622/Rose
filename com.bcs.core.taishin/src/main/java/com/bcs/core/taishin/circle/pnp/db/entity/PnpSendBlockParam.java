@@ -21,8 +21,8 @@ public class PnpSendBlockParam {
     private Date startDate;
     private Date endDate;
     private String role;
-    private Integer page = 1;
-    private Integer pageCount = 5;
+    private Integer page;
+    private Integer pageCount;
     private String mobile;
     private String insertUser;
     private String groupTag;
@@ -32,11 +32,15 @@ public class PnpSendBlockParam {
     private int blockEnable;
     private Integer inActive;
     
+    
+    
 	@Override
 	public String toString() {
-		return "PnpSendBlockParam [startDate=" + startDate + ", endDate=" + endDate + ", role=" + role + ", page=" + page + ", pageCount=" + pageCount + ", mobile=" + mobile + ", insertUser="
-				+ insertUser + ", groupTag=" + groupTag + ", insertDate=" + insertDate + ", insertTime=" + insertTime + ", modify_reason=" + modify_reason + ", blockEnable=" + blockEnable
-				+ ", inActive=" + inActive + "]";
+		try {
+	        return new com.fasterxml.jackson.databind.ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(this);
+	    } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+	        e.printStackTrace();
+	    }
+	    return null;
 	}
-
 }

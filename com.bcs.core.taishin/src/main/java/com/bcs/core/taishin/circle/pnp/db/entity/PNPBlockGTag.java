@@ -40,4 +40,14 @@ public class PNPBlockGTag {
     @Id
     @Column(name = "GROUP_TAG")
     private String groupTag;
+
+    @Override
+	public String toString() {
+		try {
+	        return new com.fasterxml.jackson.databind.ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(this);
+	    } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+	        e.printStackTrace();
+	    }
+	    return null;
+	}
 }

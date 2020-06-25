@@ -105,4 +105,9 @@ public class PNPBlockHistoryList {
     @Column(name = "INSERT_USER", columnDefinition = "NVARCHAR(32)")
     private String insertUser;
 
+	@Override
+	public String toString() {
+		return "PNPBlockHistoryList [mobile=" + mobile + ", uid=" + uid + ", modifyReason=" + modifyReason + ", modifyDateTime=" + modifyDateTime + ", blockEnable=" + blockEnable + ", groupTag="
+				+ groupTag + ", insertUser=" + insertUser + "]";
+	}
 }

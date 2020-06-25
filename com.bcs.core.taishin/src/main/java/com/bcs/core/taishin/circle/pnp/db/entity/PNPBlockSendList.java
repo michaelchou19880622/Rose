@@ -98,4 +98,13 @@ public class PNPBlockSendList {
     @Column(name = "INSERT_USER", columnDefinition = "NVARCHAR(32)")
     private String insertUser;
 
+    @Override
+	public String toString() {
+		try {
+	        return new com.fasterxml.jackson.databind.ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(this);
+	    } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+	        e.printStackTrace();
+	    }
+	    return null;
+	}
 }

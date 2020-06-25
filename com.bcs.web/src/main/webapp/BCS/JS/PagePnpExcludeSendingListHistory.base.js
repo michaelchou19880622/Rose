@@ -220,7 +220,7 @@ $(function() {
 			return;
 		}
 		
-		var getUrl = bcs.bcsContextPath + '/pnpEmployee/exportPNPBlockListReportExcel?'
+		var getUrl = bcs.bcsContextPath + '/pnpEmployee/exportPNPBlockListHistoryReportExcel?'
 										+ 'startDate=' + valStartDate 
 										+ '&endDate=' + valEndDate 
 										+ '&mobile=' + valMobile

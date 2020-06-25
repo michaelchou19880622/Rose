@@ -532,7 +532,6 @@ public class PnpReportService {
         
 		log.info("2-1 pnpSendBlockParam.getPage() = {}", pnpSendBlockParam.getPage());
         log.info("2-2 pnpSendBlockParam.getPageCount() = {}", pnpSendBlockParam.getPageCount());
-        log.info("2-3 pnpSendBlockParam.getStartDate() = {}", pnpSendBlockParam.getStartDate());
         log.info("2-3 str_startDate = {}", str_startDate);
         log.info("2-4 str_endDate = {}", str_endDate);
         log.info("2-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
@@ -566,24 +565,10 @@ public class PnpReportService {
      */
     @SuppressWarnings("unchecked")
     public long getPnpBlockSendCount(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
-        log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
-
-        log.debug("customUser.getRole() = {}", customUser.getRole());
-        pnpSendBlockParam.setRole(customUser.getRole());
-
         Date startDate = pnpSendBlockParam.getStartDate();
         String str_startDate = (startDate == null)? "" : DataUtils.formatDateToString(startDate, "yyyy-MM-dd");
         Date endDate = pnpSendBlockParam.getEndDate();
         String str_endDate = (startDate == null)? "" : DataUtils.formatDateToString(endDate, "yyyy-MM-dd");
-        
-		log.info("2-1 pnpSendBlockParam.getPage() = {}", pnpSendBlockParam.getPage());
-        log.info("2-2 pnpSendBlockParam.getPageCount() = {}", pnpSendBlockParam.getPageCount());
-        log.info("2-3 str_startDate = {}", str_startDate);
-        log.info("2-4 str_endDate = {}", str_endDate);
-        log.info("2-5 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
-        log.info("2-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
-        log.info("2-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
-        log.info("2-8 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
 
         EntityManager entityManager = entityManagerProvider.getEntityManager();
 
@@ -763,11 +748,5 @@ public class PnpReportService {
         List<PNPBlockGTag> pnpBlockGTagList = query.getResultList();
 
         return pnpBlockGTagList;
-
     }
-
-
-
-
-
 }

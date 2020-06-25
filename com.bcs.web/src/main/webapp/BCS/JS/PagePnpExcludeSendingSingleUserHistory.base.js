@@ -149,13 +149,14 @@ $(function() {
 			return;
 		}
 		
-		var getUrl = bcs.bcsContextPath + '/pnpEmployee/exportPNPBlockListReportExcel?'
-										+ 'startDate=' + valStartDate 
-										+ '&endDate=' + valEndDate 
+		var getUrl = bcs.bcsContextPath + '/pnpEmployee/exportPNPBlockListHistoryReportExcel?'
+										+ 'startDate=' + "" 
+										+ '&endDate=' + "" 
 										+ '&mobile=' + valMobile
-										+ '&insertUser=' + valInsertUser 
+										+ '&insertUser=' + "" 
 										+ '&groupTag=' + valGroupTag
-										+ '&blockEnable' + valBlockEnable;
+//										+ '&blockEnable=' + valBlockEnable;
+										+ '&blockEnable=1';
 		
 		getUrl = encodeURI(getUrl);
 //		console.info('getUrl = ', getUrl);

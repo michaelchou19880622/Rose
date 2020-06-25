@@ -543,7 +543,7 @@ public class BcsPnpReportController {
         }
     }
     
-    // PNP黑名單管理 - 排除發送中名單列表
+    /* PNP黑名單管理 - 排除發送中名單列表 */
     @WebServiceLog
     @GetMapping("/pnpExcludeSendingListPage")
     public String pnpExcludeSendingListPage() {
@@ -551,7 +551,15 @@ public class BcsPnpReportController {
         return BcsPageEnum.PNP_EXCLUDE_SENDING_LIST_PAGE.toString();
     }
     
-    // PNP黑名單管理 - 排除發送名單歷程列表
+    /* PNP黑名單管理 - 排除發送名單單筆用戶歷程紀錄 */
+    @WebServiceLog
+    @GetMapping("/pnpExcludeSendingSingleUserHistoryPage")
+    public String pnpExcludeSendingSingleUserHistoryPage(HttpServletRequest request, HttpServletResponse response) {
+        log.info("pnpExcludeSendingSingleUserHistoryPage");
+        return BcsPageEnum.PNP_EXCLUDE_SENDING_SINGLE_USER_HISTORY_PAGE.toString();
+    }
+    
+    /* PNP黑名單管理 - 排除發送名單歷程列表 */
     @WebServiceLog
     @GetMapping("/pnpExcludeSendingListHistoryPage")
     public String pnpExcludeSendingListHistoryPage() {
@@ -625,16 +633,16 @@ public class BcsPnpReportController {
 		log.info("updPnpBlockSend");
 		
 		try { 
-	        log.debug("1-1 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
-	        log.debug("1-2 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
-	        log.debug("1-3 pnpSendBlockParam.getInsertDate() = {}", pnpSendBlockParam.getInsertDate());
-	        log.debug("1-4 pnpSendBlockParam.getInsertTime() = {}", pnpSendBlockParam.getInsertTime());
-	        log.debug("1-5 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
-	        log.debug("1-6 pnpSendBlockParam.getBlockEnable() = {}", pnpSendBlockParam.getBlockEnable());
-	        log.debug("1-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
+	        log.info("1-1 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
+	        log.info("1-2 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
+	        log.info("1-3 pnpSendBlockParam.getInsertDate() = {}", pnpSendBlockParam.getInsertDate());
+	        log.info("1-4 pnpSendBlockParam.getInsertTime() = {}", pnpSendBlockParam.getInsertTime());
+	        log.info("1-5 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
+	        log.info("1-6 pnpSendBlockParam.getBlockEnable() = {}", pnpSendBlockParam.getBlockEnable());
+	        log.info("1-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
 			
 			final Long historyRefId = pnpReportService.updPnpBlockSend(customUser, pnpSendBlockParam);
-			log.debug("historyRefId = {}", historyRefId);
+			log.info("historyRefId = {}", historyRefId);
 			return new ResponseEntity<>(historyRefId, HttpStatus.OK);
 		} catch (final Exception e) {
 			log.error("Exception = {}", e);
@@ -660,7 +668,7 @@ public class BcsPnpReportController {
 														@RequestBody final PnpSendBlockParam pnpSendBlockParam) {
 		log.info("qryPNPBlockGTagList");
 
-        log.info("pnpSendBlockParam = {}", pnpSendBlockParam);
+        log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
         
         log.info("1-1 pnpSendBlockParam.getInActive() = {}", pnpSendBlockParam.getInActive());
 		
@@ -781,7 +789,7 @@ public class BcsPnpReportController {
 	public ResponseEntity<?> getPnpExcludeSendingHistoryList(HttpServletRequest request, HttpServletResponse response, 
 														@CurrentUser final CustomUser customUser,
 														@RequestBody final PnpSendBlockParam pnpSendBlockParam) {
-		log.info("getPnpExcludeSendingList");
+		log.info("getPnpExcludeSendingHistoryList");
 		
 		try { 
 			log.info("1-1 pnpSendBlockParam.getPage() = {}", pnpSendBlockParam.getPage());

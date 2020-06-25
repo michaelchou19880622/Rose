@@ -29,7 +29,7 @@ public class PnpSendBlockParam {
     private String insertDate;
     private String insertTime;
     private String modify_reason;
-    private Integer blockEnable;
+    private int blockEnable;
     private Integer inActive;
     
 	@Override

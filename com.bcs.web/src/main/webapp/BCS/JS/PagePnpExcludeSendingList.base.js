@@ -6,7 +6,7 @@ $(function() {
 	// ---- Global Variables ----
 	var isSearchData = false;
 
-	var originalTr;
+	var originalTr = {};
 	var originalTable;
 	
 	var eleModelBtnOK = document.getElementById("btn_OK");
@@ -148,15 +148,15 @@ $(function() {
 	});
 
 	$('#btn_PreviousPage').click(function() {
-		console.info('btn_PreviousPage');
-		console.info('valCurrentPageIndex = ', valCurrentPageIndex);
+//		console.info('btn_PreviousPage');
+//		console.info('valCurrentPageIndex = ', valCurrentPageIndex);
 		pageBtnHandler(valCurrentPageIndex > 1, 'back');
 	});
 
 	$('#btn_NextPage').click(function() {
-		console.info('btn_NextPage');
-		console.info('valCurrentPageIndex = ', valCurrentPageIndex);
-		console.info('valTotalPageSize = ', valTotalPageSize);
+//		console.info('btn_NextPage');
+//		console.info('valCurrentPageIndex = ', valCurrentPageIndex);
+//		console.info('valTotalPageSize = ', valTotalPageSize);
 		pageBtnHandler(valCurrentPageIndex < valTotalPageSize, 'next');
 	});
 
@@ -316,8 +316,7 @@ $(function() {
 	}
 
 	var loadData = function() {
-		
-		cleanList();
+
 
 //		console.info('valStartDate = ', valStartDate);
 //		console.info('valEndDate = ', valEndDate);
@@ -339,6 +338,8 @@ $(function() {
 		}).done(function(response) {
 //			console.info('response = ', response);
 //			console.log('JSON.stringify(response) = ', JSON.stringify(response));
+
+			$('.dataTemplate').remove();
 			
 			if (response.length == 0) {
 				return false;
@@ -348,7 +349,9 @@ $(function() {
 			response.forEach(function(obj) {
 				var list = originalTr.clone(true);
 				
-				list.find('.mobileNum').html(obj.phone);
+				list.find('.mobileNum a').attr('href', bcs.bcsContextPath +'/pnpEmployee/pnpExcludeSendingSingleUserHistoryPage?mobile=' + obj.phone);
+				list.find('.mobileNum a').html(obj.phone);
+				
 				list.find('.lineUID').html(obj.uid);
 				list.find('.reason').html(obj.modifyReason);
 				list.find('.updateTime').html(obj.createTime);
@@ -452,7 +455,7 @@ $(function() {
 	var initPage = function() {
 		originalTr = $('.dataTemplate').clone(true);
 		originalTable = $('#tableBody').clone(true);
-		
+
 		cleanList();
 		
 		loadAndSetBlockTagList();

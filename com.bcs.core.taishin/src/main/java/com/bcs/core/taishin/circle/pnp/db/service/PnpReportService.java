@@ -519,15 +519,6 @@ public class PnpReportService {
     @SuppressWarnings("unchecked")
     public List<PNPBlockSendList> qryPnpBlockSendList(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
         log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
-        
-		log.info("2-1 pnpSendBlockParam.getPage() = {}", pnpSendBlockParam.getPage());
-        log.info("2-2 pnpSendBlockParam.getPageCount() = {}", pnpSendBlockParam.getPageCount());
-        log.info("2-3 pnpSendBlockParam.getStartDate() = {}", pnpSendBlockParam.getStartDate());
-        log.info("2-4 pnpSendBlockParam.getEndDate() = {}", pnpSendBlockParam.getEndDate());
-        log.info("2-5 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
-        log.info("2-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
-        log.info("2-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
-        log.info("2-8 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
 
         pnpSendBlockParam.setRole(customUser.getRole());
 
@@ -535,12 +526,18 @@ public class PnpReportService {
 
         Date startDate = pnpSendBlockParam.getStartDate();
         String str_startDate = (startDate == null)? "" : DataUtils.formatDateToString(startDate, "yyyy-MM-dd");
-        
         Date endDate = pnpSendBlockParam.getEndDate();
         String str_endDate = (startDate == null)? "" : DataUtils.formatDateToString(endDate, "yyyy-MM-dd");
 
-        log.info("startDate = {}", startDate);
-        log.info("endDate = {}", endDate);
+        
+		log.info("2-1 pnpSendBlockParam.getPage() = {}", pnpSendBlockParam.getPage());
+        log.info("2-2 pnpSendBlockParam.getPageCount() = {}", pnpSendBlockParam.getPageCount());
+        log.info("2-3 pnpSendBlockParam.getStartDate() = {}", pnpSendBlockParam.getStartDate());
+        log.info("2-3 str_startDate = {}", str_startDate);
+        log.info("2-4 str_endDate = {}", str_endDate);
+        log.info("2-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
+        log.info("2-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
+        log.info("2-8 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
 
         StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("qryPNPBlockSendList");
         query.setParameter("show_page", pnpSendBlockParam.getPage());
@@ -570,27 +567,23 @@ public class PnpReportService {
     @SuppressWarnings("unchecked")
     public long getPnpBlockSendCount(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
         log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
-        
-		log.debug("2-1 pnpSendBlockParam.getPage() = {}", pnpSendBlockParam.getPage());
-        log.debug("2-2 pnpSendBlockParam.getPageCount() = {}", pnpSendBlockParam.getPageCount());
-        log.debug("2-3 pnpSendBlockParam.getStartDate() = {}", pnpSendBlockParam.getStartDate());
-        log.debug("2-4 pnpSendBlockParam.getEndDate() = {}", pnpSendBlockParam.getEndDate());
-        log.debug("2-5 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
-        log.debug("2-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
-        log.debug("2-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
-        log.debug("2-8 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
 
         log.debug("customUser.getRole() = {}", customUser.getRole());
         pnpSendBlockParam.setRole(customUser.getRole());
 
         Date startDate = pnpSendBlockParam.getStartDate();
         String str_startDate = (startDate == null)? "" : DataUtils.formatDateToString(startDate, "yyyy-MM-dd");
-        
         Date endDate = pnpSendBlockParam.getEndDate();
         String str_endDate = (startDate == null)? "" : DataUtils.formatDateToString(endDate, "yyyy-MM-dd");
         
-        log.debug("startDate = {}", startDate);
-        log.debug("endDate = {}", endDate);
+		log.info("2-1 pnpSendBlockParam.getPage() = {}", pnpSendBlockParam.getPage());
+        log.info("2-2 pnpSendBlockParam.getPageCount() = {}", pnpSendBlockParam.getPageCount());
+        log.info("2-3 str_startDate = {}", str_startDate);
+        log.info("2-4 str_endDate = {}", str_endDate);
+        log.info("2-5 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
+        log.info("2-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
+        log.info("2-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
+        log.info("2-8 pnpSendBlockParam.getModify_reason() = {}", pnpSendBlockParam.getModify_reason());
 
         EntityManager entityManager = entityManagerProvider.getEntityManager();
 
@@ -622,15 +615,6 @@ public class PnpReportService {
     public List<PNPBlockHistoryList> qryPnpBlockHistoryList(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
 
         log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
-        
-		log.debug("2-1 pnpSendBlockParam.getPage() = {}", pnpSendBlockParam.getPage());
-        log.debug("2-2 pnpSendBlockParam.getPageCount() = {}", pnpSendBlockParam.getPageCount());
-        log.debug("2-3 pnpSendBlockParam.getStartDate() = {}", pnpSendBlockParam.getStartDate());
-        log.debug("2-4 pnpSendBlockParam.getEndDate() = {}", pnpSendBlockParam.getEndDate());
-        log.debug("2-5 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
-        log.debug("2-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
-        log.debug("2-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
-        log.debug("2-8 pnpSendBlockParam.getBlockEnable() = {}", pnpSendBlockParam.getBlockEnable());
 
         pnpSendBlockParam.setRole(customUser.getRole());
 
@@ -640,16 +624,25 @@ public class PnpReportService {
         String str_startDate = (startDate == null)? "" : DataUtils.formatDateToString(startDate, "yyyy-MM-dd");
         Date endDate = pnpSendBlockParam.getEndDate();
         String str_endDate = (endDate == null)? "" : DataUtils.formatDateToString(endDate, "yyyy-MM-dd");
+        
+		log.info("2-1 pnpSendBlockParam.getPage() = {}", pnpSendBlockParam.getPage());
+        log.info("2-2 pnpSendBlockParam.getPageCount() = {}", pnpSendBlockParam.getPageCount());
+        log.info("2-3 str_startDate = {}", str_startDate);
+        log.info("2-4 str_endDate = {}", str_endDate);
+        log.info("2-5 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
+        log.info("2-6 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
+        log.info("2-7 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
+        log.info("2-8 pnpSendBlockParam.getBlockEnable() = {}", pnpSendBlockParam.getBlockEnable());
 
         StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("qryPNPBlockHistoryList");
-        query.setParameter("show_page", pnpSendBlockParam.getPage());
-        query.setParameter("page_count",pnpSendBlockParam.getPageCount());
-        query.setParameter("start_date",str_startDate);
-        query.setParameter("end_date",str_endDate);
-        query.setParameter("mobile",pnpSendBlockParam.getMobile());
-        query.setParameter("insert_user",pnpSendBlockParam.getInsertUser());
-        query.setParameter("group_tag",pnpSendBlockParam.getGroupTag());
-        query.setParameter("block_enable",pnpSendBlockParam.getBlockEnable());
+		query.setParameter("show_page", pnpSendBlockParam.getPage());
+		query.setParameter("page_count", pnpSendBlockParam.getPageCount());
+		query.setParameter("start_date", str_startDate);
+		query.setParameter("end_date", str_endDate);
+		query.setParameter("mobile", pnpSendBlockParam.getMobile());
+		query.setParameter("insert_user", pnpSendBlockParam.getInsertUser());
+		query.setParameter("group_tag", pnpSendBlockParam.getGroupTag());
+		query.setParameter("block_enable", pnpSendBlockParam.getBlockEnable());
 
         List<PNPBlockHistoryList> pnpBlockHistoryList = query.getResultList();
 
@@ -671,13 +664,6 @@ public class PnpReportService {
     public long getPnpBlockHistoryCount(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
 
         log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
-        
-        log.info("2-1 pnpSendBlockParam.getStartDate() = {}", pnpSendBlockParam.getStartDate());
-        log.info("2-2 pnpSendBlockParam.getEndDate() = {}", pnpSendBlockParam.getEndDate());
-        log.info("2-3 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
-        log.info("2-4 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
-        log.info("2-5 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
-        log.info("2-6 pnpSendBlockParam.getBlockEnable() = {}", pnpSendBlockParam.getBlockEnable());
 
         pnpSendBlockParam.setRole(customUser.getRole());
 
@@ -687,7 +673,14 @@ public class PnpReportService {
         String str_startDate = (startDate == null)? "" : DataUtils.formatDateToString(startDate, "yyyy-MM-dd");
         Date endDate = pnpSendBlockParam.getEndDate();
         String str_endDate = (endDate == null)? "" : DataUtils.formatDateToString(endDate, "yyyy-MM-dd");
-
+        
+        log.info("2-1 str_startDate = {}", str_startDate);
+        log.info("2-2 str_endDate = {}", str_endDate);
+        log.info("2-3 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
+        log.info("2-4 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
+        log.info("2-5 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
+        log.info("2-6 pnpSendBlockParam.getBlockEnable() = {}", pnpSendBlockParam.getBlockEnable());
+        
         StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("getPNPBlockHistoryCount");
 		query.setParameter("start_date", str_startDate);
 		query.setParameter("end_date", str_endDate);
@@ -716,7 +709,7 @@ public class PnpReportService {
     public long updPnpBlockSend(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
 
         log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
-        
+
         log.info("2-1 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
         log.info("2-2 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
         log.info("2-3 pnpSendBlockParam.getInsertDate() = {}", pnpSendBlockParam.getInsertDate());

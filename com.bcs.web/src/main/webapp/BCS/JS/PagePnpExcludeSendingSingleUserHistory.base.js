@@ -1,27 +1,19 @@
 /**
- * Pnp Block List History Page
+ * Pnp Block Single User History Page
  */
 
 $(function() {
+	var paramMobile = $.urlParam('mobile');
+	console.info('paramMobile = ', paramMobile);
+	
+	
 	// ---- Global Variables ----
-	var isSearchData = false;
-
 	var originalTr;
 	var originalTable;
 	
-	var eleModelBtnOK = document.getElementById("btn_OK");
-	var eleModelBtnCancel = document.getElementById('btn_Cancel');
-	
-	var eleCreateBtn = document.getElementById("createBtn");
 	var eleTotalPageSize = document.getElementById('totalPageSize');
 	var eleCurrentPageIndex = document.getElementById('currentPageIndex');
 
-	var eleDialogMobileInput = document.getElementById('dialogMobileInput');
-	var eleDialogModifyReasonInput = document.getElementById('dialogModifyReasonInput');
-	
-	var elePnpBlockTagSelector = document.getElementById('pnpBlockTagSelector');
-	var elePnpBlockStatusSelector = document.getElementById('pnpBlockStatusSelector');
-	
 	var valPerPageSize = $(this).find('#perPageSizeSelector option:selected').val();
 	console.info('init valPerPageSize = ', valPerPageSize);
 	
@@ -31,23 +23,12 @@ $(function() {
 	
 	var valStartDate = "";
 	var valEndDate = "";
-	var valMobile = "";
+	var valMobile = paramMobile;
 	var valInsertUser = "";
-	var valGroupTag = "";
-	var valBlockEnable = "";
+	var valGroupTag = "*";
+	var valBlockEnable = 1;
 	
-	valGroupTag = $(this).find('#pnpBlockTagSelector option:selected').val();
-	console.info('init valGroupTag = ', valGroupTag);
-	
-	valBlockEnable = $(this).find('#pnpBlockStatusSelector option:selected').val();
-	console.info('init valBlockEnable = ', valBlockEnable);
-	
-	var valMobileInput;
-	var valModifyReasonInput;
-
 	var hasData = false;
-	
-	var isChangePage = false;
 	
 	/* 更新每頁顯示數量下拉選單 */
 	var func_optionSelectChanged = function(){
@@ -74,19 +55,11 @@ $(function() {
 			
 			currentPageIndex.innerText = valCurrentPageIndex;
 
-//			document.getElementById("searchBtn").click();
-
-			loadData();
+			getListCount();
 		}
 	};
 	
 	// -------------------Event----------------------
-	$('.datepicker').datepicker({
-		maxDate : 0,
-		dateFormat : 'yy-mm-dd',
-		changeMonth : true
-	});
-
 	$('#btn_PreviousPage').click(function() {
 		console.info('btn_PreviousPage');
 		console.info('valCurrentPageIndex = ', valCurrentPageIndex);
@@ -100,42 +73,8 @@ $(function() {
 		pageBtnHandler(valCurrentPageIndex < valTotalPageSize, 'next');
 	});
 
-	// do Search
-	$('#searchBtn').click(function() {
+	var getListCount = function() {
 		
-		valStartDate = $('#startDate').val();
-		valEndDate = $('#endDate').val();
-		valMobile = $('#mobileInput').val();
-		valInsertUser = $('#insertUserInput').val();
-		valGroupTag = elePnpBlockTagSelector.options[elePnpBlockTagSelector.selectedIndex].value;
-		valBlockEnable = elePnpBlockStatusSelector.options[elePnpBlockStatusSelector.selectedIndex].value;
-		
-//		valGroupTag = $('#pnpBlockTagSelector option:selected').val();
-//		valBlockEnable = $('#pnpBlockStatusSelector option:selected').val();
-		
-		if (!valStartDate || valStartDate == 'YYYY-MM-DD') {
-			valStartDate = "";
-		}
-	
-		if (!valEndDate || valEndDate == 'YYYY-MM-DD') {
-			valEndDate = "";
-		}
-		
-		if (valStartDate == "" && valEndDate != "") {
-			valStartDate = valEndDate;
-		}
-		else if (valEndDate == "" && valStartDate != "") {
-			valEndDate = valStartDate;
-		}
-		
-		if (!valGroupTag || valGroupTag == "未設定標籤") {
-			valGroupTag = " ";
-		}
-
-		if (!valBlockEnable || valBlockEnable == "全部") {
-			valBlockEnable = " ";
-		}
-
 		console.info('valStartDate = ', valStartDate);
 		console.info('valEndDate = ', valEndDate);
 		console.info('valMobile = ', valMobile);
@@ -143,10 +82,6 @@ $(function() {
 		console.info('valGroupTag = ', valGroupTag);
 		console.info('valBlockEnable = ', valBlockEnable);
 
-		if (!dataValidate()) {
-			return false;
-		}
-		
 		$('.LyMain').block($.BCS.PnpBlock_dataLoading);
 		
 		// Get PNP Black List Count
@@ -165,8 +100,6 @@ $(function() {
 			
 		}).done(function(response) {
 			console.info('response:', response);
-			
-			isSearchData = true;
 			
 			var blockSendHistoryCount = response;
 			console.info('blockSendHistoryCount = ', blockSendHistoryCount);
@@ -203,18 +136,14 @@ $(function() {
 			
 			$('.LyMain').unblock();
 		});
-	});
+	};
 
 	$('#exportBtn').click(function() {
 
 		$('.LyMain').block($.BCS.blockMsgRead);
 		
 		if (!hasData) {
-			if (!isSearchData) {
-				alert("很抱歉，您尚未進行資料查詢，無法匯出資料！\n請先進行資料查詢，謝謝。")
-			} else {
-				alert("目前無資料可匯出！\n請重新進行查詢，謝謝。")
-			}
+			alert("很抱歉，目前該用戶無資料可匯出！\n請返回排除發送中名單列表頁面重新進行選擇，謝謝。")
 			
 			$('.LyMain').unblock();
 			return;
@@ -235,18 +164,6 @@ $(function() {
 
 		$('.LyMain').unblock();
 	});
-	
-	var dataValidate = function() {
-		valStartDate = $('#startDate').val();
-		valEndDate = $('#endDate').val();
-		
-		if (moment(valStartDate).isAfter(moment(valEndDate))) {
-			alert('更新時間設定異常 ( 起始時間不可大於結束時間 )');
-			return false;
-		}
-
-		return true;
-	};
 	
 	var loadData = function() {
 		
@@ -330,82 +247,9 @@ $(function() {
 		originalTable = $('#tableBody').clone(true);
 		
 		cleanList();
-		
-		loadAndSetBlockTagList();
-		
-		/* 設定預設的開始及結束時間 */
-//		valStartDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');
-//		
-//		valStartDate = moment(new Date()).format('YYYY-MM-DD');
-//		valEndDate = moment(new Date()).format('YYYY-MM-DD');
-//		console.info('initPage : valStartDate = ', valStartDate);
-//		console.info('initPage : valEndDate = ', valEndDate);
-//		$('#startDate').val(valStartDate);
-//		$('#endDate').val(valEndDate);
 	};
 
-	/* 更新客群標籤下拉選單 */
-	var func_optionPnpBlockTagSelectChanged = function(){
-		var selectValue = $(this).find('option:selected').text();
-		console.info('func_optionPnpBlockTagSelectChanged selectValue = ', selectValue);
-		
-		$(this).closest('.optionGuestLabel').find('.optionLabelGuestLabel').html(selectValue);
-	};
 	
-	/* 更新狀態下拉選單 */
-	var func_optionPnpBlockStatusSelectChanged = function(){
-		var selectValue = $(this).find('option:selected').text();
-		console.info('func_optionPnpBlockStatusSelectChanged selectValue = ', selectValue);
-		
-		$(this).closest('.optionStatus').find('.optionLabelStatus').html(selectValue);
-	};
-
-	$('.optionSelectStatus').change(func_optionPnpBlockStatusSelectChanged);
-	
-	/* 載入PNP排除發送名單客群標籤列表 */
-	var loadAndSetBlockTagList = function() {
-
-		$('.LyMain').block($.BCS.PnpBlock_loadTagList);
-		
-		// Get PNP Block Tag List
-		$.ajax({
-			type : 'POST',
-			url : bcs.bcsContextPath + '/pnpEmployee/qryPNPBlockGTagList',
-			contentType : 'application/json;charset=UTF-8',
-			data : JSON.stringify({
-				inActive : 0
-			})
-		}).done(function(response) {
-//			console.info('response = ', response);
-//			console.log('JSON.stringify(response) = ', JSON.stringify(response));
-			
-			if (response.length == 0) {
-				return false;
-			}
-			
-			$.each(response, function(i, o){		
-//				console.info('qryPNPBlockGTagList : o = ', JSON.stringify(o));
-				
-				if (o.groupTag == "" || o.groupTag == null || o.groupTag == " ") {
-					return true;
-				}
-				
-				var opt = document.createElement('option');
-				opt.innerHTML = o.groupTag;
-				
-				elePnpBlockTagSelector.appendChild(opt);
-			});
-
-			$('.optionSelectGuestLabel').change(func_optionPnpBlockTagSelectChanged);
-			
-			$('.LyMain').unblock();
-			
-		}).fail(function(response) {
-			console.info(response);
-			$.FailResponse(response);
-			$('.LyMain').unblock();
-		});
-	};
-
 	initPage();
+	getListCount();
 });

@@ -80,8 +80,10 @@ import java.util.Date;
 )
 public class PNPBlockHistoryList {
 
+
     @Id
-    // MOBILE, S.UID, MODIFY_REASON, S.MODIFY_TIME, BLOCK_ENABLE, GROUP_TAG, INSERT_USER
+    @Column(name = "SEQ_ID", columnDefinition = "BIGINT")
+    private String seqId;
 
     @Column(name = "MOBILE", columnDefinition = "VARCHAR(15)")
     private String mobile;

@@ -276,6 +276,21 @@ $(function() {
 			return;
 		}
 		
+		if (!valStartDate || valStartDate == 'YYYY-MM-DD') {
+			valStartDate = "";
+		}
+	
+		if (!valEndDate || valEndDate == 'YYYY-MM-DD') {
+			valEndDate = "";
+		}
+		
+		if (valStartDate == "" && valEndDate != "") {
+			valStartDate = valEndDate;
+		}
+		else if (valEndDate == "" && valStartDate != "") {
+			valEndDate = valStartDate;
+		}
+		
 		var getUrl = bcs.bcsContextPath + '/pnpEmployee/exportPNPBlockListReportExcel?'
 										+ 'startDate=' + valStartDate 
 										+ '&endDate=' + valEndDate 
@@ -293,9 +308,6 @@ $(function() {
 	});
 	
 	var dataValidate = function() {
-		startDate = $('#startDate').val();
-		endDate = $('#endDate').val();
-		
 		if (moment(startDate).isAfter(moment(endDate))) {
 			alert('更新時間設定異常 ( 起始時間不可大於結束時間 )');
 			return false;
@@ -317,10 +329,20 @@ $(function() {
 	}
 
 	var loadData = function() {
-
-
-//		console.info('valStartDate = ', valStartDate);
-//		console.info('valEndDate = ', valEndDate);
+		if (!valStartDate || valStartDate == 'YYYY-MM-DD') {
+			valStartDate = "";
+		}
+	
+		if (!valEndDate || valEndDate == 'YYYY-MM-DD') {
+			valEndDate = "";
+		}
+		
+		if (valStartDate == "" && valEndDate != "") {
+			valStartDate = valEndDate;
+		}
+		else if (valEndDate == "" && valStartDate != "") {
+			valEndDate = valStartDate;
+		}
 		
 		// Get PNP Black List
 		$.ajax({

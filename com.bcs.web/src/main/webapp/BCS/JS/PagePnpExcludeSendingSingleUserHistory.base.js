@@ -250,7 +250,6 @@ $(function() {
 		cleanList();
 	};
 
-	
 	initPage();
 	getListCount();
 });

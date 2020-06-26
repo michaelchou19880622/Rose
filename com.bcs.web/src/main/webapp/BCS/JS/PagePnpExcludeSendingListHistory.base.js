@@ -105,13 +105,13 @@ $(function() {
 		
 		valStartDate = $('#startDate').val();
 		valEndDate = $('#endDate').val();
+		console.info('1-1 valStartDate = ', valStartDate);
+		console.info('1-1 valEndDate = ', valEndDate);
+		
 		valMobile = $('#mobileInput').val();
 		valInsertUser = $('#insertUserInput').val();
 		valGroupTag = elePnpBlockTagSelector.options[elePnpBlockTagSelector.selectedIndex].value;
 		valBlockEnable = elePnpBlockStatusSelector.options[elePnpBlockStatusSelector.selectedIndex].value;
-		
-//		valGroupTag = $('#pnpBlockTagSelector option:selected').val();
-//		valBlockEnable = $('#pnpBlockStatusSelector option:selected').val();
 		
 		if (!valStartDate || valStartDate == 'YYYY-MM-DD') {
 			valStartDate = "";
@@ -237,8 +237,6 @@ $(function() {
 	});
 	
 	var dataValidate = function() {
-		valStartDate = $('#startDate').val();
-		valEndDate = $('#endDate').val();
 		
 		if (moment(valStartDate).isAfter(moment(valEndDate))) {
 			alert('更新時間設定異常 ( 起始時間不可大於結束時間 )');

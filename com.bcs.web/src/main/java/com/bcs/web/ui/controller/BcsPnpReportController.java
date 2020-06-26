@@ -735,8 +735,8 @@ public class BcsPnpReportController {
 		log.info("exportPNPBlockListHistoryReportExcel");
 		
 		try { 
-	        
-	        final PnpSendBlockParam pnpSendBlockParam = new PnpSendBlockParam();
+			final PnpSendBlockParam pnpSendBlockParam = new PnpSendBlockParam();
+	        pnpSendBlockParam.setPage(1);
 	        pnpSendBlockParam.setStartDate(DataUtils.convStrToDate(startDate, "yyyy-MM-dd"));
 	        pnpSendBlockParam.setEndDate(DataUtils.convStrToDate(endDate, "yyyy-MM-dd"));
 	        pnpSendBlockParam.setMobile(mobile);
@@ -745,12 +745,14 @@ public class BcsPnpReportController {
 	        pnpSendBlockParam.setBlockEnable(blockEnable);
 	        pnpSendBlockParam.setRole(customUser.getRole());
 			
-	        log.info("1-1 pnpSendBlockParam.getStartDate() = {}", pnpSendBlockParam.getStartDate());
-	        log.info("1-2 pnpSendBlockParam.getEndDate() = {}", pnpSendBlockParam.getEndDate());
-	        log.info("1-3 pnpSendBlockParam.getMobile() = {}", pnpSendBlockParam.getMobile());
-	        log.info("1-4 pnpSendBlockParam.getInsertUser() = {}", pnpSendBlockParam.getInsertUser());
-	        log.info("1-5 pnpSendBlockParam.getBlockEnable() = {}", pnpSendBlockParam.getBlockEnable());
-	        log.info("1-6 pnpSendBlockParam.getGroupTag() = {}", pnpSendBlockParam.getGroupTag());
+			final Long pnpBlockHistoryCount = pnpReportService.getPnpBlockHistoryCount(customUser, pnpSendBlockParam);
+			log.info("pnpBlockHistoryCount = {}", pnpBlockHistoryCount);
+			log.info("pnpBlockHistoryCount.intValue() = {}", pnpBlockHistoryCount.intValue());
+			log.info("Integer.valueOf(pnpBlockHistoryCount.intValue()) = {}", Integer.valueOf(pnpBlockHistoryCount.intValue()));
+			
+	        pnpSendBlockParam.setPageCount(Integer.valueOf(pnpBlockHistoryCount.intValue()));
+
+	        log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
 			
 			final List<PNPBlockHistoryList> result = pnpReportService.qryPnpBlockHistoryList(customUser, pnpSendBlockParam);
 			log.info(DataUtils.toPrettyJsonUseJackson(result));

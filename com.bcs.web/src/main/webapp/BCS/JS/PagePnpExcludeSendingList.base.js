@@ -204,21 +204,6 @@ $(function() {
 		
 		$('.LyMain').block($.BCS.PnpBlock_dataLoading);
 		
-		
-//	    private Date startDate;
-//	    private Date endDate;
-//	    private String role;
-//	    private Integer page = 1;
-//	    private Integer pageCount = 5;
-//	    private String mobile;
-//	    private String insertUser;
-//	    private String groupTag;
-//	    private String insertDate;
-//	    private String insertTime;
-//	    private String modify_reason;
-//	    private int blockEnable;
-//	    private Integer inActive;
-		
 		// Get PNP Black List Count
 		$.ajax({
 			type : 'POST',
@@ -296,8 +281,9 @@ $(function() {
 										+ '&endDate=' + valEndDate 
 										+ '&mobile=' + valMobile
 										+ '&insertUser=' + valInsertUser 
-										+ '&groupTag=' + valGroupTag;
-		
+										+ '&groupTag=' + valGroupTag 
+										+ '&blockEnable=-1';
+
 		getUrl = encodeURI(getUrl);
 //		console.info('getUrl = ', getUrl);
 		

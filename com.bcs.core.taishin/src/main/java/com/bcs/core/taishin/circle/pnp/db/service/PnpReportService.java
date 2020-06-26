@@ -599,8 +599,6 @@ public class PnpReportService {
     @SuppressWarnings("unchecked")
     public List<PNPBlockHistoryList> qryPnpBlockHistoryList(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
 
-        log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
-
         pnpSendBlockParam.setRole(customUser.getRole());
 
         EntityManager entityManager = entityManagerProvider.getEntityManager();
@@ -647,8 +645,6 @@ public class PnpReportService {
      */
     @SuppressWarnings("unchecked")
     public long getPnpBlockHistoryCount(@CurrentUser CustomUser customUser, final PnpSendBlockParam pnpSendBlockParam) {
-
-        log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
 
         pnpSendBlockParam.setRole(customUser.getRole());
 

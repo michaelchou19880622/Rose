@@ -226,7 +226,7 @@ $(function() {
 										+ '&mobile=' + valMobile
 										+ '&insertUser=' + valInsertUser 
 										+ '&groupTag=' + valGroupTag
-										+ '&blockEnable' + valBlockEnable;
+										+ '&blockEnable=' + valBlockEnable;
 		
 		getUrl = encodeURI(getUrl);
 //		console.info('getUrl = ', getUrl);

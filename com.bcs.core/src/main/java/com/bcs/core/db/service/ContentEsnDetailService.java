@@ -26,6 +26,11 @@ public class ContentEsnDetailService {
 		contentEsnDetailRepository.save(detail);
 	}
 
+	public void save(List<ContentEsnDetail> detailList){
+		contentEsnDetailRepository.save(detailList);
+	}
+
+	
 	public List<ContentEsnDetail> findByEsnId(String esnId){
 	    return contentEsnDetailRepository.findByEsnId(esnId);
 	}

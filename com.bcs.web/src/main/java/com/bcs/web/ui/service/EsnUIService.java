@@ -123,7 +123,11 @@ public class EsnUIService {
             public void run() {
 
                 if (!esnList.isEmpty()) {
+        			logger.info("Started a new thread to create content ESN details , ESNID = " + esnId);
+        	        
                     // 建立細項檔
+        			List<ContentEsnDetail> detailList = new ArrayList<>();
+        			int i = 0;
                     for (Map<String, String> map : esnList) {
 
                         if(StringUtils.isNotBlank(map.get("UID")) && StringUtils.isNotBlank(map.get("ESN"))) {
@@ -132,10 +136,25 @@ public class EsnUIService {
                             detail.setEsn(map.get("ESN"));
                             detail.setUid(map.get("UID"));
                             detail.setStatus(ContentEsnDetail.STATUS_READY);
-                            contentEsnDetailService.save(detail);
+//                            contentEsnDetailService.save(detail);                            
+                            detailList.add(detail);
+                            i ++;
+                            /* 每一千筆處理一次 */
+                            if (i % 1000 == 0) {
+//                            	logger.info("detailList size:" + detailList.size());
+                                contentEsnDetailService.save(detailList);
+                                detailList.clear();
+                            }   
                         }
                     }
+                    /* Update userEventSet */
+                    if (!detailList.isEmpty()) {
+                    	logger.info("The Last detailList size is = " + detailList.size());
+                        contentEsnDetailService.save(detailList);
+                        detailList.clear();
+                    }        
 
+        			logger.info("Finished a new thread to create content ESN details , ESNID = " + esnId);
                     contentEsnMainService.updateStatusByEsnId(ContentEsnMain.STATUS_ACTIVE, esnId);
                 }
             }

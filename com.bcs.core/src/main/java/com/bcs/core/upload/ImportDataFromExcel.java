@@ -192,7 +192,7 @@ public class ImportDataFromExcel {
 	public List<Map<String, String>> importCSVDataKeyValueList(InputStream inp) throws Exception { 
 		List<Map<String, String>> dataListMap = new ArrayList<>();
         Reader csvReader = new BufferedReader(new InputStreamReader(inp, "UTF-8"));
-        Iterable<CSVRecord> csvRecords = CSVFormat.EXCEL.withHeader().withTrim().parse(csvReader);
+        Iterable<CSVRecord> csvRecords = CSVFormat.EXCEL.withHeader().withTrim().withQuote(null).parse(csvReader);
         for (CSVRecord record : csvRecords) {
         	Iterator it = record.toMap().entrySet().iterator();  
         	Map <String,String> columDataMap = new  HashMap<String, String>();

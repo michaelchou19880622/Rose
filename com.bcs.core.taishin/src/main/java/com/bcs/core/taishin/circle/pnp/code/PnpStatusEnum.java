@@ -68,7 +68,8 @@ public enum PnpStatusEnum {
     /* ========================================STATUS================================================*/
     PROCESS("PROCESS", "處理中"),
     SENDING("SENDING", "發送中"),
-    COMPLETE("COMPLETE", "已完成");
+    COMPLETE("COMPLETE", "已完成"),
+    EXPIRED("EXPIRED", "已逾期");
 
     /**
      * Value

@@ -1,23 +1,17 @@
 package com.bcs.web.ui.controller;
 
-import com.bcs.core.aspect.annotation.WebServiceLog;
-import com.bcs.core.report.builder.ExportExcelBuilder;
-import com.bcs.core.report.service.ExportService;
-import com.bcs.core.resource.CoreConfigReader;
-import com.bcs.core.taishin.circle.pnp.code.PnpFtpSourceEnum;
-import com.bcs.core.taishin.circle.pnp.code.PnpStatusEnum;
-import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailReport;
-import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailReportParam;
-import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptDetail;
-import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptParam;
-import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptSummary;
-import com.bcs.core.taishin.circle.pnp.db.service.PnpReportService;
-import com.bcs.core.taishin.circle.pnp.scheduler.PnpSMSMsgService;
-import com.bcs.core.utils.DataUtils;
-import com.bcs.core.web.security.CurrentUser;
-import com.bcs.core.web.security.CustomUser;
-import com.bcs.core.web.ui.page.enums.BcsPageEnum;
-import lombok.extern.slf4j.Slf4j;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,18 +25,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.bcs.core.aspect.annotation.WebServiceLog;
+import com.bcs.core.report.builder.ExportExcelBuilder;
+import com.bcs.core.report.service.ExportService;
+import com.bcs.core.resource.CoreConfigReader;
+import com.bcs.core.taishin.circle.pnp.code.PnpFtpSourceEnum;
+import com.bcs.core.taishin.circle.pnp.code.PnpStatusEnum;
+import com.bcs.core.taishin.circle.pnp.db.entity.PNPBlockGTag;
+import com.bcs.core.taishin.circle.pnp.db.entity.PNPBlockHistoryList;
+import com.bcs.core.taishin.circle.pnp.db.entity.PNPBlockSendList;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailReport;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailReportParam;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpSendBlockParam;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptDetail;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptParam;
+import com.bcs.core.taishin.circle.pnp.db.entity.PnpStsRptSummary;
+import com.bcs.core.taishin.circle.pnp.db.service.PnpReportService;
+import com.bcs.core.taishin.circle.pnp.scheduler.PnpSMSMsgService;
+import com.bcs.core.utils.DataUtils;
+import com.bcs.core.web.security.CurrentUser;
+import com.bcs.core.web.security.CustomUser;
+import com.bcs.core.web.ui.page.enums.BcsPageEnum;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
-
-import java.io.Console;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Bcs pnp report controller.
@@ -54,7 +59,11 @@ import java.util.Map;
 @Controller
 @RequestMapping("/bcs/pnpEmployee")
 public class BcsPnpReportController {
+	
+    @Autowired
     private final PnpReportService pnpReportService;
+    
+    @Autowired
     private final PnpSMSMsgService pnpSMSMsgService;
 
     /**
@@ -539,19 +548,300 @@ public class BcsPnpReportController {
         }
     }
     
-    // PNP黑名單管理 - 排除發送中名單列表
+    /* PNP黑名單管理 - 排除發送中名單列表頁面 */
     @WebServiceLog
     @GetMapping("/pnpExcludeSendingListPage")
     public String pnpExcludeSendingListPage() {
-        log.info("pnpExcludeSendingListPage");
+        log.debug("pnpExcludeSendingListPage");
         return BcsPageEnum.PNP_EXCLUDE_SENDING_LIST_PAGE.toString();
     }
     
-    // PNP黑名單管理 - 排除發送名單歷程列表
+    /* PNP黑名單管理 - 排除發送名單單筆用戶歷程紀錄頁面 */
+    @WebServiceLog
+    @GetMapping("/pnpExcludeSendingSingleUserHistoryPage")
+    public String pnpExcludeSendingSingleUserHistoryPage() {
+        log.debug("pnpExcludeSendingSingleUserHistoryPage");
+        return BcsPageEnum.PNP_EXCLUDE_SENDING_SINGLE_USER_HISTORY_PAGE.toString();
+    }
+    
+    /* PNP黑名單管理 - 排除發送名單歷程列表頁面 */
     @WebServiceLog
     @GetMapping("/pnpExcludeSendingListHistoryPage")
     public String pnpExcludeSendingListHistoryPage() {
-        log.info("pnpExcludeSendingListHistoryPage");
+        log.debug("pnpExcludeSendingListHistoryPage");
         return BcsPageEnum.PNP_EXCLUDE_SENDING_LIST_HISTORY_PAGE.toString();
     }
+
+	/* 取得排除發送名單總數 */
+	@WebServiceLog
+	@PostMapping(value = "/getPnpBlockSendCount", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> getPnpBlockSendCount(HttpServletRequest request, HttpServletResponse response, 
+														@CurrentUser final CustomUser customUser,
+														@RequestBody final PnpSendBlockParam pnpSendBlockParam) {
+		log.info("getPnpBlockSendCount");
+		log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
+		
+		try { 
+			final Long pnpBlockSendCount = pnpReportService.getPnpBlockSendCount(customUser, pnpSendBlockParam);
+			log.info("pnpBlockSendCount = {}", pnpBlockSendCount);
+			return new ResponseEntity<>(pnpBlockSendCount, HttpStatus.OK);
+		} catch (final Exception e) {
+			log.error("Exception", e);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+    
+	/* 取得排除發送名單列表 */
+	@WebServiceLog
+	@PostMapping(value = "/getPnpExcludeSendingList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> getPnpExcludeSendingList(HttpServletRequest request, HttpServletResponse response, 
+														@CurrentUser final CustomUser customUser,
+														@RequestBody final PnpSendBlockParam pnpSendBlockParam) {
+		log.info("getPnpExcludeSendingList");
+        log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
+		
+		try { 
+			final List<PNPBlockSendList> result = pnpReportService.qryPnpBlockSendList(customUser, pnpSendBlockParam);
+//			log.info(DataUtils.toPrettyJsonUseJackson(result));
+			return new ResponseEntity<>(result, HttpStatus.OK);
+		} catch (final Exception e) {
+			log.error("Exception", e);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	/* 新增/取消排除發送名單狀態 */
+	@WebServiceLog
+	@PostMapping(value = "/updPnpBlockSend", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> updPnpBlockSend(HttpServletRequest request, HttpServletResponse response, 
+														@CurrentUser final CustomUser customUser,
+														@RequestBody final PnpSendBlockParam pnpSendBlockParam) {
+		log.info("updPnpBlockSend");
+        log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
+		
+		try { 
+			final Long historyRefId = pnpReportService.updPnpBlockSend(customUser, pnpSendBlockParam);
+			log.info("historyRefId = {}", historyRefId);
+			return new ResponseEntity<>(historyRefId, HttpStatus.OK);
+		} catch (final Exception e) {
+			log.error("Exception = {}", e);
+			
+			if (e instanceof SQLException) {
+				log.error("SQLException = {}", e);
+				
+				if (e.toString().contains("duplicate key")) {
+					return new ResponseEntity<>("duplicate key", HttpStatus.INTERNAL_SERVER_ERROR);
+				}
+			}
+			
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	/* 取得客群標籤列表 */
+	@WebServiceLog
+	@PostMapping(value = "/qryPNPBlockGTagList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> qryPNPBlockGTagList(HttpServletRequest request, HttpServletResponse response, 
+														@CurrentUser final CustomUser customUser,
+														@RequestBody final PnpSendBlockParam pnpSendBlockParam) {
+		log.info("qryPNPBlockGTagList");
+        log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
+		
+		try { 
+			final List<PNPBlockGTag> lstPnpBlockGTags = pnpReportService.qryPNPBlockGTagList(customUser, pnpSendBlockParam);
+			
+			return new ResponseEntity<>(lstPnpBlockGTags, HttpStatus.OK);
+		} catch (final Exception e) {
+			log.error("Exception", e);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	/* 匯出排除發送中名單列表EXCEL */
+	@WebServiceLog(action = "Download")
+    @GetMapping("/exportPNPBlockListReportExcel")
+    @ResponseBody
+    public void exportPNPBlockListReportExcel(HttpServletRequest request, HttpServletResponse response, @CurrentUser final CustomUser customUser, 
+    			@RequestParam(required = false) final String startDate, @RequestParam(required = false) String endDate,
+				@RequestParam(required = false) final String mobile, @RequestParam(required = false) final String insertUser,
+				@RequestParam(required = false) final String groupTag) {
+		
+		log.info("exportPNPBlockListReportExcel");
+		
+		try { 
+	        
+	        final PnpSendBlockParam pnpSendBlockParam = new PnpSendBlockParam();
+	        pnpSendBlockParam.setPage(1);
+	        pnpSendBlockParam.setStartDate(DataUtils.convStrToDate(startDate, "yyyy-MM-dd"));
+	        pnpSendBlockParam.setEndDate(DataUtils.convStrToDate(endDate, "yyyy-MM-dd"));
+	        pnpSendBlockParam.setMobile(mobile);
+	        pnpSendBlockParam.setInsertUser(insertUser);
+	        pnpSendBlockParam.setGroupTag(groupTag);
+	        pnpSendBlockParam.setRole(customUser.getRole());
+
+	        log.info("getPnpBlockSendCount : pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
+	        
+			final Long pnpBlockSendCount = pnpReportService.getPnpBlockSendCount(customUser, pnpSendBlockParam);
+			log.info("pnpBlockSendCount = {}", pnpBlockSendCount);
+			
+	        pnpSendBlockParam.setPageCount(Integer.valueOf(pnpBlockSendCount.intValue()));
+	        
+	        log.info("qryPnpBlockSendList : pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
+			
+			final List<PNPBlockSendList> result = pnpReportService.qryPnpBlockSendList(customUser, pnpSendBlockParam);
+			log.info(DataUtils.toPrettyJsonUseJackson(result));
+			
+			final ExportExcelBuilder builder = ExportExcelBuilder.createWorkBook().setSheetName("PNPBlockSendList");
+			
+            final List<Map<Integer, String>> allMapList = new ArrayList<Map<Integer,String>>();
+            allMapList.add(getPnpBlockHeaderMap(7));
+            result.forEach(r -> allMapList.add(getPnpBlockBodyMap(r, 7)));
+			log.info(DataUtils.toPrettyJsonUseJackson(allMapList));
+            
+            allMapList.forEach(rowData -> builder.createRow(allMapList.indexOf(rowData)).setRowValue(rowData));
+
+            builder.setAllColumnAutoWidth().setOutputPath(CoreConfigReader.getString("file.path"))
+                    .setOutputFileName(String.format("PNPBlockSendListReport_%s.xlsx", DataUtils.formatDateToString(new Date(), "yyyy-MM-dd-HHmmss")));
+            log.info("Builder: {}", DataUtils.toPrettyJsonUseJackson(builder));
+            
+            final ExportService exportService = new ExportService();
+            exportService.exportExcel(response, builder);
+		} catch (final Exception e) {
+			log.error("Exception", e);
+		}
+    }
+	
+	/* 匯出排除發送中名單歷程記錄列表EXCEL */
+	@WebServiceLog(action = "Download")
+    @GetMapping("/exportPNPBlockListHistoryReportExcel")
+    @ResponseBody
+    public void exportPNPBlockListHistoryReportExcel(HttpServletRequest request, HttpServletResponse response, @CurrentUser final CustomUser customUser, 
+    			@RequestParam(required = false) final String startDate, @RequestParam(required = false) String endDate,
+				@RequestParam(required = false) final String mobile, @RequestParam(required = false) final String insertUser,
+				@RequestParam(required = false) final String groupTag, @RequestParam(required = false) final int blockEnable) {
+		
+		log.info("exportPNPBlockListHistoryReportExcel");
+		
+		try { 
+			final PnpSendBlockParam pnpSendBlockParam = new PnpSendBlockParam();
+	        pnpSendBlockParam.setPage(1);
+	        pnpSendBlockParam.setStartDate(DataUtils.convStrToDate(startDate, "yyyy-MM-dd"));
+	        pnpSendBlockParam.setEndDate(DataUtils.convStrToDate(endDate, "yyyy-MM-dd"));
+	        pnpSendBlockParam.setMobile(mobile);
+	        pnpSendBlockParam.setInsertUser(insertUser);
+	        pnpSendBlockParam.setGroupTag(groupTag);
+	        pnpSendBlockParam.setBlockEnable(blockEnable);
+	        pnpSendBlockParam.setRole(customUser.getRole());
+	        log.info("getPnpBlockHistoryCount : pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
+			
+			final Long pnpBlockHistoryCount = pnpReportService.getPnpBlockHistoryCount(customUser, pnpSendBlockParam);
+			log.info("pnpBlockHistoryCount = {}", pnpBlockHistoryCount);
+			
+	        pnpSendBlockParam.setPageCount(Integer.valueOf(pnpBlockHistoryCount.intValue()));
+
+	        log.info("qryPnpBlockHistoryList : pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
+			
+			final List<PNPBlockHistoryList> result = pnpReportService.qryPnpBlockHistoryList(customUser, pnpSendBlockParam);
+			log.info(DataUtils.toPrettyJsonUseJackson(result));
+			
+			final ExportExcelBuilder builder = ExportExcelBuilder.createWorkBook().setSheetName("PNPBlockListHistory");
+
+            final List<Map<Integer, String>> allMapList = new LinkedList<>();
+            allMapList.add(getPnpBlockHeaderMap(7));
+            result.forEach(r -> allMapList.add(getPnpBlockHistoryBodyMap(r, 7)));
+            allMapList.forEach(rowData -> builder.createRow(allMapList.indexOf(rowData)).setRowValue(rowData));
+
+            builder.setAllColumnAutoWidth().setOutputPath(CoreConfigReader.getString("file.path"))
+                    .setOutputFileName(String.format("PNPBlockListHistoryReport_%s.xlsx", DataUtils.formatDateToString(new Date(), "yyyy-MM-dd-HHmmss")));
+            log.info("Builder: {}", DataUtils.toPrettyJsonUseJackson(builder));
+            
+            final ExportService exportService = new ExportService();
+            exportService.exportExcel(response, builder);
+		} catch (final Exception e) {
+			log.error("Exception", e);
+		}
+    }
+	
+	/* 設定排除發送中名單列表EXCEL HEADER */
+    private Map<Integer, String> getPnpBlockHeaderMap(final int columnSize) {
+        final Map<Integer, String> row = new LinkedHashMap<>(columnSize);
+        row.put(0, "手機門號");
+        row.put(1, "LINE UID");
+        row.put(2, "原因");
+        row.put(3, "更新時間");
+        row.put(4, "狀態");
+        row.put(5, "客群標籤");
+        row.put(6, "異動人員");
+        return row;
+    }
+
+	/* 設定排除發送中名單列表EXCEL BODY */
+    private Map<Integer, String> getPnpBlockBodyMap(final PNPBlockSendList r, final int columnSize) {
+        final Map<Integer, String> row = new LinkedHashMap<>(columnSize);
+        row.put(0, r.getPhone());
+        row.put(1, r.getUid());
+        row.put(2, r.getModifyReason());
+        row.put(3, DataUtils.convDateToStr(r.getCreateTime(), "yyyy-MM-dd HH:mm:ss.sss"));
+        row.put(4, (r.getBlockEnable() == 1)? "排除中" : "取消排除");
+        row.put(5, r.getGroupTag());
+        row.put(6, r.getInsertUser());
+        return row;
+    }
+
+	/* 設定排除發送中名單歷程記錄列表EXCEL BODY */
+    private Map<Integer, String> getPnpBlockHistoryBodyMap(final PNPBlockHistoryList r, final int columnSize) {
+        final Map<Integer, String> row = new LinkedHashMap<>(columnSize);
+        row.put(0, r.getMobile());
+        row.put(1, r.getUid());
+        row.put(2, r.getModifyReason());
+        row.put(3, DataUtils.convDateToStr(r.getModifyDateTime(), "yyyy-MM-dd HH:mm:ss.sss"));
+        row.put(4, (r.getBlockEnable() == 1)? "排除中" : "取消排除");
+        row.put(5, r.getGroupTag());
+        row.put(6, r.getInsertUser());
+        return row;
+    }
+
+	/* 取得排除發送名單歷程記錄總數 */
+	@WebServiceLog
+	@PostMapping(value = "/getPnpBlockHistoryCount", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> getPnpBlockHistoryCount(HttpServletRequest request, HttpServletResponse response, 
+														@CurrentUser final CustomUser customUser,
+														@RequestBody final PnpSendBlockParam pnpSendBlockParam) {
+		log.info("getPnpBlockHistoryCount");
+        log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
+		
+		try { 
+			final Long pnpBlockHistoryCount = pnpReportService.getPnpBlockHistoryCount(customUser, pnpSendBlockParam);
+			log.info("pnpBlockHistoryCount = {}", pnpBlockHistoryCount);
+			return new ResponseEntity<>(pnpBlockHistoryCount, HttpStatus.OK);
+		} catch (final Exception e) {
+			log.error("Exception", e);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	/* 取得排除發送名單歷程列表 */
+	@WebServiceLog
+	@PostMapping(value = "/getPnpExcludeSendingHistoryList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> getPnpExcludeSendingHistoryList(HttpServletRequest request, HttpServletResponse response, 
+														@CurrentUser final CustomUser customUser,
+														@RequestBody final PnpSendBlockParam pnpSendBlockParam) {
+		log.info("getPnpExcludeSendingHistoryList");
+        log.info("pnpSendBlockParam.toString() = {}", pnpSendBlockParam.toString());
+		
+		try { 
+			final List<PNPBlockHistoryList> result = pnpReportService.qryPnpBlockHistoryList(customUser, pnpSendBlockParam);
+			log.info(DataUtils.toPrettyJsonUseJackson(result));
+			return new ResponseEntity<>(result, HttpStatus.OK);
+		} catch (final Exception e) {
+			log.error("Exception", e);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 }

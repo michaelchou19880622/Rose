@@ -19,9 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
-
-import static org.hamcrest.CoreMatchers.containsString;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -102,20 +99,21 @@ public class PnpPushMsgService {
 
         String procApName = DataUtils.getProcApName();
         for (PnpFtpSourceEnum type : PnpFtpSourceEnum.values()) {
-            log.info("Ftp source is {}", type.english);
+            log.info("ftp source is {}, ap_name: {}", type.english, procApName);
             try {
                 /* 1.Find all main */
                 List<PnpMain> allMainList = pnpRepositoryCustom.findAllMain(procApName, type);
                 if (allMainList.isEmpty()) {
+                    log.info("allmainList: {} is empty", type.english);
                     continue;
                 }
-
+                log.info("detailTable: {} forEach operation", type.english);
                 allMainList.forEach(main -> {
                     /* 2.Find all detail by main id */
 //                    int detailCount = pnpRepositoryCustom.getDetailCountByMainId(type, main.getPnpMainId());
                     List<PnpDetail> allDetailList = pnpRepositoryCustom.findAllDetail(main.getPnpMainId(), type);
                     int detailCount = allDetailList.size();
-                    log.info(String.format("detain Count : %s, detail Table : %s,  main id: %s", detailCount, type.detailTable,  main.getPnpMainId().toString()));
+                    log.info(String.format("detail count: %s, detail table: %s,  main id: %s", detailCount, type.detailTable,  main.getPnpMainId().toString()));
                     
                     if (detailCount > 0) {
 	                    List<PnpDetail> allDetailListAndUpdate = pnpRepositoryCustom.findAllDetailAndUpdateStatus(main.getPnpMainId(), type);
@@ -127,8 +125,15 @@ public class PnpPushMsgService {
 	                    
 	                    List<PnpDetail> filterDetailCompleteList = usePhoneFindDetailUid(allDetailList).stream()
 	                            .filter(detail -> Objects.equals((detail).getStatus(), PnpStatusEnum.COMPLETE.value))
-	                            .sorted(Comparator.comparing(PnpDetail::getPnpDetailId))
+                                .sorted(Comparator.comparing(PnpDetail::getPnpDetailId))
 	                            .collect(Collectors.toList());
+
+                        List<PnpDetail> filterDetailExpiredList = usePhoneFindDetailUid(allDetailList).stream()
+                                .filter(detail -> Objects.equals((detail).getStatus(), PnpStatusEnum.EXPIRED.value))
+                                .sorted(Comparator.comparing(PnpDetail::getPnpDetailId))
+                                .collect(Collectors.toList());
+
+                        filterDetailCompleteList.addAll(filterDetailExpiredList);
 	                    
 //	                    for (PnpDetail detail : filterDetailList) {
 //		                    log.info(String.format("Filter and Update Detail id: %s, detail status: %s, main id: %s",  detail.getPnpDetailId(), detail.getStatus(), main.getPnpMainId()));
@@ -150,7 +155,7 @@ public class PnpPushMsgService {
 	                    else if (filterDetailList.size() > 0){
 	                        main.setPnpDetails(filterDetailList);
 	                        /* 4.Tell akka */
-	                        log.info("Tell Akka Send BC main id: {} !!",  main.getPnpMainId());
+	                        log.info("Tell Akka Send BC, main id: {}",  main.getPnpMainId());
 	                        pnpAkkaService.tell(main);
 	                    }
 	                    else {
@@ -158,7 +163,7 @@ public class PnpPushMsgService {
 	                    }
                     }
                     else {
-	                    log.info("AllDetailList size is Empty in main id : {}", main.getPnpMainId());                    	
+	                    log.info("AllDetailList size is empty in main id : {}", main.getPnpMainId());
                     }
                     	
                 });

@@ -1,59 +1,24 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
 	xmlns:sec="http://www.springframework.org/security/tags"
-	th:with="strList = ${ {'/BCS/JS/PagePnpExcludeSendingListHistory.base.js'} }">
-<head th:replace="/BCS/Views/Common/Head :: head ('PNP Exclude Sending List History Page', ${strList})"></head>
+	th:with="strList = ${ {'/BCS/JS/PagePnpExcludeSendingSingleUserHistory.base.js'} }">
+<head th:replace="/BCS/Views/Common/Head :: head ('PNP Exclude Sending Single User History Page', ${strList})"></head>
 <body>
 	<header th:replace="/BCS/Views/Common/Header :: header"></header>
 	
 	<div class="LyContents">
-		<div th:replace="/BCS/Views/Common/Menu :: menu ('PagePnpExcludeSendingListHistory')"></div>
+		<div th:replace="/BCS/Views/Common/Menu :: menu ('PagePnpExcludeSendingList')"></div>
 		
 		<div class="LyMain" role="main" style="padding-right: 20px; padding-left: 20px;">
 			<form>
 				<section>
 					<header class="ContentHead">
-						<h3 class="CHTtl">排除發送名單歷程列表</h3>
+						<h3 class="CHTtl">排除發送名單單筆用戶歷程紀錄</h3>
 					</header>
 					
 					<div class="CHBtnSet">
 						<div class="CHLeft" style="width:100%;">
-	                    	<div>
-								<label style="display: inline-block; width: 80px;" class="param-label">手機門號：</label> 
-								<input class="customSearchInput" type="text" id="mobileInput" name="accountInput" value="" maxlength="30" />
-								<label style="display: inline-block; width: 80px; padding-left:10px" class="param-label">異動人員：</label> 
-								<input class="customSearchInput" type="text" id="insertUserInput" name="pccCodeInput" value="" maxlength="20" />
-								<label style="display: inline-block; width: 80px; padding-left:10px" class="param-label">狀　　態：</label> 
-                                <div class="optionStatus">
-                                    <div class="optionLabelStatus">全部</div>
-                                    <select id="pnpBlockStatusSelector" class="optionSelectStatus">
-                                        <option value="-1" selected>全部</option>
-                                        <option value="1">排除中</option>
-                                        <option value="0">取消排除</option>
-                                    </select>
-                                </div>
-                                
-								<input class="customBtn" id="searchBtn" style="float:right; width: 90px; cursor: pointer;" type="button" value="查詢">
-	                    	</div>
 							<div class="paramGroup" style="margin-top:8px;">
-								<label style="display: inline-block; width: 80px;" class="param-label">更新時間：</label>
-		                    	<div class="option pnpDate">
-									<input type="text" class="datepicker" id="startDate" placeholder="YYYY-MM-DD" style="font-size:10px;"/>
-								</div>
-		                       	<span>~</span>
-		                       	<div class="option pnpDate">
-									<input type="text" class="datepicker" id="endDate" placeholder="YYYY-MM-DD" style="font-size:10px;" />
-								</div>
-								
-								<label style="display: inline-block; width: 80px; padding-left:10px" class="param-label">客群標籤：</label> 
-                                <div class="optionGuestLabel">
-                                    <div class="optionLabelGuestLabel">全部</div>
-                                    <select id="pnpBlockTagSelector" class="optionSelectGuestLabel">
-                                        <option value="*" selected>全部</option>
-                                        <option value="" >未設定標籤</option>
-                                    </select>
-                                </div>
-								
 								<input class="customBtn" id="exportBtn" style="float:right; width: 90px; cursor: pointer;" type="button" value="匯出">
 							</div>
 						</div>

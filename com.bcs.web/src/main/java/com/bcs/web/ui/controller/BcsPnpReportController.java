@@ -692,6 +692,14 @@ public class BcsPnpReportController {
 	        pnpSendBlockParam.setInsertUser(insertUser);
 	        pnpSendBlockParam.setGroupTag(groupTag);
 	        pnpSendBlockParam.setRole(customUser.getRole());
+	        
+
+			final Long pnpBlockSendCount = pnpReportService.getPnpBlockSendCount(customUser, pnpSendBlockParam);
+			log.info("pnpBlockSendCount = {}", pnpBlockSendCount);
+			log.info("pnpBlockSendCount.intValue() = {}", pnpBlockSendCount.intValue());
+			log.info("Integer.valueOf(pnpBlockSendCount.intValue()) = {}", Integer.valueOf(pnpBlockSendCount.intValue()));
+			
+	        pnpSendBlockParam.setPageCount(Integer.valueOf(pnpBlockSendCount.intValue()));
 			
 	        log.info("1-1 pnpSendBlockParam.getStartDate() = {}", pnpSendBlockParam.getStartDate());
 	        log.info("1-2 pnpSendBlockParam.getEndDate() = {}", pnpSendBlockParam.getEndDate());

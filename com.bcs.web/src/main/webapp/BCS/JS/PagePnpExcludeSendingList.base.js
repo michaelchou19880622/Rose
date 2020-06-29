@@ -91,7 +91,12 @@ $(function() {
 		console.info('valModifyReasonInput = ', valModifyReasonInput);
 		
 		if (!modelDataValidate()) {
-			var aaa = alert("手機門號及原因皆為必填欄位，不得為空!\n請再次確認是否已填寫正確?");
+			alert("手機門號及原因皆為必填欄位，不得為空!\n請再次確認是否已填寫正確?");
+			return false;
+		}
+
+		if (!mobileFormatValidate()) {
+			alert("手機號碼格式錯誤，請重新輸入。\n正確格式為: 09XXXXXXXX");
 			return false;
 		}
 		
@@ -322,6 +327,18 @@ $(function() {
 		}
 		
 		if (!valModifyReasonInput || valModifyReasonInput == "") {
+			return false;
+		}
+		
+		return true;
+	}
+	
+
+	var mobileFormatValidate = function() {
+		let checkedMobile = valMobileInput.match(/((?=(09))[0-9]{10})$/g);
+		console.info('checkedMobile = ', checkedMobile);
+		
+		if (!checkedMobile || checkedMobile == null) {
 			return false;
 		}
 		

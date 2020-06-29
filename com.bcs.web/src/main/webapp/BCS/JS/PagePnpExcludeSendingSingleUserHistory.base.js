@@ -26,7 +26,7 @@ $(function() {
 	var valMobile = paramMobile;
 	var valInsertUser = "";
 	var valGroupTag = "*";
-	var valBlockEnable = 1;
+	var valBlockEnable = -1;
 	
 	var hasData = false;
 	
@@ -155,8 +155,7 @@ $(function() {
 										+ '&mobile=' + valMobile
 										+ '&insertUser=' + "" 
 										+ '&groupTag=' + valGroupTag
-//										+ '&blockEnable=' + valBlockEnable;
-										+ '&blockEnable=1';
+										+ '&blockEnable=' + valBlockEnable;
 		
 		getUrl = encodeURI(getUrl);
 //		console.info('getUrl = ', getUrl);

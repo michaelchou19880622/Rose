@@ -685,6 +685,7 @@ public class BcsPnpReportController {
 		try { 
 	        
 	        final PnpSendBlockParam pnpSendBlockParam = new PnpSendBlockParam();
+	        pnpSendBlockParam.setPage(1);
 	        pnpSendBlockParam.setStartDate(DataUtils.convStrToDate(startDate, "yyyy-MM-dd"));
 	        pnpSendBlockParam.setEndDate(DataUtils.convStrToDate(endDate, "yyyy-MM-dd"));
 	        pnpSendBlockParam.setMobile(mobile);

@@ -483,7 +483,7 @@ $(function() {
 		
 		loadAndSetBlockTagList();
 
-		document.getElementById("searchBtn").click();
+//		document.getElementById("searchBtn").click();
 		
 		/* 設定預設的開始及結束時間 */
 //		startDate = moment(new Date()).add(-7, 'days').format('YYYY-MM-DD');

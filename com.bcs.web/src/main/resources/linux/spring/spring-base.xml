@@ -96,8 +96,8 @@
 				<prop key="portNumber">2819</prop>
 			</props>
 		</property> -->
-		<property name="connectionTestQuery" value="SELECT 1" />
-		<property name="dataSourceClassName" value="net.sourceforge.jtds.jdbcx.JtdsDataSource" />
+        <property name="maxLifetime" value="530000" />
+		<property name="dataSourceClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDataSource" />
 		<property name="maximumPoolSize" value="50" />
 		<property name="dataSourceProperties">
 			<props>

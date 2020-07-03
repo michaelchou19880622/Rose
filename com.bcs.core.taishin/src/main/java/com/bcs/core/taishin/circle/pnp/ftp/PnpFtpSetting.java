@@ -36,6 +36,7 @@ public class PnpFtpSetting {
     public String smsAccount;
     public String smsPassword;
     public String smsProtocol;
+    private String uploadToEvery8dPath;
 
 
     private List<String> fileNames = new ArrayList<>();
@@ -100,6 +101,10 @@ public class PnpFtpSetting {
         if (StringUtils.isBlank(procFlow)) {
             log.warn("Properties [pnp.proc.flow] does not found or value is blank!!");
         }
+        String smsUploadToEvery8dPath = CoreConfigReader.getString(CONFIG_STR.PNP_SMS_UPLOAD_TO_EVERY8D_PATH.toString() + englishName, false, true);
+        if (StringUtils.isBlank(smsUploadPath)) {
+            log.warn("Properties [pnp.sms.upload.to.every8d.path.{}] does not found or value is blank!!", englishName);
+        }
 
         pnpFtpSetting.setFileEncoding(fileEncoding);
         pnpFtpSetting.setChannelId(englishName);
@@ -116,6 +121,7 @@ public class PnpFtpSetting {
         pnpFtpSetting.setDownloadSavePath(downloadToLocalPath);
         pnpFtpSetting.setProtocol(ftpProtocol);
         pnpFtpSetting.setFlow(procFlow);
+        pnpFtpSetting.setUploadToEvery8dPath(smsUploadToEvery8dPath);
 
         String smsServerHostName = CoreConfigReader.getString(CONFIG_STR.PNP_SMS_SERVER_HOST_NAME.toString() + englishName, true, false);
         int smsServerHostPort = CoreConfigReader.getInteger(CONFIG_STR.PNP_SMS_SERVER_HOST_NAME_PORT.toString() + englishName, true, false);
@@ -364,6 +370,14 @@ public class PnpFtpSetting {
     public void setSmsProtocol(String smsProtocol) {
         this.smsProtocol = smsProtocol;
     }
+
+	public String getUploadToEvery8dPath() {
+		return uploadToEvery8dPath;
+	}
+
+	public void setUploadToEvery8dPath(String uploadToEvery8dPath) {
+		this.uploadToEvery8dPath = uploadToEvery8dPath;
+	}
 
 
 }

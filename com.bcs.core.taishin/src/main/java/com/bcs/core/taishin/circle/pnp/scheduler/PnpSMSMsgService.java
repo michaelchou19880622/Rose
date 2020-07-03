@@ -208,7 +208,7 @@ public class PnpSMSMsgService {
             }
             
             /* Send File To SMS FTP */
-            uploadFileToSms(type, map);
+            uploadFileToSmsWithEvery8dFmt(type, map);
             // i = 0;
             for (PnpDetail detail : afterSaveList) {
             	 PnpMain main = pnpRepositoryCustom.findSingleMainById(type, detail.getPnpMainId());
@@ -285,7 +285,7 @@ public class PnpSMSMsgService {
             return false;
         }
         /* Send File To SMS FTP */
-        uploadFileToSms(ftpSourceEnum, Collections.singletonMap(main.getSmsFileName(), inputStream));
+        uploadFileToSmsWithEvery8dFmt(ftpSourceEnum, Collections.singletonMap(main.getSmsFileName(), inputStream));
         updateDetailStatus(ftpSourceEnum, Collections.singletonList(detail));
         return true;
     }
@@ -759,6 +759,24 @@ public class PnpSMSMsgService {
 
         } catch (Exception e) {
             log.error("Exception", e);
+        }
+    }
+    /**
+     * Upload File To SMS With Every8d Format
+     */
+    private void uploadFileToSmsWithEvery8dFmt(PnpFtpSourceEnum source, Map<String, InputStream> targetStreamMap) {
+        log.info("Start Upload File To SMS With Every8d Format.");
+
+        final PnpFtpSetting setting = pnpFtpService.getFtpSettings(source);
+        if (StringUtils.isBlank(setting.getAccount())
+                || StringUtils.isBlank(setting.getPassword())) {
+            log.error("FTP account or password is blank!!");
+            return;
+        }
+        try {
+            pnpFtpService.uploadFileByType(targetStreamMap, setting.getUploadToEvery8dPath(), setting);
+        } catch (Exception e) {
+            log.error("Exception : {}", e);
         }
     }
 

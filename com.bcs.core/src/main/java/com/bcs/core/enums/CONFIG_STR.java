@@ -205,6 +205,7 @@ public enum CONFIG_STR {
     PNP_SMS_APP_CODE("pnp.sms.APPCode."),
     PNP_SMS_RES_CODE("pnp.sms.RESCode."),
     PNP_SMS_PROTOCOL("pnp.sms.protocol."),
+    PNP_SMS_UPLOAD_TO_EVERY8D_PATH("pnp.sms.upload.to.every8d.path."),
 
 
     //三竹
@@ -231,6 +232,7 @@ public enum CONFIG_STR {
     PNP_SMS_APP_CODE_MITAKE("pnp.sms.APPCode.mitake"),
     PNP_SMS_RES_CODE_MITAKE("pnp.sms.RESCode.mitake"),
     PNP_SMS_PROTOCOL_MITAKE("pnp.sms.protocol.mitake"),
+    PNP_SMS_UPLOAD_TO_EVERY8D_PATH_MITAKE("pnp.sms.upload.to.every8d.path.mitake"),
 
     //三竹
     //互動
@@ -257,8 +259,9 @@ public enum CONFIG_STR {
     PNP_SMS_APP_CODE_EVERY8D("pnp.sms.APPCode.every8d"),
     PNP_SMS_RES_CODE_EVERY8D("pnp.sms.RESCode.every8d"),
     PNP_SMS_PROTOCOL_EVERY8D("pnp.sms.protocol.every8d"),
+    PNP_SMS_UPLOAD_TO_EVERY8D_PATH_EVERY8D("pnp.sms.upload.to.every8d.path.every8d"),
 
-
+    
     //互動
     //明宣
     PNP_FTP_SERVER_HOST_NAME_MING("pnp.ftp.serverHostName.ming"),
@@ -284,6 +287,7 @@ public enum CONFIG_STR {
     PNP_SMS_APP_CODE_MING("pnp.sms.APPCode.ming"),
     PNP_SMS_RES_CODE_MING("pnp.sms.RESCode.ming"),
     PNP_SMS_PROTOCOL_MING("pnp.sms.protocol.ming"),
+    PNP_SMS_UPLOAD_TO_EVERY8D_PATH_MING("pnp.sms.upload.to.every8d.path.ming"),
     //明宣
     //UNICA
     PNP_FTP_SERVER_HOST_NAME_UNICA("pnp.ftp.serverHostName.unica"),
@@ -309,9 +313,10 @@ public enum CONFIG_STR {
     PNP_SMS_APP_CODE_UNICA("pnp.sms.APPCode.unica"),
     PNP_SMS_RES_CODE_UNICA("pnp.sms.RESCode.unica"),
     PNP_SMS_PROTOCOL_UNICA("pnp.sms.protocol.unica"),
+    PNP_SMS_UPLOAD_TO_EVERY8D_PATH_UNICA("pnp.sms.upload.to.every8d.path.unica"),
 
     //PNP白名單
-
+    
     PNP_WHITELIST_VALIDATE("pnp.whitelist.validate"),
     PNP_WHITELIST_ACCOUNT_PCC_CODE_MITAKE(""),
     PNP_WHITELIST_ACCOUNT_PCC_CODE_EVERY8D(""),

@@ -57,7 +57,7 @@
 		<property name="jpaProperties">
 	        <props>
             	<!-- <prop key="hibernate.dialect">org.hibernate.dialect.MySQL57InnoDBDialect</prop>-->
-            	<prop key="hibernate.dialect">org.hibernate.dialect.SQLServer2008Dialect</prop>
+            	<prop key="hibernate.dialect">com.bcs.core.db.connection.SQlServer2008DialectExtended</prop>
             	<prop key="hibernate.show_sql">false</prop>
             	<prop key="hibernate.format_sql">false</prop>
                 <prop key="hibernate.connection.useUnicode">true</prop>

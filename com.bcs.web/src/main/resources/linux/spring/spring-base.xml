@@ -52,7 +52,8 @@
 		<property name="jpaProperties">
 	        <props>
             	<!-- <prop key="hibernate.dialect">org.hibernate.dialect.DB2400Dialect</prop> -->
-            	<prop key="hibernate.dialect">org.hibernate.dialect.SQLServer2008Dialect</prop>
+<!--             	<prop key="hibernate.dialect">org.hibernate.dialect.SQLServer2008Dialect</prop> -->
+            	<prop key="hibernate.dialect">com.bcs.core.db.connection.SQlServer2008DialectExtended</prop>
             	<!-- <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop> -->
             	<prop key="hibernate.show_sql">true</prop>
             	<prop key="hibernate.format_sql">true</prop>

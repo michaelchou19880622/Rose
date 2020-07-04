@@ -127,7 +127,7 @@ public class ContentLinkReportService {
 
 							if(clickMapCount == null){ 
 
-								Thread.sleep(100);
+								Thread.sleep(10);
 								
 								logger.info("countClickCountByLinkId queryTime:" + sdf.format(calendarStart.getTime()));
 								List<Object[]> listCountDistinct = contentLinkService.countClickCountByLinkUrl(linkUrl, sdf.format(calendarStart.getTime()));

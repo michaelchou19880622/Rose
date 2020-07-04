@@ -8,11 +8,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.bcs.core.db.entity.ContentLink;
 import com.bcs.core.db.persistence.EntityRepository;
 
+/* HardCode 開始日期, 先解決台新報表無法產出問題 */
 public interface ContentLinkRepository extends EntityRepository<ContentLink, String>{
 	@Transactional(readOnly = true, timeout = 30)
 	@Query(value = "SELECT LINK_URL, LINK_TITLE, LINK_ID, MODIFY_TIME "
 			+ "FROM BCS_CONTENT_LINK "
 			+ "WHERE LINK_URL IS NOT NULL AND LINK_URL != '' "
+			+ "AND MODIFY_TIME >= '2020/01/01 00:00:00' "
 			+ "ORDER BY MODIFY_TIME DESC, LINK_URL ", nativeQuery = true)
 	public List<Object[]> findAllLinkUrl();
 

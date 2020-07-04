@@ -367,8 +367,9 @@ public class BCSLinkPageController extends BCSBaseController {
 	
 	private void setLinkClickCount(LinkClickReportModel model, Calendar nowCalendar, Calendar yesterdayCalendar, Calendar nextCalendar) throws Exception{
 		
-		String systemStartDate = CoreConfigReader.getString(CONFIG_STR.SYSTEM_START_DATE);
-
+		/* HardCode 開始日期, 先解決台新報表無法產出問題 */
+//		String systemStartDate = CoreConfigReader.getString(CONFIG_STR.SYSTEM_START_DATE);
+		String systemStartDate = "2020-01-01";
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
 		String nowDateKey = model.getLinkUrl() + sdf.format(nowCalendar.getTime());

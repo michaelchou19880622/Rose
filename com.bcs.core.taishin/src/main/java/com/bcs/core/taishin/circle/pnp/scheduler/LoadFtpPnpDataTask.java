@@ -84,6 +84,15 @@ public class LoadFtpPnpDataTask {
     private static final String TAG = "\\&";
     private static final String MING_TAG = "\\;;";
     private static final int FTP_CHUNK_SIZE = 1000;
+    
+    private static final int LIMIT_HEADER_LENGTH_MITAKE = 6;
+    private static final int LIMIT_HEADER_LENGTH_EVERY8D = 7;
+    private static final int LIMIT_HEADER_LENGTH_UNICA = 7;
+    
+    private static final int LIMIT_BODY_LENGTH_MITAKE = 4;
+    private static final int LIMIT_BODY_LENGTH_EVERY8D = 4;
+    private static final int LIMIT_BODY_LENGTH_UNICA = 4;
+    private static final int LIMIT_BODY_LENGTH_MING = 3;
 
     private ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1,
             new BasicThreadFactory.Builder()
@@ -753,7 +762,7 @@ public class LoadFtpPnpDataTask {
         log.info("fileContent List Size: " + fileContents.size());
         final String[] contentSp = fileContents.get(0).split(MING_TAG, 9);
         log.info("Content Array: " + Arrays.toString(contentSp));
-        if (contentSp.length < 3) {
+        if (contentSp.length < LIMIT_BODY_LENGTH_MING) {
             log.error("File Contents validate is failed");
             return Collections.emptyList();
         }
@@ -804,22 +813,32 @@ public class LoadFtpPnpDataTask {
             return Collections.emptyList();
         }
         log.info("fileContent List Size: " + fileContents.size());
+        
+        final String header = fileContents.get(0);
+        log.info("Header Content      : " + header);
+        final String[] splitHeaderData = header.split(TAG, 6);
+        log.info("Header Content Array: " + Arrays.toString(splitHeaderData));
+        
+        // 增加 Boundary Check，如果 splitHeaderData 長度不符合規定格式 header 的長度，則按照白名單檢核失敗處理，直接轉檔到SMS FTP 路徑。
+        if (splitHeaderData.length < LIMIT_HEADER_LENGTH_MITAKE) {
+            log.error("Header validate failed");
+            return Collections.emptyList();
+        }
+        
         final String[] contentSp = fileContents.get(1).split(TAG, 4);
         log.info("Content Array: " + Arrays.toString(contentSp));
-        if (contentSp.length < 4) {
+        if (contentSp.length < LIMIT_BODY_LENGTH_MITAKE) {
             log.error("File Contents validate is failed");
             return Collections.emptyList();
         }
+        
         final String content = contentSp[3];
         PNPMaintainAccountModel accountModel = validateWhiteListContent(PnpFtpSourceEnum.MITAKE, origFileName, content);
         if (null == accountModel) {
             log.error("File Contents validate is failed");
             return Collections.emptyList();
         }
-        final String header = fileContents.get(0);
-        log.info("Header Content      : " + header);
-        final String[] splitHeaderData = header.split(TAG, 6);
-        log.info("Header Content Array: " + Arrays.toString(splitHeaderData));
+        
         PnpMainMitake pnpMain = new PnpMainMitake();
         // 原生欄位
         pnpMain.setGroupIDSource(splitHeaderData[0]);
@@ -865,9 +884,21 @@ public class LoadFtpPnpDataTask {
             return Collections.emptyList();
         }
         log.info("fileContent List Size: " + fileContents.size());
+
+        final String header = fileContents.get(0);
+        log.info("Header Content      : " + header);
+        final String[] splitHeaderData = header.split(TAG, 7);
+        log.info("Header Content Array: " + Arrays.toString(splitHeaderData));
+        
+        // 增加 Boundary Check，如果 splitHeaderData 長度不符合規定格式 header 的長度，則按照白名單檢核失敗處理，直接轉檔到SMS FTP 路徑。
+        if (splitHeaderData.length < LIMIT_HEADER_LENGTH_EVERY8D) {
+            log.error("Header validate failed");
+        	return Collections.emptyList();
+        }
+        
         final String[] contentSp = fileContents.get(1).split(TAG, 10);
         log.info("Content Array: " + Arrays.toString(contentSp));
-        if (contentSp.length < 4) {
+        if (contentSp.length < LIMIT_BODY_LENGTH_EVERY8D) {
             log.error("File Contents validate is failed");
             return Collections.emptyList();
         }
@@ -877,11 +908,7 @@ public class LoadFtpPnpDataTask {
             log.error("File Contents validate is failed");
             return Collections.emptyList();
         }
-
-        final String header = fileContents.get(0);
-        log.info("Header Content      : " + header);
-        final String[] splitHeaderData = header.split(TAG, 7);
-        log.info("Header Content Array: " + Arrays.toString(splitHeaderData));
+        
         PnpMainEvery8d pnpMain = new PnpMainEvery8d();
         // 原生欄位
         pnpMain.setSubject(splitHeaderData[0]);
@@ -929,9 +956,21 @@ public class LoadFtpPnpDataTask {
             return Collections.emptyList();
         }
         log.info("fileContent List Size: " + fileContents.size());
+        
+        final String header = fileContents.get(0);
+        log.info("Header Content      : " + header);
+        final String[] splitHeaderData = header.split(TAG, 7);
+        log.info("Header Content Array: " + Arrays.toString(splitHeaderData));
+        
+        // 增加 Boundary Check，如果 splitHeaderData 長度不符合規定格式 header 的長度，則按照白名單檢核失敗處理，直接轉檔到SMS FTP 路徑。
+        if (splitHeaderData.length < LIMIT_HEADER_LENGTH_UNICA) {
+            log.error("Header validate failed");
+            return Collections.emptyList();
+        }
+        
         final String[] contentSp = fileContents.get(1).split(TAG, 10);
         log.info("Content Array: " + Arrays.toString(contentSp));
-        if (contentSp.length < 4) {
+        if (contentSp.length < LIMIT_BODY_LENGTH_UNICA) {
             log.error("File Contents validate is failed");
             return Collections.emptyList();
         }
@@ -941,11 +980,7 @@ public class LoadFtpPnpDataTask {
             log.error("File Contents validate is failed");
             return Collections.emptyList();
         }
-
-        final String header = fileContents.get(0);
-        log.info("Header Content      : " + header);
-        final String[] splitHeaderData = header.split(TAG, 7);
-        log.info("Header Content Array: " + Arrays.toString(splitHeaderData));
+        
         PnpMainUnica pnpMain = new PnpMainUnica();
         // 原生欄位
         pnpMain.setSubject(splitHeaderData[0]);

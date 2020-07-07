@@ -755,7 +755,7 @@ public class SendMsgUIService {
     @SuppressWarnings("unchecked")
     public void setDetailContent(Map<String, Object> result, List<MsgDetail> details) {
         try {
-            logger.debug("setDetailContent:" + details);
+//            logger.debug("setDetailContent:" + details);
             Map<String, Object> resourceMap = (Map<String, Object>) result.get("ResourceMap");
             if (resourceMap == null) {
                 resourceMap = new HashMap<String, Object>();

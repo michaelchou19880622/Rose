@@ -101,7 +101,7 @@ public class OracleService {
                 	//離職日期是null and empty 才撈取資料
                 	if (StringUtils.isBlank(trim(rs.getString(8)))) {
 	                    employee.setEmployeeId(empId);
-	                    employee.setDepartmentId(trim(rs.getString(2)));
+	                    employee.setDepartmentId(trim(rs.getString(3)));
 	                    employee.setPccCode(trim(rs.getString(3)) + trim(rs.getString(4)));
 	                    employee.setDivisionName(trim(rs.getString(5)));
 	                    employee.setDepartmentName(trim(rs.getString(6)));

@@ -555,6 +555,12 @@ $(function () {
         console.log('Search Button Click!!');
         var id = $('#employeeId').val();
         console.info("id:", id);
+        
+        /* 員工編號欄位檢核 */
+        if (!id || id.trim().length == 0) {
+        	alert('請輸入員工代碼進行查詢');
+        	return;
+        }
 
         $.ajax({
             type: 'GET',

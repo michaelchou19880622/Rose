@@ -47,7 +47,7 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
     @Override
     @Transactional(rollbackFor = Exception.class, timeout = 3000, propagation = Propagation.REQUIRES_NEW)
     public Object[] updateStatus(String procApName, List<String> tempIds) {
-        log.info("Used tempIds: {}", tempIds);
+//        log.info("Used tempIds: {}", tempIds);
         try {
             Set<Long> allMainIds = new HashSet<>();
             /* 1. Find wait main set and update status to sending */
@@ -84,7 +84,7 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
             }
 
         });
-        log.info("retrySet = {}", retrySet);
+//        log.info("retrySet = {}", retrySet);
         return retrySet;
     }
 
@@ -99,7 +99,7 @@ public class BillingNoticeRepositoryCustomImpl implements BillingNoticeRepositor
                 log.info("waitMainId is null");
             }
         });
-        log.info("waitSet = {}", waitSet);
+//        log.info("waitSet = {}", waitSet);
         return waitSet;
     }
 

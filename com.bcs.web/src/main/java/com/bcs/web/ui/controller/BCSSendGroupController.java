@@ -322,7 +322,7 @@ public class BCSSendGroupController extends BCSBaseController {
                 sendGroupCondition.putPOJO(queryFieldId, sendGroupQueryProperty);
             }
 
-            logger.info("sendGroupCondition1:" + sendGroupCondition);
+//            logger.info("sendGroupCondition1:" + sendGroupCondition);
             return new ResponseEntity<>(sendGroupCondition, HttpStatus.OK);
         } catch (Exception e) {
             logger.error(ErrorRecord.recordError(e));

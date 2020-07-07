@@ -92,14 +92,14 @@ public class SystemLogService {
 
     public void deleteLogByRange(int scheduleTime, TimeUnit unit, int deleteRangeDay) {
         scheduler.scheduleWithFixedDelay(() -> {
-            log.info("Search Expired System Log!!");
+//            log.info("Search Expired System Log!!");
             List<SystemLog> expiredLogList = systemLogRepository.findTop10ByModifyTimeBefore(DateUtils.addDays(new Date(), -deleteRangeDay));
             if (CollectionUtils.isNotEmpty(expiredLogList)) {
                 log.info("Start Clean!! Size:{}", expiredLogList.size());
                 systemLogRepository.delete(expiredLogList);
                 log.info("Clean done!!");
             } else {
-                log.info("Expired System Log Not Found!!");
+//                log.info("Expired System Log Not Found!!");
             }
         }, 0, scheduleTime, unit);
     }

@@ -190,11 +190,15 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
     @Transactional(rollbackFor = Exception.class)
     public List<PnpMain> findAllMain(String procApName, PnpFtpSourceEnum type) {
 
-        String expiredCheckSql = "EXEC usp_batchCheckPNPExpiredDetail '" + type + "'";
-        log.info("checking {} pnp detail table expired data start ...", type);
-        providerService.getEntityManager().createNativeQuery(expiredCheckSql)
-        .executeUpdate();
-        log.info("checking {} pnp detail table expired data end ...", type);
+    	try {
+            String expiredCheckSql = "EXEC usp_batchCheckPNPExpiredDetail '" + type + "'";
+            log.info("checking {} pnp detail table expired data start ...", type);
+            providerService.getEntityManager().createNativeQuery(expiredCheckSql)
+            .executeUpdate();
+            log.info("checking {} pnp detail table expired data end ...", type);
+		} catch (Exception e) {
+			log.error("Exception : {}", e);
+		}
 
     	
         String waitMainString = "SELECT TOP 100 PNP_MAIN_ID FROM " + type.mainTable +

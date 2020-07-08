@@ -104,7 +104,7 @@ public class BillingNoticeFtpService {
             List<FtpSetting> ftpSettingList = ftpService.getFtpSettings();
             Map<String, byte[]> lReturnDataMap = downloadFtpFile(fileExtension, ftpSettingList);
             if (lReturnDataMap.isEmpty()) {
-            	log.info("Finished the task due to no files at this time, scheduleTaskCount=" + scheduleTaskcount.get());
+//            	log.info("Finished the task due to no files at this time, scheduleTaskCount=" + scheduleTaskcount.get());
             }
             else {
                 saveObjToDb(parseDataToObj(downloadSavePath, lReturnDataMap, ftpSettingList));

@@ -110,14 +110,14 @@ public class SendingMsgService {
     }
 
     public void sendToLineAsync(String channelId, List<MsgGenerator> msgGenerators, List<MsgDetail> detailList, List<String> midList, API_TYPE apiType, Long updateMsgId) {
-        log.info("---------- sendToLineAsync ----------");
-        log.info("[sendToLineAsync] Mid List Size: {}", midList.size());
+//        log.info("---------- sendToLineAsync ----------");
+//        log.info("[sendToLineAsync] Mid List Size: {}", midList.size());
 
         if (channelId == null) {
             channelId = CONFIG_STR.DEFAULT.toString();
         }
 
-        log.info("[sendToLineAsync] channelId: {}", channelId);
+//        log.info("[sendToLineAsync] channelId: {}", channelId);
 
         AsyncSendingModel asyncSendingModel;
         if (updateMsgId != null) {
@@ -125,7 +125,7 @@ public class SendingMsgService {
         } else {
             asyncSendingModel = new AsyncSendingModel(channelId, msgGenerators, midList, apiType);
         }
-        log.info("[sendToLineAsync] asyncSendingModel: {}", asyncSendingModel);
+//        log.info("[sendToLineAsync] asyncSendingModel: {}", asyncSendingModel);
 
         if (detailList == null) {
             log.info("[sendToLineAsync] Detail List Is Null!!");
@@ -146,7 +146,7 @@ public class SendingMsgService {
         }
 
         try {
-            log.info("[sendToLineAsync] Last!!");
+//            log.info("[sendToLineAsync] Last!!");
             AsyncSendingClusterModel model = new AsyncSendingClusterModel(channelId, detailList, midList, apiType.toString(), updateMsgId);
             PostLineResponse response = BcsApiClusterService.clusterApiSend(model);
             log.info("[sendToLineAsync] response: {}", response);
@@ -430,7 +430,7 @@ public class SendingMsgService {
     }
 
     public void sendMsgToMids(List<String> midList, List<MsgGenerator> msgGenerators, List<MsgDetail> details, boolean async, Long updateMsgId, int retryCount, LOG_TARGET_ACTION_TYPE target, LOG_TARGET_ACTION_TYPE action, String referenceId) throws Exception {
-        log.info("sendMsgToMid:" + midList);
+ //       log.info("sendMsgToMid:" + midList);
 
         if (midList != null && !midList.isEmpty() && msgGenerators != null && !msgGenerators.isEmpty()) {
 

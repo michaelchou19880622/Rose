@@ -36,7 +36,7 @@ public class LineTokenApiService {
     }
 
     public ObjectNode callVerifyAPI(Date start, String access_token, int retryCount) throws Exception {
-        logger.info("callVerifyAPI");
+//        logger.info("callVerifyAPI");
 
         int status = 0;
         try (CloseableHttpClient httpClient = HttpClientUtil.getSingleInstance()) {
@@ -61,7 +61,7 @@ public class LineTokenApiService {
             HttpResponse clientResponse = httpClient.execute(requestPost);
 
             status = clientResponse.getStatusLine().getStatusCode();
-            logger.info("clientResponse StatusCode : " + status);
+//            logger.info("clientResponse StatusCode : " + status);
 
             String result = "";
             if (clientResponse.getEntity() != null && clientResponse.getEntity().getContent() != null) {
@@ -92,7 +92,7 @@ public class LineTokenApiService {
     }
 
     public ObjectNode callRefreshingAPI(Date start, String client_id, String client_secret, int retryCount) throws Exception {
-        logger.info("callRefreshingAPI");
+//        logger.info("callRefreshingAPI");
 
         int status = 0;
         try (CloseableHttpClient httpClient = HttpClientUtil.getSingleInstance()) {
@@ -118,7 +118,7 @@ public class LineTokenApiService {
             HttpResponse clientResponse = httpClient.execute(requestPost);
 
             status = clientResponse.getStatusLine().getStatusCode();
-            logger.info("clientResponse StatusCode : " + status);
+//            logger.info("clientResponse StatusCode : " + status);
 
             String result = "";
             if (clientResponse.getEntity() != null && clientResponse.getEntity().getContent() != null) {

@@ -122,7 +122,7 @@ public class GroupGenerateRepository {
 
 
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format(" SELECT %s FROM (", selectColumns));
+        sb.append(String.format(" SELECT %s FROM ", selectColumns));
 
         log.info("UploadMid Size: {}, SendGroupSetting Size: {}", uploadMidSetting.size(), sendGroupSetting.size());
         if (!sendGroupDetails.isEmpty()) {
@@ -137,10 +137,13 @@ public class GroupGenerateRepository {
                 sb.append(generateUploadMidSettingFrom(uploadMidSetting, sendGroupDetails.size() * 2 + 1));
             } else {
                 sb = new StringBuilder();
+
+				selectColumns = selectColumns.replace("MID", "SETMID");
+                
                 sb.append(String.format(" SELECT %s FROM", selectColumns));
                 sb.append(generateUploadMidSettingFrom(uploadMidSetting, 1));
                 if (StringUtils.isNotBlank(mid)) {
-                    sb.append(" WHERE MID = ?");
+                    sb.append(" WHERE SETMID = ?");
                     sb.append((uploadMidSetting.size() + 1));
                 }
             }
@@ -150,7 +153,7 @@ public class GroupGenerateRepository {
         // Setting Upload Mid SQL
         if (!uploadMidSetting.isEmpty()) {
             if (!sendGroupDetails.isEmpty()) {
-                sb.append(" WHERE MID = EVENT_SET.MID ");
+                sb.append(" WHERE MID = EVENT_SET.SETMID ");
 
                 if (StringUtils.isNotBlank(mid)) {
                     sb.append(" AND MID = ?");
@@ -397,7 +400,7 @@ public class GroupGenerateRepository {
         }
         String sqlString =
                 "( "
-                        + " SELECT s.MID as MID"
+                        + " SELECT s.MID as SETMID"
                         + " FROM BCS_USER_EVENT_SET s ";
 
         sqlString += " INNER JOIN BCS_LINE_USER k ON k.MID = s.MID ";

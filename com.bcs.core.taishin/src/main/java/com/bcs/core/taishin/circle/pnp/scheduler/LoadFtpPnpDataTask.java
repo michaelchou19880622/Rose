@@ -467,7 +467,7 @@ public class LoadFtpPnpDataTask {
      * @throws Exception Exception
      * @see this#parseMingFiles
      */
-    private List<PnpDetail> parsePnpDetailMing(String fileContent, String flexTemplateId, String
+    private List<PnpDetail> parsePnpDetailMing(Long pnpMaintainAccountId, String fileContent, String flexTemplateId, String
             scheduleTime) throws Exception {
         log.info("flexTemplateId : " + flexTemplateId);
         List<PnpDetail> details = new ArrayList<>();
@@ -475,9 +475,21 @@ public class LoadFtpPnpDataTask {
         final int columnSize = 9;
         // TODO : 因為無資料可測試, 後續可參考Mitake進行效能優化.
         // TODO : Need to optimize and check for loop 目前只讀一行..
+        PNPMaintainAccountModel pnpMaintainAccountModel = pnpMaintainAccountModelRepository.findOne(pnpMaintainAccountId);
+        
+        String pnpContentPattern = pnpMaintainAccountModel.getPnpContent();
+        log.info("pnpContentPattern = {}", pnpContentPattern);
+        
         if (StringUtils.isNotBlank(fileContent)) {
             final String[] detailData = fileContent.split(MING_TAG, columnSize);
             if (detailData.length == columnSize) {
+            	// 檢核發送訊息內容
+            	if (!isMatch(detailData[2], pnpContentPattern)) {
+                    log.error("parsePnpDetailMing error Data :" + Arrays.toString(detailData));
+
+                    /* 內容有異常或未符合樣板訊息內容，直接return null，整批不做處理也不寫入DB，直接比照白名單檢核失敗機制轉至SMS */
+                    return null;
+            	}
 
                 /*
                  * 0.SN 流水號
@@ -509,7 +521,10 @@ public class LoadFtpPnpDataTask {
                 details.add(detail);
 
             } else {
-                log.error("parsePnpDetailMing error Data:" + Arrays.toString(detailData));
+                log.error("parsePnpDetailMing columnSize error : " + Arrays.toString(detailData));
+
+                /* detail欄位長度不符合規定格式的長度，直接return null，整批不做處理也不寫入DB，直接比照白名單檢核失敗機制轉至SMS */
+                return null;
             }
         }
         return details;
@@ -522,18 +537,32 @@ public class LoadFtpPnpDataTask {
      * @return Mitake物件清單
      * @throws Exception Exception
      */
-    private List<PnpDetail> parsePnpDetailMitake(List<String> fileContents, String
+    private List<PnpDetail> parsePnpDetailMitake(Long pnpMaintainAccountId, List<String> fileContents, String
             flexTemplateId, String scheduleTime) throws Exception {
         List<PnpDetail> details = new ArrayList<>();
         /* Mitake有header所以從1開始 */
         
         List<String> phoneNumberList = new ArrayList<>();
         
+        PNPMaintainAccountModel pnpMaintainAccountModel = pnpMaintainAccountModelRepository.findOne(pnpMaintainAccountId);
+        
+        String pnpContentPattern = pnpMaintainAccountModel.getPnpContent();
+        log.info("pnpContentPattern = {}", pnpContentPattern);
+        
         for (int i = 1, size = fileContents.size(); i < size; i++) {
             if (StringUtils.isNotBlank(fileContents.get(i))) {
                 final int columnSize = 4;
                 final String[] detailData = fileContents.get(i).split(TAG, columnSize);
                 if (detailData.length == columnSize) {
+                	
+                	// 檢核發送訊息內容
+                	if (!isMatch(detailData[3], pnpContentPattern)) {
+                        log.error("parsePnpDetailMitake error Data :" + Arrays.toString(detailData));
+
+                        /* 內容有異常或未符合樣板訊息內容，直接return null，整批不做處理也不寫入DB，直接比照白名單檢核失敗機制轉至SMS */
+                        return null;
+                	}
+                	
                     /*
                      * 0.DestCategory 掛帳代碼
                      * 1.DestName  請填入系統有意義之流水號(open端可辯示之唯一序號)
@@ -557,7 +586,10 @@ public class LoadFtpPnpDataTask {
                     phoneNumberList.add(phoneNumber);
                     details.add(detail);
                 } else {
-                    log.error("parsePnpDetailMitake error Data:" + Arrays.toString(detailData));
+                    log.error("parsePnpDetailMitake columnSize error : " + Arrays.toString(detailData));
+
+                    /* detail欄位長度不符合規定格式的長度，直接return null，整批不做處理也不寫入DB，直接比照白名單檢核失敗機制轉至SMS */
+                    return null;
                 }
             }
         }
@@ -603,19 +635,31 @@ public class LoadFtpPnpDataTask {
      * @return Every8d物件清單
      * @throws Exception Exception
      */
-    private List<PnpDetail> parsePnpDetailEvery8d(List<String> fileContents, String
+    private List<PnpDetail> parsePnpDetailEvery8d(Long pnpMaintainAccountId, List<String> fileContents, String
             flexTemplateId, String scheduleTime) throws Exception {
         List<PnpDetail> details = new ArrayList<>();
         /* Every8D有header所以從1開始 */
         // TODO : 因為無資料可測試, 後續可參考Mitake進行效能優化.
         long start = System.currentTimeMillis();
         LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
+
+        PNPMaintainAccountModel pnpMaintainAccountModel = pnpMaintainAccountModelRepository.findOne(pnpMaintainAccountId);
+        
+        String pnpContentPattern = pnpMaintainAccountModel.getPnpContent();
+        log.info("pnpContentPattern = {}", pnpContentPattern);
+        
         for (int i = 1, size = fileContents.size(); i < size; i++) {
             if (StringUtils.isNotBlank(fileContents.get(i))) {
                 final int columnSize = 10;
                 final String[] detailData = fileContents.get(i).split(TAG, columnSize);
                 if (detailData.length == columnSize) {
+                	// 檢核發送訊息內容
+                	if (!isMatch(detailData[3], pnpContentPattern)) {
+                        log.error("parsePnpDetailEvery8d error Data :" + Arrays.toString(detailData));
 
+                        /* 內容有異常或未符合樣板訊息內容，直接return null，整批不做處理也不寫入DB，直接比照白名單檢核失敗機制轉至SMS */
+                        return null;
+                	}
 
                     /*
                      * 0.SN 序號
@@ -649,7 +693,10 @@ public class LoadFtpPnpDataTask {
                     detail.setUid(mid);
                     details.add(detail);
                 } else {
-                    log.error("parsePnpDetailEvery8d error Data:" + Arrays.toString(detailData));
+                    log.error("parsePnpDetailEvery8d columnSize error : " + Arrays.toString(detailData));
+
+                    /* detail欄位長度不符合規定格式的長度，直接return null，整批不做處理也不寫入DB，直接比照白名單檢核失敗機制轉至SMS */
+                    return null;
                 }
             }
         }
@@ -666,17 +713,30 @@ public class LoadFtpPnpDataTask {
      * @return Unica物件清單
      * @throws Exception Exception
      */
-    private List<PnpDetail> parsePnpDetailUnica(List<String> fileContents, String flexTemplateId, String
+    private List<PnpDetail> parsePnpDetailUnica(Long pnpMaintainAccountId, List<String> fileContents, String flexTemplateId, String
             scheduleTime) throws Exception {
         List<PnpDetail> details = new ArrayList<>();
         /* Unica有header所以從1開始 */
-        // TODO : 因為無資料可測試, 後續可參考Mitake進行效能優化.        
+        // TODO : 因為無資料可測試, 後續可參考Mitake進行效能優化.     
+
+        PNPMaintainAccountModel pnpMaintainAccountModel = pnpMaintainAccountModelRepository.findOne(pnpMaintainAccountId);
+        
+        String pnpContentPattern = pnpMaintainAccountModel.getPnpContent();
+        log.info("pnpContentPattern = {}", pnpContentPattern);
+        
         for (int i = 1, size = fileContents.size(); i < size; i++) {
             if (StringUtils.isNotBlank(fileContents.get(i))) {
                 final int columnSize = 10;
                 final String[] detailData = fileContents.get(i).split(TAG, columnSize);
                 if (detailData.length == columnSize) {
+                	// 檢核發送訊息內容
+                	if (!isMatch(detailData[3], pnpContentPattern)) {
+                        log.error("parsePnpDetailUnica error Data :" + Arrays.toString(detailData));
 
+                        /* 內容有異常或未符合樣板訊息內容，直接return null，整批不做處理也不寫入DB，直接比照白名單檢核失敗機制轉至SMS */
+                        return null;
+                	}
+                	
                     /*
                      * 0.SN 序號
                      * 1.DestName 收件者名稱
@@ -709,7 +769,10 @@ public class LoadFtpPnpDataTask {
                     detail.setUid(mid);
                     details.add(detail);
                 } else {
-                    log.error("parsePnpDetailUnica error Data:" + Arrays.toString(detailData));
+                    log.error("parsePnpDetailUnica columnSize error : " + Arrays.toString(detailData));
+
+                    /* detail欄位長度不符合規定格式的長度，直接return null，整批不做處理也不寫入DB，直接比照白名單檢核失敗機制轉至SMS */
+                    return null;
                 }
             }
         }
@@ -792,7 +855,14 @@ public class LoadFtpPnpDataTask {
                     || PnpSendTypeEnum.SCHEDULE_TIME_EXPIRED.value.equals(pnpMain.getSendType())) {
                 pnpMain.setScheduleTime(orderTime);
             }
-            pnpMain.setPnpDetails(parsePnpDetailMing(content, accountModel.getTemplate(), pnpMain.getScheduleTime()));
+            
+            List<PnpDetail> lstPnpDetail = parsePnpDetailMing(accountModel.getId(), content, accountModel.getTemplate(), pnpMain.getScheduleTime());
+            
+            if (lstPnpDetail == null) {
+            	return Collections.emptyList();
+            }
+            
+            pnpMain.setPnpDetails(lstPnpDetail);
             mains.add(pnpMain);
         }
         return mains;
@@ -863,7 +933,14 @@ public class LoadFtpPnpDataTask {
                 || PnpSendTypeEnum.SCHEDULE_TIME_EXPIRED.value.equals(pnpMain.getSendType())) {
             pnpMain.setScheduleTime(pnpMain.getOrderTime());
         }
-        pnpMain.setPnpDetails(parsePnpDetailMitake(fileContents, accountModel.getTemplate(), pnpMain.getScheduleTime()));
+        
+        List<PnpDetail> lstPnpDetail = parsePnpDetailMitake(accountModel.getId(), fileContents, accountModel.getTemplate(), pnpMain.getScheduleTime());
+        
+        if (lstPnpDetail == null) {
+        	return Collections.emptyList();
+        }
+        
+        pnpMain.setPnpDetails(lstPnpDetail);
         List<Object> mains = new ArrayList<>();
         mains.add(pnpMain);
         return mains;
@@ -933,8 +1010,14 @@ public class LoadFtpPnpDataTask {
                 || PnpSendTypeEnum.SCHEDULE_TIME_EXPIRED.value.equals(pnpMain.getSendType())) {
             pnpMain.setScheduleTime(pnpMain.getOrderTime());
         }
+        
+        List<PnpDetail> lstPnpDetail = parsePnpDetailEvery8d(accountModel.getId(), fileContents, accountModel.getTemplate(), pnpMain.getScheduleTime());
 
-        pnpMain.setPnpDetails(parsePnpDetailEvery8d(fileContents, accountModel.getTemplate(), pnpMain.getScheduleTime()));
+        if (lstPnpDetail == null) {
+        	return Collections.emptyList();
+        }
+        
+        pnpMain.setPnpDetails(lstPnpDetail);
         List<Object> mains = new ArrayList<>();
         mains.add(pnpMain);
         return mains;
@@ -1006,8 +1089,14 @@ public class LoadFtpPnpDataTask {
                 || PnpSendTypeEnum.SCHEDULE_TIME_EXPIRED.value.equals(pnpMain.getSendType())) {
             pnpMain.setScheduleTime(pnpMain.getOrderTime());
         }
+        
+        List<PnpDetail> lstPnpDetail = parsePnpDetailUnica(accountModel.getId(), fileContents, accountModel.getTemplate(), pnpMain.getScheduleTime());
+        
+        if (lstPnpDetail == null) {
+        	return Collections.emptyList();
+        }
 
-        pnpMain.setPnpDetails(parsePnpDetailUnica(fileContents, accountModel.getTemplate(), pnpMain.getScheduleTime()));
+        pnpMain.setPnpDetails(lstPnpDetail);
         List<Object> mains = new ArrayList<>();
         mains.add(pnpMain);
         return mains;

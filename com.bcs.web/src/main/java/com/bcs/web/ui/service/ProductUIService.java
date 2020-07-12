@@ -43,7 +43,7 @@ public class ProductUIService {
         logger.info("getSize:" + filePart.getSize());
 
         Set<String> products = null;
-        if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType)){
+        if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType) || "text/csv".equals(contentType)){
             products = importDataFromExcel.importData(filePart.getInputStream());    
         }
         else if("text/plain".equals(contentType)){

@@ -69,7 +69,7 @@ public class MidToUidUIService {
 		logger.info("getSize:" + filePart.getSize());
 
 		Set<String> mids = null;
-		if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType)){
+		if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType) || "text/csv".equals(contentType)){
 			mids = importMidFromExcel.importData(filePart.getInputStream());
 		}
 		else if("text/plain".equals(contentType)){
@@ -161,7 +161,7 @@ public class MidToUidUIService {
 		logger.info("getSize:" + filePart.getSize());
 
 		Set<String> mids = null;
-		if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType)){
+		if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType) || "text/csv".equals(contentType)){
 			mids = importMidFromExcel.importData(filePart.getInputStream());
 		}
 		else if("text/plain".equals(contentType)){

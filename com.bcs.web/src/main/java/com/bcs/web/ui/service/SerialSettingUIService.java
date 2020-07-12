@@ -56,7 +56,7 @@ public class SerialSettingUIService {
 		logger.info("getSize:" + filePart.getSize());
 
 		Map<String, String> midsMap = null;
-		if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType)){
+		if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType) || "text/csv".equals(contentType)){
 			midsMap = importMidFromExcel.importDataKeyValue(filePart.getInputStream());	
 		}
 		else if("text/plain".equals(contentType)){

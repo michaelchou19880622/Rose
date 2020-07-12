@@ -68,7 +68,7 @@ public class EsnUIService {
 	        String contentType = file.getContentType();
 
 	        // 比對檔案類型
-	        if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType)){
+	        if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType) || "text/csv".equals(contentType)){
 	            esnList = importFromExcel.importCSVDataKeyValueList(file.getInputStream());
 	        }
 	        else if("text/plain".equals(contentType)){

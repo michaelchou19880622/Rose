@@ -83,16 +83,29 @@
 	</bean>
 
 	<bean id="hikariConfig" class="com.bcs.core.db.connection.BcsHikariConfig">
-		<property name="poolName" value="springHikariCP" />
+		<property name="poolName" value="ROSEHikariCP" />
 
 		<!--
 			jtds 只支援 JDBC3 而不支援 JDBC4，所以須設定 connectionTestQuery
 			若是支援 JDBC4 的 driver 則不須設定 connectionTestQuery
 		-->
+		<!--
 		<property name="connectionTestQuery" value="SELECT 1" />
 		<property name="dataSourceClassName" value="net.sourceforge.jtds.jdbcx.JtdsDataSource" />
 		<property name="maximumPoolSize" value="50" />
 		<property name="connectionTimeout" value="30000" />
+		<property name="dataSourceProperties">
+			<props>
+				<prop key="user">linebc</prop>
+				<prop key="password">1qaz@WSX</prop>
+				<prop key="serverName">10.6.5.82</prop>
+				<prop key="databaseName">TAISHINOADB</prop>
+				<prop key="portNumber">1433</prop>
+			</props>
+		</property> -->
+		<property name="maxLifetime" value="240000" />
+		<property name="dataSourceClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDataSource" />
+		<property name="maximumPoolSize" value="50" />
 		<property name="dataSourceProperties">
 			<props>
 				<prop key="user">linebc</prop>

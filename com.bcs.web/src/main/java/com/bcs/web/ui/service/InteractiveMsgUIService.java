@@ -358,7 +358,7 @@ public class InteractiveMsgUIService {
         String contentType = filePart.getContentType();
         Map<String, List<String>> keywordsMap = null;
         
-        if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType)){
+        if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType) || "text/csv".equals(contentType)){
             keywordsMap = importDataFromExcel.importDataKeyValueList(filePart.getInputStream());    
         }
         

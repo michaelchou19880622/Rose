@@ -43,7 +43,7 @@ public class BusinessUIService {
         logger.info("getSize:" + filePart.getSize());
 
         Set<String> businesses = null;
-        if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType)){
+        if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType) || "text/csv".equals(contentType)){
             businesses = importDataFromExcel.importData(filePart.getInputStream());    
         }
         else if("text/plain".equals(contentType)){

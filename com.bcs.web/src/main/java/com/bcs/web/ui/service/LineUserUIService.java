@@ -50,7 +50,7 @@ public class LineUserUIService {
         logger.info("getSize:" + filePart.getSize());
 
         Map<String, List<String>> dataMap = null;
-        if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType)){
+        if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType) || "text/csv".equals(contentType)){
             dataMap = importDataFromExcel.importDataKeyValueList(filePart.getInputStream());
         }
         else if("text/plain".equals(contentType)){
@@ -220,7 +220,7 @@ public class LineUserUIService {
         logger.info("getSize:" + filePart.getSize());
 
         List<Map<String, String>> lineUserList = null;
-        if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType)){
+        if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType) || "text/csv".equals(contentType)){
         	lineUserList = importDataFromExcel.importCSVDataKeyValueList(filePart.getInputStream());
         }
         else if("text/plain".equals(contentType)){

@@ -76,7 +76,7 @@
 	</bean>
 
 	<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
-		<property name="poolName" value="springHikariCP" />
+		<property name="poolName" value="ROSEHikariCP" />
 
 		<!--
 			jtds 只支援 JDBC3 而不支援 JDBC4，所以須設定 connectionTestQuery
@@ -94,8 +94,21 @@
 				<prop key="portNumber">2819</prop>
 			</props>
 		</property> -->
+		<!-- 
 		<property name="connectionTestQuery" value="SELECT 1" />
 		<property name="dataSourceClassName" value="net.sourceforge.jtds.jdbcx.JtdsDataSource" />
+		<property name="maximumPoolSize" value="50" />
+		<property name="dataSourceProperties">
+			<props>
+				<prop key="user">Taishin</prop>
+				<prop key="password">Hpifive16890535</prop>
+				<prop key="serverName">13.78.19.109</prop>
+				<prop key="databaseName">Taishin Customer Connect</prop>
+				<prop key="portNumber">1433</prop>
+			</props>
+		</property> -->
+		<property name="maxLifetime" value="240000" />
+		<property name="dataSourceClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDataSource" />
 		<property name="maximumPoolSize" value="50" />
 		<property name="dataSourceProperties">
 			<props>

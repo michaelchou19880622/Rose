@@ -359,7 +359,7 @@ public class ActionUserRewardCardUIService {
         logger.info("getSize:" + filePart.getSize());
         
         List<Map<String, String>> dataMap = null;
-        if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType)){
+        if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType) || "application/vnd.ms-excel".equals(contentType) || "text/csv".equals(contentType)){
         	  dataMap = importDataFromExcel.importCSVDataKeyValueList(filePart.getInputStream());    
         }
 

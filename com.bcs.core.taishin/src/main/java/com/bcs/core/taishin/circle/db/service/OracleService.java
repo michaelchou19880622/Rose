@@ -101,7 +101,7 @@ public class OracleService {
                 	//離職日期是null and empty 才撈取資料
                 	if (StringUtils.isBlank(trim(rs.getString(8)))) {
 	                    employee.setEmployeeId(empId);
-	                    employee.setDepartmentId(trim(rs.getString(3)));
+	                    employee.setDepartmentId(trim(rs.getString(9)));
 	                    employee.setPccCode(trim(rs.getString(3)) + trim(rs.getString(4)));
 	                    employee.setDivisionName(trim(rs.getString(5)));
 	                    employee.setDepartmentName(trim(rs.getString(6)));
@@ -382,7 +382,8 @@ public class OracleService {
                         "     card_div, " +
                         "     card_dept, " +
                         "     dept_easy_nm, " +
-                        "     quit_dt " +                        
+                        "     quit_dt, " +
+                        "     dept_cd " +                            
                         " from " +
                         "     %s.hr_emp " +
                         " left outer join %s.hr_dept " +

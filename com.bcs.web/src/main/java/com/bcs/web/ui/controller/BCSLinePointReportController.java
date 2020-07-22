@@ -510,7 +510,7 @@ public class BCSLinePointReportController extends BCSBaseController {
                     String environment = CoreConfigReader.getString("environment");
                     log.info("environment = {}", environment);
                     
-                    if ("local".equals(environment) || "linux".equals(environment)) {
+                    if ("local".equals(environment) || "linux".equals(environment) ||  "mac".equals(environment)) {
                     	employee = oracleService.findByLocalEmployeeId(empId);
                     } else {
                     	employee = oracleService.findByEmployeeId(empId);

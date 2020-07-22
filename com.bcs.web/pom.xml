@@ -223,6 +223,7 @@
                 <excludes>
                     <exclude>windows/</exclude>
                     <exclude>linux/</exclude>
+                    <exclude>mac/</exclude>                    
                     <exclude>uat-ap/</exclude>
                     <exclude>uat-be/</exclude>
                     <exclude>prod-be-oa/</exclude>

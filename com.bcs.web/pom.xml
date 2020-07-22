@@ -200,6 +200,21 @@
                 <aa>WEB-INF/lib/*pwd.jar, WEB-INF/lib/*TSIB.jar</aa>
             </properties>
         </profile>
+        <profile>
+            <id>mac</id>
+            <build>
+                <directory>target</directory>
+            </build>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <package.environment>mac</package.environment>
+                <rp.build.warname>Taishin</rp.build.warname>
+                <maven.war.webxml>src/main/resources/linux/web/web.xml</maven.war.webxml>
+                <aa>WEB-INF/lib/*pwd.jar, WEB-INF/lib/*TSIB.jar</aa>
+            </properties>
+        </profile>        
     </profiles>
     <build>
         <resources>

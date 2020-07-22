@@ -332,6 +332,9 @@ public class DataUtils {
             case "linux":
                 processApName = "taishin";
                 break;
+            case "mac":
+                processApName = "taishin-SIT-MAC";
+                break;
             case "uat":
                 processApName = "AIMLAP-T";
                 break;

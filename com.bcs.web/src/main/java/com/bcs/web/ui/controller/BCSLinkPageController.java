@@ -43,6 +43,7 @@ import com.bcs.core.exception.BcsNoticeException;
 import com.bcs.core.report.service.ContentLinkReportService;
 import com.bcs.core.report.service.PageVisitReportService;
 import com.bcs.core.resource.CoreConfigReader;
+import com.bcs.core.resource.UriHelper;
 import com.bcs.core.utils.DBResultUtil;
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.web.security.CurrentUser;
@@ -88,44 +89,6 @@ public class BCSLinkPageController extends BCSBaseController {
 
 		try{ 
 			List<ContentLink> result = new ArrayList<ContentLink>();
-			
-//			// Add Coupon List Page
-//			ContentLink couponListPage = new ContentLink();
-//			couponListPage.setLinkUrl(UriHelper.getCouponListPagePattern());
-//			couponListPage.setLinkTitle("我的優惠列表");
-//			result.add(couponListPage);
-//
-//			// Add Reward Card List Page
-//			ContentLink rewardCardListPage = new ContentLink();
-//			rewardCardListPage.setLinkUrl(UriHelper.getRewardCardListPagePattern());
-//			rewardCardListPage.setLinkTitle("我的集點卡列表");
-//			result.add(rewardCardListPage);
-//			
-//			// Add Read Terms Of Business Page
-//			ContentLink readTermsOfBusinessPage = new ContentLink();
-//			readTermsOfBusinessPage.setLinkUrl(UriHelper.getReadTermsOfBusinessPagePattern());
-//			readTermsOfBusinessPage.setLinkTitle("升級LINE帳號");
-//			result.add(readTermsOfBusinessPage);
-//			
-//			// Add Game List
-//			List<GameModel> games = contentGameService.getAllContentGame();
-//			for(GameModel game : games){
-//
-//				ContentLink gamePage = new ContentLink();
-//				gamePage.setLinkUrl(UriHelper.getScratchPattern(game.getGameId()));
-//				gamePage.setLinkTitle("遊戲：" + game.getGameName());
-//				result.add(gamePage);
-//			}
-			
-//			// Add MGM Pages
-//            List<ShareCampaign> shareCampaigns = shareCampaignService.findByStatus(ShareCampaign.STATUS_ACTIVE);
-//            for(ShareCampaign o : shareCampaigns) {  
-//                ContentLink shareCampaignLinkPage = new ContentLink();
-//                shareCampaignLinkPage.setLinkUrl(UriHelper.getMgmPagePattern(o.getCampaignId()));
-//                shareCampaignLinkPage.setLinkTitle("分享好友活動: " + o.getCampaignName());
-//                result.add(shareCampaignLinkPage);
-//            }
-
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		}
 		catch(Exception e){
@@ -349,6 +312,78 @@ public class BCSLinkPageController extends BCSBaseController {
 		catch(Exception e){
 			logger.error(ErrorRecord.recordError(e));
 
+			if(e instanceof BcsNoticeException){
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			}
+			else{
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		}
+	}
+	
+	/**
+	 * 取得連結列表
+	 */
+	@ControllerLog(description="取得連結列表-新版本")
+	@RequestMapping(method = RequestMethod.POST, value = "/edit/getLinkUrlReportListNew", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> getLinkUrlReportListNew(
+			HttpServletRequest request, 
+			HttpServletResponse response,
+			@CurrentUser CustomUser customUser,
+			@RequestBody LinkClickReportSearchModel linkClickReportSearchModel) throws IOException {
+		String queryFlag = new String(linkClickReportSearchModel.getQueryFlag().getBytes("utf-8"),"utf-8");
+		Integer page = linkClickReportSearchModel.getPage() == null ? 0 : linkClickReportSearchModel.getPage();
+		int pageSize = linkClickReportSearchModel.getPageSize() == null ? 20 : linkClickReportSearchModel.getPageSize();
+		String startDate = linkClickReportSearchModel.getStartDate();
+		String endDate = linkClickReportSearchModel.getEndDate();
+		
+		Calendar calendar = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		if (endDate == null) {
+			endDate = sdf.format(calendar.getTime());
+		}	
+		if (startDate == null) {
+			calendar.add(Calendar.DATE, -7);
+			startDate = sdf.format(calendar.getTime());
+		}	
+		logger.info("getLinkUrlReportListNew start, queryFlag=" + queryFlag + " page=" + page + " pageSize=" + pageSize + " startDate=" + startDate + " endDate=" + endDate);
+		try{
+			Sort.Order order = new Sort.Order(Direction.DESC, "tracingId");
+			Sort sort = new Sort(order);
+			Pageable pageable = new PageRequest(page, pageSize, sort);
+			Page<Object[]> result = null; // TRACING_ID, LINK_ID, LINK_TITLE, LINK_URL, MODIFY_TIME, CLICK_COUNT, USER_COUNT
+			result = contentLinkService.findListByModifyDateAndFlag(startDate, endDate, queryFlag, pageable);
+			Map<String, Object> tracingResult = new HashMap<String, Object>();
+			Map<String, LinkClickReportModel> linkResult = new LinkedHashMap<String, LinkClickReportModel>();
+			String tracingUrlPre = UriHelper.getTracingUrlPre();
+            tracingResult.put("TracingUrlPre", tracingUrlPre);
+			for(Object[] data : result){
+				String tracingId = castToString(data[0]);
+				String linkId = castToString(data[1]);
+				String linkTitle = castToString(data[2]);
+				String linkUrl = castToString(data[3]);
+				String linkTime = castToString(data[4]);
+				String totalCount = castToString(data[5]);
+				String userCount = castToString(data[6]);
+				LinkClickReportModel model = new LinkClickReportModel();
+				model = new LinkClickReportModel();
+				model.setTracingLink(tracingId);
+				model.setLinkUrl(linkUrl);
+				model.setLinkId(linkId);
+				model.setLinkTitle(linkTitle);
+				model.setLinkTime(linkTime);
+				model.setTotalCount(StringUtils.isBlank(totalCount) ? 0 : Long.parseLong(totalCount));
+				model.setUserCount(StringUtils.isBlank(userCount) ? 0 : Long.parseLong(userCount));
+				model.addFlags(contentFlagService.findFlagValueByReferenceIdAndContentTypeOrderByFlagValueAsc(linkId, "LINK"));
+				linkResult.put(linkId, model);
+			}
+			tracingResult.put("ContentLinkTracingList", linkResult);
+			logger.info("getLinkUrlReportListNew end, queryFlag=" + queryFlag + " page=" + page + " pageSize=" + pageSize + " startDate=" + startDate + " endDate=" + endDate + " tracingUrlPre=" + tracingUrlPre + " linkResultSize=" + (linkResult == null ? 0 : linkResult.size()));
+			return new ResponseEntity<>(linkResult, HttpStatus.OK);
+		}
+		catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));
 			if(e instanceof BcsNoticeException){
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
 			}

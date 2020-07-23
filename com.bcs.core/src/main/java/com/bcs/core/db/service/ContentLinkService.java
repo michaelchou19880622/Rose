@@ -155,4 +155,13 @@ public class ContentLinkService {
 	public List<String> findClickMidByLinkUrlAndTime(String linkUrl, String start, String end){
 		return contentLinkRepository.findClickMidByLinkUrlAndTime(linkUrl, start, end);
 	}
+	
+	public Page<Object[]> findListByModifyDateAndFlag(String startDate, String endDate, String flag, Pageable pageable){
+		if(StringUtils.isBlank(flag)){
+		    return contentLinkRepository.findListByModifyDateAndFlag(startDate, endDate, flag, pageable);
+		}
+		else {
+			return contentLinkRepository.findListByModifyDate(startDate, endDate, pageable);
+		}
+	}
 }

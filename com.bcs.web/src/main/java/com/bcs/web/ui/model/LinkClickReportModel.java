@@ -25,6 +25,8 @@ public class LinkClickReportModel extends AbstractBcsEntity{
 	
 	private Long userCount = 0L;
 	
+	private String tracingLink;
+	
 	public String getLinkTitle() {
 		return linkTitle;
 	}
@@ -72,5 +74,11 @@ public class LinkClickReportModel extends AbstractBcsEntity{
 	}
 	public void setLinkId(String linkId) {
 		this.linkId = linkId;
+	}
+	public String getTracingLink() {
+		return tracingLink;
+	}
+	public void setTracingLink(String tracingLink) {
+		this.tracingLink = tracingLink;
 	}
 }

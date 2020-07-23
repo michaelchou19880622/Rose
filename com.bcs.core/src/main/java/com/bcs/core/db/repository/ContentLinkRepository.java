@@ -2,6 +2,8 @@ package com.bcs.core.db.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +31,7 @@ public interface ContentLinkRepository extends EntityRepository<ContentLink, Str
 			+ "WHERE CONTENT_TYPE = 'LINK' AND FLAG_VALUE LIKE ?1 AND LINK_ID = REFERENCE_ID AND LINK_URL IS NOT NULL AND LINK_URL != '' "
 			+ "ORDER BY MODIFY_TIME DESC, LINK_URL ", nativeQuery = true)
 	public List<Object[]> findAllLinkUrlByLikeFlag(String flag);
-
+	
 	@Transactional(readOnly = true, timeout = 30)
 	@Query(value = "SELECT LINK_URL, LINK_TITLE, LINK_ID, MODIFY_TIME "
 			+ "FROM BCS_CONTENT_LINK "
@@ -106,4 +108,31 @@ public interface ContentLinkRepository extends EntityRepository<ContentLink, Str
 			+ "FROM BCS_CONTENT_LINK, BCS_USER_TRACE_LOG "
 			+ "WHERE LINK_ID = REFERENCE_ID AND ACTION = 'ClickLink' AND LINK_URL = ?1 AND BCS_USER_TRACE_LOG.MODIFY_DAY >= ?2 AND BCS_USER_TRACE_LOG.MODIFY_DAY < ?3  ", nativeQuery = true)
 	public List<String> findClickMidByLinkUrlAndTime(String linkUrl, String start, String end);
+	
+	@Transactional(readOnly = true, timeout = 30)
+	@Query(value = "SELECT" + 
+			       "    (SELECT TRACING_ID FROM BCS_CONTENT_LINK_TRACING bclt WHERE (bcl.LINK_ID = bclt.LINK_ID OR bcl.LINK_ID = bclt.LINK_ID_BINDED OR bcl.LINK_ID = bclt.LINK_ID_UNMOBILE)) AS TRACING_ID," + 
+			       "	bcl.LINK_ID," + 
+			       "	bcl.LINK_TITLE," + 
+			       "	bcl.LINK_URL," + 
+			       "	bcl.MODIFY_TIME," + 
+			       "	(SELECT COUNT(MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?1 AND MODIFY_DAY <= ?2) AS CLICK_COUNT, " + 
+			       "	(SELECT COUNT(DISTINCT MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?1 AND MODIFY_DAY <= ?2) AS USER_COUNT " + 
+			       "FROM BCS_CONTENT_LINK bcl" + 
+			       "ORDER BY TRACING_ID DESC", nativeQuery = true)
+	public Page<Object[]> findListByModifyDate(String startDate, String endDate, Pageable pageable);
+	
+	@Transactional(readOnly = true, timeout = 30)
+	@Query(value = "SELECT" + 
+			       "    (SELECT TRACING_ID FROM BCS_CONTENT_LINK_TRACING bclt WHERE (bcl.LINK_ID = bclt.LINK_ID OR bcl.LINK_ID = bclt.LINK_ID_BINDED OR bcl.LINK_ID = bclt.LINK_ID_UNMOBILE)) AS TRACING_ID," + 
+			       "	bcl.LINK_ID," + 
+			       "	bcl.LINK_TITLE," + 
+			       "	bcl.LINK_URL," + 
+			       "	bcl.MODIFY_TIME," + 
+			       "	(SELECT COUNT(MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?1 AND MODIFY_DAY <= ?2) AS CLICK_COUNT, " + 
+			       "	(SELECT COUNT(DISTINCT MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?1 AND MODIFY_DAY <= ?2) AS USER_COUNT " + 
+			       "FROM BCS_CONTENT_LINK bcl" + 
+			       "WHERE bcl.LINK_ID IN (SELECT REFERENCE_ID FROM BCS_CONTENT_FLAG bcf WHERE CONTENT_TYPE='LINK' AND FLAG_VALUE LIKE ?3) " +
+	               "ORDER BY TRACING_ID DESC", nativeQuery = true)
+	public Page<Object[]> findListByModifyDateAndFlag(String startDate, String endDate, String flag, Pageable pageable);
 }

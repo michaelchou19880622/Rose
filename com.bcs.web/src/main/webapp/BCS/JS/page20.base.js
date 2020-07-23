@@ -62,14 +62,14 @@ $(function(){
 			alert("起始日不能大於結束日");
 			return;
 		}
-		postData.flag = $("#queryByFlag").val();
+		postData.flag = $("#queryFlag").val();
 		postData.page = page;
 		postData.pageSize = 20;
 		postData.startDate = startDate;
 		postData.endDate = endDate;
 		$('.LyMain').block($.BCS.blockMsgRead);
-		console.info("queryFlag", queryFlag);
-		console.info("page", page);
+		console.info("queryFlag", postData.flag);
+		console.info("page", postData.page);
 		$('#pageText').html(page+1);
 		$.ajax({
 			type : "POST",

@@ -30,6 +30,17 @@ $(function(){
 		loadDataFunc();
 	});
 	
+	//選取日期元件
+	$(".datepicker").datepicker({
+		'maxDate' : 0, //最多只能選至今天
+		'dateFormat' : 'yy-mm-dd'
+	});
+	
+	$('.queryDate').click(function(){
+		page = 0;
+		loadDataFunc();
+	});
+
 	var loadDataFunc = function(){
 		var postData = {};
 		var campaignStartTime = moment($('#campaignStartTime').val(), "YYYY-MM-DD");
@@ -98,9 +109,9 @@ $(function(){
 				groupData.find('.linkFlag').html(linkFlag);				
 				var linkUrl = encodeURIComponent(o.linkUrl);
 				console.info(linkUrl);
-				groupData.find('.totalCount a').attr('href', bcs.bcsContextPath +'/admin/reportLinkClickDetailPage?linkUrl=' + linkUrl)
+				groupData.find('.totalCount a').attr('href', bcs.bcsContextPath + '/admin/reportLinkClickDetailPage?linkUrl=' + linkUrl + "&startDate=" + startDate + "&endDate=" + endDate)
 				groupData.find('.totalCount a').html($.BCS.formatNumber(o.totalCount,0));
-				groupData.find('.userCount a').attr('href', bcs.bcsContextPath +'/admin/reportLinkClickDetailPage?linkUrl=' + linkUrl)
+				groupData.find('.userCount a').attr('href', bcs.bcsContextPath + '/admin/reportLinkClickDetailPage?linkUrl=' + linkUrl  + "&startDate=" + startDate + "&endDate=" + endDate)
 				groupData.find('.userCount a').html($.BCS.formatNumber(o.userCount,0));
 				$('#tableBody').append(groupData);
 			});
@@ -115,10 +126,4 @@ $(function(){
 	};
 
 	loadDataFunc("");
-	//選取日期元件
-	$(".datepicker").datepicker({ 'dateFormat' : 'yy-mm-dd'});
-	$('.querydate').click(function(){
-		page = 0;
-		loadDataFunc();
-	});
 });

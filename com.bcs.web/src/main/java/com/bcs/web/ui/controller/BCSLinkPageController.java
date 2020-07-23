@@ -380,7 +380,7 @@ public class BCSLinkPageController extends BCSBaseController {
 			}
 			tracingResult.put("ContentLinkTracingList", linkResult);
 			logger.info("getLinkUrlReportListNew end, queryFlag=" + queryFlag + " page=" + page + " pageSize=" + pageSize + " startDate=" + startDate + " endDate=" + endDate + " tracingUrlPre=" + tracingUrlPre + " linkResultSize=" + (linkResult == null ? 0 : linkResult.size()));
-			return new ResponseEntity<>(linkResult, HttpStatus.OK);
+			return new ResponseEntity<>(tracingResult, HttpStatus.OK);
 		}
 		catch(Exception e){
 			logger.error(ErrorRecord.recordError(e));

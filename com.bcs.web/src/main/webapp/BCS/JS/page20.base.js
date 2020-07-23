@@ -107,11 +107,12 @@ $(function(){
 				for (var i = 0; i < o.flags.length; i++) {
 					linkFlag += "<br/><br/>" + o.flags[i];
 				}
-				groupData.find('.linkFlag').html(linkFlag);				
+				groupData.find('.linkFlag').html(linkFlag);
+				var linkId = encodeURIComponent(o.linkId);
 				var linkUrl = encodeURIComponent(o.linkUrl);
-				groupData.find('.totalCount a').attr('href', bcs.bcsContextPath + '/admin/reportLinkClickDetailPage?linkUrl=' + linkUrl + "&startDate=" + startDate + "&endDate=" + endDate)
+				groupData.find('.totalCount a').attr('href', bcs.bcsContextPath + '/admin/reportLinkClickDetailPage?linkUrl=' + linkUrl + "&linkId=" + linkId + "&startDate=" + startDate + "&endDate=" + endDate)
 				groupData.find('.totalCount a').html($.BCS.formatNumber(o.totalCount,0));
-				groupData.find('.userCount a').attr('href', bcs.bcsContextPath + '/admin/reportLinkClickDetailPage?linkUrl=' + linkUrl  + "&startDate=" + startDate + "&endDate=" + endDate)
+				groupData.find('.userCount a').attr('href', bcs.bcsContextPath + '/admin/reportLinkClickDetailPage?linkUrl=' + linkUrl  + "&linkId=" + linkId + "&startDate=" + startDate + "&endDate=" + endDate)
 				groupData.find('.userCount a').html($.BCS.formatNumber(o.userCount,0));
 				$('#tableBody').append(groupData);
 			});

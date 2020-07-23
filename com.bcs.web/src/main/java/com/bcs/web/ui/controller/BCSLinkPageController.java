@@ -547,28 +547,26 @@ public class BCSLinkPageController extends BCSBaseController {
 			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser) throws Exception {
-		logger.info("countLinkUrlList");
-		
+		String linkUrl = request.getParameter("linkUrl");
+		String startDate = request.getParameter("startDate");
+		String endDate = request.getParameter("endDate");
+		logger.info("countLinkUrlList start, linkUrl=" + linkUrl + " startDate=" + startDate + " endDate=" + endDate);
 		try {
-			String linkUrl = request.getParameter("linkUrl");
-			String startDate = request.getParameter("startDate");
-			String endDate = request.getParameter("endDate");
-			
 			if (StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate)) {
 				Map<String, Map<String, Long>> result = contentLinkReportService.getLinkUrlReport(startDate, endDate, linkUrl);
+				logger.info("countLinkUrlList end, linkUrl=" + linkUrl + " startDate=" + startDate + " endDate=" + endDate + " listSize=" + (result == null ? 0 : result.size()));
 				return new ResponseEntity<>(result, HttpStatus.OK);
 			} else {
 				if (StringUtils.isBlank(startDate)) {
-					logger.error("startDate null");
+					logger.error("countLinkUrlList end, no start date");
 					throw new BcsNoticeException("缺少查詢起始日期");
 				} else {
-					logger.error("endDate null");
+					logger.error("countLinkUrlList end, no end date");
 					throw new BcsNoticeException("缺少查詢結束日期");
 				}
 			}
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
-			
 			if(e instanceof BcsNoticeException) {
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
 			} else{
@@ -584,28 +582,27 @@ public class BCSLinkPageController extends BCSBaseController {
 			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser) throws Exception {
-		logger.info("countLinkIdList");
-		
+		String linkId = request.getParameter("linkId");
+		String linkUrl = request.getParameter("linkUrl");
+		String startDate = request.getParameter("startDate");
+		String endDate = request.getParameter("endDate");
+		logger.info("countLinkIdList start, linkId=" + linkId + " linkUrl=" + linkUrl + " startDate=" + startDate + " endDate=" + endDate);
 		try {
-			String linkId = request.getParameter("linkId");
-			String startDate = request.getParameter("startDate");
-			String endDate = request.getParameter("endDate");
-			
 			if (StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate)) {
-				Map<String, Map<String, Long>> result = contentLinkReportService.getLinkIdReport(startDate, endDate, linkId);
+				Map<String, Map<String, Long>> result = contentLinkReportService.getLinkIdReportNew(startDate, endDate, linkId);
+				logger.info("countLinkUrlList end, linkId=" + linkId + " linkUrl=" + linkUrl + " startDate=" + startDate + " endDate=" + endDate + " listSize=" + (result == null ? 0 : result.size()));
 				return new ResponseEntity<>(result, HttpStatus.OK);
 			} else {
 				if (StringUtils.isBlank(startDate)) {
-					logger.error("startDate null");
+					logger.error("countLinkIdList end, no start date");
 					throw new BcsNoticeException("缺少查詢起始日期");
 				} else {
-					logger.error("endDate null");
+					logger.error("countLinkIdList end, no start date");
 					throw new BcsNoticeException("缺少查詢結束日期");
 				}
 			}
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
-			
 			if(e instanceof BcsNoticeException) {
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
 			} else{

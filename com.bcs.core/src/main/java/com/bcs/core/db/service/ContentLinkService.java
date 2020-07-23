@@ -1,6 +1,9 @@
 package com.bcs.core.db.service;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PreDestroy;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.bcs.core.db.entity.ContentLink;
 import com.bcs.core.db.repository.ContentLinkRepository;
+import com.bcs.core.enums.RECORD_REPORT_TYPE;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -140,8 +144,8 @@ public class ContentLinkService {
 		return contentLinkRepository.countClickCountByLinkUrl(linkUrl, start);
 	}
 
-	public List<Object[]> countClickCountByLinkIdAndTime(String linkUrl, String start, String end){
-		return contentLinkRepository.countClickCountByLinkIdAndTime(linkUrl, start, end);
+	public List<Object[]> countClickCountByLinkIdAndTime(String linkId, String start, String end){
+		return contentLinkRepository.countClickCountByLinkIdAndTime(linkId, start, end);
 	}
 
 	public List<Object[]> countClickCountByLinkId(String LinkId){
@@ -161,7 +165,7 @@ public class ContentLinkService {
 		    return contentLinkRepository.findListByModifyDate(startDate, endDate);
 		}
 		else {
-			return contentLinkRepository.findListByModifyDateAndFlag(startDate, endDate, flag);
+			return contentLinkRepository.findListByModifyDateAndFlag(startDate, endDate, "%" + flag + "%");
 		}
 	}
 }

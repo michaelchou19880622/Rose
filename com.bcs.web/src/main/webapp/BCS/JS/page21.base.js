@@ -27,6 +27,11 @@ $(function(){
 			alert("起始日不能大於結束日");
 			return false;
 		}
+		var n = parseInt((new Date(endDate) - new Date(startDate)) / 86400000);
+		if (n > 30) {
+			alert("僅限查詢一個月內資料");
+			return false;
+		}
 		return true;
 	}
 	

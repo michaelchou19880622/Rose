@@ -47,6 +47,7 @@ $(function(){
 		var campaignEndTime = moment($('#campaignEndTime').val(), "YYYY-MM-DD");
 		var startDate = $("#campaignStartTime").val();
 		var endDate = $("#campaignEndTime").val();
+		var n = parseInt((new Date(endDate) - new Date(startDate)) / 86400000);
 		console.info("startDate", startDate);
 		console.info("endDate", endDate);
 		//需要有日期
@@ -75,6 +76,9 @@ $(function(){
 			$('#campaignEndTime').val(endDate);
 		}else if (campaignStartTime.isAfter(campaignEndTime)){
 			alert("起始日不能大於結束日");
+			return;
+		}else if (n > 30){
+	        alert("僅限查詢一個月內資料");
 			return;
 		}
 		postData.queryFlag = $("#queryFlag").val();

@@ -98,7 +98,6 @@ $(function(){
 			console.info(response);
 			var contentLinkTracingList = response.ContentLinkTracingList;
 			var tracingUrlPre = response.TracingUrlPre;
-			console.info("listSize", contentLinkTracingList.length);
 			$.each(contentLinkTracingList, function(i, o){
 				var groupData = templateBody.clone(true);
 				groupData.find('.tracingLink').html(tracingUrlPre + o.tracingLink);

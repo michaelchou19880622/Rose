@@ -2,7 +2,6 @@ package com.bcs.core.db.repository;
 
 import java.util.List;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -117,7 +116,7 @@ public interface ContentLinkRepository extends EntityRepository<ContentLink, Str
 			       "	bcl.MODIFY_TIME," + 
 			       "	(SELECT COUNT(MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?1 AND MODIFY_DAY <= ?2) AS CLICK_COUNT, " + 
 			       "	(SELECT COUNT(DISTINCT MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?1 AND MODIFY_DAY <= ?2) AS USER_COUNT " + 
-			       "FROM BCS_CONTENT_LINK bcl" + 
+			       "FROM BCS_CONTENT_LINK bcl " + 
 			       "ORDER BY TRACING_ID DESC", nativeQuery = true)
 	public List<Object[]> findListByModifyDate(String startDate, String endDate);
 	
@@ -130,7 +129,7 @@ public interface ContentLinkRepository extends EntityRepository<ContentLink, Str
 			       "	bcl.MODIFY_TIME," + 
 			       "	(SELECT COUNT(MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?1 AND MODIFY_DAY <= ?2) AS CLICK_COUNT, " + 
 			       "	(SELECT COUNT(DISTINCT MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?1 AND MODIFY_DAY <= ?2) AS USER_COUNT " + 
-			       "FROM BCS_CONTENT_LINK bcl" + 
+			       "FROM BCS_CONTENT_LINK bcl " + 
 			       "WHERE bcl.LINK_ID IN (SELECT REFERENCE_ID FROM BCS_CONTENT_FLAG bcf WHERE CONTENT_TYPE='LINK' AND FLAG_VALUE LIKE ?3) " +
 	               "ORDER BY TRACING_ID DESC", nativeQuery = true)
 	public List<Object[]> findListByModifyDateAndFlag(String startDate, String endDate, String flag);

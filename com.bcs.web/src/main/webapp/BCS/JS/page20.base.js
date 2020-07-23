@@ -77,13 +77,13 @@ $(function(){
 			alert("起始日不能大於結束日");
 			return;
 		}
-		postData.flag = $("#queryFlag").val();
+		postData.queryFlag = $("#queryFlag").val();
 		postData.page = page;
 		postData.pageSize = 20;
 		postData.startDate = startDate;
 		postData.endDate = endDate;
 		$('.LyMain').block($.BCS.blockMsgRead);
-		console.info("queryFlag", postData.flag);
+		console.info("queryFlag", postData.queryFlag);
 		console.info("page", postData.page);
 		$('#pageText').html(page+1);
 		$.ajax({
@@ -103,13 +103,12 @@ $(function(){
 				groupData.find('.tracingLink').html(tracingUrlPre + o.tracingLink);
 				groupData.find('.linkTitle').html(o.linkTitle);
 				groupData.find('.linkUrl').html(o.linkUrl);
-				var linkFlag = moment(o.linkTime).format("YYYY/MM/DD") + "<br/><br/>";
-				if (o.linkFlag != null) {
-				    linkFlag += o.linkFlag;
+				var linkFlag = moment(o.linkTime).format("YYYY/MM/DD");
+				for (var i = 0; i < o.flags.length; i++) {
+					linkFlag += "<br/><br/>" + o.flags[i];
 				}
 				groupData.find('.linkFlag').html(linkFlag);				
 				var linkUrl = encodeURIComponent(o.linkUrl);
-				console.info(linkUrl);
 				groupData.find('.totalCount a').attr('href', bcs.bcsContextPath + '/admin/reportLinkClickDetailPage?linkUrl=' + linkUrl + "&startDate=" + startDate + "&endDate=" + endDate)
 				groupData.find('.totalCount a').html($.BCS.formatNumber(o.totalCount,0));
 				groupData.find('.userCount a').attr('href', bcs.bcsContextPath + '/admin/reportLinkClickDetailPage?linkUrl=' + linkUrl  + "&startDate=" + startDate + "&endDate=" + endDate)

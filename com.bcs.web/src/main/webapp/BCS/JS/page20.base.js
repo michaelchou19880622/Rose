@@ -56,6 +56,8 @@ $(function(){
 			    startDate += '0';
 			}
 			startDate += d.getDate();
+			$('#campaignStartTime').val(startDate);
+			$('#campaignEndTime').val(endDate);
 		}else if (campaignStartTime.isAfter(campaignEndTime)){
 			alert("起始日不能大於結束日");
 			return;

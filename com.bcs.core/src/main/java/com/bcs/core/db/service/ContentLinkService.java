@@ -1,9 +1,6 @@
 package com.bcs.core.db.service;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PreDestroy;
@@ -17,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import com.bcs.core.db.entity.ContentLink;
 import com.bcs.core.db.repository.ContentLinkRepository;
-import com.bcs.core.enums.RECORD_REPORT_TYPE;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;

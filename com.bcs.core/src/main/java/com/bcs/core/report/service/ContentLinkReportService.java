@@ -364,8 +364,8 @@ public class ContentLinkReportService {
 			calendarEnd.add(Calendar.DATE, 1);
 			endDate = sdf.format(calendarEnd.getTime());
 			// Query By linkId
-			String CONTENT_TYPE_LINK_ID = RECORD_REPORT_TYPE.CONTENT_TYPE_LINK_ID.toString();
-			Map<String, Map<String, Long>> countLinkIdList = recordReportService.findRecordReportListByContentType(linkId, CONTENT_TYPE_LINK_ID, startDate, endDate);			
+			String contentType = RECORD_REPORT_TYPE.CONTENT_TYPE_LINK_ID.toString();
+			Map<String, Map<String, Long>> countLinkIdList = recordReportService.findRecordReportListByContentType(linkId, contentType, startDate, endDate);			
 			Map<String, Map<String, Long>> result = new LinkedHashMap<String, Map<String, Long>>();
 			Date timeBreak = sdf.parse(startDate);
 			Calendar calendarBreak = Calendar.getInstance();
@@ -407,13 +407,13 @@ public class ContentLinkReportService {
 							recordReportService.saveByReferenceIdAndContentTypeAndDataTypeAndRecordTime(
 											startTimeStr,
 											linkId,
-											CONTENT_TYPE_LINK_ID,
+											contentType,
 											RECORD_REPORT_TYPE.DATA_TYPE_LINK_COUNT.toString(),
 											count);
 							recordReportService.saveByReferenceIdAndContentTypeAndDataTypeAndRecordTime(
 											startTimeStr,
 											linkId,
-											CONTENT_TYPE_LINK_ID,
+											contentType,
 											RECORD_REPORT_TYPE.DATA_TYPE_LINK_DISTINCT_COUNT.toString(),
 											distinctCount);
 						}

@@ -93,7 +93,7 @@ $(function(){
 		$('#linkUrl').html(decodeURIComponent(linkUrl));
 		startDate = $('#reportStartDate').val();
 		endDate = $('#reportEndDate').val();
-		console.info("linkId", Id);
+		console.info("linkId", linkId);
 		console.info("linkUrl", linkUrl);
 		console.info("startDate", startDate);
 		console.info("endDate", endDate);

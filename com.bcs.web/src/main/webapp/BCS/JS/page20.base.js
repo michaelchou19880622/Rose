@@ -35,7 +35,7 @@ $(function(){
 		console.info("startDate", startDate);
 		console.info("endDate", endDate);
 		//需要有日期
-		if(startTime == '' || endTime == ''){
+		if(startDate == '' || endDate == ''){
 			var d = new Date();
 			endDate = d.getFullYear() + '-';
 			if (parseInt(d.getMonth()) < 9) {

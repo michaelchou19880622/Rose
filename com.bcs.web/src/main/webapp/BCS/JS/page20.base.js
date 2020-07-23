@@ -36,8 +36,26 @@ $(function(){
 		console.info("endDate", endDate);
 		//需要有日期
 		if(startTime == '' || endTime == ''){
-			starDate = '2020-01-01';
-			endDate = '2020-12-31';
+			var d = new Date();
+			endDate = d.getFullYear() + '-';
+			if (parseInt(d.getMonth()) < 9) {
+			    endDate += '0';
+			}
+			endDate += (parseInt(d.getMonth()) + 1) + '-';
+			if (parseInt(d.getDate()) < 10) {
+			    endDate += '0';
+			}
+			endDate += d.getDate();
+			d.setDate(d.getDate() - 6);
+			startDate = d.getFullYear() + '-';
+			if (parseInt(d.getMonth()) < 9) {
+			    startDate += '0';
+			}
+			startDate += (parseInt(d.getMonth()) + 1) + '-';
+			if (parseInt(d.getDate()) < 10) {
+			    startDate += '0';
+			}
+			startDate += d.getDate();
 		}else if (campaignStartTime.isAfter(campaignEndTime)){
 			alert("起始日不能大於結束日");
 			return;

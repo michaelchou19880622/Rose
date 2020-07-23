@@ -353,7 +353,7 @@ public class BCSLinkPageController extends BCSBaseController {
 			Sort sort = new Sort(order);
 			Pageable pageable = new PageRequest(page, pageSize, sort);
 			List<Object[]> result = null; // TRACING_ID, LINK_ID, LINK_TITLE, LINK_URL, MODIFY_TIME, CLICK_COUNT, USER_COUNT
-			result = contentLinkService.findListByModifyDateAndFlag(startDate, endDate, queryFlag, pageable);
+			result = contentLinkService.findListByModifyDateAndFlag(startDate, endDate, queryFlag);
 			Map<String, Object> tracingResult = new HashMap<String, Object>();
 			Map<String, LinkClickReportModel> linkResult = new LinkedHashMap<String, LinkClickReportModel>();
 			String tracingUrlPre = UriHelper.getTracingUrlPre();

@@ -342,7 +342,6 @@ public class ContentLinkReportService {
 	
 	public Map<String, Map<String, Long>> getLinkIdReportNew(String startDate, String endDate, String linkId) throws Exception {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		Date fisrtTime = new Date();
 		// Validate
 		if(StringUtils.isNotBlank(linkId)){
 			ContentLink link = contentLinkService.findOne(linkId);
@@ -384,39 +383,35 @@ public class ContentLinkReportService {
 						distinctCount = mapLinkId.get(RECORD_REPORT_TYPE.DATA_TYPE_LINK_DISTINCT_COUNT.toString());
 					}
 					if(count == null || distinctCount == null){
-						if(calendarStart.getTime().getTime() >= fisrtTime.getTime()){
-							if(clickMapCount == null){ 
-								List<Object[]> listCountDistinct = contentLinkService.countClickCountByLinkId(linkId, sdf.format(calendarStart.getTime()));
-								clickMapCount = new HashMap<String, Long>();
-								for(Object[] objArray : listCountDistinct){
-									String timeDay = (String) objArray[0];
-									clickMapCount.put(timeDay + "Count", DBResultUtil.caseCountResult(objArray[1], false).longValue()) ;
-									clickMapCount.put(timeDay + "CountDistinct", DBResultUtil.caseCountResult(objArray[2], false).longValue()) ;
-								}
+						if(clickMapCount == null){ 
+							List<Object[]> listCountDistinct = contentLinkService.countClickCountByLinkId(linkId, sdf.format(calendarStart.getTime()));
+							clickMapCount = new HashMap<String, Long>();
+							for(Object[] objArray : listCountDistinct){
+								String timeDay = (String) objArray[0];
+								clickMapCount.put(timeDay + "Count", DBResultUtil.caseCountResult(objArray[1], false).longValue()) ;
+								clickMapCount.put(timeDay + "CountDistinct", DBResultUtil.caseCountResult(objArray[2], false).longValue()) ;
 							}
-							count = clickMapCount.get(startTimeStr + "Count");
-							distinctCount = clickMapCount.get(startTimeStr + "CountDistinct");
 						}
+						count = clickMapCount.get(startTimeStr + "Count");
+						distinctCount = clickMapCount.get(startTimeStr + "CountDistinct");
 						if(count == null){
 							count = 0L;
 						}
 						if(distinctCount == null){
 							distinctCount = 0L;
 						}
-						if(calendarStart.getTime().getTime() >= fisrtTime.getTime()){
-							recordReportService.saveByReferenceIdAndContentTypeAndDataTypeAndRecordTime(
+						recordReportService.saveByReferenceIdAndContentTypeAndDataTypeAndRecordTime(
 											startTimeStr,
 											linkId,
 											contentType,
 											RECORD_REPORT_TYPE.DATA_TYPE_LINK_COUNT.toString(),
 											count);
-							recordReportService.saveByReferenceIdAndContentTypeAndDataTypeAndRecordTime(
+						recordReportService.saveByReferenceIdAndContentTypeAndDataTypeAndRecordTime(
 											startTimeStr,
 											linkId,
 											contentType,
 											RECORD_REPORT_TYPE.DATA_TYPE_LINK_DISTINCT_COUNT.toString(),
 											distinctCount);
-						}
 					}
 					countMap.put(RECORD_REPORT_TYPE.DATA_TYPE_LINK_COUNT.toString(), count);
 					countMap.put(RECORD_REPORT_TYPE.DATA_TYPE_LINK_DISTINCT_COUNT.toString(), distinctCount);

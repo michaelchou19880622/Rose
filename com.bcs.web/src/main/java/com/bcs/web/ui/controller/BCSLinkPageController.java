@@ -590,7 +590,7 @@ public class BCSLinkPageController extends BCSBaseController {
 		try {
 			if (StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate)) {
 				Map<String, Map<String, Long>> result = contentLinkReportService.getLinkIdReportNew(startDate, endDate, linkId);
-				logger.info("countLinkUrlList end, linkId=" + linkId + " linkUrl=" + linkUrl + " startDate=" + startDate + " endDate=" + endDate + " listSize=" + (result == null ? 0 : result.size()));
+				logger.info("countLinkIdList end, linkId=" + linkId + " linkUrl=" + linkUrl + " startDate=" + startDate + " endDate=" + endDate + " listSize=" + (result == null ? 0 : result.size()));
 				return new ResponseEntity<>(result, HttpStatus.OK);
 			} else {
 				if (StringUtils.isBlank(startDate)) {

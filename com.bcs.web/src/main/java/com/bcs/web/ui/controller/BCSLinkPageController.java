@@ -352,7 +352,7 @@ public class BCSLinkPageController extends BCSBaseController {
 			Sort.Order order = new Sort.Order(Direction.DESC, "tracingId");
 			Sort sort = new Sort(order);
 			Pageable pageable = new PageRequest(page, pageSize, sort);
-			Page<Object[]> result = null; // TRACING_ID, LINK_ID, LINK_TITLE, LINK_URL, MODIFY_TIME, CLICK_COUNT, USER_COUNT
+			List<Object[]> result = null; // TRACING_ID, LINK_ID, LINK_TITLE, LINK_URL, MODIFY_TIME, CLICK_COUNT, USER_COUNT
 			result = contentLinkService.findListByModifyDateAndFlag(startDate, endDate, queryFlag, pageable);
 			Map<String, Object> tracingResult = new HashMap<String, Object>();
 			Map<String, LinkClickReportModel> linkResult = new LinkedHashMap<String, LinkClickReportModel>();

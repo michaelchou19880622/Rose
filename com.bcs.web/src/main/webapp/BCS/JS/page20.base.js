@@ -32,10 +32,12 @@ $(function(){
 		var campaignEndTime = moment($('#campaignEndTime').val(), "YYYY-MM-DD");
 		var startDate = $("#campaignStartTime").val();
 		var endDate = $("#campaignEndTime").val();
+		console.info("startDate", startDate);
+		console.info("endDate", endDate);
 		//需要有日期
 		if(startTime == '' || endTime == ''){
-			alert('請輸入日期區間');
-			return;
+			starDate = '2020-01-01';
+			endDate = '2020-12-31';
 		}else if (campaignStartTime.isAfter(campaignEndTime)){
 			alert("起始日不能大於結束日");
 			return;

@@ -332,7 +332,7 @@ public class BCSLinkPageController extends BCSBaseController {
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser,
 			@RequestBody LinkClickReportSearchModel linkClickReportSearchModel) throws IOException {
-		String queryFlag = new String(linkClickReportSearchModel.getQueryFlag().getBytes("utf-8"),"utf-8");
+		String queryFlag = linkClickReportSearchModel.getQueryFlag() == null ? "" : new String(linkClickReportSearchModel.getQueryFlag().getBytes("utf-8"),"utf-8");
 		Integer page = linkClickReportSearchModel.getPage() == null ? 0 : linkClickReportSearchModel.getPage();
 		int pageSize = linkClickReportSearchModel.getPageSize() == null ? 20 : linkClickReportSearchModel.getPageSize();
 		String startDate = linkClickReportSearchModel.getStartDate();

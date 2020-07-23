@@ -104,7 +104,9 @@ $(function(){
 				groupData.find('.linkTitle').html(o.linkTitle);
 				groupData.find('.linkUrl').html(o.linkUrl);
 				var linkFlag = moment(o.linkTime).format("YYYY/MM/DD") + "<br/><br/>";
-				linkFlag += o.linkFlag;
+				if (o.linkFlag != null) {
+				    linkFlag += o.linkFlag;
+				}
 				groupData.find('.linkFlag').html(linkFlag);				
 				var linkUrl = encodeURIComponent(o.linkUrl);
 				console.info(linkUrl);

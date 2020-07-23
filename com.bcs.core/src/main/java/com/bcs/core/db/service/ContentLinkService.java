@@ -158,10 +158,10 @@ public class ContentLinkService {
 	
 	public List<Object[]> findListByModifyDateAndFlag(String startDate, String endDate, String flag){
 		if(StringUtils.isBlank(flag)){
-		    return contentLinkRepository.findListByModifyDateAndFlag(startDate, endDate, flag);
+		    return contentLinkRepository.findListByModifyDate(startDate, endDate);
 		}
 		else {
-			return contentLinkRepository.findListByModifyDate(startDate, endDate);
+			return contentLinkRepository.findListByModifyDateAndFlag(startDate, endDate, flag);
 		}
 	}
 }

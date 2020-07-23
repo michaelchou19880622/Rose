@@ -4,6 +4,10 @@
 $(function(){
 	var page = 0;
 	var paramPage = $.urlParam("page");
+	var templateBody = {};
+	$("#queryFlag").val("");
+	templateBody = $('.dataTemplate').clone(true);
+	$('.dataTemplate').remove();
 	if(paramPage){
 		page = paramPage;
 		page--;
@@ -83,6 +87,7 @@ $(function(){
 			console.info(response);
 			var contentLinkTracingList = response.ContentLinkTracingList;
 			var tracingUrlPre = response.TracingUrlPre;
+			console.info("listSize", contentLinkTracingList.length);
 			$.each(contentLinkTracingList, function(i, o){
 				var groupData = templateBody.clone(true);
 				groupData.find('.tracingLink').html(tracingUrlPre + o.tracingLink);
@@ -108,10 +113,7 @@ $(function(){
 			$('.LyMain').unblock();
 		});
 	};
-	
-	var templateBody = {};
-	templateBody = $('.dataTemplate').clone(true);
-	$('.dataTemplate').remove();
+
 	loadDataFunc("");
 	//選取日期元件
 	$(".datepicker").datepicker({ 'dateFormat' : 'yy-mm-dd'});

@@ -142,8 +142,9 @@ public interface ContentLinkRepository extends EntityRepository<ContentLink, Str
 	
 	@Transactional(readOnly = true, timeout = 30)
 	@Query(value = "SELECT "
-			+ "          COUNT('x') AS allCount, "
-			+ "          COUNT(distinct BCS_USER_TRACE_LOG.MODIFY_USER) AS allDistinctCount "
+			+ "     MODIFY_DAY AS Day, "
+			+ "     COUNT('x') AS allCount, "
+			+ "     COUNT(distinct BCS_USER_TRACE_LOG.MODIFY_USER) AS allDistinctCount "
 			+ "FROM BCS_CONTENT_LINK, BCS_USER_TRACE_LOG "
 			+ "WHERE LINK_ID = REFERENCE_ID AND ACTION = 'ClickLink' AND LINK_ID = ?1 AND BCS_USER_TRACE_LOG.MODIFY_DAY >= ?2 AND BCS_USER_TRACE_LOG.MODIFY_DAY <= ?3  ", nativeQuery = true)
 	public List<Object[]> countClickCountByLinkIdAndTimeNew(String linkId, String start, String end);

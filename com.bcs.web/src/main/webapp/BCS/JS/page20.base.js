@@ -31,11 +31,38 @@ $(function(){
 	});
 	
 	$('.exportToExcel').click(function(){
-		var url =  bcs.bcsContextPath + '/edit/exportToExcelForInterface';
+		var campaignStartTime = moment($('#campaignStartTime').val(), "YYYY-MM-DD");
+		var campaignEndTime = moment($('#campaignEndTime').val(), "YYYY-MM-DD");
+		var startDate = $("#campaignStartTime").val();
+		var endDate = $("#campaignEndTime").val();
+		if(!validateTimeRange(startDate, endDate)){
+			return false;
+		}
+		var url =  bcs.bcsContextPath + '/edit/exportLinkClickReportListNew?startDate=' + startDate + '&endDate=' + endDate;
 		var downloadReport = $('#downloadReport');
 		downloadReport.attr("src", url);
-		
 	});
+	
+	var validateTimeRange = function(startDate, endDate) {
+		if (!startDate.isValid()) {
+			alert("請選擇起始日期");
+			return false;
+		}
+		if (!endDate.isValid()) {
+			alert("請選擇結束日期");
+			return false;
+		}
+		if (startDate.isAfter(endDate)) {
+			alert("起始日不能大於結束日");
+			return false;
+		}
+		var n = parseInt((new Date(endDate) - new Date(startDate)) / 86400000);
+		if (n > 30) {
+			alert("僅限查詢一個月內資料");
+			return false;
+		}
+		return true;
+	}
 	
 	//選取日期元件
 	$(".datepicker").datepicker({
@@ -49,7 +76,6 @@ $(function(){
 	});
 
 	var loadDataFunc = function(){
-		var postData = {};
 		var campaignStartTime = moment($('#campaignStartTime').val(), "YYYY-MM-DD");
 		var campaignEndTime = moment($('#campaignEndTime').val(), "YYYY-MM-DD");
 		var startDate = $("#campaignStartTime").val();
@@ -81,13 +107,11 @@ $(function(){
 			startDate += d.getDate();
 			$('#campaignStartTime').val(startDate);
 			$('#campaignEndTime').val(endDate);
-		}else if (campaignStartTime.isAfter(campaignEndTime)){
-			alert("起始日不能大於結束日");
-			return;
-		}else if (n > 30){
-	        alert("僅限查詢一個月內資料");
+		}
+		if(!validateTimeRange(startDate, endDate)){
 			return;
 		}
+		var postData = {};
 		postData.queryFlag = $("#queryFlag").val();
 		postData.page = page;
 		postData.pageSize = 20;
@@ -99,7 +123,7 @@ $(function(){
 		$('#pageText').html(page+1);
 		$.ajax({
 			type : "POST",
-			url : bcs.bcsContextPath + '/edit/getLinkUrlReportListNew',
+			url : bcs.bcsContextPath + '/edit/getLinkClickReportListNew',
 			cache: false,
             contentType: 'application/json',
             processData: false,

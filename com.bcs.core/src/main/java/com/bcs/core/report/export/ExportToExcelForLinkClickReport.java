@@ -14,9 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bcs.core.db.entity.ContentLink;
+import com.bcs.core.db.service.ContentFlagService;
 import com.bcs.core.db.service.ContentLinkService;
 import com.bcs.core.enums.RECORD_REPORT_TYPE;
 import com.bcs.core.report.service.ContentLinkReportService;
+import com.bcs.core.resource.UriHelper;
 import com.bcs.core.utils.ErrorRecord;
 
 @Service
@@ -29,6 +31,8 @@ public class ExportToExcelForLinkClickReport {
 	private ContentLinkService contentLinkService;
 	@Autowired
 	private ContentLinkReportService contentLinkReportService;
+	@Autowired
+	private ContentFlagService contentFlagService;
 	
 	/**
 	 * 匯出 Link Click Report EXCEL
@@ -108,7 +112,7 @@ public class ExportToExcelForLinkClickReport {
 	public void exportToExcelForLinkClickReportNew(String exportPath, String fileName, String startDate, String endDate,  String linkId, String linkUrl) throws Exception {
 		try {
 			Workbook wb = new XSSFWorkbook();
-			Sheet sheetLink = wb.createSheet("Link Click Report");
+			Sheet sheetLink = wb.createSheet("ClickReportById");
 			this.exportToExcelForLinkClickReportNew(wb, sheetLink, startDate, endDate, linkId, linkUrl);
 			// Save
 			FileOutputStream out = new FileOutputStream(exportPath + System.getProperty("file.separator") + fileName);
@@ -133,7 +137,7 @@ public class ExportToExcelForLinkClickReport {
 	public void exportToExcelForLinkClickReportNew(Workbook wb, Sheet sheet, String startDate, String endDate, String linkId, String linkUrl) throws Exception{
 		ContentLink link = contentLinkService.findOne(linkId);
 		if(link == null){
-			throw new Exception("linkId Error");
+			throw new Exception("link Id Error");
 		}			
 		String linkTitle = link.getLinkTitle();
 		//取得匯出資料
@@ -165,5 +169,57 @@ public class ExportToExcelForLinkClickReport {
 				seqNo++;
 			}
 		}
+	}
+	
+	public void exportLinkClickReportListNew(String exportPath, String fileName, String startDate, String endDate,  String queryFlag) throws Exception {
+		try {
+			Workbook wb = new XSSFWorkbook();
+			Sheet sheetLink = wb.createSheet("ClickReportBySearch");
+			this.exportToExcelForLinkClickReportNew(wb, sheetLink, startDate, endDate, queryFlag);
+			// Save
+			FileOutputStream out = new FileOutputStream(exportPath + System.getProperty("file.separator") + fileName);
+			wb.write(out);
+			out.close();
+			wb.close();
+		} catch (Exception e) {
+    		logger.error(ErrorRecord.recordError(e));
+		}
+	}
+	
+	public void exportToExcelForLinkClickReportNew(Workbook wb, Sheet sheet, String startDate, String endDate, String queryFlag) throws Exception{
+		List<Object[]> result = null; // TRACING_ID, LINK_ID, LINK_TITLE, LINK_URL, MODIFY_TIME, CLICK_COUNT, USER_COUNT
+		String tracingUrlPre = UriHelper.getTracingUrlPre();
+		result = contentLinkService.findListByModifyDateAndFlag(startDate, endDate, queryFlag);
+		Row row = sheet.createRow(0); // declare a row object reference
+		row.createCell(0).setCellValue("追蹤連結");
+		row.createCell(1).setCellValue("連結名稱");
+		row.createCell(2).setCellValue("追蹤目標");
+		row.createCell(3).setCellValue("時間/註記");
+		row.createCell(4).setCellValue("點擊次數");
+		row.createCell(5).setCellValue("點擊人數");
+        for(Object[] data : result){
+        	int seqNo = 1; //序號
+        	Row row1 = sheet.createRow(seqNo);
+			row1.createCell(0).setCellValue(tracingUrlPre + castToString(data[0]));
+			row1.createCell(1).setCellValue(castToString(data[2]));
+			row1.createCell(2).setCellValue(castToString(data[3]));
+			List<String> flagList = contentFlagService.findFlagValueByReferenceIdAndContentTypeOrderByFlagValueAsc(castToString(data[1]), "LINK");
+			String flagStr = castToString(data[4]);
+			for(String flag : flagList){
+				flagStr += flag;
+			}
+			row1.createCell(3).setCellValue(flagStr);
+			row1.createCell(4).setCellValue(castToString(data[5]));
+			row1.createCell(5).setCellValue(castToString(data[6]));
+			seqNo++;
+		}
+		return;
+	}
+	
+	private String castToString(Object obj){
+		if(obj != null){
+			return obj.toString();
+		}
+		return "";
 	}
 }

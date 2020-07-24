@@ -684,7 +684,7 @@ public class BCSLinkPageController extends BCSBaseController {
 	 * 匯出連結列表到Excel
 	 */
 	@ControllerLog(description="匯出連結列表到Excel-新版本")
-	@RequestMapping(method = RequestMethod.GET, value = "/edit/exportLinkClickReportListNew", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/exportLinkClickReportListNew")
 	@ResponseBody
 	public void exportLinkClickReportListNew(
 			HttpServletRequest request, 

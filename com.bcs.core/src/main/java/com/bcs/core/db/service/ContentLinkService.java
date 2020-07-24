@@ -143,6 +143,10 @@ public class ContentLinkService {
 	public List<Object[]> countClickCountByLinkIdAndTime(String linkId, String start, String end){
 		return contentLinkRepository.countClickCountByLinkIdAndTime(linkId, start, end);
 	}
+	
+	public List<Object[]> countClickCountByLinkIdAndTimeNew(String linkId, String start, String end){
+		return contentLinkRepository.countClickCountByLinkIdAndTimeNew(linkId, start, end);
+	}
 
 	public List<Object[]> countClickCountByLinkId(String LinkId){
 		return contentLinkRepository.countClickCountByLinkId(LinkId);
@@ -154,6 +158,10 @@ public class ContentLinkService {
 
 	public List<String> findClickMidByLinkUrlAndTime(String linkUrl, String start, String end){
 		return contentLinkRepository.findClickMidByLinkUrlAndTime(linkUrl, start, end);
+	}
+	
+	public List<String> findClickMidByLinkIdAndTime(String linkId, String start, String end){
+		return contentLinkRepository.findClickMidByLinkIdAndTime(linkId, start, end);
 	}
 	
 	public List<Object[]> findListByModifyDateAndFlag(String startDate, String endDate, String flag){

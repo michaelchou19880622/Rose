@@ -384,7 +384,7 @@ public class ContentLinkReportService {
 					}
 					if(count == null || distinctCount == null){
 						if(clickMapCount == null){ 
-							List<Object[]> listCountDistinct = contentLinkService.countClickCountByLinkId(linkId, sdf.format(calendarStart.getTime()));
+							List<Object[]> listCountDistinct = contentLinkService.countClickCountByLinkIdAndTimeNew(linkId, sdf.format(calendarStart.getTime()), sdf.format(calendarStart.getTime()));
 							clickMapCount = new HashMap<String, Long>();
 							for(Object[] objArray : listCountDistinct){
 								String timeDay = (String) objArray[0];

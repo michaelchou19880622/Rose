@@ -1,5 +1,6 @@
 package com.bcs.web.ui.controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.enums.LOG_TARGET_ACTION_TYPE;
 import com.bcs.core.enums.RECORD_REPORT_TYPE;
 import com.bcs.core.exception.BcsNoticeException;
+import com.bcs.core.report.export.ExportToExcelForLinkClickReport;
 import com.bcs.core.report.service.ContentLinkReportService;
 import com.bcs.core.report.service.PageVisitReportService;
 import com.bcs.core.resource.CoreConfigReader;
@@ -55,6 +57,7 @@ import com.bcs.web.ui.model.LinkClickReportModel;
 import com.bcs.web.ui.model.LinkClickReportSearchModel;
 import com.bcs.web.ui.model.PageVisitReportModel;
 import com.bcs.web.ui.service.ExportExcelUIService;
+import com.bcs.web.ui.service.LoadFileUIService;
 
 @Controller
 @RequestMapping("/bcs")
@@ -71,6 +74,8 @@ public class BCSLinkPageController extends BCSBaseController {
 	private ContentFlagService contentFlagService;
 	@Autowired
 	private ExportExcelUIService exportExcelUIService;
+	@Autowired
+	private ExportToExcelForLinkClickReport exportToExcelForLinkClickReport;
 	
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSLinkPageController.class);
@@ -349,9 +354,6 @@ public class BCSLinkPageController extends BCSBaseController {
 		}	
 		logger.info("getLinkUrlReportListNew start, queryFlag=" + queryFlag + " page=" + page + " pageSize=" + pageSize + " startDate=" + startDate + " endDate=" + endDate);
 		try{
-			Sort.Order order = new Sort.Order(Direction.DESC, "tracingId");
-			Sort sort = new Sort(order);
-			Pageable pageable = new PageRequest(page, pageSize, sort);
 			List<Object[]> result = null; // TRACING_ID, LINK_ID, LINK_TITLE, LINK_URL, MODIFY_TIME, CLICK_COUNT, USER_COUNT
 			result = contentLinkService.findListByModifyDateAndFlag(startDate, endDate, queryFlag);
 			Map<String, Object> tracingResult = new HashMap<String, Object>();
@@ -704,5 +706,83 @@ public class BCSLinkPageController extends BCSBaseController {
 				}
 		 }
 		 throw new Exception("資料產生錯誤");
+	}
+	
+	@ControllerLog(description="exportMidForLinkClickReportNew")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/exportMidForLinkClickReportNew")
+	@ResponseBody
+	public void exportMidForLinkClickReportNew(
+			HttpServletRequest request,
+			HttpServletResponse response,
+			@CurrentUser CustomUser customUser) throws Exception {
+		String linkId = request.getParameter("linkId");
+		String startDate = request.getParameter("startDate");
+		String endDate = request.getParameter("endDate");
+		String linkUrl = request.getParameter("linkUrl");
+		logger.info("exportMidForLinkClickReport start, linkId=" + linkId + " linkUrl=" + linkUrl + " startDate=" + startDate + " endDate=" + endDate);
+		try {
+		    if(StringUtils.isNotBlank(linkUrl)){
+			    ContentLink contentLink = contentLinkService.findOne(linkId);
+			    if(contentLink == null){
+				    throw new Exception("linkId Error");
+			    }				
+			    if(StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate)){
+				    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+				    Date timeStart = sdf.parse(startDate);					
+				    Date timeEnd = sdf.parse(endDate);
+				    Calendar calendarEnd = Calendar.getInstance();
+				    calendarEnd.setTime(timeEnd);
+				    calendarEnd.add(Calendar.DATE, 1);				
+				    String title = contentLink.getLinkTitle();
+				    List<String> clickLinkMids = contentLinkService.findClickMidByLinkIdAndTime(linkId, sdf.format(timeStart), sdf.format(calendarEnd.getTime()));
+				    if(clickLinkMids != null){						
+					    List<String> titles = new ArrayList<String>();
+					    titles.add("點擊人UID");
+					    List<List<String>> data = new ArrayList<List<String>>();
+					    data.add(clickLinkMids);	
+					    String time = sdf.format(timeStart) + "~" + sdf.format(calendarEnd.getTime()) ;
+					    exportExcelUIService.exportMidResultToExcel(request, response, "ClickUrlMid", "點擊連結:" + title , time, titles, data);
+					    logger.info("exportMidForLinkClickReport end, linkId=" + linkId + " linkUrl=" + linkUrl + " startDate=" + startDate + " endDate=" + endDate + " numOfMID=" + clickLinkMids.size());
+					    return;
+				    }
+				    logger.info("exportMidForLinkClickReport end, linkId=" + linkId + " linkUrl=" + linkUrl + " startDate=" + startDate + " endDate=" + endDate);
+			    }
+		     }
+		} catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+		}
+		throw new Exception("資料產生錯誤");
+	}
+	
+	/**
+	 * 匯出 Link Click Report EXCEL
+	 */
+	@ControllerLog(description="匯出 Link Click Report EXCEL")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForLinkClickReportNew")
+	@ResponseBody
+	public void exportToExcelForLinkClickReportNew(
+			HttpServletRequest request, 
+			HttpServletResponse response,
+			@CurrentUser CustomUser customUser) throws IOException{
+		String linkId = request.getParameter("linkId");
+		String startDate = request.getParameter("startDate");
+		String endDate = request.getParameter("endDate");
+		String linkUrl = request.getParameter("linkUrl");
+		logger.info("exportToExcelForLinkClickReportNew start, linkId=" + linkId + " linkUrl=" + linkUrl + " startDate=" + startDate + " endDate=" + endDate);
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
+			String filePath = CoreConfigReader.getString("file.path") + System.getProperty("file.separator") + "REPORT";
+			Date date = new Date();
+			String fileName = "LinkUrlClickReportList_" + sdf.format(date) + ".xlsx";
+			File folder = new File(filePath);
+			if(!folder.exists()){
+				folder.mkdirs();
+			}
+			exportToExcelForLinkClickReport.exportToExcelForLinkClickReportNew(filePath, fileName, startDate, endDate, linkId, linkUrl);
+			LoadFileUIService.loadFileToResponse(filePath, fileName, response);
+			logger.info("exportToExcelForLinkClickReportNew end, linkId=" + linkId + " linkUrl=" + linkUrl + " startDate=" + startDate + " endDate=" + endDate + " filePaht=" + filePath + " fileName=" + fileName);
+		} catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+		}
 	}
 }

@@ -58,7 +58,7 @@ $(function(){
 		}
 		var startDate = $('#reportStartDate').val();
 		var endDate = $('#reportEndDate').val();
-		var url =  bcs.bcsContextPath + '/edit/exportToExcelForLinkClickReport?startDate=' + startDate + '&endDate=' + endDate + '&linkUrl=' + linkUrl;
+		var url =  bcs.bcsContextPath + '/edit/exportToExcelForLinkClickReportNew?startDate=' + startDate + '&endDate=' + endDate + '&linkUrl=' + linkUrl + '&linkId=' + linkId;
 		var downloadReport = $('#downloadReport');
 		downloadReport.attr("src", url);
 	});
@@ -69,7 +69,7 @@ $(function(){
 		}
 		var startDate = $('#reportStartDate').val();
 		var endDate = $('#reportEndDate').val();
-		var url =  bcs.bcsContextPath + '/edit/exportMidForLinkClickReport?startDate=' + startDate + '&endDate=' + endDate + '&linkUrl=' + linkUrl;
+		var url =  bcs.bcsContextPath + '/edit/exportMidForLinkClickReportNew?startDate=' + startDate + '&endDate=' + endDate + '&linkUrl=' + linkUrl + '&linkId=' + linkId;
 		var downloadReport = $('#downloadReport');
 		downloadReport.attr("src", url);
 	});

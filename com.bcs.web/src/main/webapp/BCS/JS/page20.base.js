@@ -30,6 +30,13 @@ $(function(){
 		loadDataFunc();
 	});
 	
+	$('.exportToExcel').click(function(){
+		var url =  bcs.bcsContextPath + '/edit/exportToExcelForInterface';
+		var downloadReport = $('#downloadReport');
+		downloadReport.attr("src", url);
+		
+	});
+	
 	//選取日期元件
 	$(".datepicker").datepicker({
 		'maxDate' : 0, //最多只能選至今天

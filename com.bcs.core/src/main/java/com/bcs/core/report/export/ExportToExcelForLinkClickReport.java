@@ -61,35 +61,28 @@ public class ExportToExcelForLinkClickReport {
 	 * @throws Exception
 	 */
 	public void exportToExcelForLinkClickReport(Workbook wb, Sheet sheet, String startDate, String endDate, String linkUrl) throws Exception{
-		
 		List<ContentLink> list = contentLinkService.findByLinkUrl(linkUrl);
-			
 		if(list == null || list.size() == 0){
 			throw new Exception("linkUrl Error");
 		}
-			
 		String linkTitle = "";
 		for(ContentLink link : list){
 			if(StringUtils.isBlank(linkTitle)){
 				linkTitle = link.getLinkTitle();
 			}
 		}
-			
 		//取得匯出資料
-		Map<String, Map<String, Long>> result = contentLinkReportService.getLinkUrlReport(startDate, endDate, linkUrl);
-		
+		Map<String, Map<String, Long>> result = contentLinkReportService.getLinkUrlReport(startDate, endDate, linkUrl);		
 		Row row = sheet.createRow(0); // declare a row object reference
 		row.createCell(0).setCellValue("日期");
 		row.createCell(1).setCellValue("連結說明");
 		row.createCell(2).setCellValue("連結");
 		row.createCell(3).setCellValue("點擊次數");
 		row.createCell(4).setCellValue("點擊人數");
-		
 		if(result.size() != 0){
 			int seqNo = 1; //序號
 			for (String responseDate : result.keySet()) {
 				Map<String, Long> dataMap = result.get(responseDate);
-					
 				Long clickCount = dataMap.get(RECORD_REPORT_TYPE.DATA_TYPE_LINK_COUNT.toString());
 				if(clickCount == null){
 					clickCount = 0L;
@@ -98,19 +91,78 @@ public class ExportToExcelForLinkClickReport {
 				if(clickUser == null){
 					clickUser = 0L;
 				}
-				
 				Row row1 = sheet.createRow(seqNo);
 				row1.createCell(0).setCellValue(responseDate);
 				row1.createCell(1).setCellValue(linkTitle);
 				row1.createCell(2).setCellValue(linkUrl);
 				row1.createCell(3).setCellValue(clickCount);
 				row1.createCell(4).setCellValue(clickUser);
-				
 				seqNo++;
-				
-//				for (int colNum=0; colNum<row.getLastCellNum(); colNum++) {
-//					sheet.autoSizeColumn(colNum);
-//				}
+			}
+		}
+	}
+	
+	/**
+	 * 匯出 Link Click Report EXCEL
+	 */
+	public void exportToExcelForLinkClickReportNew(String exportPath, String fileName, String startDate, String endDate,  String linkId, String linkUrl) throws Exception {
+		try {
+			Workbook wb = new XSSFWorkbook();
+			Sheet sheetLink = wb.createSheet("Link Click Report");
+			this.exportToExcelForLinkClickReportNew(wb, sheetLink, startDate, endDate, linkId, linkUrl);
+			// Save
+			FileOutputStream out = new FileOutputStream(exportPath + System.getProperty("file.separator") + fileName);
+			wb.write(out);
+			out.close();
+			wb.close();
+		} catch (Exception e) {
+    		logger.error(ErrorRecord.recordError(e));
+		}
+	}
+	
+	/**
+	 * Export To Excel For Link Click Report
+	 * @param wb
+	 * @param sheet
+	 * @param startDate
+	 * @param endDate
+	 * @param iMsgId
+	 * @param userStatus
+	 * @throws Exception
+	 */
+	public void exportToExcelForLinkClickReportNew(Workbook wb, Sheet sheet, String startDate, String endDate, String linkId, String linkUrl) throws Exception{
+		ContentLink link = contentLinkService.findOne(linkId);
+		if(link == null){
+			throw new Exception("linkId Error");
+		}			
+		String linkTitle = link.getLinkTitle();
+		//取得匯出資料
+		Map<String, Map<String, Long>> result = contentLinkReportService.getLinkIdReportNew(startDate, endDate, linkId);
+		Row row = sheet.createRow(0); // declare a row object reference
+		row.createCell(0).setCellValue("日期");
+		row.createCell(1).setCellValue("連結說明");
+		row.createCell(2).setCellValue("連結");
+		row.createCell(3).setCellValue("點擊次數");
+		row.createCell(4).setCellValue("點擊人數");
+		if(result.size() != 0){
+			int seqNo = 1; //序號
+			for (String responseDate : result.keySet()) {
+				Map<String, Long> dataMap = result.get(responseDate);
+				Long clickCount = dataMap.get(RECORD_REPORT_TYPE.DATA_TYPE_LINK_COUNT.toString());
+				if(clickCount == null){
+					clickCount = 0L;
+				}
+				Long clickUser = dataMap.get(RECORD_REPORT_TYPE.DATA_TYPE_LINK_DISTINCT_COUNT.toString());
+				if(clickUser == null){
+					clickUser = 0L;
+				}
+				Row row1 = sheet.createRow(seqNo);
+				row1.createCell(0).setCellValue(responseDate);
+				row1.createCell(1).setCellValue(linkTitle);
+				row1.createCell(2).setCellValue(linkUrl);
+				row1.createCell(3).setCellValue(clickCount);
+				row1.createCell(4).setCellValue(clickUser);
+				seqNo++;
 			}
 		}
 	}

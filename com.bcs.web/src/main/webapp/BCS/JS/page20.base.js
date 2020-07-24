@@ -31,11 +31,7 @@ $(function(){
 	});
 	
 	$('.exportToExcel').click(function(){
-		var campaignStartTime = moment($('#campaignStartTime').val(), "YYYY-MM-DD");
-		var campaignEndTime = moment($('#campaignEndTime').val(), "YYYY-MM-DD");
-		var startDate = $("#campaignStartTime").val();
-		var endDate = $("#campaignEndTime").val();
-		if(!validateTimeRange(startDate, endDate)){
+		if(!validateTimeRange()){
 			return false;
 		}
 		var url =  bcs.bcsContextPath + '/edit/exportLinkClickReportListNew?startDate=' + startDate + '&endDate=' + endDate;
@@ -43,7 +39,11 @@ $(function(){
 		downloadReport.attr("src", url);
 	});
 	
-	var validateTimeRange = function(startDate, endDate) {
+	var validateTimeRange = function() {
+		var campaignStartTime = moment($('#campaignStartTime').val(), "YYYY-MM-DD");
+		var campaignEndTime = moment($('#campaignEndTime').val(), "YYYY-MM-DD");
+		var startDate = $("#campaignStartTime").val();
+		var endDate = $("#campaignEndTime").val();
 		if (!startDate.isValid()) {
 			alert("請選擇起始日期");
 			return false;
@@ -108,7 +108,7 @@ $(function(){
 			$('#campaignStartTime').val(startDate);
 			$('#campaignEndTime').val(endDate);
 		}
-		if(!validateTimeRange(startDate, endDate)){
+		if(!validateTimeRange()){
 			return;
 		}
 		var postData = {};

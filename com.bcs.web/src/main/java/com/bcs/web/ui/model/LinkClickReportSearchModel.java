@@ -9,6 +9,8 @@ public class LinkClickReportSearchModel extends AbstractBcsEntity{
 	private Integer pageSize;
 	private String startDate;
 	private String endDate;
+	private String dataStartDate;
+	private String dataEndDate;
 	
 	public String getQueryFlag() {
 		return queryFlag;
@@ -39,5 +41,17 @@ public class LinkClickReportSearchModel extends AbstractBcsEntity{
 	}
 	public void setEndDate(String endDate) {
 		this.endDate = endDate;
+	}
+	public String getDataStartDate() {
+		return dataStartDate;
+	}
+	public void setDataStartDate(String dataStartDate) {
+		this.dataStartDate = dataStartDate;
+	}
+	public String getDataEndDate() {
+		return dataEndDate;
+	}
+	public void setDataEndDate(String dataEndDate) {
+		this.dataEndDate = dataEndDate;
 	}
 }

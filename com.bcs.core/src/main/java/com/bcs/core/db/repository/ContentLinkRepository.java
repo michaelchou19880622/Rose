@@ -114,11 +114,12 @@ public interface ContentLinkRepository extends EntityRepository<ContentLink, Str
 			       "	bcl.LINK_TITLE," + 
 			       "	bcl.LINK_URL," + 
 			       "	bcl.MODIFY_TIME," + 
-			       "	(SELECT COUNT(MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?1 AND MODIFY_DAY <= ?2) AS CLICK_COUNT, " + 
-			       "	(SELECT COUNT(DISTINCT MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?1 AND MODIFY_DAY <= ?2) AS USER_COUNT " + 
-			       "FROM BCS_CONTENT_LINK bcl " + 
+			       "	(SELECT COUNT(MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?3 AND MODIFY_DAY <= ?4) AS CLICK_COUNT, " + 
+			       "	(SELECT COUNT(DISTINCT MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?3 AND MODIFY_DAY <= ?4) AS USER_COUNT " + 
+			       "FROM BCS_CONTENT_LINK bcl " +
+			       "WHERE bcl.MODIFY_TIME >= ?1 AND bcl.MODIFY_TIME <= ?2 " +
 			       "ORDER BY TRACING_ID DESC, LINK_TITLE", nativeQuery = true)
-	public List<Object[]> findListByModifyDate(String startDate, String endDate);
+	public List<Object[]> findListByModifyDate(String startDate, String endDate, String dataStartDate, String dataEndDate);
 	
 	@Transactional(readOnly = true, timeout = 30)
 	@Query(value = "SELECT" + 
@@ -127,12 +128,13 @@ public interface ContentLinkRepository extends EntityRepository<ContentLink, Str
 			       "	bcl.LINK_TITLE," + 
 			       "	bcl.LINK_URL," + 
 			       "	bcl.MODIFY_TIME," + 
-			       "	(SELECT COUNT(MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?1 AND MODIFY_DAY <= ?2) AS CLICK_COUNT, " + 
-			       "	(SELECT COUNT(DISTINCT MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?1 AND MODIFY_DAY <= ?2) AS USER_COUNT " + 
+			       "	(SELECT COUNT(MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?3 AND MODIFY_DAY <= ?4) AS CLICK_COUNT, " + 
+			       "	(SELECT COUNT(DISTINCT MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?3 AND MODIFY_DAY <= ?4) AS USER_COUNT " + 
 			       "FROM BCS_CONTENT_LINK bcl " + 
-			       "WHERE bcl.LINK_ID IN (SELECT REFERENCE_ID FROM BCS_CONTENT_FLAG bcf WHERE CONTENT_TYPE='LINK' AND FLAG_VALUE LIKE ?3) " +
+			       "WHERE bcl.MODIFY_TIME >= ?1 AND bcl.MODIFY_TIME <= ?2 " + 
+			       "AND bcl.LINK_ID IN (SELECT REFERENCE_ID FROM BCS_CONTENT_FLAG bcf WHERE CONTENT_TYPE='LINK' AND FLAG_VALUE LIKE ?5) " + 
 	               "ORDER BY TRACING_ID DESC, LINK_TITLE", nativeQuery = true)
-	public List<Object[]> findListByModifyDateAndFlag(String startDate, String endDate, String flag);
+	public List<Object[]> findListByModifyDateAndFlag(String startDate, String endDate, String dataStartDate, String dataEndDate, String flag);
 	
 	@Transactional(readOnly = true, timeout = 30)
 	@Query(value = "SELECT DISTINCT BCS_USER_TRACE_LOG.MODIFY_USER "

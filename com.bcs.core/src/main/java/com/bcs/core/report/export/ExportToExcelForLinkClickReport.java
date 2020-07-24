@@ -171,11 +171,11 @@ public class ExportToExcelForLinkClickReport {
 		}
 	}
 	
-	public void exportLinkClickReportListNew(String exportPath, String fileName, String startDate, String endDate,  String queryFlag) throws Exception {
+	public void exportLinkClickReportListNew(String exportPath, String fileName, String startDate, String endDate,  String dataStartDate, String dataEndDate, String queryFlag) throws Exception {
 		try {
 			Workbook wb = new XSSFWorkbook();
 			Sheet sheetLink = wb.createSheet("ClickReportBySearch");
-			this.exportToExcelForLinkClickReportNew(wb, sheetLink, startDate, endDate, queryFlag);
+			this.exportToExcelForLinkClickReportNew(wb, sheetLink, startDate, endDate, dataStartDate, dataEndDate, queryFlag);
 			// Save
 			FileOutputStream out = new FileOutputStream(exportPath + System.getProperty("file.separator") + fileName);
 			wb.write(out);
@@ -186,10 +186,10 @@ public class ExportToExcelForLinkClickReport {
 		}
 	}
 	
-	public void exportToExcelForLinkClickReportNew(Workbook wb, Sheet sheet, String startDate, String endDate, String queryFlag) throws Exception{
+	public void exportToExcelForLinkClickReportNew(Workbook wb, Sheet sheet, String startDate, String endDate, String dataStartDate, String dataEndDate, String queryFlag) throws Exception{
 		List<Object[]> result = null; // TRACING_ID, LINK_ID, LINK_TITLE, LINK_URL, MODIFY_TIME, CLICK_COUNT, USER_COUNT
 		String tracingUrlPre = UriHelper.getTracingUrlPre();
-		result = contentLinkService.findListByModifyDateAndFlag(startDate, endDate, queryFlag);
+		result = contentLinkService.findListByModifyDateAndFlag(startDate, endDate, dataStartDate, dataEndDate, queryFlag);
 		Row row = sheet.createRow(0); // declare a row object reference
 		row.createCell(0).setCellValue("追蹤連結");
 		row.createCell(1).setCellValue("連結名稱");

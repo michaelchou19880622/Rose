@@ -164,12 +164,18 @@ public class ContentLinkService {
 		return contentLinkRepository.findClickMidByLinkIdAndTime(linkId, start, end);
 	}
 	
-	public List<Object[]> findListByModifyDateAndFlag(String startDate, String endDate, String flag){
+	public List<Object[]> findListByModifyDateAndFlag(String startDate, String endDate, String dataStartDate, String dataEndDate, String flag){
+		if(!StringUtils.isBlank(startDate) && startDate.length() == 10){
+			startDate += " 00:00:00";
+		}
+		if(!StringUtils.isBlank(endDate) && endDate.length() == 10){
+			endDate += " 23:59:59";
+		}
 		if(StringUtils.isBlank(flag)){
-		    return contentLinkRepository.findListByModifyDate(startDate, endDate);
+		    return contentLinkRepository.findListByModifyDate(startDate, endDate, dataStartDate, dataEndDate);
 		}
 		else {
-			return contentLinkRepository.findListByModifyDateAndFlag(startDate, endDate, "%" + flag + "%");
+			return contentLinkRepository.findListByModifyDateAndFlag(startDate, endDate, dataStartDate, dataEndDate, "%" + flag + "%");
 		}
 	}
 }

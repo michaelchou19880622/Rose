@@ -31,7 +31,11 @@ $(function(){
 		if(!validateTimeRange()){
 			return false;
 		}
-		var url =  bcs.bcsContextPath + '/edit/exportLinkClickReportListNew?startDate=' + startDate + '&endDate=' + endDate;
+		var startDate = $('#campaignStartTime').val();
+		var endDate = $('#campaignEndTime').val();
+		var dataStartDate = $('#dataStartTime').val();
+		var dataEndDate = $('#dataEndTime').val();
+		var url =  bcs.bcsContextPath + '/edit/exportLinkClickReportListNew?startDate=' + startDate + '&endDate=' + endDate + '&dataStartDate=' + dataStartDate + '&dataEndDate=' + dataEndDate;
 		var downloadReport = $('#downloadReport');
 		downloadReport.attr("src", url);
 	});
@@ -39,21 +43,40 @@ $(function(){
 	var validateTimeRange = function() {
 		var startDate = moment($('#campaignStartTime').val(), "YYYY-MM-DD");
 		var endDate = moment($('#campaignEndTime').val(), "YYYY-MM-DD");
+		var dataStartDate = moment($('#dataStartTime').val(), "YYYY-MM-DD");
+		var dataEndDate = moment($('#dataEndTime').val(), "YYYY-MM-DD");
 		if (!startDate.isValid()) {
-			alert("請選擇起始日期");
+			alert("請選擇建立連結起始日期");
 			return false;
 		}
 		if (!endDate.isValid()) {
-			alert("請選擇結束日期");
+			alert("請選擇建立連結結束日期");
 			return false;
 		}
 		if (startDate.isAfter(endDate)) {
-			alert("起始日不能大於結束日");
+			alert("建立連結起始日不能大於結束日");
 			return false;
 		}
 		var n = parseInt((new Date(endDate) - new Date(startDate)) / 86400000);
 		if (n > 30) {
-			alert("僅限查詢一個月內資料");
+			alert("僅限查詢建立連結一個月區間內資料");
+			return false;
+		}
+		if (!dataStartDate.isValid()) {
+			alert("請選擇資料記錄起始日期");
+			return false;
+		}
+		if (!dataEndDate.isValid()) {
+			alert("請選擇資料記錄結束日期");
+			return false;
+		}
+		if (dataStartDate.isAfter(dataEndDate)) {
+			alert("資料記錄起始日不能大於結束日");
+			return false;
+		}
+		n = parseInt((new Date(dataEndDate) - new Date(dataStartDate)) / 86400000);
+		if (n > 30) {
+			alert("僅限查詢資料記錄一個月區間內資料");
 			return false;
 		}
 		return true;
@@ -69,26 +92,36 @@ $(function(){
 		page = 0;
 		loadDataFunc();
 	});
+	
+	$('.queryDataDate').click(function(){
+		page = 0;
+		loadDataFunc();
+	});
 
 	var loadDataFunc = function(){
-		var campaignStartTime = moment($('#campaignStartTime').val(), "YYYY-MM-DD");
-		var campaignEndTime = moment($('#campaignEndTime').val(), "YYYY-MM-DD");
 		var startDate = $("#campaignStartTime").val();
 		var endDate = $("#campaignEndTime").val();
+		var dataStartDate = $("#dataStartTime").val();
+		var dataEndDate = $("#dataEndTime").val();
+		var queryFlag = $("#queryFlag").val();
 		console.info("startDate", startDate);
 		console.info("endDate", endDate);
+		console.info("dataStartDate", dataStartDate);
+		console.info("dataEndDate", dataEndDate);
+		console.info("queryFlag", queryFlag);
+		console.info("page", page);
 		if(!validateTimeRange()){
 			return;
 		}
 		var postData = {};
-		postData.queryFlag = $("#queryFlag").val();
+		postData.queryFlag = queryFlag;
 		postData.page = page;
 		postData.pageSize = 20;
 		postData.startDate = startDate;
 		postData.endDate = endDate;
+		postData.dataStartDate = startDate;
+		postData.dataEndDate = dataEndDate;
 		$('.LyMain').block($.BCS.blockMsgRead);
-		console.info("queryFlag", postData.queryFlag);
-		console.info("page", postData.page);
 		$('#pageText').html(page+1);
 		$.ajax({
 			type : "POST",
@@ -114,9 +147,9 @@ $(function(){
 				groupData.find('.linkFlag').html(linkFlag);
 				var linkId = encodeURIComponent(o.linkId);
 				var linkUrl = encodeURIComponent(o.linkUrl);
-				groupData.find('.totalCount a').attr('href', bcs.bcsContextPath + '/admin/reportLinkClickDetailPage?linkUrl=' + linkUrl + "&linkId=" + linkId + "&startDate=" + startDate + "&endDate=" + endDate)
+				groupData.find('.totalCount a').attr('href', bcs.bcsContextPath + '/admin/reportLinkClickDetailPage?linkUrl=' + linkUrl + "&linkId=" + linkId + "&startDate=" + dataStartDate + "&endDate=" + dataEndDate)
 				groupData.find('.totalCount a').html($.BCS.formatNumber(o.totalCount,0));
-				groupData.find('.userCount a').attr('href', bcs.bcsContextPath + '/admin/reportLinkClickDetailPage?linkUrl=' + linkUrl  + "&linkId=" + linkId + "&startDate=" + startDate + "&endDate=" + endDate)
+				groupData.find('.userCount a').attr('href', bcs.bcsContextPath + '/admin/reportLinkClickDetailPage?linkUrl=' + linkUrl  + "&linkId=" + linkId + "&startDate=" + dataStartDate + "&endDate=" + dataEndDate)
 				groupData.find('.userCount a').html($.BCS.formatNumber(o.userCount,0));
 				$('#tableBody').append(groupData);
 			});
@@ -138,6 +171,8 @@ $(function(){
 		var lastWeek = moment().dates(nowDate.dates() - 6); // 取得前7天(上一週)的時間
 		$('#campaignStartTime').val(lastWeek.format('YYYY-MM-DD'));
 		$('#campaignEndTime').val(nowDate.format('YYYY-MM-DD'));
+		$('#dataStartTime').val(lastWeek.format('YYYY-MM-DD'));
+		$('#dataEndTime').val(nowDate.format('YYYY-MM-DD'));
 	}
 	initTemplate();
 	loadDataFunc("");

@@ -117,7 +117,7 @@ public interface ContentLinkRepository extends EntityRepository<ContentLink, Str
 			       "	(SELECT COUNT(MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?1 AND MODIFY_DAY <= ?2) AS CLICK_COUNT, " + 
 			       "	(SELECT COUNT(DISTINCT MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?1 AND MODIFY_DAY <= ?2) AS USER_COUNT " + 
 			       "FROM BCS_CONTENT_LINK bcl " + 
-			       "ORDER BY TRACING_ID DESC", nativeQuery = true)
+			       "ORDER BY TRACING_ID DESC, LINK_TITLE", nativeQuery = true)
 	public List<Object[]> findListByModifyDate(String startDate, String endDate);
 	
 	@Transactional(readOnly = true, timeout = 30)
@@ -131,7 +131,7 @@ public interface ContentLinkRepository extends EntityRepository<ContentLink, Str
 			       "	(SELECT COUNT(DISTINCT MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?1 AND MODIFY_DAY <= ?2) AS USER_COUNT " + 
 			       "FROM BCS_CONTENT_LINK bcl " + 
 			       "WHERE bcl.LINK_ID IN (SELECT REFERENCE_ID FROM BCS_CONTENT_FLAG bcf WHERE CONTENT_TYPE='LINK' AND FLAG_VALUE LIKE ?3) " +
-	               "ORDER BY TRACING_ID DESC", nativeQuery = true)
+	               "ORDER BY TRACING_ID DESC, LINK_TITLE", nativeQuery = true)
 	public List<Object[]> findListByModifyDateAndFlag(String startDate, String endDate, String flag);
 	
 	@Transactional(readOnly = true, timeout = 30)
@@ -142,10 +142,10 @@ public interface ContentLinkRepository extends EntityRepository<ContentLink, Str
 	
 	@Transactional(readOnly = true, timeout = 30)
 	@Query(value = "SELECT "
-			+ "     MODIFY_DAY AS Day, "
+			+ "     BCS_USER_TRACE_LOG.MODIFY_DAY AS Day, "
 			+ "     COUNT('x') AS allCount, "
 			+ "     COUNT(distinct BCS_USER_TRACE_LOG.MODIFY_USER) AS allDistinctCount "
 			+ "FROM BCS_CONTENT_LINK, BCS_USER_TRACE_LOG "
-			+ "WHERE LINK_ID = REFERENCE_ID AND ACTION = 'ClickLink' AND LINK_ID = ?1 AND BCS_USER_TRACE_LOG.MODIFY_DAY >= ?2 AND BCS_USER_TRACE_LOG.MODIFY_DAY <= ?3  ", nativeQuery = true)
+			+ "WHERE LINK_ID = REFERENCE_ID AND ACTION = 'ClickLink' AND LINK_ID = ?1 AND BCS_USER_TRACE_LOG.MODIFY_DAY >= ?2 AND BCS_USER_TRACE_LOG.MODIFY_DAY <= ?3 GROUP BY MODIFY_DAY ", nativeQuery = true)
 	public List<Object[]> countClickCountByLinkIdAndTimeNew(String linkId, String start, String end);
 }

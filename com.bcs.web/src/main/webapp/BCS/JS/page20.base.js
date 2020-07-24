@@ -5,9 +5,6 @@ $(function(){
 	var page = 0;
 	var paramPage = $.urlParam("page");
 	var templateBody = {};
-	$("#queryFlag").val("");
-	templateBody = $('.dataTemplate').clone(true);
-	$('.dataTemplate').remove();
 	if(paramPage){
 		page = paramPage;
 		page--;
@@ -40,10 +37,8 @@ $(function(){
 	});
 	
 	var validateTimeRange = function() {
-		var campaignStartTime = moment($('#campaignStartTime').val(), "YYYY-MM-DD");
-		var campaignEndTime = moment($('#campaignEndTime').val(), "YYYY-MM-DD");
-		var startDate = $("#campaignStartTime").val();
-		var endDate = $("#campaignEndTime").val();
+		var startDate = moment($('#campaignStartTime').val(), "YYYY-MM-DD");
+		var endDate = moment($('#campaignEndTime').val(), "YYYY-MM-DD");
 		if (!startDate.isValid()) {
 			alert("請選擇起始日期");
 			return false;
@@ -80,34 +75,8 @@ $(function(){
 		var campaignEndTime = moment($('#campaignEndTime').val(), "YYYY-MM-DD");
 		var startDate = $("#campaignStartTime").val();
 		var endDate = $("#campaignEndTime").val();
-		var n = parseInt((new Date(endDate) - new Date(startDate)) / 86400000);
 		console.info("startDate", startDate);
 		console.info("endDate", endDate);
-		//需要有日期
-		if(startDate == '' || endDate == ''){
-			var d = new Date();
-			endDate = d.getFullYear() + '-';
-			if (parseInt(d.getMonth()) < 9) {
-			    endDate += '0';
-			}
-			endDate += (parseInt(d.getMonth()) + 1) + '-';
-			if (parseInt(d.getDate()) < 10) {
-			    endDate += '0';
-			}
-			endDate += d.getDate();
-			d.setDate(d.getDate() - 6);
-			startDate = d.getFullYear() + '-';
-			if (parseInt(d.getMonth()) < 9) {
-			    startDate += '0';
-			}
-			startDate += (parseInt(d.getMonth()) + 1) + '-';
-			if (parseInt(d.getDate()) < 10) {
-			    startDate += '0';
-			}
-			startDate += d.getDate();
-			$('#campaignStartTime').val(startDate);
-			$('#campaignEndTime').val(endDate);
-		}
 		if(!validateTimeRange()){
 			return;
 		}
@@ -160,6 +129,16 @@ $(function(){
 			$('.LyMain').unblock();
 		});
 	};
-
+	
+	var initTemplate = function(){
+		$("#queryFlag").val("");
+		templateBody = $('.dataTemplate').clone(true);
+		$('.dataTemplate').remove();
+		var nowDate = moment(); //取得現在時間
+		var lastWeek = moment().dates(nowDate.dates() - 6); // 取得前7天(上一週)的時間
+		$('#campaignStartTime').val(lastWeek.format('YYYY-MM-DD'));
+		$('#campaignEndTime').val(nowDate.format('YYYY-MM-DD'));
+	}
+	initTemplate();
 	loadDataFunc("");
 });

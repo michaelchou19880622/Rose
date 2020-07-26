@@ -640,7 +640,7 @@ public class BCSLinkPageController extends BCSBaseController {
 				dataStartDate = sdf.format(calendar.getTime());
 			}
 			List<Object[]> result = null; // TRACING_ID, LINK_ID, LINK_TITLE, LINK_URL, MODIFY_TIME, CLICK_COUNT, USER_COUNT
-			result = contentLinkService.findListByModifyDateAndFlag(startDate, endDate, dataStartDate, dataEndDate, queryFlag, page * pageSize, pageSize);
+			result = contentLinkService.findListByModifyDateAndFlag(startDate, endDate, dataStartDate, dataEndDate, queryFlag, page * pageSize + 1, pageSize);
 			Map<String, Object> tracingResult = new HashMap<String, Object>();
 			Map<String, LinkClickReportModel> linkResult = new LinkedHashMap<String, LinkClickReportModel>();
 			String tracingUrlPre = UriHelper.getTracingUrlPre();

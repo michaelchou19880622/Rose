@@ -206,8 +206,11 @@ public class ExportToExcelForLinkClickReport {
 			row1.createCell(2).setCellValue(castToString(data[3]));
 			List<String> flagList = contentFlagService.findFlagValueByReferenceIdAndContentTypeOrderByFlagValueAsc(castToString(data[1]), "LINK");
 			String flagStr = castToString(data[4]);
+			if (flagStr.length() > 19) {
+				flagStr = flagStr.substring(0, 19);
+			}
 			for(String flag : flagList){
-				flagStr += "\r\n" + flag;
+				flagStr += "&" + flag;
 			}
 			row1.createCell(3).setCellValue(flagStr);
 			row1.createCell(4).setCellValue(castToString(data[5]));

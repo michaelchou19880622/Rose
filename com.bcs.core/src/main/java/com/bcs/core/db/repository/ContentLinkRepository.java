@@ -109,28 +109,30 @@ public interface ContentLinkRepository extends EntityRepository<ContentLink, Str
 	
 	@Transactional(readOnly = true, timeout = 30)
 	@Query(value = "SELECT" + 
-			       "    (SELECT TRACING_ID FROM BCS_CONTENT_LINK_TRACING bclt WHERE (bcl.LINK_ID = bclt.LINK_ID OR bcl.LINK_ID = bclt.LINK_ID_BINDED OR bcl.LINK_ID = bclt.LINK_ID_UNMOBILE)) AS TRACING_ID," + 
+			       "    bclt.TRACING_ID," + 
 			       "	bcl.LINK_ID," + 
 			       "	bcl.LINK_TITLE," + 
 			       "	bcl.LINK_URL," + 
 			       "	bcl.MODIFY_TIME," + 
 			       "	(SELECT COUNT(MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?3 AND MODIFY_DAY <= ?4) AS CLICK_COUNT, " + 
-			       "	(SELECT COUNT(DISTINCT MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?3 AND MODIFY_DAY <= ?4) AS USER_COUNT " + 
+			       "	(SELECT COUNT(DISTINCT MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID = bcl.LINK_ID AND MODIFY_DAY >= ?3 AND MODIFY_DAY <= ?4) AS USER_COUNT " + 
 			       "FROM BCS_CONTENT_LINK bcl " +
+			       "LEFT JOIN BCS_CONTENT_LINK_TRACING bclt ON (bcl.LINK_ID = bclt.LINK_ID_BINDED OR bcl.LINK_ID = bclt.LINK_ID OR bcl.LINK_ID = bclt.LINK_ID_UNMOBILE) " +
 			       "WHERE bcl.MODIFY_TIME >= ?1 AND bcl.MODIFY_TIME <= ?2 " +
 			       "ORDER BY TRACING_ID DESC, LINK_TITLE", nativeQuery = true)
 	public List<Object[]> findListByModifyDate(String startDate, String endDate, String dataStartDate, String dataEndDate);
 	
 	@Transactional(readOnly = true, timeout = 30)
 	@Query(value = "SELECT" + 
-			       "    (SELECT TRACING_ID FROM BCS_CONTENT_LINK_TRACING bclt WHERE (bcl.LINK_ID = bclt.LINK_ID OR bcl.LINK_ID = bclt.LINK_ID_BINDED OR bcl.LINK_ID = bclt.LINK_ID_UNMOBILE)) AS TRACING_ID," + 
+			       "    bclt.TRACING_ID," + 
 			       "	bcl.LINK_ID," + 
 			       "	bcl.LINK_TITLE," + 
 			       "	bcl.LINK_URL," + 
 			       "	bcl.MODIFY_TIME," + 
 			       "	(SELECT COUNT(MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?3 AND MODIFY_DAY <= ?4) AS CLICK_COUNT, " + 
-			       "	(SELECT COUNT(DISTINCT MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID  = bcl.LINK_ID AND MODIFY_DAY >= ?3 AND MODIFY_DAY <= ?4) AS USER_COUNT " + 
-			       "FROM BCS_CONTENT_LINK bcl " + 
+			       "	(SELECT COUNT(DISTINCT MODIFY_USER) FROM BCS_USER_TRACE_LOG WHERE ACTION = 'ClickLink' AND REFERENCE_ID = bcl.LINK_ID AND MODIFY_DAY >= ?3 AND MODIFY_DAY <= ?4) AS USER_COUNT " + 
+			       "FROM BCS_CONTENT_LINK bcl " +
+			       "LEFT JOIN BCS_CONTENT_LINK_TRACING bclt ON (bcl.LINK_ID = bclt.LINK_ID_BINDED OR bcl.LINK_ID = bclt.LINK_ID OR bcl.LINK_ID = bclt.LINK_ID_UNMOBILE) " +
 			       "WHERE bcl.MODIFY_TIME >= ?1 AND bcl.MODIFY_TIME <= ?2 " + 
 			       "AND bcl.LINK_ID IN (SELECT REFERENCE_ID FROM BCS_CONTENT_FLAG bcf WHERE CONTENT_TYPE='LINK' AND FLAG_VALUE LIKE ?5) " + 
 	               "ORDER BY TRACING_ID DESC, LINK_TITLE", nativeQuery = true)

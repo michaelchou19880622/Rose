@@ -189,29 +189,29 @@ public class ExportToExcelForLinkClickReport {
 	public void exportToExcelForLinkClickReportNew(Workbook wb, Sheet sheet, String startDate, String endDate, String dataStartDate, String dataEndDate, String queryFlag) throws Exception{
 		List<Object[]> result = null; // TRACING_ID, LINK_ID, LINK_TITLE, LINK_URL, MODIFY_TIME, CLICK_COUNT, USER_COUNT
 		String tracingUrlPre = UriHelper.getTracingUrlPre();
-		result = contentLinkService.findListByModifyDateAndFlag(startDate, endDate, dataStartDate, dataEndDate, queryFlag);
-		Row row = sheet.createRow(0); // declare a row object reference
+		result = contentLinkService.findListByModifyDateAndFlag(startDate, endDate, dataStartDate, dataEndDate, queryFlag, 0, -1);
+		int seqNo = 0;
+		Row row = sheet.createRow(seqNo++); // declare a row object reference
 		row.createCell(0).setCellValue("追蹤連結");
 		row.createCell(1).setCellValue("連結名稱");
 		row.createCell(2).setCellValue("追蹤目標");
 		row.createCell(3).setCellValue("時間/註記");
 		row.createCell(4).setCellValue("點擊次數");
 		row.createCell(5).setCellValue("點擊人數");
-        for(Object[] data : result){
-        	int seqNo = 1; //序號
-        	Row row1 = sheet.createRow(seqNo);
+		logger.info("exportLinkClickReportListNew Got report data successfully, queryFlag=" + queryFlag + " startDate=" + startDate + " endDate=" + endDate + " dataStartDate=" + dataStartDate + " dataEndDate=" + dataEndDate + " numOfRecords=" + (result == null ? 0 : result.size()));
+		for(Object[] data : result){
+        	Row row1 = sheet.createRow(seqNo++);
 			row1.createCell(0).setCellValue(tracingUrlPre + castToString(data[0]));
 			row1.createCell(1).setCellValue(castToString(data[2]));
 			row1.createCell(2).setCellValue(castToString(data[3]));
 			List<String> flagList = contentFlagService.findFlagValueByReferenceIdAndContentTypeOrderByFlagValueAsc(castToString(data[1]), "LINK");
 			String flagStr = castToString(data[4]);
 			for(String flag : flagList){
-				flagStr += flag;
+				flagStr += "\r\n" + flag;
 			}
 			row1.createCell(3).setCellValue(flagStr);
 			row1.createCell(4).setCellValue(castToString(data[5]));
 			row1.createCell(5).setCellValue(castToString(data[6]));
-			seqNo++;
 		}
 		return;
 	}

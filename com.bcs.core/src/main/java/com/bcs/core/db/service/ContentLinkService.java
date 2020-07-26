@@ -164,7 +164,7 @@ public class ContentLinkService {
 		return contentLinkRepository.findClickMidByLinkIdAndTime(linkId, start, end);
 	}
 	
-	public List<Object[]> findListByModifyDateAndFlag(String startDate, String endDate, String dataStartDate, String dataEndDate, String flag){
+	public List<Object[]> findListByModifyDateAndFlag(String startDate, String endDate, String dataStartDate, String dataEndDate, String flag, int offset, int recordNum){
 		if(!StringUtils.isBlank(startDate) && startDate.length() == 10){
 			startDate += " 00:00:00";
 		}
@@ -172,10 +172,16 @@ public class ContentLinkService {
 			endDate += " 23:59:59";
 		}
 		if(StringUtils.isBlank(flag)){
-		    return contentLinkRepository.findListByModifyDate(startDate, endDate, dataStartDate, dataEndDate);
+			if (recordNum >= 0)
+		        return contentLinkRepository.findListByModifyDate(startDate, endDate, dataStartDate, dataEndDate, offset, recordNum);
+			else
+				return contentLinkRepository.findListByModifyDate(startDate, endDate, dataStartDate, dataEndDate, offset);	
 		}
 		else {
-			return contentLinkRepository.findListByModifyDateAndFlag(startDate, endDate, dataStartDate, dataEndDate, "%" + flag + "%");
+			if (recordNum >= 0)
+			    return contentLinkRepository.findListByModifyDateAndFlag(startDate, endDate, dataStartDate, dataEndDate, "%" + flag + "%", offset, recordNum);
+			else
+				return contentLinkRepository.findListByModifyDateAndFlag(startDate, endDate, dataStartDate, dataEndDate, "%" + flag + "%", offset);
 		}
 	}
 }

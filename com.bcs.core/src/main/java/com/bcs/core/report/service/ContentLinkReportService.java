@@ -365,22 +365,24 @@ public class ContentLinkReportService {
 			// Query By linkId
 			String contentType = RECORD_REPORT_TYPE.CONTENT_TYPE_LINK_ID.toString();
 			Map<String, Map<String, Long>> countLinkIdList = recordReportService.findRecordReportListByContentType(linkId, contentType, startDate, endDate);
-			logger.info("contentType=" + contentType + " sizeOfCountLinkIdList=" + (countLinkIdList == null ? 0 : countLinkIdList.size()));
 			Map<String, Map<String, Long>> result = new LinkedHashMap<String, Map<String, Long>>();
+			String startTimeStr;
+			Map<String, Long> mapLinkId;
+			Long count; 
+			Long distinctCount; 
 			while(true){
 				if(calendarStart.compareTo(calendarEnd) < 0){
-					String startTimeStr = sdf.format(calendarStart.getTime());
-					Map<String, Long> countMap = new HashMap<String, Long>();
-					Map<String, Long> mapLinkId = countLinkIdList.get(startTimeStr);
-					Long count = null; 
-					Long distinctCount = null; 
+					startTimeStr = sdf.format(calendarStart.getTime());
+					mapLinkId = countLinkIdList.get(startTimeStr);
+					count = null; 
+					distinctCount = null; 
 					if(mapLinkId != null){
 						count = mapLinkId.get(RECORD_REPORT_TYPE.DATA_TYPE_LINK_COUNT.toString());
 						distinctCount = mapLinkId.get(RECORD_REPORT_TYPE.DATA_TYPE_LINK_DISTINCT_COUNT.toString());
 					}
 					if(count == null || distinctCount == null){
 						Map<String, Long> clickMapCount = new HashMap<String, Long>();
-						List<Object[]> listCountDistinct = contentLinkService.countClickCountByLinkIdAndTimeNew(linkId, sdf.format(calendarStart.getTime()), sdf.format(calendarStart.getTime()));
+						List<Object[]> listCountDistinct = contentLinkService.countClickCountByLinkIdAndTimeNew(linkId, startTimeStr, startTimeStr);
 						for(Object[] objArray : listCountDistinct){
 							String timeDay = (String) objArray[0];
 							clickMapCount.put(timeDay + "Count", DBResultUtil.caseCountResult(objArray[1], false).longValue()) ;
@@ -407,10 +409,10 @@ public class ContentLinkReportService {
 											RECORD_REPORT_TYPE.DATA_TYPE_LINK_DISTINCT_COUNT.toString(),
 											distinctCount);
 					}
-					logger.info("startTimeStr=" + startTimeStr + " count=" + count + " distinctCount=" + distinctCount);
+					Map<String, Long> countMap = new HashMap<String, Long>();
 					countMap.put(RECORD_REPORT_TYPE.DATA_TYPE_LINK_COUNT.toString(), count);
 					countMap.put(RECORD_REPORT_TYPE.DATA_TYPE_LINK_DISTINCT_COUNT.toString(), distinctCount);
-					result.put(sdf.format(calendarStart.getTime()), countMap);
+					result.put(startTimeStr, countMap);
 					calendarStart.add(Calendar.DATE, 1);
 				}
 				else{

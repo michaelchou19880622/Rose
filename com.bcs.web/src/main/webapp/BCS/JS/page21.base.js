@@ -30,7 +30,8 @@ $(function(){
 		var n = parseInt((new Date(endDate) - new Date(startDate)) / 86400000);
 		if (n > 30) {
 			alert("僅限查詢一個月內資料");
-			return false;
+			endDate = startDate.dates(startDate.dates() + 30); // 取得前一個月的時間
+			$('#reportEndDate').val(endDate.format('YYYY-MM-DD'));
 		}
 		return true;
 	}
@@ -145,5 +146,7 @@ $(function(){
 	}
 	
 	initTemplate();
-	loadDataFunc();
+	if (validateTimeRange()) {
+	    loadDataFunc();
+	}
 });

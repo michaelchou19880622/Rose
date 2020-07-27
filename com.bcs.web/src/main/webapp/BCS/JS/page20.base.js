@@ -21,11 +21,6 @@ $(function(){
 		page++;
 		loadDataFunc();
 	});
-
-	$('.query').click(function(){
-		page = 0;
-		loadDataFunc();
-	});
 	
 	$('.exportToExcel').click(function(){
 		if(!validateTimeRange()){
@@ -88,12 +83,7 @@ $(function(){
 		'dateFormat' : 'yy-mm-dd'
 	});
 	
-	$('.queryDate').click(function(){
-		page = 0;
-		loadDataFunc();
-	});
-	
-	$('.queryDataDate').click(function(){
+	$('.query').click(function(){
 		page = 0;
 		loadDataFunc();
 	});

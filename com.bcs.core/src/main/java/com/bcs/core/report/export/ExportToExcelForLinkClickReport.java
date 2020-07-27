@@ -198,8 +198,9 @@ public class ExportToExcelForLinkClickReport {
 		row.createCell(3).setCellValue("時間/註記");
 		row.createCell(4).setCellValue("點擊次數");
 		row.createCell(5).setCellValue("點擊人數");
-		logger.info("exportLinkClickReportListNew Got report data successfully, queryFlag=" + queryFlag + " startDate=" + startDate + " endDate=" + endDate + " dataStartDate=" + dataStartDate + " dataEndDate=" + dataEndDate + " numOfRecords=" + (result == null ? 0 : result.size()));
+		logger.info("exportLinkClickReportListNew, Got report data successfully, queryFlag=" + queryFlag + " startDate=" + startDate + " endDate=" + endDate + " dataStartDate=" + dataStartDate + " dataEndDate=" + dataEndDate + " numOfRecords=" + (result == null ? 0 : result.size()));
 		for(Object[] data : result){
+			logger.info("obj=" + data.toString());
         	Row row1 = sheet.createRow(seqNo++);
 			row1.createCell(0).setCellValue(tracingUrlPre + castToString(data[0]));
 			row1.createCell(1).setCellValue(castToString(data[2]));
@@ -213,8 +214,10 @@ public class ExportToExcelForLinkClickReport {
 				flagStr += "&" + flag;
 			}
 			row1.createCell(3).setCellValue(flagStr);
-			row1.createCell(4).setCellValue(castToString(data[5]));
-			row1.createCell(5).setCellValue(castToString(data[6]));
+			String totalCount = castToString(data[5]);
+			String userCount = castToString(data[6]);
+			row1.createCell(4).setCellValue("" + (StringUtils.isBlank(totalCount) ? 0 : Long.parseLong(totalCount)));
+			row1.createCell(5).setCellValue("" + (StringUtils.isBlank(userCount) ? 0 : Long.parseLong(userCount)));
 		}
 		return;
 	}

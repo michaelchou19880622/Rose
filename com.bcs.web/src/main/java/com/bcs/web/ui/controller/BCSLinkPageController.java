@@ -720,7 +720,7 @@ public class BCSLinkPageController extends BCSBaseController {
 			if(!folder.exists()){
 				folder.mkdirs();
 			}
-			exportToExcelForLinkClickReport.exportLinkClickReportListNew(filePath, fileName, startDate, endDate, dataStartDate, dataStartDate, queryFlag);
+			exportToExcelForLinkClickReport.exportLinkClickReportListNew(filePath, fileName, startDate, endDate, dataStartDate, dataEndDate, queryFlag);
 			LoadFileUIService.loadFileToResponse(filePath, fileName, response);
 			logger.info("exportLinkClickReportListNew end, queryFlag=" + queryFlag + " startDate=" + startDate + " endDate=" + endDate + " dataStartDate=" + dataStartDate + " dataEndDate=" + dataEndDate + " filePaht=" + filePath + " fileName=" + fileName);
 		} catch (Exception e) {

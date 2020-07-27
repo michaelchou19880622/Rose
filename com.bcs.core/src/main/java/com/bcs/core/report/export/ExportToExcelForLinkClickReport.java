@@ -200,8 +200,7 @@ public class ExportToExcelForLinkClickReport {
 		row.createCell(5).setCellValue("點擊人數");
 		logger.info("exportLinkClickReportListNew, Got report data successfully, queryFlag=" + queryFlag + " startDate=" + startDate + " endDate=" + endDate + " dataStartDate=" + dataStartDate + " dataEndDate=" + dataEndDate + " numOfRecords=" + (result == null ? 0 : result.size()));
 		for(Object[] data : result){
-			logger.info("obj=" + data.toString());
-        	Row row1 = sheet.createRow(seqNo++);
+			Row row1 = sheet.createRow(seqNo++);
 			row1.createCell(0).setCellValue(tracingUrlPre + castToString(data[0]));
 			row1.createCell(1).setCellValue(castToString(data[2]));
 			row1.createCell(2).setCellValue(castToString(data[3]));

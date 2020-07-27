@@ -2,18 +2,19 @@
  * 
  */
 $(function(){
+	var linkId = $.urlParam("linkId");
 	var linkUrl = $.urlParam("linkUrl");
-	
+	var startDate = $.urlParam("startDate");
+	var endDate = $.urlParam("endDate");
 	// 日期元件
 	$(".datepicker").datepicker({
 		'maxDate' : 0, //最多只能選至今天
 		'dateFormat' : 'yy-mm-dd'
-	});
-	
+	});	
 	
 	var validateTimeRange = function() {
-		var startDate = moment($('#reportStartDate').val(), "YYYY-MM-DD");
-		var endDate = moment($('#reportEndDate').val(), "YYYY-MM-DD");
+		startDate = moment($('#reportStartDate').val(), "YYYY-MM-DD");
+		endDate = moment($('#reportEndDate').val(), "YYYY-MM-DD");
 		if (!startDate.isValid()) {
 			alert("請選擇起始日期");
 			return false;
@@ -26,7 +27,11 @@ $(function(){
 			alert("起始日不能大於結束日");
 			return false;
 		}
-		
+		var n = parseInt((new Date(endDate) - new Date(startDate)) / 86400000);
+		if (n > 30) {
+			alert("僅限查詢一個月內資料");
+			return false;
+		}
 		return true;
 	}
 	
@@ -51,12 +56,9 @@ $(function(){
 		if(!validateTimeRange()){
 			return false;
 		}
-		
 		var startDate = $('#reportStartDate').val();
 		var endDate = $('#reportEndDate').val();
-		
-		var url =  bcs.bcsContextPath + '/edit/exportToExcelForLinkClickReport?startDate=' + startDate + '&endDate=' + endDate + '&linkUrl=' + linkUrl;
-		
+		var url =  bcs.bcsContextPath + '/edit/exportToExcelForLinkClickReportNew?startDate=' + startDate + '&endDate=' + endDate + '&linkUrl=' + linkUrl + '&linkId=' + linkId;
 		var downloadReport = $('#downloadReport');
 		downloadReport.attr("src", url);
 	});
@@ -65,12 +67,9 @@ $(function(){
 		if(!validateTimeRange()){
 			return false;
 		}
-		
 		var startDate = $('#reportStartDate').val();
 		var endDate = $('#reportEndDate').val();
-		
-		var url =  bcs.bcsContextPath + '/edit/exportMidForLinkClickReport?startDate=' + startDate + '&endDate=' + endDate + '&linkUrl=' + linkUrl;
-		
+		var url =  bcs.bcsContextPath + '/edit/exportMidForLinkClickReportNew?startDate=' + startDate + '&endDate=' + endDate + '&linkUrl=' + linkUrl + '&linkId=' + linkId;
 		var downloadReport = $('#downloadReport');
 		downloadReport.attr("src", url);
 	});
@@ -79,28 +78,36 @@ $(function(){
 	var initTemplate = function(){
 		dataTemplate = $('.dataTemplate').clone(true);
 		$('.dataTemplate').remove();
-		
 		var nowDate = moment(); //取得現在時間
-//		var yesterday = moment().dates(nowDate.dates() - 1) //取得昨天的時間
 		var lastWeek = moment().dates(nowDate.dates() - 6); //取得前7天(上一週)的時間
-		
-		$('#reportStartDate').val(lastWeek.format('YYYY-MM-DD'));
-		$('#reportEndDate').val(nowDate.format('YYYY-MM-DD'));
+		if (startDate != null) {
+			$('#reportStartDate').val(startDate)
+		}
+		else {
+			$('#reportStartDate').val(lastWeek.format('YYYY-MM-DD'));
+		}
+		if (endDate != null) {
+			$('#reportEndDate').val(endDate)
+		}
+		else {
+			$('#reportEndDate').val(nowDate.format('YYYY-MM-DD'));
+		}
 	}
 	
 	var loadDataFunc = function() {
 		$('#linkUrl').html(decodeURIComponent(linkUrl));
-		
-		var startDate = $('#reportStartDate').val();
-		var endDate = $('#reportEndDate').val();
-		
+		startDate = $('#reportStartDate').val();
+		endDate = $('#reportEndDate').val();
+		console.info("linkId", linkId);
+		console.info("linkUrl", linkUrl);
+		console.info("startDate", startDate);
+		console.info("endDate", endDate);
 		var n = parseInt((new Date(endDate) - new Date(startDate)) / 86400000);
 		$('.MdTxtNotice01').html("顯示以下來源的" + (n+1) + "天資料 " + startDate + "~" + endDate);
-
 		$('.LyMain').block($.BCS.blockMsgRead);
 		$.ajax({
 			type : "GET",
-			url : bcs.bcsContextPath + '/admin/countLinkUrlList?startDate=' + startDate  + '&endDate=' + endDate + '&linkUrl=' + linkUrl
+			url : bcs.bcsContextPath + '/admin/countLinkIdList?startDate=' + startDate  + '&endDate=' + endDate + '&linkUrl=' + linkUrl + '&linkId=' + linkId
 		}).success(function(response){
 			$('.dataTemplate').remove();
 			$('#noDataTxt').remove();
@@ -112,23 +119,19 @@ $(function(){
 			
 			for(key in response){
 				var data = dataTemplate.clone(true);
-				
 				var valueObj = response[key];
 				console.info('valueObj', valueObj);
-				
-				var LINK_COUNT = valueObj.LINK_COUNT;
-				if(!LINK_COUNT){
-					LINK_COUNT = 0;
+				var linkCount = valueObj.LINK_COUNT;
+				if(!linkCount){
+					linkCount = 0;
 				}
-				var LINK_DISTINCT_COUNT = valueObj.LINK_DISTINCT_COUNT;
-				if(!LINK_DISTINCT_COUNT){
-					LINK_DISTINCT_COUNT = 0;
+				var linkUserCount = valueObj.LINK_DISTINCT_COUNT;
+				if(!linkUserCount){
+					linkUserCount = 0;
 				}
-				
 				data.find('.clickDate').html(key);
-				data.find('.clickCount').html($.BCS.formatNumber(LINK_COUNT, 0));
-				data.find('.clickUser').html($.BCS.formatNumber(LINK_DISTINCT_COUNT, 0));
-				
+				data.find('.clickCount').html($.BCS.formatNumber(linkCount, 0));
+				data.find('.clickUser').html($.BCS.formatNumber(linkUserCount, 0));
 				$('#reportList').append(data);
 			}
 			

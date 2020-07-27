@@ -240,6 +240,9 @@ public class LoadFtpPnpDataTask {
                         transFileToSMSFlow(source);
                         log.debug("{}: Transfer File To SMS Flow Complete!", bigSwitch);
                         break;
+                    case -1:
+                        log.warn("Can't Load PNP_BIG_SWITCH!");
+                        break;
                     default:
                         /* 解析資料存到DB */
                         log.debug("{}: Parse Data Flow To Database!!", bigSwitch);

@@ -92,11 +92,15 @@ public class PnpPushMsgService {
      */
     private void sendProcess() {
         int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIG_SWITCH, true, false);
-        if (0 == bigSwitch || 1 == bigSwitch) {
+        if (bigSwitch == 0 || bigSwitch == 1) {
             log.warn("Stop sending!!");
             return;
         }
-
+        else if (bigSwitch == -1) {
+            log.warn("Can't Load PNP_BIG_SWITCH!");
+            return;
+        }
+        
         String procApName = DataUtils.getProcApName();
         for (PnpFtpSourceEnum type : PnpFtpSourceEnum.values()) {
             log.info("ftp source is {}, ap_name: {}", type.english, procApName);

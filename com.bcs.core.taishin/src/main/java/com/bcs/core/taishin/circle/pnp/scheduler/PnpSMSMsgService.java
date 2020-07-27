@@ -125,10 +125,18 @@ public class PnpSMSMsgService {
 
     private void sendProcess() {
         int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIG_SWITCH, true, false);
-        if (1 == bigSwitch || 0 == bigSwitch) {
-            log.warn("Stop sms ftp service!!");
+        if (bigSwitch == 1 || bigSwitch ==  0) {
+            log.warn("Stop sms ftp service!! bigSwitch is : {}", bigSwitch);
             return;
         }
+        else if (bigSwitch == -1) {
+            log.warn("Can't Load PNP_BIG_SWITCH!");
+            return;
+        }
+        else {
+            log.info("BigSwitch is : {}", bigSwitch);        	
+        }
+        
         Arrays.stream(PnpFtpSourceEnum.values()).forEach(this::sendSmsProcess);
     }
 

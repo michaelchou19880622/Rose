@@ -59,6 +59,9 @@ public class PNPFtpService {
             if (!CoreConfigReader.isPNPFtpTypeDevelop() && !("linux").equals(CoreConfigReader.getString("environment"))) {
                 pnpFtpSetting = useTrendPwMgmt(pnpFtpSetting, type);
             }
+            else if (!CoreConfigReader.isPNPFtpTypeDevelop() && !("mac").equals(CoreConfigReader.getString("environment"))) {
+                pnpFtpSetting = useTrendPwMgmt(pnpFtpSetting, type);
+            }
             ftpSettings.put(type.id, pnpFtpSetting);
         }
         log.info("initFtpSettings...OK");

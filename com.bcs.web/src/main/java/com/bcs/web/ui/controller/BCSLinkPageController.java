@@ -1,5 +1,6 @@
 package com.bcs.web.ui.controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -40,9 +41,11 @@ import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.enums.LOG_TARGET_ACTION_TYPE;
 import com.bcs.core.enums.RECORD_REPORT_TYPE;
 import com.bcs.core.exception.BcsNoticeException;
+import com.bcs.core.report.export.ExportToExcelForLinkClickReport;
 import com.bcs.core.report.service.ContentLinkReportService;
 import com.bcs.core.report.service.PageVisitReportService;
 import com.bcs.core.resource.CoreConfigReader;
+import com.bcs.core.resource.UriHelper;
 import com.bcs.core.utils.DBResultUtil;
 import com.bcs.core.utils.ErrorRecord;
 import com.bcs.core.web.security.CurrentUser;
@@ -54,6 +57,7 @@ import com.bcs.web.ui.model.LinkClickReportModel;
 import com.bcs.web.ui.model.LinkClickReportSearchModel;
 import com.bcs.web.ui.model.PageVisitReportModel;
 import com.bcs.web.ui.service.ExportExcelUIService;
+import com.bcs.web.ui.service.LoadFileUIService;
 
 @Controller
 @RequestMapping("/bcs")
@@ -70,6 +74,8 @@ public class BCSLinkPageController extends BCSBaseController {
 	private ContentFlagService contentFlagService;
 	@Autowired
 	private ExportExcelUIService exportExcelUIService;
+	@Autowired
+	private ExportToExcelForLinkClickReport exportToExcelForLinkClickReport;
 	
 	/** Logger */
 	private static Logger logger = Logger.getLogger(BCSLinkPageController.class);
@@ -88,44 +94,6 @@ public class BCSLinkPageController extends BCSBaseController {
 
 		try{ 
 			List<ContentLink> result = new ArrayList<ContentLink>();
-			
-//			// Add Coupon List Page
-//			ContentLink couponListPage = new ContentLink();
-//			couponListPage.setLinkUrl(UriHelper.getCouponListPagePattern());
-//			couponListPage.setLinkTitle("我的優惠列表");
-//			result.add(couponListPage);
-//
-//			// Add Reward Card List Page
-//			ContentLink rewardCardListPage = new ContentLink();
-//			rewardCardListPage.setLinkUrl(UriHelper.getRewardCardListPagePattern());
-//			rewardCardListPage.setLinkTitle("我的集點卡列表");
-//			result.add(rewardCardListPage);
-//			
-//			// Add Read Terms Of Business Page
-//			ContentLink readTermsOfBusinessPage = new ContentLink();
-//			readTermsOfBusinessPage.setLinkUrl(UriHelper.getReadTermsOfBusinessPagePattern());
-//			readTermsOfBusinessPage.setLinkTitle("升級LINE帳號");
-//			result.add(readTermsOfBusinessPage);
-//			
-//			// Add Game List
-//			List<GameModel> games = contentGameService.getAllContentGame();
-//			for(GameModel game : games){
-//
-//				ContentLink gamePage = new ContentLink();
-//				gamePage.setLinkUrl(UriHelper.getScratchPattern(game.getGameId()));
-//				gamePage.setLinkTitle("遊戲：" + game.getGameName());
-//				result.add(gamePage);
-//			}
-			
-//			// Add MGM Pages
-//            List<ShareCampaign> shareCampaigns = shareCampaignService.findByStatus(ShareCampaign.STATUS_ACTIVE);
-//            for(ShareCampaign o : shareCampaigns) {  
-//                ContentLink shareCampaignLinkPage = new ContentLink();
-//                shareCampaignLinkPage.setLinkUrl(UriHelper.getMgmPagePattern(o.getCampaignId()));
-//                shareCampaignLinkPage.setLinkTitle("分享好友活動: " + o.getCampaignName());
-//                result.add(shareCampaignLinkPage);
-//            }
-
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		}
 		catch(Exception e){
@@ -512,65 +480,26 @@ public class BCSLinkPageController extends BCSBaseController {
 			HttpServletRequest request,
 			HttpServletResponse response,
 			@CurrentUser CustomUser customUser) throws Exception {
-		logger.info("countLinkUrlList");
-		
+		String linkUrl = request.getParameter("linkUrl");
+		String startDate = request.getParameter("startDate");
+		String endDate = request.getParameter("endDate");
+		logger.info("countLinkUrlList start, linkUrl=" + linkUrl + " startDate=" + startDate + " endDate=" + endDate);
 		try {
-			String linkUrl = request.getParameter("linkUrl");
-			String startDate = request.getParameter("startDate");
-			String endDate = request.getParameter("endDate");
-			
 			if (StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate)) {
 				Map<String, Map<String, Long>> result = contentLinkReportService.getLinkUrlReport(startDate, endDate, linkUrl);
+				logger.info("countLinkUrlList end, linkUrl=" + linkUrl + " startDate=" + startDate + " endDate=" + endDate + " listSize=" + (result == null ? 0 : result.size()));
 				return new ResponseEntity<>(result, HttpStatus.OK);
 			} else {
 				if (StringUtils.isBlank(startDate)) {
-					logger.error("startDate null");
+					logger.error("countLinkUrlList end, no start date");
 					throw new BcsNoticeException("缺少查詢起始日期");
 				} else {
-					logger.error("endDate null");
+					logger.error("countLinkUrlList end, no end date");
 					throw new BcsNoticeException("缺少查詢結束日期");
 				}
 			}
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
-			
-			if(e instanceof BcsNoticeException) {
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-			} else{
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-		}
-	}
-
-	@ControllerLog(description="countLinkIdList")
-	@RequestMapping(method = RequestMethod.GET, value = "/admin/countLinkIdList")
-	@ResponseBody
-	public ResponseEntity<?> countLinkIdList(
-			HttpServletRequest request,
-			HttpServletResponse response,
-			@CurrentUser CustomUser customUser) throws Exception {
-		logger.info("countLinkIdList");
-		
-		try {
-			String linkId = request.getParameter("linkId");
-			String startDate = request.getParameter("startDate");
-			String endDate = request.getParameter("endDate");
-			
-			if (StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate)) {
-				Map<String, Map<String, Long>> result = contentLinkReportService.getLinkIdReport(startDate, endDate, linkId);
-				return new ResponseEntity<>(result, HttpStatus.OK);
-			} else {
-				if (StringUtils.isBlank(startDate)) {
-					logger.error("startDate null");
-					throw new BcsNoticeException("缺少查詢起始日期");
-				} else {
-					logger.error("endDate null");
-					throw new BcsNoticeException("缺少查詢結束日期");
-				}
-			}
-		} catch (Exception e) {
-			logger.error(ErrorRecord.recordError(e));
-			
 			if(e instanceof BcsNoticeException) {
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
 			} else{
@@ -672,5 +601,243 @@ public class BCSLinkPageController extends BCSBaseController {
 				}
 		 }
 		 throw new Exception("資料產生錯誤");
+	}
+	
+	/**
+	 * 取得連結列表
+	 */
+	@ControllerLog(description="取得連結列表-新版本")
+	@RequestMapping(method = RequestMethod.POST, value = "/edit/getLinkClickReportListNew", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> getLinkClickReportListNew(
+			HttpServletRequest request, 
+			HttpServletResponse response,
+			@CurrentUser CustomUser customUser,
+			@RequestBody LinkClickReportSearchModel linkClickReportSearchModel) throws IOException {
+		String queryFlag = linkClickReportSearchModel.getQueryFlag() == null ? "" : new String(linkClickReportSearchModel.getQueryFlag().getBytes("utf-8"),"utf-8");
+		Integer page = linkClickReportSearchModel.getPage() == null ? 0 : linkClickReportSearchModel.getPage();
+		int pageSize = linkClickReportSearchModel.getPageSize() == null ? 20 : linkClickReportSearchModel.getPageSize();
+		String startDate = linkClickReportSearchModel.getStartDate();
+		String endDate = linkClickReportSearchModel.getEndDate();
+		String dataStartDate = linkClickReportSearchModel.getDataStartDate();
+		String dataEndDate = linkClickReportSearchModel.getDataEndDate();
+		logger.info("getLinkClickReportListNew start, queryFlag=" + queryFlag + " page=" + page + " pageSize=" + pageSize + " startDate=" + startDate + " endDate=" + endDate + " dataStartDate=" + dataStartDate + " dataEndDate=" + dataEndDate);
+		try{
+			Calendar calendar = Calendar.getInstance();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			if (endDate == null) {
+				endDate = sdf.format(calendar.getTime());
+			}	
+			if (startDate == null) {
+				calendar.add(Calendar.DATE, -7);
+				startDate = sdf.format(calendar.getTime());
+			}
+			if (dataEndDate == null) {
+				dataEndDate = sdf.format(calendar.getTime());
+			}	
+			if (dataStartDate == null) {
+				calendar.add(Calendar.DATE, -7);
+				dataStartDate = sdf.format(calendar.getTime());
+			}
+			List<Object[]> result = null; // TRACING_ID, LINK_ID, LINK_TITLE, LINK_URL, MODIFY_TIME, CLICK_COUNT, USER_COUNT
+			result = contentLinkService.findListByModifyDateAndFlag(startDate, endDate, dataStartDate, dataEndDate, queryFlag, page * pageSize + 1, pageSize);
+			Map<String, Object> tracingResult = new HashMap<String, Object>();
+			Map<String, LinkClickReportModel> linkResult = new LinkedHashMap<String, LinkClickReportModel>();
+			String tracingUrlPre = UriHelper.getTracingUrlPre();
+            tracingResult.put("TracingUrlPre", tracingUrlPre);
+			for(Object[] data : result){
+				String tracingId = castToString(data[0]);
+				String linkId = castToString(data[1]);
+				String linkTitle = castToString(data[2]);
+				String linkUrl = castToString(data[3]);
+				String linkTime = castToString(data[4]);
+				String totalCount = castToString(data[5]);
+				String userCount = castToString(data[6]);
+				LinkClickReportModel model = new LinkClickReportModel();
+				model = new LinkClickReportModel();
+				model.setTracingLink(tracingId);
+				model.setLinkUrl(linkUrl);
+				model.setLinkId(linkId);
+				model.setLinkTitle(linkTitle);
+				model.setLinkTime(linkTime);
+				model.setTotalCount(StringUtils.isBlank(totalCount) ? 0 : Long.parseLong(totalCount));
+				model.setUserCount(StringUtils.isBlank(userCount) ? 0 : Long.parseLong(userCount));
+				model.addFlags(contentFlagService.findFlagValueByReferenceIdAndContentTypeOrderByFlagValueAsc(linkId, "LINK"));
+				linkResult.put(linkId, model);
+			}
+			tracingResult.put("ContentLinkTracingList", linkResult);
+			logger.info("getLinkClickReportListNew end, queryFlag=" + queryFlag + " page=" + page + " pageSize=" + pageSize + " startDate=" + startDate + " endDate=" + endDate + " dataStartDate=" + dataStartDate + " dataEndDate=" + dataEndDate + " tracingUrlPre=" + tracingUrlPre + " linkResultSize=" + (linkResult == null ? 0 : linkResult.size()));
+			return new ResponseEntity<>(tracingResult, HttpStatus.OK);
+		}
+		catch(Exception e){
+			logger.error(ErrorRecord.recordError(e));
+			if(e instanceof BcsNoticeException){
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			}
+			else{
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		}
+	}
+	
+	/**
+	 * 匯出連結列表到Excel
+	 */
+	@ControllerLog(description="匯出連結列表到Excel-新版本")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/exportLinkClickReportListNew")
+	@ResponseBody
+	public void exportLinkClickReportListNew(
+			HttpServletRequest request, 
+			HttpServletResponse response,
+			@CurrentUser CustomUser customUser) throws IOException {
+		String queryFlag = request.getParameter("queryFlag");
+		String startDate = request.getParameter("startDate");
+		String endDate = request.getParameter("endDate");
+		String dataStartDate = request.getParameter("dataStartDate");
+		String dataEndDate = request.getParameter("dataEndDate");
+		logger.info("exportLinkClickReportListNew start, queryFlag=" + queryFlag + " startDate=" + startDate + " endDate=" + endDate + " dataStartDate=" + dataStartDate + " dataEndDate=" + dataEndDate);
+		try {
+			Calendar calendar = Calendar.getInstance();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			if (endDate == null) {
+				endDate = sdf.format(calendar.getTime());
+			}	
+			if (startDate == null) {
+				calendar.add(Calendar.DATE, -7);
+				startDate = sdf.format(calendar.getTime());
+			}
+			if (dataEndDate == null) {
+				dataEndDate = sdf.format(calendar.getTime());
+			}	
+			if (dataStartDate == null) {
+				calendar.add(Calendar.DATE, -7);
+				dataStartDate = sdf.format(calendar.getTime());
+			}
+			String filePath = CoreConfigReader.getString("file.path") + System.getProperty("file.separator") + "REPORT";
+			Date date = new Date();
+			String fileName = "LinkClickReportList_" + sdf.format(date) + ".xlsx";
+			File folder = new File(filePath);
+			if(!folder.exists()){
+				folder.mkdirs();
+			}
+			exportToExcelForLinkClickReport.exportLinkClickReportListNew(filePath, fileName, startDate, endDate, dataStartDate, dataStartDate, queryFlag);
+			LoadFileUIService.loadFileToResponse(filePath, fileName, response);
+			logger.info("exportLinkClickReportListNew end, queryFlag=" + queryFlag + " startDate=" + startDate + " endDate=" + endDate + " dataStartDate=" + dataStartDate + " dataEndDate=" + dataEndDate + " filePaht=" + filePath + " fileName=" + fileName);
+		} catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+		}
+	}
+	
+	@ControllerLog(description="countLinkIdList")
+	@RequestMapping(method = RequestMethod.GET, value = "/admin/countLinkIdList")
+	@ResponseBody
+	public ResponseEntity<?> countLinkIdList(
+			HttpServletRequest request,
+			HttpServletResponse response,
+			@CurrentUser CustomUser customUser) throws Exception {
+		String linkId = request.getParameter("linkId");
+		String linkUrl = request.getParameter("linkUrl");
+		String startDate = request.getParameter("startDate");
+		String endDate = request.getParameter("endDate");
+		logger.info("countLinkIdList start, linkId=" + linkId + " linkUrl=" + linkUrl + " startDate=" + startDate + " endDate=" + endDate);
+		try {
+			if (StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate)) {
+				Map<String, Map<String, Long>> result = contentLinkReportService.getLinkIdReportNew(startDate, endDate, linkId);
+				logger.info("countLinkIdList end, linkId=" + linkId + " linkUrl=" + linkUrl + " startDate=" + startDate + " endDate=" + endDate + " listSize=" + (result == null ? 0 : result.size()));
+				return new ResponseEntity<>(result, HttpStatus.OK);
+			} else {
+				if (StringUtils.isBlank(startDate)) {
+					logger.error("countLinkIdList end, no start date");
+					throw new BcsNoticeException("缺少查詢起始日期");
+				} else {
+					logger.error("countLinkIdList end, no start date");
+					throw new BcsNoticeException("缺少查詢結束日期");
+				}
+			}
+		} catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+			if(e instanceof BcsNoticeException) {
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_IMPLEMENTED);
+			} else{
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		}
+	}
+	
+	/**
+	 * 匯出 Link Click Report EXCEL
+	 */
+	@ControllerLog(description="匯出 Link Click Report EXCEL")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/exportToExcelForLinkClickReportNew")
+	@ResponseBody
+	public void exportToExcelForLinkClickReportNew(
+			HttpServletRequest request, 
+			HttpServletResponse response,
+			@CurrentUser CustomUser customUser) throws IOException{
+		String linkId = request.getParameter("linkId");
+		String startDate = request.getParameter("startDate");
+		String endDate = request.getParameter("endDate");
+		String linkUrl = request.getParameter("linkUrl");
+		logger.info("exportToExcelForLinkClickReportNew start, linkId=" + linkId + " linkUrl=" + linkUrl + " startDate=" + startDate + " endDate=" + endDate);
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
+			String filePath = CoreConfigReader.getString("file.path") + System.getProperty("file.separator") + "REPORT";
+			Date date = new Date();
+			String fileName = "LinkUrlClickReportList_" + sdf.format(date) + ".xlsx";
+			File folder = new File(filePath);
+			if(!folder.exists()){
+				folder.mkdirs();
+			}
+			exportToExcelForLinkClickReport.exportToExcelForLinkClickReportNew(filePath, fileName, startDate, endDate, linkId, linkUrl);
+			LoadFileUIService.loadFileToResponse(filePath, fileName, response);
+			logger.info("exportToExcelForLinkClickReportNew end, linkId=" + linkId + " linkUrl=" + linkUrl + " startDate=" + startDate + " endDate=" + endDate + " filePaht=" + filePath + " fileName=" + fileName);
+		} catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+		}
+	}
+	
+	@ControllerLog(description="exportMidForLinkClickReportNew")
+	@RequestMapping(method = RequestMethod.GET, value = "/edit/exportMidForLinkClickReportNew")
+	@ResponseBody
+	public void exportMidForLinkClickReportNew(
+			HttpServletRequest request,
+			HttpServletResponse response,
+			@CurrentUser CustomUser customUser) throws Exception {
+		String linkId = request.getParameter("linkId");
+		String startDate = request.getParameter("startDate");
+		String endDate = request.getParameter("endDate");
+		String linkUrl = request.getParameter("linkUrl");
+		logger.info("exportMidForLinkClickReport start, linkId=" + linkId + " linkUrl=" + linkUrl + " startDate=" + startDate + " endDate=" + endDate);
+		try {
+		    if(StringUtils.isNotBlank(linkUrl)){
+			    ContentLink contentLink = contentLinkService.findOne(linkId);
+			    if(contentLink == null){
+				    throw new Exception("linkId Error");
+			    }				
+			    if(StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate)){
+				    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+				    Date timeStart = sdf.parse(startDate);					
+				    Date timeEnd = sdf.parse(endDate);
+				    Calendar calendarEnd = Calendar.getInstance();
+				    calendarEnd.setTime(timeEnd);
+				    String title = contentLink.getLinkTitle();
+				    List<String> clickLinkMids = contentLinkService.findClickMidByLinkIdAndTime(linkId, sdf.format(timeStart), sdf.format(calendarEnd.getTime()));
+				    if(clickLinkMids != null){						
+					    List<String> titles = new ArrayList<String>();
+					    titles.add("點擊人UID");
+					    List<List<String>> data = new ArrayList<List<String>>();
+					    data.add(clickLinkMids);	
+					    String time = sdf.format(timeStart) + "~" + sdf.format(calendarEnd.getTime()) ;
+					    exportExcelUIService.exportMidResultToExcel(request, response, "ClickUrlMid", "點擊連結:" + title , time, titles, data);
+					    logger.info("exportMidForLinkClickReport end, linkId=" + linkId + " linkUrl=" + linkUrl + " startDate=" + startDate + " endDate=" + endDate + " numOfMID=" + clickLinkMids.size());
+					    return;
+				    }
+				    logger.info("exportMidForLinkClickReport end, linkId=" + linkId + " linkUrl=" + linkUrl + " startDate=" + startDate + " endDate=" + endDate);
+			    }
+		     }
+		} catch (Exception e) {
+			logger.error(ErrorRecord.recordError(e));
+		}
+		throw new Exception("資料產生錯誤");
 	}
 }

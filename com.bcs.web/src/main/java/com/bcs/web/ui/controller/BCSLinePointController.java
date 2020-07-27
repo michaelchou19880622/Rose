@@ -145,7 +145,7 @@ public class BCSLinePointController extends BCSBaseController {
             String environment = CoreConfigReader.getString("environment");
             log.info("environment = {}", environment);
 
-            if ("local".equals(environment) || "linux".equals(environment)) {
+            if ("local".equals(environment) || "linux".equals(environment) ||  "mac".equals(environment)) {
             	taishinEmployee = oracleService.findByLocalEmployeeId(empId);
             } else {
             	taishinEmployee = oracleService.findByEmployeeId(empId);
@@ -272,7 +272,7 @@ public class BCSLinePointController extends BCSBaseController {
             String environment = CoreConfigReader.getString("environment");
             log.info("environment = {}", environment);
 
-            if ("local".equals(environment) || "linux".equals(environment)) {
+            if ("local".equals(environment) || "linux".equals(environment) ||  "mac".equals(environment)) {
             	taishinEmployee = oracleService.findByLocalEmployeeId(empId);
             } else {
             	taishinEmployee = oracleService.findByEmployeeId(empId);
@@ -478,7 +478,7 @@ public class BCSLinePointController extends BCSBaseController {
             String environment = CoreConfigReader.getString("environment");
             log.info("environment = {}", environment);
 
-            if ("local".equals(environment) || "linux".equals(environment)) {
+            if ("local".equals(environment) || "linux".equals(environment) ||  "mac".equals(environment)) {
             	taishinEmployee = oracleService.findByLocalEmployeeId(empId);
             } else {
             	taishinEmployee = oracleService.findByEmployeeId(empId);

@@ -68,9 +68,13 @@ public class PnpPNPMsgService {
         log.info("StartCircle....");
         /* pnp.big switch = 0(停止排程) 1(停止排程，並轉發SMS) 其他(正常運行) */
         int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIG_SWITCH, true, false);
-        if (0 == bigSwitch || 1 == bigSwitch) {
+        if (bigSwitch == 0 || bigSwitch == 1) {
             return;
         }
+        else if (bigSwitch == -1) {
+            log.warn("Can't Load PNP_BIG_SWITCH!");
+            return;
+        }        
         sendingPnpMain();
     }
 

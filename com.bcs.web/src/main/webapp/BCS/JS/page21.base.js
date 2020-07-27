@@ -8,7 +8,7 @@ $(function(){
 	var endDate = $.urlParam("endDate");
 	// 日期元件
 	$(".datepicker").datepicker({
-		'maxDate' : 0, //最多只能選至今天
+		'maxDate' : -1, //最多只能選至前一天
 		'dateFormat' : 'yy-mm-dd'
 	});	
 	
@@ -80,12 +80,13 @@ $(function(){
 		dataTemplate = $('.dataTemplate').clone(true);
 		$('.dataTemplate').remove();
 		var nowDate = moment(); //取得現在時間
-		var lastWeek = moment().dates(nowDate.dates() - 6); //取得前7天(上一週)的時間
+		var reportStartDate = moment().dates(nowDate.dates() - 7);
+		var reportEndDate = moment().dates(nowDate.dates() - 1);
 		if (startDate != null) {
 			$('#reportStartDate').val(startDate)
 		}
 		else {
-			$('#reportStartDate').val(lastWeek.format('YYYY-MM-DD'));
+			$('#reportStartDate').val(reportStartDate.format('YYYY-MM-DD'));
 		}
 		if (endDate != null) {
 			$('#reportEndDate').val(endDate)

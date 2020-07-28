@@ -457,7 +457,8 @@ public class MobileTracingController extends BCSBaseController {
                         if (isBound) {
                             /* 非新使用者 */
                             logger.info("A binded Desktop user!!");
-                            lineUserService.findByMidAndCreateUnbind(sessionMID);
+                            //?? 此Binnded MID當Line User NULL時候, 會Create 此MID, 並設為UNBINDED..?? 
+                            //lineUserService.findByMidAndCreateUnbind(sessionMID);
 
                         } else {
                             /* 新使用者 */
@@ -475,7 +476,8 @@ public class MobileTracingController extends BCSBaseController {
                         /* 非新使用者 */
                         String linkUrl = UriHelper.getLinkUriCode(contentLinkBinded.getLinkId(), SendCode, SendEvent);
 
-                        lineUserService.findByMidAndCreateUnbind(sessionMID);
+                        //?? 此Binnded MID當Line User NULL時候, 會Create 此MID, 並設為UNBINDED..?? 
+                        //lineUserService.findByMidAndCreateUnbind(sessionMID);
 
                         UserTraceLogUtil.saveLogTrace(LOG_TARGET_ACTION_TYPE.TARGET_ContentLink, LOG_TARGET_ACTION_TYPE.ACTION_ClickLinkWebLogin, sessionMID, linkUrl + "--" + contentLinkBinded, contentLinkBinded.getLinkId() + ":WebLogin:" + state);
                         UserTraceLogUtil.saveLogTrace(LOG_TARGET_ACTION_TYPE.TARGET_ContentLink, LOG_TARGET_ACTION_TYPE.ACTION_ClickLinkWebLogin_API, sessionMID, result, contentLinkBinded.getLinkId() + ":WebLogin:" + state);

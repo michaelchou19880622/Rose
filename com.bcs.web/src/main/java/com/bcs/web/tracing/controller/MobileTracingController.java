@@ -38,10 +38,6 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-// import com.bcs.core.akka.service.AkkaCoreService;
-// import com.bcs.core.record.akke.model.WebLoginClickLinkModel;
-// import com.bcs.core.servlet.service.HttpSessionService;
-
 
 @Controller
 @RequestMapping("/l")
@@ -58,8 +54,6 @@ public class MobileTracingController extends BCSBaseController {
     private LineWebLoginApiService lineWebLoginApiService;
     @Autowired
     private MobilePageService mobilePageService;
-    /* @Autowired
-    private HttpSessionService httpSessionService; */
     @Autowired
     private LineUserService lineUserService;
     @Autowired
@@ -134,14 +128,13 @@ public class MobileTracingController extends BCSBaseController {
             String bcsTargetLink = "";
 
             boolean isGetFromSession = CoreConfigReader.getBoolean(CONFIG_STR.TRACING_CONFIG_GET_FROM_SESSION, true);
-            logger.info("isGetFromSession:" + isGetFromSession);
 
             boolean useSwitch = CoreConfigReader.getBoolean(CONFIG_STR.TRACING_CONFIG_USE_SWITCH, true);
-            logger.info("useSwitch:" + useSwitch);
 
             boolean checkMobile = CoreConfigReader.getBoolean(CONFIG_STR.TRACING_CONFIG_CHECK_MOBILE, true);
-            logger.info("checkMobile:" + checkMobile);
-
+            
+            logger.info("MobileTracingController startTracing isGetFromSession : " + isGetFromSession + ", useSwitch: " + useSwitch + ", checkMobile:" + checkMobile);
+            
             if (StringUtils.isNotBlank(sessionMID) && isGetFromSession) {
                 boolean isBound = userValidateService.isBound(sessionMID);
                 logger.info("isBound:" + isBound);
@@ -457,7 +450,7 @@ public class MobileTracingController extends BCSBaseController {
                     boolean isBound = userValidateService.isBound(sessionMID);
                     //=================OS=======================
                     if ((userAgent.toLowerCase().indexOf("windows") >= 0  || 
-                        	userAgent.toLowerCase().indexOf("macintosh") >= 0)) {
+                         userAgent.toLowerCase().indexOf("macintosh") >= 0)) {
                         logger.info("Desktop user!!");
                         String linkUrl = UriHelper.getLinkUriCode(contentLinkUnMobile.getLinkId(), SendCode, SendEvent);
 
@@ -478,7 +471,7 @@ public class MobileTracingController extends BCSBaseController {
                     } 
                 
                     if (isBound) {
-                        logger.info("A binded user!!");
+                        logger.info("A binded mobile user!!");
                         /* 非新使用者 */
                         String linkUrl = UriHelper.getLinkUriCode(contentLinkBinded.getLinkId(), SendCode, SendEvent);
 
@@ -490,7 +483,7 @@ public class MobileTracingController extends BCSBaseController {
                         response.sendRedirect(linkUrl);
                     } else {
                         /* 新使用者 */
-                        logger.info("An unbind user!!");
+                        logger.info("An unbind mobile user!!");
                         String linkUrl = UriHelper.getLinkUriCode(contentLink.getLinkId(), SendCode, SendEvent);
 
                         lineUserService.findByMidAndCreateSysAdd(sessionMID);

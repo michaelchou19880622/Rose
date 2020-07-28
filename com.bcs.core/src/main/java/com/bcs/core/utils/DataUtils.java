@@ -367,14 +367,6 @@ public class DataUtils {
             //與mac profile redundant   
             case "linux":
                 processApName = "MacBook-Pro.local";
-        		excludeNumbers.add(2);
-            	if(sourceAPName.contains("AIBCWEB") && sourceAPName.length() == 8){
-            		String APNumber= sourceAPName.substring(7,8);
-                    if (StringUtils.isNumeric(APNumber)) {
-                    	excludeNumbers.add(Integer.parseInt(APNumber));            		
-                    }
-        		}
-                processApName = String.format("AIBCWEB%d", randomNumber(1, 6, excludeNumbers));                
                 break;
             //與linux profile redundant    
             case "mac":

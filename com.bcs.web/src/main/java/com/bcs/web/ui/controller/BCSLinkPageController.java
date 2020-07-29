@@ -639,8 +639,8 @@ public class BCSLinkPageController extends BCSBaseController {
 				calendar.add(Calendar.DATE, -7);
 				dataStartDate = sdf.format(calendar.getTime());
 			}
-			List<Object[]> result = null; // TRACING_ID, LINK_ID, LINK_TITLE, LINK_URL, MODIFY_TIME, CLICK_COUNT, USER_COUNT
-			result = contentLinkService.findListByModifyDateAndFlag(startDate, endDate, dataStartDate, dataEndDate, queryFlag, page * pageSize + 1, pageSize);
+			// TRACING_ID, LINK_ID, LINK_TITLE, LINK_URL, MODIFY_TIME, CLICK_COUNT, USER_COUNT
+			List<Object[]> result = contentLinkService.findListByModifyDateAndFlag(startDate, endDate, dataStartDate, dataEndDate, queryFlag, page * pageSize + 1, pageSize);
 			Map<String, Object> tracingResult = new HashMap<String, Object>();
 			Map<String, LinkClickReportModel> linkResult = new LinkedHashMap<String, LinkClickReportModel>();
 			String tracingUrlPre = UriHelper.getTracingUrlPre();
@@ -654,7 +654,6 @@ public class BCSLinkPageController extends BCSBaseController {
 				String totalCount = castToString(data[5]);
 				String userCount = castToString(data[6]);
 				LinkClickReportModel model = new LinkClickReportModel();
-				model = new LinkClickReportModel();
 				model.setTracingLink(tracingId);
 				model.setLinkUrl(linkUrl);
 				model.setLinkId(linkId);

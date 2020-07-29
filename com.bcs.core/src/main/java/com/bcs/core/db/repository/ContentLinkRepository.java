@@ -107,7 +107,7 @@ public interface ContentLinkRepository extends EntityRepository<ContentLink, Str
 			+ "WHERE LINK_ID = REFERENCE_ID AND ACTION = 'ClickLink' AND LINK_URL = ?1 AND BCS_USER_TRACE_LOG.MODIFY_DAY >= ?2 AND BCS_USER_TRACE_LOG.MODIFY_DAY < ?3  ", nativeQuery = true)
 	public List<String> findClickMidByLinkUrlAndTime(String linkUrl, String start, String end);
 	
-	@Transactional(readOnly = true, timeout = 30)
+	@Transactional(readOnly = true, timeout = 60)
 	@Query(value = "SELECT * FROM (" +
 	               "SELECT" + 
 			       "    bclt.TRACING_ID," + 
@@ -126,7 +126,7 @@ public interface ContentLinkRepository extends EntityRepository<ContentLink, Str
 			       "ORDER BY TRACING_ID DESC, LINK_TITLE", nativeQuery = true)
 	public List<Object[]> findListByModifyDate(String startDate, String endDate, String dataStartDate, String dataEndDate, int offset, int recordNum);
 	
-	@Transactional(readOnly = true, timeout = 30)
+	@Transactional(readOnly = true, timeout = 60)
 	@Query(value = "SELECT * FROM (" +
 	               "SELECT" + 
 			       "    bclt.TRACING_ID," + 
@@ -145,7 +145,7 @@ public interface ContentLinkRepository extends EntityRepository<ContentLink, Str
 			       "ORDER BY TRACING_ID DESC, LINK_TITLE", nativeQuery = true)
 	public List<Object[]> findListByModifyDate(String startDate, String endDate, String dataStartDate, String dataEndDate, int offset);
 	
-	@Transactional(readOnly = true, timeout = 30)
+	@Transactional(readOnly = true, timeout = 60)
 	@Query(value = "SELECT * FROM (" +
 	               "SELECT" + 
 			       "    bclt.TRACING_ID," + 
@@ -165,7 +165,7 @@ public interface ContentLinkRepository extends EntityRepository<ContentLink, Str
 	               "ORDER BY TRACING_ID DESC, LINK_TITLE", nativeQuery = true)
 	public List<Object[]> findListByModifyDateAndFlag(String startDate, String endDate, String dataStartDate, String dataEndDate, String flag, int offset, int recordNum);
 	
-	@Transactional(readOnly = true, timeout = 30)
+	@Transactional(readOnly = true, timeout = 60)
 	@Query(value = "SELECT * FROM (" +
 	               "SELECT" + 
 			       "    bclt.TRACING_ID," + 
@@ -185,13 +185,13 @@ public interface ContentLinkRepository extends EntityRepository<ContentLink, Str
 	               "ORDER BY TRACING_ID DESC, LINK_TITLE", nativeQuery = true)
 	public List<Object[]> findListByModifyDateAndFlag(String startDate, String endDate, String dataStartDate, String dataEndDate, String flag, int offset);
 	
-	@Transactional(readOnly = true, timeout = 30)
+	@Transactional(readOnly = true, timeout = 60)
 	@Query(value = "SELECT DISTINCT BCS_USER_TRACE_LOG.MODIFY_USER "
 			+ "FROM BCS_CONTENT_LINK, BCS_USER_TRACE_LOG "
 			+ "WHERE LINK_ID = REFERENCE_ID AND ACTION = 'ClickLink' AND LINK_ID = ?1 AND BCS_USER_TRACE_LOG.MODIFY_DAY >= ?2 AND BCS_USER_TRACE_LOG.MODIFY_DAY <= ?3  ", nativeQuery = true)
 	public List<String> findClickMidByLinkIdAndTime(String linkId, String start, String end);
 	
-	@Transactional(readOnly = true, timeout = 30)
+	@Transactional(readOnly = true, timeout = 60)
 	@Query(value = "SELECT "
 			+ "     BCS_USER_TRACE_LOG.MODIFY_DAY AS Day, "
 			+ "     COUNT('x') AS allCount, "

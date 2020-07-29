@@ -125,6 +125,7 @@ $(function(){
 			console.info(response);
 			var contentLinkTracingList = response.ContentLinkTracingList;
 			var tracingUrlPre = response.TracingUrlPre;
+			var recordNumber = 0;
 			$.each(contentLinkTracingList, function(i, o){
 				var groupData = templateBody.clone(true);
 				groupData.find('.tracingLink').html(tracingUrlPre + o.tracingLink);
@@ -142,7 +143,9 @@ $(function(){
 				groupData.find('.userCount a').attr('href', bcs.bcsContextPath + '/admin/reportLinkClickDetailPage?linkUrl=' + linkUrl  + "&linkId=" + linkId + "&startDate=" + dataStartDate + "&endDate=" + dataEndDate)
 				groupData.find('.userCount a').html($.BCS.formatNumber(o.userCount,0));
 				$('#tableBody').append(groupData);
+				recordNumber += 1;
 			});
+			$('#recordNumberText').html(recordNumber);
 			
 		}).fail(function(response){
 			console.info(response);

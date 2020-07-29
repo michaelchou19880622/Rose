@@ -335,15 +335,17 @@ public class PnpRepositoryCustomImpl implements PnpRepositoryCustom {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public List<PnpDetail> findDetailByPnpStatusAndExpired(PnpFtpSourceEnum type, List<String> statusList){
+    public List<PnpDetail> findDetailByPnpStatusAndExpired(PnpFtpSourceEnum type, List<String> statusList,  int expireTime){
         String selectSql = "SELECT TOP 1000 * FROM " + type.detailTable +
                 " WHERE PNP_STATUS IN (:STATUS_LIST)" +
                 " AND PNP_DELIVERY_EXPIRE_TIME < :NOW" +
-                " AND SMS_STATUS IS NULL";
-        // log.info(selectSql);
+				" AND DATEADD(MINUTE, :EXPIRE_TIME, PNP_DELIVERY_EXPIRE_TIME) > :NOW" +
+				" AND SMS_STATUS IS NULL";
+        
         return providerService.getEntityManager().createNativeQuery(selectSql, type.detailClass)
                 .setParameter("STATUS_LIST", statusList)
                 .setParameter("NOW", new Date())
+                .setParameter("EXPIRE_TIME", expireTime)
                 .getResultList();
     }
 

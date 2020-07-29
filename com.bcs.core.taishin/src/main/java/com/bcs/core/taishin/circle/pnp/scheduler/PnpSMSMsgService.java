@@ -408,9 +408,14 @@ public class PnpSMSMsgService {
     }
 
     private List<PnpDetail> getPnpExpiredToSmsList(PnpFtpSourceEnum type) {
+        int expiredTime = CoreConfigReader.getInteger(CONFIG_STR.PNP_DELIVERY_EXPIRED_TIME);
+        //Default : 預設 PNP_DELIVERY_EXPIRE_TIME轉發至SMS的timeout的時間最少需30分鐘, 目前系統設定值為120分鐘.
+        if (expiredTime < 30) {
+        	expiredTime = 30;
+        }
+        
         List<PnpDetail> list = pnpRepositoryCustom.findDetailByPnpStatusAndExpired(type, Collections.singletonList(
-                PnpStatusEnum.PNP_SENT_CHECK_DELIVERY.value
-        ));
+                PnpStatusEnum.PNP_SENT_CHECK_DELIVERY.value), expiredTime);
         if (!list.isEmpty()) {
             log.info("Pnp expired to sms list size is {}", list.size());
         }

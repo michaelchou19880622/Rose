@@ -97,14 +97,14 @@ public class LinePointPushMessageActor extends UntypedActor {
 
             // 檢查uid狀態，若在發送LINE POINTS時客戶已封鎖台新LINE就不發送，但是要列入發送失敗的紀錄中，失敗原因要記錄為「客戶已封鎖」
             final String memberUid = detail.getUid();
-            log.info("memberUid = {}", memberUid);
+//            log.info("memberUid = {}", memberUid);
             
             LineUserService lineUserService = ApplicationContextProvider.getApplicationContext().getBean(LineUserService.class);
             LineUser lineUser = lineUserService.findByMid(memberUid);
-            log.info("lineUser = {}", lineUser);
+//            log.info("lineUser = {}", lineUser);
             
             boolean isStatusBlock = lineUser.getStatus().equals(LineUser.STATUS_BLOCK)? true : false;
-            log.info("isStatusBlock = {}", isStatusBlock);
+//           log.info("isStatusBlock = {}", isStatusBlock);
 
             final String orderKey = getOrderKey(pushApiModel, detail);
             

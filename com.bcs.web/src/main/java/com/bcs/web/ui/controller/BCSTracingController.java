@@ -145,13 +145,13 @@ public class BCSTracingController extends BCSBaseController {
 						Long tracingId = Long.parseLong(tracingIdStr);
 						contentLinkTracingUIService.generateTracingLink(tracingId, linkDatas.get(0), linkDatas.get(1), linkDatas.get(2), adminUserAccount);
 						tracingUrl = UriHelper.getTracingUrl(tracingId);
-						logger.info("tracingGenerate start, tracingId=" + tracingIdStr + " tracingUrl=" + tracingUrl);
+						logger.info("tracingGenerate end, tracingId=" + tracingIdStr + " tracingUrl=" + tracingUrl);
 						return new ResponseEntity<>(tracingUrl, HttpStatus.OK);
 					}
 					else{
 						Long result = contentLinkTracingUIService.generateTracingLink(linkDatas.get(0), linkDatas.get(1), linkDatas.get(2), adminUserAccount);
 						tracingUrl = UriHelper.getTracingUrl(result);
-						logger.info("tracingGenerate start, tracingId=" + tracingIdStr + " tracingUrl=" + tracingUrl);
+						logger.info("tracingGenerate end, tracingId=" + result + " tracingUrl=" + tracingUrl);
 						return new ResponseEntity<>(tracingUrl, HttpStatus.OK);
 					}
 				}

@@ -24,7 +24,6 @@ public class ContentLinkTracingService {
 	public ContentLinkTracingService(){}
 	public void save(ContentLinkTracing contentLinkTracing){
 		contentLinkTracingRepository.save(contentLinkTracing);
-
 		if(contentLinkTracing != null){}
 	}
 	

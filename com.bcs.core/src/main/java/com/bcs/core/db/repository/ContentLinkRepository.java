@@ -159,7 +159,8 @@ public interface ContentLinkRepository extends EntityRepository<ContentLink, Str
 			       "FROM BCS_CONTENT_LINK bcl " +
 			       "LEFT JOIN BCS_CONTENT_LINK_TRACING bclt ON (bcl.LINK_ID = bclt.LINK_ID_BINDED OR bcl.LINK_ID = bclt.LINK_ID OR bcl.LINK_ID = bclt.LINK_ID_UNMOBILE) " +
 			       "WHERE bcl.MODIFY_TIME >= ?1 AND bcl.MODIFY_TIME <= ?2 " + 
-			       "AND bcl.LINK_ID IN (SELECT REFERENCE_ID FROM BCS_CONTENT_FLAG bcf WHERE CONTENT_TYPE='LINK' AND FLAG_VALUE LIKE ?5) " +
+			       "AND (bcl.LINK_ID IN (SELECT REFERENCE_ID FROM BCS_CONTENT_FLAG bcf WHERE CONTENT_TYPE='LINK' AND FLAG_VALUE LIKE ?5) " +
+			       "OR bcl.LINK_TITLE LIKE ?5) " +
 			       ") AS NewTable " +
 			       "WHERE ROW_ID >= ?6 AND ROW_ID < (?6 + ?7) " +
 	               "ORDER BY TRACING_ID DESC, LINK_TITLE", nativeQuery = true)
@@ -179,7 +180,8 @@ public interface ContentLinkRepository extends EntityRepository<ContentLink, Str
 			       "FROM BCS_CONTENT_LINK bcl " +
 			       "LEFT JOIN BCS_CONTENT_LINK_TRACING bclt ON (bcl.LINK_ID = bclt.LINK_ID_BINDED OR bcl.LINK_ID = bclt.LINK_ID OR bcl.LINK_ID = bclt.LINK_ID_UNMOBILE) " +
 			       "WHERE bcl.MODIFY_TIME >= ?1 AND bcl.MODIFY_TIME <= ?2 " + 
-			       "AND bcl.LINK_ID IN (SELECT REFERENCE_ID FROM BCS_CONTENT_FLAG bcf WHERE CONTENT_TYPE='LINK' AND FLAG_VALUE LIKE ?5) " +
+			       "AND (bcl.LINK_ID IN (SELECT REFERENCE_ID FROM BCS_CONTENT_FLAG bcf WHERE CONTENT_TYPE='LINK' AND FLAG_VALUE LIKE ?5) " +
+			       "OR bcl.LINK_TITLE LIKE ?5) " +
 			       ") AS NewTable " +
 			       "WHERE ROW_ID >= ?6 " +
 	               "ORDER BY TRACING_ID DESC, LINK_TITLE", nativeQuery = true)

@@ -8,7 +8,7 @@ $(function(){
 	var endDate = $.urlParam("endDate");
 	// 日期元件
 	$(".datepicker").datepicker({
-		'maxDate' : -1, //最多只能選至前一天
+		'maxDate' : 0, //最多只能選至前一天
 		'dateFormat' : 'yy-mm-dd'
 	});	
 	
@@ -80,8 +80,8 @@ $(function(){
 		dataTemplate = $('.dataTemplate').clone(true);
 		$('.dataTemplate').remove();
 		var nowDate = moment(); //取得現在時間
-		var reportStartDate = moment().dates(nowDate.dates() - 7);
-		var reportEndDate = moment().dates(nowDate.dates() - 1);
+		var reportStartDate = moment().dates(nowDate.dates() - 6);
+		var reportEndDate = moment().dates(nowDate.dates());
 		if (startDate != null) {
 			$('#reportStartDate').val(startDate)
 		}

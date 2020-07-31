@@ -79,7 +79,7 @@ $(function(){
 	
 	//選取日期元件
 	$(".datepicker").datepicker({
-		'maxDate' : -1, //最多只能選至前一天
+		'maxDate' : 0, //最多只能選至前一天
 		'dateFormat' : 'yy-mm-dd'
 	});
 	
@@ -161,10 +161,10 @@ $(function(){
 		templateBody = $('.dataTemplate').clone(true);
 		$('.dataTemplate').remove();
 		var nowDate = moment(); //取得現在時間
-		var campaignStartTime = moment().dates(nowDate.dates() - 7);
-		var campaignEndTime = moment().dates(nowDate.dates() - 1);
-		var dataStartTime = moment().dates(nowDate.dates() - 7);
-		var dataEndTime = moment().dates(nowDate.dates() - 1);
+		var campaignStartTime = moment().dates(nowDate.dates() - 6);
+		var campaignEndTime = moment().dates(nowDate.dates());
+		var dataStartTime = moment().dates(nowDate.dates() - 6);
+		var dataEndTime = moment().dates(nowDate.dates());
 		$('#campaignStartTime').val(campaignStartTime.format('YYYY-MM-DD'));
 		$('#campaignEndTime').val(campaignEndTime.format('YYYY-MM-DD'));
 		$('#dataStartTime').val(dataStartTime.format('YYYY-MM-DD'));

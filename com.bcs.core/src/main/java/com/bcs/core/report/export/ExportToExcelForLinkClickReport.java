@@ -171,11 +171,11 @@ public class ExportToExcelForLinkClickReport {
 		}
 	}
 	
-	public void exportLinkClickReportListNew(String exportPath, String fileName, String startDate, String endDate,  String dataStartDate, String dataEndDate, String queryFlag) throws Exception {
+	public void exportLinkClickReportListNew(String exportPath, String fileName, String startDate, String endDate, String dataStartDate, String dataEndDate, String queryFlag, int orderBy) throws Exception {
 		try {
 			Workbook wb = new XSSFWorkbook();
 			Sheet sheetLink = wb.createSheet("ClickReportBySearch");
-			this.exportToExcelForLinkClickReportNew(wb, sheetLink, startDate, endDate, dataStartDate, dataEndDate, queryFlag);
+			this.exportToExcelForLinkClickReportNew(wb, sheetLink, startDate, endDate, dataStartDate, dataEndDate, queryFlag, orderBy);
 			// Save
 			FileOutputStream out = new FileOutputStream(exportPath + System.getProperty("file.separator") + fileName);
 			wb.write(out);
@@ -186,10 +186,10 @@ public class ExportToExcelForLinkClickReport {
 		}
 	}
 	
-	public void exportToExcelForLinkClickReportNew(Workbook wb, Sheet sheet, String startDate, String endDate, String dataStartDate, String dataEndDate, String queryFlag) throws Exception{
-		List<Object[]> result = null; // TRACING_ID, LINK_ID, LINK_TITLE, LINK_URL, MODIFY_TIME, CLICK_COUNT, USER_COUNT
+	public void exportToExcelForLinkClickReportNew(Workbook wb, Sheet sheet, String startDate, String endDate, String dataStartDate, String dataEndDate, String queryFlag, int orderBy) throws Exception{
+		List<Object[]> result = null; // TRACING_ID, LINK_ID, LINK_TITLE, LINK_URL, MODIFY_TIME, LINK_TAG, CLICK_COUNT, USER_COUNT
 		String tracingUrlPre = UriHelper.getTracingUrlPre();
-		result = contentLinkService.findListByModifyDateAndFlag(startDate, endDate, dataStartDate, dataEndDate, queryFlag, 0, -1);
+		result = contentLinkService.findListByModifyDateAndFlag(startDate, endDate, dataStartDate, dataEndDate, queryFlag, orderBy, 0, -1);	
 		int seqNo = 0;
 		Row row = sheet.createRow(seqNo++); // declare a row object reference
 		row.createCell(0).setCellValue("追蹤連結");
@@ -198,7 +198,7 @@ public class ExportToExcelForLinkClickReport {
 		row.createCell(3).setCellValue("時間/註記");
 		row.createCell(4).setCellValue("點擊次數");
 		row.createCell(5).setCellValue("點擊人數");
-		logger.info("exportLinkClickReportListNew, Got report data successfully, queryFlag=" + queryFlag + " startDate=" + startDate + " endDate=" + endDate + " dataStartDate=" + dataStartDate + " dataEndDate=" + dataEndDate + " numOfRecords=" + (result == null ? 0 : result.size()));
+		logger.info("exportLinkClickReportListNew, Got report data successfully, queryFlag=" + queryFlag + " startDate=" + startDate + " endDate=" + endDate + " dataStartDate=" + dataStartDate + " dataEndDate=" + dataEndDate + " orderBy=" + orderBy + " numOfRecords=" + (result == null ? 0 : result.size()));
 		for(Object[] data : result){
 			Row row1 = sheet.createRow(seqNo++);
 			row1.createCell(0).setCellValue(tracingUrlPre + castToString(data[0]));
@@ -213,8 +213,8 @@ public class ExportToExcelForLinkClickReport {
 				flagStr += "&" + flag;
 			}
 			row1.createCell(3).setCellValue(flagStr);
-			String totalCount = castToString(data[5]);
-			String userCount = castToString(data[6]);
+			String totalCount = castToString(data[6]);
+			String userCount = castToString(data[7]);
 			row1.createCell(4).setCellValue("" + (StringUtils.isBlank(totalCount) ? 0 : Long.parseLong(totalCount)));
 			row1.createCell(5).setCellValue("" + (StringUtils.isBlank(userCount) ? 0 : Long.parseLong(userCount)));
 		}

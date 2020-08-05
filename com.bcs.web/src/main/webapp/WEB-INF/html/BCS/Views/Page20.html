@@ -27,7 +27,7 @@
                             </ul>
 	                    </div>
 	                    <div class="CHRight">
-	                    <input type="button" class="btn_save exportToExcel" style="cursor: pointer; text-decoration: none" value="匯出EXCEL">
+	                    <input type="button" class="btn_save exportToExcel" style="cursor: pointer; text-decoration: none; width:100px;" value="匯出EXCEL">
 	                    <iframe id="downloadReport" style='display:none' ></iframe>
 	                    <!--
 	                    <input type="button" class="btn_save exportSummary" style="cursor: pointer; text-decoration: none" value="匯出總表">
@@ -36,36 +36,41 @@
 	                    </div>
                         <div class="CHRight">
 	                    	<span>查詢標題/註記：</span>
-	                    	<div class="option date"  style="width:330px;">
-	                        	<input type="text"  id="queryFlag"  style="width:300px;"/>
+	                    	<div class="option date" style="width:180px;">
+	                        	<input type="text"  id="queryFlag" style="width:150px;"/>
 	                       	</div>
 	                       	<span>建立連結區間：</span>
-	                    	<span class="option date"  style="width:150px;">
+	                    	<span class="option date" style="width:150px;">
                               	<input type="text" class="datepicker" id="campaignStartTime" name="campaignStartTime" placeholder="YYYY-MM-DD"/></span>
                               	<a>~</a>
-                              	<span class="option date"  style="width:150px;">
+                              	<span class="option date" style="width:150px;">
                               	<input type="text" class="datepicker" id="campaignEndTime" name="campaignEndTime" placeholder="YYYY-MM-DD"/>
 	                       	</span>
 	                       	<span>點擊記錄區間：</span>
-	                    	<span class="option date"  style="width:150px;">
+	                    	<span class="option date" style="width:150px;">
                               	<input type="text" class="datepicker" id="dataStartTime" name="dataStartTime" placeholder="YYYY-MM-DD"/></span>
                               	<a>~</a>
-                              	<span class="option date"  style="width:150px;">
+                              	<span class="option date" style="width:150px;">
                               	<input type="text" class="datepicker" id="dataEndTime" name="dataEndTime" placeholder="YYYY-MM-DD"/>
 	                       	</span>
-	                      	<input class="btn_save query" type="button" value="查詢"  style="cursor: pointer;">
+	                       	<span>排序：</span>
+	                       	<select class="option" id="orderBy" name="orderBy" style="appearance: none;">
+	                            <option value="0" selected>追蹤ID</option>
+	                            <option value="1">連結URL</option>
+	                        </select>
+	                      	<input class="btn_save query" type="button" value="查詢"  style="cursor: pointer;width:100px;">
                        	</div>
                     </div>
                     <p class="MdTxtNotice01 MdAC pad10"></p>
                     <div class="mainFrame">
                         <table border="1" id="tableBody">
                             <colgroup>
-                                <col width="200">
-                                <col width="150">
-                                <col width="200">
                                 <col width="150">
                                 <col width="100">
+                                <col width="200">
                                 <col width="100">
+                                <col width="40">
+                                <col width="40">
                             </colgroup>
                             <tr class="tableHeader">
                                 <th>追蹤連結</th>

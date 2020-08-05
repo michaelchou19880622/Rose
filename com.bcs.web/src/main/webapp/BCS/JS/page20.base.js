@@ -30,7 +30,9 @@ $(function(){
 		var endDate = $('#campaignEndTime').val();
 		var dataStartDate = $('#dataStartTime').val();
 		var dataEndDate = $('#dataEndTime').val();
-		var url =  bcs.bcsContextPath + '/edit/exportLinkClickReportListNew?startDate=' + startDate + '&endDate=' + endDate + '&dataStartDate=' + dataStartDate + '&dataEndDate=' + dataEndDate;
+		var queryFlag = $("#queryFlag").val();
+		var orderBy = $('#orderBy').val();
+		var url =  bcs.bcsContextPath + '/edit/exportLinkClickReportListNew?startDate=' + startDate + '&endDate=' + endDate + '&dataStartDate=' + dataStartDate + '&dataEndDate=' + dataEndDate + "&queryFlag=" + queryFlag + "&orderBy=" + orderBy;
 		var downloadReport = $('#downloadReport');
 		downloadReport.attr("src", url);
 	});
@@ -94,11 +96,13 @@ $(function(){
 		var dataStartDate = $("#dataStartTime").val();
 		var dataEndDate = $("#dataEndTime").val();
 		var queryFlag = $("#queryFlag").val();
+		var orderBy = $("#orderBy").val();
 		console.info("startDate", startDate);
 		console.info("endDate", endDate);
 		console.info("dataStartDate", dataStartDate);
 		console.info("dataEndDate", dataEndDate);
 		console.info("queryFlag", queryFlag);
+		console.info("orderBy", queryFlag);
 		console.info("page", page);
 		if(!validateTimeRange()){
 			return;
@@ -111,6 +115,7 @@ $(function(){
 		postData.endDate = endDate;
 		postData.dataStartDate = startDate;
 		postData.dataEndDate = dataEndDate;
+		postData.orderBy = orderBy;
 		$('.LyMain').block($.BCS.blockMsgRead);
 		$('#pageText').html(page+1);
 		$.ajax({
@@ -158,6 +163,7 @@ $(function(){
 	
 	var initTemplate = function(){
 		$("#queryFlag").val("");
+		$("#orderBy").val("0");
 		templateBody = $('.dataTemplate').clone(true);
 		$('.dataTemplate').remove();
 		var nowDate = moment(); //取得現在時間

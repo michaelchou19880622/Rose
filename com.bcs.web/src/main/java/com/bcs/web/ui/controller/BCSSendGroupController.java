@@ -610,11 +610,13 @@ public class BCSSendGroupController extends BCSBaseController {
             List<String> mids = new ArrayList<String>();
 
             int page = 0;
+			//一個Page從原本千筆調整成百萬筆
+			int pageSize = 1000000;			            
             while (true) {
-                List<String> list = sendGroupService.queryDefaultGroup(groupId, page);
+                List<String> list = sendGroupService.queryDefaultGroup(groupId, page, pageSize);
                 if (list != null && list.size() > 0) {
                     mids.addAll(list);
-                    logger.debug("queryDefaultGroup:" + list.size());
+                    logger.info("queryDefaultGroup:" + list.size() + ", page:" + page);
                 } else {
                     break;
                 }

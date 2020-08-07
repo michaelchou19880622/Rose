@@ -9,9 +9,14 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.springframework.stereotype.Service;
 
 import com.bcs.core.utils.ErrorRecord;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 
 @Service
 public class ExportToExcelForMid {
@@ -28,19 +33,22 @@ public class ExportToExcelForMid {
 	
 	public void exportToExcel(String exportPath, String fileName, String excelName, String title, String time, List<String> titles, List<List<String>> data) throws Exception {
 		try {
-			Workbook wb = new XSSFWorkbook(); //→xls // new XSSFWorkbook()→xlsx
-			
+//			Workbook wb = new XSSFWorkbook(); //→xls // new XSSFWorkbook()→xlsx
+
+			SXSSFWorkbook workbook = new SXSSFWorkbook();
 			/**
 			 * exportMidToExcel
 			 */
-			Sheet sheetLink = wb.createSheet(excelName); // create a new sheet
-			this.exportMidToExcel(wb, sheetLink, title, time, titles, data);
+			SXSSFSheet sheetLink = workbook.createSheet(excelName);
+			this.exportMidToExcel(workbook, sheetLink, title, time, titles, data);
 			
 			// Save
 			FileOutputStream out = new FileOutputStream(exportPath + System.getProperty("file.separator") + fileName);
-			wb.write(out);
+			workbook.write(out);
 			out.close();
-			wb.close();
+			workbook.dispose();
+			workbook.close();
+			
 		} catch (Exception e) {
     		logger.error(ErrorRecord.recordError(e));
 		}
@@ -48,17 +56,18 @@ public class ExportToExcelForMid {
 	
 	/**
 	 * Export MID To Excel
-	 * @param wb
+	 * @param workbook
 	 * @param sheet
 	 * @param data
 	 * @throws Exception
 	 */
-	public void exportMidToExcel(Workbook wb, Sheet sheet, String title, String time, List<List<String>> data) throws Exception{
-		this.exportMidToExcel(wb, sheet, title, time, null, data);
+	public void exportMidToExcel(SXSSFWorkbook workbook, SXSSFSheet sheet, String title, String time, List<List<String>> data) throws Exception{
+		this.exportMidToExcel(workbook, sheet, title, time, null, data);
 	}
 	
-	public void exportMidToExcel(Workbook wb, Sheet sheet, String title, String time, List<String> titles, List<List<String>> data) throws Exception{
+	public void exportMidToExcel(SXSSFWorkbook workbook, SXSSFSheet sheet, String title, String time, List<String> titles, List<List<String>> data) throws Exception{
 
+    	log.info("Received a request to begin exportMidToExcel");
 		int index = 0;
 		if(StringUtils.isNotBlank(title)){
 			Row row = sheet.createRow(index); // declare a row object reference
@@ -110,5 +119,6 @@ public class ExportToExcelForMid {
 				}
 			}
 		}
+    	log.info("Received a request to end exportMidToExcel");		
 	}
 }

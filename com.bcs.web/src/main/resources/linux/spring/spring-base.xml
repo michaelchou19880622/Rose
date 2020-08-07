@@ -104,7 +104,7 @@
 			<props>
 				<prop key="user">Taishin</prop>
 				<prop key="password">Hpifive16890535</prop>
-				<prop key="serverName">13.78.19.109</prop>
+				<prop key="serverName">db01.sit.taishin.hpicorp.tk</prop>
 				<prop key="databaseName">Taishin Customer Connect</prop>
 				<prop key="portNumber">1433</prop>
 			</props>

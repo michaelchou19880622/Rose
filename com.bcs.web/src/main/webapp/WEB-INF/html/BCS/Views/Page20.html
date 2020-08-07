@@ -3,13 +3,10 @@
       xmlns:th="http://www.thymeleaf.org">
 <head th:replace="/BCS/Views/Common/Head :: head ('Report Link Click Page', '/BCS/JS/page20.base.js')">
 </head>
-
 <body>
 	<header th:replace="/BCS/Views/Common/Header :: header"></header>
-
     <div class="LyContents">
 		<div th:replace="/BCS/Views/Common/Menu :: menu ('Page20')"></div>
-
         <!-- Right Content -->
         <div class="LyMain" role="main">
             <form>
@@ -35,22 +32,22 @@
 	                    -->
 	                    </div>
                         <div class="CHRight">
-	                    	<span>查詢標題/註記：</span>
+	                    	<span>標題/註記搜尋：</span>
 	                    	<div class="option date" style="width:180px;">
 	                        	<input type="text"  id="queryFlag" style="width:150px;"/>
 	                       	</div>
-	                       	<span>建立連結區間：</span>
-	                    	<span class="option date" style="width:150px;">
+	                       	<span>建立區間：</span>
+	                    	<span class="option date" style="width:120px;">
                               	<input type="text" class="datepicker" id="campaignStartTime" name="campaignStartTime" placeholder="YYYY-MM-DD"/></span>
                               	<a>~</a>
-                              	<span class="option date" style="width:150px;">
+                              	<span class="option date" style="width:120px;">
                               	<input type="text" class="datepicker" id="campaignEndTime" name="campaignEndTime" placeholder="YYYY-MM-DD"/>
 	                       	</span>
-	                       	<span>點擊記錄區間：</span>
-	                    	<span class="option date" style="width:150px;">
+	                       	<span>點擊區間：</span>
+	                    	<span class="option date" style="width:120px;">
                               	<input type="text" class="datepicker" id="dataStartTime" name="dataStartTime" placeholder="YYYY-MM-DD"/></span>
                               	<a>~</a>
-                              	<span class="option date" style="width:150px;">
+                              	<span class="option date" style="width:120px;">
                               	<input type="text" class="datepicker" id="dataEndTime" name="dataEndTime" placeholder="YYYY-MM-DD"/>
 	                       	</span>
 	                       	<span>排序：</span>
@@ -65,12 +62,12 @@
                     <div class="mainFrame">
                         <table border="1" id="tableBody">
                             <colgroup>
-                                <col width="150">
-                                <col width="100">
-                                <col width="200">
-                                <col width="100">
-                                <col width="40">
-                                <col width="40">
+                                <col width="30%">
+                                <col width="15%">
+                                <col width="30%">
+                                <col width="15%">
+                                <col width="5%">
+                                <col width="5%">
                             </colgroup>
                             <tr class="tableHeader">
                                 <th>追蹤連結</th>
@@ -90,11 +87,9 @@
                             </tr>
                         </table>
                     </div>
-
                 </section>
             </form>
         </div>
     </div>
 </body>
-
 </html>

@@ -49,7 +49,7 @@ public class MobileUserController {
 		String MID = request.getParameter("MID");
 //		logger.info("goIndex MID:" + MID);
 		String toPage = request.getParameter("toPage");
-		logger.info("goIndex toPage:" + toPage);
+//		logger.info("goIndex toPage:" + toPage);
 		String referenceId = request.getParameter("referenceId");
 //		logger.info("goIndex referenceId:" + referenceId);
 		String time = request.getParameter("time");
@@ -57,6 +57,9 @@ public class MobileUserController {
 		String hash = request.getParameter("hash");
 //		logger.info("goIndex hash:" + hash);
 
+		logger.info("MobileUserController received a goIndex request, toPage:" + toPage + ", MID:" + MID + 
+				     ", referenceId:" + referenceId  + ", time:" + time + ", hash:" + hash );
+		
 		if(StringUtils.isBlank(MID)){
 			MID = (String) request.getSession().getAttribute("MID");
 		}

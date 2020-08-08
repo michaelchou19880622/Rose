@@ -332,7 +332,7 @@ public class DataUtils {
             case "sit":
                 break;
             case "linux":
-                processApName = "taishin";
+                processApName = "ts-sit-ap01";
                 break;
             case "mac":
                 processApName = "MacBook-Pro.local";
@@ -370,7 +370,7 @@ public class DataUtils {
                 break;
             //與linux profile redundant    
             case "mac":
-                processApName = "taishin";
+                processApName = "ts-sit-ap01";
                 break;
             case "uat":
                 processApName = "AIMLAP-T";

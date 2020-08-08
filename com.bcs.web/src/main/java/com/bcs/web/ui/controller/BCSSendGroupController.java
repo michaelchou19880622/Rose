@@ -630,6 +630,8 @@ public class BCSSendGroupController extends BCSBaseController {
                 List<List<String>> data = new ArrayList<List<String>>();
                 data.add(mids);
                 exportExcelUIService.exportMidResultToExcel(request, response, "SendGroup", DEFAULT_SEND_GROUP.getGroupByGroupId(groupId).getTitle(), null, titles, data);
+    			data.clear();
+    			mids.clear();			            
             }
         }
     }

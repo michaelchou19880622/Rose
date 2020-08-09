@@ -49,9 +49,9 @@ public class PnpTaskService {
             SchedulerFactory schedulerFactory = new StdSchedulerFactory();
             Scheduler scheduler = schedulerFactory.getScheduler();
             /* Job */
-            JobDetail jobDetail = newJob(PnpTask.class).withIdentity("PNPMain", "PNP").build();
+            JobDetail jobDetail = newJob(PnpTask.class).withIdentity("PNPMain", pnpMain.getPnpMainId().toString()).build();
             /* 執行週期 */
-            Trigger trigger = newTrigger().withIdentity("PNPMain", "PNP").startAt(scheduleTime).build();
+            Trigger trigger = newTrigger().withIdentity("PNPMain", pnpMain.getPnpMainId().toString()).startAt(scheduleTime).build();
 
             scheduler.getContext().put("PnpMain", pnpMain);
 

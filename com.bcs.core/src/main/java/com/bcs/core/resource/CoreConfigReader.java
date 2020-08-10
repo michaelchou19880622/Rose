@@ -335,7 +335,7 @@ public class CoreConfigReader {
 				}
 			}
 			catch(Exception e){
-	            logger.error("CoreConfig getString error:" + e + ", errorMessage: " + e.getMessage());				
+//	            logger.error("CoreConfig getString error:" + e + ", errorMessage: " + e.getMessage());				
 			}// Skip
 		}
 

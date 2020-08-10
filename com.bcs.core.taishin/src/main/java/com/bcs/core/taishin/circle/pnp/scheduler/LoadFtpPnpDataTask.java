@@ -228,8 +228,8 @@ public class LoadFtpPnpDataTask {
         for (PnpFtpSourceEnum source : PnpFtpSourceEnum.values()) {
             try {
                 log.info("{} => StartCircle!!", source.english);
-                final int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIG_SWITCH, true, false);
-
+                final int bigSwitch = Integer.parseInt(CoreConfigReader.getString(CONFIG_STR.PNP_BIG_SWITCH, true, false));
+    	        /* pnp.big switch = 0(停止排程) 1(停止排程，並轉發SMS)  2(正常運行) , -1(系統異常)*/
                 switch (bigSwitch) {
                     case 0:
                         log.debug("{}: Stop Process!!", bigSwitch);
@@ -240,17 +240,18 @@ public class LoadFtpPnpDataTask {
                         transFileToSMSFlow(source);
                         log.debug("{}: Transfer File To SMS Flow Complete!", bigSwitch);
                         break;
-                    case -1:
-                        log.warn("Can't Load PNP_BIG_SWITCH!");
-                        break;
-                    default:
+                    case 2 :
                         /* 解析資料存到DB */
                         log.debug("{}: Parse Data Flow To Database!!", bigSwitch);
                         parseDataFlow(source);
+                        break;     
+                    case -1 :
+                    default:
+                        log.warn("Can't Load PNP_BIG_SWITCH!");
                         break;
                 }
             } catch (Exception e) {
-                log.error("", e);
+                log.error("LoadFtpPnpDataTask ftpProcessHandler error:" + e + ", errorMessage: " + e.getMessage());
             }
         }
     }

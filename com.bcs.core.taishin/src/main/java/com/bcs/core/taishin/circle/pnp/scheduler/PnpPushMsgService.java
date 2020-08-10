@@ -91,89 +91,99 @@ public class PnpPushMsgService {
      * 4. Tell akka
      */
     private void sendProcess() {
-        int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIG_SWITCH, true, false);
-        if (bigSwitch == 0 || bigSwitch == 1) {
-            log.warn("Stop sending!!");
-            return;
-        }
-        else if (bigSwitch == -1) {
-            log.warn("Can't Load PNP_BIG_SWITCH!");
-            return;
-        }
-        
-        String procApName = DataUtils.getProcApName();
-        for (PnpFtpSourceEnum type : PnpFtpSourceEnum.values()) {
-            log.info("ftp source is {}, ap_name: {}", type.english, procApName);
-            try {
-                /* 1.Find all main */
-                List<PnpMain> allMainList = pnpRepositoryCustom.findAllMain(procApName, type);
-                if (allMainList.isEmpty()) {
-                    log.info("allmainList: {} is empty", type.english);
-                    continue;
-                }
-                log.info("detailTable: {} forEach operation", type.english);
-                allMainList.forEach(main -> {
-                    /* 2.Find all detail by main id */
-//                    int detailCount = pnpRepositoryCustom.getDetailCountByMainId(type, main.getPnpMainId());
-                    List<PnpDetail> allDetailList = pnpRepositoryCustom.findAllDetail(main.getPnpMainId(), type);
-                    int detailCount = allDetailList.size();
-                    log.info(String.format("detail count: %s, detail table: %s,  main id: %s", detailCount, type.detailTable,  main.getPnpMainId().toString()));
-                    
-                    if (detailCount > 0) {
-	                    List<PnpDetail> allDetailListAndUpdate = pnpRepositoryCustom.findAllDetailAndUpdateStatus(main.getPnpMainId(), type);
-	                    /* 3.Use phone find detail uid */
-	                    List<PnpDetail> filterDetailList = usePhoneFindDetailUid(allDetailListAndUpdate).stream()
-	                            .filter(detail -> Objects.equals((detail).getStatus(), PnpStatusEnum.SENDING.value))
-	                            .sorted(Comparator.comparing(PnpDetail::getPnpDetailId))
-	                            .collect(Collectors.toList());
-	                    
-	                    List<PnpDetail> filterDetailCompleteList = usePhoneFindDetailUid(allDetailList).stream()
-	                            .filter(detail -> Objects.equals((detail).getStatus(), PnpStatusEnum.COMPLETE.value))
-                                .sorted(Comparator.comparing(PnpDetail::getPnpDetailId))
-	                            .collect(Collectors.toList());
-
-                        List<PnpDetail> filterDetailExpiredList = usePhoneFindDetailUid(allDetailList).stream()
-                                .filter(detail -> Objects.equals((detail).getStatus(), PnpStatusEnum.EXPIRED.value))
-                                .sorted(Comparator.comparing(PnpDetail::getPnpDetailId))
-                                .collect(Collectors.toList());
-
-                        filterDetailCompleteList.addAll(filterDetailExpiredList);
-	                    
-//	                    for (PnpDetail detail : filterDetailList) {
-//		                    log.info(String.format("Filter and Update Detail id: %s, detail status: %s, main id: %s",  detail.getPnpDetailId(), detail.getStatus(), main.getPnpMainId()));
-//	                    }
-//	                    for (PnpDetail detail : allDetailList) {
-//		                    log.info(String.format("Filter Complete Detail id: %s, detail status: %s, main id: %s",  detail.getPnpDetailId(), detail.getStatus(), main.getPnpMainId()));
-//	                    }
-	                    allDetailList.clear();
-	                    
-	                    log.info("Main id and after filter detail list size, main id: {}, after filter detail size: {}", main.getPnpMainId(), filterDetailList.size());
-	                    // log.info("After filter detail list: {}", DataUtils.toPrettyJsonUseJackson(filterDetailList));
-	                    
-	                    /* If detail list is empty not include any sending and detail from db is all sent  */
-	                    if (detailCount == filterDetailCompleteList.size()) {
-	                        /* all detail sent to bc and pnp is finish, Update main status to complete, but not include sms */
-	                        log.info("Before update main id: {} to complete!!", main.getPnpMainId());
-	                        pnpRepositoryCustom.updateMainToComplete(main.getPnpMainId(), type, PnpStatusEnum.COMPLETE);
-	                    } 
-	                    else if (filterDetailList.size() > 0){
-	                        main.setPnpDetails(filterDetailList);
-	                        /* 4.Tell akka */
-	                        log.info("Tell Akka Send BC, main id: {}",  main.getPnpMainId());
-	                        pnpAkkaService.tell(main);
+        try {
+	        /* pnp.big switch = 0(停止排程) 1(停止排程，並轉發SMS)  2(正常運行) , -1(系統異常)*/        	
+	        int bigSwitch = Integer.parseInt(CoreConfigReader.getString(CONFIG_STR.PNP_BIG_SWITCH, true, false));
+	        if (bigSwitch == 0 || bigSwitch == 1) {
+	            log.warn("Stop sending!!, BigSwitch is : {}", bigSwitch);
+	            return;
+	        }
+	        else if (bigSwitch == 2) {
+	            String procApName = DataUtils.getProcApName();
+	            for (PnpFtpSourceEnum type : PnpFtpSourceEnum.values()) {
+	                log.info("ftp source is {}, ap_name: {}", type.english, procApName);
+	                try {
+	                    /* 1.Find all main */
+	                    List<PnpMain> allMainList = pnpRepositoryCustom.findAllMain(procApName, type);
+	                    if (allMainList.isEmpty()) {
+	                        log.info("allmainList: {} is empty", type.english);
+	                        continue;
 	                    }
-	                    else {
-	                        log.info("Do Nothing, main id: {}", main.getPnpMainId());	                    	
-	                    }
-                    }
-                    else {
-	                    log.info("AllDetailList size is empty in main id : {}", main.getPnpMainId());
-                    }
-                    	
-                });
-            } catch (Exception e) {
-                log.error("Exception", e);
-            }
+	                    log.info("detailTable: {} forEach operation", type.english);
+	                    allMainList.forEach(main -> {
+	                        /* 2.Find all detail by main id */
+//                          int detailCount = pnpRepositoryCustom.getDetailCountByMainId(type, main.getPnpMainId());
+	                        List<PnpDetail> allDetailList = pnpRepositoryCustom.findAllDetail(main.getPnpMainId(), type);
+	                        int detailCount = allDetailList.size();
+	                        log.info(String.format("detail count: %s, detail table: %s,  main id: %s", detailCount, type.detailTable,  main.getPnpMainId().toString()));
+	                        
+	                        if (detailCount > 0) {
+	    	                    List<PnpDetail> allDetailListAndUpdate = pnpRepositoryCustom.findAllDetailAndUpdateStatus(main.getPnpMainId(), type);
+	    	                    /* 3.Use phone find detail uid */
+	    	                    List<PnpDetail> filterDetailList = usePhoneFindDetailUid(allDetailListAndUpdate).stream()
+	    	                            .filter(detail -> Objects.equals((detail).getStatus(), PnpStatusEnum.SENDING.value))
+	    	                            .sorted(Comparator.comparing(PnpDetail::getPnpDetailId))
+	    	                            .collect(Collectors.toList());
+	    	                    
+	    	                    List<PnpDetail> filterDetailCompleteList = usePhoneFindDetailUid(allDetailList).stream()
+	    	                            .filter(detail -> Objects.equals((detail).getStatus(), PnpStatusEnum.COMPLETE.value))
+	                                    .sorted(Comparator.comparing(PnpDetail::getPnpDetailId))
+	    	                            .collect(Collectors.toList());
+	
+	                            List<PnpDetail> filterDetailExpiredList = usePhoneFindDetailUid(allDetailList).stream()
+	                                    .filter(detail -> Objects.equals((detail).getStatus(), PnpStatusEnum.EXPIRED.value))
+	                                    .sorted(Comparator.comparing(PnpDetail::getPnpDetailId))
+	                                    .collect(Collectors.toList());
+	
+	                            filterDetailCompleteList.addAll(filterDetailExpiredList);
+	    	                    
+//    	                    	for (PnpDetail detail : filterDetailList) {
+//    		                    	log.info(String.format("Filter and Update Detail id: %s, detail status: %s, main id: %s",  detail.getPnpDetailId(), detail.getStatus(), main.getPnpMainId()));
+//    	                    	}
+//    	                    	for (PnpDetail detail : allDetailList) {
+//    		                    	log.info(String.format("Filter Complete Detail id: %s, detail status: %s, main id: %s",  detail.getPnpDetailId(), detail.getStatus(), main.getPnpMainId()));
+//    	                    	}
+	    	                    allDetailList.clear();
+	    	                    
+	    	                    log.info("Main id and after filter detail list size, main id: {}, after filter detail size: {}", main.getPnpMainId(), filterDetailList.size());
+	    	                    // log.info("After filter detail list: {}", DataUtils.toPrettyJsonUseJackson(filterDetailList));
+	    	                    
+	    	                    /* If detail list is empty not include any sending and detail from db is all sent  */
+	    	                    if (detailCount == filterDetailCompleteList.size()) {
+	    	                        /* all detail sent to bc and pnp is finish, Update main status to complete, but not include sms */
+	    	                        log.info("Before update main id: {} to complete!!", main.getPnpMainId());
+	    	                        pnpRepositoryCustom.updateMainToComplete(main.getPnpMainId(), type, PnpStatusEnum.COMPLETE);
+	    	                    } 
+	    	                    else if (filterDetailList.size() > 0){
+	    	                        main.setPnpDetails(filterDetailList);
+	    	                        /* 4.Tell akka */
+	    	                        log.info("Tell Akka Send BC, main id: {}",  main.getPnpMainId());
+	    	                        pnpAkkaService.tell(main);
+	    	                    }
+	    	                    else {
+	    	                        log.info("Do Nothing, main id: {}", main.getPnpMainId());	                    	
+	    	                    }
+	                        }
+	                        else {
+	    	                    log.info("AllDetailList size is empty in main id : {}", main.getPnpMainId());
+	                        }
+	                        	
+	                    });
+	                } catch (Exception e) {
+	                    log.error("PnpPushMsgService sendProcess error:" + e + ", errorMessage: " + e.getMessage());
+	                }
+	            }	            
+	        }   
+	        else if (bigSwitch == -1) {
+	            log.warn("Can't Load PNP_BIG_SWITCH!");
+	            return;
+	        }
+	        else  {
+	            log.warn("BigSwitch is is not defined: {}", bigSwitch);  	
+	            return;
+	        }	            	        
+        } catch (Exception e) {
+            log.error("PnpPushMsgService sendProcess error:" + e + ", errorMessage: " + e.getMessage());
         }
     }
 

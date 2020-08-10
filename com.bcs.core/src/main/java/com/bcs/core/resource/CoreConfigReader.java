@@ -7,9 +7,13 @@ import org.apache.commons.lang3.StringUtils;
 import com.bcs.core.db.service.SystemConfigService;
 import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.spring.ApplicationContextProvider;
+import org.apache.log4j.Logger;
 
 public class CoreConfigReader {
 
+	/** Logger */
+	private static Logger logger = Logger.getLogger(CoreConfigReader.class);
+	
 	/** configuration reader */
 	private static CoreConfigReader reader;
 
@@ -173,6 +177,7 @@ public class CoreConfigReader {
 			return Integer.parseInt(getString(key, false));
 		}
 		catch(Exception e){
+			logger.error("CoreConfig getInteger error:" + e + ", errorMessage: " + e.getMessage());							
 			return -1;
 		}
 	}
@@ -182,6 +187,7 @@ public class CoreConfigReader {
 			return Integer.parseInt(getString(key, false));
 		}
 		catch(Exception e){
+			logger.error("CoreConfig getInteger error:" + e + ", errorMessage: " + e.getMessage());							
 			return -1;
 		}
 	}
@@ -191,6 +197,7 @@ public class CoreConfigReader {
 			return Boolean.parseBoolean(getString(key, false));
 		}
 		catch(Exception e){
+			logger.error("CoreConfig getBoolean error:" + e + ", errorMessage: " + e.getMessage());							
 			return false;
 		}
 	}
@@ -200,6 +207,7 @@ public class CoreConfigReader {
 			return Boolean.parseBoolean(getString(key, false));
 		}
 		catch(Exception e){
+			logger.error("CoreConfig getBoolean error:" + e + ", errorMessage: " + e.getMessage());							
 			return false;
 		}
 	}
@@ -209,6 +217,7 @@ public class CoreConfigReader {
 			return Integer.parseInt(getString(key, fromDB));
 		}
 		catch(Exception e){
+			logger.error("CoreConfig getInteger error:" + e + ", errorMessage: " + e.getMessage());							
 			return -1;
 		}
 	}
@@ -218,15 +227,17 @@ public class CoreConfigReader {
 			return Integer.parseInt(getString(key, fromDB, fromCatch));
 		}
 		catch(Exception e){
+			logger.error("CoreConfig getInteger error:" + e + ", errorMessage: " + e.getMessage());							
 			return -1;
 		}
 	}
-
+	
 	public static int getInteger(CONFIG_STR key, boolean fromDB){
 		try{
 			return Integer.parseInt(getString(key, fromDB));
 		}
 		catch(Exception e){
+			logger.error("CoreConfig getInteger error:" + e + ", errorMessage: " + e.getMessage());							
 			return -1;
 		}
 	}
@@ -237,6 +248,7 @@ public class CoreConfigReader {
 			return Integer.parseInt(getString(key, fromDB, fromCatch));
 		}
 		catch(Exception e){
+			logger.error("CoreConfig getInteger error:" + e + ", errorMessage: " + e.getMessage());							
 			return -1;
 		}
 	}
@@ -246,6 +258,7 @@ public class CoreConfigReader {
 			return Boolean.parseBoolean(getString(key, fromDB));
 		}
 		catch(Exception e){
+			logger.error("CoreConfig getBoolean error:" + e + ", errorMessage: " + e.getMessage());							
 			return false;
 		}
 	}
@@ -255,6 +268,7 @@ public class CoreConfigReader {
 			return Boolean.parseBoolean(getString(key, fromDB));
 		}
 		catch(Exception e){
+			logger.error("CoreConfig getBoolean error:" + e + ", errorMessage: " + e.getMessage());							
 			return false;
 		}
 	}
@@ -264,6 +278,7 @@ public class CoreConfigReader {
 			return Boolean.parseBoolean(getString(key, fromDB, fromCatch));
 		}
 		catch(Exception e){
+			logger.error("CoreConfig getBoolean error:" + e + ", errorMessage: " + e.getMessage());							
 			return false;
 		}
 	}
@@ -288,6 +303,7 @@ public class CoreConfigReader {
 			return Integer.parseInt(getString(ChannelId, key, fromDB));
 		}
 		catch(Exception e){
+			logger.error("CoreConfig getInteger error:" + e + ", errorMessage: " + e.getMessage());							
 			return -1;
 		}
 	}
@@ -297,6 +313,7 @@ public class CoreConfigReader {
 			return Integer.parseInt(getString(ChannelId, key, fromDB, fromCatch));
 		}
 		catch(Exception e){
+			logger.error("CoreConfig getInteger error:" + e + ", errorMessage: " + e.getMessage());							
 			return -1;
 		}
 	}
@@ -317,7 +334,9 @@ public class CoreConfigReader {
 					return result;
 				}
 			}
-			catch(Exception e){}// Skip
+			catch(Exception e){
+	            logger.error("CoreConfig getString error:" + e + ", errorMessage: " + e.getMessage());				
+			}// Skip
 		}
 
 		if (reader.resourceBundle.containsKey(ChannelId + "." + key)) {

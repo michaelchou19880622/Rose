@@ -124,20 +124,29 @@ public class PnpSMSMsgService {
     }
 
     private void sendProcess() {
-        int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIG_SWITCH, true, false);
-        if (bigSwitch == 1 || bigSwitch ==  0) {
-            log.warn("Stop sms ftp service!! bigSwitch is : {}", bigSwitch);
-            return;
+        try {
+	        /* pnp.big switch = 0(停止排程) 1(停止排程，並轉發SMS)  2(正常運行) , -1(系統異常)*/
+	    	int bigSwitch = Integer.parseInt(CoreConfigReader.getString(CONFIG_STR.PNP_BIG_SWITCH, true, false));
+	        if (bigSwitch == 1 || bigSwitch ==  0) {
+	            log.warn("Stop sms ftp service!! bigSwitch is : {}", bigSwitch);
+	            return;
+	        }
+	        else if (bigSwitch == 2) { 
+	            log.info("BigSwitch is : {}", bigSwitch);        	
+	            Arrays.stream(PnpFtpSourceEnum.values()).forEach(this::sendSmsProcess);
+	            return;
+	        }       
+	        else if (bigSwitch == -1) {
+	            log.warn("Can't Load PNP_BIG_SWITCH!");
+	            return;
+	        }
+	        else {
+	            log.warn("BigSwitch is is not defined: {}", bigSwitch);  	
+	            return;	        	
+	        }
+        } catch (Exception e) {
+            log.error("PnpSMSMsgService sendProcess error:" + e + ", errorMessage: " + e.getMessage());
         }
-        else if (bigSwitch == -1) {
-            log.warn("Can't Load PNP_BIG_SWITCH!");
-            return;
-        }
-        else {
-            log.info("BigSwitch is : {}", bigSwitch);        	
-        }
-        
-        Arrays.stream(PnpFtpSourceEnum.values()).forEach(this::sendSmsProcess);
     }
 
     private void sendSmsProcess(PnpFtpSourceEnum type) {

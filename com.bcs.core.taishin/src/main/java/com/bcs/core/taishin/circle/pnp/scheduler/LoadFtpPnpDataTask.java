@@ -228,7 +228,7 @@ public class LoadFtpPnpDataTask {
         for (PnpFtpSourceEnum source : PnpFtpSourceEnum.values()) {
             try {
                 log.info("{} => StartCircle!!", source.english);
-                final int bigSwitch = Integer.parseInt(CoreConfigReader.getString(CONFIG_STR.PNP_BIG_SWITCH, true, false));
+                final int bigSwitch = Integer.parseInt(CoreConfigReader.getStringOnlyFromDB(null, CONFIG_STR.PNP_BIG_SWITCH.toString(), true));
     	        /* pnp.big switch = 0(停止排程) 1(停止排程，並轉發SMS)  2(正常運行) , -1(系統異常)*/
                 switch (bigSwitch) {
                     case 0:

@@ -126,7 +126,7 @@ public class PnpSMSMsgService {
     private void sendProcess() {
         try {
 	        /* pnp.big switch = 0(停止排程) 1(停止排程，並轉發SMS)  2(正常運行) , -1(系統異常)*/
-	    	int bigSwitch = Integer.parseInt(CoreConfigReader.getString(CONFIG_STR.PNP_BIG_SWITCH, true, false));
+	    	int bigSwitch = Integer.parseInt(CoreConfigReader.getStringOnlyFromDB(null, CONFIG_STR.PNP_BIG_SWITCH.toString(), true));
 	        if (bigSwitch == 1 || bigSwitch ==  0) {
 	            log.warn("Stop sms ftp service!! bigSwitch is : {}", bigSwitch);
 	            return;

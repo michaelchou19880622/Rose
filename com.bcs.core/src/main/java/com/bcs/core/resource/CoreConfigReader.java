@@ -346,6 +346,28 @@ public class CoreConfigReader {
 		return null;
 	}
 
+	public static String getStringOnlyFromDB(String ChannelId, String key, boolean fromDB) {
+		if (reader == null) {
+			reader = new CoreConfigReader();
+		}
+
+		if(ChannelId == null){
+			ChannelId = "";
+		}
+
+		if(fromDB){
+			try{
+				String result = ApplicationContextProvider.getApplicationContext().getBean(SystemConfigService.class).findOne(ChannelId + "." + key, false);
+				if(StringUtils.isNotBlank(result)){
+					return result;
+				}
+			}
+			catch(Exception e){
+//	            logger.error("CoreConfig getString error:" + e + ", errorMessage: " + e.getMessage());				
+			}// Skip
+		}
+		return null;
+	}	
 	/** properties */
 	private ResourceBundle resourceBundle;
 

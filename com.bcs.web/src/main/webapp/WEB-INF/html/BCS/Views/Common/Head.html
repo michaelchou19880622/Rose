@@ -56,7 +56,11 @@
 	<link th:href="@{/BCS/JS/jQuery-tagEditor/jquery.tag-editor.css}" type="text/css" rel="stylesheet" />
 	<script type='text/javascript' th:src="@{${@mvcResourceUrlProvider.getForLookupPath('/BCS/JS/jQuery-tagEditor/jquery.caret.min.js')}}"></script>
 	<script type='text/javascript' th:src="@{${@mvcResourceUrlProvider.getForLookupPath('/BCS/JS/jQuery-tagEditor/jquery.tag-editor.min.js')}}"></script>
-	
+
+	<!-- jQuery pagination plugin -->
+    <link th:href="@{/BCS/Content/simplePagination.css}" type="text/css" rel="stylesheet" />
+    <script type='text/javascript' th:src="@{${@mvcResourceUrlProvider.getForLookupPath('/BCS/JS/lib/jquery.simplePagination.js')}}"></script>
+    	
 	<script type='text/javascript' th:src="@{${@mvcResourceUrlProvider.getForLookupPath('/BCS/JS/core.js')}}"></script>
     <!-- <script type='text/javascript' th:src="@{${@mvcResourceUrlProvider.getForLookupPath('/BCS/JS/TsbSecurity-t.js')}}"></script> -->
 	<script type='text/javascript' th:each="js : ${pageJs}"  th:if="${pageJs != null and pageJs != ''}" th:src='@{${@mvcResourceUrlProvider.getForLookupPath(js)}}'></script>

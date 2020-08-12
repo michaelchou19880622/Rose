@@ -324,19 +324,12 @@ textarea:focus {
     padding: 12px 10px 11px;
     border: 1px solid #e2e5eb;
     background: #fff;
-    word-break: break-word;
+    word-break: break-all;
     text-align: center;
     vertical-align: middle;
 }
 
-.mainFrame.alignLeft table td {
-    padding: 12px 10px 11px;
-    border: 1px solid #e2e5eb;
-    background: #fff;
-    word-break: break-word;
-	text-align: left;
-    vertical-align: middle;
-}
+
 
 .mainFrame table td>input[type='text'] {
     display: block;

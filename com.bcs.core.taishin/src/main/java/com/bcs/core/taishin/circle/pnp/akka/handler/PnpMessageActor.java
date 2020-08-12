@@ -4,15 +4,20 @@ import akka.actor.UntypedActor;
 import com.bcs.core.spring.ApplicationContextProvider;
 import com.bcs.core.taishin.circle.pnp.code.PnpSendTypeEnum;
 import com.bcs.core.taishin.circle.pnp.code.PnpStageEnum;
-import com.bcs.core.taishin.circle.pnp.db.entity.AbstractPnpMainEntity;
+import com.bcs.core.taishin.circle.pnp.code.PnpStatusEnum;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpMain;
 import com.bcs.core.taishin.circle.pnp.scheduler.PnpTaskService;
 import com.bcs.core.taishin.circle.pnp.service.PnpService;
+import com.bcs.core.resource.CoreConfigReader;
+import com.bcs.core.enums.CONFIG_STR;
 import com.bcs.core.utils.DataUtils;
 import lombok.extern.slf4j.Slf4j;
+
 import org.quartz.SchedulerException;
 
 import java.util.Date;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /**
  * PNP發送訊息
@@ -67,30 +72,12 @@ public class PnpMessageActor extends UntypedActor {
      * @throws SchedulerException SchedulerException
      */
     private void delayOrImmediate(PnpMain pnpMain) throws SchedulerException {
-        Date scheduleTime = getFormatScheduleTimeBySourceSystem(pnpMain.getSource(), pnpMain.getScheduleTime());
+        PnpService pnpService = ApplicationContextProvider.getApplicationContext().getBean(PnpService.class);
+        Date scheduleTime = pnpService.getFormatScheduleTimeBySourceSystem(pnpMain.getSource(), pnpMain.getScheduleTime());
         if (DataUtils.isPast(scheduleTime)) {
             immediate(pnpMain);
         } else {
             delayPushMessage(pnpMain, scheduleTime);
-        }
-    }
-
-    /**
-     * 取得格式化後預約發送時間
-     *
-     * @param sourceSystem sourceSystem
-     * @param scheduleTime scheduleTIme
-     * @return 預約時間
-     */
-    private Date getFormatScheduleTimeBySourceSystem(String sourceSystem, String scheduleTime) {
-        switch (sourceSystem) {
-            case AbstractPnpMainEntity.SOURCE_MITAKE:
-            case AbstractPnpMainEntity.SOURCE_UNICA:
-            case AbstractPnpMainEntity.SOURCE_EVERY8D:
-                return DataUtils.convStrToDate(scheduleTime, "yyyyMMddHHmmss");
-            case AbstractPnpMainEntity.SOURCE_MING:
-            default:
-                return DataUtils.convStrToDate(scheduleTime, "yyyy-MM-dd hh:mm:ss");
         }
     }
 
@@ -102,7 +89,49 @@ public class PnpMessageActor extends UntypedActor {
     private void immediate(PnpMain pnpMain) {
         log.debug("PNP Immediate Push Message");
         PnpService pnpService = ApplicationContextProvider.getApplicationContext().getBean(PnpService.class);
-        pnpService.pushPnpMessage(pnpMain, this.getSender(), this.getSelf(), PnpStageEnum.PNP);
+        PnpSendTypeEnum sendType = PnpSendTypeEnum.findEnumByName(pnpMain.getSendType());
+        
+        int expiredTime = CoreConfigReader.getInteger(CONFIG_STR.PNP_DELIVERY_EXPIRED_TIME);
+        /* Default : 預設 PNP_DELIVERY_EXPIRE_TIME的timeout的時間最少需30分鐘, 目前系統設定值為120分鐘. */
+        if (expiredTime < 30) {
+        	expiredTime = 30;
+        }
+        Calendar expiredCalendar = new GregorianCalendar();
+        
+        switch (sendType) {
+	        case IMMEDIATE:
+	        	/* 發送前最後檢查..檢查是否在Create Time 起算的EpiredTime內發送 */
+	        	expiredCalendar.setTime(pnpMain.getCreateTime());
+	        	expiredCalendar.add(Calendar.MINUTE, expiredTime);            
+	            if (DataUtils.inBetween(new Date(), pnpMain.getCreateTime(), expiredCalendar.getTime())) {
+	                log.info("Send a PNP Immediate Push Message");
+	                pnpService.pushPnpMessage(pnpMain, this.getSender(), this.getSelf(), PnpStageEnum.PNP);
+	            }
+	            else {
+	                /* 將 Main/Detail 訊息狀態更改為EXPIRED */
+	                log.info("Received an expired PNP Immediate Push Message, update status to [EXPIRED]. ExpiredTime is : {}", expiredCalendar.getTime());	            	
+	                pnpService.updateMainAndDetailStatus(pnpMain, PnpStatusEnum.EXPIRED.value);            	
+	            }      	        	
+	            break;
+	        case DELAY:
+	        case SCHEDULE_TIME_EXPIRED:
+	        	/* 發送前最後檢查..檢查是否在Schedule Time 起算的EpiredTime內發送 */
+	            Date scheduleTime = pnpService.getFormatScheduleTimeBySourceSystem(pnpMain.getSource(), pnpMain.getScheduleTime());            
+	        	expiredCalendar.setTime(scheduleTime);
+	        	expiredCalendar.add(Calendar.MINUTE, expiredTime);            
+	            if (DataUtils.inBetween(new Date(), scheduleTime, expiredCalendar.getTime())) {
+	                log.info("Send a PNP Delay/ScheduleExpired Push Message");
+	                pnpService.pushPnpMessage(pnpMain, this.getSender(), this.getSelf(), PnpStageEnum.PNP);
+	            } 
+	            else {
+	                /* 將 Main/Detail 訊息狀態更改為EXPIRED */
+	                log.info("Received an expired PNP Delay/ScheduleExpired Push Message, update status to [EXPIRED]. ExpiredTime is : {}", expiredCalendar.getTime());	            		            		            	
+	                pnpService.updateMainAndDetailStatus(pnpMain, PnpStatusEnum.EXPIRED.value);            	            	
+	            }     	        	
+	            break;
+	        default:
+	        	break;
+        }
     }
 
     /**

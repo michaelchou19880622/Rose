@@ -167,25 +167,20 @@ public class BCSResourceController extends BCSBaseController {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/getLink/{linkId}")
 	public void getLink(@PathVariable String linkId, HttpServletRequest request, HttpServletResponse response) throws Exception {
-		logger.info("getLink:" + linkId );
 
 		String MID = request.getParameter("MID");
-//		logger.info("getLink MID:" + MID);
 		String replace = request.getParameter("replace");
-//		logger.info("getLink replace:" + replace);
 		String type = request.getParameter("type");
-//		logger.info("getLink type:" + type);
 		String code = request.getParameter("code");
-//		logger.info("getLink code:" + code);
 		String event = request.getParameter("event");
-//		logger.info("getLink event:" + event);
 		String serialId = request.getParameter("serialId");
-//		logger.info("getLink serialId:" + serialId);
 		String time = request.getParameter("time");
-//		logger.info("getLink time:" + time);
 		String hash = request.getParameter("hash");
-//		logger.info("getLink hash:" + hash);
 
+		logger.info("BCSResourceController GetLink linkId:" + linkId + ", MID:" + MID + ", replace:" + replace + 
+				    ", type:" + type + ", code:" + code + ", event:" + event + ", serialId:" + serialId + ", time:" + time +
+				    ", hash:" + hash);
+		
 		if(StringUtils.isBlank(MID)){
 			MID = (String) request.getSession().getAttribute("MID");
 		}

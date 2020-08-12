@@ -133,10 +133,10 @@ public class RecordReportService {
 	public Map<String, Map<String, Long>> findRecordReportListByContentType(String referenceId, String contentType, String startTimeStr, String endTimeStr) throws ParseException{
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		sdf.parse(startTimeStr);
+		startTimeStr += " 00:00:00";
 		sdf.parse(endTimeStr);
-		
+		endTimeStr += " 00:00:00";
 		List<RecordReport> list = recordReportRepository.findRecordReportListByRecordTime(referenceId, contentType, startTimeStr, endTimeStr);
-
 		return parseDataToMapWithDataType(list);
 	}
 	
@@ -150,29 +150,22 @@ public class RecordReportService {
 	 * @return Map<String, Map<String, Long>>
 	 */
 	public Map<String, Map<String, Long>> findRecordReportListByContentType(String referenceId, String contentType){
-		
 		List<RecordReport> list = recordReportRepository.findByReferenceIdAndContentType(referenceId, contentType);
-		
 		return parseDataToMapWithDataType(list);
 	}
 	
 	private Map<String, Map<String, Long>> parseDataToMapWithDataType(List<RecordReport> list){
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
 		Map<String, Map<String, Long>> result = new HashMap<String, Map<String, Long>>();
-		
 		for(RecordReport record : list){
 			String timeStr = sdf.format(record.getRecordTime());
-					
 			Map<String, Long> map = result.get(timeStr);
 			if(map == null){
 				map = new HashMap<String, Long>();
 				result.put(timeStr, map);
 			}
-			
 			map.put(record.getDataType(), record.getRecordCount());
 		}
-		
 		return result;
 	}
 }

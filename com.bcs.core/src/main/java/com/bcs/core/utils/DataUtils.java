@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.ArrayList;
+
 
 import com.bcs.core.resource.CoreConfigReader;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -330,10 +332,10 @@ public class DataUtils {
             case "sit":
                 break;
             case "linux":
-                processApName = "taishin";
+                processApName = "ts-sit-ap01";
                 break;
             case "mac":
-                processApName = "taishin-SIT-MAC";
+                processApName = "MacBook-Pro.local";
                 break;
             case "uat":
                 processApName = "AIMLAP-T";
@@ -353,6 +355,45 @@ public class DataUtils {
         log.info("Process Ap Name -> {}", processApName);
         return processApName;
     }
+    
+    
+    public static String getRandomRedundantProcApName(String sourceAPName) {
+        String processApName = "";
+        String environment = CoreConfigReader.getString("environment", false);
+    	List<Integer> excludeNumbers = new ArrayList<Integer>();
+        switch (environment) {
+            case "sit":
+                break;
+            //與mac profile redundant   
+            case "linux":
+                processApName = "MacBook-Pro.local";
+                break;
+            //與linux profile redundant    
+            case "mac":
+                processApName = "ts-sit-ap01";
+                break;
+            case "uat":
+                processApName = "AIMLAP-T";
+                break;
+            //排除 AIBCWEB2 & AIBCWEBAP自己
+            case "prod":
+        		excludeNumbers.add(2);
+            	if(sourceAPName.contains("AIBCWEB") && sourceAPName.length() == 8){
+            		String APNumber= sourceAPName.substring(7,8);
+                    if (StringUtils.isNumeric(APNumber)) {
+                    	excludeNumbers.add(Integer.parseInt(APNumber));            		
+                    }
+        		}
+                processApName = String.format("AIBCWEB%d", randomNumber(1, 6, excludeNumbers));
+                break;
+            default:
+                processApName = "";
+                break;
+        }
+
+        log.info("Process Ap Name -> {}", processApName);
+        return processApName;
+    }    
 
 
     public static int randomNumber(int start, int end, List<Integer> excludeNumbers) {

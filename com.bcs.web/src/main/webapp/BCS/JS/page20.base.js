@@ -21,11 +21,6 @@ $(function(){
 		page++;
 		loadDataFunc();
 	});
-
-	$('.query').click(function(){
-		page = 0;
-		loadDataFunc();
-	});
 	
 	$('.exportToExcel').click(function(){
 		if(!validateTimeRange()){
@@ -35,7 +30,9 @@ $(function(){
 		var endDate = $('#campaignEndTime').val();
 		var dataStartDate = $('#dataStartTime').val();
 		var dataEndDate = $('#dataEndTime').val();
-		var url =  bcs.bcsContextPath + '/edit/exportLinkClickReportListNew?startDate=' + startDate + '&endDate=' + endDate + '&dataStartDate=' + dataStartDate + '&dataEndDate=' + dataEndDate;
+		var queryFlag = $("#queryFlag").val();
+		var orderBy = $('#orderBy').val();
+		var url =  bcs.bcsContextPath + '/edit/exportLinkClickReportListNew?startDate=' + startDate + '&endDate=' + endDate + '&dataStartDate=' + dataStartDate + '&dataEndDate=' + dataEndDate + "&queryFlag=" + queryFlag + "&orderBy=" + orderBy;
 		var downloadReport = $('#downloadReport');
 		downloadReport.attr("src", url);
 	});
@@ -84,16 +81,11 @@ $(function(){
 	
 	//選取日期元件
 	$(".datepicker").datepicker({
-		'maxDate' : 0, //最多只能選至今天
+		'maxDate' : 0, //最多只能選至前一天
 		'dateFormat' : 'yy-mm-dd'
 	});
 	
-	$('.queryDate').click(function(){
-		page = 0;
-		loadDataFunc();
-	});
-	
-	$('.queryDataDate').click(function(){
+	$('.query').click(function(){
 		page = 0;
 		loadDataFunc();
 	});
@@ -104,11 +96,13 @@ $(function(){
 		var dataStartDate = $("#dataStartTime").val();
 		var dataEndDate = $("#dataEndTime").val();
 		var queryFlag = $("#queryFlag").val();
+		var orderBy = $("#orderBy").val();
 		console.info("startDate", startDate);
 		console.info("endDate", endDate);
 		console.info("dataStartDate", dataStartDate);
 		console.info("dataEndDate", dataEndDate);
 		console.info("queryFlag", queryFlag);
+		console.info("orderBy", queryFlag);
 		console.info("page", page);
 		if(!validateTimeRange()){
 			return;
@@ -121,6 +115,7 @@ $(function(){
 		postData.endDate = endDate;
 		postData.dataStartDate = startDate;
 		postData.dataEndDate = dataEndDate;
+		postData.orderBy = orderBy;
 		$('.LyMain').block($.BCS.blockMsgRead);
 		$('#pageText').html(page+1);
 		$.ajax({
@@ -135,6 +130,7 @@ $(function(){
 			console.info(response);
 			var contentLinkTracingList = response.ContentLinkTracingList;
 			var tracingUrlPre = response.TracingUrlPre;
+			var recordNumber = 0;
 			$.each(contentLinkTracingList, function(i, o){
 				var groupData = templateBody.clone(true);
 				groupData.find('.tracingLink').html(tracingUrlPre + o.tracingLink);
@@ -152,7 +148,9 @@ $(function(){
 				groupData.find('.userCount a').attr('href', bcs.bcsContextPath + '/admin/reportLinkClickDetailPage?linkUrl=' + linkUrl  + "&linkId=" + linkId + "&startDate=" + dataStartDate + "&endDate=" + dataEndDate)
 				groupData.find('.userCount a').html($.BCS.formatNumber(o.userCount,0));
 				$('#tableBody').append(groupData);
+				recordNumber += 1;
 			});
+			$('#recordNumberText').html(recordNumber);
 			
 		}).fail(function(response){
 			console.info(response);
@@ -165,14 +163,18 @@ $(function(){
 	
 	var initTemplate = function(){
 		$("#queryFlag").val("");
+		$("#orderBy").val("0");
 		templateBody = $('.dataTemplate').clone(true);
 		$('.dataTemplate').remove();
 		var nowDate = moment(); //取得現在時間
-		var lastWeek = moment().dates(nowDate.dates() - 6); // 取得前7天(上一週)的時間
-		$('#campaignStartTime').val(lastWeek.format('YYYY-MM-DD'));
-		$('#campaignEndTime').val(nowDate.format('YYYY-MM-DD'));
-		$('#dataStartTime').val(lastWeek.format('YYYY-MM-DD'));
-		$('#dataEndTime').val(nowDate.format('YYYY-MM-DD'));
+		var campaignStartTime = moment().dates(nowDate.dates() - 6);
+		var campaignEndTime = moment().dates(nowDate.dates());
+		var dataStartTime = moment().dates(nowDate.dates() - 6);
+		var dataEndTime = moment().dates(nowDate.dates());
+		$('#campaignStartTime').val(campaignStartTime.format('YYYY-MM-DD'));
+		$('#campaignEndTime').val(campaignEndTime.format('YYYY-MM-DD'));
+		$('#dataStartTime').val(dataStartTime.format('YYYY-MM-DD'));
+		$('#dataEndTime').val(dataEndTime.format('YYYY-MM-DD'));
 	}
 	initTemplate();
 	loadDataFunc("");

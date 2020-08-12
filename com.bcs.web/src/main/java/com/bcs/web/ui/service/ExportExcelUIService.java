@@ -29,7 +29,6 @@ public class ExportExcelUIService {
 	private static Logger logger = Logger.getLogger(ExportExcelUIService.class);
 	
 	public void exportDBResultToExcel(HttpServletRequest request, HttpServletResponse response, String excelName, List<String> titles, List<Object[]> data) throws IOException{
-		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
 		String filePath = CoreConfigReader.getString("file.path") + System.getProperty("file.separator") + "REPORT";
 		Date date = new Date();
@@ -62,14 +61,11 @@ public class ExportExcelUIService {
 	}
 
 	public void exportMidResultToExcel(HttpServletRequest request, HttpServletResponse response, String excelName, String title, Date start, Date end, List<String> titles, List<List<String>> data) throws IOException{
-		
 		String time = start.toString() + "~" + end.toString();
-		
 		this.exportMidResultToExcel(request, response, excelName, title, time, titles, data);
 	}
 	
 	public void exportMidResultToExcel(HttpServletRequest request, HttpServletResponse response, String excelName, String title, String time, List<String> titles, List<List<String>> data) throws IOException{
-		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
 		String filePath = CoreConfigReader.getString("file.path") + System.getProperty("file.separator") + "REPORT";
 		Date date = new Date();

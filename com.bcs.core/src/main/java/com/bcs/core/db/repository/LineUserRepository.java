@@ -111,7 +111,8 @@ public interface LineUserRepository extends EntityRepository<LineUser, String>, 
      * @return the page
      */
     @Transactional(readOnly = true, timeout = 30)
-    @Query("select x.mid from LineUser x where x.status in ( ?1 )")
+	//Line USERID Regular Expression :「^U[0-9a-f]{32}$」    
+    @Query("select CONCAT(UPPER(SUBSTRING(x.mid, 1, 1)) , SUBSTRING(x.mid , 2, 32)) from LineUser x where x.status in ( ?1 )")
     Page<String> findMIDByStatus(String status, Pageable pageable);
 
     /**

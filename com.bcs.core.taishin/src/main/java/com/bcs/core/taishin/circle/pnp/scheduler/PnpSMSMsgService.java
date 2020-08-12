@@ -124,20 +124,29 @@ public class PnpSMSMsgService {
     }
 
     private void sendProcess() {
-        int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIG_SWITCH, true, false);
-        if (bigSwitch == 1 || bigSwitch ==  0) {
-            log.warn("Stop sms ftp service!! bigSwitch is : {}", bigSwitch);
-            return;
+        try {
+	        /* pnp.big switch = 0(停止排程) 1(停止排程，並轉發SMS)  2(正常運行) , -1(系統異常)*/
+	    	int bigSwitch = Integer.parseInt(CoreConfigReader.getStringOnlyFromDB(null, CONFIG_STR.PNP_BIG_SWITCH.toString(), true));
+	        if (bigSwitch == 1 || bigSwitch ==  0) {
+	            log.warn("Stop sms ftp service!! bigSwitch is : {}", bigSwitch);
+	            return;
+	        }
+	        else if (bigSwitch == 2) { 
+	            log.info("BigSwitch is : {}", bigSwitch);        	
+	            Arrays.stream(PnpFtpSourceEnum.values()).forEach(this::sendSmsProcess);
+	            return;
+	        }       
+	        else if (bigSwitch == -1) {
+	            log.warn("Can't Load PNP_BIG_SWITCH!");
+	            return;
+	        }
+	        else {
+	            log.warn("BigSwitch is is not defined: {}", bigSwitch);  	
+	            return;	        	
+	        }
+        } catch (Exception e) {
+            log.error("PnpSMSMsgService sendProcess error:" + e + ", errorMessage: " + e.getMessage());
         }
-        else if (bigSwitch == -1) {
-            log.warn("Can't Load PNP_BIG_SWITCH!");
-            return;
-        }
-        else {
-            log.info("BigSwitch is : {}", bigSwitch);        	
-        }
-        
-        Arrays.stream(PnpFtpSourceEnum.values()).forEach(this::sendSmsProcess);
     }
 
     private void sendSmsProcess(PnpFtpSourceEnum type) {
@@ -408,9 +417,14 @@ public class PnpSMSMsgService {
     }
 
     private List<PnpDetail> getPnpExpiredToSmsList(PnpFtpSourceEnum type) {
+        int expiredTime = CoreConfigReader.getInteger(CONFIG_STR.PNP_DELIVERY_EXPIRED_TIME);
+        //Default : 預設 PNP_DELIVERY_EXPIRE_TIME轉發至SMS的timeout的時間最少需30分鐘, 目前系統設定值為120分鐘.
+        if (expiredTime < 30) {
+        	expiredTime = 30;
+        }
+        
         List<PnpDetail> list = pnpRepositoryCustom.findDetailByPnpStatusAndExpired(type, Collections.singletonList(
-                PnpStatusEnum.PNP_SENT_CHECK_DELIVERY.value
-        ));
+                PnpStatusEnum.PNP_SENT_CHECK_DELIVERY.value), expiredTime);
         if (!list.isEmpty()) {
             log.info("Pnp expired to sms list size is {}", list.size());
         }

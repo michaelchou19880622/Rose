@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.bcs.core.db.entity.ContentLink;
 import com.bcs.core.db.repository.ContentLinkRepository;
+import com.bcs.core.enums.EnumClickReportSortType;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -164,7 +165,7 @@ public class ContentLinkService {
 		return contentLinkRepository.findClickMidByLinkIdAndTime(linkId, start, end);
 	}
 	
-	public List<Object[]> findListByModifyDateAndFlag(String startDate, String endDate, String dataStartDate, String dataEndDate, String flag, int offset, int recordNum){
+	public List<Object[]> findListByModifyDateAndFlag(String startDate, String endDate, String dataStartDate, String dataEndDate, String flag, int orderBy, int offset, int recordNum){
 		if(!StringUtils.isBlank(startDate) && startDate.length() == 10){
 			startDate += " 00:00:00";
 		}
@@ -172,16 +173,32 @@ public class ContentLinkService {
 			endDate += " 23:59:59";
 		}
 		if(StringUtils.isBlank(flag)){
-			if (recordNum >= 0)
-		        return contentLinkRepository.findListByModifyDate(startDate, endDate, dataStartDate, dataEndDate, offset, recordNum);
-			else
-				return contentLinkRepository.findListByModifyDate(startDate, endDate, dataStartDate, dataEndDate, offset);	
+			if (recordNum >= 0) {
+				if (orderBy == EnumClickReportSortType.ByTracingID.getValue())
+		            return contentLinkRepository.findListByModifyDateOrderByTracingID(startDate, endDate, dataStartDate, dataEndDate, offset, recordNum);
+				else
+					return contentLinkRepository.findListByModifyDateOrderByLinkUrl(startDate, endDate, dataStartDate, dataEndDate, offset, recordNum);
+			}
+			else {
+				if (orderBy == EnumClickReportSortType.ByTracingID.getValue())
+				    return contentLinkRepository.findListByModifyDateOrderByTracingID(startDate, endDate, dataStartDate, dataEndDate, offset);
+				else
+					return contentLinkRepository.findListByModifyDateOrderByLinkUrl(startDate, endDate, dataStartDate, dataEndDate, offset);
+			}
 		}
 		else {
-			if (recordNum >= 0)
-			    return contentLinkRepository.findListByModifyDateAndFlag(startDate, endDate, dataStartDate, dataEndDate, "%" + flag + "%", offset, recordNum);
-			else
-				return contentLinkRepository.findListByModifyDateAndFlag(startDate, endDate, dataStartDate, dataEndDate, "%" + flag + "%", offset);
+			if (recordNum >= 0) {
+				if (orderBy == EnumClickReportSortType.ByTracingID.getValue())
+			        return contentLinkRepository.findListByModifyDateAndFlagOrderByTracingID(startDate, endDate, dataStartDate, dataEndDate, "%" + flag + "%", offset, recordNum);
+				else
+					return contentLinkRepository.findListByModifyDateAndFlagOrderByLinkUrl(startDate, endDate, dataStartDate, dataEndDate, "%" + flag + "%", offset, recordNum);
+			}
+			else {
+				if (orderBy == EnumClickReportSortType.ByTracingID.getValue())
+				    return contentLinkRepository.findListByModifyDateAndFlagOrderByTracingID(startDate, endDate, dataStartDate, dataEndDate, "%" + flag + "%", offset);
+				else
+					return contentLinkRepository.findListByModifyDateAndFlagOrderByLinkUrl(startDate, endDate, dataStartDate, dataEndDate, "%" + flag + "%", offset);
+			}
 		}
 	}
 }

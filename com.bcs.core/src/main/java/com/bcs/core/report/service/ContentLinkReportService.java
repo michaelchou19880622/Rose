@@ -341,7 +341,6 @@ public class ContentLinkReportService {
 	}
 	
 	public Map<String, Map<String, Long>> getLinkIdReportNew(String startDate, String endDate, String linkId) throws Exception {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		// Validate
 		if(StringUtils.isNotBlank(linkId)){
 			ContentLink link = contentLinkService.findOne(linkId);
@@ -353,7 +352,8 @@ public class ContentLinkReportService {
 			throw new Exception("Link Id Null");
 		}
 		
-		if(StringUtils.isNotBlank(linkId) && StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate)){
+		if(StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate)){
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			Date timeStart = sdf.parse(startDate);
 			Calendar calendarStart = Calendar.getInstance();
 			calendarStart.setTime(timeStart);
@@ -364,33 +364,29 @@ public class ContentLinkReportService {
 			endDate = sdf.format(calendarEnd.getTime());
 			// Query By linkId
 			String contentType = RECORD_REPORT_TYPE.CONTENT_TYPE_LINK_ID.toString();
-			Map<String, Map<String, Long>> countLinkIdList = recordReportService.findRecordReportListByContentType(linkId, contentType, startDate, endDate);			
+			Map<String, Map<String, Long>> countLinkIdList = recordReportService.findRecordReportListByContentType(linkId, contentType, startDate, endDate);
 			Map<String, Map<String, Long>> result = new LinkedHashMap<String, Map<String, Long>>();
-			Date timeBreak = sdf.parse(startDate);
-			Calendar calendarBreak = Calendar.getInstance();
-			calendarBreak.setTime(timeBreak);
-			Map<String, Long> clickMapCount = null;
+			String startTimeStr;
+			Map<String, Long> mapLinkId;
+			Long count; 
+			Long distinctCount; 
 			while(true){
 				if(calendarStart.compareTo(calendarEnd) < 0){
-					calendarBreak.add(Calendar.DATE, 1);
-					String startTimeStr = sdf.format(calendarStart.getTime());
-					Map<String, Long> countMap = new HashMap<String, Long>();
-					Map<String, Long> mapLinkId = countLinkIdList.get(startTimeStr);
-					Long count = null; 
-					Long distinctCount = null; 
+					startTimeStr = sdf.format(calendarStart.getTime());
+					mapLinkId = countLinkIdList.get(startTimeStr);
+					count = null; 
+					distinctCount = null; 
 					if(mapLinkId != null){
 						count = mapLinkId.get(RECORD_REPORT_TYPE.DATA_TYPE_LINK_COUNT.toString());
 						distinctCount = mapLinkId.get(RECORD_REPORT_TYPE.DATA_TYPE_LINK_DISTINCT_COUNT.toString());
 					}
 					if(count == null || distinctCount == null){
-						if(clickMapCount == null){ 
-							List<Object[]> listCountDistinct = contentLinkService.countClickCountByLinkIdAndTimeNew(linkId, sdf.format(calendarStart.getTime()), sdf.format(calendarStart.getTime()));
-							clickMapCount = new HashMap<String, Long>();
-							for(Object[] objArray : listCountDistinct){
-								String timeDay = (String) objArray[0];
-								clickMapCount.put(timeDay + "Count", DBResultUtil.caseCountResult(objArray[1], false).longValue()) ;
-								clickMapCount.put(timeDay + "CountDistinct", DBResultUtil.caseCountResult(objArray[2], false).longValue()) ;
-							}
+						Map<String, Long> clickMapCount = new HashMap<String, Long>();
+						List<Object[]> listCountDistinct = contentLinkService.countClickCountByLinkIdAndTimeNew(linkId, startTimeStr, startTimeStr);
+						for(Object[] objArray : listCountDistinct){
+							String timeDay = (String) objArray[0];
+							clickMapCount.put(timeDay + "Count", DBResultUtil.caseCountResult(objArray[1], false).longValue()) ;
+							clickMapCount.put(timeDay + "CountDistinct", DBResultUtil.caseCountResult(objArray[2], false).longValue()) ;
 						}
 						count = clickMapCount.get(startTimeStr + "Count");
 						distinctCount = clickMapCount.get(startTimeStr + "CountDistinct");
@@ -413,9 +409,10 @@ public class ContentLinkReportService {
 											RECORD_REPORT_TYPE.DATA_TYPE_LINK_DISTINCT_COUNT.toString(),
 											distinctCount);
 					}
+					Map<String, Long> countMap = new HashMap<String, Long>();
 					countMap.put(RECORD_REPORT_TYPE.DATA_TYPE_LINK_COUNT.toString(), count);
 					countMap.put(RECORD_REPORT_TYPE.DATA_TYPE_LINK_DISTINCT_COUNT.toString(), distinctCount);
-					result.put(sdf.format(calendarStart.getTime()), countMap);
+					result.put(startTimeStr, countMap);
 					calendarStart.add(Calendar.DATE, 1);
 				}
 				else{
@@ -424,6 +421,8 @@ public class ContentLinkReportService {
 			}
 			return result;
 		}
-		return null;
+		else {
+			throw new Exception("No time interval set");
+		}
 	}
 }

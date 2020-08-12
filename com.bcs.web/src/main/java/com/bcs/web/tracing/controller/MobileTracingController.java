@@ -38,10 +38,6 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-// import com.bcs.core.akka.service.AkkaCoreService;
-// import com.bcs.core.record.akke.model.WebLoginClickLinkModel;
-// import com.bcs.core.servlet.service.HttpSessionService;
-
 
 @Controller
 @RequestMapping("/l")
@@ -58,8 +54,6 @@ public class MobileTracingController extends BCSBaseController {
     private LineWebLoginApiService lineWebLoginApiService;
     @Autowired
     private MobilePageService mobilePageService;
-    /* @Autowired
-    private HttpSessionService httpSessionService; */
     @Autowired
     private LineUserService lineUserService;
     @Autowired
@@ -80,17 +74,17 @@ public class MobileTracingController extends BCSBaseController {
 
         try {
             String code = request.getParameter("code");
-            logger.info("code:" + code);
 
             String event = request.getParameter("event");
-            logger.info("event:" + event);
 
+            String userAgent = request.getHeader("User-Agent");
+            
             Long tracingId = Long.parseLong(tracingIdStr);
-            logger.info("tracingId:" + tracingId);
 
             String sessionMID = (String) request.getSession().getAttribute("MID");
-            logger.info("sessionMID:" + sessionMID);
 
+            logger.info("MobileTracingController startTracing sessionMID : " + sessionMID + ", tracingId: " + tracingId + ", userAgent:" + userAgent + ", code:" + code + ", event:" + event);
+            
             ContentLinkTracing contentLinkTracing = contentLinkTracingService.findOne(tracingId);
 
             if (contentLinkTracing == null) {
@@ -134,14 +128,13 @@ public class MobileTracingController extends BCSBaseController {
             String bcsTargetLink = "";
 
             boolean isGetFromSession = CoreConfigReader.getBoolean(CONFIG_STR.TRACING_CONFIG_GET_FROM_SESSION, true);
-            logger.info("isGetFromSession:" + isGetFromSession);
 
             boolean useSwitch = CoreConfigReader.getBoolean(CONFIG_STR.TRACING_CONFIG_USE_SWITCH, true);
-            logger.info("useSwitch:" + useSwitch);
 
             boolean checkMobile = CoreConfigReader.getBoolean(CONFIG_STR.TRACING_CONFIG_CHECK_MOBILE, true);
-            logger.info("checkMobile:" + checkMobile);
-
+            
+            logger.info("MobileTracingController startTracing isGetFromSession : " + isGetFromSession + ", useSwitch: " + useSwitch + ", checkMobile:" + checkMobile);
+            
             if (StringUtils.isNotBlank(sessionMID) && isGetFromSession) {
                 boolean isBound = userValidateService.isBound(sessionMID);
                 logger.info("isBound:" + isBound);
@@ -260,27 +253,24 @@ public class MobileTracingController extends BCSBaseController {
     public void validateTracing(HttpServletRequest request,
                                 HttpServletResponse response,
                                 Model model) throws Exception {
-        logger.info("validateTracing");
 
         try {
             String code = request.getParameter("code");
-            logger.info("validateTracing code:" + code);
 
             String state = request.getParameter("state");
-            logger.info("validateTracing state:" + state);
 
             String error = request.getParameter("error");
-            logger.info("validateTracing error:" + error);
 
+            String userAgent = request.getHeader("User-Agent");
+            
             String errorCode = request.getParameter("errorCode");
-            logger.info("validateTracing errorCode:" + errorCode);
 
             String errorMessage = request.getParameter("errorMessage");
-            logger.info("validateTracing errorMessage:" + errorMessage);
 
             String sessionMID = (String) request.getSession().getAttribute("MID");
-            logger.info("sessionMID:" + sessionMID);
 
+            logger.info("MobileTracingController validateTracing sessionMID : " + sessionMID + ", state: " + state + ", code: " + code + ", userAgent:" + userAgent + ", error:" + error + ", errorCode:" + errorCode + ", errorMessage:" + errorMessage);
+            
             if (StringUtils.isBlank(state)) {
                 throw new Exception("TracingId Error:" + state);
             }
@@ -444,6 +434,9 @@ public class MobileTracingController extends BCSBaseController {
 
         ObjectNode result = lineWebLoginApiService.callRetrievingAPI(channelID, channelSecret, code, UriHelper.getOauthUrl());
 
+        String userAgent = request.getHeader("User-Agent");
+        logger.info("userAgent:" + userAgent);
+        
         if (result != null && result.get("access_token") != null) {
             String accessToken = result.get("access_token").asText();
             if (StringUtils.isNotBlank(accessToken)) {
@@ -455,13 +448,36 @@ public class MobileTracingController extends BCSBaseController {
 
                     request.getSession().setAttribute("MID", sessionMID);
                     boolean isBound = userValidateService.isBound(sessionMID);
+                    //=================OS=======================
+                    if ((userAgent.toLowerCase().indexOf("windows") >= 0  || 
+                         userAgent.toLowerCase().indexOf("macintosh") >= 0)) {
+                        logger.info("Desktop user!!");
+                        String linkUrl = UriHelper.getLinkUriCode(contentLinkUnMobile.getLinkId(), SendCode, SendEvent);
 
+                        if (isBound) {
+                            /* 非新使用者 */
+                            logger.info("A binded Desktop user!!");
+                            //?? 此Binnded MID當Line User NULL時候, 會Create 此MID, 並設為UNBINDED..?? 
+                            //lineUserService.findByMidAndCreateUnbind(sessionMID);
+
+                        } else {
+                            /* 新使用者 */
+                            logger.info("An unbind Desktop user!!");
+                            lineUserService.findByMidAndCreateSysAdd(sessionMID);
+                        }
+                        UserTraceLogUtil.saveLogTrace(LOG_TARGET_ACTION_TYPE.TARGET_ContentLink, LOG_TARGET_ACTION_TYPE.ACTION_ClickLinkWebLogin, sessionMID, linkUrl + "--" + contentLinkUnMobile, contentLinkUnMobile.getLinkId() + ":WebLogin:" + state);
+                        UserTraceLogUtil.saveLogTrace(LOG_TARGET_ACTION_TYPE.TARGET_ContentLink, LOG_TARGET_ACTION_TYPE.ACTION_ClickLinkWebLogin_API, sessionMID, result, contentLinkUnMobile.getLinkId() + ":WebLogin:" + state);
+                        response.sendRedirect(linkUrl);
+                        return;
+                    } 
+                
                     if (isBound) {
-                        logger.info("Not new user!!");
+                        logger.info("A binded mobile user!!");
                         /* 非新使用者 */
                         String linkUrl = UriHelper.getLinkUriCode(contentLinkBinded.getLinkId(), SendCode, SendEvent);
 
-                        lineUserService.findByMidAndCreateUnbind(sessionMID);
+                        //?? 此Binnded MID當Line User NULL時候, 會Create 此MID, 並設為UNBINDED..?? 
+                        //lineUserService.findByMidAndCreateUnbind(sessionMID);
 
                         UserTraceLogUtil.saveLogTrace(LOG_TARGET_ACTION_TYPE.TARGET_ContentLink, LOG_TARGET_ACTION_TYPE.ACTION_ClickLinkWebLogin, sessionMID, linkUrl + "--" + contentLinkBinded, contentLinkBinded.getLinkId() + ":WebLogin:" + state);
                         UserTraceLogUtil.saveLogTrace(LOG_TARGET_ACTION_TYPE.TARGET_ContentLink, LOG_TARGET_ACTION_TYPE.ACTION_ClickLinkWebLogin_API, sessionMID, result, contentLinkBinded.getLinkId() + ":WebLogin:" + state);
@@ -469,7 +485,7 @@ public class MobileTracingController extends BCSBaseController {
                         response.sendRedirect(linkUrl);
                     } else {
                         /* 新使用者 */
-                        logger.info("Is new user!!");
+                        logger.info("An unbind mobile user!!");
                         String linkUrl = UriHelper.getLinkUriCode(contentLink.getLinkId(), SendCode, SendEvent);
 
                         lineUserService.findByMidAndCreateSysAdd(sessionMID);

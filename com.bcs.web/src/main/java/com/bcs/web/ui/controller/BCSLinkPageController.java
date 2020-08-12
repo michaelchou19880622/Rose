@@ -38,6 +38,7 @@ import com.bcs.core.db.service.ContentFlagService;
 import com.bcs.core.db.service.ContentLinkService;
 import com.bcs.core.db.service.UserTraceLogService;
 import com.bcs.core.enums.CONFIG_STR;
+import com.bcs.core.enums.EnumClickReportSortType;
 import com.bcs.core.enums.LOG_TARGET_ACTION_TYPE;
 import com.bcs.core.enums.RECORD_REPORT_TYPE;
 import com.bcs.core.exception.BcsNoticeException;
@@ -621,7 +622,8 @@ public class BCSLinkPageController extends BCSBaseController {
 		String endDate = linkClickReportSearchModel.getEndDate();
 		String dataStartDate = linkClickReportSearchModel.getDataStartDate();
 		String dataEndDate = linkClickReportSearchModel.getDataEndDate();
-		logger.info("getLinkClickReportListNew start, queryFlag=" + queryFlag + " page=" + page + " pageSize=" + pageSize + " startDate=" + startDate + " endDate=" + endDate + " dataStartDate=" + dataStartDate + " dataEndDate=" + dataEndDate);
+		String orderBy = linkClickReportSearchModel.getOrderBy();
+		logger.info("getLinkClickReportListNew start, queryFlag=" + queryFlag + " page=" + page + " pageSize=" + pageSize + " startDate=" + startDate + " endDate=" + endDate + " dataStartDate=" + dataStartDate + " dataEndDate=" + dataEndDate + " orderBy=" + orderBy);
 		try{
 			Calendar calendar = Calendar.getInstance();
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -639,8 +641,12 @@ public class BCSLinkPageController extends BCSBaseController {
 				calendar.add(Calendar.DATE, -7);
 				dataStartDate = sdf.format(calendar.getTime());
 			}
-			List<Object[]> result = null; // TRACING_ID, LINK_ID, LINK_TITLE, LINK_URL, MODIFY_TIME, CLICK_COUNT, USER_COUNT
-			result = contentLinkService.findListByModifyDateAndFlag(startDate, endDate, dataStartDate, dataEndDate, queryFlag, page * pageSize + 1, pageSize);
+			int orderByID = EnumClickReportSortType.ByTracingID.getValue();
+			if(StringUtils.isNotBlank(orderBy)){
+				orderByID = Integer.parseInt(orderBy);
+			}
+			// TRACING_ID, LINK_ID, LINK_TITLE, LINK_URL, MODIFY_TIME, LINK_TAG, CLICK_COUNT, USER_COUNT
+			List<Object[]> result = contentLinkService.findListByModifyDateAndFlag(startDate, endDate, dataStartDate, dataEndDate, queryFlag, orderByID, page * pageSize + 1, pageSize);
 			Map<String, Object> tracingResult = new HashMap<String, Object>();
 			Map<String, LinkClickReportModel> linkResult = new LinkedHashMap<String, LinkClickReportModel>();
 			String tracingUrlPre = UriHelper.getTracingUrlPre();
@@ -651,10 +657,9 @@ public class BCSLinkPageController extends BCSBaseController {
 				String linkTitle = castToString(data[2]);
 				String linkUrl = castToString(data[3]);
 				String linkTime = castToString(data[4]);
-				String totalCount = castToString(data[5]);
-				String userCount = castToString(data[6]);
+				String totalCount = castToString(data[6]);
+				String userCount = castToString(data[7]);
 				LinkClickReportModel model = new LinkClickReportModel();
-				model = new LinkClickReportModel();
 				model.setTracingLink(tracingId);
 				model.setLinkUrl(linkUrl);
 				model.setLinkId(linkId);
@@ -695,7 +700,8 @@ public class BCSLinkPageController extends BCSBaseController {
 		String endDate = request.getParameter("endDate");
 		String dataStartDate = request.getParameter("dataStartDate");
 		String dataEndDate = request.getParameter("dataEndDate");
-		logger.info("exportLinkClickReportListNew start, queryFlag=" + queryFlag + " startDate=" + startDate + " endDate=" + endDate + " dataStartDate=" + dataStartDate + " dataEndDate=" + dataEndDate);
+		String orderBy = request.getParameter("orderBy");
+		logger.info("exportLinkClickReportListNew start, queryFlag=" + queryFlag + " startDate=" + startDate + " endDate=" + endDate + " dataStartDate=" + dataStartDate + " dataEndDate=" + dataEndDate + " orderBy=" + orderBy);
 		try {
 			Calendar calendar = Calendar.getInstance();
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -713,6 +719,10 @@ public class BCSLinkPageController extends BCSBaseController {
 				calendar.add(Calendar.DATE, -7);
 				dataStartDate = sdf.format(calendar.getTime());
 			}
+			int orderByID = EnumClickReportSortType.ByTracingID.getValue();
+			if(StringUtils.isNotBlank(orderBy)){
+				orderByID = Integer.parseInt(orderBy);
+			}
 			String filePath = CoreConfigReader.getString("file.path") + System.getProperty("file.separator") + "REPORT";
 			Date date = new Date();
 			String fileName = "LinkClickReportList_" + sdf.format(date) + ".xlsx";
@@ -720,9 +730,9 @@ public class BCSLinkPageController extends BCSBaseController {
 			if(!folder.exists()){
 				folder.mkdirs();
 			}
-			exportToExcelForLinkClickReport.exportLinkClickReportListNew(filePath, fileName, startDate, endDate, dataStartDate, dataStartDate, queryFlag);
+			exportToExcelForLinkClickReport.exportLinkClickReportListNew(filePath, fileName, startDate, endDate, dataStartDate, dataEndDate, queryFlag, orderByID);
 			LoadFileUIService.loadFileToResponse(filePath, fileName, response);
-			logger.info("exportLinkClickReportListNew end, queryFlag=" + queryFlag + " startDate=" + startDate + " endDate=" + endDate + " dataStartDate=" + dataStartDate + " dataEndDate=" + dataEndDate + " filePaht=" + filePath + " fileName=" + fileName);
+			logger.info("exportLinkClickReportListNew end, queryFlag=" + queryFlag + " startDate=" + startDate + " endDate=" + endDate + " dataStartDate=" + dataStartDate + " dataEndDate=" + dataEndDate + " orderBy=" + orderBy + " filePaht=" + filePath + " fileName=" + fileName);
 		} catch (Exception e) {
 			logger.error(ErrorRecord.recordError(e));
 		}

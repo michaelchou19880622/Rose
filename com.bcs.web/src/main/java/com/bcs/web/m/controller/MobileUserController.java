@@ -45,26 +45,29 @@ public class MobileUserController {
 	@WebServiceLog
 	@RequestMapping(method = RequestMethod.GET, value = "/goIndex")
 	public void goIndex(HttpServletRequest request, HttpServletResponse response) throws IOException{
-		logger.info("goIndex");
+//		logger.info("goIndex");
 		String MID = request.getParameter("MID");
-		logger.info("goIndex MID:" + MID);
+//		logger.info("goIndex MID:" + MID);
 		String toPage = request.getParameter("toPage");
-		logger.info("goIndex toPage:" + toPage);
+//		logger.info("goIndex toPage:" + toPage);
 		String referenceId = request.getParameter("referenceId");
-		logger.info("goIndex referenceId:" + referenceId);
+//		logger.info("goIndex referenceId:" + referenceId);
 		String time = request.getParameter("time");
-		logger.info("goIndex time:" + time);
+//		logger.info("goIndex time:" + time);
 		String hash = request.getParameter("hash");
-		logger.info("goIndex hash:" + hash);
+//		logger.info("goIndex hash:" + hash);
 
+		logger.info("MobileUserController received a goIndex request, toPage:" + toPage + ", MID:" + MID + 
+				     ", referenceId:" + referenceId  + ", time:" + time + ", hash:" + hash );
+		
 		if(StringUtils.isBlank(MID)){
 			MID = (String) request.getSession().getAttribute("MID");
 		}
 		else{
 			boolean validate = false;
-			logger.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-			logger.info("@@@@@@@@BCS_PAGE_TYPE.TYPE_REWARD_CARD_LIST_PAGE:"+BCS_PAGE_TYPE.TYPE_REWARD_CARD_LIST_PAGE);
-			logger.info("@@@@@@@@@@@@@@@@@toPage:"+toPage);
+//			logger.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+//			logger.info("@@@@@@@@BCS_PAGE_TYPE.TYPE_REWARD_CARD_LIST_PAGE:"+BCS_PAGE_TYPE.TYPE_REWARD_CARD_LIST_PAGE);
+//			logger.info("@@@@@@@@@@@@@@@@@toPage:"+toPage);
 			if(StringUtils.isNotBlank(referenceId)){
 				validate = UrlUtil.validateHash(MID, referenceId, time, hash);
 			}
@@ -75,7 +78,7 @@ public class MobileUserController {
 				validate = UrlUtil.validateHash(MID, null, time, hash);
 			}
 
-			logger.info("goIndex validate:" + validate);
+//			logger.info("goIndex validate:" + validate);
 			if(!validate){
 				String linkUrl = UriHelper.bcsMPage;
 				response.sendRedirect(linkUrl);

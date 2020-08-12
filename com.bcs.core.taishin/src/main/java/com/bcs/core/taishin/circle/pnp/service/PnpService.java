@@ -10,6 +10,7 @@ import com.bcs.core.taishin.circle.pnp.code.PnpFtpSourceEnum;
 import com.bcs.core.taishin.circle.pnp.code.PnpProcessFlowEnum;
 import com.bcs.core.taishin.circle.pnp.code.PnpStageEnum;
 import com.bcs.core.taishin.circle.pnp.code.PnpStatusEnum;
+import com.bcs.core.taishin.circle.pnp.db.entity.AbstractPnpMainEntity;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpDeliveryRecord;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetail;
 import com.bcs.core.taishin.circle.pnp.db.entity.PnpDetailEvery8d;
@@ -32,6 +33,7 @@ import com.bcs.core.taishin.circle.pnp.db.service.PnpSendBlockService;
 import com.bcs.core.utils.DataUtils;
 import com.bcs.core.utils.RestfulUtil;
 import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -140,7 +142,7 @@ public class PnpService {
      * @param pnpMain pnpMain
      * @param status  status
      * @see com.bcs.core.taishin.circle.pnp.scheduler.PnpTaskService#startTask
-     * 批次排程開始將進入排程的訊息狀態更改為Delay
+     * 批次排程開始將進入排程的訊息狀態更改為Delay or Expired
      */
     @SuppressWarnings("unchecked")
     @Transactional(rollbackFor = Exception.class, timeout = 30)
@@ -847,7 +849,24 @@ public class PnpService {
         }
     }
 
-
+    /**
+     * 取得格式化後預約發送時間
+     *
+     * @param sourceSystem sourceSystem
+     * @param scheduleTime scheduleTIme
+     * @return 預約時間
+     */
+    public Date getFormatScheduleTimeBySourceSystem(String sourceSystem, String scheduleTime) {
+        switch (sourceSystem) {
+            case AbstractPnpMainEntity.SOURCE_MITAKE:
+            case AbstractPnpMainEntity.SOURCE_UNICA:
+            case AbstractPnpMainEntity.SOURCE_EVERY8D:
+                return DataUtils.convStrToDate(scheduleTime, "yyyyMMddHHmmss");
+            case AbstractPnpMainEntity.SOURCE_MING:
+            default:
+                return DataUtils.convStrToDate(scheduleTime, "yyyy-MM-dd hh:mm:ss");
+        }
+    } 
     /**
      * Get Line Point Process Sleep Time
      */

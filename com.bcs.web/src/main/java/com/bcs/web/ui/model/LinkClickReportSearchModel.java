@@ -11,6 +11,7 @@ public class LinkClickReportSearchModel extends AbstractBcsEntity{
 	private String endDate;
 	private String dataStartDate;
 	private String dataEndDate;
+	private String orderBy;
 	
 	public String getQueryFlag() {
 		return queryFlag;
@@ -53,5 +54,11 @@ public class LinkClickReportSearchModel extends AbstractBcsEntity{
 	}
 	public void setDataEndDate(String dataEndDate) {
 		this.dataEndDate = dataEndDate;
+	}
+	public String getOrderBy() {
+		return orderBy;
+	}
+	public void setOrderBy(String orderBy) {
+		this.orderBy = orderBy;
 	}
 }

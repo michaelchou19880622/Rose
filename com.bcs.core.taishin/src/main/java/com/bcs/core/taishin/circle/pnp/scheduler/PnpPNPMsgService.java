@@ -66,16 +66,29 @@ public class PnpPNPMsgService {
 
     private void pnpSendProcess() {
         log.info("StartCircle....");
-        /* pnp.big switch = 0(停止排程) 1(停止排程，並轉發SMS) 其他(正常運行) */
-        int bigSwitch = CoreConfigReader.getInteger(CONFIG_STR.PNP_BIG_SWITCH, true, false);
-        if (bigSwitch == 0 || bigSwitch == 1) {
-            return;
+        try {
+	        /* pnp.big switch = 0(停止排程) 1(停止排程，並轉發SMS)  2(正常運行) , -1(系統異常)*/
+	        int bigSwitch = Integer.parseInt(CoreConfigReader.getStringOnlyFromDB(null, CONFIG_STR.PNP_BIG_SWITCH.toString(), true));
+	        if (bigSwitch == 0 || bigSwitch == 1) {
+	            log.info("Stop Sending. BigSwitch is : {}", bigSwitch);        	
+	            return;
+	        }
+	        else if (bigSwitch == 2) {
+	            log.info("BigSwitch is : {}", bigSwitch);        	
+		        sendingPnpMain();	    
+	            return;		        
+	        }	        
+	        else if (bigSwitch == -1) {
+	            log.warn("Can't Load PNP_BIG_SWITCH!");
+	            return;
+	        }
+	        else {
+	            log.warn("BigSwitch is not defined: {}", bigSwitch);  	
+	            return;	        	
+	        }
+        } catch (Exception e) {
+            log.error("PnpPNPMsgService pnpSendProcess error:" + e + ", errorMessage: " + e.getMessage());
         }
-        else if (bigSwitch == -1) {
-            log.warn("Can't Load PNP_BIG_SWITCH!");
-            return;
-        }        
-        sendingPnpMain();
     }
 
     /**

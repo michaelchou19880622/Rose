@@ -182,7 +182,7 @@ public class ContentGameService {
 			gameModels.add(gameModel);
 		}
 
-		logger.debug(gameModels);
+//		logger.debug(gameModels);
 
 		return gameModels;
 	}

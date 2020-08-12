@@ -90,4 +90,17 @@ public interface BillingNoticeMainRepository extends EntityRepository<BillingNot
     @Transactional(rollbackFor = Exception.class)
     List<BigInteger> findAndUpdateFirstWaitMain(String status, List<String> tempIds, String procApName, Date modifyTime, String newStatus);
 
+    
+    /**
+     * 找出前一百個 超過20分鐘CreateTime timeout並且還未Expire的BillingNoticeMain
+     */
+    @Query(value =  "SELECT TOP 100 *" +
+            " FROM BCS_BILLING_NOTICE_MAIN" +
+            " WHERE STATUS='WAIT'" +
+            " AND getdate() < EXPIRY_TIME" +
+            " AND DATEADD(MINUTE, 20, CREAT_TIME) < getdate()" +
+            " ORDER BY CREAT_TIME DESC", nativeQuery = true)
+    @Transactional(rollbackFor = Exception.class, timeout = 30)
+    List<BillingNoticeMain> findCreateTimeTimeoutAndWaitMain();
+
 }

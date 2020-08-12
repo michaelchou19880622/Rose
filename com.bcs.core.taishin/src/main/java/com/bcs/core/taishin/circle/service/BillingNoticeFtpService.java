@@ -115,8 +115,33 @@ public class BillingNoticeFtpService {
         	log.info("An exception detected during processing the FTP task!");
             log.error("Error: ", e);
         }
+        /* 每執行十次ftp(50 sec), 執行一次check AP keepAlive, 此interval需大於bn.send.schedule.time的設定(30 sec) */
+        if (scheduleTaskcount.get()%10 == 0) {
+	        try {
+	        	checkAPKeepAlive();
+	        } catch (Exception e) {
+	            	log.info("An exception detected during checking the KeepAlive of the AP!");
+	                log.error("Error: ", e);
+	        }
+        }
     }
 
+    /**
+     * 撈取Billing Notice Main Table 檢查AP是否Alive.
+     */
+    private void checkAPKeepAlive() {
+        /* 找出前一百個 超過20分鐘CreateTime timeout並且還未Expire的BillingNoticeMain */
+        List<BillingNoticeMain> billingNoticeMainList = new ArrayList<>();
+        billingNoticeMainList = billingNoticeMainRepository.findCreateTimeTimeoutAndWaitMain();    	
+    	log.info("Started a new Check AP Keep Alive task for BN service, billingNoticeMainList : {}", billingNoticeMainList);
+            	
+        for (BillingNoticeMain billingNoticeMain : billingNoticeMainList) {
+        	log.info("billingNoticeMain.getNoticeMainId: {}, billingNoticeMain.getProcApName : {}", billingNoticeMain.getNoticeMainId(), billingNoticeMain.getProcApName());
+        	billingNoticeMain.setProcApName(DataUtils.getRandomRedundantProcApName(billingNoticeMain.getProcApName()));
+            log.info(String.format("Update data to DB, filename=%s status=%s procApName=%s ", billingNoticeMain.getOrigFileName(), billingNoticeMain.getStatus(), billingNoticeMain.getProcApName()));              
+            billingNoticeMainRepository.save(billingNoticeMain);
+        }
+    }
     /**
      * 由多個FTP下載檔案
      *

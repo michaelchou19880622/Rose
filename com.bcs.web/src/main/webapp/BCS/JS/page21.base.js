@@ -8,7 +8,7 @@ $(function(){
 	var endDate = $.urlParam("endDate");
 	// 日期元件
 	$(".datepicker").datepicker({
-		'maxDate' : 0, //最多只能選至今天
+		'maxDate' : 0, //最多只能選至前一天
 		'dateFormat' : 'yy-mm-dd'
 	});	
 	
@@ -30,7 +30,8 @@ $(function(){
 		var n = parseInt((new Date(endDate) - new Date(startDate)) / 86400000);
 		if (n > 30) {
 			alert("僅限查詢一個月內資料");
-			return false;
+			endDate = startDate.dates(startDate.dates() + 30); // 取得前一個月的時間
+			$('#reportEndDate').val(endDate.format('YYYY-MM-DD'));
 		}
 		return true;
 	}
@@ -79,12 +80,13 @@ $(function(){
 		dataTemplate = $('.dataTemplate').clone(true);
 		$('.dataTemplate').remove();
 		var nowDate = moment(); //取得現在時間
-		var lastWeek = moment().dates(nowDate.dates() - 6); //取得前7天(上一週)的時間
+		var reportStartDate = moment().dates(nowDate.dates() - 6);
+		var reportEndDate = moment().dates(nowDate.dates());
 		if (startDate != null) {
 			$('#reportStartDate').val(startDate)
 		}
 		else {
-			$('#reportStartDate').val(lastWeek.format('YYYY-MM-DD'));
+			$('#reportStartDate').val(reportStartDate.format('YYYY-MM-DD'));
 		}
 		if (endDate != null) {
 			$('#reportEndDate').val(endDate)
@@ -145,5 +147,7 @@ $(function(){
 	}
 	
 	initTemplate();
-	loadDataFunc();
+	if (validateTimeRange()) {
+	    loadDataFunc();
+	}
 });
